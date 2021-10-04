@@ -71,7 +71,7 @@
                             <div class="input-group-addon"><span class="icon-bookmark-o"
                                 aria-hidden="true"></span>
                             </div>
-                            {{ Form::text('client_name', null, ['class' => 'form-control round required', 'placeholder' => trans('general.reference'),'id'=>'payer-name', 'readonly']) }}
+                            {{ Form::text('client_name', null, ['class' => 'form-control round required', 'placeholder' => 'Name','id'=>'payer-name', 'readonly']) }}
                         </div>
                     </div>
                     <div class="col-sm-6"><label for="client_email"
@@ -81,7 +81,7 @@
                             <div class="input-group-addon"><span class="icon-bookmark-o"
                                 aria-hidden="true"></span>
                             </div>
-                            {{ Form::text('client_email', null, ['class' => 'form-control round required', 'placeholder' => trans('general.reference'),'id'=>'client_email', 'readonly']) }}
+                            {{ Form::text('client_email', null, ['class' => 'form-control round required', 'placeholder' => 'Email','id'=>'client_email', 'readonly']) }}
                         </div>
                     </div>
 
