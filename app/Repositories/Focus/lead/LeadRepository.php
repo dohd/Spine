@@ -72,7 +72,7 @@ class LeadRepository extends BaseRepository
             return $result;
         }
 
-        throw new GeneralException('Error Creating Branch');
+        throw new GeneralException('Error Creating Lead');
 
 
 
@@ -87,10 +87,10 @@ class LeadRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Branch $branch, array $input)
+    public function update(Lead $lead, array $input)
     {
         $input = array_map( 'strip_tags', $input);
-    	if ($branch->update($input))
+    	if ($lead->update($input))
             return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
@@ -103,9 +103,9 @@ class LeadRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Branch $branch)
+    public function delete(Lead $lead)
     {
-        if ($branch->delete()) {
+        if ($lead->delete()) {
             return true;
         }
 
