@@ -2,22 +2,23 @@
 
 namespace App\Http\Responses\Focus\lead;
 
+use App\Models\customer\Customer;
+use App\Models\branch\Branch;
 use Illuminate\Contracts\Support\Responsable;
-use App\Models\lead\Lead;
 
 class EditResponse implements Responsable
 {
     /**
-     * @var App\Models\productcategory\Productcategory
+     * @var App\Models\Lead
      */
-    protected $leads;
+    protected $lead;
 
     /**
-     * @param App\Models\productcategory\Productcategory $productcategories
+     * @param App\Models\Lead $lead
      */
-    public function __construct($leads)
+    public function __construct($lead)
     {
-        $this->branches = $leads;
+        $this->lead = $lead;
     }
 
     /**
@@ -29,9 +30,14 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-         $leads=Lead::all();
+
+        $branch = Branch::find($this->lead['branch_id'], ['id', 'name']);
+        $customer=Customer::where('employee_id', '=', $this->lead['employee_id'])->first(['id','name']);
+            
         return view('focus.leads.edit')->with([
-            'leads' => $this->leads,'leads'=>$leads
+            'lead' => $this->lead,
+            'branch' => $branch,
+            'customer' => $customer
         ]);
     }
 }
