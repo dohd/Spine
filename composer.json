@@ -1,0 +1,16 @@
+{
+    "name": "lean_ventures/spine",
+    "description": "Enterprise Resource Application",
+    "authors": [
+        {
+            "name": "Dohd",
+            "email": "alloicebrian@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
