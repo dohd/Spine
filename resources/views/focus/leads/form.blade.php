@@ -4,161 +4,94 @@
 
         <div class="form-group row">
             <div class="fcol-sm-12">
-                <h3 class="title">Customer Info 
-                </h3>
+                <h3 class="title">Customer Info </h3>
             </div>
         </div>
 
       <div class="form-group row">
         <div class='col-md-12'>
             <div class='col m-1'>
-                {{ Form::label( 'method', trans('transactions.payer_type'),['class' => 'col-12 control-label']) }}
-                <div class="d-inline-block custom-control custom-checkbox mr-1">
-                    <input type="radio" class="custom-control-input bg-primary" name="client_status" id="colorCheck1"
-                           value="customer" checked="">
-                    <label class="custom-control-label" for="colorCheck1">Existing</label>
+                {{ Form::label( 'method', trans('transactions.payer_type'),['class' => 'col-12 control-label']) }} 
+
+                <div class="d-inline-block custom-control custom-checkbox mr-1">                    
+                <input type="radio" class="custom-control-input bg-primary" name="client_status" id="colorCheck1" value="customer" checked="">
+                <label class="custom-control-label" for="colorCheck1">Existing</label>
                 </div>
 
-                <div class="d-inline-block custom-control custom-checkbox mr-1">
-                    <input type="radio" class="custom-control-input bg-purple" name="client_status" value="new" 
-                           id="colorCheck3">
+                <div class="d-inline-block custom-control custom-checkbox mr-1">                   
+                    <input type="radio" class="custom-control-input bg-purple" name="client_status" value="new" id="colorCheck3">
                     <label class="custom-control-label" for="colorCheck3">New Client</label>
                 </div>
         </div>
     </div>
 
     </div>
-
-
-
-   <div class="form-group row">
-
-                    <div class="col-sm-6"><label for="client_id"
-                                                    class="caption">Customer*</label>
-
-                        <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-file-text-o"
-                                aria-hidden="true"></span>
-                            </div>
-
-                            <select id="person" name="client_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}" >
-    </select>
-                        </div>
-                    </div>
-                        <div class="col-sm-6"><label for="ref_type"
-                                                    class="caption">Branch</label>
-
-                        <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-file-text-o"
-                                aria-hidden="true"></span>
-                            </div>
-
-                                <select id="branch_id" name="branch_id" class="form-control  select-box"  data-placeholder="Branch" >
-    </select>
-                        </div>
-                    </div>
+        <div class="form-group row">
+            <div class="col-sm-6"><label for="client_id" class="caption">Customer*</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-file-text-o"aria-hidden="true"></span></div>
+                    <select id="person" name="client_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}" ></select>
                 </div>
-
-
-                
+            </div>
+            <div class="col-sm-6"><label for="ref_type" class="caption">Branch</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                    <select id="branch_id" name="branch_id" class="form-control  select-box"  data-placeholder="Branch" >
+                    </select>
+                </div>
+            </div>
+        </div>
 
                 <div class="form-group row">
-
-                    <div class="col-sm-6"><label for="client_name"
-                                                    class="caption"> Name</label>
-
+                    <div class="col-sm-6"><label for="client_name" class="caption"> Name</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-bookmark-o"
-                                aria-hidden="true"></span>
-                            </div>
+                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                             {{ Form::text('client_name', null, ['class' => 'form-control round required', 'placeholder' => 'Name','id'=>'payer-name', 'readonly']) }}
                         </div>
                     </div>
-                    <div class="col-sm-6"><label for="client_email"
-                                                    class="caption"> Email</label>
-
+                    <div class="col-sm-6"><label for="client_email" class="caption"> Email</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-bookmark-o"
-                                aria-hidden="true"></span>
-                            </div>
+                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                             {{ Form::text('client_email', null, ['class' => 'form-control round required', 'placeholder' => 'Email','id'=>'client_email', 'readonly']) }}
                         </div>
-                    </div>
-
-                    
+                    </div>                    
                 </div>
 
-
                     <div class="form-group row">
-
-                    
-                    
-                        <div class="col-sm-6"><label for="client_contact"
-                                                    class="caption"> Contact</label>
-
+                        <div class="col-sm-6"><label for="client_contact" class="caption"> Contact</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-bookmark-o"
-                                aria-hidden="true"></span>
-                            </div>
+                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                             {{ Form::text('client_contact', null, ['class' => 'form-control round required', 'placeholder' => 'Contact','id'=>'client_contact', 'readonly']) }}
                         </div>
                     </div>
                 </div>
-
-
-
-
             </div>
         </div>
 
-
-
-
-
-
-            <div class="col-sm-6 cmp-pnl">
-            <div class="inner-cmp-pnl">
-
+                <div class="col-sm-6 cmp-pnl">
+                <div class="inner-cmp-pnl">
                     <div class="form-group row">
-
-                    <div class="col-sm-12"><h3
-                                class="title">Lead Info</h3>
-                    </div>
-
+                    <div class="col-sm-12"><h3 class="title">Lead Info</h3></div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-6"><label for="reference"
-                                                    class="caption">Lead ID*</label>
-
+                    <div class="col-sm-6"><label for="reference" class="caption">Lead ID*</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-file-text-o"
-                                aria-hidden="true"></span>
-                            </div>
-
-                            {{ Form::number('reference', @$last_lead->reference+1, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid')]) }}
+                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                            {{ Form::number('reference', @$last_lead->reference+1, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid'), 'id' => 'reference']) }}
                         </div>
                     </div>
 
-                        <div class="col-sm-6"><label for="date_of_request"
-                class="caption">Date Of Request*</label>
-
+                        <div class="col-sm-6"><label for="date_of_request" class="caption">Date Of Request*</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-calendar4"
-                            aria-hidden="true"></span>
-                            </div>
-                            {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
+                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                            <!-- {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }} -->
+                            {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'), 'autocomplete'=>'false']) }}
                         </div>
                     </div>
-                    
                 </div>
 
-
-                <div class="form-group row">
-                    
-
-                        <div class="col-sm-12"><label for="title"
-                                                    class="caption"> Subject or Title*</label>
-
+                <div class="form-group row">            
+                        <div class="col-sm-12"><label for="title" class="caption"> Subject or Title*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-bookmark-o"
                                 aria-hidden="true"></span>
@@ -166,127 +99,69 @@
                             {{ Form::text('title', null, ['class' => 'form-control round required', 'placeholder' => 'Title']) }}
                         </div>
                     </div>
-                    
-                </div>
-
-
-                
+                </div>                
 
                 <div class="form-group row">
-
-                    <div class="col-sm-6"><label for="source"
-                                                    class="caption">Source*</label>
-
+                    <div class="col-sm-6"><label for="source" class="caption">Source*</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-file-text-o"
-                                aria-hidden="true"></span>
-                            </div>
-
-                                <select id="ref_type" name="source" 
-                        class="form-control round required  ">
-                        <option value="">Select Source*</option>
-                        <option value="Emergency Call">Emergency Call</option>
-                        <option value="RFQ" >RFQ</option>
-                            <option value="Site Survey" >Site Survey</option>
-                            <option value="Tender" >Tender</option>
-                
-
-                            </select>
+                            <div class="input-group-addon"><span class="icon-file-text-o"aria-hidden="true"></span></div>
+                                <select id="ref_type" name="source" class="form-control round required  ">
+                                    <option value="">Select Source*</option>
+                                    <option value="Emergency Call">Emergency Call</option>
+                                    <option value="RFQ" >RFQ</option>
+                                    <option value="Site Survey" >Site Survey</option>
+                                    <option value="Tender" >Tender</option>               
+                                </select>
                         </div>
                     </div>
-                        <div class="col-sm-6"><label for="employee_id"
-                                                    class="caption">Assign To*</label>
 
+                    <div class="col-sm-6"><label for="employee_id" class="caption">Assign To*</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-file-text-o"
-                                aria-hidden="true"></span>
-                            </div>
-
-                            {{ Form::text('employee_id', null, ['class' => 'form-control round required', 'placeholder' => 'Assign To ']) }}
-
-
-
-                
+                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                            {{ Form::text('assign_to', null, ['class' => 'form-control round required', 'placeholder' => 'Assign To ']) }}
                         </div>
                     </div>
                 </div>
 
-                    <div class="form-group row">
-                    
-                    <div class="col-sm-12"><label for="refer_no"
-                                                    class="caption">Note</label>
-
-                        <div class="input-group">
-                            <div class="input-group-addon"><span class="icon-bookmark-o"
-                                aria-hidden="true"></span>
+                    <div class="form-group row">                    
+                        <div class="col-sm-12"><label for="refer_no" class="caption">Note</label>
+                            <div class="input-group">
+                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                {{ Form::text('note', null, ['class' => 'form-control round', 'placeholder' => trans('general.note'),'autocomplete'=>'off']) }}
                             </div>
-                                {{ Form::text('note', null, ['class' => 'form-control round', 'placeholder' => trans('general.note'),'autocomplete'=>'off']) }}</div>
                         </div>
                     </div>
-
-
-
-
-
-
-
-
-
                 </div>
-
-
-
-
-                
             </div>
         </div>
-
-
-
     </div>
-
-
-
-
-
-
-
-
-
-
 
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('[data-toggle="datepicker"]').datepicker({
-                autoHide: true,
-                format: '{{config('core.user_date_format')}}'
-            });
-            $('[data-toggle="datepicker"]').datepicker('setDate', '{{date(config('core.user_date_format'))}}');
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('[data-toggle="datepicker"]').datepicker({
+            autoHide: true,
+            format: '{{config('core.user_date_format')}}'
         });
+        $('[data-toggle="datepicker"]')
+            .datepicker('setDate', '{{date(config('core.user_date_format'))}}');
+    });        
+</script>
 
-        
-    </script>
+{{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
+<script type="text/javascript">
+    /** 
+     * Create Lead Form Inputs Script
+    */
 
+    $("#employee").select2();
+    $("input[name=client_status]").on('change', function () {
+        var p_t = $('input[name=client_status]:checked').val();
 
-     {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
- <script type="text/javascript">
- $("#employee").select2();
-
-      
-
-
-
-      $("input[name=client_status]").on('change', function () {
-
-            var p_t = $('input[name=client_status]:checked').val();
-
-        
-
-          if(p_t!='customer'){
+        if (p_t !== 'customer') {
             $('#person').attr('disabled',true);
-             $('#branch_id').attr('disabled',true);
+            $('#branch_id').attr('disabled',true);
             
             $('#person').val('');
             $('#branch_id').val('');
@@ -294,20 +169,12 @@
             $('#client_email').attr('readonly',false);
             $('#client_contact').attr('readonly',false);
 
-
             $('#payer-name').val('');
             $('#client_email').val('');
             $('#client_contact').val('');
-  
-
-            
-
-
-
         }else{
-             
             $('#person').attr('disabled',false);
-             $('#branch_id').attr('disabled',false);
+            $('#branch_id').attr('disabled',false);
             $('#person').val('');
             $('#branch_id').val('');
 
@@ -316,12 +183,8 @@
             $('#client_contact').attr('readonly',true);
             $('#client_email').val('');
             $('#client_contact').val('');
-
-             
         }
-    
-
-      });
+    });
 
     $(".user-box-new").keyup(function () {
         $.ajaxSetup({
@@ -329,8 +192,10 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
         var box_id = $(this).attr('data-section');
-         var p_t = $('input[name=client_status]:checked').val();
+        var p_t = $('input[name=client_status]:checked').val();
+
         $.ajax({
             type: "POST",
             url: baseurl +'transactions/payer_search',
@@ -346,83 +211,109 @@
         });
     });
 
-      function selectPayer(data) {
-            $('#payer_id').val(data.id);
-            $('#relation_id').val(data.relation_id);
-            $('#payer-name').val(data.name);
-            //console.log(data);
-            $('#taxid').val(data.taxid);
-
-            $("#suppliers-box-result").hide();
+    $("#person").select2({
+        tags: [],
+        ajax: {
+            url: '{{route('biller.customers.select')}}',
+            dataType: 'json',
+            type: 'POST',
+            quietMillis: 50,
+            data: function (person) {
+                console.log('person:',person);
+                return {person};
+            },
+            processResults: function (data) {
+                console.log('person_data:',data);
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.name+' - '+item.company,
+                            id: item.id
+                        }
+                    })
+                };
+            },
         }
+    });
 
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
-             $("#person").select2({
-                tags: [],
-                ajax: {
-                    url: '{{route('biller.customers.select')}}',
-                    dataType: 'json',
-                    type: 'POST',
-                    quietMillis: 50,
-                    data: function (person) {
-                        return {
-                            person: person
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: $.map(data, function (item) {
-                                return {
-                                    text: item.name+' - '+item.company,
-                                    id: item.id
-                                }
-                            })
-                        };
-                    },
-                }
-            });
+    $("#person").on('change', function () {
+        $("#branch_id").val('').trigger('change');
+        var tips = $('#person :selected').val();
 
-             $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-           $("#person").on('change', function () {
-            $("#branch_id").val('').trigger('change');
-            var tips = $('#person :selected').val();
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $("#branch_id").select2({
-                ajax: {
-                    url: '{{route('biller.branches.branch_load')}}?id=' + tips,
-                    dataType: 'json',
-                    type: 'POST',
-                    quietMillis: 50,
-                    params: {'cat_id': tips},
-                    data: function (product) {
-                        return {
-                            product: product
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: $.map(data, function (item) {
-                                return {
-                                    text: item.name,
-                                    id: item.id
-                                }
-                            })
-                        };
-                    },
-                }
-            });
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         });
+        $("#branch_id").select2({
+            ajax: {
+                url: '{{route('biller.branches.branch_load')}}?id=' + tips,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                params: {'cat_id': tips},
+                data: function (product) {
+                    return {product};
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {text: item.name, id: item.id}
+                        })
+                    };
+                },
+            }
+        });
+    });
 
 
+    /** 
+     * Edit Lead Form Inputs Script
+     * 
+     * @var lead object
+     * @var branch object
+     * @var customer object
+    */
+
+    const lead = @json($lead);
+    const branch = @json($branch);
+    const customer = @json($customer);
+
+    // if branch_id is 0 then its a new customer otherwise an existing customer
+    if (lead && lead.hasOwnProperty('branch_id')) {
+        if (lead['branch_id'] === 0) {
+            $('#colorCheck1').prop('checked', false);
+            $('#colorCheck3').prop('checked', true);
+
+            $('#person').prop('disabled', true);
+            $('#branch_id').prop('disabled', true).select2();
+
+            $('#payer-name').prop('readonly', false);
+            $('#client_email').prop('readonly', false);
+            $('#client_contact').prop('readonly', false);
+        } else {
+            $('#colorCheck1').prop('checked', true);
+            $('#colorCheck3').prop('checked', false);
+    
+            $('#payer-name').prop('readonly',true);
+            $('#client_email').prop('readonly',true);
+            $('#client_contact').prop('readonly',true);
+
+            // set default select option for customer and branch
+            $('#person').select2({data: [{id: customer['id'], text: customer['name']}]});
+            $('#branch_id').select2({data: [{id: branch['id'], text: branch['name']}]});
+        } 
+        $('input[type=radio]').prop('disabled', true);
+        $('#person').prop('disabled', true);
+        $('#branch_id').prop('disabled', true);
+        $('#reference').val(lead['reference']);
+        $('#ref_type').val(lead['source']);
+    }
 </script>
 @endsection
-
-
