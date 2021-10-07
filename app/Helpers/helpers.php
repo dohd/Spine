@@ -899,3 +899,9 @@ function strip_tags_deep($value, $key = null){
     return $value;
   }
 }
+
+function browser_log($log)
+{
+    echo '<script>console.log('.json_encode($log).')</script>';
+    return;
+}
