@@ -26,7 +26,6 @@ use App\Http\Responses\Focus\lead\CreateResponse;
 use App\Http\Responses\Focus\lead\EditResponse;
 use App\Repositories\Focus\lead\LeadRepository;
 use App\Http\Requests\Focus\lead\ManageLeadRequest;
-use App\Http\Requests\Focus\lead\StoreLeadRequest;
 
 /**
  * ProductcategoriesController
@@ -87,16 +86,17 @@ class LeadsController extends Controller
             'reference' => 'required',
             'date_of_request' => 'required',
             'title' => 'required',
-            'source' => 'required'
+            'source' => 'required',
+            'assign_to' => 'required'
 
         ]);
-        //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-         $input['user_id'] = auth()->user()->id;
+        $input['user_id'] = auth()->user()->id;
+
         //Create the model using repository create method
-         
         $id = $this->repository->create($input);
+
         //return with successfull message
         return new RedirectResponse(
             route('biller.leads.index'), 
@@ -162,6 +162,9 @@ class LeadsController extends Controller
         ];
         $request->validate($fields);
         $input = $request->except(['_token', 'ins']);
+
+        // update date format to 'YY-MM-DD'
+        $input['date_of_request'] = date('Y-m-d', strtotime($input['date_of_request']));
 
         //Update the model using repository update method
         $this->repository->update($lead, $input);
