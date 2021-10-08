@@ -3,7 +3,6 @@
 namespace App\Http\Responses\Focus\lead;
 
 use App\Models\lead\Lead;
-use App\Models\hrm\Hrm;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -17,9 +16,10 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-          $leads=Lead::all();
-          $employees = Hrm::all();
-          $last_lead = Lead::orderBy('reference', 'desc')->first();
-        return view('focus.leads.create',compact('leads','employees','last_lead'));
+        $lead = Lead::orderBy('reference', 'desc')->first('reference');
+
+        return view('focus.leads.create')->with([
+            'reference' => $lead->reference + 1,
+        ]);
     }
 }
