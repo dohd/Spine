@@ -121,8 +121,8 @@ class BranchesController extends Controller
 
      public function branch_load(Request $request)
     {
-        $q = $request->get('id');
-        $result = Branch::all()->where('rel_id', '=', $q);
+        $id = $request->get('id');
+        $result = Branch::where('rel_id', '=', $id)->get(['id', 'name']);
         return json_encode($result);
     }
 
