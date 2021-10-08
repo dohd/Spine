@@ -77,15 +77,14 @@
                     <div class="col-sm-6"><label for="reference" class="caption">Lead ID*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                            {{ Form::number('reference', @$last_lead->reference+1, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid'), 'id' => 'reference']) }}
+                            {{ Form::number('reference', $reference, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid'), 'id' => 'reference']) }}
                         </div>
                     </div>
 
                         <div class="col-sm-6"><label for="date_of_request" class="caption">Date Of Request*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                            <!-- {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }} -->
-                            {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'), 'autocomplete'=>'false']) }}
+                            {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false', 'id' => 'date_of_request']) }}
                         </div>
                     </div>
                 </div>
@@ -106,7 +105,7 @@
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o"aria-hidden="true"></span></div>
                                 <select id="ref_type" name="source" class="form-control round required  ">
-                                    <option value="">Select Source*</option>
+                                    <option value="">--Select Source--</option>
                                     <option value="Emergency Call">Emergency Call</option>
                                     <option value="RFQ" >RFQ</option>
                                     <option value="Site Survey" >Site Survey</option>
@@ -138,28 +137,24 @@
 
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('[data-toggle="datepicker"]').datepicker({
-            autoHide: true,
-            format: '{{config('core.user_date_format')}}'
-        });
-        $('[data-toggle="datepicker"]')
-            .datepicker('setDate', '{{date(config('core.user_date_format'))}}');
-    });        
-</script>
-
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
+
 <script type="text/javascript">
     /** 
      * Create Lead Form Inputs Script
     */
 
-    $("#employee").select2();
-    $("input[name=client_status]").on('change', function () {
-        var p_t = $('input[name=client_status]:checked').val();
+    // on page load
+    $(document).ready(function() {
+        // initialize datepicker with php configured date format
+        $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}"})
+    });
 
-        if (p_t !== 'customer') {
+    // on selecting a payer type
+    $("input[name=client_status]").on('change', function () {
+        var payerType = $('input[name=client_status]:checked').val();
+
+        if (payerType !== 'customer') {
             $('#person').attr('disabled',true);
             $('#branch_id').attr('disabled',true);
             
@@ -186,44 +181,28 @@
         }
     });
 
-    $(".user-box-new").keyup(function () {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+    // initialize datepicker with current date parsed by php
+    const now = "{{ date('Y-m-d') }}";
+    $('[data-toggle="datepicker"]')
+        .datepicker({ format: "{{config('core.user_date_format')}}"})
+        .datepicker('setDate', new Date(now));
 
-        var box_id = $(this).attr('data-section');
-        var p_t = $('input[name=client_status]:checked').val();
+    // set ajax headers
+    const token = $('meta[name="csrf-token"]').attr('content');
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': token }});
 
-        $.ajax({
-            type: "POST",
-            url: baseurl +'transactions/payer_search',
-            data: 'keyword=' + $(this).val()+ '&payer_type=' + p_t,
-            beforeSend: function () {
-                $("#" + box_id + "-box").css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
-            },
-            success: function (data) {
-                $("#" + box_id + "-box-result").show();
-                $("#" + box_id + "-box-result").html(data);
-                $("#" + box_id + "-box").css("background", "none");
-            }
-        });
-    });
-
+    // fetch customers
     $("#person").select2({
         tags: [],
         ajax: {
-            url: '{{route('biller.customers.select')}}',
+            url: "{{route('biller.customers.select')}}",
             dataType: 'json',
             type: 'POST',
             quietMillis: 50,
             data: function (person) {
-                console.log('person:',person);
                 return {person};
             },
             processResults: function (data) {
-                console.log('person_data:',data);
                 return {
                     results: $.map(data, function (item) {
                         return {
@@ -236,28 +215,19 @@
         }
     });
 
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
+    // on selecting a customer
     $("#person").on('change', function () {
         $("#branch_id").val('').trigger('change');
-        var tips = $('#person :selected').val();
+        const id = $('#person :selected').val();
 
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+        // fetch branches with params id from selected customer
         $("#branch_id").select2({
             ajax: {
-                url: '{{route('biller.branches.branch_load')}}?id=' + tips,
+                url: "{{route('biller.branches.branch_load')}}?id=" + id,
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
-                params: {'cat_id': tips},
+                params: {'cat_id': id},
                 data: function (product) {
                     return {product};
                 },
@@ -271,7 +241,6 @@
             }
         });
     });
-
 
     /** 
      * Edit Lead Form Inputs Script
@@ -314,6 +283,12 @@
         $('#branch_id').prop('disabled', true);
         $('#reference').val(lead['reference']);
         $('#ref_type').val(lead['source']);
+
+        // covert date to local timezone by adding time 'T00:00' parameter 
+        // for correct parsing by datepicker
+        $('[data-toggle="datepicker"]')
+            .datepicker({ format: "{{config('core.user_date_format')}}"})
+            .datepicker('setDate', new Date(lead['date_of_request']+'T00:00'))
     }
 </script>
 @endsection
