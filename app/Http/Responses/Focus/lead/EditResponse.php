@@ -30,7 +30,6 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-
         $branch = Branch::find($this->lead['branch_id'], ['id', 'name']);
         $customer=Customer::where('employee_id', '=', $this->lead['employee_id'])->first(['id','name']);
             
