@@ -39,8 +39,7 @@
         Route::post('banktransfers/get', 'BanktransfersTableController')->name('banktransfers.get');
     });
     Route::group(['namespace' => 'branch'], function () {
-        
-       Route::resource('branches', 'BranchesController');
+        Route::resource('branches', 'BranchesController');
         //For Datatable
         Route::post('branches/get', 'BranchesTableController')->name('branches.get');
         Route::post('branches/branch_load', 'BranchesController@branch_load')->name('branches.branch_load');
@@ -155,12 +154,7 @@
         
         //For Datatable
         Route::get('makepayment/single_payment/{tr_id}', 'MakepaymentsController@single_payment')->name('makepayment.single_payment');
-
-
-
         Route::get('makepayment/receive_single_payment/{tr_id}', 'MakepaymentsController@receive_single_payment')->name('makepayment.receive_single_payment');
-
-        
     });
 
      
