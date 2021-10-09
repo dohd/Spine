@@ -29,7 +29,7 @@ public/**/
 **/assets
 build
 resources/lang
-package
+package/**/
 vendor
 
 .env
