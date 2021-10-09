@@ -144,12 +144,6 @@
      * Create Lead Form Inputs Script
     */
 
-    // on page load
-    $(document).ready(function() {
-        // initialize datepicker with php configured date format
-        $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}"})
-    });
-
     // on selecting a payer type
     $("input[name=client_status]").on('change', function () {
         var payerType = $('input[name=client_status]:checked').val();
@@ -181,7 +175,7 @@
         }
     });
 
-    // initialize datepicker with current date parsed by php
+    // initialize datepicker with current date parsed by php date function
     const now = "{{ date('Y-m-d') }}";
     $('[data-toggle="datepicker"]')
         .datepicker({ format: "{{config('core.user_date_format')}}"})
@@ -284,11 +278,10 @@
         $('#reference').val(lead['reference']);
         $('#ref_type').val(lead['source']);
 
-        // covert date to local timezone by adding time 'T00:00' parameter 
-        // for correct parsing by datepicker
-        $('[data-toggle="datepicker"]')
-            .datepicker({ format: "{{config('core.user_date_format')}}"})
-            .datepicker('setDate', new Date(lead['date_of_request']+'T00:00'))
+        // parse date using php date function
+        const date = "{{ date('Y-m-d', strtotime($lead['date_of_request'])) }}";
+        // set datepicker with parsed date
+        $('[data-toggle="datepicker"]').datepicker('setDate', new Date(date));
     }
 </script>
 @endsection
