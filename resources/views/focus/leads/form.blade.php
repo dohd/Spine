@@ -14,8 +14,8 @@
                 {{ Form::label( 'method', trans('transactions.payer_type'),['class' => 'col-12 control-label']) }} 
 
                 <div class="d-inline-block custom-control custom-checkbox mr-1">                    
-                <input type="radio" class="custom-control-input bg-primary" name="client_status" id="colorCheck1" value="customer" checked="">
-                <label class="custom-control-label" for="colorCheck1">Existing</label>
+                    <input type="radio" class="custom-control-input bg-primary" name="client_status" id="colorCheck1" value="customer" checked="">
+                    <label class="custom-control-label" for="colorCheck1">Existing</label>
                 </div>
 
                 <div class="d-inline-block custom-control custom-checkbox mr-1">                   
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-                <div class="col-sm-6 cmp-pnl">
+            <div class="col-sm-6 cmp-pnl">
                 <div class="inner-cmp-pnl">
                     <div class="form-group row">
                     <div class="col-sm-12"><h3 class="title">Lead Info</h3></div>
@@ -104,13 +104,13 @@
                     <div class="col-sm-6"><label for="source" class="caption">Source*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o"aria-hidden="true"></span></div>
-                                <select id="ref_type" name="source" class="form-control round required  ">
-                                    <option value="">--Select Source--</option>
-                                    <option value="Emergency Call">Emergency Call</option>
-                                    <option value="RFQ" >RFQ</option>
-                                    <option value="Site Survey" >Site Survey</option>
-                                    <option value="Tender" >Tender</option>               
-                                </select>
+                            <select id="ref_type" name="source" class="form-control round required  ">
+                                <option value="">--Select Source--</option>
+                                <option value="Emergency Call">Emergency Call</option>
+                                <option value="RFQ" >RFQ</option>
+                                <option value="Site Survey" >Site Survey</option>
+                                <option value="Tender" >Tender</option>               
+                            </select>
                         </div>
                     </div>
 
@@ -130,6 +130,20 @@
                             </div>
                         </div>
                     </div>
+
+
+                    <div class="form-group row status-group">                    
+                        <div class="col-sm-12"><label for="refer_no" class="caption">Status</label>
+                            <div class="input-group">
+                                <div class="form-check">
+                                    <input type="hidden" name="status" value="{{ $lead->status }}" id="status">
+                                    <input class="form-check-input" type="checkbox" id="statusCheckbox">
+                                    <label class="form-check-label" for="status">Open</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -236,6 +250,9 @@
         });
     });
 
+    // remove visibility for status checkbox
+    $('.status-group').css('display', 'none');
+
     /** 
      * Edit Lead Form Inputs Script
      * 
@@ -282,6 +299,24 @@
         const date = "{{ date('Y-m-d', strtotime($lead['date_of_request'])) }}";
         // set datepicker with parsed date
         $('[data-toggle="datepicker"]').datepicker('setDate', new Date(date));
+
+        // set status checkbox to be visible
+        $('.status-group').css('display', 'block');
+        // if lead status is 1 then, display text Closed
+        if (lead['status']) {
+            $('#statusCheckbox').prop('checked', true);
+            $('label[for=status]').text('Closed');
+        }
+        // change status value when checkbox is clicked
+        $('input[type=checkbox]').change(function() {
+            if ($(this).is(':checked')) { 
+                $('label[for=status]').text('Closed');
+                $('#status').val(1);
+            } else {
+                $('label[for=status]').text('Open');
+                $('#status').val(0);
+            }
+        });
     }
 </script>
 @endsection
