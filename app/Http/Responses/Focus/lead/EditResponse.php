@@ -30,8 +30,8 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $branch = Branch::find($this->lead['branch_id'], ['id', 'name']);
-        $customer=Customer::where('employee_id', '=', $this->lead['employee_id'])->first(['id','name']);
+        $branch = Branch::find($this->lead->branch_id, ['id', 'name']);
+        $customer=Customer::find($this->lead->client_id, ['id', 'name']);
             
         return view('focus.leads.edit')->with([
             'lead' => $this->lead,
