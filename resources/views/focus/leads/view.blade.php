@@ -15,58 +15,58 @@
             <table id="leads-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                 <tbody>
                     <tr>
-                        <td>Reference</td>
-                        <th>{{ $lead->reference }}</th>
+                        <th>Reference</th>
+                        <td>{{ $lead->reference }}</td>
                     </tr>
                     <tr>
-                        <td>Status</td>
+                        <th>Status</th>
                         @if ($lead->status)
-                            <th class='text-success'>Closed</th>
+                            <td class='text-success'>Closed</td>
                         @else
-                            <th>Open</th>
+                            <td>Open</td>
                         @endif
                     </tr>                    
                     <tr>
-                        <td>Client Name</td>
-                        <th>{{ $lead->client_name ?: $customer->name }}</th>
+                        <th>Client Name</th>
+                        <td>{{ $lead->client_name ?: $customer->name }}</td>
                     </tr>
                     @if ($branch->name)
                         <tr>
-                            <td>Client Branch</td>
-                            <th>{{ $branch->name }}</th>
+                            <th>Client Branch</th>
+                            <td>{{ $branch->name }}</td>
                         </tr>
                     @endif
                     <tr>
-                        <td>Client Contact</td>
-                        <th>{{ $lead->client_contact ?: $customer->phone }}</th>
+                        <th>Client Contact</th>
+                        <td>{{ $lead->client_contact ?: $customer->phone }}</td>
                     </tr>
                     <tr>
-                        <td>Client Email</td>
-                        <th>{{ $lead->client_email ?: $customer->email }}</th>
+                        <th>Client Email</th>
+                        <td>{{ $lead->client_email ?: $customer->email }}</td>
                     </tr>                    
                     <tr>
-                        <td>Date of Request</td>
-                        <th>{{ $lead->date_of_request }}</th>
+                        <th>Date of Request</th>
+                        <td>{{ $lead->date_of_request }}</td>
                     </tr>
                     <tr>
-                        <td>Cost</td>
-                        <th>{{ $lead->cost }}</th>
+                        <th>Cost</th>
+                        <td>{{ $lead->cost }}</td>
                     </tr>
                     <tr>
-                        <td>Assigned to</td>
-                        <th>{{ $lead->assign_to }}</th>
+                        <th>Assigned to</th>
+                        <td>{{ $lead->assign_to }}</td>
                     </tr>
                     <tr>
-                        <td>Source</td>
-                        <th>{{ $lead->source }}</th>
+                        <th>Source</th>
+                        <td>{{ $lead->source }}</td>
                     </tr>
                     <tr>
-                        <td>Note</td>
-                        <th>{{ $lead->note }}</th>
+                        <th>Note</th>
+                        <td>{{ $lead->note }}</td>
                     </tr>
                     <tr>
-                        <td>Created at</td>
-                        <th>{{ date('d-m-Y', strtotime($lead->created_at)) }}</th>
+                        <th>Created at</th>
+                        <td>{{ date('d-m-Y', strtotime($lead->created_at)) }}</td>
                     </tr>
                 </tbody>
             </table>
