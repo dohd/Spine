@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\lead;
 
 use App\Models\lead\Lead;
@@ -26,6 +27,8 @@ use App\Http\Responses\Focus\lead\CreateResponse;
 use App\Http\Responses\Focus\lead\EditResponse;
 use App\Repositories\Focus\lead\LeadRepository;
 use App\Http\Requests\Focus\lead\ManageLeadRequest;
+use App\Models\branch\Branch;
+use App\Models\customer\Customer;
 
 /**
  * ProductcategoriesController
@@ -99,23 +102,23 @@ class LeadsController extends Controller
 
         //return with successfull message
         return new RedirectResponse(
-            route('biller.leads.index'), 
+            route('biller.leads.index'),
             [
-                'flash_success' => 'Lead  Successfully Created' 
-                    . ' <a href="' 
-                    . route('biller.leads.show', [$id]) 
-                    . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
-                    . trans('general.view') 
-                    . '  </a> &nbsp; &nbsp;' 
-                    . ' <a href="' 
-                    . route('biller.leads.create') 
-                    . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
-                    . trans('general.create') 
-                    . '  </a>&nbsp; &nbsp;' 
-                    . ' <a href="' 
-                    . route('biller.leads.index') 
-                    . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
-                    . trans('general.list') 
+                'flash_success' => 'Lead  Successfully Created'
+                    . ' <a href="'
+                    . route('biller.leads.show', [$id])
+                    . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> '
+                    . trans('general.view')
+                    . '  </a> &nbsp; &nbsp;'
+                    . ' <a href="'
+                    . route('biller.leads.create')
+                    . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> '
+                    . trans('general.create')
+                    . '  </a>&nbsp; &nbsp;'
+                    . ' <a href="'
+                    . route('biller.leads.index')
+                    . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">'
+                    . trans('general.list')
                     . '</span> </a>'
             ]
         );
@@ -142,23 +145,23 @@ class LeadsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
 
-     public function lead_load(Request $request)
+    public function lead_load(Request $request)
     {
-        $q = $request->get('id');
-        $result = Lead::all()->where('rel_id', '=', $q);
+        $id = $request->get('id');
+        $result = Lead::all()->where('rel_id', '=', $id);
         return json_encode($result);
     }
 
 
     public function update(Request $request, Lead $lead)
-    {   
+    {
         // fields to validate
         $fields = [
-            'reference' => 'required', 
-            'date_of_request' => 'required', 
-            'title' => 'required', 
-            'source' => 'required', 
-            'assign_to' => 'required', 
+            'reference' => 'required',
+            'date_of_request' => 'required',
+            'title' => 'required',
+            'source' => 'required',
+            'assign_to' => 'required',
         ];
         $request->validate($fields);
         $input = $request->except(['_token', 'ins']);
@@ -170,23 +173,23 @@ class LeadsController extends Controller
         $this->repository->update($lead, $input);
 
         return new RedirectResponse(
-            route('biller.leads.index'), 
+            route('biller.leads.index'),
             [
                 'flash_success' => 'Lead Successfully Updated'
-                    .'<a href="'
-                    .route('biller.leads.show', [$lead->id])
-                    .'" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> '
-                    .trans('general.view')
-                    .'  </a> &nbsp; &nbsp;'
-                    .' <a href="'
-                    .route('biller.branches.create') 
-                    .'" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
-                    . trans('general.create') 
-                    . '  </a>&nbsp; &nbsp;' 
-                    . ' <a href="' 
-                    . route('biller.branches.index') 
-                    . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
-                    . trans('general.list') 
+                    . '<a href="'
+                    . route('biller.leads.show', [$lead->id])
+                    . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> '
+                    . trans('general.view')
+                    . '  </a> &nbsp; &nbsp;'
+                    . ' <a href="'
+                    . route('biller.leads.create')
+                    . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> '
+                    . trans('general.create')
+                    . '  </a>&nbsp; &nbsp;'
+                    . ' <a href="'
+                    . route('biller.leads.index')
+                    . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">'
+                    . trans('general.list')
                     . '</span> </a>'
             ]
         );
@@ -209,34 +212,26 @@ class LeadsController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Show the view for the specific resource
      *
      * @param DeleteProductcategoryRequestNamespace $request
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(lead $lead, ManageBranchRequest $request)
+    public function show(Lead $lead, Request $request)
     {
+        $branch = Branch::find($lead->branch_id, ['id', 'name']);
+        $customer = Customer::find($lead->client_id, ['id', 'name', 'phone', 'email']);
 
-        //returning with successfull message
-        return new ViewResponse('focus.leads.view', compact('lead'));
+        return new ViewResponse('focus.leads.view', compact('lead', 'branch', 'customer'));
     }
-
-
 
     public function lead_search(ManageLeadRequest $request)
     {
         $q = $request->post('keyword');
-
-
-    // $user = \App\Models\lead\Lead::with('primary_group')->where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'taxid', 'name', 'phone', 'address', 'city', 'email'));
-
-
-     $lead = \App\Models\lead\Lead::where('id', $q )->first();
-
-        if (!$q) return false;
+        // $user = \App\Models\lead\Lead::with('primary_group')->where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'taxid', 'name', 'phone', 'address', 'city', 'email'));
+        $lead = \App\Models\lead\Lead::where('id', $q)->first();
         if (count($lead) > 0) return $lead;
-
+        return false;
     }
-
 }
