@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\equipment;
 
 use App\Models\equipment\Equipment;
@@ -72,7 +73,7 @@ class EquipmentsController extends Controller
      */
     public function create(StoreEquipmentRequest $request)
     {
-       
+
         return new CreateResponse('focus.equipments.create');
     }
 
@@ -88,13 +89,13 @@ class EquipmentsController extends Controller
             'manufacturer' => 'required',
             'location' => 'required',
             'unit_type' => 'required',
-            
+
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-         
+
         $id = $this->repository->create($input);
         //return with successfull message
         return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Odu  Successfully Created' . ' <a href="' . route('biller.equipments.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
@@ -121,19 +122,17 @@ class EquipmentsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
 
-     public function equipment_load(Request $request)
+    public function equipment_load(Request $request)
     {
 
-          $q = $request->get('id');
-        if($q==1){
-       $result = Equipment::all()->where('rel_id', '=', $q);
-        return json_encode($result);
-
-        }else{
-            $result="";
-             return json_encode($result);
+        $q = $request->get('id');
+        if ($q == 1) {
+            $result = Equipment::all()->where('rel_id', '=', $q);
+            return json_encode($result);
+        } else {
+            $result = "";
+            return json_encode($result);
         }
-      
     }
 
 
@@ -149,7 +148,6 @@ class EquipmentsController extends Controller
         $this->repository->update($equipment, $input);
         //return with successfull message
         return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipments  Successfully Updated'  . ' <a href="' . route('biller.equipments.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-
     }
 
     /**
@@ -183,30 +181,26 @@ class EquipmentsController extends Controller
         return new ViewResponse('focus.odus.view', compact('odu'));
     }
 
-     public function equipment_search(Request $request, $bill_type)
+    public function equipment_search(Request $request)
     {
-        //if (!access()->allow('product_search')) return false;
         $q = $request->post('keyword');
-        //$w = $request->post('client_id');
-      
-
-
         $equipments = Equipment::where('unique_id', 'LIKE', '%' . $q . '%')->limit(6)->with(['customer'])->get();
+
+        // transform equipemts
         $output = array();
-
-            foreach ($equipments as $row) {
-
-
-
-                $output[] = array('name' => $row->unique_id,'customer' => $row->customer->company, 'unit_type' => $row->unit_type, 'make_type' => $row->make_type, 'id' => $row->id, 'capacity' => $row->capacity, 'location' => $row->location, 'next_maintenance_date' => dateFormat($row->next_maintenance_date), 'last_maint_date' => dateFormat($row->last_maint_date));
-
-
-            }
-        
-
-        if (count($output) > 0)
-
-            return view('focus.djcs.partials.search')->withDetails($output);
+        foreach ($equipments as $row) {
+            $output[] = array(
+                'name' => $row->unique_id,
+                'customer' => $row->customer->company, 
+                'unit_type' => $row->unit_type, 
+                'make_type' => $row->make_type, 
+                'id' => $row->id, 
+                'capacity' => $row->capacity, 
+                'location' => $row->location, 
+                'next_maintenance_date' => $row->next_maintenance_date, 
+                'last_maint_date' => $row->last_maint_date,
+            );
+        }
+        if (count($output) > 0) return view('focus.djcs.partials.search')->withDetails($output);
     }
-
 }
