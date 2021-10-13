@@ -133,8 +133,9 @@ class LeadsController extends Controller
      */
     public function edit(Lead $lead)
     {
-        //dd(0);
-        return new EditResponse($lead);
+        $branch = Branch::find($this->lead->branch_id, ['id', 'name']);
+        $customer=Customer::find($this->lead->client_id, ['id', 'name']);
+        return new EditResponse('focus.leads.edit', compact('lead', 'branch', 'customer'));
     }
 
     /**
