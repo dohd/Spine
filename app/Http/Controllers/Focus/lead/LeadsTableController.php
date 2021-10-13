@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\lead;
 
 use Carbon\Carbon;
@@ -52,44 +53,32 @@ class LeadsTableController extends Controller
      */
     public function __invoke(ManageLeadRequest $request)
     {
-    
-
         $core = $this->lead->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-
-             ->addColumn('reference', function ($lead) {
-                return '<a class="font-weight-bold" href="' . route('biller.leads.index') . '?rel_type=' . $lead->id . '&rel_id=' . $lead->id . '">' . $lead->reference . '</a>';
+            ->addColumn('reference', function ($lead) {
+                $href = route("biller.leads.index").'/'.$lead->id;
+                return sprintf('<a class="font-weight-bold" href="%s">%d</a>', $href, $lead->reference);
             })
-
-
-                ->addColumn('client_name', function ($lead) {
-
-
-                     
-                    switch ($lead->client_status) {
-                        case 'customer':
-                            return  $lead->customer->company.'   '. $lead->branch->name;
-                            break;
-                        case 'new':
-                            return  $lead->client_name;
-                            break;
-                            
-                    }
-             
-
-
-
-                  return $lead->client_name;
-                })
-           
+            ->addColumn('client_name', function ($lead) {
+                switch ($lead->client_status) {
+                    case 'customer':
+                        return  $lead->customer->company.'&nbsp;'. $lead->branch->name;
+                    case 'new':
+                        return  $lead->client_name;
+                }
+                return $lead->client_name;
+            })
             ->addColumn('created_at', function ($lead) {
                 return dateFormat($lead->created_at);
             })
+            ->addColumn('status', function($lead) {
+                if ($lead->status == 0) return '<span class="badge badge-secondary">Open</span>';
+                return '<span class="badge badge-success">Closed</span>';
+            })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
-              
             })
             ->make(true);
     }
