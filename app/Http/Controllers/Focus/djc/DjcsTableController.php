@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\djc;
 
 use Carbon\Carbon;
@@ -44,40 +45,25 @@ class DjcsTableController extends Controller
     }
 
     /**
-     * This method return the data of the model
-     * @param ManageAccountRequest $request
-     *
-     * @return mixed
+     * This method returns the datatable view
      */
     public function __invoke(ManageDjcRequest $request)
     {
-        //
         $core = $this->djc->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-           ->addColumn('customer', function ($djc) {
-               return $djc->client->company.' '.$djc->branch->name. ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';;
-              
-               
+            ->addColumn('customer', function ($djc) {
+                return $djc->client->company . ' ' . $djc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
             })
-           
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
             })
-
-             ->addColumn('actions', function ($djc) {
-
-                        $valid_token = token_validator('','d' . $djc->id,true);
-
-                           $link=route( 'biller.print_djc',[$djc->id,10,$valid_token,1]);
-
-                return '<a href="' .$link.'" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="List"><i class="fa fa-print"></i></a> ' . $djc->action_buttons;
+            ->addColumn('actions', function ($djc) {
+                $valid_token = token_validator('', 'd' . $djc->id, true);
+                $link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
+                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="List"><i class="fa fa-print"></i></a> ' . $djc->action_buttons;
             })
-
-            //->addColumn('actions', function ($djc) {
-               // return $djc->action_buttons;
-           // })
             ->make(true);
     }
 }

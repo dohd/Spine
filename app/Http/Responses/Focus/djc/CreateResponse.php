@@ -19,10 +19,8 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
          
-         $leads=Lead::all();
-          $last_djc = Djc::orderBy('tid', 'desc')->first();
+        $leads=Lead::all();
+        $last_djc = Djc::orderBy('tid', 'desc')->first();
         return view('focus.djcs.create',compact('leads','last_djc'));
-
-
     }
 }
