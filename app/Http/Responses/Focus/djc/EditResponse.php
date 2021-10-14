@@ -8,16 +8,23 @@ use App\Models\djc\Djc;
 class EditResponse implements Responsable
 {
     /**
-     * @var App\Models\productcategory\Productcategory
+     * @var array
      */
-    protected $djcs;
+    protected $with;
 
     /**
-     * @param App\Models\productcategory\Productcategory $productcategories
+     * @var string
      */
-    public function __construct($djcs)
+    protected $view;
+
+    /**
+     * @param string $view
+     * @param array $with
+     */
+    public function __construct($view, $with=[])
     {
-        $this->djcs = $djcs;
+        $this->view = $view;
+        $this->with = $with;
     }
 
     /**
@@ -29,9 +36,7 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-         $djcs=Djc::all();
-        return view('focus.djcs.edit')->with([
-            'djcs' => $this->djcs,'djcs'=>$djcs
-        ]);
+        if (empty($this->with)) return view($this->view);
+        return view($this->view)->with($this->with);
     }
 }

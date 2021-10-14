@@ -114,7 +114,7 @@ class DjcsController extends Controller
      */
     public function edit(Djc $djc, ManageDjcRequest $request)
     {
-        return new EditResponse($djc);
+        return new EditResponse('focus.djcs.edit', compact('djc', 'lead'));
     }
 
     /**
@@ -157,6 +157,7 @@ class DjcsController extends Controller
      * View the specified resource from storage
      * 
      * @param App\Models\djc\Djc $djc
+     * @return \App\Http\Responses\ViewResponse
      */
     public function show(Djc $djc)
     {
@@ -165,10 +166,10 @@ class DjcsController extends Controller
         $customer = Customer::find($djc->client_id, ['id', 'name']);
         $djc_items = DjcItem::where('djc_id', '=', $djc->id)->get();
 
-        browser_log($djc);
         return new ViewResponse('focus.djcs.view', compact('djc', 'lead', 'branch', 'customer', 'djc_items'));
     }
 
+    // account search
     public function account_search(Request $request, $bill_type)
     {
         if (!access()->allow('product_search')) return false;
@@ -193,6 +194,7 @@ class DjcsController extends Controller
             return view('focus.products.partials.search')->withDetails($output);
     }
 
+    // balance sheet
     public function balance_sheet(Request $request)
     {
         $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
@@ -215,6 +217,7 @@ class DjcsController extends Controller
         }
     }
 
+    // trial balance
     public function trial_balance(Request $request)
     {
         $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
