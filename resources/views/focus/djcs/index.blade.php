@@ -7,59 +7,49 @@
 @endsection
 
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class=" mb-0">Djc Report Management</h4>
+<div class="">
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <h4 class=" mb-0">Djc Report Management</h4>
 
-                </div>
-                <div class="content-header-right col-md-6 col-12">
-                    <div class="media width-250 float-right">
+            </div>
+            <div class="content-header-right col-md-6 col-12">
+                <div class="media width-250 float-right">
 
-                        <div class="media-body media-right text-right">
-                            @include('focus.djcs.partials.djcs-header-buttons')
-                        </div>
+                    <div class="media-body media-right text-right">
+                        @include('focus.djcs.partials.djcs-header-buttons')
                     </div>
                 </div>
             </div>
-            <div class="content-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
+        </div>
+        <div class="content-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
 
-                            <div class="card-content">
+                        <div class="card-content">
 
-                                <div class="card-body">
-                                    <table id="djc-table"
-                                           class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                                           width="100%">
-                                        <thead>
+                            <div class="card-body">
+                                <table id="djc-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                    <thead>
                                         <tr>
                                             <th>#</th>
                                             <th>Djc ID</th>
                                             <th>Reference</th>
                                             <th>Subject</th>
                                             <th>Client & Branch</th>
-                                         <th>Job Card</th>
-                                            
-                                            
-                                          <th>{{ trans('general.createdat') }}</th>
+                                            <th>Job Card</th>
+                                            <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
-                                        </thead>
-
-
-                                        <tbody>
+                                    </thead>
+                                    <tbody>
                                         <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1"><i
-                                                        class="fa fa-spinner spinner"></i></td>
+                                            <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
                                         </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -67,6 +57,7 @@
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('after-scripts')
@@ -75,9 +66,7 @@
 
     <script>
         $(function () {
-            setTimeout(function () {
-                draw_data()
-            }, {{config('master.delay')}});
+            setTimeout(function () { draw_data(); }, "{{config('master.delay')}}");
         });
 
         function draw_data() {
@@ -87,13 +76,13 @@
                 }
             });
 
+            const lang = {@lang('datatable.strings')};
+
             var dataTable = $('#djc-table').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                language: {
-                    @lang('datatable.strings')
-                },
+                language: lang,
                 ajax: {
                     url: '{{ route("biller.djcs.get") }}',
                     type: 'post',
@@ -106,7 +95,7 @@
                     {data: 'subject', name: 'subject'},
                     {data: 'customer', name: 'customer'},
                     {data: 'job_card', name: 'job_card'},
-                    {data: 'created_at', name: '{{config('module.djcs.table')}}.created_at'},
+                    {data: 'created_at', name: "{{config('module.djcs.table')}}.created_at"},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "asc"]],
@@ -114,15 +103,14 @@
                 dom: 'Blfrtip',
                 buttons: {
                     buttons: [
-
                         {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
                         {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
                         {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
                     ]
                 }
             });
+            
             $('#branches-table_wrapper').removeClass('form-inline');
-
         }
     </script>
 @endsection
