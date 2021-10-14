@@ -30,7 +30,6 @@ class ViewResponse implements Responsable
      * In Response.
      *
      * @param \Illuminate\Http\Request $request
-     *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function toResponse($request)
