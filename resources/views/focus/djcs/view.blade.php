@@ -1,628 +1,151 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management') . ' | ' . trans('labels.backend.quotes.create'))
+@section ('title', 'Djc Report Management')
 
 @section('page-header')
-    <h1>
-        {{ trans('labels.backend.quotes.management') }}
-        <small>{{ trans('labels.backend.quotes.create') }}</small>
-    </h1>
+<h1>Djc Report</h1>
 @endsection
-
-
 
 @section('content')
-    <div class="app-content m-1">
-        <div class="content-wrapper">
-
-            <div class="content-body">
-                <section class="card">
-                    <div id="invoice-template" class="card-body">
-                        <div class="row">
-                            @if($quote['status']!='canceled')
-                                <div class="col">
-                                    <a href="{{$quote['id']}}/edit" class="btn btn-warning mb-1"><i
-                                                class="fa fa-pencil"></i> {{trans('labels.backend.quotes.edit')}}</a>
-
-                                    <a href="#pop_model_3" class="btn btn-success mb-1" data-toggle="modal"
-                                       data-remote="false"><i
-                                                class="fa fa-repeat"> </i> {{trans('quotes.convert_invoice')}}
-                                    </a>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-facebook dropdown-toggle mb-1"
-                                                data-toggle="dropdown"
-                                                aria-haspopup="true" aria-expanded="false">
-                            <span
-                                    class="fa fa-envelope-o"></span> {{trans('customers.email')}}
-                                        </button>
-                                        <div class="dropdown-menu"><a href="#sendEmail" data-toggle="modal"
-                                                                      data-remote="false"
-                                                                      class="dropdown-item send_bill"
-                                                                      data-type="6"
-                                                                      data-type1="proposal">{{trans('general.quote_proposal')}}</a>
-
-                                        </div>
-
-                                    </div>
-
-                                    <!-- SMS -->
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-blue dropdown-toggle mb-1"
-                                                data-toggle="dropdown"
-                                                aria-haspopup="true" aria-expanded="false">
-                            <span
-                                    class="fa fa-mobile"></span> {{trans('general.sms')}}
-                                        </button>
-                                        <div class="dropdown-menu"><a href="#sendSMS" data-toggle="modal"
-                                                                      data-remote="false" class="dropdown-item send_sms"
-                                                                      data-type="16"
-                                                                      data-type1="proposal">{{trans('general.quote_proposal')}}</a>
-
-                                        </div>
-
-                                    </div>
-
-                                    @php
-                                        $valid_token = token_validator('','q' . $quote['id'].$quote['tid'],true);
-                                        $link=route( 'biller.print_bill',[$quote['id'],4,$valid_token,1]);
-                                        $link_download=route( 'biller.print_bill',[$quote['id'],4,$valid_token,2]);
-                                        $link_preview=route( 'biller.view_bill',[$quote['id'],4,$valid_token,0]);
-                                    @endphp
-
-                                    <div class="btn-group ">
-                                        <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
-                                                    class="fa fa-print"></i> {{trans('general.print')}}
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item"
-                                               href="{{$link}}">{{trans('general.print')}}</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item"
-                                               href="{{$link_download}}">{{trans('general.pdf')}}</a>
-
-                                        </div>
-                                    </div>
-                                    <a href="{{$link_preview}}" class="btn btn-blue-grey mb-1"><i
-                                                class="fa fa-globe"></i> {{trans('general.preview')}}
-                                    </a>
-
-                                    <a href="#pop_model_1" data-toggle="modal" data-remote="false"
-                                       class="btn btn-large btn-danger mb-1" title="Change Status"
-                                    ><span class="fa fa-check"></span> {{trans('general.change_status')}}</a>
-
-                                     <a href="#pop_model_4" data-toggle="modal" data-remote="false"
-                                       class="btn btn-large btn-cyan mb-1" title="Add LPO"
-                                    ><span class="fa fa-retweet"></span> Add LPO</a>
-
-
-                                </div>
-                            @else
-                                <div class="badge text-center white d-block m-1"><span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('payments.'.$quote['status'])}}&nbsp;&nbsp;</span>
-                                </div>
-                            @endif
-                        </div>
-                        @if($quote['currency'])
-                            <div class="badge text-center white d-block m-1"><span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('general.different_currency')}}&nbsp;&nbsp;</span>
-                            </div>
-                    @endif
-
-                    <!-- Invoice Company Details -->
-                        <div id="invoice-company-details" class="row">
-                            <div class="col-md-6 col-sm-12 text-center text-md-left">{{trans('general.our_info')}}
-                                <div class="">
-                                    <img src="{{ Storage::disk('public')->url('app/public/img/company/' . config('core.logo')) }}"
-                                         alt="company logo" class="avatar-100 img-responsive"/>
-                                    <div class="media-body"><br>
-                                        <ul class="px-0 list-unstyled">
-                                            <li class="text-bold-800">{{(config('core.cname'))}}</li>
-
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-sm-12 text-center text-md-right">
-                                <h2>{{trans('quotes.quote')}}</h2>
-                                <p class="pb-3">{{prefix(5)}} # {{$quote['tid']}}</p>
-
-                                <ul class="px-0 list-unstyled">
-                                    <li>{{trans('general.total')}}</li>
-                                    <li class="lead text-bold-800">{{amountFormat($quote['total'])}}</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!--/ Invoice Company Details -->
-
-                        <!-- Invoice Customer Details -->
-                        <div id="invoice-customer-details" class="row pt-2">
-                            <div class="col-sm-12 text-center text-md-left">
-                                <p class="text-muted">{{trans('invoices.bill_to')}}</p>
-                            </div>
-                            <div class="col-md-6 col-sm-12 text-center text-md-left">
-
-                          @php
-                          if(isset($quote->lead_id)){
-
-
-                             if($quote->lead->client_status=='customer'){
-                                $customername=$quote->client->name;
-                                $branchname=$quote->branch->name;
-                                $adrress=$quote->client->address;
-                                $email=$quote->client->email;
-                                $cell=$quote->client->phone;
-
-                            }else{
-                                $customername=$quote->lead->client_name;
-                                $branchname="";
-                                $adrress="";
-                                $email=$quote->lead->client_email;
-                                $cell=$quote->lead->client_contact;
-
-                            }
-
-
-                          }else{
-
-                            if(isset($quote->customer_id)){
-
-
-                                $customername=$quote->customer->name;
-                                $branchname=$quote->customer_branch->name;
-                                $adrress=$quote->customer->address;
-                                $email=$quote->customer->email;
-                                $cell=$quote->customer->phone; 
-
-
-                            }else{
-                                
-
-                                $customername=$quote->client_name;
-                                $branchname="";
-                                $adrress="";
-                                $email=$quote->client_email;
-                                $cell=$quote->client_contact; 
-                            }
-
-
-
-                                
-
-                          }
-                                    
-                            @endphp
-                            
-                               
-
-                               
-                                <ul class="px-0 list-unstyled">
-                              
-                                    <!--<li class="text-bold-800"><a
-                                                href=""></a>
-                                    </li>-->
-                                    <li>{{$customername}},</li>
-                                     <li>{{$branchname}},</li>
-                                    <li>{{$adrress}},</li>
-                                    <li>{{$email}},</li>
-                                    <li>{{$cell}},</li>
-                                    {!! custom_fields_view(1,$quote->customer->id,false) !!}
-                                </ul>
-                               
-                            </div>
-
-                            <div class="col-md-6 col-sm-12 text-center text-md-right">
-                                <p>
-                                    <span class="text-muted">{{trans('quotes.invoicedate')}} :</span> {{dateFormat($quote['invoicedate'])}}
-                                </p>
-
-                                <p>
-                                    <span class="text-muted">{{trans('quotes.invoiceduedate')}} :</span> {{dateFormat($quote['invoiceduedate'])}}
-                                </p>
-                                <div class="row">
-                                    <div class="col">
-
-                                        <hr>
-
-                                        <p class=" text-danger">{{$quote['notes']}}</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-<div class="row">
-                                    <div class="col">
-
-                                        <hr>
-
-                                        <p>{!! $quote['proposal']  !!}</p>
-                                    </div>
-
-                                </div>
-                        <!--/ Invoice Customer Details -->
-                        <!-- Invoice Items Details -->
-                        <div id="invoice-items-details" class="pt-2">
-                            <div class="row">
-                                <div class="table-responsive col-sm-12">
-
-                                    <table class="table">
-                                        @if($quote['tax_format']=='exclusive' OR $quote['tax_format']=='inclusive')
-                                            <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>{{trans('products.product_des')}}</th>
-                                                <th class="text-right">{{trans('products.price')}}</th>
-                                                <th class="text-right">{{trans('products.qty')}}</th>
-                                                <th class="text-right">{{trans('general.tax')}}</th>
-                                                <th class="text-right">{{trans('general.discount')}}</th>
-                                                <th class="text-right">{{trans('general.subtotal')}}</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-
-                                            @foreach($quote->products as $product)
-
-                                              @if($product['a_type']==1)
-
-
-                                                <tr>
-                                                    <th scope="row">{{ $product['numbering'] }}</th>
-                                                    <td>
-                                                        <p>{{$product['product_name']}}</p>
-                                                        <p class="text-muted"> {!!$product['product_des'] !!} </p>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                                    <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
-                                                    <td class="text-right">{{amountFormat($product['total_tax'])}} <span
-                                                                class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
-                                                    <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
-                                                </tr>
-
-                                            @elseif($product['a_type']==2)
-
-                                                      <tr>
-                                                    <th scope="row">{{ $product['numbering'] }}</th>
-                                                    <td>
-                                                        <p>{{$product['product_name']}}</p>
-                                                       
-                                                    </td>
-                                                    <td class="text-right"></td>
-                                                    <td class="text-right"></td>
-                                                    <td class="text-right">  </td>
-                                                    <td class="text-right"></td>
-                                                    <td class="text-right"></td>
-                                                </tr>
-
-
-
-                                            @endif
-
-
-                                                <tr>
-                                                    <td colspan="7">{!! custom_fields_view(3,$product['product_id'],false) !!}</td>
-                                                </tr>
-                                            @endforeach
-                                            </tbody>
-                                        @endif
-
-                                        @if($quote['tax_format']=='cgst')
-                                            <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>{{trans('products.product_des')}}</th>
-                                                <th class="text-right">{{trans('products.price')}}</th>
-                                                <th class="text-right">{{trans('products.qty')}}</th>
-                                                <th class="text-right">{{trans('general.cgst')}}</th>
-                                                <th class="text-right">{{trans('general.sgst')}}</th>
-                                                <th class="text-right">{{trans('general.discount')}}</th>
-                                                <th class="text-right">{{trans('general.subtotal')}}</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-
-                                            @foreach($quote->products as $product)
-
-
-                                                <tr>
-                                                    <th scope="row">{{ $loop->iteration }}</th>
-                                                    <td>
-                                                        <p>{{$product['product_name']}}</p>
-                                                        <p class="text-muted"> {!!$product['product_des'] !!} </p>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                                    <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
-                                                    <td class="text-right">{{amountFormat($product['total_tax']/2)}}
-                                                        <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2)}}%)</span>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['total_tax']/2)}}
-                                                        <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2)}}%)</span>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
-                                                    <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="8">{!! custom_fields_view(3,$product['product_id'],false) !!}</td>
-                                                </tr>
-                                            @endforeach
-                                            </tbody>
-                                        @endif
-
-                                        @if($quote['tax_format']=='igst')
-                                            <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>{{trans('products.product_des')}}</th>
-                                                <th class="text-right">{{trans('products.price')}}</th>
-                                                <th class="text-right">{{trans('products.qty')}}</th>
-                                                <th class="text-right">{{trans('general.igst')}}</th>
-                                                <th class="text-right">{{trans('general.discount')}}</th>
-                                                <th class="text-right">{{trans('general.subtotal')}}</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-
-                                            @foreach($quote->products as $product)
-                                                <tr>
-                                                    <th scope="row">{{ $loop->iteration }}</th>
-                                                    <td>
-                                                        <p>{{$product['product_name']}}</p>
-                                                        <p class="text-muted"> {!!$product['product_des'] !!} </p>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                                    <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
-                                                    <td class="text-right">{{amountFormat($product['total_tax'])}} <span
-                                                                class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
-                                                    </td>
-                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
-                                                    <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="7">{!! custom_fields_view(4,$product['product_id'],false) !!}</td>
-                                                </tr>
-                                            @endforeach
-                                            </tbody>
-                                        @endif
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-7">
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <table class="table table-borderless table-md text-bold-600">
-                                                <tbody>
-                                                <tr>
-                                                    <td>{{trans('quotes.status')}}:</td>
-                                                    <td id="status"
-                                                        class="badge badge-info">{{trans('payments.'.$quote['status'])}}</td>
-                                                </tr>
-
-
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-5 col-sm-12">
-                                    <p class="lead">{{trans('general.summary')}}</p>
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <tbody>
-                                            <tr>
-                                                <td>{{trans('general.subtotal')}}</td>
-                                                <td class="text-right">{{amountFormat($quote['subtotal'])}}</td>
-                                            </tr>
-                                            @if($quote['tax']>0)
-                                                <tr>
-                                                    <td>{{trans('general.tax')}}</td>
-                                                    <td class="text-right">{{amountFormat($quote['tax'])}}</td>
-                                                </tr>@endif
-                                            @if($quote['discount']>0)
-                                                <tr>
-                                                    <td>{{trans('general.discount')}}</td>
-                                                    <td class="text-right">{{amountFormat($quote['discount'])}}</td>
-                                                </tr>@endif
-                                            @if($quote['shipping']>0)
-                                                <tr>
-                                                    <td>{{trans('general.shipping')}}</td>
-                                                    <td class="text-right">{{amountFormat($quote['shipping'])}}</td>
-                                                </tr>
-                                                @if($quote['ship_tax']>0)
-                                                    <tr>
-                                                        <td>{{trans('general.shipping_tax')}}
-                                                            ({{trans('general.'.$quote['ship_tax_type'])}})
-                                                        </td>
-                                                        <td class="text-right">{{amountFormat($quote['ship_tax'])}}</td>
-                                                    </tr>@endif
-                                            @endif
-                                            <tr>
-                                                <td class="text-bold-800">{{trans('general.total')}}</td>
-                                                <td class="text-bold-800 text-right">{{amountFormat($quote['total'])}}</td>
-                                            </tr>
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="text-center">
-                                        <p>{{trans('general.authorized_person')}}</p>
-                                        <img src="{{ Storage::disk('public')->url('app/public/img/signs/' . $quote->user->signature) }}"
-                                             alt="signature" class="height-100 m-2"/>
-                                        <h6>{{$quote->user->first_name}} {{$quote->user->last_name}}</h6>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    {!! custom_fields_view(2,$quote['id']) !!}
-
-                    <!-- Invoice Footer -->
-                        <div id="invoice-footer">
-                            <div class="row">
-                                <div class="col-md-7 col-sm-12">
-                                    <h5>Approvals</h5>
-                                    <hr>
-                                    <h5> <span class="text-muted">Approved By :</span> <span class=" text-danger">{{$quote['approved_by']}}</span> <span class="text-muted">Approval Date :</span>  <span class=" text-danger">{{dateFormat($quote['approved_date'])}}</span>    <span class="text-muted">Approval Method :</span><span class=" text-danger">{{$quote['approved_method']}}</span></h5>
-                                    <p><span class="text-muted">LPO Date :</span> <span class=" text-danger">{{dateFormat($quote['lpo_date'])}}</span> <span class="text-muted">LPO Number :</span>  <span class=" text-danger">{{$quote['lpo_number']}}</span>    <span class="text-muted">LPO Amount :</span><span class=" text-danger">{{numberFormat($quote['lpo_amount'])}}</span></p>
-                                </div>
-                                 <div class="col-md-7 col-sm-12">
-                                    <h5>{{trans('general.payment_terms')}}</h5>
-                                    <hr>
-                                    <h5>{{@$quote->term->title}}</h5>
-                                    <p>{!! @$quote->term->terms !!}</p>
-                                </div>
-                                <div class="col-md-5 col-sm-12 text-center">
-                                    @if($quote['status']!='canceled')   <a href="#sendEmail" data-toggle="modal"
-                                                                           data-remote="false"
-                                                                           data-type="6"
-                                                                           data-type1="proposal"
-                                                                           class="btn btn-primary btn-lg my-1 send_bill"><i
-                                                class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
-                                    </a>@endif
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!--/ Invoice Footer -->
-
-
-
-                        <div class="row mt-2">
-                            <div class="col-12">
-                                <p class="lead">{{trans('general.attachment')}}</p>
-                                <pre>{{trans('general.allowed')}}:   {{$features['value1']}} </pre>
-                                <!-- The fileinput-button span is used to style the file input field as button -->
-                                <div class="btn btn-success fileinput-button display-block col-2">
-                                    <i class="glyphicon glyphicon-plus"></i>
-                                    <span>Select files...</span>
-                                    <!-- The file input field used as target for the file upload widget -->
-                                    <input id="fileupload" type="file" name="files">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- The global progress bar -->
-                        <div id="progress" class="progress progress-sm mt-1 mb-0 col-md-3">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0"
-                                 aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-
-                        <!-- The container for the uploaded files -->
-                        <table id="files" class="files table table-striped mt-2">
-                            @foreach($quote->attachment as $row)
-                                <tr>
-                                    <td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id={{$row['id']}}"
-                                           class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> <a
-                                                href="{{ Storage::disk('public')->url('app/public/files/' . $row['value']) }}"
-                                                class="purple"><i class="btn-sm fa fa-eye"></i> {{$row['value']}}</a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </table>
-                        <br>
-                    </div>
-                </section>
+<div class="p-2">
+    <div class="card">
+        <h5 class="card-header">Diagnosis Job-card</h5>
+        <div class="card-body">
+            <!-- tab header -->
+            <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">
+                        Customer & Reference Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">
+                        Equipment Maintained
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">
+                        Other Details
+                    </a>
+                </li>
+            </ul>
+            <!-- tab body -->
+            <div class="tab-content px-1 pt-1" id='djc-report'>
+                <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
+                    <!-- customer & reference details -->
+                    <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <tbody>
+                            <tr>
+                                <th>Client</th>
+                                <td>{{ $customer->name ?: $lead->client_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Branch</th>
+                                <td>{{ $branch->name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Region</th>
+                                <td>{{ $djc->region }}</td>
+                            </tr>
+                            <tr>
+                                <th>Attention</th>
+                                <td>{{ $djc->attention }}</td>
+                            </tr>
+                            <tr><th></th></tr>
+                            <tr>
+                                <th>Report No</th>
+                                <td>{{ $djc->tid }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ date('d-m-Y', strtotime($djc->report_date)) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Client Ref No.</th>
+                                <td>{{ $djc->reference }}</td>
+                            </tr>
+                            <tr>
+                                <th>Prepared By</th>
+                                <td>{{ $djc->prepared_by }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane" id="active3" aria-labelledby="equipment-maintained" role="tabpanel">
+                    <table id="technician-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <tr>
+                            <th>Reference</th>
+                            <td>{{ $djc->subject }}</td>
+                        </tr>
+                        <tr>
+                            <th>Technician</th>
+                            <td>{{ $djc->technician }}</td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <table id="items-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <tr>
+                            <th>Tag No</th>
+                            <th>Job Card</th>
+                            <th>Make</th>
+                            <th>Capacity</th>
+                            <th>Location</th>
+                            <th>Last Service Date</th>
+                            <th>Next Service Date</th>
+                        </tr>
+                        @foreach ($djc_items as $row)
+                            <tr>
+                                <td>{{ $row->tag_number }}</td>
+                                <td>{{ $row->joc_card }}</td>
+                                <td>{{ $row->make }}</td>
+                                <td>{{ $row->capacity }}</td>
+                                <td>{{ $row->location }}</td>
+                                <td>{{ date('d-m-Y', strtotime($row->last_service_date)) }}</td>
+                                <td>{{ date('d-m-Y', strtotime($row->next_service_date)) }}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+                <div class="tab-pane" id="active4" aria-labelledby="other-details" role="tabpanel">
+                    <table id="others-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <tr>
+                            <th>Call Description</th>
+                            <td>{{ $lead->note }}</td>
+                        </tr>
+                        <tr>
+                            <th>Findings and Root Cause</th>
+                            <td>{{ $djc->root_cause }}</td>
+                        </tr>
+                        <tr>
+                            <th>Action Taken</th>
+                            <td>{{ $djc->action_taken }}</td>
+                        </tr>
+                        <tr>
+                            <th>Recommendation</th>
+                            <td>{{ $djc->recommendations }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
+
         </div>
     </div>
-    @php $invoice=$quote; @endphp
-
-    @include('focus.modal.email_model',array('category'=>4))
-    @include('focus.modal.sms_model',array('category'=>4))
-    @include("focus.modal.quote_status_model")
-    @include("focus.modal.cancel_model")
-    pop_lop_1
-    @include("focus.modal.convert_model")
-     @include("focus.modal.lpo_model")
+</div>
 @endsection
-@section('extra-style')
 
-@endsection
+
 @section('extra-scripts')
-    {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
-    {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
-
-
-    <script type="text/javascript">
-
-        $('[data-toggle="datepicker"]').datepicker({
-            autoHide: true,
-            format: '{{config('core.user_date_format')}}'
-        });
-        $('[data-toggle="datepicker"]').datepicker('setDate', '{{date(config('core.user_date_format'))}}');
-
-        $(function () {
-            $('.summernote').summernote({
-                height: 150,
-                toolbar: [
-                    // [groupName, [list of button]]
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['strikethrough', 'superscript', 'subscript']],
-                    ['fontsize', ['fontsize']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']],
-                    ['fullscreen', ['fullscreen']],
-                    ['codeview', ['codeview']]
-                ],
-                popover: {}
-            });
-
-
-            /*jslint unparam: true */
-            /*global window, $ */
-            $(function () {
-                'use strict';
-                // Change this to the location of your server-side upload handler:
-                var url = '{{route('biller.bill_attachment')}}';
-                $('#fileupload').fileupload({
-                    url: url,
-                    dataType: 'json',
-                    formData: {_token: "{{ csrf_token() }}", id: '{{$quote['id']}}', 'bill': 4},
-                    done: function (e, data) {
-
-                        $.each(data.result, function (index, file) {
-                            $('#files').append('<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
-                        });
-
-                    },
-                    progressall: function (e, data) {
-
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
-
-                    }
-                }).prop('disabled', !$.support.fileInput)
-                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-            });
-
-            $(document).on('click', ".aj_delete", function (e) {
-                e.preventDefault();
-                var aurl = $(this).attr('data-url');
-                var obj = $(this);
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    url: aurl,
-                    type: 'POST',
-                    dataType: 'json',
-                    success: function (data) {
-                        obj.closest('tr').remove();
-                        obj.remove();
-                    }
-                });
-
-            });
-        });
-    </script>
-
+<script type="text/javascript">
+    /**
+     * Remove html tags from djc value and create new string
+     * Replace old cell data containing tags with new string
+     */
+    const djc = @json($djc);    
+    const root_cause = djc['root_cause'].replace(/<\/p><p>/g, " ").replace(/(<p>)|(<\/p>)/g, "");
+    $('#others-table td').eq(1).html(root_cause);
+    const action_taken = djc['action_taken'].replace(/(<p>)|(<\/p>)/g, "");
+    $('#others-table td').eq(2).html(action_taken);
+    const recommendations = djc['recommendations'].replace(/(<p>)|(<\/p>)/g, "");
+    $('#others-table td').eq(3).html(recommendations);
+</script>
 @endsection
