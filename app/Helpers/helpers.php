@@ -418,6 +418,11 @@ function dateFormat($date = '', $local = false)
     return date(config('core.main_date_format'));
 }
 
+// Database date format
+function db_dateformat($date='')
+{
+    return date('Y-m-d', strtotime($date));
+}
 
 function dateTimeFormat($date = '', $local = false)
 {
