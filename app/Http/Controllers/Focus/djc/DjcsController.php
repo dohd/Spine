@@ -70,12 +70,15 @@ class DjcsController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @param CreateAccountRequestNamespace $request
-     * @return \App\Http\Responses\Focus\account\CreateResponse
+     * @param CreateDjcRequestNamespace $request
+     * @return \App\Http\Responses\Focus\djc\CreateResponse
      */
     public function create(ManageDjcRequest $request)
     {
-        return new CreateResponse('focus.djcs.create');
+        $leads=Lead::all();
+        $last_djc = Djc::orderBy('tid', 'desc')->first();
+
+        return new CreateResponse('focus.djcs.create', compact('leads','last_djc'));
     }
 
     /**
@@ -87,8 +90,10 @@ class DjcsController extends Controller
     public function store(ManageDjcRequest $request)
     {
         $request->validate([
+            'attention' => 'required',
+            'prepared_by' => 'required',
             'technician' => 'required',
-            'title' => 'required'
+            'subject' => 'required'
         ]);
 
         $data = $request->only(['tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
@@ -108,41 +113,50 @@ class DjcsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param App\Models\account\Account $account
+     * @param App\Models\djc\Account $djc
      * @param EditAccountRequestNamespace $request
-     * @return \App\Http\Responses\Focus\account\EditResponse
+     * @return \App\Http\Responses\Focus\djc\EditResponse
      */
     public function edit(Djc $djc, ManageDjcRequest $request)
     {
-        return new EditResponse('focus.djcs.edit', compact('djc', 'lead'));
+        $leads=Lead::all();
+        return new EditResponse('focus.djcs.edit', compact('djc', 'leads'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param UpdateAccountRequestNamespace $request
-     * @param App\Models\account\Account $account
+     * @param UpdateDjcRequestNamespace $request
+     * @param App\Models\djc\Djc $djc
      * @return \App\Http\Responses\RedirectResponse
      */
     public function update(ManageDjcRequest $request, Djc $djc)
     {
         $request->validate([
-            'number' => 'required',
-            'holder' => 'required'
+            'attention' => 'required',
+            'prepared_by' => 'required',
+            'technician' => 'required',
+            'subject' => 'required'
         ]);
-        //Input received from the request
+        $data = $request->only(['tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data_item = $request->only(['tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data['ins'] = auth()->user()->ins;
+
+        // Filter _token and ins from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($djc, $input);
+
+        // Call using repository update method
+        $this->repository->update(compact('data', 'data_item'));
+
         //return with successfull message
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => trans('alerts.backend.accounts.updated')]);
+        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'DJC Report Updated Successfully']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param DeleteAccountRequestNamespace $request
-     * @param App\Models\account\Account $account
+     * @param App\Models\djc\Djc $djc
      * @return \App\Http\Responses\RedirectResponse
      */
     public function destroy(Djc $djc, ManageDjcRequest $request)
@@ -161,83 +175,80 @@ class DjcsController extends Controller
      */
     public function show(Djc $djc)
     {
-        $lead = Lead::find($djc->lead_id, ['id', 'client_name', 'note']);
-        $branch = Branch::find($djc->branch_id, ['id', 'name']);
-        $customer = Customer::find($djc->client_id, ['id', 'name']);
         $djc_items = DjcItem::where('djc_id', '=', $djc->id)->get();
 
-        return new ViewResponse('focus.djcs.view', compact('djc', 'lead', 'branch', 'customer', 'djc_items'));
+        return new ViewResponse('focus.djcs.view', compact('djc', 'djc_items'));
     }
 
     // account search
-    public function account_search(Request $request, $bill_type)
-    {
-        if (!access()->allow('product_search')) return false;
+    // public function account_search(Request $request, $bill_type)
+    // {
+    //     if (!access()->allow('product_search')) return false;
 
-        $q = $request->post('keyword');
-        $w = $request->post('wid');
-        $s = $request->post('serial_mode');
-        if ($bill_type == 'label') $q = @$q['term'];
-        $wq = compact('q', 'w');
+    //     $q = $request->post('keyword');
+    //     $w = $request->post('wid');
+    //     $s = $request->post('serial_mode');
+    //     if ($bill_type == 'label') $q = @$q['term'];
+    //     $wq = compact('q', 'w');
 
-        $account = Account::where('holder', 'LIKE', '%' . $q . '%')
-            ->where('account_type', 'Expenses')
-            ->orWhere('number', 'LIKE', '%' . $q . '%')->limit(6)->get();
-        $output = array();
+    //     $account = Account::where('holder', 'LIKE', '%' . $q . '%')
+    //         ->where('account_type', 'Expenses')
+    //         ->orWhere('number', 'LIKE', '%' . $q . '%')->limit(6)->get();
+    //     $output = array();
 
-        foreach ($account as $row) {
-            if ($row->id > 0) {
-                $output[] = array('name' => $row->holder . ' - ' . $row->number, 'id' => $row['id']);
-            }
-        }
-        if (count($output) > 0)
-            return view('focus.products.partials.search')->withDetails($output);
-    }
+    //     foreach ($account as $row) {
+    //         if ($row->id > 0) {
+    //             $output[] = array('name' => $row->holder . ' - ' . $row->number, 'id' => $row['id']);
+    //         }
+    //     }
+    //     if (count($output) > 0)
+    //         return view('focus.products.partials.search')->withDetails($output);
+    // }
 
     // balance sheet
-    public function balance_sheet(Request $request)
-    {
-        $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
-        $account = Account::all();
-        $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
-        $account_types = json_decode($account_types->value1, true);
-        if ($request->type == 'v') {
-            return new ViewResponse('focus.accounts.balance_sheet', compact('account', 'bg_styles', 'account_types'));
-        } else {
-            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-        }
-    }
+    // public function balance_sheet(Request $request)
+    // {
+    //     $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
+    //     $account = Account::all();
+    //     $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
+    //     $account_types = json_decode($account_types->value1, true);
+    //     if ($request->type == 'v') {
+    //         return new ViewResponse('focus.accounts.balance_sheet', compact('account', 'bg_styles', 'account_types'));
+    //     } else {
+    //         $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
+    //         $pdf = new \Mpdf\Mpdf(config('pdf'));
+    //         $pdf->WriteHTML($html);
+    //         $headers = array(
+    //             "Content-type" => "application/pdf",
+    //             "Pragma" => "no-cache",
+    //             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+    //             "Expires" => "0"
+    //         );
+    //         return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
+    //     }
+    // }
 
     // trial balance
-    public function trial_balance(Request $request)
-    {
-        $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
-        $account = Account::orderBy('number', 'asc')->get();
-        $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
-        $account_types = json_decode($account_types->value1, true);
-        if ($request->type == 'v') {
-            return new ViewResponse('focus.accounts.trial_balance', compact('account', 'bg_styles', 'account_types'));
-        } else {
+    // public function trial_balance(Request $request)
+    // {
+    //     $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
+    //     $account = Account::orderBy('number', 'asc')->get();
+    //     $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
+    //     $account_types = json_decode($account_types->value1, true);
+    //     if ($request->type == 'v') {
+    //         return new ViewResponse('focus.accounts.trial_balance', compact('account', 'bg_styles', 'account_types'));
+    //     } else {
 
-            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-        }
-    }
+    //         $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
+    //         $pdf = new \Mpdf\Mpdf(config('pdf'));
+    //         $pdf->WriteHTML($html);
+    //         $headers = array(
+    //             "Content-type" => "application/pdf",
+    //             "Pragma" => "no-cache",
+    //             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+    //             "Expires" => "0"
+    //         );
+    //         return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
+    //     }
+    // }
 }
