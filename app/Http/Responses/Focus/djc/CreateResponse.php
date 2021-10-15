@@ -2,13 +2,29 @@
 
 namespace App\Http\Responses\Focus\djc;
 
-use App\Models\djc\Djc;
-use App\Models\hrm\Hrm;
-use App\Models\lead\Lead;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
 {
+    /**
+     * @var string
+     */
+    protected $view;
+
+    /**
+     * @var array
+     */
+    protected $with;
+
+    /**
+     * @param string $view
+     * @param array $with
+     */
+    public function __construct($view, $with=[])
+    {
+        $this->view = $view;
+        $this->with = $with;
+    }
     /**
      * To Response
      *
@@ -17,10 +33,8 @@ class CreateResponse implements Responsable
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function toResponse($request)
-    {
-         
-        $leads=Lead::all();
-        $last_djc = Djc::orderBy('tid', 'desc')->first();
-        return view('focus.djcs.create',compact('leads','last_djc'));
+    {       
+        if (empty($this->with)) return view($this->view);
+        return view($this->view)->with($this->with);
     }
 }
