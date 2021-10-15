@@ -25,8 +25,7 @@
     
     <div class="card">
         <h5 class="card-header">Diagnosis Job-card</h5>
-        <div class="card-body">
-            <!-- tab header -->
+        <div class="card-body">            
             <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">
@@ -44,10 +43,9 @@
                     </a>
                 </li>
             </ul>
-            <!-- tab body -->
+
             <div class="tab-content px-1 pt-1" id='djc-report'>
                 <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
-                    <!-- customer & reference details -->
                     <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tbody>
                             <tr>
@@ -86,6 +84,7 @@
                         </tbody>
                     </table>
                 </div>
+
                 <div class="tab-pane" id="active3" aria-labelledby="equipment-maintained" role="tabpanel">
                     <table id="technician-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -121,6 +120,7 @@
                         @endforeach
                     </table>
                 </div>
+
                 <div class="tab-pane" id="active4" aria-labelledby="other-details" role="tabpanel">
                     <table id="others-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -142,7 +142,6 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -151,16 +150,15 @@
 
 @section('extra-scripts')
 <script type="text/javascript">
-    /**
-     * Remove html tags from djc value and create new string
-     * Replace old cell data containing tags with new string
-     */
-    const djc = @json($djc);    
-    const root_cause = djc['root_cause'].replace(/<\/p><p>/g, " ").replace(/(<p>)|(<\/p>)/g, "");
-    $('#others-table td').eq(1).html(root_cause);
-    const action_taken = djc['action_taken'].replace(/(<p>)|(<\/p>)/g, "");
-    $('#others-table td').eq(2).html(action_taken);
-    const recommendations = djc['recommendations'].replace(/(<p>)|(<\/p>)/g, "");
-    $('#others-table td').eq(3).html(recommendations);
+    // create a temporary div element
+    const div = document.createElement('div');
+    // loop through td elements
+    $('#others-table td').each(function(i, td) {
+        if (i === 0) return;
+        // append td value to div
+        div.innerHTML = td.innerText;
+        // replace camel case in div text with a space prefix 
+        td.innerText = div.innerText.replace(/[A-Z]/g, function(el) { return ` ${el}`; });
+    });
 </script>
 @endsection
