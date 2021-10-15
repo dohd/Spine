@@ -30,9 +30,8 @@
             <div class="card">
                 <div class="card-content">
                     <div class="card-body">
-                        <!-- {{ Form::open(['route' => 'biller.djcs.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post','files' => true, 'id' => 'create-product']) }} -->
                         {{ Form::model($djc, ['route' => ['biller.djcs.update', $djc], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-djc']) }}
-                        
+
                         <div class="row">
                             <div class="col-sm-6 cmp-pnl">
                                 <div id="customerpanel" class="inner-cmp-pnl">
@@ -47,8 +46,6 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control  round  select-box" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required="required">
-                                                    <option value="1">No Lead Selected</option>
-                                                    <option value="1">No Lead Selected 2</option>
                                                     @foreach ($leads as $lead)
                                                         @php
                                                             if ($lead->client_status == "customer") {
@@ -57,11 +54,11 @@
                                                                 $name = $lead->client_name;
                                                             }
                                                         @endphp
-                                                        <option value="{{$lead['id']}}">{{$lead['reference']}} - {{$name}} - {{$lead->title}}</option>
+                                                        <option value="{{ $lead->id }}">{{$lead->reference}} - {{$name}} - {{$lead->title}}</option>
                                                     @endforeach
                                                 </select>
-                                                <input type="hidden" name="client_id" id="client_id">
-                                                <input type="hidden" name="branch_id" id="branch_id">
+                                                <input type="hidden" name="client_id" id="client_id" value="{{ $djc->client_id }}">
+                                                <input type="hidden" name="branch_id" id="branch_id" value="{{ $djc->branch_id }}">
                                             </div>
                                         </div>
                                     </div>
@@ -112,36 +109,6 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <div class="col-sm-3"><label for="client_name" class="caption"> Image 1 </label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {!! Form::file('image_one', array('class'=>'input' )) !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 2</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {!! Form::file('image_two', array('class'=>'input' )) !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 3</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {!! Form::file('image_three', array('class'=>'input' )) !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 4</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {!! Form::file('image_four', array('class'=>'input' )) !!}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
                                         <div class="col-sm-3"><label for="caption" class="caption"> Caption 1 </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
@@ -183,7 +150,7 @@
                                     <div class="form-group row">
                                         <div class="col-sm-12">
                                             <label for="subject" class="caption">Subject / Title</label>
-                                            {{ Form::text('subject', null, ['class' => 'form-control round required', 'placeholder' => 'Subject Or Title','autocomplete'=>'false','id'=>'subject']) }}
+                                            {{ Form::text('subject', null, ['class' => 'form-control round required', 'placeholder' => 'Subject / Title','autocomplete'=>'false','id'=>'subject']) }}
                                         </div>
                                     </div>
                                     <div class="form-group row">
@@ -209,7 +176,7 @@
                         </div>
 
                         <div id="saman-row">
-                            <table id="quotation" class="table-responsive tfr my_stripe_single" style="padding-bottom: 100px;">
+                            <table id="equipment" class="table-responsive tfr my_stripe_single" style="padding-bottom: 100px;">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
                                         <th width="20%" class="text-center">Tag/Unique Number</th>
@@ -218,7 +185,7 @@
                                         <th width="10%" class="text-center">Make</th>
                                         <th width="10%" class="text-center">Capacity</th>
                                         <th width="10%" class="text-center">Location</th>
-                                        <th width="10%" class="text-center">Last Serive Date</th>
+                                        <th width="10%" class="text-center">Last Service Date</th>
                                         <th width="10%" class="text-center">Next Service date</th>
                                         <th width="10%" class="text-center">Action</th>
                                     </tr>
@@ -245,8 +212,7 @@
 
                             <div class="row">
                                 <div class="col-md-8 col-xs-7 payment-method last-item-row sub_c">
-                                    <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-10 mg-lg-t-0-force">
-                                    </div>
+                                    <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-10 mg-lg-t-0-force"></div>
                                     <button type="button" class="btn btn-success" aria-label="Left Align" id="addqproduct">
                                         <i class="fa fa-plus-square"></i> Add Equipment
                                     </button>
@@ -257,7 +223,6 @@
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
                                         <div class="clearfix"></div>
                                     </div>
-                                    <!--edit-form-btn-->
                                 </div>
                             </div>
                         </div>
@@ -280,9 +245,8 @@
 <script type="text/javascript">
     $('#edit-djc').submit(function(e) {
         e.preventDefault();
-        console.log($(this).serializeArray());
+        console.log('serialized => ', $(this).serializeArray());
     });
-
 
     // initialize date picker with php parsed date
     const now = "{{ date('Y-m-d') }}";
@@ -298,31 +262,52 @@
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
     });
 
-    // bill type value
-    var billtype = $('#billtype').val();
+    // equipment row counter;
+    var counter = 1;
 
-    // add product
-    $('#addqproduct').on('click', function() {
-        var cvalue = parseInt($('#ganak').val()) + 1;
-        var nxt = parseInt(cvalue);
-        $('#ganak').val(nxt);
-        var functionNum = "'" + cvalue + "'";
-        count = $('#saman-row div').length;
-
-        //project details
-        var project_id = $('#project_id option:selected').val();
-
-        if (project_id = "") {
-            var customer_id = "";
-            var branch_id = "";
-            var project_description = "";
-        } else {
-            var customer_id = $('#project_id option:selected').attr('data-type1');
-            var branch_id = $('#project_id option:selected').attr('data-type2');
-            var project_description = $('#project_id option:selected').attr('data-type3');
+    // autocomplete properties
+    const autocompleteProp = {
+        source: function(request, response) {
+            const billtype = counter;
+            $.ajax({
+                url: baseurl + 'equipments/search/' + billtype,
+                dataType: "json",
+                method: 'post',
+                data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
+                success: function(data) {
+                    console.log('auto_data', data)
+                    response($.map(data, function(item) {
+                        // console.log(item);
+                        return {
+                            label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
+                            value: item.name,
+                            data: item
+                        };
+                    }));
+                }
+            });
+        },
+        autoFocus: true,
+        minLength: 0,
+        select: function(event, ui) {
+            $('#equipment_type-0').val(ui.item.data.unit_type);
+            $('#make-0').val(ui.item.data.make_type);
+            $('#capacity-0').val(ui.item.data.capacity);
+            $('#equipment_type-0').val(ui.item.data.unit_type);
+            $('#location-0').val(ui.item.data.location);
+            $('#last_service_date-0').val(ui.item.data.last_maint_date);
+            $('#next_service_date-0').val(ui.item.data.next_maintenance_date);
         }
+    };
 
-        //product row
+    // initial autocomplete on default equipment row
+    $('#tag_number-0').autocomplete(autocompleteProp);
+    
+    // on clicking add product/equipment row
+    $('#addqproduct').on('click', function() {
+        const cvalue = counter++;
+
+        // product or equipment row html
         var data = (
             '<tr><td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-' 
             + cvalue + '" autocomplete="off"></td><td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-' 
@@ -338,162 +323,41 @@
             + cvalue + '" >Remove</a><a class="dropdown-item up" href="javascript:void(0);">Up</a><a class="dropdown-item down" href="javascript:void(0);">Down</a></div></div></td></tr>'
         );
 
+        // append row to html tr tag 
         $('tr.last-item-row').before(data);
-        $('[data-toggle-' + cvalue + '="datepicker"]').datepicker('setDate', new Date(now));
 
-        // row = cvalue;
-        $('#tag_number-' + cvalue).autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: baseurl + 'equipments/search/' + billtype,
-                    dataType: "json",
-                    method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
-                    success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
-                                value: item.name,
-                                data: item
-                            };
-                        }));
-                    }
-                });
-            },
-            autoFocus: true,
-            minLength: 0,
-            select: function(event, ui) {
-                id_arr = $(this).attr('id');
-                id = id_arr.split("-");
+        // initialize datepicker
+        $('[data-toggle-' + cvalue + '="datepicker"]')
+            .datepicker({format: "{{config('core.user_date_format')}}"})
+            .datepicker('setDate', new Date(now));
 
-                //$('#amount-0').val(1);
-                $('#equipment_type-' + id[1]).val(ui.item.data.unit_type);
-                $('#make-' + id[1]).val(ui.item.data.make_type);
-                $('#capacity-' + id[1]).val(ui.item.data.capacity);
-                $('#equipment_type-' + id[1]).val(ui.item.data.unit_type);
-                $('#location-' + id[1]).val(ui.item.data.location);
-                $('#last_service_date-' + id[1]).val(ui.item.data.last_maint_date);
-                $('#next_service_date-' + id[1]).val(ui.item.data.next_maintenance_date);
-            },
-            create: function(e) {
-                $(this).prev('.ui-helper-hidden-accessible').remove();
-            }
-        });
+        // autocomplete on added row
+        $('#tag_number-' + cvalue).autocomplete(autocompleteProp);
     });
 
-    $("#quotation").on("click", ".up,.down,.removeProd", function() {
+    // on clicking equipment drop down options
+    $("#equipment").on("click", ".up,.down,.removeProd", function() {
         var row = $(this).parents("tr:first");
+        // move row up on click up
         if ($(this).is('.up')) row.insertBefore(row.prev());
+        // move row down on click down
         if ($(this).is('.down')) row.insertAfter(row.next());
-        
-        if ($(this).is('.removeProd')) {
-            var pidd = $(this).closest('tr').find('.item_pdIn').val();
-            var retain = $(this).closest('tr').attr('data-re');
-
-            var pqty = $(this).closest('tr').find('.item_amnt').val();
-            pqty = pidd + '-' + pqty;
-            if (retain) {
-                $('<input>')
-                    .attr({
-                        type: 'hidden',
-                        id: 'restock',
-                        name: 'restock[]',
-                        value: pqty
-                    })
-                    .appendTo('form');
-            }
-
-            $(this).closest('tr').remove();
-            $('#d' + $(this).closest('tr').find('.item_pdIn').attr('id')).closest('tr').remove();
-            $('.item_amnt').each(function(index) {
-                expRowTotal(index);
-                expBillUpyog();
-            });
-
-            return false;
-        }
-    });
-
-    $("#quotation").on("click", ".up,.down,.removeProd", function() {
-        var row = $(this).parents("tr:first");
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        
-        if ($(this).is('.removeProd')) {
-            var pidd = $(this).closest('tr').find('.item_pdIn').val();
-            var retain = $(this).closest('tr').attr('data-re');
-            var pqty = $(this).closest('tr').find('.item_amnt').val();
-            pqty = pidd + '-' + pqty;
-            if (retain) {
-                $('<input>').attr({
-                    type: 'hidden',
-                    id: 'restock',
-                    name: 'restock[]',
-                    value: pqty
-                }).appendTo('form');
-            }
-
-            $(this).closest('tr').remove();
-            $('#d' + $(this).closest('tr').find('.item_pdIn').attr('id')).closest('tr').remove();
-            $('.item_amnt').each(function(index) {
-                expRowTotal(index);
-                expBillUpyog();
-            });
-
-            return false;
-        }
+        // remove row on click remove
+        if ($(this).is('.removeProd')) $(this).closest('tr').remove();
     });
     
-    // fetch selected lead details from the server
+    // on selecting lead option, fetch lead details from the server
     $("#lead_id").on('change', function() {
-        console.log('lead_id on change');
         $.ajax({
             type: "POST",
             url: baseurl + 'leads/lead_search',
             data: 'keyword=' + $(this).val(),
             success: function(data) {
-                console.log("lead_", data);
-
                 $("#subject").val(data.note);
                 $("#client_id").val(data.client_id);
                 $("#branch_id").val(data.branch_id);
             }
         });
-    });
-
-
-
-    $('#tag_number-0').autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: baseurl + 'equipments/search/' + billtype,
-                dataType: "json",
-                method: 'post',
-                data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
-                success: function(data) {
-                    response($.map(data, function(item) {
-                        // console.log(item);
-                        return {
-                            label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
-                            value: item.name,
-                            data: item
-                        };
-                    }));
-                }
-            });
-        },
-        autoFocus: true,
-        minLength: 0,
-        select: function(event, ui) {
-            //$('#amount-0').val(1);
-            $('#equipment_type-0').val(ui.item.data.unit_type);
-            $('#make-0').val(ui.item.data.make_type);
-            $('#capacity-0').val(ui.item.data.capacity);
-            $('#equipment_type-0').val(ui.item.data.unit_type);
-            $('#location-0').val(ui.item.data.location);
-            $('#last_service_date-0').val(ui.item.data.last_maint_date);
-            $('#next_service_date-0').val(ui.item.data.next_maintenance_date);
-        }
     });
 </script>
 @endsection
