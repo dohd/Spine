@@ -20,11 +20,12 @@
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                             @include('focus.leads.partials.leads-header-buttons')
+                            @include('focus.leads.partials.leads-header-buttons')
                         </div>
                     </div>
                 </div>
             </div>
+            
             <div class="content-body">
                 <div class="row">
                     <div class="col-12">
@@ -32,7 +33,6 @@
                             <div class="card-content">
                                 <div class="card-body">
                                     {{ Form::model($lead, ['route' => ['biller.leads.update', $lead], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-lead']) }}
-
                                         <div class="form-group">
                                             {{-- Including Form blade file --}}
                                             @include("focus.leads.form")
@@ -40,9 +40,8 @@
                                                 {{ link_to_route('biller.leads.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                                 {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
                                                 <div class="clearfix"></div>
-                                            </div><!--edit-form-btn-->
-                                        </div><!--form-group-->
-
+                                            </div>
+                                        </div>
                                     {{ Form::close() }}
                                 </div>
                             </div>
