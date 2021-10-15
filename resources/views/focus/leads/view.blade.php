@@ -23,30 +23,36 @@
                         @if ($lead->status)
                             <td class='text-success'>Closed</td>
                         @else
-                            <td>Open</td>
+                            <td class='font-weight-bold'>Open</td>
                         @endif
-                    </tr>                    
+                    </tr> 
                     <tr>
                         <th>Client Name</th>
-                        <td>{{ $lead->client_name ?: $customer->name }}</td>
+                        <td>{{ $lead->client_name ?: $lead->customer->name }}</td>
                     </tr>
-                    @if ($branch->name)
+                    <tr>
+                        <th>Client Ref / Callout ID</th>
+                        <td>{{ $lead->client_ref }}</td>
+                    </tr>
+                    @if ($lead->branch->name)
                         <tr>
                             <th>Client Branch</th>
-                            <td>{{ $branch->name }}</td>
+                            <td>{{ $lead->branch->name }}</td>
                         </tr>
                     @endif
                     <tr>
                         <th>Client Contact</th>
-                        <td>{{ $lead->client_contact ?: $customer->phone }}</td>
+                        <td>{{ $lead->client_contact ?: $lead->customer->phone }}</td>
                     </tr>
                     <tr>
                         <th>Client Email</th>
-                        <td>{{ $lead->client_email ?: $customer->email }}</td>
-                    </tr>                    
+                        <td>{{ $lead->client_email ?: $lead->customer->email }}</td>
+                    </tr>                      
+                    
+                    <tr><th></th></tr>                                     
                     <tr>
                         <th>Date of Request</th>
-                        <td>{{ $lead->date_of_request }}</td>
+                        <td>{{ date('d-m-Y', strtotime($lead->date_of_request)) }}</td>
                     </tr>
                     <tr>
                         <th>Cost</th>

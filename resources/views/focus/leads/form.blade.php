@@ -4,7 +4,7 @@
 
         <div class="form-group row">
             <div class="fcol-sm-12">
-                <h3 class="title">Customer Info </h3>
+                <h3 class="title pl-1">Customer Info </h3>
             </div>
         </div>
 
@@ -77,7 +77,7 @@
                     <div class="col-sm-6"><label for="reference" class="caption">Lead ID*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                            {{ Form::number('reference', $reference, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid'), 'id' => 'reference']) }}
+                            {{ Form::number('reference', $reference, ['class' => 'form-control round', 'placeholder' => 'Lead ID', 'id' => 'reference']) }}
                         </div>
                     </div>
 
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="form-group row">            
-                        <div class="col-sm-12"><label for="title" class="caption"> Subject or Title*</label>
+                        <div class="col-sm-12"><label for="title" class="caption"> Subject / Title*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-bookmark-o"
                                 aria-hidden="true"></span>
@@ -131,6 +131,14 @@
                         </div>
                     </div>
 
+                    <div class="form-group row">
+                        <div class="col-sm-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
+                            <div class="input-group">
+                                <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                {{ Form::number('client_ref', $client_ref, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref']) }}
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="form-group row status-group">                    
                         <div class="col-sm-12"><label for="refer_no" class="caption">Status</label>

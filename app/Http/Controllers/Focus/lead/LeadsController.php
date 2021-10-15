@@ -221,10 +221,7 @@ class LeadsController extends Controller
      */
     public function show(Lead $lead, Request $request)
     {
-        $branch = Branch::find($lead->branch_id, ['id', 'name']);
-        $customer = Customer::find($lead->client_id, ['id', 'name', 'phone', 'email']);
-
-        return new ViewResponse('focus.leads.view', compact('lead', 'branch', 'customer'));
+        return new ViewResponse('focus.leads.view', compact('lead'));
     }
 
     public function lead_search(ManageLeadRequest $request)
