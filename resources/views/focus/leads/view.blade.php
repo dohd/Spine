@@ -8,6 +8,21 @@
 
 @section('content')
 <div class="p-2">
+    <div class="content-header row">
+        <div class="content-header-left col-md-6 col-12 mb-2">
+            <h4 class=" mb-0">Leads Management</h4>
+
+        </div>
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right">
+
+                <div class="media-body media-right text-right">
+                    @include('focus.leads.partials.leads-header-buttons')
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="card">
         <h5 class="card-header">Lead</h5>
         <div class="card-body">
