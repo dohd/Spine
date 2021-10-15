@@ -167,8 +167,8 @@ class LeadsController extends Controller
         $request->validate($fields);
         $input = $request->except(['_token', 'ins']);
 
-        // update date format to 'YY-MM-DD'
-        $input['date_of_request'] = date('Y-m-d', strtotime($input['date_of_request']));
+        // convert to database dateformat
+        $input['date_of_request'] = db_dateformat($input['date_of_request']);
 
         //Update the model using repository update method
         $this->repository->update($lead, $input);
