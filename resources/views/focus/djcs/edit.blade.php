@@ -11,6 +11,21 @@
 @section('content')
 <div class="">
     <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <h4 class=" mb-0">Djc Report Management</h4>
+
+            </div>
+            <div class="content-header-right col-md-6 col-12">
+                <div class="media width-250 float-right">
+
+                    <div class="media-body media-right text-right">
+                        @include('focus.djcs.partials.djcs-header-buttons')
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="content-body">
             <div class="card">
                 <div class="card-content">
