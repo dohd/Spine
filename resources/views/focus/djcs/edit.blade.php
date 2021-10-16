@@ -175,7 +175,7 @@
                             </div>
                         </div>
 
-                        <div id="saman-row">
+                        <div>
                             <table id="equipment" class="table-responsive tfr my_stripe_single" style="padding-bottom: 100px;">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
@@ -186,26 +186,11 @@
                                         <th width="10%" class="text-center">Capacity</th>
                                         <th width="10%" class="text-center">Location</th>
                                         <th width="10%" class="text-center">Last Service Date</th>
-                                        <th width="10%" class="text-center">Next Service date</th>
+                                        <th width="10%" class="text-center">&nbsp;Next Service Date</th>
                                         <th width="10%" class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td><input type="text" class="form-control" name="tag_number[]" placeholder="Search Equipment" id='tag_number-0' required="required"></td>
-                                        <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-0" autocomplete="off"></td>
-                                        <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-0" autocomplete="off"></td>
-                                        <td><input type="text" class="form-control r" name="make[]" id="make-0" autocomplete="off"></td>
-                                        <td><input type="text" class="form-control req" name="capacity[]" id="capacity-0" autocomplete="off"></td>
-                                        <td><input type="text" class="form-control req" name="location[]" id="location-0" autocomplete="off"></td>
-                                        <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-0" autocomplete="off" data-toggle="datepicker"></td>
-                                        <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-0" autocomplete="off" data-toggle="datepicker"></td>
-                                        <td class="text-center">
-                                            <div class="dropdown"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action</button>
-                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"><a class="dropdown-item removeProd" href="javascript:void(0);" data-rowid="0">Remove</a><a class="dropdown-item up" href="javascript:void(0);">Up</a><a class="dropdown-item down" href="javascript:void(0);">Down</a></div>
-                                            </div>
-                                        </td>
-                                    </tr>
                                     <tr class="last-item-row sub_c" style="display: none"></tr>
                                 </tbody>
                             </table>
@@ -244,7 +229,7 @@
 
 <script type="text/javascript">
     $('#edit-djc').submit(function(e) {
-        e.preventDefault();
+        // e.preventDefault();
         console.log('serialized => ', $(this).serializeArray());
     });
 
@@ -265,66 +250,73 @@
     // equipment row counter;
     var counter = 1;
 
-    // autocomplete properties
-    const autocompleteProp = {
-        source: function(request, response) {
-            const billtype = counter;
-            $.ajax({
-                url: baseurl + 'equipments/search/' + billtype,
-                dataType: "json",
-                method: 'post',
-                data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
-                success: function(data) {
-                    console.log('auto_data', data)
-                    response($.map(data, function(item) {
-                        // console.log(item);
-                        return {
-                            label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
-                            value: item.name,
-                            data: item
-                        };
-                    }));
-                }
-            });
-        },
-        autoFocus: true,
-        minLength: 0,
-        select: function(event, ui) {
-            $('#equipment_type-0').val(ui.item.data.unit_type);
-            $('#make-0').val(ui.item.data.make_type);
-            $('#capacity-0').val(ui.item.data.capacity);
-            $('#equipment_type-0').val(ui.item.data.unit_type);
-            $('#location-0').val(ui.item.data.location);
-            $('#last_service_date-0').val(ui.item.data.last_maint_date);
-            $('#next_service_date-0').val(ui.item.data.next_maintenance_date);
-        }
-    };
-
-    // initial autocomplete on default equipment row
-    $('#tag_number-0').autocomplete(autocompleteProp);
-    
-    // on clicking add product/equipment row
+    // autocompleteProp returns autocomplete object properties
+    function autocompleteProp(i = 0) {
+        return {
+            source: function(request, response) {
+                const billtype = counter;
+                $.ajax({
+                    url: baseurl + 'equipments/search/' + billtype,
+                    dataType: "json",
+                    method: 'post',
+                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
+                    success: function(data) {
+                        response($.map(data, function(item) {
+                            return {
+                                label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
+                                value: item.name,
+                                data: item
+                            };
+                        }));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                $('#equipment_type-'+i).val(data.unit_type);
+                $('#make-'+i).val(data.make_type);
+                $('#capacity-'+i).val(data.capacity);
+                $('#equipment_type-'+i).val(data.unit_type);
+                $('#location-'+i).val(data.location);
+                $('#last_service_date-'+i).val(data.last_maint_date);
+                $('#next_service_date-'+i).val(data.next_maintenance_date);
+            }
+        };
+    }
+        
+    // on clicking addproduct (equipment) button
     $('#addqproduct').on('click', function() {
         const cvalue = counter++;
+        // product (equipment) row
+        const row = `
+            <tr>
+                <td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
+                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item removeProd" href="javascript:void(0);" data-rowid="${cvalue}" >Remove</a>
+                            <a class="dropdown-item up" href="javascript:void(0);">Up</a>
+                            <a class="dropdown-item down" href="javascript:void(0);">Down</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
 
-        // product or equipment row html
-        var data = (
-            '<tr><td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-' 
-            + cvalue + '" autocomplete="off"></td><td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-' 
-            + cvalue + '" autocomplete="off" ></td><td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-' 
-            + cvalue + '"autocomplete="off"> </td><td><input type="text" class="form-control r" name="make[]" id="make-' 
-            + cvalue + '" autocomplete="off"></td><td><input type="text" class="form-control req" name="capacity[]" id="capacity-' 
-            + cvalue + '" autocomplete="off" ></td><td><input type="text" class="form-control req" name="location[]" id="location-' 
-            + cvalue + '" autocomplete="off" ></td><td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-' 
-            + cvalue + '" autocomplete="off" data-toggle-' 
-            + cvalue + '="datepicker"></td><td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-' 
-            + cvalue + '" autocomplete="off" data-toggle-' 
-            + cvalue + '="datepicker"></td><td class="text-center"><div class="dropdown"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action</button><div class="dropdown-menu" aria-labelledby="dropdownMenuButton"><a class="dropdown-item removeProd" href="javascript:void(0);" data-rowid="' 
-            + cvalue + '" >Remove</a><a class="dropdown-item up" href="javascript:void(0);">Up</a><a class="dropdown-item down" href="javascript:void(0);">Down</a></div></div></td></tr>'
-        );
-
-        // append row to html tr tag 
-        $('tr.last-item-row').before(data);
+        // add poduct row to equipment table
+        $('tr.last-item-row').before(row);
 
         // initialize datepicker
         $('[data-toggle-' + cvalue + '="datepicker"]')
@@ -332,7 +324,7 @@
             .datepicker('setDate', new Date(now));
 
         // autocomplete on added row
-        $('#tag_number-' + cvalue).autocomplete(autocompleteProp);
+        $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
     });
 
     // on clicking equipment drop down options
