@@ -140,12 +140,11 @@ class DjcsController extends Controller
         ]);
         $data = $request->only(['tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
         $data_item = $request->only(['tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        
         $data['ins'] = auth()->user()->ins;
+        $data['id'] = $djc->id;
 
-        // Filter _token and ins from the request
-        $input = $request->except(['_token', 'ins']);
-
-        // Call using repository update method
+        // Update using repository update method
         $this->repository->update(compact('data', 'data_item'));
 
         //return with successfull message
