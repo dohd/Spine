@@ -98,25 +98,9 @@ class DjcRepository extends BaseRepository
         $result = Djc::create($input['data']);
 
         if ($result) {
-            $dataitems = array();
-            $i = 0;
-            foreach ($input['data_item']['tag_number'] as $key => $value) {
-                $dataitems[] = array(
-                    'djc_id' => $result->id, 
-                    'tag_number' => $input['data_item']['tag_number'][$key], 
-                    'make' => $input['data_item']['make'][$key], 
-                    'equipment_type' => $input['data_item']['equipment_type'][$key], 
-                    'joc_card' => $input['data_item']['joc_card'][$key], 
-                    'capacity' => $input['data_item']['capacity'][$key], 
-                    'location' => $input['data_item']['location'][$key], 
-                    'last_service_date' => date_for_database($input['data_item']['last_service_date'][$key]), 
-                    'next_service_date' => date_for_database($input['data_item']['next_service_date'][$key]), 
-                    'ins' => $result->ins
-                );
-                $i++;
-            }
+            $data_items = $this->items_array($input['data_item'], $result->id, $result->ins);
 
-            DjcItem::insert($dataitems);
+            DjcItem::insert($data_items);
             DB::commit();
 
             return $result->id;
@@ -135,15 +119,63 @@ class DjcRepository extends BaseRepository
      */
     public function update(array $input)
     {
-        
         error_log('===djc update called===');
-        error_log(print_r($input['data'], true));
-        error_log(print_r($input['data_item'], true));
 
-        // $input = array_map('strip_tags', $input);
-        // if ($djc->update($input)) return true;
+        // djc data
+        $data = $input['data'];
+        $data['report_date'] = date_for_database($data['report_date']);
 
-        // throw new GeneralException('Error Updating Djc');
+        // djc_item data
+        $data_items = $this->items_array($input['data_item'], $data['id'], $data['ins']);
+
+        // database transactional update
+        // DB::beginTransaction();
+        $action_taken = $data['action_taken'];
+        $root_cause = $data['root_cause'];
+        $recommendations = $data['recommendations'];
+
+        $data = array_map('strip_tags', $data);
+        $data['action_taken'] = strip_tags($action_taken, config('general.allowed'));
+        $data['root_cause'] = strip_tags($root_cause, config('general.allowed'));
+        $data['recommendations'] = strip_tags($recommendations, config('general.allowed'));
+        // error_log(print_r($data, true));
+        // $result = Djc::where('id', $data['id'])->update($data);
+
+        if (true) {
+            // error_log(print_r($data_items, true));
+
+            foreach($data_items as $item) {
+                error_log('=== update or new object ===');
+
+                $db_item = DjcItem::firstOrNew([
+                    'djc_id' => $item['djc_id'],
+                    'tag_number' => $item['tag_number']
+                ]);
+                $properties = [
+                    'make' => $item['make'], 
+                    'equipment_type' => $item['equipment_type'], 
+                    'joc_card' => $item['joc_card'], 
+                    'capacity' => $item['capacity'], 
+                    'location' => $item['location'], 
+                    'last_service_date' => $item['last_service_date'], 
+                    'next_service_date' => $item['next_service_date'], 
+                    'ins' => $item['ins']
+                ];
+                // assign properties to db_item
+                foreach($properties as $key => $value) {
+                    $db_item[$key] = $value;
+                } 
+
+                // error_log(print_r($db_item, true));
+            }
+
+            // DjcItem::insert($dataitems);
+            // DB::commit();
+
+            return;
+        }
+
+        throw new GeneralException('Error Updating Djc');
     }
 
     /**
@@ -168,5 +200,30 @@ class DjcRepository extends BaseRepository
         $this->storage->put($path . $file_name, file_get_contents($file->getRealPath()));
 
         return $file_name;
+    }
+
+    // for generating dataitem array
+    protected function items_array($item, $djc_id, $djc_ins)
+    {
+        error_log('=== input data item=== ');
+        error_log(print_r($item, true));
+
+        $data_items = array();
+        foreach ($item['tag_number'] as $key => $value) {
+            $data_items[] = array(
+                'djc_id' => $djc_id, 
+                'tag_number' => $item['tag_number'][$key], 
+                'make' => $item['make'][$key], 
+                'equipment_type' => $item['equipment_type'][$key], 
+                'joc_card' => $item['joc_card'][$key], 
+                'capacity' => $item['capacity'][$key], 
+                'location' => $item['location'][$key], 
+                'last_service_date' => date_for_database($item['last_service_date'][$key]), 
+                'next_service_date' => date_for_database($item['next_service_date'][$key]), 
+                'ins' => $djc_ins
+            );
+        }
+        
+        return $data_items;
     }
 }
