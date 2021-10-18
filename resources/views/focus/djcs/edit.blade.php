@@ -64,7 +64,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <div class="col-sm-12">
-                                            <label for="attention" class="attention">Attention</label>
+                                            <label for="attention" class="attention">Attention *</label>
                                             {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Atrtention','autocomplete'=>'false','id'=>'attention']) }}
                                         </div>
                                     </div>
@@ -73,7 +73,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::number('tid', @$last_djc->tid+1, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
+                                                {{ Form::number('tid', null, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
@@ -96,7 +96,7 @@
                                             <label for="region" class="caption"> Region</label>
                                             {{ Form::text('region', null, ['class' => 'form-control round ', 'placeholder' => 'Region','autocomplete'=>'false','id'=>'region']) }}
                                         </div>
-                                        <div class="col-sm-4"><label for="prepared_by" class="caption">Prepaired By</label>
+                                        <div class="col-sm-4"><label for="prepared_by" class="caption">Prepaired By *</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
@@ -104,7 +104,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
-                                            <label for="technician" class="caption"> Techinican</label>
+                                            <label for="technician" class="caption"> Technician *</label>
                                             {{ Form::text('technician', null, ['class' => 'form-control round required', 'placeholder' => 'Technician','autocomplete'=>'false','id'=>'prepaired_by','required' => 'required']) }}
                                         </div>
                                     </div>
@@ -149,7 +149,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <div class="col-sm-12">
-                                            <label for="subject" class="caption">Subject / Title</label>
+                                            <label for="subject" class="caption">Subject / Title *</label>
                                             {{ Form::text('subject', null, ['class' => 'form-control round required', 'placeholder' => 'Subject / Title','autocomplete'=>'false','id'=>'subject']) }}
                                         </div>
                                     </div>
@@ -190,9 +190,7 @@
                                         <th width="10%" class="text-center">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr class="last-item-row sub_c" style="display: none"></tr>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
 
                             <div class="row">
@@ -234,10 +232,10 @@
     });
 
     // initialize date picker with php parsed date
-    const now = "{{ date('Y-m-d') }}";
+    const date = "{{ date_for_database($djc->report_date) }}";
     $('[data-toggle="datepicker"]')
         .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date(now));
+        .datepicker('setDate', new Date(date));
 
     // initialize html editor
     editor();
@@ -298,8 +296,8 @@
                 <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
+                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle="datepicker"></td>
+                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle="datepicker"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -316,14 +314,13 @@
         `;
 
         // add poduct row to equipment table
-        $('tr.last-item-row').before(row);
+        $('#equipment tr:last').after(row);
 
-        // initialize datepicker
-        $('[data-toggle-' + cvalue + '="datepicker"]')
+        // initialize date picker with php parsed date
+        $('[data-toggle="datepicker"]')
             .datepicker({format: "{{config('core.user_date_format')}}"})
-            .datepicker('setDate', new Date(now));
 
-        // autocomplete on added row
+        // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
     });
 
