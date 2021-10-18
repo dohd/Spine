@@ -27,8 +27,6 @@ use App\Http\Responses\Focus\lead\CreateResponse;
 use App\Http\Responses\Focus\lead\EditResponse;
 use App\Repositories\Focus\lead\LeadRepository;
 use App\Http\Requests\Focus\lead\ManageLeadRequest;
-use App\Models\branch\Branch;
-use App\Models\customer\Customer;
 
 /**
  * ProductcategoriesController
@@ -71,7 +69,7 @@ class LeadsController extends Controller
      * @param CreateProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\CreateResponse
      */
-    public function create(ManageLeadRequest $request)
+    public function create()
     {
 
         return new CreateResponse('focus.leads.create');
@@ -127,33 +125,22 @@ class LeadsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param App\Models\productcategory\Productcategory $productcategory
+     * @param App\Models\Lead $lead
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
     public function edit(Lead $lead)
     {
-        $branch = Branch::find($this->lead->branch_id, ['id', 'name']);
-        $customer=Customer::find($this->lead->client_id, ['id', 'name']);
-        return new EditResponse('focus.leads.edit', compact('lead', 'branch', 'customer'));
+        return new EditResponse('focus.leads.edit', compact('lead'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource.
      *
-     * @param UpdateProductcategoryRequestNamespace $request
-     * @param App\Models\productcategory\Productcategory $productcategory
-     * @return \App\Http\Responses\RedirectResponse
+     * @param App\Models\Lead $lead
+     * @param EditProductcategoryRequestNamespace $request
+     * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-
-    public function lead_load(Request $request)
-    {
-        $id = $request->get('id');
-        $result = Lead::all()->where('rel_id', '=', $id);
-        return json_encode($result);
-    }
-
-
     public function update(Request $request, Lead $lead)
     {
         // fields to validate
@@ -166,9 +153,7 @@ class LeadsController extends Controller
         ];
         $request->validate($fields);
         $input = $request->except(['_token', 'ins']);
-
-        // convert to database dateformat
-        $input['date_of_request'] = db_dateformat($input['date_of_request']);
+        $input['date_of_request'] = date_for_database($input['date_of_request']);
 
         //Update the model using repository update method
         $this->repository->update($lead, $input);
@@ -200,7 +185,7 @@ class LeadsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param DeleteProductcategoryRequestNamespace $request
-     * @param App\Models\productcategory\Productcategory $productcategory
+     * @param App\Models\Lead $lead
      * @return \App\Http\Responses\RedirectResponse
      */
     public function destroy(Lead $lead)
@@ -216,7 +201,7 @@ class LeadsController extends Controller
      * Show the view for the specific resource
      *
      * @param DeleteProductcategoryRequestNamespace $request
-     * @param App\Models\productcategory\Productcategory $productcategory
+     * @param App\Models\Lead $lead
      * @return \App\Http\Responses\RedirectResponse
      */
     public function show(Lead $lead, Request $request)
@@ -224,12 +209,20 @@ class LeadsController extends Controller
         return new ViewResponse('focus.leads.view', compact('lead'));
     }
 
+    // fetch lead details with specific lead_id
+    public function lead_load(Request $request)
+    {
+        $id = $request->get('id');
+        $result = Lead::all()->where('rel_id', '=', $id);
+        return json_encode($result);
+    }
+    
+    // search specific lead with defined parameters
     public function lead_search(ManageLeadRequest $request)
     {
         $q = $request->post('keyword');
-        // $user = \App\Models\lead\Lead::with('primary_group')->where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'taxid', 'name', 'phone', 'address', 'city', 'email'));
-        $lead = \App\Models\lead\Lead::where('id', $q)->first();
-        if (count($lead) > 0) return $lead;
+        $lead = Lead::where('id', $q)->first();
+        if ($lead) return $lead;
         return false;
     }
 }
