@@ -197,15 +197,14 @@
         }
     });
 
-    // initialize datepicker with current date parsed by php date function
-    const now = "{{ date('Y-m-d') }}";
     $('[data-toggle="datepicker"]')
         .datepicker({ format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date(now));
+        .datepicker('setDate', new Date());
 
     // set ajax headers
-    const token = $('meta[name="csrf-token"]').attr('content');
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': token }});
+    $.ajaxSetup({ 
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
 
     // fetch customers
     $("#person").select2({
@@ -270,8 +269,8 @@
     */
 
     const lead = @json($lead);
-    const branch = @json($branch);
-    const customer = @json($customer);
+    const branch = @json($lead->branch);
+    const customer = @json($lead->customer);
 
     // if branch_id is 0 then its a new customer otherwise an existing customer
     if (lead && lead.hasOwnProperty('branch_id')) {
@@ -304,7 +303,7 @@
         $('#ref_type').val(lead['source']);
 
         // parse date using php date function
-        const date = "{{ date('Y-m-d', strtotime($lead['date_of_request'])) }}";
+        const date = "{{ date_for_database($lead->date_of_request) }}";
         // set datepicker with parsed date
         $('[data-toggle="datepicker"]').datepicker('setDate', new Date(date));
 
