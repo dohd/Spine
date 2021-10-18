@@ -109,8 +109,6 @@
                     ]
                 }
             });
-            
-            $('#branches-table_wrapper').removeClass('form-inline');
         }
     </script>
 @endsection
