@@ -50,11 +50,11 @@
                         <tbody>
                             <tr>
                                 <th>Client</th>
-                                <td>{{ $djc->lead->customer->name ?: $djc->lead->client_name }}</td>
+                                <td>{{ $djc->customer->name ?: $djc->lead->client_name }}</td>
                             </tr>
                             <tr>
                                 <th>Branch</th>
-                                <td>{{ $djc->lead->branch->name }}</td>
+                                <td>{{ $djc->branch->name }}</td>
                             </tr>
                             <tr>
                                 <th>Region</th>
@@ -71,7 +71,7 @@
                             </tr>
                             <tr>
                                 <th>Date</th>
-                                <td>{{ date('d-m-Y', strtotime($djc->report_date)) }}</td>
+                                <td>{{ dateFormat($djc->report_date) }}</td>
                             </tr>
                             <tr>
                                 <th>Client Ref No.</th>
@@ -114,8 +114,8 @@
                                 <td>{{ $row->make }}</td>
                                 <td>{{ $row->capacity }}</td>
                                 <td>{{ $row->location }}</td>
-                                <td>{{ date('d-m-Y', strtotime($row->last_service_date)) }}</td>
-                                <td>{{ date('d-m-Y', strtotime($row->next_service_date)) }}</td>
+                                <td>{{ dateFormat($row->last_service_date) }}</td>
+                                <td>{{ dateFormat($row->next_service_date) }}</td>
                             </tr>
                         @endforeach
                     </table>
