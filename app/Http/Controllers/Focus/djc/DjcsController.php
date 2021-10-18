@@ -76,9 +76,10 @@ class DjcsController extends Controller
     public function create(ManageDjcRequest $request)
     {
         $leads=Lead::all();
-        $last_djc = Djc::orderBy('tid', 'desc')->first();
+        $djc =  Djc::orderBy('tid', 'desc')->first();
+        $tid = $djc->tid + 1;
 
-        return new CreateResponse('focus.djcs.create', compact('leads','last_djc'));
+        return new CreateResponse('focus.djcs.create', compact('leads','tid'));
     }
 
     /**
@@ -103,11 +104,19 @@ class DjcsController extends Controller
         //Create the model using repository create method
         $id = $this->repository->create(compact('data', 'data_item'));
 
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => trans('alerts.djc.report.created')]);
-
-        //return with successfull message
-        //return new RedirectResponse(route('biller.djcs.show', [$id]), ['flash_success' => 'Djc Report Created' . ' <a href="' . route('biller.djcs.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-        // echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.created') . ' <a href="' . route('biller.djcs.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        return new RedirectResponse(
+            route('biller.djcs.index', [$id]), 
+            [
+                'flash_success' => 'Djc Report Created' 
+                . ' <a href="' . route('biller.djcs.index', [$id]) 
+                . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
+                . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.create') 
+                . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
+                . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.index') 
+                . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
+                . trans('general.list') . '</span> </a>'
+            ]
+        );
     }
 
     /**
@@ -148,7 +157,7 @@ class DjcsController extends Controller
         $this->repository->update(compact('data', 'data_item'));
 
         //return with successfull message
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'DJC Report Updated Successfully']);
+        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'DJC Report Updated']);
     }
 
     /**
@@ -158,12 +167,12 @@ class DjcsController extends Controller
      * @param App\Models\djc\Djc $djc
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Djc $djc, ManageDjcRequest $request)
+    public function destroy(Djc $djc)
     {
         //Calling the delete method on repository
         $this->repository->delete($djc);
         //returning with successfull message
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => trans('alerts.backend.accounts.deleted')]);
+        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => trans('alerts.backend.djcs.deleted')]);
     }
 
     /**
@@ -178,76 +187,4 @@ class DjcsController extends Controller
 
         return new ViewResponse('focus.djcs.view', compact('djc', 'djc_items'));
     }
-
-    // account search
-    // public function account_search(Request $request, $bill_type)
-    // {
-    //     if (!access()->allow('product_search')) return false;
-
-    //     $q = $request->post('keyword');
-    //     $w = $request->post('wid');
-    //     $s = $request->post('serial_mode');
-    //     if ($bill_type == 'label') $q = @$q['term'];
-    //     $wq = compact('q', 'w');
-
-    //     $account = Account::where('holder', 'LIKE', '%' . $q . '%')
-    //         ->where('account_type', 'Expenses')
-    //         ->orWhere('number', 'LIKE', '%' . $q . '%')->limit(6)->get();
-    //     $output = array();
-
-    //     foreach ($account as $row) {
-    //         if ($row->id > 0) {
-    //             $output[] = array('name' => $row->holder . ' - ' . $row->number, 'id' => $row['id']);
-    //         }
-    //     }
-    //     if (count($output) > 0)
-    //         return view('focus.products.partials.search')->withDetails($output);
-    // }
-
-    // balance sheet
-    // public function balance_sheet(Request $request)
-    // {
-    //     $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
-    //     $account = Account::all();
-    //     $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
-    //     $account_types = json_decode($account_types->value1, true);
-    //     if ($request->type == 'v') {
-    //         return new ViewResponse('focus.accounts.balance_sheet', compact('account', 'bg_styles', 'account_types'));
-    //     } else {
-    //         $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-    //         $pdf = new \Mpdf\Mpdf(config('pdf'));
-    //         $pdf->WriteHTML($html);
-    //         $headers = array(
-    //             "Content-type" => "application/pdf",
-    //             "Pragma" => "no-cache",
-    //             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-    //             "Expires" => "0"
-    //         );
-    //         return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-    //     }
-    // }
-
-    // trial balance
-    // public function trial_balance(Request $request)
-    // {
-    //     $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
-    //     $account = Account::orderBy('number', 'asc')->get();
-    //     $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
-    //     $account_types = json_decode($account_types->value1, true);
-    //     if ($request->type == 'v') {
-    //         return new ViewResponse('focus.accounts.trial_balance', compact('account', 'bg_styles', 'account_types'));
-    //     } else {
-
-    //         $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-    //         $pdf = new \Mpdf\Mpdf(config('pdf'));
-    //         $pdf->WriteHTML($html);
-    //         $headers = array(
-    //             "Content-type" => "application/pdf",
-    //             "Pragma" => "no-cache",
-    //             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-    //             "Expires" => "0"
-    //         );
-    //         return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-    //     }
-    // }
 }
