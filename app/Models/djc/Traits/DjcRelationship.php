@@ -7,39 +7,29 @@ use App\Models\customer\Customer;
 use App\Models\lead\Lead;
 
 use DB;
+
 /**
  * Class ProductcategoryRelationship
  */
 trait DjcRelationship
 {
-    
-
-
-
      public function client()
-    {
-         return $this->hasOneThrough(Customer::class,Lead::class,'id','id','lead_id','client_id')->withoutGlobalScopes();
-    }
+     {
+          return $this->hasOneThrough(Customer::class, Lead::class, 'id', 'id', 'lead_id', 'client_id')->withoutGlobalScopes();
+     }
 
      public function lead()
-    {
-         return $this->hasOne(Lead::class,'id','lead_id')->withoutGlobalScopes();
-    }
-
+     {
+          return $this->hasOne(Lead::class, 'id', 'lead_id')->withoutGlobalScopes();
+     }
 
      public function branch()
-    {
-         return $this->hasOneThrough(Branch::class,Lead::class,'id','id','lead_id','branch_id')->withoutGlobalScopes();
-    }
+     {
+          return $this->hasOneThrough(Branch::class, Lead::class, 'id', 'id', 'lead_id', 'branch_id')->withoutGlobalScopes();
+     }
 
      public function items()
-    {
-        return $this->hasMany('App\Models\items\DjcItem')->withoutGlobalScopes();
-    }
-
-
-
-
-
-      
+     {
+          return $this->hasMany('App\Models\items\DjcItem')->withoutGlobalScopes();
+     }
 }

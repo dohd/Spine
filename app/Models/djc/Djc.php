@@ -11,9 +11,9 @@ class Djc extends Model
 {
     use ModelTrait,
         DjcAttribute,
-    	DjcRelationship {
-            // ProductcategoryAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        DjcRelationship {
+        // ProductcategoryAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,13 @@ class Djc extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -69,9 +65,9 @@ class Djc extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
