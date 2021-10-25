@@ -96,12 +96,7 @@
 </div>
 @endsection
 
-
 @section('after-scripts')
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
-
-<script>
-
-</script>
 @endsection
