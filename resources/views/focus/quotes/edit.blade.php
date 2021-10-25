@@ -1,453 +1,509 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.invoices.management') . ' | ' . trans('labels.backend.invoices.edit'))
+@section ('title', trans('labels.backend.quotes.management')." | Edit Quote" )
 
 @section('page-header')
-    <h1>
-        {{ trans('labels.backend.invoices.management') }}
-        <small>{{ trans('labels.backend.invoices.edit') }}</small>
-    </h1>
+    <h1>{{ trans('labels.backend.quotes.management') }}</h1>
 @endsection
 
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-body">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            {{ Form::model($quotes, [ 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PUT', 'id' => 'data_form','files'=>true]) }}
-
-                            <div class="row">
-                                <div class="col-sm-6 cmp-pnl">
-                                    <div id="customerpanel" class="inner-cmp-pnl">
-                                        <div class="form-group row">
-                                            <div class="fcol-sm-12">
-                                                <h3 class="title">{{trans('invoices.bill_to')}} <a href='#'
-                                                                                                   class="btn btn-primary btn-sm round"
-                                                                                                   data-toggle="modal"
-                                                                                                   data-target="#addCustomer">
-                                                        {{trans('invoices.add_client')}}
-                                                    </a>
-                                                </h3>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <div class="frmSearch col-sm-12">
-                                                {{ Form::label( 'cst', trans('invoices.search_client'),['class' => 'caption']) }}
-                                                {{ Form::text('cst', null, ['class' => 'form-control round', 'placeholder' =>trans('invoices.enter_customer'), 'id'=>'customer-box','autocomplete'=>'off']) }}
-                                                <div id="customer-box-result"></div>
-                                            </div>
-                                        </div>
-                                        <div id="customer">
-                                            <div class="clientinfo">{{trans('invoices.client_details')}}
-                                                <hr>
-                                                <div id="customer_name">{{$quotes->customer->name}}</div>
-                                            </div>
-                                            <div class="clientinfo">
-                                                <div id="customer_address1">{{$quotes->customer->address}}
-                                                    , {{$quotes->customer->city}}</div>
-                                            </div>
-                                            <div class="clientinfo">
-                                                <div id="customer_phone">{{$quotes->customer->phone}}</div>
-                                            </div>
-                                            <hr>
-                                            <div id="customer_pass"></div>
-                                            <hr>
-                                        </div>{{trans('warehouses.warehouse')}}<select
-                                                id="s_warehouses"
-                                                class="form-control round mt-1">
-                                            <option value="0">{{trans('general.all')}}</option>
-                                            @foreach($warehouses as $warehouses)
-                                                <option value="{{$warehouses->id}}" {{$warehouses->id==$defaults[1][0]['feature_value'] ? 'selected' : ''}}>{{$warehouses->title}}</option>
-                                            @endforeach
-                                        </select>
-
-                                        {{ Form::hidden('customer_id', $quotes['customer_id'],['id'=>'customer_id']) }}
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 cmp-pnl">
-                                    <div class="inner-cmp-pnl">
-
-
-                                        <div class="form-group row">
-
-                                            <div class="col-sm-12"><h3
-                                                        class="title">{{trans('quotes.properties')}}</h3>
-                                            </div>
-
-                                        </div>
-                                        <div class="form-group row">
-                                            <div class="col-sm-6"><label for="invocieno"
-                                                                         class="caption">{{trans('quotes.quote')}}</label>
-
-                                                <div class="input-group">
-                                                    <div class="input-group-addon"><span class="icon-file-text-o"
-                                                                                         aria-hidden="true"></span>
-                                                    </div>
-
-                                                    {{ Form::number('tid',null, ['class' => 'form-control round', 'placeholder' => trans('quotes.quote'),'readonly'=>'']) }}
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6"><label for="invocieno"
-                                                                         class="caption">{{trans('general.reference')}}</label>
-
-                                                <div class="input-group">
-                                                    <div class="input-group-addon"><span class="icon-bookmark-o"
-                                                                                         aria-hidden="true"></span>
-                                                    </div>
-                                                    {{ Form::text('refer', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference')]) }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-
-                                            <div class="col-sm-6"><label for="invociedate"
-                                                                         class="caption">{{trans('quotes.invoicedate')}}</label>
-
-                                                <div class="input-group">
-                                                    <div class="input-group-addon"><span class="icon-calendar4"
-                                                                                         aria-hidden="true"></span>
-                                                    </div>
-                                                    {{ Form::text('invoicedate','', ['class' => 'form-control round required', 'placeholder' => trans('quotes.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false','id'=>'date1']) }}
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6"><label for="invocieduedate"
-                                                                         class="caption">{{trans('quotes.invoiceduedate')}}</label>
-
-                                                <div class="input-group">
-                                                    <div class="input-group-addon"><span class="icon-calendar-o"
-                                                                                         aria-hidden="true"></span>
-                                                    </div>
-
-                                                    {{ Form::text('invoiceduedate', date_for_database($quotes['invoiceduedate']), ['class' => 'form-control round required', 'placeholder' => trans('quotes.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false','id'=>'date2']) }}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group row">
-                                            <div class="col-sm-6">
-                                                <label for="taxFormat"
-                                                       class="caption">{{trans('general.tax')}}</label>
-                                                <select class="form-control round"
-                                                        onchange="changeTaxFormat()"
-                                                        id="taxFormat">
-                                                    @php
-                                                        $tax_format='exclusive';
-                                                        $tax_format_id=0;
-                                                        $tax_format_type='exclusive';
-                                                         $tax_flag=true;
-                                                    @endphp
-                                                    @foreach($additionals as $additional_tax)
-
-                                                        @php
-                                                            if($additional_tax->id == $quotes['tax_id']  && $additional_tax->class == 1 && $tax_flag){
-                                                             echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
-                                                             $tax_format=$additional_tax->type2;
-                                                             $tax_flag=false;
-                                                               $tax_format_type=$additional_tax->type3;
-
-                                                            }
-
-                                                        @endphp
-                                                        {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
-                                                    @endforeach
-
-                                                    <option value="0.0000" data-type1="%" data-type2="off"
-                                                            data-type3="off">{{trans('general.off')}}</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-sm-6">
-
-                                                <div class="form-group">
-                                                    <label for="discountFormat"
-                                                           class="caption">{{trans('general.discount')}}</label>
-                                                    <select class="form-control round"
-                                                            onchange="changeDiscountFormat()"
-                                                            id="discountFormat">
-                                                        @php
-                                                            $discount_format='%';
-                                                        @endphp
-                                                        @foreach($additionals as $additional_discount)
-                                                            @php
-                                                                if($additional_discount->type1== $quotes['discount_format'] && $additional_discount->class == 2){
-                                                                 echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
-                                                                 $discount_format=$additional_discount->type1;
-                                                                }
-                                                            @endphp
-                                                            {!! $additional_discount->class == 2 ? "<option value='$additional_discount->value' data-type1='$additional_discount->type1' data-type2='$additional_discount->type2' data-type3='$additional_discount->type3'>$additional_discount->name</option>" : "" !!}
-                                                        @endforeach
-
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <div class="col-sm-12">
-                                                <label for="toAddInfo"
-                                                       class="caption">{{trans('quotes.notes')}}</label>
-
-                                                {{ Form::textarea('notes', null, ['class' => 'form-control round', 'placeholder' => trans('quotes.notes'),'rows'=>'2']) }}
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-                            <div id="saman-row">
-                                <table class="table-responsive tfr my_stripe">
-
-                                    <thead>
-                                    <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="30%" class="text-center">{{trans('general.item_name')}}</th>
-                                        <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
-                                        <th width="10%" class="text-center">{{trans('general.rate')}}</th>
-                                        <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
-                                        <th width="10%" class="text-center">{{trans('general.tax')}}</th>
-                                        <th width="7%" class="text-center">{{trans('general.discount')}}</th>
-                                        <th width="10%" class="text-center">{{trans('general.amount')}}
-                                            ({{config('currency.symbol')}})
-                                        </th>
-                                        <th width="5%" class="text-center">{{trans('general.action')}}</th>
-                                    </tr>
-
-                                    </thead>
-                                    <tbody>
-                                    @php
-                                        $total_tax=0;
-                                    @endphp
-                                    @foreach($quotes->products as $product)
-
-                                        @php
-                                            $total_tax+=$product['total_tax'];
-                                        @endphp
-                                        <tr data-re="1">
-                                            <td><input type="text" class="form-control" name="product_name[]"
-                                                       placeholder="{{trans('general.enter_product')}}"
-                                                       id='productname-{{$loop->index}}'
-                                                       value="{{$product['product_name']}}">
-                                            </td>
-                                            <td><input type="text" class="form-control req amnt" name="product_qty[]"
-                                                       id="amount-{{$loop->index}}"
-                                                       onkeypress="return isNumber(event)"
-                                                       onkeyup="rowTotal('{{$loop->index}}'), billUpyog()"
-                                                       autocomplete="off"
-                                                       value="{{numberFormat($product['product_qty'])}}"><input
-                                                        type="hidden" id="alert-{{$loop->index}}"
-                                                        value="{{$product->product['alert']}}"
-                                                        name="alert[]"><input type="hidden"
-                                                                              id="amount_old-{{$loop->index}}"
-                                                                              value="{{numberFormat($product['product_qty'])}}"
-                                                                              name="old_product_qty[]"></td>
-                                            <td><input type="text" class="form-control req prc" name="product_price[]"
-                                                       id="price-{{$loop->index}}"
-                                                       onkeypress="return isNumber(event)"
-                                                       onkeyup="rowTotal('{{$loop->index}}'), billUpyog()"
-                                                       autocomplete="off"
-                                                       value="{{numberFormat($product['product_price'])}}"></td>
-                                            <td><input type="text" class="form-control vat " name="product_tax[]"
-                                                       id="vat-{{$loop->index}}"
-                                                       onkeypress="return isNumber(event)"
-                                                       onkeyup="rowTotal('{{$loop->index}}'), billUpyog()"
-                                                       autocomplete="off"
-                                                       value="{{numberFormat($product['product_tax'])}}"></td>
-                                            <td class="text-center"
-                                                id="texttaxa-{{$loop->index}}">{{numberFormat($product['total_tax'])}}</td>
-                                            <td><input type="text" class="form-control discount"
-                                                       name="product_discount[]"
-                                                       onkeypress="return isNumber(event)"
-                                                       id="discount-{{$loop->index}}"
-                                                       onkeyup="rowTotal('{{$loop->index}}'), billUpyog()"
-                                                       autocomplete="off"
-                                                       value="{{numberFormat($product['product_discount'])}}"></td>
-                                            <td><span class="currenty">{{config('currency.symbol')}}</span>
-                                                <strong><span class='ttlText'
-                                                              id="result-{{$loop->index}}">{{numberFormat($product['product_subtotal'])}}</span></strong>
-                                            </td>
-                                            <td class="text-center">
-                                                <button type="button" data-rowid="{{$loop->index}}"
-                                                        class="btn btn-danger removeProd" title="Remove"><i
-                                                            class="fa fa-minus-square"></i></button>
-                                            </td>
-                                            <input type="hidden" name="total_tax[]" id="taxa-{{$loop->index}}"
-                                                   value="{{numberFormat($product['total_tax'])}}">
-                                            <input type="hidden" name="total_discount[]" id="disca-{{$loop->index}}"
-                                                   value="{{numberFormat($product['total_discount'])}}">
-                                            <input type="hidden" class="ttInput" name="product_subtotal[]"
-                                                   id="total-{{$loop->index}}"
-                                                   value="{{numberFormat($product['product_subtotal'])}}">
-                                            <input type="hidden" class="pdIn" name="product_id[]"
-                                                   id="pid-{{$loop->index}}" value="{{$product['product_id']}}">
-                                            <input type="hidden" name="unit[]" id="unit-{{$loop->index}}"
-                                                   value="{{$product['unit']}}">
-                                            <input type="hidden" name="code[]" id="hsn-{{$loop->index}}"
-                                                   value="{{$product['code']}}">
-                                        </tr>
-
-                                        <tr>
-                                            <td colspan="8"><textarea id="dpid-{{$loop->index}}" class="form-control html_editor"
-                                                                      name="product_description[]"
-                                                                      placeholder="{{trans('general.enter_description')}} (Optional)"
-                                                                      autocomplete="off">{{$product['product_des']}}</textarea><br>
-                                            </td>
-                                        </tr>
-                                        @php
-                                            $counter=$loop->index;
-                                        @endphp
-                                    @endforeach
-                                    <tr class="last-item-row sub_c">
-                                        <td class="add-row">
-                                            <button type="button" class="btn btn-success" aria-label="Left Align"
-                                                    id="addproduct">
-                                                <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
-                                            </button>
-                                        </td>
-                                        <td colspan="7"></td>
-                                    </tr>
-
-                                    <tr class="sub_c" style="display: table-row;">
-                                        <td colspan="6"
-                                            align="right">{{ Form::hidden('subtotal',null,['id'=>'subttlform']) }}
-                                            <strong>{{trans('general.total_tax')}}</strong>
-                                        </td>
-                                        <td align="left" colspan="2"><span
-                                                    class="currenty lightMode">{{config('currency.symbol')}}</span>
-                                            <span id="taxr" class="lightMode">{{numberFormat($total_tax)}}</span></td>
-                                    </tr>
-                                    <tr class="sub_c" style="display: table-row;">
-                                        <td colspan="6" align="right">
-                                            <strong>{{trans('general.total_discount')}}</strong></td>
-                                        <td align="left" colspan="2"><span
-                                                    class="currenty lightMode"></span>
-                                            <span id="discs"
-                                                  class="lightMode">{{numberFormat($quotes['discount']-$quotes['extra_discount'])}}</span>
-                                        </td>
-                                    </tr>
-
-                                    <tr class="sub_c" style="display: table-row;">
-                                        <td colspan="6" align="right">
-                                            <strong>{{trans('general.shipping')}}</strong></td>
-                                        <td align="left" colspan="2"><input type="text" class="form-control shipVal"
-                                                                            onkeypress="return isNumber(event)"
-                                                                            placeholder="Value"
-                                                                            name="shipping" autocomplete="off"
-                                                                            onkeyup="billUpyog()"
-                                                                            value="{{numberFormat($quotes['shipping'])}}">
-                                            ( {{trans('general.tax')}} {{config('currency.symbol')}}
-                                            <span id="ship_final">{{numberFormat($quotes['ship_tax'])}}</span> )
-                                        </td>
-                                    </tr>
-                                    <tr class="sub_c" style="display: table-row;">
-                                        <td colspan="6" align="right">
-                                            <strong> {{trans('general.extra_discount')}}</strong>
-                                        </td>
-                                        <td align="left" colspan="2"><input type="text"
-                                                                            class="form-control form-control-sm discVal"
-                                                                            onkeypress="return isNumber(event)"
-                                                                            placeholder="Value"
-                                                                            name="discount_rate" autocomplete="off"
-                                                                            value="{{numberFormat($quotes['discount_rate'])}}"
-                                                                            onkeyup="billUpyog()">
-                                            <input type="hidden"
-                                                   name="after_disc" id="after_disc"
-                                                   value="{{numberFormat($quotes['extra_discount'])}}">
-                                            ( {{config('currency.symbol')}}
-                                            <span id="disc_final">{{numberFormat($quotes['extra_discount'])}}</span> )
-                                        </td>
-                                    </tr>
-
-
-                                    <tr class="sub_c" style="display: table-row;">
-                                        <td colspan="2">{{trans('general.payment_currency_client')}}
-                                            <small>{{trans('general.based_live_market')}}</small>
-                                            <select name="currency"
-                                                    class="selectpicker form-control">
-                                                <option value="0">Default</option>
-                                                @foreach($currencies as $currency)
-                                                    <option value="{{$currency->id}}" {{$currency->id==$quotes['currency'] ? 'selected' : ''}}>{{$currency->symbol}}
-                                                        - {{$currency->code}}</option>
-                                                @endforeach
-
-                                            </select></td>
-                                        <td colspan="4" align="right"><strong>{{trans('general.grand_total')}}
-                                                (<span
-                                                        class="currenty lightMode">{{config('currency.symbol')}}</span>)</strong>
-                                        </td>
-                                        <td align="left" colspan="2"><input type="text" name="total"
-                                                                            class="form-control"
-                                                                            value="{{numberFormat($quotes['total'])}}"
-                                                                            id="invoiceyoghtml" readonly="">
-
-                                        </td>
-                                    </tr>
-                                    <tr class="sub_c" style="display: table-row;">
-                                        <td colspan="2">{{trans('general.payment_terms')}} <select name="term_id"
-                                                                                                   class="selectpicker form-control">
-                                                @foreach($terms as $term)
-                                                    <option value="{{$term->id}}" {{$term->id==$quotes['term_id'] ? 'selected' : ''}} >{{$term->title}}</option>
-                                                @endforeach
-
-                                            </select></td>
-                                        <td align="right" colspan="6"><input type="submit"
-                                                                             class="btn btn-success sub-btn btn-lg"
-                                                                             value="{{trans('general.generate')}}"
-                                                                             id="submit-data"
-                                                                             data-loading-text="Creating...">
-
-                                        </td>
-                                    </tr>
-
-
-                                    </tbody>
-                                </table>
-                                <div class="row mt-3">
-                                    <div class="col-12">{!! $fields_data !!}</div>
-                                </div>
-                            </div>
-                            <input type="hidden" value="new_i" id="inv_page">
-                            <input type="hidden" value="{{route('biller.quotes.update',$quotes['id'])}}"
-                                   id="action-url">
-                            <input type="hidden" value="search" id="billtype">
-                            <input type="hidden" value="{{$counter}}" name="counter" id="ganak">
-                            <input type="hidden" value="{{$tax_format}}" name="tax_format_static" id="tax_format">
-                            <input type="hidden" value="{{$tax_format_type}}" name="tax_format" id="tax_format_type">
-                            <input type="hidden" value="{{$quotes['tax_id']}}" name="tax_id" id="tax_format_id">
-                            <input type="hidden" value="{{$discount_format}}" name="discount_format"
-                                   id="discount_format">
-
-                            <input type='hidden' value='{{numberFormat($quotes['ship_tax_rate'])}}'
-                                   name='ship_rate' id='ship_rate'><input
-                                    type='hidden' value='{{$quotes['ship_tax_type']}}' name='ship_tax_type'
-                                    id='ship_taxtype'>
-                            <input type="hidden" value="0" id="custom_discount">
-                            <input type="hidden" value="{{numberFormat($quotes['ship_tax'])}}" name="ship_tax"
-                                   id="ship_tax">
-                            <input type="hidden" value="{{$quotes['id']}}" name="id">
-
-                            </form>
-                        </div>
-
-                    </div>
+<div class="content-wrapper">
+    <div class="content-header row">
+        <div class="content-header-left col-md-6 col-12 mb-2">
+            <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
+        </div>
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.quotes.partials.quotes-header-buttons')
                 </div>
             </div>
-
         </div>
     </div>
-    @include("focus.modal.customer")
-@section('extra-scripts')
-    <script type="text/javascript">
-  $(function () {
-            $('[data-toggle="datepicker"]').datepicker({
-                autoHide: true,
-                format: '{{config('core.user_date_format')}}'
-            });
-            $('#date1').datepicker('setDate', '{{dateFormat($quotes['invoicedate'])}}');
-            $('#date2').datepicker('setDate', '{{dateFormat($quotes['invoiceduedate'])}}');
-            editor();
-        });
-    </script>
+
+    <div class="content-body">
+            <div class="card">
+                <div class="card-body">
+                    {{ Form::model($quote, ['class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-quote']) }}
+                    <div class="row">
+                        <div class="col-sm-6 cmp-pnl">
+                            <div id="customerpanel" class="inner-cmp-pnl">
+                                <div class="form-group row">
+                                    <div class="fcol-sm-12">
+                                        <h3 class="title pl-1">Edit Quote</h3>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="ref_type" class="caption">Search Lead</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">
+                                                @foreach ($quote->lead->get() as $lead)
+                                                    @php
+                                                        if ($lead->client_status == "customer") {
+                                                            $name = $lead->customer->company.' '. $lead->branch->name;                                                                
+                                                        } else {
+                                                            $name = $lead->client_name;
+                                                        }
+                                                    @endphp
+                                                    <option value="{{ $lead['id'] }}">
+                                                        {{$lead['reference']}} - {{$name}} - {{dateFormat($lead->date_of_request)}} - {{$lead->employee_id}} - {{$lead->title}}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class='col-md-6'>
+                                        <div class='col m-1'>
+                                            {{ Form::label( 'method', 'Print Type',['class' => 'col-12 control-label']) }}
+                                            <div class="d-inline-block custom-control custom-checkbox mr-1">
+                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" id="colorCheck6" value="inclusive" checked="">
+                                                <label class="custom-control-label" for="colorCheck6">VATInclusive</label>
+                                            </div>
+                                            <div class="d-inline-block custom-control custom-checkbox mr-1">
+                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7">
+                                                <label class="custom-control-label" for="colorCheck7">VATExclusive</label>
+                                            </div>
+                                            <input type="hidden" id="document_type" value="QUOTE" name="document_type">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3"><label for="pricing" class="caption"> Pricing</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
+                                            </div>
+                                            <select id="pricing" name="pricing" class="form-control round required  ">
+                                                <option value="0">Default </option>
+                                                @foreach($selling_prices as $selling_price)
+                                                    <option value="{{$selling_price->id}}">{{$selling_price->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            {{ Form::number('tid', @$last_invoice->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6">
+                                        <label for="attention" class="caption">Attention</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Attention','autocomplete'=>'false','id'=>'attention']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="prepaired_by" class="caption"> Prepaired By</label>
+                                        {{ Form::text('prepaired_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepaired_by']) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 cmp-pnl">
+                            <div class="inner-cmp-pnl">
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <h3 class="title">{{trans('quotes.properties')}}</h3>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-4">
+                                        <label for="invocieno" class="caption">{{trans('general.reference')}} (Diagnosis JobCard)</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference')]) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4"><label for="reference_date" class="caption">Reference {{trans('general.date')}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
+                                        </div>
+                                    </div>                                    
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                            <select class="form-control round  select-box" name="validity" id="validity" data-placeholder="{{trans('tasks.assign')}}">
+                                                <option value="0">On Reciept</option>
+                                                <option value="14">Valid For 14 Days</option>
+                                                <option value="30">Valid For 30 Days</option>
+                                                <option value="45">Valid For 45 Days</option>
+                                                <option value="60">Valid For 60 Days</option>
+                                                <option value="90">Valid For 90 Days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4"><label for="ref_type" class="caption">Currency *</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                            <select class="form-control  select-box " name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
+                                                <option value="0">Default</option>
+                                                @foreach($currencies as $currency)
+                                                    <option value="{{$currency->id}}">{{$currency->symbol}} - {{$currency->code}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                            <select class="form-control round  select-box" name="revision" id="revision">
+                                                <option value="0">-- Select Revision --</option>
+                                                <option value="_r1">R1</option>
+                                                <option value="_r2">R2</option>
+                                                <option value="_r3">R3</option>
+                                                <option value="_r4">R4</option>
+                                                <option value="_r5">R5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                            <select id="items" name="term_id" class="form-control round  selectpicker required">
+                                                <option value="0">No Terms</option>
+                                                @foreach($terms as $term)
+                                                    <option value="{{$term->id}}">{{$term->title}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
+                                        <select class="form-control round" onchange="changeTaxFormat()" id="taxFormat">
+                                            @php
+                                                $tax_format='exclusive';
+                                                $tax_format_id=0;
+                                                $tax_format_type='exclusive';
+                                            @endphp
+                                            @foreach($additionals as $additional_tax)
+                                                @php
+                                                    if ($additional_tax->id == $defaults[4][0]['feature_value'] && $additional_tax->class == 1) {
+                                                        echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>
+                                                            --'.$additional_tax->name.'--</option>';
+                                                        $tax_format=$additional_tax->type2;
+                                                        $tax_format_id=$additional_tax->id;
+                                                        $tax_format_type=$additional_tax->type3;
+                                                    }
+                                                @endphp
+                                                {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>"
+                                                : "" !!}
+                                            @endforeach
+                                            <option value="0" data-type1="%" data-type2="off" data-type3="off">
+                                                {{trans('general.off')}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                        
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-10">
+                            <label for="subject" class="caption">Subject / Title</label>
+                            {{ Form::text('notes', null, ['class' => 'form-control round required', 'placeholder' => 'Subject Or Title','autocomplete'=>'false','id'=>'subject']) }}
+                        </div>
+                    </div>
+
+                    <div>                            
+                        <table id="quotation" class="table-responsive pb-5 tfr my_stripe_single">
+                            <thead>
+                                <tr class="item_header bg-gradient-directional-blue white">
+                                    <th width="7%" class="text-center">Numbering</th>
+                                    <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
+                                    <th width="7%" class="text-center">UOM</th>
+                                    <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
+                                    <th width="14%" class="text-center">{{trans('general.rate')}} Exclusive</th>
+                                    <th width="14%" class="text-center">{{trans('general.rate')}} Inclusive</th>
+                                    <th width="10%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
+                                    <th width="5%" class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div class="row">
+                            <div class="col-md-8 col-xs-7 payment-method last-item-row sub_c">
+                                <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-20 mg-lg-t-0-force"></div>
+                                <button type="button" class="btn btn-success" aria-label="Left Align" id="add-product">
+                                    <i class="fa fa-plus-square"></i> Add Product
+                                </button>
+                                <button type="button" class="btn btn-primary" aria-label="Left Align" id="add-title">
+                                    <i class="fa fa-plus-square"></i> Add Title
+                                </button>
+                            </div>
+
+                            <div class="col-md-4 col-xs-5 invoice-block pull-right">
+                                <div class="unstyled amounts">
+                                    <div class="form-group">
+                                        <label>SubTotal (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
+                                        <div class="input-group m-bot15">
+                                            <input type="text" required readonly="readonly" name="subtotal" id="subtotal" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>{{trans('general.total_tax')}}</label>
+                                        <div class="input-group m-bot15">
+                                            <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Total Discount :</label>
+                                        <div class="input-group m-bot15">
+                                            <input readonly="readonly" type="text" value="0" name="after-disc" class="form-control" id="after-disc" placeholder="Discount">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
+                                        <div class="input-group m-bot15">
+                                            <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
+                                        </div>
+                                    </div>
+                                    {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{ Form::close() }}
+                </div>
+            </div>   
+        </div>
+    </div>
+</div>
 @endsection
+
+@section('extra-scripts')
+<script>
+    $('#edit-quote').submit(function(e) {
+        // e.preventDefault();
+        // console.log($(this).serializeArray());
+    })
+
+    // quote object
+    const quote = @json($quote);
+
+    // set default options
+    $('#lead_id').val("{{ $quote->lead->id }}");
+    $('#validity').val(quote.validity);
+    $('#currency').val(quote.currency);
+    $('#revesion').val(quote.revision);
+
+    // initialize Reference Date datepicker
+    $('[data-toggle="datepicker-rd"]')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date(quote.reference_date));
+
+    // initialize Quote Date datepicker
+    $('[data-toggle="datepicker-qd"]')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date(quote.invoicedate));
+
+    // product row
+    function productRow(val) {
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
+                <td><select class="form-control unit" data-uid=${val} name="u_m[]"><option value="0">Default Unit</option></select></td>                
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prcrate" name="rate_inclusive[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td class="text-center">${dropDown()}</td>
+            </tr>
+        `;
+    }
+
+    // product title row
+    function productTitleRow(val) {
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
+                <td class="text-center">${dropDown()}</td>
+            </tr>
+        `;
+    }
+
+    // row dropdown menu
+    function dropDown(val) {
+        return `
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Action
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item removeProd" href="javascript:void(0);">Remove</a>
+                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
+                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
+                </div>
+            </div>            
+        `;
+    }
+
+    // on clicking Add Product button
+    let cvalue = 0;
+    $('#add-product').click(function() {
+        // append row
+        const row = productRow(cvalue);
+        $('#quotation tr:last').after(row);
+
+        // autocomplete on added product row
+        $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
+        cvalue++;
+    });
+    // on clicking Add Title button
+    $('#add-title').click(function() {
+        // append row
+        const row = productTitleRow(cvalue);
+        $('#quotation tr:last').after(row);
+        cvalue++;
+    });
+
+    // on clicking Product row drop down menu
+    $("#quotation").on("click", ".up,.down,.removeProd", function() {
+        var row = $(this).parents("tr:first");
+        // move row up 
+        if ($(this).is('.up')) row.insertBefore(row.prev());
+        // move row down
+        if ($(this).is('.down')) row.insertAfter(row.next());
+        // remove row
+        if ($(this).is('.removeProd')) {
+            $(this).closest('tr').remove();
+            totals();
+        }
+    });
+
+    // ajax setup
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+
+    // autocompleteProp returns autocomplete object properties
+    const dataTaxRate = {};
+    function autocompleteProp(i) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url: baseurl + 'products/quotesearch/' + billtype,
+                    dataType: "json",
+                    method: 'post',
+                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&pricing=' + $("#pricing").val(),
+                    success: function(data) {
+                        response($.map(data, function(item) {
+                            return {
+                                label: item.name,
+                                value: item.name,
+                                data: item
+                            };
+                        }));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                $('#itemname-'+i).val(data.name);
+                $('#amount-'+i).val(1);
+
+                const productPrice = parseFloat(data.price.replace(',',''));
+                $('#price-'+i).val(productPrice.toFixed(2));
+
+                // Initial values                
+                const tax = data.taxrate? parseFloat(data.taxrate) : 100;
+                const rateInclusive = (tax/100*productPrice) + productPrice;
+                $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
+                // displayed Amount
+                $('#result-'+i).text(rateInclusive.toFixed(2));
+                // Compute Totals
+                dataTaxRate[i] = tax;
+                totals();
+            }
+        };
+    }
+
+    // on quantity input change
+    function qtyChange(e) {
+        const id = e.target.id;
+        const indx = id.split('-')[1];
+        const tax = dataTaxRate[indx]
+
+        const productQty = $('#'+id).val() || 1;
+
+        let productPrice = $('#price-'+indx).val();
+        productPrice = parseFloat(productPrice.replace(',', ''));
+
+        const rateInclusive = (tax/100 * productPrice) + productPrice;
+        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
+
+        const rowAmount = productQty * parseFloat(rateInclusive);
+        $('#result-'+indx).text(rowAmount.toFixed(2));
+
+        totals();
+    }
+    // on price input change
+    function priceChange(e) {
+        const id = e.target.id;
+        indx = id.split('-')[1];
+        const tax = dataTaxRate[indx];
+
+        const productQty = $('#amount-'+indx).val() || 1;
+
+        let productPrice = $('#'+id).val();
+        productPrice = parseFloat(productPrice.replace(',', ''));
+
+        const rateInclusive = (tax/100 * productPrice) + productPrice;
+        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
+
+        const rowAmount = productQty * parseFloat(rateInclusive);
+        $('#result-'+indx).text(rowAmount.toFixed(2));
+
+        totals();
+    }
+
+    // totals
+    function totals() {
+        const colTotalExc = [];
+        const colTotalInc = [];
+        const colTotalQty = [];
+
+        $('#quotation tr').each(function(i) {
+            if (!i) return;
+            const productQty = $(this).find('td').eq(3).children().val()
+            if (productQty) {
+                const productPrice = $(this).find('td').eq(4).children().val();
+                const rateInclusive = $(this).find('td').eq(5).children().val();
+                colTotalQty.push(Number(productQty));
+                colTotalExc.push(parseFloat(productPrice));
+                colTotalInc.push(parseFloat(rateInclusive));
+            }
+        });
+
+        const subTotal = colTotalExc.reduce(function(acc, curr, indx) { return colTotalQty[indx] * curr + acc }, 0);
+        const grandTotal = colTotalInc.reduce(function(acc, curr, indx) { return colTotalQty[indx] * curr + acc }, 0);
+        const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
+
+        $('#subtotal').val(subTotal.toFixed(2));
+        $('#tax').val(taxTotal.toFixed(2));
+        $('#total').val(grandTotal.toFixed(2));
+    }
+</script>
 @endsection
