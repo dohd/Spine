@@ -31,7 +31,6 @@
                 <div class="card-content">
                     <div class="card-body">
                         {{ Form::model($djc, ['route' => ['biller.djcs.update', $djc], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-djc']) }}
-
                         <div class="row">
                             <div class="col-sm-6 cmp-pnl">
                                 <div id="customerpanel" class="inner-cmp-pnl">
@@ -228,7 +227,7 @@
 <script type="text/javascript">
     $('#edit-djc').submit(function(e) {
         // e.preventDefault();
-        console.log('serialized => ', $(this).serializeArray());
+        // console.log('serialized => ', $(this).serializeArray());
     });
 
     // initialize date picker with php parsed date
