@@ -35,30 +35,28 @@ class QuoteRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        $q=$this->query();
-       $q->when(request('i_rel_type')==1, function ($q) {
-
-            return $q->where('customer_id', '=',request('i_rel_id',0));
+        $q = $this->query();
+        $q->when(request('i_rel_type') == 1, function ($q) {
+            return $q->where('customer_id', '=', request('i_rel_id', 0));
         });
 
-               if (request('start_date')) {
+        if (request('start_date')) {
             $q->whereBetween('invoicedate', [date_for_database(request('start_date')), date_for_database(request('end_date'))]);
         }
 
         return
-            $q->get(['id','tid','customer_id','invoicedate','invoiceduedate','total','status']);
+            $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
     }
 
-        public function getSelfDataTable($self_id = false)
+    public function getSelfDataTable($self_id = false)
     {
-    if ($self_id) {
-         $q = $this->query()->withoutGlobalScopes();
-    $q->where('customer_id', '=', $self_id);
+        if ($self_id) {
+            $q = $this->query()->withoutGlobalScopes();
+            $q->where('customer_id', '=', $self_id);
 
-        return
-           $q->get(['id','tid','customer_id','invoicedate','invoiceduedate','total','status']);
-    }
+            return
+                $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
+        }
     }
 
     /**
@@ -70,60 +68,49 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        $invoice = $input['invoice'];
+        $extra_discount = numberClean($invoice['after_disc']);
 
-        $extra_discount = numberClean($input['invoice']['after_disc']);
-
-        $date = Carbon::createFromFormat('Y-m-d', date_for_database($input['invoice']['invoicedate']));
-        $daysToAdd = date_for_database($input['invoice']['validity']);
+        $date = Carbon::createFromFormat('Y-m-d', date_for_database($invoice['invoicedate']));
+        $daysToAdd = date_for_database($invoice['validity']);
         $invoiceduedate = $date->addDays($daysToAdd);
 
+        $invoice['invoicedate'] = date_for_database($invoice['invoicedate']);
+        $invoice['invoiceduedate'] = date_for_database($invoiceduedate); 
+        $invoice['subtotal'] = numberClean($invoice['subtotal']);
+        $invoice['tax'] = numberClean($invoice['tax']); 
+        //$invoice['discount_rate'] = numberClean($invoice['discount_rate']);
+        //$invoice['after_disc'] = numberClean($invoice['after_disc']);
+        $invoice['total'] = numberClean($invoice['total']); 
+        // $invoice['ship_tax_rate'] = numberClean($invoice['ship_rate']);
+        //$invoice['ship_tax'] = numberClean($invoice['ship_tax']);
 
-
-
-
-        $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
-        $input['invoice']['invoiceduedate'] = date_for_database($invoiceduedate);
-        $input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
-        $input['invoice']['tax'] = numberClean($input['invoice']['tax']);
-        //$input['invoice']['discount_rate'] = numberClean($input['invoice']['discount_rate']);
-        //$input['invoice']['after_disc'] = numberClean($input['invoice']['after_disc']);
-        $input['invoice']['total'] = numberClean($input['invoice']['total']);
-       // $input['invoice']['ship_tax_rate'] = numberClean($input['invoice']['ship_rate']);
-        //$input['invoice']['ship_tax'] = numberClean($input['invoice']['ship_tax']);
-        $input['invoice']['extra_discount'] = $extra_discount;
+        $invoice['extra_discount'] = $extra_discount;
         $total_discount = $extra_discount;
-        unset($input['invoice']['after_disc']);
-        unset($input['invoice']['ship_rate']);
- //dd($input['invoice'] );
+        unset($invoice['after_disc']);
+        unset($invoice['ship_rate']);
+        //dd($invoice );
         DB::beginTransaction();
-        $proposal= $input['invoice']['proposal'];
-        $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
-        $input['invoice']['proposal']=strip_tags($proposal,config('general.allowed'));
-        $result = Quote::create($input['invoice']);
-
+        $proposal = $invoice['proposal'];
+        $invoice = array_map('strip_tags', $invoice);
+        $invoice['proposal'] = strip_tags($proposal, config('general.allowed'));
+        $result = Quote::create($invoice);
 
         if ($result) {
-            //      dd($result->id);
+            // dd($result->id);
             $products = array();
             $subtotal = 0;
             $total_qty = 0;
             $total_tax = 0;
             $stock_update = array();
 
-           
             foreach ($input['invoice_items']['numbering'] as $key => $value) {
-
-
-
-               
-
-
-
-               $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
+                $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
                 $total_qty += numberClean(@$input['invoice_items']['product_qty'][$key]);
                 $total_tax += numberClean(@$input['invoice_items']['total_tax'][$key]);
                 $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array('quote_id' => $result->id,
+                $products[] = array(
+                    'quote_id' => $result->id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
                     //'code' => @$input['invoice_items']['code'][$key],
@@ -137,30 +124,19 @@ class QuoteRepository extends BaseRepository
                     'a_type' => numberClean(@$input['invoice_items']['a_type'][$key]),
                     'numbering' => strip_tags(@$input['invoice_items']['numbering'][$key]),
                     'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins);
-
-
-                
-
-
-               
+                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins
+                );
             }
 
-
-    
-
-
-
-//dd($products);
+            //dd($products);
             $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => numberClean($input['invoice_items']['product_qty'][$key]));
             QuoteItem::insert($products);
             $invoice_d = Quote::find($result->id);
-           // $invoice_d->subtotal = $subtotal;
+            // $invoice_d->subtotal = $subtotal;
             //$invoice_d->tax = $total_tax;
             //$invoice_d->discount = $total_discount;
             $invoice_d->items = $total_qty;
             $invoice_d->save();
-
 
             if (@$result->id) {
                 $fields = array();
@@ -172,53 +148,42 @@ class QuoteRepository extends BaseRepository
                 }
             }
 
-
-
             DB::commit();
             return $result;
         }
         throw new GeneralException(trans('exceptions.backend.quotes.create_error'));
-
-
     }
 
-
-
-
-     public function verify(array $input)
+    public function verify(array $input)
     {
-
         DB::beginTransaction();
 
-
-            $result = Quote::find($input['invoice']['quote_id']);
-            $result->verified = 'Yes';
-            $result->verified_total = numberClean(@$input['invoice']['verified_total']);
-            $result->verified_disc = numberClean(@$input['invoice']['verified_disc']);
-            $result->verified_tax = numberClean(@$input['invoice']['verified_tax']);
-            $result->verified_amount = numberClean(@$input['invoice']['verified_amount']);
-            $result->verified_by = $input['invoice']['user_id'];
-            $result->verification_date = date('Y-m-d');
-            $result->save();
-
-
+        $result = Quote::find($input['invoice']['quote_id']);
+        $result->verified = 'Yes';
+        $result->verified_total = numberClean(@$input['invoice']['verified_total']);
+        $result->verified_disc = numberClean(@$input['invoice']['verified_disc']);
+        $result->verified_tax = numberClean(@$input['invoice']['verified_tax']);
+        $result->verified_amount = numberClean(@$input['invoice']['verified_amount']);
+        $result->verified_by = $input['invoice']['user_id'];
+        $result->verification_date = date('Y-m-d');
+        $result->save();
 
         if ($result) {
-        VerifiedItem::where('quote_id', $result->id)->delete();
-        
+            VerifiedItem::where('quote_id', $result->id)->delete();
+
             $products = array();
             $subtotal = 0;
             $total_qty = 0;
             $total_tax = 0;
             $stock_update = array();
 
-           
             foreach ($input['invoice_items']['numbering'] as $key => $value) {
-               $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
+                $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
                 $total_qty += numberClean(@$input['invoice_items']['product_qty'][$key]);
                 $total_tax += numberClean(@$input['invoice_items']['total_tax'][$key]);
                 $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array('quote_id' => $result->id,
+                $products[] = array(
+                    'quote_id' => $result->id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
                     'product_qty' => numberClean(@$input['invoice_items']['product_qty'][$key]),
@@ -230,19 +195,16 @@ class QuoteRepository extends BaseRepository
                     'a_type' => numberClean(@$input['invoice_items']['a_type'][$key]),
                     'numbering' => strip_tags(@$input['invoice_items']['numbering'][$key]),
                     'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins);
-
-               
+                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins
+                );
             }
 
             VerifiedItem::insert($products);
-      
+
             DB::commit();
             return $result;
         }
         throw new GeneralException(trans('exceptions.backend.quotes.create_error'));
-
-
     }
 
     /**
@@ -255,7 +217,7 @@ class QuoteRepository extends BaseRepository
      */
     public function update(Quote $quote, array $input)
     {
-    	$id = $input['invoice']['id'];
+        $id = $input['invoice']['id'];
         $extra_discount = numberClean($input['invoice']['after_disc']);
         $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
         $input['invoice']['invoiceduedate'] = date_for_database($input['invoice']['invoiceduedate']);
@@ -273,9 +235,11 @@ class QuoteRepository extends BaseRepository
         unset($input['invoice']['ship_rate']);
         unset($input['invoice']['id']);
         unset($input['invoice']['restock']);
+
         $result = Quote::find($id);
         if ($result->status == 'canceled') return false;
-         $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
+
+        $input['invoice'] = array_map('strip_tags', $input['invoice']);
         $result->update($input['invoice']);
 
         if ($result) {
@@ -286,12 +250,13 @@ class QuoteRepository extends BaseRepository
             $total_tax = 0;
             foreach ($input['invoice_items']['product_id'] as $key => $value) {
                 $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $qty=numberClean($input['invoice_items']['product_qty'][$key]);
+                $qty = numberClean($input['invoice_items']['product_qty'][$key]);
 
                 $total_qty += $qty;
                 $total_tax += numberClean(@$input['invoice_items']['product_tax'][$key]);
                 $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array('quote_id' => $id,
+                $products[] = array(
+                    'quote_id' => $id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
                     'code' => @$input['invoice_items']['code'][$key],
@@ -302,11 +267,10 @@ class QuoteRepository extends BaseRepository
                     'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
                     'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
                     'total_discount' => numberClean(@$input['invoice_items']['total_discount'][$key]),
-                    'product_des' =>strip_tags(@$input['invoice_items']['product_description'][$key],config('general.allowed')),
+                    'product_des' => strip_tags(@$input['invoice_items']['product_description'][$key], config('general.allowed')),
                     'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']);
-
-
+                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']
+                );
             }
             QuoteItem::insert($products);
             $invoice_d = Quote::find($id);
@@ -324,15 +288,9 @@ class QuoteRepository extends BaseRepository
                 CustomEntry::insert($fields);
             }
 
-
-
-
             DB::commit();
-
-
             return $result;
         }
-
 
         throw new GeneralException(trans('exceptions.backend.quotes.update_error'));
     }

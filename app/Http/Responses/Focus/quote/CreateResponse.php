@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Responses\Focus\quote;
+
 use App\Models\quote\Quote;
 use Illuminate\Contracts\Support\Responsable;
 use App\Models\lead\Lead;
@@ -16,10 +17,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $last_invoice = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
 
-         $last_invoice=Quote::orderBy('id', 'desc')->where('i_class','=',0)->first();
-
-         $leads=Lead::all();
-        return view('focus.quotes.create')->with(array('last_invoice'=>$last_invoice,'leads'=>$leads))->with(bill_helper(2,4));
+        $leads = Lead::all();
+        return view('focus.quotes.create')->with(array('last_invoice' => $last_invoice, 'leads' => $leads))->with(bill_helper(2, 4));
     }
 }

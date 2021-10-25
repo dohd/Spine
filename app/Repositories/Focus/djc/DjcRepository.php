@@ -173,7 +173,7 @@ class DjcRepository extends BaseRepository
         $data_items = array();
         for ($i = 0; $i < count($item['tag_number']); $i++) {
             $tmp = array('djc_id' => $djc_id, 'ins' => $djc_ins);
-            foreach(array_keys($item) as $key) {
+            foreach (array_keys($item) as $key) {
                 $value = $item[$key][$i];
                 if ($key == 'last_service_date' || $key == 'next_service_date') {
                     $value = date_for_database($value);

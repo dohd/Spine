@@ -73,10 +73,10 @@ class ProductsController extends Controller
         $segment = false;
         if (isset($input['rel_id']) and isset($input['rel_type'])) {
             switch ($input['rel_type']) {
-                case 2 :
+                case 2:
                     $segment = Warehouse::find($input['rel_id']);
                     break;
-                default :
+                default:
                     $segment = Productcategory::find($input['rel_id']);
             }
         }
@@ -170,7 +170,6 @@ class ProductsController extends Controller
         $this->repository->delete($product);
         //returning with successfull message
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.products.deleted')));
-
     }
 
     /**
@@ -190,15 +189,13 @@ class ProductsController extends Controller
     public function product_label(ManageProductRequest $style)
     {
 
-        if (isset($style->items_per_row) AND isset($style->products_l)) {
+        if (isset($style->items_per_row) and isset($style->products_l)) {
 
             $product = ProductVariation::whereIn('id', $style->products_l)->get();
 
             $products = array();
             foreach ($product as $row) {
                 $products[] = array('name' => $row->product['name'] . ' ' . $row['name'] . '', 'price' => $row['price'], 'unit' => $row['unit'], 'code' => $row['code'], 'warehouse' => $row->warehouse['title'], 'barcode' => $row['barcode'], 'expiry' => $row['expiry ']);
-
-
             }
 
             if (count($products) > 0)
@@ -212,18 +209,17 @@ class ProductsController extends Controller
                 if ($style->pdf == 2) {
                     return $pdf->Output('products_label_print.pdf', 'D');
                 } else {
-                      $headers = array(
+                    $headers = array(
                         "Content-type" => "application/pdf",
                         "Pragma" => "no-cache",
                         "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
                         "Expires" => "0"
-                );
-                return Response::stream($pdf->Output('products_label_print.pdf', 'I'), 200, $headers);
+                    );
+                    return Response::stream($pdf->Output('products_label_print.pdf', 'I'), 200, $headers);
                 }
             } catch (\Exception $e) {
                 return new RedirectResponse(route('biller.products.product_label'), ['flash_error' => $e->getMessage()]);
             }
-
         }
 
 
@@ -246,10 +242,10 @@ class ProductsController extends Controller
                 if (!isset($qtyArray[$i])) $qtyArray[$i] = $row->qty;
                 $check_product_list->when(request('merger'), function ($q) {
                     switch (request('merger')) {
-                        case 1 :
+                        case 1:
                             return $q->where('code', '=', request('merger'))->whereNotNull('code');
                             break;
-                        case 2 :
+                        case 2:
                             return $q->whereNull('code');
                             break;
                     }
@@ -269,7 +265,6 @@ class ProductsController extends Controller
                 }
                 $stock_log[] = array('rel_type' => 1, 'rel_id' => $row['id'], 'ref_id' => $row['warehouse_id'], 'value' => $qtyArray[$i], 'value2' => $input['to_warehouse']);
                 $i++;
-
             }
             ProductMeta::insert($stock_log);
             return new RedirectResponse(route('biller.products.stock_transfer'), ['flash_success' => trans('products.stock_transfer_success')]);
@@ -313,8 +308,6 @@ class ProductsController extends Controller
 
                     $html = view('focus.products.sheets.LP24_134', compact('style', 'products'))->render();
                     break;
-
-
             }
             try {
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
@@ -322,13 +315,13 @@ class ProductsController extends Controller
                 if ($style->pdf == 2) {
                     return $pdf->Output('products_label_print.pdf', 'D');
                 } else {
-                       $headers = array(
+                    $headers = array(
                         "Content-type" => "application/pdf",
                         "Pragma" => "no-cache",
                         "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
                         "Expires" => "0"
-                );
-                return Response::stream($pdf->Output('products_label_print.pdf', 'I'), 200, $headers);
+                    );
+                    return Response::stream($pdf->Output('products_label_print.pdf', 'I'), 200, $headers);
                 }
             } catch (\Exception $e) {
                 return new RedirectResponse(route('biller.products.product_label'), ['flash_error' => $e->getMessage()]);
@@ -336,7 +329,6 @@ class ProductsController extends Controller
         }
         $warehouses = Warehouse::all();
         return view('focus.products.fixed_label', compact('warehouses'));
-
     }
 
 
@@ -357,8 +349,6 @@ class ProductsController extends Controller
             foreach ($product as $row) {
 
                 $output[] = array('name' => $row->product_serial->product['name'], 'disrate' => $row->product_serial['disrate'], 'price' => $row->product_serial['price'], 'id' => $row->product_serial['id'], 'taxrate' => $row->product_serial->product['taxrate'], 'product_des' => $row->product_serial->product['product_des'], 'unit' => $row->product_serial->product['unit'], 'code' => $row->product_serial['code'], 'alert' => $row->product_serial['qty'], 'serial' => $row->value);
-
-
             }
         } else {
 
@@ -375,76 +365,71 @@ class ProductsController extends Controller
 
             foreach ($product as $row) {
                 if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
-                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price),'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
+                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price), 'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
                 }
             }
-
         }
 
         if (count($output) > 0)
-
             return view('focus.products.partials.search')->withDetails($output);
     }
-
-
 
     public function product_quote_search(Request $request, $bill_type)
     {
         if (!access()->allow('product_search')) return false;
         $q = $request->post('keyword');
         $p = $request->post('pricing');
-        $wq = compact('q', 'w','p');
-     
-        
-        if($p!=0){
+        $wq = compact('q', 'w', 'p');
 
-           
-        $product = ProductVariation::whereHas('product', function ($query) use ($wq) {
-        $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
+        if ($p != 0) {
+            $product = ProductVariation::whereHas('product', function ($query) use ($wq) {
+                $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
                 return $query;
             })->whereHas('v_prices', function ($query) use ($wq) {
-                $query->where('pricegroup_id', $wq['p'] );
+                $query->where('pricegroup_id', $wq['p']);
                 return $query;
             })->when($wq['w'] > 0, function ($q) use ($wq) {
                 $q->where('warehouse_id', $wq['w']);
             })->limit(6)->get();
+
             $output = array();
-
             foreach ($product as $row) {
-
-            if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
-                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price),'price' => numberFormat($row->v_prices->selling_price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
+                if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
+                    $output[] = array(
+                        'name' => $row->product->name . ' ' . $row['name'], 
+                        'disrate' => numberFormat($row->disrate), 
+                        'purchase_price' => numberFormat($row->purchase_price), 
+                        'price' => numberFormat($row->v_prices->selling_price), 
+                        'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 
+                        'product_des' => $row->product['product_des'], 
+                        'unit' => $row->product['unit'], 
+                        'code' => $row->code, 
+                        'alert' => $row->qty, 
+                        'image' => $row->image, 
+                        'serial' => ''
+                    );
                 }
             }
-
-          }else{
-                     $product = ProductVariation::whereHas('product', function ($query) use ($wq) {
+        } else {
+            $product = ProductVariation::whereHas('product', function ($query) use ($wq) {
                 $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
                 return $query;
             })->when($wq['w'] > 0, function ($q) use ($wq) {
                 $q->where('warehouse_id', $wq['w']);
             })->limit(6)->get();
+
             $output = array();
-
             foreach ($product as $row) {
-
-            if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
-                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price),'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
+                if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
+                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price), 'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
                 }
             }
-                }
+        }
 
-
-
-
-
-
-        
-
-      
+        error_log('===  Search output ===');
+        error_log(print_r($output, 1));
 
         if (count($output) > 0)
-
             return view('focus.products.partials.search')->withDetails($output);
     }
 
@@ -465,10 +450,9 @@ class ProductsController extends Controller
         $cat_id = $request->post('cat_id');
         $s = $request->post('serial_mode');
         $limit = $request->post('search_limit', 20);
-        $bill_type=$request->bill_type;
-        if ($bill_type == 'label'){
+        $bill_type = $request->bill_type;
+        if ($bill_type == 'label') {
             $q = @$request->post('product')['term'];
-
         }
 
         $wq = compact('q', 'w', 'cat_id');
@@ -481,8 +465,6 @@ class ProductsController extends Controller
             foreach ($product as $row) {
 
                 $output[] = array('name' => $row->product_serial->product['name'], 'disrate' => $row->product_serial['disrate'], 'price' => $row->product_serial['price'], 'id' => $row->product_serial['id'], 'taxrate' => $row->product_serial->product['taxrate'], 'product_des' => $row->product_serial->product['product_des'], 'unit' => $row->product_serial->product['unit'], 'code' => $row->product_serial['code'], 'alert' => $row->product_serial['qty'], 'image' => $row->product_serial['image'], 'serial' => $row->value);
-
-
             }
         } else {
 
@@ -500,7 +482,6 @@ class ProductsController extends Controller
                     $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
                 }
             }
-
         }
 
         if (count($output) > 0)
@@ -508,13 +489,12 @@ class ProductsController extends Controller
             return view('focus.products.partials.pos')->withDetails($output);
     }
 
-      public function getProducts(Request $request)
+    public function getProducts(Request $request)
     {
-       $result = \App\Models\product\ProductMeta::where('value', 'LIKE', '%' . $q . '%')->whereNull('value2')->whereHas('product_serial', function ($query) use ($wq) {
-                if ($wq['w'] > 0) return $query->where('warehouse_id', $wq['w']);
-            })->with(['product_standard'])->limit($limit)->get();
-          return json_encode($result);
-
+        $result = \App\Models\product\ProductMeta::where('value', 'LIKE', '%' . $q . '%')->whereNull('value2')->whereHas('product_serial', function ($query) use ($wq) {
+            if ($wq['w'] > 0) return $query->where('warehouse_id', $wq['w']);
+        })->with(['product_standard'])->limit($limit)->get();
+        return json_encode($result);
     }
 
 
@@ -522,13 +502,5 @@ class ProductsController extends Controller
     {
 
         return new CreateModalResponse('focus.modal.product');
-        
-
     }
-
-
-
-
-
-
 }

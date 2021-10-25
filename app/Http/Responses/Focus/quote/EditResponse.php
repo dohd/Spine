@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Responses\Focus\quote;
+
 use App\Models\customfield\Customfield;
 use App\Models\items\CustomEntry;
 use Illuminate\Contracts\Support\Responsable;
@@ -10,14 +11,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\quote\Quote
      */
-    protected $quotes;
+    protected $quote;
 
     /**
-     * @param App\Models\quote\Quote $quotes
+     * @param App\Models\quote\Quote $quote
      */
-    public function __construct($quotes)
+    public function __construct($quote)
     {
-        $this->quotes = $quotes;
+        $this->quote = $quote;
     }
 
     /**
@@ -29,26 +30,35 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-
-           $fields = Customfield::where('module_id','=',4)->get()->groupBy('field_type');
+        $fields = Customfield::where('module_id', '=', 4)->get()->groupBy('field_type');
         $fields_raw = array();
 
         if (isset($fields['text'])) {
             foreach ($fields['text'] as $row) {
-                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 4)->where('rid', '=', $this->quotes->id)->first();
+                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 4)->where('rid', '=', $this->quote->id)->first();
                 $fields_raw['text'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
             }
         }
         if (isset($fields['number'])) {
             foreach ($fields['number'] as $row) {
-                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 4)->where('rid', '=', $this->quotes->id)->first();
+                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 4)->where('rid', '=', $this->quote->id)->first();
                 $fields_raw['number'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
             }
         }
 
         $fields_data = custom_fields($fields_raw);
 
-        return view('focus.quotes.edit')->with([
-            'quotes' => $this->quotes])->with(bill_helper(2))->with(['fields_data' => $fields_data]);
+        $this->quote['validity'] = 14;
+
+        browser_log($this->quote);
+
+        return view('focus.quotes.edit')->with(['quote' => $this->quote])->with(bill_helper(2))->with(['fields_data' => $fields_data]);
+    }
+
+    public function get_name($lead) {
+        if ($lead->client_status == "customer") {
+            return $lead->customer->company.' '. $lead->branch->name;                                                                
+        } 
+        return $lead->client_name;    
     }
 }

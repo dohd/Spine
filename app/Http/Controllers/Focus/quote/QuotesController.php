@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\quote;
 
 use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
@@ -69,17 +70,16 @@ class QuotesController extends Controller
         $words = array();
         if (isset($input['rel_id']) and isset($input['rel_type'])) {
             switch ($input['rel_type']) {
-                case 1 :
+                case 1:
                     $segment = Customer::find($input['rel_id']);
                     $words['name'] = trans('customers.title');
                     $words['name_data'] = $segment->name;
                     break;
-                case 2 :
+                case 2:
                     $segment = Hrm::find($input['rel_id']);
                     $words['name'] = trans('hrms.employee');
                     $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
                     break;
-
             }
         }
 
@@ -94,8 +94,6 @@ class QuotesController extends Controller
      */
     public function create(CreateQuoteRequest $request)
     {
-
-
         return new CreateResponse('focus.quotes.create');
     }
 
@@ -108,19 +106,10 @@ class QuotesController extends Controller
     public function store(CreateQuoteRequest $request)
     {
         //Input received from the request
-        $invoice = $request->only(['tid', 'term_id','invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal','tax', 'total', 'tax_format', 'term_id', 'tax_id','lead_id','attention','reference','reference_date','validity','pricing','conversion_rate','prepaired_by','print_type']);
+        $invoice = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $invoice_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
 
-
-
-
-        $invoice_items = $request->only(['numbering','product_id','a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive','total_tax', 'total_discount', 'unit']);
-
-
-    
-
-        
-
-            //$input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
+        //$input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
         $data2 = $request->only(['custom_field']);
         $data2['ins'] = auth()->user()->ins;
         //dd($invoice_items);
@@ -132,17 +121,16 @@ class QuotesController extends Controller
         //return with successfull message
 
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.created') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
-
     }
 
 
-      public function storeverified(ManageQuoteRequest $request)
+    public function storeverified(ManageQuoteRequest $request)
     {
         //Input received from the request
-        $invoice = $request->only(['quote_id', 'verified_amount','verified_disc', 'verified_tax', 'verified_amount']);
+        $invoice = $request->only(['quote_id', 'verified_amount', 'verified_disc', 'verified_tax', 'verified_amount']);
 
-         $invoice_items = $request->only(['numbering','product_id','a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive','total_tax', 'total_discount', 'unit']);
-     
+        $invoice_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
+
         $data2['ins'] = auth()->user()->ins;
         //dd($invoice_items);
         $invoice['ins'] = auth()->user()->ins;
@@ -153,13 +141,7 @@ class QuotesController extends Controller
         //return with successfull message
 
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.created') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
-
     }
-
-
-
-
-    
 
     /**
      * Show the form for editing the specified resource.
@@ -168,30 +150,18 @@ class QuotesController extends Controller
      * @param EditQuoteRequestNamespace $request
      * @return \App\Http\Responses\Focus\quote\EditResponse
      */
-    public function edit(Quote $quote, EditQuoteRequest $request)
+    public function edit(Quote $quote)
     {
         return new EditResponse($quote);
     }
 
-
-
-
-     public function verify(Quote $quote, EditQuoteRequest $request, $qt_id)
+    // verify
+    public function verify(Quote $quote, $qt_id)
     {
+        $quote = Quote::find($qt_id);
 
-
-       
-
-       $quote=Quote::find($qt_id);
-
-        return view('focus.quotes.verify')->with(array('quote'=>$quote))->with(bill_helper(2,4));
+        return view('focus.quotes.verify')->with(array('quote' => $quote))->with(bill_helper(2, 4));
     }
-
-
-
-   
-
-    
 
     /**
      * Update the specified resource in storage.
@@ -204,8 +174,8 @@ class QuotesController extends Controller
     {
 
         //Input received from the request
-        $invoice = $request->only(['customer_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock','proposal']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
+        $invoice = $request->only(['customer_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock', 'proposal']);
+        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
         //dd($request->id);
         $invoice['ins'] = auth()->user()->ins;
         //$invoice['user_id']=auth()->user()->id;
@@ -247,9 +217,7 @@ class QuotesController extends Controller
      */
     public function show(Quote $quote, ManageQuoteRequest $request)
     {
-
-      //  dd($quote);
-
+        //  dd($quote);
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
 
@@ -263,8 +231,6 @@ class QuotesController extends Controller
 
     public function convert(InvoiceRepository $invoicerepository, ManageInvoiceRequest $request)
     {
-
-
         $input = $request->only(['bill_id', 'delete_item']);
         $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
         //Input received from the request
@@ -289,14 +255,13 @@ class QuotesController extends Controller
         //return with successfull message
         //return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => trans('alerts.backend.invoices.created')]);
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
-
     }
 
     public function update_status(ManageQuoteRequest $request)
     {
 
-        $input = $request->only(['bill_id', 'status','approved_method','approved_by','approval_note']);
-       $approved_date= date_for_database($request->input('approved_date'));
+        $input = $request->only(['bill_id', 'status', 'approved_method', 'approved_by', 'approval_note']);
+        $approved_date = date_for_database($request->input('approved_date'));
         $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
         if ($quote_o->id) {
 
@@ -309,15 +274,14 @@ class QuotesController extends Controller
         }
         //return with successfull message
         echo json_encode(array('status' => 'Success', 'message' => trans('general.bill_status_update'), 'bill_status' => trans('payments.' . $input['status'])));
-
     }
 
-     public function update_lpo(ManageQuoteRequest $request)
+    public function update_lpo(ManageQuoteRequest $request)
     {
 
-        $input = $request->only(['bill_id','lpo_number']);
-       $lpo_amount= numberClean($request->input('lpo_amount'));
-       $lpo_date= date_for_database($request->input('lpo_date'));
+        $input = $request->only(['bill_id', 'lpo_number']);
+        $lpo_amount = numberClean($request->input('lpo_amount'));
+        $lpo_date = date_for_database($request->input('lpo_date'));
         $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
         if ($quote_o->id) {
             $quote_o->lpo_number = $input['lpo_number'];
@@ -326,11 +290,6 @@ class QuotesController extends Controller
             $quote_o->save();
         }
         //return with successfull message
-        echo json_encode(array('status' => 'Success', 'message' => 'Record Updated Successfully '.$quote_o->id.' ', 'bill_status' => trans('payments.' . $input['status'])));
-
+        echo json_encode(array('status' => 'Success', 'message' => 'Record Updated Successfully ' . $quote_o->id . ' ', 'bill_status' => trans('payments.' . $input['status'])));
     }
-
-
-    
-
 }
