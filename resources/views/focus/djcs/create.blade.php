@@ -256,7 +256,7 @@
 <script type="text/javascript">
     $('#edit-djc').submit(function(e) {
         // e.preventDefault();
-        console.log('serialized => ', $(this).serializeArray());
+        // console.log('serialized => ', $(this).serializeArray());
     });
 
     // initialize html editor
