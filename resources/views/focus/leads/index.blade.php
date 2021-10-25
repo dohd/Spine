@@ -72,9 +72,7 @@
 
 <script>
     $(function() {
-        setTimeout(function() {
-            draw_data()
-        }, "{{ config('master.delay')}}");
+        setTimeout(function() { draw_data() }, "{{ config('master.delay')}}");
     });
 
     function draw_data() {
@@ -167,8 +165,6 @@
                 ]
             }
         });
-
-        // $('#branches-table_wrapper').removeClass('form-inline');
     }
 </script>
 @endsection
