@@ -18,8 +18,10 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $last_invoice = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
-
         $leads = Lead::all();
-        return view('focus.quotes.create')->with(array('last_invoice' => $last_invoice, 'leads' => $leads))->with(bill_helper(2, 4));
+
+        return view('focus.quotes.create')
+            ->with(compact('last_invoice','leads'))
+            ->with(bill_helper(2, 4));
     }
 }
