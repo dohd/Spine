@@ -426,11 +426,7 @@ class ProductsController extends Controller
             }
         }
 
-        error_log('===  Search output ===');
-        error_log(print_r($output, 1));
-
-        if (count($output) > 0)
-            return view('focus.products.partials.search')->withDetails($output);
+        return view('focus.products.partials.search')->withDetails($output);
     }
 
 
