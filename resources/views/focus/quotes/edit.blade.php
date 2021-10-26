@@ -24,7 +24,7 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::model($quote, ['class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-quote']) }}
+                    {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-quote']) }}
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
@@ -39,7 +39,7 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  round  select-box required" name="lead_id" id="lead_id">
-                                                @foreach ($quote->lead->get() as $lead)
+                                                @foreach ($leads as $lead)
                                                     @php
                                                         if ($lead->client_status == "customer") {
                                                             $name = $lead->customer->company.' '. $lead->branch->name;                                                                
@@ -163,7 +163,6 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control round  select-box" name="revision" id="revision">
-                                                <option value="0">-- Select Revision --</option>
                                                 <option value="_r1">R1</option>
                                                 <option value="_r2">R2</option>
                                                 <option value="_r3">R3</option>
@@ -187,7 +186,7 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
-                                        <select class="form-control round" onchange="changeTaxFormat()" id="taxFormat">
+                                        <select class="form-control round" name='tax_id' id="tax_id">
                                             @php
                                                 $tax_format='exclusive';
                                                 $tax_format_id=0;
@@ -195,21 +194,22 @@
                                             @endphp
                                             @foreach($additionals as $additional_tax)
                                                 @php
-                                                    if ($additional_tax->id == $defaults[4][0]['feature_value'] && $additional_tax->class == 1) {
-                                                        echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>
-                                                            --'.$additional_tax->name.'--</option>';
+                                                    $default = $additional_tax->id == $defaults[4][0]['feature_value'] && $additional_tax->class == 1;
+                                                    if ($default) {
                                                         $tax_format=$additional_tax->type2;
                                                         $tax_format_id=$additional_tax->id;
                                                         $tax_format_type=$additional_tax->type3;
                                                     }
-                                                @endphp
-                                                {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>"
-                                                : "" !!}
+                                                @endphp                                                
+                                                @if ($default)
+                                                    <option value="{{ $additional_tax->value }}" selected>{{ $additional_tax->name }}</option>                                                    
+                                                @elseif ($additional_tax->class == 1)
+                                                    <option value="{{ $additional_tax->value }}" data-type1="data-type1">{{ $additional_tax->name }}</option>                                                    
+                                                @endif
                                             @endforeach
-                                            <option value="0" data-type1="%" data-type2="off" data-type3="off">
-                                                {{trans('general.off')}}
-                                            </option>
+                                            <option value="0">{{trans('general.off')}}</option>
                                         </select>
+                                        <input type="hidden" name="tax_format" value="{{ $tax_format }}">
                                     </div>
                                 </div>
                             </div>
@@ -292,39 +292,41 @@
 @section('extra-scripts')
 <script>
     $('#edit-quote').submit(function(e) {
-        // e.preventDefault();
-        // console.log($(this).serializeArray());
+        e.preventDefault();
+        console.log($(this).serializeArray());
     })
 
-    // quote object
-    const quote = @json($quote);
+    // console.log('additionals', @json($additionals))
+    // console.log('defaults', @json($defaults))
 
     // set default options
     $('#lead_id').val("{{ $quote->lead->id }}");
-    $('#validity').val(quote.validity);
-    $('#currency').val(quote.currency);
-    $('#revesion').val(quote.revision);
+    $('#validity').val("{{ $quote->validity }}");
+    $('#currency').val("{{ $quote->currency }}");
+    $('#tax_id').val("{{ $quote->tax_id }}");
+    $('#revision').val("{{ $quote->revision }}" || '_r1');
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date(quote.reference_date));
+        .datepicker('setDate', new Date("{{ $quote->reference_date }}"));
 
     // initialize Quote Date datepicker
     $('[data-toggle="datepicker-qd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date(quote.invoicedate));
+        .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
 
     // product row
     function productRow(val) {
         return `
             <tr>
+                <input type="hidden" name="product_id" value=0 id="productid-${val}">
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
-                <td><select class="form-control unit" data-uid=${val} name="u_m[]"><option value="0">Default Unit</option></select></td>                
+                <td><select class="form-control unit" name="unit" id="unit-${val}" selected><option value="">Default Unit</option></select></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="rate_inclusive[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
                 <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
             </tr>
@@ -421,7 +423,10 @@
             minLength: 0,
             select: function(event, ui) {
                 const {data} = ui.item;
+                console.log('autodata', data);
+                $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
+                $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
 
                 const productPrice = parseFloat(data.price.replace(',',''));
