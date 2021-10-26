@@ -129,7 +129,7 @@ class QuotesController extends Controller
         //Input received from the request
         $invoice = $request->only(['quote_id', 'verified_amount', 'verified_disc', 'verified_tax', 'verified_amount']);
 
-        $invoice_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
+        $invoice_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
 
         $data2['ins'] = auth()->user()->ins;
         //dd($invoice_items);
@@ -172,7 +172,20 @@ class QuotesController extends Controller
      */
     public function update(EditQuoteRequest $request, Quote $quote)
     {
+        error_log('===  Update Quote ===');
+        //Input received from the request
+        $input = array();
+        $input['quote'] = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $input['quote_items'] = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
 
+        error_log(print_r($input, 1));
+
+        return new EditResponse($quote);
+
+        // $result = $quote;
+        // echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.updated') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+
+        return;
         //Input received from the request
         $invoice = $request->only(['customer_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock', 'proposal']);
         $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
@@ -189,7 +202,6 @@ class QuotesController extends Controller
 
         //return with successfull message
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.updated') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
     }
 
     /**
