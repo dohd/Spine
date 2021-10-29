@@ -234,6 +234,8 @@ Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
 
     Route::get('quotes/{id}/copy', 'QuotesController@copy')->name('quotes.copy');
+    Route::get('quotes/{id}/quote_items', 'QuotesController@quote_items')->name('quotes.quote_items');
+
     // PI endpoints
     Route::get('quotes/create_pi', 'QuotesController@create_pi')->name('quotes.create_pi');
     Route::post('quotes/store_pi', 'QuotesController@store_pi')->name('quotes.store_pi');
