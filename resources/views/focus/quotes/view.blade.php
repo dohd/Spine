@@ -14,6 +14,19 @@
 @section('content')
 <div class="app-content m-1">
     <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
+            </div>
+            <div class="content-header-right col-md-6 col-12">
+                <div class="media width-250 float-right">
+                    <div class="media-body media-right text-right">
+                        @include('focus.quotes.partials.quotes-header-buttons')
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-body">
@@ -22,7 +35,7 @@
                         <div class="col">
                             <a href="{{$quote['id']}}/edit" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> {{trans('labels.backend.quotes.edit')}}</a>
                             @php
-                            $qt_link=route('biller.quotes.verify',[$quote->id ]);
+                                $qt_link=route('biller.quotes.verify',[$quote->id ]);
                             @endphp
                             <div class="btn-group ">
                                 <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-repeat"></i> Verify & Download
