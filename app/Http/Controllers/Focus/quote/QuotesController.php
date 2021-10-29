@@ -221,12 +221,7 @@ class QuotesController extends Controller
 
         $quote['bill_type'] = 4;
 
-        $valid_token = token_validator('', 'q' . $quote['id'].$quote['tid'], true);
-        $link=route( 'biller.print_bill', [$quote['id'], 4, $valid_token, 1]);
-        $link_download=route('biller.print_bill', [$quote['id'], 4, $valid_token, 2]);
-        $link_preview=route('biller.view_bill', [$quote['id'], 4, $valid_token, 0]);
-
-        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'valid_token', 'link', 'link_download', 'link_preview'));
+        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features'));
     }
 
     /**
