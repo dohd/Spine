@@ -217,87 +217,54 @@ class QuoteRepository extends BaseRepository
      */
     public function update(array $input)
     {
-        print_log($input);
-
-        return true;
-
-
-        $id = $input['invoice']['id'];
-        $extra_discount = numberClean($input['invoice']['after_disc']);
-        $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
-        $input['invoice']['invoiceduedate'] = date_for_database($input['invoice']['invoiceduedate']);
-        $input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
-        $input['invoice']['shipping'] = numberClean($input['invoice']['shipping']);
-        $input['invoice']['discount_rate'] = numberClean($input['invoice']['discount_rate']);
-        $input['invoice']['after_disc'] = numberClean($input['invoice']['after_disc']);
-        $input['invoice']['total'] = numberClean($input['invoice']['total']);
-        $input['invoice']['ship_tax_rate'] = numberClean($input['invoice']['ship_rate']);
-        $input['invoice']['ship_tax'] = numberClean($input['invoice']['ship_tax']);
-        $input['invoice']['extra_discount'] = $extra_discount;
-        $total_discount = $extra_discount;
-        $re_stock = @$input['invoice']['restock'];
-        unset($input['invoice']['after_disc']);
-        unset($input['invoice']['ship_rate']);
-        unset($input['invoice']['id']);
-        unset($input['invoice']['restock']);
-
-        $result = Quote::find($id);
-        if ($result->status == 'canceled') return false;
-
-        $input['invoice'] = array_map('strip_tags', $input['invoice']);
-        $result->update($input['invoice']);
-
-        if ($result) {
-            QuoteItem::where('quote_id', $id)->delete();
-            $products = array();
-            $subtotal = 0;
-            $total_qty = 0;
-            $total_tax = 0;
-            foreach ($input['invoice_items']['product_id'] as $key => $value) {
-                $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $qty = numberClean($input['invoice_items']['product_qty'][$key]);
-
-                $total_qty += $qty;
-                $total_tax += numberClean(@$input['invoice_items']['product_tax'][$key]);
-                $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array(
-                    'quote_id' => $id,
-                    'product_id' => $input['invoice_items']['product_id'][$key],
-                    'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
-                    'code' => @$input['invoice_items']['code'][$key],
-                    'product_qty' => numberClean(@$input['invoice_items']['product_qty'][$key]),
-                    'product_price' => numberClean(@$input['invoice_items']['product_price'][$key]),
-                    'product_tax' => numberClean(@$input['invoice_items']['product_tax'][$key]),
-                    'product_discount' => numberClean(@$input['invoice_items']['product_discount'][$key]),
-                    'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
-                    'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
-                    'total_discount' => numberClean(@$input['invoice_items']['total_discount'][$key]),
-                    'product_des' => strip_tags(@$input['invoice_items']['product_description'][$key], config('general.allowed')),
-                    'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']
-                );
+        $quote = $input['data'];
+        // change date values to database format
+        foreach ($quote as $key => $value) {
+            if ($key == 'invoicedate' || $key == 'reference_date') {
+                $quote[$key] = date_for_database($value);
             }
-            QuoteItem::insert($products);
-            $invoice_d = Quote::find($id);
-            $invoice_d->subtotal = $subtotal;
-            $invoice_d->tax = $total_tax;
-            $invoice_d->discount = $total_discount;
-            $invoice_d->items = $total_qty;
-            $invoice_d->save();
+        }
+        $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
+        $quote['invoiceduedate'] = date_for_database($duedate);
 
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $id, 'module' => 4, 'data' => strip_tags($value), 'ins' => $input['invoice']['ins']);
-                    CustomEntry::where('custom_field_id', '=', $key)->where('rid', '=', $id)->delete();
+        DB::beginTransaction();
+        $result = Quote::where('id', $quote['id'])->update($quote);
+
+        // quote items
+        $items_count = count($input['data_items']['product_name']);
+        $quote_items = $this->array_items(
+            $items_count, 
+            $input['data_items'], 
+            ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
+        );
+        // grouped quote item titles
+        $titles_count = count($input['item_titles']['product_title']);
+        $item_titles = $this->array_items(
+            $titles_count,
+            $input['item_titles'],
+            ['rid' => $quote['id'], 'module' => 4, 'ins' => $quote['ins']]
+        );
+
+        // update or create new quote_items
+        if ($result && $items_count) {
+            foreach($quote_items as $item) {
+                $quote_item = QuoteItem::firstOrNew([
+                    'quote_id' => $item['quote_id'],
+                    'product_name' => $item['product_name']
+                ]);
+                // assign properties to the item
+                foreach($item as $key => $value) {
+                    if ($key == 'quote_id' || $key == 'product_name') continue;
+                    $quote_item[$key] = $value;
                 }
-                CustomEntry::insert($fields);
+                $quote_item->save();
             }
 
             DB::commit();
             return $result;
         }
-
-        throw new GeneralException(trans('exceptions.backend.quotes.update_error'));
+        
+        throw new GeneralException('Error Updating PI');
     }
 
     /**
@@ -341,14 +308,24 @@ class QuoteRepository extends BaseRepository
 
         DB::beginTransaction();
         $result = Quote::create($quote);
+
+        // quote items
         $items_count = count($input['data_items']['product_name']);
+        $quote_items = $this->array_items(
+            $items_count, 
+            $input['data_items'], 
+            ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
+        );
+        // grouped quote item titles
+        $titles_count = count($input['item_titles']['product_title']);
+        $item_titles = $this->array_items(
+            $titles_count,
+            $input['item_titles'],
+            ['rid' => $quote['id'], 'module' => 4, 'ins' => $quote['ins']]
+        );
+
         // bulk update quote items
         if ($result && $items_count) {
-            $quote_items = $this->array_items(
-                $items_count, 
-                $input['data_items'], 
-                array('quote_id' => $result->id, 'ins' => $result->ins)
-            );
             QuoteItem::insert($quote_items);
             DB::commit();
             return $result;
@@ -366,9 +343,7 @@ class QuoteRepository extends BaseRepository
      */
     public function update_pi(array $input)
     {
-        $quote = $input['data'];
-        // $item_titles = $input['item_titles'];
-        
+        $quote = $input['data'];        
         // change date values to database format
         foreach ($quote as $key => $value) {
             if ($key == 'invoicedate' || $key == 'reference_date') {
@@ -380,15 +355,24 @@ class QuoteRepository extends BaseRepository
 
         DB::beginTransaction();
         $result = Quote::where('id', $quote['id'])->update($quote);
-        $items_count = count($input['data_items']['product_name']);
 
+        // quote items
+        $items_count = count($input['data_items']['product_name']);
+        $quote_items = $this->array_items(
+            $items_count, 
+            $input['data_items'], 
+            ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
+        );
+        // grouped quote item titles
+        $titles_count = count($input['item_titles']['product_title']);
+        $item_titles = $this->array_items(
+            $titles_count,
+            $input['item_titles'],
+            ['rid' => $quote['id'], 'module' => 4, 'ins' => $quote['ins']]
+        );     
+
+        // update or create new quote_items
         if ($result && $items_count) {
-            $quote_items = $this->array_items(
-                $items_count, 
-                $input['data_items'], 
-                array('quote_id' => $result->id, 'ins' => $result->ins)
-            );
-            // update or create new quote_items
             foreach($quote_items as $item) {
                 $quote_item = QuoteItem::firstOrNew([
                     'quote_id' => $item['quote_id'],
@@ -411,7 +395,7 @@ class QuoteRepository extends BaseRepository
 
 
     // convert array elements
-    protected function array_items($count, $item, $extra=array())
+    protected function array_items($count=0, $item=[], $extra=[])
     {
         $data_items = array();
         for ($i = 0; $i < $count; $i++) {
