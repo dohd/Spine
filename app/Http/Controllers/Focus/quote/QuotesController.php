@@ -110,7 +110,6 @@ class QuotesController extends Controller
         // filter request input fields
         $invoice = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $invoice_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
-
         $data2 = $request->only(['custom_field']);
 
         $data2['ins'] = auth()->user()->ins;
@@ -129,21 +128,22 @@ class QuotesController extends Controller
 
     public function storeverified(ManageQuoteRequest $request)
     {
-        //Input received from the request
+        //filter request input fields
         $invoice = $request->only(['quote_id', 'verified_amount', 'verified_disc', 'verified_tax', 'verified_amount']);
-
         $invoice_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
+        $data2 = $request->only(['custom_field']);
 
         $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
         $invoice['ins'] = auth()->user()->ins;
         $invoice['user_id'] = auth()->user()->id;
         $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->verify(compact('invoice', 'invoice_items'));
-        //return with successfull message
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.created') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        $result = $this->repository->verify(compact('invoice', 'invoice_items', 'data2'));
+
+        return new RedirectResponse(
+            route('biller.quotes.index', [$result->id]), 
+            ['flash_success' => $this->flash_msg('Quote verified', $result->id)]
+        );
     }
 
     /**
@@ -295,7 +295,7 @@ class QuotesController extends Controller
     }
 
     // default flash message format
-    protected function flash_msg($message, $id)
+    protected function flash_msg($message="", $id="")
     {
         return $message 
             . ' <a href="' . route('biller.quotes.index', [$id]) 
