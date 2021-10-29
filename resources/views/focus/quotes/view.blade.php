@@ -422,11 +422,9 @@ pop_lop_1
 
 
 <script type="text/javascript">
-    $('[data-toggle="datepicker"]').datepicker({
-        autoHide: true,
-        format: "{{config('core.user_date_format ')}}"
-    });
-    $('[data-toggle="datepicker"]').datepicker('setDate', "{{date(config('core.user_date_format'))}}");
+    $('[data-toggle="datepicker"]')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', "{{ date(config('core.user_date_format')) }}");
 
     $(function() {
         $('.summernote').summernote({
@@ -444,7 +442,6 @@ pop_lop_1
             ],
             popover: {}
         });
-
 
         /*jslint unparam: true */
         /*global window, $ */
@@ -464,17 +461,13 @@ pop_lop_1
                         $.each(data.result, function(index, file) {
                             $('#files').append('<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
                         });
-
                     },
                     progressall: function(e, data) {
-
                         var progress = parseInt(data.loaded / data.total * 100, 10);
-
                         $('#progress .progress-bar').css(
                             'width',
                             progress + '%'
                         );
-
                     }
                 }).prop('disabled', !$.support.fileInput)
                 .parent().addClass($.support.fileInput ? undefined : 'disabled');
@@ -498,7 +491,6 @@ pop_lop_1
                     obj.remove();
                 }
             });
-
         });
     });
 </script>
