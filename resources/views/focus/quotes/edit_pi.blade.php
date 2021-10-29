@@ -25,7 +25,7 @@
             <div class="card">
                 <div class="card-body">
                     @if (@$last_quote->tid)
-                        {{ Form::model($quote, ['route' => 'biller.quotes.create_pi', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-pi']) }}
+                        {{ Form::model($quote, ['route' => 'biller.quotes.store_pi', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-pi']) }}
                     @else
                         {{ Form::model($quote, ['route' => ['biller.quotes.update_pi', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'update-pi']) }}
                     @endif
@@ -351,6 +351,7 @@
     function productTitleRow(val) {
         return `
             <tr>
+                <input type="hidden" name="custom_field_id[]" value="${val}" id="customfieldid-${val}">
                 <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
                 <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
                 <td class="text-center">${dropDown()}</td>

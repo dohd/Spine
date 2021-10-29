@@ -25,7 +25,7 @@
             <div class="card">
                 <div class="card-body">
                     @if (@$last_quote->tid)
-                        {{ Form::model($quote, ['route' => 'biller.quotes.create', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'create-quote']) }}
+                        {{ Form::model($quote, ['route' => 'biller.quotes.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-quote']) }}
                     @else
                         {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-quote']) }}
                     @endif
@@ -291,7 +291,7 @@
                                         </div>
                                     </div>
                                     @if (@$last_quote->tid)
-                                        {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-lg']) }}
+                                        {{ Form::submit('Create', ['class' => 'btn btn-primary btn-lg']) }}
                                     @else
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
                                     @endif
@@ -350,6 +350,7 @@
     function productTitleRow(val) {
         return `
             <tr>
+                <input type="hidden" name="custom_field_id[]" value="${val}" id="customfieldid-${val}">
                 <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
                 <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
                 <td class="text-center">${dropDown()}</td>
