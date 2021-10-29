@@ -905,7 +905,17 @@ function strip_tags_deep($value, $key = null){
   }
 }
 
-function browser_log($log)
+// log to the browser console when return type is a view
+function browser_log(...$logs)
 {
-    echo '<script>console.log('.json_encode($log).')</script>';
+    foreach ($logs as $log) {
+        echo '<script>console.log('.json_encode($log).')</script>';
+    }
+}
+// log to the server console
+function print_log(...$logs)
+{
+    foreach ($logs as $log) {
+        error_log(print_r($log, 1));
+    }
 }
