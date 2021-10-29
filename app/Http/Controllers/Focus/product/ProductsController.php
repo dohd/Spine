@@ -379,6 +379,8 @@ class ProductsController extends Controller
         if (!access()->allow('product_search')) return false;
         $q = $request->post('keyword');
         $p = $request->post('pricing');
+        // temporary server error fix by defining $w
+        $w = 7;
         $wq = compact('q', 'w', 'p');
 
         if ($p != 0) {
