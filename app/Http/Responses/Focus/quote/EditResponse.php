@@ -2,8 +2,10 @@
 
 namespace App\Http\Responses\Focus\quote;
 
+use App\Models\bank\Bank;
 use App\Models\customfield\Customfield;
 use App\Models\items\CustomEntry;
+use App\Models\lead\Lead;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -30,32 +32,19 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        // $fields = Customfield::where('module_id', '=', 4)->get()->groupBy('field_type');
-        // $fields_raw = array();
-
-        // if (isset($fields['text'])) {
-        //     foreach ($fields['text'] as $row) {
-        //         $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 4)->where('rid', '=', $this->quote->id)->first();
-        //         $fields_raw['text'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
-        //     }
-        // }
-        // if (isset($fields['number'])) {
-        //     foreach ($fields['number'] as $row) {
-        //         $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 4)->where('rid', '=', $this->quote->id)->first();
-        //         $fields_raw['number'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
-        //     }
-        // }
-
-        // $fields_data = custom_fields($fields_raw);
-
-        // $this->quote['validity'] = 14;
-
-        browser_log($this->quote);
-
         $quote = $this->quote;
         $leads = $this->quote->lead->get();
 
-        // return view('focus.quotes.edit')->with(['quote' => $this->quote])->with(bill_helper(2))->with(['fields_data' => $fields_data]);
+        browser_log($this->quote);
+
+        // edit proformer invoice
+        if ($this->quote->bank_id ) {
+            $banks = Bank::all();
+            return view('focus.quotes.edit_pi')
+                ->with(compact('quote', 'leads', 'banks'))
+                ->with(bill_helper(2, 4));
+        }
+
         return view('focus.quotes.edit')
             ->with(compact('quote','leads'))
             ->with(bill_helper(2, 4));
