@@ -452,7 +452,7 @@
                 // displayed Amount
                 $('#result-'+i).text(rateInclusive.toFixed(2));
                 // Compute Totals
-                dataTaxRate[i] = tax;
+                dataTaxRate[i] = taxRate;
                 totals();
             }
         };
