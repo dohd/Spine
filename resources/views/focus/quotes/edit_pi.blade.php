@@ -35,7 +35,7 @@
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
                                         @if (@$last_quote->tid)
-                                            <h3 class="title pl-1">Copy Proformer Invoice</h3>
+                                            <h3 class="title pl-1">Create Proformer Invoice Copy</h3>
                                         @else
                                             <h3 class="title pl-1">Edit Proformer Invoice</h3>
                                         @endif
