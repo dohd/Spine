@@ -24,13 +24,21 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-quote']) }}
+                    @if (@$last_quote->tid)
+                        {{ Form::model($quote, ['route' => 'biller.quotes.create', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'create-quote']) }}
+                    @else
+                        {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-quote']) }}
+                    @endif
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
-                                        <h3 class="title pl-1">Edit Quote</h3>
+                                        @if (@$last_quote->tid)
+                                            <h3 class="title pl-1">Copy Quote</h3>
+                                        @else
+                                            <h3 class="title pl-1">Edit Quote</h3>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -38,7 +46,7 @@
                                         <label for="ref_type" class="caption">Search Lead</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">
+                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">                                                 
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         if ($lead->client_status == "customer") {
@@ -50,7 +58,7 @@
                                                     <option value="{{ $lead['id'] }}">
                                                         {{$lead['reference']}} - {{$name}} - {{dateFormat($lead->date_of_request)}} - {{$lead->employee_id}} - {{$lead->title}}
                                                     </option>
-                                                @endforeach
+                                                @endforeach                                                                                             
                                             </select>
                                         </div>
                                     </div>
@@ -86,7 +94,11 @@
                                         <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{ Form::number('tid', @$last_invoice->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
+                                            @if (@$last_quote->tid)
+                                                {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            @else
+                                                {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -159,24 +171,26 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control round  select-box" name="revision" id="revision">
-                                                <option value="_r1">R1</option>
-                                                <option value="_r2">R2</option>
-                                                <option value="_r3">R3</option>
-                                                <option value="_r4">R4</option>
-                                                <option value="_r5">R5</option>
-                                            </select>
+                                    @if (!@$last_quote->tid)
+                                        <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                                <select class="form-control round  select-box" name="revision" id="revision">
+                                                    <option value="_r1">R1</option>
+                                                    <option value="_r2">R2</option>
+                                                    <option value="_r3">R3</option>
+                                                    <option value="_r4">R4</option>
+                                                    <option value="_r5">R5</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="items" name="term_id" class="form-control round  selectpicker required">
+                                            <select id="term_id" name="term_id" class="form-control round  selectpicker required">
                                                 <option value="0">No Terms</option>
                                                 @foreach($terms as $term)
                                                     <option value="{{$term->id}}">{{$term->title}}</option>
@@ -276,7 +290,11 @@
                                             <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
                                         </div>
                                     </div>
-                                    {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
+                                    @if (@$last_quote->tid)
+                                        {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-lg']) }}
+                                    @else
+                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -291,20 +309,15 @@
 
 @section('extra-scripts')
 <script>
-    $('#edit-quote').submit(function(e) {
-        e.preventDefault();
-        console.log($(this).serializeArray());
-    })
-
-    // console.log('additionals', @json($additionals))
-    // console.log('defaults', @json($defaults))
-
+    
     // set default options
     $('#lead_id').val("{{ $quote->lead->id }}");
+    $('#pricing').val("{{ $quote->pricing }}");
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
-    $('#tax_id').val("{{ $quote->tax_id }}");
+    $('#term_id').val("{{ $quote->term_id }}");
     $('#revision').val("{{ $quote->revision }}" || '_r1');
+    $('#tax_id').val("{{ $quote->tax_id }}");
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
@@ -320,10 +333,10 @@
     function productRow(val) {
         return `
             <tr>
-                <input type="hidden" name="product_id" value=0 id="productid-${val}">
+                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
-                <td><select class="form-control unit" name="unit" id="unit-${val}" selected><option value="">Default Unit</option></select></td>                
+                <td><select class="form-control unit" name="unit[]" id="unit-${val}" selected><option value="">Default Unit</option></select></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
@@ -337,8 +350,8 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
+                <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
                 <td class="text-center">${dropDown()}</td>
             </tr>
         `;
@@ -366,7 +379,6 @@
         // append row
         const row = productRow(cvalue);
         $('#quotation tr:last').after(row);
-
         // autocomplete on added product row
         $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
         cvalue++;
@@ -407,7 +419,8 @@
                     url: baseurl + 'products/quotesearch/' + billtype,
                     dataType: "json",
                     method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&pricing=' + $("#pricing").val(),
+                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&pricing=' 
+                        + $("#pricing").val(),
                     success: function(data) {
                         response($.map(data, function(item) {
                             return {
@@ -423,18 +436,18 @@
             minLength: 0,
             select: function(event, ui) {
                 const {data} = ui.item;
-                console.log('autodata', data);
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
-                $('#unit-'+i).val(data.unit);                
+                $('#unit-'+i).html(`<option value="${data.unit}">${data.unit}</option>`);                
                 $('#amount-'+i).val(1);
 
                 const productPrice = parseFloat(data.price.replace(',',''));
                 $('#price-'+i).val(productPrice.toFixed(2));
 
+                const tax = data.taxrate? parseFloat(data.taxrate) : 0;
+                const taxRate = (tax+100)/100;
                 // Initial values                
-                const tax = data.taxrate? parseFloat(data.taxrate) : 100;
-                const rateInclusive = (tax/100*productPrice) + productPrice;
+                const rateInclusive = taxRate * productPrice;
                 $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
                 // displayed Amount
                 $('#result-'+i).text(rateInclusive.toFixed(2));
@@ -449,14 +462,14 @@
     function qtyChange(e) {
         const id = e.target.id;
         const indx = id.split('-')[1];
-        const tax = dataTaxRate[indx]
 
-        const productQty = $('#'+id).val() || 1;
+        const productQty = $('#'+id).val();
 
         let productPrice = $('#price-'+indx).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const rateInclusive = (tax/100 * productPrice) + productPrice;
+        const taxRate = dataTaxRate[indx];
+        const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
         const rowAmount = productQty * parseFloat(rateInclusive);
@@ -468,14 +481,14 @@
     function priceChange(e) {
         const id = e.target.id;
         indx = id.split('-')[1];
-        const tax = dataTaxRate[indx];
 
-        const productQty = $('#amount-'+indx).val() || 1;
+        const productQty = $('#amount-'+indx).val();
 
         let productPrice = $('#'+id).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const rateInclusive = (tax/100 * productPrice) + productPrice;
+        const taxRate = dataTaxRate[indx];
+        const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
         const rowAmount = productQty * parseFloat(rateInclusive);
@@ -486,28 +499,23 @@
 
     // totals
     function totals() {
-        const colTotalExc = [];
-        const colTotalInc = [];
-        const colTotalQty = [];
-
+        let subTotal = 0;
+        let grandTotal = 0;
         $('#quotation tr').each(function(i) {
             if (!i) return;
             const productQty = $(this).find('td').eq(3).children().val()
             if (productQty) {
                 const productPrice = $(this).find('td').eq(4).children().val();
                 const rateInclusive = $(this).find('td').eq(5).children().val();
-                colTotalQty.push(Number(productQty));
-                colTotalExc.push(parseFloat(productPrice));
-                colTotalInc.push(parseFloat(rateInclusive));
+                // increament
+                subTotal += Number(productQty) * parseFloat(productPrice);
+                grandTotal += Number(productQty) * parseFloat(rateInclusive);
             }
         });
 
-        const subTotal = colTotalExc.reduce(function(acc, curr, indx) { return colTotalQty[indx] * curr + acc }, 0);
-        const grandTotal = colTotalInc.reduce(function(acc, curr, indx) { return colTotalQty[indx] * curr + acc }, 0);
         const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
-
+        $('#tax').val(taxTotal.toFixed(2));        
         $('#subtotal').val(subTotal.toFixed(2));
-        $('#tax').val(taxTotal.toFixed(2));
         $('#total').val(grandTotal.toFixed(2));
     }
 </script>

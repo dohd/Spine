@@ -36,6 +36,8 @@ use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Http\Requests\Focus\quote\DeleteQuoteRequest;
+use App\Models\bank\Bank;
+use App\Models\lead\Lead;
 
 /**
  * QuotesController
@@ -174,34 +176,14 @@ class QuotesController extends Controller
     {
         error_log('===  Update Quote ===');
         //Input received from the request
-        $input = array();
-        $input['quote'] = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
-        $input['quote_items'] = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
+        $data = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $item_titles = $request->only(['title_numbering', 'product_title']);
+        $data['id'] = $quote->id;
 
-        error_log(print_r($input, 1));
+        $result = $this->repository->update(compact('data', 'data_items', 'item_titles'));
 
         return new EditResponse($quote);
-
-        // $result = $quote;
-        // echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.updated') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
-
-        return;
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock', 'proposal']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
-        //dd($request->id);
-        $invoice['ins'] = auth()->user()->ins;
-        //$invoice['user_id']=auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-
-
-        $result = $this->repository->update($quote, compact('invoice', 'invoice_items', 'data2'));
-
-        //return with successfull message
-
     }
 
     /**
@@ -221,22 +203,126 @@ class QuotesController extends Controller
 
 
     /**
-     * Remove the specified resource from storage.
+     * Show the form for viewing the specified resource.
      *
      * @param DeleteQuoteRequestNamespace $request
      * @param App\Models\quote\Quote $quote
-     * @return \App\Http\Responses\RedirectResponse
+     * @return \App\Http\Responses\ViewResponse ViewResponse
      */
     public function show(Quote $quote, ManageQuoteRequest $request)
     {
-        //  dd($quote);
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
 
-        //returning with successfull message
         $quote['bill_type'] = 4;
-        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features'));
+
+        $valid_token = token_validator('','q' . $quote['id'].$quote['tid'],true);
+        $link=route( 'biller.print_bill',[$quote['id'],4,$valid_token,1]);
+        $link_download=route('biller.print_bill',[$quote['id'],4,$valid_token,2]);
+        $link_preview=route('biller.view_bill',[$quote['id'],4,$valid_token,0]);
+
+        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'valid_token', 'link', 'link_download', 'link_preview'));
     }
+
+    /**
+     * Show the form for creating a Proformer Invoice.
+     *
+     * @param CreateQuoteRequestNamespace $request
+     * @return \App\Http\Responses\Focus\quote\CreateResponse
+     */
+    public function create_pi(CreateQuoteRequest $request)
+    {
+        $last_quote = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
+        $leads = Lead::all();
+        $banks = Bank::all();
+
+        return view('focus.quotes.create_pi')
+            ->with(compact('last_quote','leads','banks'))
+            ->with(bill_helper(2, 4));
+    }
+
+    /**
+     * Store a newly created Proformer invoice in storage.
+     *
+     * @param StoreInvoiceRequestNamespace $request
+     * @return \App\Http\Responses\RedirectResponse
+     */
+    public function store_pi(CreateQuoteRequest $request)
+    {
+        print_log('=== Store PI ===');
+
+        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $item_titles = $request->only(['title_numbering', 'product_title']);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        print_log(compact('data', 'data_items', 'item_titles'));
+
+        $this->repository->create_pi(compact('data', 'data_items', 'item_titles'));
+
+        print_log('=== PI created successfully ===');
+
+        return redirect(route('biller.quotes.index'));
+    }
+
+    /**
+     * Update Proformer Invoice resource in storage.
+     *
+     * @param App\Http\Requests\Focus\quote\EditQuoteRequest $request
+     * @param App\Models\quote\Quote $quote
+     * @return \App\Http\Responses\RedirectResponse
+     */
+    public function update_pi(EditQuoteRequest $request, Quote $quote)
+    {
+        print_log('=== Update PI ===');
+
+        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $item_titles = $request->only(['title_numbering', 'product_title']);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        print_log(compact('data', 'data_items', 'item_titles'));
+
+        $this->repository->update_pi(compact('data', 'data_items', 'item_titles'));
+
+        print_log('=== PI created successfully ===');
+
+        return redirect(route('biller.quotes.index'));
+    }
+
+    /**
+     * Copy the resource in storage.
+     *
+     * @param App\Http\Requests\Focus\quote\EditQuoteRequest $request
+     * @param App\Models\quote\Quote $quote
+     * @return \App\Http\Responses\RedirectResponse
+     */
+    public function copy($id)
+    {
+        $quote = Quote::find($id);
+        print_log('=== Copy Quote ===', $quote);
+        // $leads = $quote->lead->get();
+        $leads = Lead::all();
+        $last_quote = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
+
+        // edit proformer invoice
+        if ($quote->bank_id ) {
+            $banks = Bank::all();
+            return view('focus.quotes.edit_pi')
+                ->with(compact('quote', 'leads', 'banks', 'last_quote'))
+                ->with(bill_helper(2, 4));
+        }
+
+        return view('focus.quotes.edit')
+            ->with(compact('quote', 'leads', 'last_quote'))
+            ->with(bill_helper(2, 4));
+    }
+
+
 
 
 

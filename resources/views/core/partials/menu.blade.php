@@ -261,9 +261,13 @@
                             <li><a class="dropdown-item" href="{{ route( 'biller.quotes.create' ) }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}
                                 </a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ route( 'biller.quotes.create_pi' ) }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endauth
+                    
                     @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Management</a>
                         <ul class="dropdown-menu">

@@ -321,6 +321,7 @@
                                     <div class="col-12">{!! $fields !!}</div>
                                 </div>
                             </div>
+                            {{-- **Inputs causing unknown errors
                             <input type="hidden" value="new_i" id="inv_page">
                             <input type="hidden" value="{{route('biller.quotes.store')}}" id="action-url">
                             <input type="hidden" value="search" id="billtype">
@@ -336,6 +337,7 @@
                             @endif
                             <input type="hidden" value="0" name="ship_tax" id="ship_tax">
                             <input type="hidden" value="0" id="custom_discount">
+                            --}}
                         </form>
                     </div>
                 </div>
