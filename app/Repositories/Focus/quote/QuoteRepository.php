@@ -325,7 +325,8 @@ class QuoteRepository extends BaseRepository
         );
 
         // bulk update quote items
-        if ($result && $items_count) {
+        if ($result) {
+            if (!$items_count) throw new GeneralException('Error Creating PI at least one product required');
             QuoteItem::insert($quote_items);
             DB::commit();
             return $result;
