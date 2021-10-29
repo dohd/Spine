@@ -107,22 +107,23 @@ class QuotesController extends Controller
      */
     public function store(CreateQuoteRequest $request)
     {
-        //Input received from the request
+        // filter request input fields
         $invoice = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $invoice_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
 
-        //$input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
         $data2 = $request->only(['custom_field']);
+
         $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
         $invoice['ins'] = auth()->user()->ins;
         $invoice['user_id'] = auth()->user()->id;
         $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
-        //return with successfull message
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.quotes.created') . ' <a href="' . route('biller.quotes.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
+
+        return new RedirectResponse(
+            route('biller.quotes.index', [$result['id']]), 
+            ['flash_success' => $this->flash_msg('Quote generated', $result['id'])]
+        );
     }
 
 
@@ -174,16 +175,20 @@ class QuotesController extends Controller
      */
     public function update(EditQuoteRequest $request, Quote $quote)
     {
-        error_log('===  Update Quote ===');
-        //Input received from the request
+        //filter request input fields
         $data = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $item_titles = $request->only(['title_numbering', 'product_title']);
+        $item_titles = $request->only(['title_numbering', 'product_title', 'custom_field_id']);
+
         $data['id'] = $quote->id;
+        $data['ins'] = auth()->user()->ins;
 
         $result = $this->repository->update(compact('data', 'data_items', 'item_titles'));
 
-        return new EditResponse($quote);
+        return new RedirectResponse(
+            route('biller.quotes.index', [$quote->id]), 
+            ['flash_success' => $this->flash_msg('Quote updated', $quote->id)]
+        );
     }
 
     /**
@@ -216,10 +221,10 @@ class QuotesController extends Controller
 
         $quote['bill_type'] = 4;
 
-        $valid_token = token_validator('','q' . $quote['id'].$quote['tid'],true);
-        $link=route( 'biller.print_bill',[$quote['id'],4,$valid_token,1]);
-        $link_download=route('biller.print_bill',[$quote['id'],4,$valid_token,2]);
-        $link_preview=route('biller.view_bill',[$quote['id'],4,$valid_token,0]);
+        $valid_token = token_validator('', 'q' . $quote['id'].$quote['tid'], true);
+        $link=route( 'biller.print_bill', [$quote['id'], 4, $valid_token, 1]);
+        $link_download=route('biller.print_bill', [$quote['id'], 4, $valid_token, 2]);
+        $link_preview=route('biller.view_bill', [$quote['id'], 4, $valid_token, 0]);
 
         return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'valid_token', 'link', 'link_download', 'link_preview'));
     }
@@ -249,22 +254,20 @@ class QuotesController extends Controller
      */
     public function store_pi(CreateQuoteRequest $request)
     {
-        print_log('=== Store PI ===');
-
+        // filter request input fields
         $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $item_titles = $request->only(['title_numbering', 'product_title']);
+        $item_titles = $request->only(['title_numbering', 'product_title', 'custom_field_id']);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
 
-        print_log(compact('data', 'data_items', 'item_titles'));
+        $result = $this->repository->create_pi(compact('data', 'data_items', 'item_titles'));
 
-        $this->repository->create_pi(compact('data', 'data_items', 'item_titles'));
-
-        print_log('=== PI created successfully ===');
-
-        return redirect(route('biller.quotes.index'));
+        return new RedirectResponse(
+            route('biller.quotes.index', [$result['id']]), 
+            ['flash_success' => $this->flash_msg('Proformer Invoice generated', $result['id'])]
+        );
     }
 
     /**
@@ -276,26 +279,36 @@ class QuotesController extends Controller
      */
     public function update_pi(EditQuoteRequest $request, Quote $quote)
     {
-        print_log('=== Update PI ===');
-
         $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $item_titles = $request->only(['title_numbering', 'product_title']);
+        $item_titles = $request->only(['title_numbering', 'product_title', 'custom_field_id']);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
 
-        print_log(compact('data', 'data_items', 'item_titles'));
-
         $this->repository->update_pi(compact('data', 'data_items', 'item_titles'));
 
-        print_log('=== PI created successfully ===');
+        return new RedirectResponse(
+            route('biller.quotes.index', [$quote->id]), 
+            ['flash_success' => $this->flash_msg('Proformer Invoice updated', $quote->id)]
+        );
+    }
 
-        return redirect(route('biller.quotes.index'));
+    // default flash message format
+    protected function flash_msg($message, $id)
+    {
+        return $message 
+            . ' <a href="' . route('biller.quotes.index', [$id]) 
+            . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
+            . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.quotes.create') 
+            . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
+            . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.quotes.index') 
+            . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
+            . trans('general.list') . '</span> </a>';
     }
 
     /**
-     * Copy the resource in storage.
+     * Show the form for Copying the resource in storage.
      *
      * @param App\Http\Requests\Focus\quote\EditQuoteRequest $request
      * @param App\Models\quote\Quote $quote
@@ -304,8 +317,6 @@ class QuotesController extends Controller
     public function copy($id)
     {
         $quote = Quote::find($id);
-        print_log('=== Copy Quote ===', $quote);
-        // $leads = $quote->lead->get();
         $leads = Lead::all();
         $last_quote = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
 
@@ -313,7 +324,7 @@ class QuotesController extends Controller
         if ($quote->bank_id ) {
             $banks = Bank::all();
             return view('focus.quotes.edit_pi')
-                ->with(compact('quote', 'leads', 'banks', 'last_quote'))
+                ->with(compact('quote', 'leads', 'last_quote', 'banks'))
                 ->with(bill_helper(2, 4));
         }
 
@@ -321,10 +332,6 @@ class QuotesController extends Controller
             ->with(compact('quote', 'leads', 'last_quote'))
             ->with(bill_helper(2, 4));
     }
-
-
-
-
 
 
     public function convert(InvoiceRepository $invoicerepository, ManageInvoiceRequest $request)
