@@ -2,18 +2,14 @@
     <div class="card-body">
         <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" role="tab"
-                   aria-selected="true">{{trans('customers.billing_address')}}</a>
+                <a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1" role="tab" aria-selected="true">{{trans('customers.billing_address')}}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" role="tab"
-                   aria-selected="false">{{trans('customers.shipping_address')}}</a>
+                <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" role="tab" aria-selected="false">{{trans('customers.shipping_address')}}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" role="tab"
-                   aria-selected="false">{{trans('general.other')}}</a>
+                <a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" role="tab" aria-selected="false">{{trans('general.other')}}</a>
             </li>
-
         </ul>
         <div class="tab-content px-1">
             <div class="tab-pane active" id="tab1" role="tabpanel" aria-labelledby="base-tab1">
@@ -35,7 +31,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-sm-6">
                         <div class='form-group'>
@@ -54,8 +49,6 @@
                         </div>
                     </div>
                 </div>
-
-
                 <div class='form-group'>
                     {{ Form::label( 'address', trans('customers.address'),['class' => 'col-lg-6 control-label']) }}
                     <div class='col-lg-12'>
@@ -80,7 +73,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-sm-6">
                         <div class='form-group'>
@@ -99,24 +91,22 @@
                         </div>
                     </div>
                 </div>
-
-
                 <div class="row">
                     <div class="col-sm-6">
-
                         <div class="form-group">
                             {{ Form::label( 'gid', trans('customers.gid'),['class' => 'col-lg-6 control-label']) }}
                             <div class='col-lg-12'>
-                                <select class="form-control select-box col-12" name="groups[]" id="groups"
-                                        multiple="multiple" data-placeholder="{{trans('customers.gid')}}">
-                                    @if(@$current_groups) @foreach($current_groups as $group)
-                                        <option value="{{$group->group_data->id}}"
-                                                selected>{{$group->group_data->title}}</option>
-                                    @endforeach
+                                <select class="form-control select-box col-12" name="groups[]" id="groups" multiple="multiple" data-placeholder="{{trans('customers.gid')}}">
+                                    @if (@$current_groups) 
+                                        @foreach($current_groups as $group)
+                                            <option value="{{$group->group_data->id}}" selected>{{$group->group_data->title}}</option>
+                                        @endforeach
                                     @endif
-                                    @foreach($customergroups as $item)
-                                        <option value="{{$item->id}}">{{$item->title}}</option>
-                                    @endforeach
+                                    @if (@$customergroups_groups) 
+                                        @foreach ($customergroups as $item)
+                                            <option value="{{$item->id}}">{{$item->title}}</option>
+                                        @endforeach
+                                    @endif
                                 </select>
                             </div>
                         </div>
@@ -128,13 +118,8 @@
                                 {{ Form::text('taxid', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.taxid')]) }}
                             </div>
                         </div>
-
                     </div>
-
-
                 </div>
-
-
             </div>
             <div class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="base-tab2">
                 <div class="row">
@@ -155,7 +140,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-sm-6">
                         <div class='form-group'>
@@ -174,7 +158,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-sm-6">
                         <div class='form-group'>
@@ -213,7 +196,7 @@
                 </div>
             </div>
             <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
-                {!! $fields !!}
+                {!! @$fields !!}
                 <div class='form-group'>
                     {{ Form::label( 'docid', trans('customers.docid'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
@@ -226,45 +209,36 @@
                         {{ Form::text('custom1', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.custom1')]) }}
                     </div>
                 </div>
-
                 <div class='form-group hide_picture'>
                     {{ Form::label( 'picture', trans('customers.picture'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-6'>
                         {!! Form::file('picture', array('class'=>'input' )) !!}
                     </div>
                 </div>
-
                 <div class='form-group'>
                     {{ Form::label( 'password', trans('customers.password'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
                         {{ Form::text('password', '', ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
-
 @section("after-scripts")
-    {{ Html::script('focus/js/select2.min.js') }}
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#groups").select2();
+{{ Html::script('focus/js/select2.min.js') }}
 
-            $("#groups").on("select2:select", function (evt) {
-                var element = evt.params.data.element;
-                var $element = $(element);
-                $element.detach();
-                $(this).append($element);
-
-                $(this).trigger("change");
-            });
-
-
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#groups").select2();
+        $("#groups").on("select2:select", function(evt) {
+            var element = evt.params.data.element;
+            var $element = $(element);
+            $element.detach();
+            $(this).append($element);
+            $(this).trigger("change");
         });
-
-
-    </script>
+    });
+</script>
 @endsection
