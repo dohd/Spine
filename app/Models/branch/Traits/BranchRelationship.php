@@ -2,9 +2,11 @@
 
 namespace App\Models\branch\Traits;
 
+use App\Models\branch\CustomerBranch;
 use App\Models\customer\Customer;
 //use App\Models\branch\ProductVariation;
 use DB;
+
 /**
  * Class ProductcategoryRelationship
  */
@@ -12,16 +14,21 @@ trait BranchRelationship
 {
     public function branches()
     {
-        return $this->hasMany(Self::class,'rel_id','id');
+        return $this->hasMany(Self::class, 'rel_id', 'id');
     }
 
-public function customer()
+    public function customer()
     {
-        return $this->hasOne(Customer::class,'id','rel_id');
+        return $this->hasOne(Customer::class, 'id', 'rel_id');
     }
 
     /* public function products()
     {
         return $this->hasManyThrough(ProductVariation::class,Product::class)->select([DB::raw('qty*price as total_value'),'qty']);
     }*/
+
+    public function customers()
+    {
+        return $this->belongsToMany(Customer::class, 'customer_branches', 'branch_id', 'customer_id');
+    }
 }
