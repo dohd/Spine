@@ -27,7 +27,7 @@ use App\Http\Responses\Focus\branch\EditResponse;
 use App\Repositories\Focus\branch\BranchRepository;
 use App\Http\Requests\Focus\branch\ManageBranchRequest;
 use App\Http\Requests\Focus\branch\StoreBranchRequest;
-
+use App\Models\customer\Customer;
 
 /**
  * ProductcategoriesController
@@ -122,7 +122,7 @@ class BranchesController extends Controller
      public function branch_load(Request $request)
     {
         $id = $request->get('id');
-        $result = Branch::where('rel_id', '=', $id)->get(['id', 'name']);
+        $result = Customer::find($id)->branches;
         return json_encode($result);
     }
 
