@@ -44,21 +44,23 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required="required">
-                                                <option>-- Select Lead --</option>
-                                                    @foreach ($leads as $lead)
-                                                        @php
-                                                            if ($lead->client_status == "customer") {
-                                                                $name = $lead->customer->company.' '. $lead->branch->name;
-                                                            } else {
-                                                                $name = $lead->client_name;
-                                                            }
-                                                        @endphp
-                                                        <option value="{{ $lead->id }}">{{$lead->reference}} - {{$name}} - {{$lead->title}}</option>
-                                                    @endforeach
-                                                </select>
-                                                <input type="hidden" name="client_id" id="client_id" value="{{ $djc->client_id }}">
-                                                <input type="hidden" name="branch_id" id="branch_id" value="{{ $djc->branch_id }}">
+                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" onchange="onSelectChange(event);" required="required">
+                                                    <option>-- Select Lead --</option>
+                                                        @foreach ($leads as $lead)
+                                                            @php
+                                                                if ($lead->client_status == "customer") {
+                                                                    $name = $lead->customer->company.' '. $lead->branch->name;
+                                                                } else {
+                                                                    $name = $lead->client_name;
+                                                                }
+                                                            @endphp
+                                                            <option value="{{ $lead->id }}">
+                                                                {{$lead->reference}} - {{$name}} - {{$lead->title}}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>                                                
+                                                <input type="hidden" name="client_id" id="client_id">
+                                                <input type="hidden" name="branch_id" id="branch_id">                                                
                                             </div>
                                         </div>
                                     </div>
@@ -244,20 +246,25 @@
         </div>
     </div>
 </div>
-
-@include("focus.modal.customer")
 @endsection
-@section('extra-scripts')
-@inclue("focus.djcs.edit")
 
+@section('extra-scripts')
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
+ 
 <script type="text/javascript">
-    $('#edit-djc').submit(function(e) {
-        // e.preventDefault();
-        // console.log('serialized => ', $(this).serializeArray());
-    });
+    // assign client_id and branch_id inputs
+    // on select change
+    const leads = @json($leads);
+    function onSelectChange(e) {
+        const leadId = Number(e.target.value);
+        leads.forEach(v => {
+            if (v.id === leadId) {
+                $('#client_id').val(v.client_id);
+                $('#branch_id').val(v.branch_id);
+            }
+        });
+    }
 
     // initialize html editor
     editor();
