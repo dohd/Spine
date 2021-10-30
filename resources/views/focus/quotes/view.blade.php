@@ -9,8 +9,6 @@
 </h1>
 @endsection
 
-
-
 @section('content')
 <div class="app-content m-1">
     <div class="content-wrapper">
@@ -30,67 +28,13 @@
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-body">
-                    <div class="row">
-                        @if($quote['status']!='canceled')
-                            <div class="col">
-                                <a href="{{$quote['id']}}/edit" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> {{trans('labels.backend.quotes.edit')}}</a>
-                                <a href="{{$quote['id']}}/copy" class="btn btn-large btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i> Copy </a>
-                                
-                                @php
-                                    $qt_link=route('biller.quotes.verify',[$quote->id ]);
-                                @endphp
-                                <div class="btn-group ">
-                                    <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-repeat"></i> Verify & Download
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{$qt_link}}">Verify</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="{{$link_download}}">{{trans('general.pdf')}}</a>
-                                    </div>
-                                </div>                                
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-facebook dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span class="fa fa-envelope-o"></span> {{trans('customers.email')}}
-                                    </button>
-                                    <div class="dropdown-menu"><a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="6" data-type1="proposal">{{trans('general.quote_proposal')}}</a>
-                                    </div>
-                                </div>
-                                <!-- SMS -->
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-blue dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span class="fa fa-mobile"></span> {{trans('general.sms')}}
-                                    </button>
-                                    <div class="dropdown-menu"><a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="16" data-type1="proposal">{{trans('general.quote_proposal')}}</a>
-                                    </div>
-                                </div>
-                                @php
-                                    $valid_token = token_validator('', 'q' . $quote['id'].$quote['tid'], true);
-                                    $link=route( 'biller.print_bill', [$quote['id'], 4, $valid_token, 1]);
-                                    $link_download=route('biller.print_bill', [$quote['id'], 4, $valid_token, 2]);
-                                    $link_preview=route('biller.view_bill', [$quote['id'], 4, $valid_token, 0]);
-                                @endphp
-                                <div class="btn-group ">
-                                    <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i> {{trans('general.print')}}
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{$link}}">{{trans('general.print')}}</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="{{$link_download}}">{{trans('general.pdf')}}</a>
-                                    </div>
-                                </div>
-                                <a href="{{$link_preview}}" class="btn btn-blue-grey mb-1"><i class="fa fa-globe"></i> {{trans('general.preview')}}
-                                </a>
-                                <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="btn btn-large btn-danger mb-1" title="Change Status"><span class="fa fa-check"></span> {{trans('general.change_status')}}</a>
-                                <a href="#pop_model_4" data-toggle="modal" data-remote="false" class="btn btn-large btn-cyan mb-1" title="Add LPO"><span class="fa fa-retweet"></span> Add LPO</a>
-                            </div>
-                        @else
-                            <div class="badge text-center white d-block m-1"><span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('payments.'.$quote['status'])}}&nbsp;&nbsp;</span>
-                            </div>
-                        @endif
-                    </div>
-                    @if($quote['verified']=="Yes")
-                    <div class="badge text-center white d-block m-1"><span class="bg-danger round p-1">&nbsp;&nbsp;This Quote/PI has been verified&nbsp;&nbsp;</span>
-                    </div>
+                    @include('focus.quotes.partials.view_menu')
+                    @if ($quote['verified'] == "Yes")
+                        <div class="badge text-center white d-block m-1">
+                            <span class="bg-danger round p-1">
+                                &nbsp;&nbsp;This Quote/PI has been verified&nbsp;&nbsp;
+                            </span>
+                        </div>
                     @endif
                     <!-- Invoice Company Details -->
                     <div id="invoice-company-details" class="row">
@@ -121,33 +65,33 @@
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-left">
                             @php
-                                if (isset($quote->lead_id)) {
-                                    if($quote->lead->client_status=='customer'){
-                                    $customername=$quote->client->name ;
-                                    $branchname=$quote->branch->name ;
-                                    $adrress=$quote->client->address;
-                                    $email=$quote->client->email ;
-                                    $cell=$quote->client->phone;
+                                if ($quote->lead_id) {
+                                    if($quote->lead->client_status == 'customer') {
+                                        $customername = $quote->client->name ;
+                                        $branchname = $quote->branch->name ;
+                                        $adrress = $quote->client->address;
+                                        $email = @$quote->client->email ;
+                                        $cell = $quote->client->phone;
                                     } else {
-                                        $customername=$quote->lead->client_name;
-                                        $branchname="";
-                                        $adrress="";
-                                        $email=$quote->lead->client_email;
-                                        $cell=$quote->lead->client_contact; 
-                                    }                              
+                                        $customername = $quote->lead->client_name;
+                                        $branchname = "";
+                                        $adrress = "";
+                                        $email = $quote->lead->client_email;
+                                        $cell = $quote->lead->client_contact; 
+                                    }
                                 } else {
-                                    if (isset($quote->customer_id)) {
-                                        $customername=$quote->customer->name ;
-                                        $branchname=$quote->customer_branch->name ;
-                                        $adrress=$quote->customer->address;
-                                        $email=$quote->customer->email ;
-                                        $cell=$quote->customer->phone;
+                                    if ($quote->customer_id) {
+                                        $customername = $quote->customer->name ;
+                                        $branchname = $quote->customer_branch->name ;
+                                        $adrress = $quote->customer->address;
+                                        $email = @$quote->customer->email ;
+                                        $cell = $quote->customer->phone;
                                     } else {
-                                        $customername=$quote->client_name;
-                                        $branchname="";
-                                        $adrress="";
-                                        $email=$quote->client_email;
-                                        $cell=$quote->client_contact;
+                                        $customername = $quote->client_name;
+                                        $branchname = "";
+                                        $adrress = "";
+                                        $email = $quote->client_email;
+                                        $cell = $quote->client_contact;
                                     }
                                 }
                             @endphp
@@ -157,7 +101,9 @@
                                 <li>{{$adrress}},</li>
                                 <li>{{$email}},</li>
                                 <li>{{$cell}},</li>
-                                {!! custom_fields_view(1,$quote->customer->id, false) !!}
+                                @if ($quote->customer)
+                                    {!! custom_fields_view(1, $quote->customer->id, false) !!}
+                                @endif
                             </ul>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
@@ -248,7 +194,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($quote->products as $product)
+                                        @foreach ($quote->products as $product)
                                         <tr>
                                             <th scope="row">{{ $loop->iteration }}</th>
                                             <td>
@@ -272,7 +218,7 @@
                                         @endforeach
                                     </tbody>
                                     @endif
-                                    @if($quote['tax_format']=='igst')
+                                    @if ($quote['tax_format'] == 'igst')
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -424,28 +370,15 @@
         </div>
     </div>
 </div>
-@php $invoice=$quote; @endphp
 
-@include('focus.modal.email_model',array('category'=>4))
-@include('focus.modal.sms_model',array('category'=>4))
-@include("focus.modal.quote_status_model")
-@include("focus.modal.cancel_model")
-pop_lop_1
-@include("focus.modal.convert_model")
-@include("focus.modal.lpo_model")
-@endsection
-@section('extra-style')
-
-@endsection
 @section('extra-scripts')
 {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
-
 <script type="text/javascript">
     $('[data-toggle="datepicker"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', "{{ date(config('core.user_date_format')) }}");
+        .datepicker('setDate', new Date());
 
     $(function() {
         $('.summernote').summernote({
@@ -471,27 +404,27 @@ pop_lop_1
             // Change this to the location of your server-side upload handler:
             var url = "{{route('biller.bill_attachment')}}";
             $('#fileupload').fileupload({
-                    url: url,
-                    dataType: 'json',
-                    formData: {
-                        _token: "{{ csrf_token() }}",
-                        id: "{{$quote['id ']}}",
-                        'bill': 4
-                    },
-                    done: function(e, data) {
-                        $.each(data.result, function(index, file) {
-                            $('#files').append('<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
-                        });
-                    },
-                    progressall: function(e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
-                    }
-                }).prop('disabled', !$.support.fileInput)
-                .parent().addClass($.support.fileInput ? undefined : 'disabled');
+                url: url,
+                dataType: 'json',
+                formData: {
+                    _token: "{{ csrf_token() }}",
+                    id: "{{$quote['id ']}}",
+                    'bill': 4
+                },
+                done: function(e, data) {
+                    $.each(data.result, function(index, file) {
+                        $('#files').append('<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
+                    });
+                },
+                progressall: function(e, data) {
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $('#progress .progress-bar').css(
+                        'width',
+                        progress + '%'
+                    );
+                }
+            }).prop('disabled', !$.support.fileInput)
+            .parent().addClass($.support.fileInput ? undefined : 'disabled');
         });
 
         $(document).on('click', ".aj_delete", function(e) {
@@ -515,5 +448,4 @@ pop_lop_1
         });
     });
 </script>
-
 @endsection
