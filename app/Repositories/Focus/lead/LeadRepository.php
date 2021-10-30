@@ -29,14 +29,14 @@ class LeadRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        
-       $q=$this->query();
-      // $q->when(!request('rel_type'), function ($q) {
-           // return $q->where('c_type', '=',request('rel_type',0));
+
+        $q = $this->query();
+        // $q->when(!request('rel_type'), function ($q) {
+        // return $q->where('c_type', '=',request('rel_type',0));
         //});
-       //$q->when(request('rel_type'), function ($q) {
-           // return $q->where('rel_id', '=',request('rel_id',0));
-       // });
+        //$q->when(request('rel_type'), function ($q) {
+        // return $q->where('rel_id', '=',request('rel_id',0));
+        // });
 
         return $q->get();
     }
@@ -50,33 +50,13 @@ class LeadRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-         //$employees = @$input['employees'];
-       // unset($input['employees']);
         $input['date_of_request'] = date_for_database($input['date_of_request']);
-       
-      
-       $result = Lead::create($input);
 
-        if ($result) {
-            
-            $message = array('title' =>'Leads  - ' . $result->title, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['note']);
+        $result = Lead::create($input);
 
-            if ($input['employee_id']) {
-                $users = User::where('id', $input['employee_id'])->get();
-                \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
-            } else {
-                $notification = new Rose(auth()->user(), $message);
-                auth()->user()->notify($notification);
-            }
-            return $result;
-        }
+        if ($result) return $result;
 
         throw new GeneralException('Error Creating Lead');
-
-
-
-
     }
 
     /**
@@ -89,8 +69,8 @@ class LeadRepository extends BaseRepository
      */
     public function update(Lead $lead, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($lead->update($input))
+        $input = array_map('strip_tags', $input);
+        if ($lead->update($input))
             return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
