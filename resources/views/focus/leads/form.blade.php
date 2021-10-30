@@ -12,7 +12,6 @@
         <div class='col-md-12'>
             <div class='col m-1'>
                 {{ Form::label( 'method', trans('transactions.payer_type'),['class' => 'col-12 control-label']) }} 
-
                 <div class="d-inline-block custom-control custom-checkbox mr-1">                    
                     <input type="radio" class="custom-control-input bg-primary" name="client_status" id="colorCheck1" value="customer" checked="">
                     <label class="custom-control-label" for="colorCheck1">Existing</label>
@@ -77,7 +76,7 @@
                     <div class="col-sm-6"><label for="reference" class="caption">Lead ID*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                            {{ Form::number('reference', $reference, ['class' => 'form-control round', 'placeholder' => 'Lead ID', 'id' => 'reference']) }}
+                            {{ Form::number('reference', @$lead->reference+1, ['class' => 'form-control round', 'placeholder' => 'Lead ID', 'id' => 'reference']) }}
                         </div>
                     </div>
 
@@ -135,23 +134,10 @@
                         <div class="col-sm-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                             <div class="input-group">
                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                {{ Form::number('client_ref', $client_ref, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref']) }}
+                                {{ Form::number('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref']) }}
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group row status-group">                    
-                        <div class="col-sm-12"><label for="refer_no" class="caption">Status</label>
-                            <div class="input-group">
-                                <div class="form-check">
-                                    <input type="hidden" name="status" value="{{ $lead->status }}" id="status">
-                                    <input class="form-check-input" type="checkbox" id="statusCheckbox">
-                                    <label class="form-check-label" for="status">Open</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -162,9 +148,6 @@
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 
 <script type="text/javascript">
-    /** 
-     * Create Lead Form Inputs Script
-    */
 
     // on selecting a payer type
     $("input[name=client_status]").on('change', function () {
@@ -206,6 +189,49 @@
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
+    // remove visibility for status checkbox
+    $('.status-group').css('display', 'none');
+
+
+    /**
+     * Edit Lead form script
+     */
+    const lead = @json(@$lead);
+    const branch = @json(@$lead->branch);
+    const customer = @json(@$lead->customer);
+    // if branch_id is 0 then its a new customer otherwise an existing customer
+    if (lead && lead.hasOwnProperty('branch_id')) {
+        if (lead['branch_id'] === 0) {
+            $('#colorCheck1').prop('checked', false);
+            $('#colorCheck3').prop('checked', true);
+
+            $('#person').prop('disabled', true);
+            $('#branch_id').prop('disabled', true).select2();
+
+            $('#payer-name').prop('readonly', false);
+            $('#client_email').prop('readonly', false);
+            $('#client_contact').prop('readonly', false);
+        } else {
+            $('#colorCheck1').prop('checked', true);
+            $('#colorCheck3').prop('checked', false);
+    
+            $('#payer-name').prop('readonly',true);
+            $('#client_email').prop('readonly',true);
+            $('#client_contact').prop('readonly',true);
+
+            // set default select option for customer and branch
+            $('#person').select2({data: [{id: customer['id'], text: customer['name']}]});
+            $('#branch_id').select2({data: [{id: branch['id'], text: branch['name']}]});
+        } 
+        $('input[type=radio]').prop('disabled', true);
+        $('#reference').val(lead['reference']);
+        $('#ref_type').val(lead['source']);
+
+        // parse date using php date function
+        const date = "{{ date_for_database(@$lead->date_of_request) }}";
+        $('[data-toggle="datepicker"]').datepicker('setDate', new Date(date));
+    }
+
     // fetch customers
     $("#person").select2({
         tags: [],
@@ -220,9 +246,9 @@
             processResults: function (data) {
                 return {
                     results: $.map(data, function (item) {
-                        return {
-                            text: item.name+' - '+item.company,
-                            id: item.id
+                        return { 
+                            id: item.id, 
+                            text: `${item.name} - ${item.company}`,                            
                         }
                     })
                 };
@@ -256,74 +282,5 @@
             }
         });
     });
-
-    // remove visibility for status checkbox
-    $('.status-group').css('display', 'none');
-
-    /** 
-     * Edit Lead Form Inputs Script
-     * 
-     * @var lead object
-     * @var branch object
-     * @var customer object
-    */
-
-    const lead = @json($lead);
-    const branch = @json($lead->branch);
-    const customer = @json($lead->customer);
-
-    // if branch_id is 0 then its a new customer otherwise an existing customer
-    if (lead && lead.hasOwnProperty('branch_id')) {
-        if (lead['branch_id'] === 0) {
-            $('#colorCheck1').prop('checked', false);
-            $('#colorCheck3').prop('checked', true);
-
-            $('#person').prop('disabled', true);
-            $('#branch_id').prop('disabled', true).select2();
-
-            $('#payer-name').prop('readonly', false);
-            $('#client_email').prop('readonly', false);
-            $('#client_contact').prop('readonly', false);
-        } else {
-            $('#colorCheck1').prop('checked', true);
-            $('#colorCheck3').prop('checked', false);
-    
-            $('#payer-name').prop('readonly',true);
-            $('#client_email').prop('readonly',true);
-            $('#client_contact').prop('readonly',true);
-
-            // set default select option for customer and branch
-            $('#person').select2({data: [{id: customer['id'], text: customer['name']}]});
-            $('#branch_id').select2({data: [{id: branch['id'], text: branch['name']}]});
-        } 
-        $('input[type=radio]').prop('disabled', true);
-        $('#person').prop('disabled', true);
-        $('#branch_id').prop('disabled', true);
-        $('#reference').val(lead['reference']);
-        $('#ref_type').val(lead['source']);
-
-        // parse date using php date function
-        const date = "{{ date_for_database($lead->date_of_request) }}";
-        // set datepicker with parsed date
-        $('[data-toggle="datepicker"]').datepicker('setDate', new Date(date));
-
-        // set status checkbox to be visible
-        $('.status-group').css('display', 'block');
-        // if lead status is 1 then, display text Closed
-        if (lead['status']) {
-            $('#statusCheckbox').prop('checked', true);
-            $('label[for=status]').text('Closed');
-        }
-        // change status value when checkbox is clicked
-        $('input[type=checkbox]').change(function() {
-            if ($(this).is(':checked')) { 
-                $('label[for=status]').text('Closed');
-                $('#status').val(1);
-            } else {
-                $('label[for=status]').text('Open');
-                $('#status').val(0);
-            }
-        });
-    }
 </script>
 @endsection
