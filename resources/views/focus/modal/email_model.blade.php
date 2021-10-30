@@ -14,12 +14,12 @@
                         <div class="col">
                             <div class="input-group">
                                 <div class="input-group-addon"><span class="fa fa-envelope-o" aria-hidden="true"></span></div>
-                                <input type="text" class="form-control" placeholder="Email" name="mail_to" value="{{$invoice->customer->email}}">
+                                <input type="text" class="form-control" placeholder="Email" name="mail_to" value="{{@$invoice->customer->email}}">
                             </div>
                         </div>
                     <div class="row">
                         <div class="col mb-1"><label for="customer_name">{{trans('customers.name')}}</label>
-                            <input type="text" class="form-control" name="customer_name" value="{{$invoice->customer->name}}">
+                            <input type="text" class="form-control" name="customer_name" value="{{@$invoice->customer->name}}">
                         </div>
                     </div>
                     <div class="row">
