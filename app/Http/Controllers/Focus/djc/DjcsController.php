@@ -102,13 +102,13 @@ class DjcsController extends Controller
         $data['ins'] = auth()->user()->ins;
 
         //Create the model using repository create method
-        $id = $this->repository->create(compact('data', 'data_item'));
+        $result = $this->repository->create(compact('data', 'data_item'));
 
         return new RedirectResponse(
-            route('biller.djcs.index', [$id]), 
+            route('biller.djcs.index', [$result['id']]), 
             [
                 'flash_success' => 'Djc Report Created' 
-                . ' <a href="' . route('biller.djcs.index', [$id]) 
+                . ' <a href="' . route('biller.djcs.index', [$result['id']]) 
                 . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
                 . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.create') 
                 . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 

@@ -83,14 +83,13 @@ class DjcRepository extends BaseRepository
         DB::beginTransaction();
         $result = Djc::create($data);
 
+        // bulk insert djc items
         if ($result) {
-            // djc_item input data
             $data_items = $this->items_array($input['data_item'], $result->id, $result->ins);
-
             DjcItem::insert($data_items);
             DB::commit();
             
-            return $result->id;
+            return $result;
         }
 
         throw new GeneralException('Error Creating Djc');
