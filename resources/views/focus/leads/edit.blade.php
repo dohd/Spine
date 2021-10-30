@@ -37,8 +37,7 @@
                                             {{-- Including Form blade file --}}
                                             @include("focus.leads.form")
                                             <div class="edit-form-btn">
-                                                {{ link_to_route('biller.leads.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                                {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
+                                                {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg pull-right']) }}
                                                 <div class="clearfix"></div>
                                             </div>
                                         </div>
