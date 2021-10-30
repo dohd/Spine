@@ -137,6 +137,8 @@ Route::group(['namespace' => 'jobschedule'], function () {
 Route::group(['namespace' => 'lead'], function () {
     Route::resource('leads', 'LeadsController');
     Route::post('leads/lead_search', 'LeadsController@lead_search')->name('leads.lead_search');
+    Route::post('leads/{id}/edit_status', 'LeadsController@edit_status')->name('leads.edit_status');
+
     //For Datatable
     Route::post('leads/get', 'LeadsTableController')->name('leads.get');
 });
