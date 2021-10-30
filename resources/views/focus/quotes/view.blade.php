@@ -1,6 +1,9 @@
-@extends ('core.layouts.app')
+@extends('core.layouts.app')
+@section('title', trans('labels.backend.quotes.management') . ' | ' . trans('labels.backend.quotes.create'))
 
-@section ('title', trans('labels.backend.quotes.management') . ' | ' . trans('labels.backend.quotes.create'))
+@section('after-styles')
+{!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
+@endsection
 
 @section('page-header')
 <h1>
@@ -27,8 +30,9 @@
         
         <div class="content-body">
             <section class="card">
-                <div id="invoice-template" class="card-body">
+                <div id="invoice-template" class="card-body">                    
                     @include('focus.quotes.partials.view_menu')
+                    
                     @if ($quote['verified'] == "Yes")
                         <div class="badge text-center white d-block m-1">
                             <span class="bg-danger round p-1">
@@ -370,9 +374,18 @@
         </div>
     </div>
 </div>
+@php 
+    $invoice=$quote; 
+@endphp
+@include("focus.modal.quote_status_model")
+@include('focus.modal.email_model', array('category'=>4))
+@include('focus.modal.sms_model', array('category'=>4))
+@include("focus.modal.cancel_model")
+@include("focus.modal.convert_model")
+@include("focus.modal.lpo_model")
+@endsection
 
 @section('extra-scripts')
-{!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
 <script type="text/javascript">

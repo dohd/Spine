@@ -1,7 +1,3 @@
-@php 
-    $invoice=$quote; 
-@endphp
-
 <div class="row">
     @if ($quote['status'] != 'canceled')
         <div class="col">
@@ -67,10 +63,3 @@
         </div>
     @endif
 </div>
-
-@include("focus.modal.quote_status_model")
-@include('focus.modal.email_model', array('category'=>4))
-@include('focus.modal.sms_model', array('category'=>4))
-@include("focus.modal.cancel_model")
-@include("focus.modal.convert_model")
-@include("focus.modal.lpo_model")
