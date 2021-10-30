@@ -91,20 +91,21 @@ class LeadsController extends Controller
             'assign_to' => 'required'
 
         ]);
+        // filter request input fields
         $input = $request->except(['_token', 'ins']);
+
         $input['ins'] = auth()->user()->ins;
         $input['user_id'] = auth()->user()->id;
 
         //Create the model using repository create method
-        $id = $this->repository->create($input);
+        $result = $this->repository->create($input);
 
-        //return with successfull message
         return new RedirectResponse(
             route('biller.leads.index'),
             [
                 'flash_success' => 'Lead  Successfully Created'
                     . ' <a href="'
-                    . route('biller.leads.show', [$id])
+                    . route('biller.leads.show', $result['id'])
                     . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> '
                     . trans('general.view')
                     . '  </a> &nbsp; &nbsp;'
@@ -224,5 +225,15 @@ class LeadsController extends Controller
         $lead = Lead::where('id', $q)->first();
         if ($lead) return $lead;
         return false;
+    }
+
+    // edit lead status
+    public function edit_status(Request $request, $id)
+    {
+        $status = $request->post('status');
+
+        Lead::find($id)->update(compact('status'));
+
+        return redirect()->back();
     }
 }
