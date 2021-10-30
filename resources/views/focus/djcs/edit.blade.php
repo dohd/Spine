@@ -215,78 +215,24 @@
         </div>
     </div>
 </div>
-
-@include("focus.modal.customer")
 @endsection
-@section('extra-scripts')
 
+@section('extra-scripts')
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
 <script type="text/javascript">
-    $('#edit-djc').submit(function(e) {
-        // e.preventDefault();
-        // console.log('serialized => ', $(this).serializeArray());
-    });
-
-    // initialize date picker with php parsed date
-    const date = "{{ date_for_database($djc->report_date) }}";
-    $('[data-toggle="datepicker"]')
-        .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date(date));
-
     // initialize html editor
     editor();
 
-    // ajax setup
-    $.ajaxSetup({ 
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
-    });
+    // initialize datepicker
+    $('[data-toggle="datepicker"]')
+        .datepicker({format: "{{config('core.user_date_format')}}"})
+        .datepicker('setDate', new Date("{{ $djc->report_date }}"));
 
-    // equipment row counter;
-    var counter = 1;
-
-    // autocompleteProp returns autocomplete object properties
-    function autocompleteProp(i = 0) {
-        return {
-            source: function(request, response) {
-                const billtype = counter;
-                $.ajax({
-                    url: baseurl + 'equipments/search/' + billtype,
-                    dataType: "json",
-                    method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
-                    success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
-                                value: item.name,
-                                data: item
-                            };
-                        }));
-                    }
-                });
-            },
-            autoFocus: true,
-            minLength: 0,
-            select: function(event, ui) {
-                const {data} = ui.item;
-                $('#equipment_type-'+i).val(data.unit_type);
-                $('#make-'+i).val(data.make_type);
-                $('#capacity-'+i).val(data.capacity);
-                $('#equipment_type-'+i).val(data.unit_type);
-                $('#location-'+i).val(data.location);
-                $('#last_service_date-'+i).val(data.last_maint_date);
-                $('#next_service_date-'+i).val(data.next_maintenance_date);
-            }
-        };
-    }
-        
-    // on clicking addproduct (equipment) button
-    $('#addqproduct').on('click', function() {
-        const cvalue = counter++;
-        // product (equipment) row
-        const row = `
+    // product (equipment) row
+    function equipmentRow(cvalue) {
+        return `
             <tr>
                 <td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
@@ -310,14 +256,83 @@
                 </td>
             </tr>
         `;
-
+    }
+    
+    // equipment row counter;
+    var counter = 1;
+    // set default djc items rows
+    const djcItems = @json($djc->items);
+    djcItems.forEach(v => {
+        const i = counter;
         // add poduct row to equipment table
+        const row = equipmentRow(i);
         $('#equipment tr:last').after(row);
-
         // initialize date picker with php parsed date
         $('[data-toggle="datepicker"]')
-            .datepicker({format: "{{config('core.user_date_format')}}"})
+            .datepicker({format: "{{config('core.user_date_format')}}"});
+        // autocomplete on added product row
+        $('#tag_number-' + i).autocomplete(autocompleteProp(i));
+        // fill row input with values
+        $('#tag_number-'+i).val(v.tag_number);
+        $('#joc_card-'+i).val(v.joc_card);
+        $('#equipment_type-'+i).val(v.equipment_type);
+        $('#make-'+i).val(v.make);
+        $('#capacity-'+i).val(v.capacity);
+        $('#location-'+i).val(v.location);
+        $('#last_service_date-'+i).val(v.last_service_date);
+        $('#next_service_date-'+i).val(v.next_service_date);
+        counter++;
+    });
 
+    // ajax setup
+    $.ajaxSetup({ 
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+    });
+
+    // autocompleteProp returns autocomplete object properties
+    function autocompleteProp(i = 0) {
+        return {
+            source: function(request, response) {
+                const billtype = counter;
+                $.ajax({
+                    url: baseurl + 'equipments/search/' + billtype,
+                    dataType: "json",
+                    method: 'post',
+                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
+                    success: function(data) {
+                        response($.map(data, function(itm) {
+                            const label = `${itm.customer} ${itm.name} ${itm.make_type} ${itm.capacity} ${itm.location}`
+                            const value = itm.name;
+                            const data = itm;
+                            return { label, value, data};
+                        }));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                $('#equipment_type-'+i).val(data.unit_type);
+                $('#make-'+i).val(data.make_type);
+                $('#capacity-'+i).val(data.capacity);
+                $('#location-'+i).val(data.location);
+                $('#last_service_date-'+i).val(data.last_maint_date);
+                $('#next_service_date-'+i).val(data.next_maintenance_date);
+            }
+        };
+    }
+
+    // on clicking addproduct (equipment) button
+    $('#addqproduct').on('click', function() {
+        const cvalue = counter++;
+        // product (equipment) row
+        const row = equipmentRow(cvalue);
+        // add poduct row to equipment table
+        $('#equipment tr:last').after(row);
+        // initialize date picker with php parsed date
+        $('[data-toggle="datepicker"]')
+            .datepicker({format: "{{config('core.user_date_format')}}"});
         // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
     });
@@ -325,11 +340,11 @@
     // on clicking equipment drop down options
     $("#equipment").on("click", ".up,.down,.removeProd", function() {
         var row = $(this).parents("tr:first");
-        // move row up on click up
+        // move row up 
         if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down on click down
+        // move row down 
         if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row on click remove
+        // remove row
         if ($(this).is('.removeProd')) $(this).closest('tr').remove();
     });
     
