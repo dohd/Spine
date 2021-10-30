@@ -50,11 +50,11 @@
                         <tbody>
                             <tr>
                                 <th>Client</th>
-                                <td>{{ $djc->customer->name ?: $djc->lead->client_name }}</td>
+                                <td>{{ @$djc->customer->name ?: @$djc->lead->client_name }}</td>
                             </tr>
                             <tr>
                                 <th>Branch</th>
-                                <td>{{ $djc->branch->name }}</td>
+                                <td>{{ @$djc->branch->name }}</td>
                             </tr>
                             <tr>
                                 <th>Region</th>
@@ -125,7 +125,7 @@
                     <table id="others-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
                             <th>Call Description</th>
-                            <td>{{ $djc->lead->note }}</td>
+                            <td>{{ @$djc->lead->note }}</td>
                         </tr>
                         <tr>
                             <th>Findings and Root Cause</th>
