@@ -109,32 +109,30 @@ class DjcRepository extends BaseRepository
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
 
-        // djc_item input data
-        $data_items = $this->items_array($input['data_item'], $data['id'], $data['ins']);
-
         DB::beginTransaction();
         // update djc data
         $result = Djc::where('id', $data['id'])->update($data);
+        // djc_item input data
+        $data_items = $this->items_array($input['data_item'], $data['id'], $data['ins']);
 
-        if ($result) {
-            if (count($data_items)) {
-                foreach($data_items as $item) {
-                    // update or create new djc_item
-                    $djc_item = DjcItem::firstOrNew([
-                        'djc_id' => $item['djc_id'],
-                        'tag_number' => $item['tag_number']
-                    ]);
-                    // assign properties to the djc_item
-                    foreach($item as $key => $value) {
-                        if ($key == 'djc_id' || $key == 'tag_number') continue;
-                        $djc_item[$key] = $value;
-                    }
-                    $djc_item->save();
+        // update or create new djc_item
+        if ($result && count($data_items)) {
+            foreach($data_items as $item) {
+                $djc_item = DjcItem::firstOrNew([
+                    'djc_id' => $item['djc_id'],
+                    'tag_number' => $item['tag_number']
+                ]);
+                // assign properties to the djc_item
+                foreach($item as $key => $value) {
+                    if ($key == 'djc_id' || $key == 'tag_number') continue;
+                    $djc_item[$key] = $value;
                 }
+
+                $djc_item->save();
             }
 
             DB::commit();
-            return;
+            return $result;
         }
 
         throw new GeneralException('Error Updating Djc');
