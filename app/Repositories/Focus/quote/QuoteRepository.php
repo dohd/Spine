@@ -12,6 +12,7 @@ use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\items\CustomEntry;
+use App\Models\lead\Lead;
 use App\Models\product\ProductVariation;
 use Illuminate\Support\Facades\DB;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
@@ -79,30 +80,31 @@ class QuoteRepository extends BaseRepository
         $invoice['invoiceduedate'] = date_for_database($invoiceduedate);
         $invoice['subtotal'] = numberClean($invoice['subtotal']);
         $invoice['tax'] = numberClean($invoice['tax']);
-        //$invoice['discount_rate'] = numberClean($invoice['discount_rate']);
-        //$invoice['after_disc'] = numberClean($invoice['after_disc']);
         $invoice['total'] = numberClean($invoice['total']);
-        // $invoice['ship_tax_rate'] = numberClean($invoice['ship_rate']);
-        //$invoice['ship_tax'] = numberClean($invoice['ship_tax']);
 
         $invoice['extra_discount'] = $extra_discount;
         $total_discount = $extra_discount;
+
         unset($invoice['after_disc']);
         unset($invoice['ship_rate']);
-        //dd($invoice );
-        DB::beginTransaction();
+
         $proposal = $invoice['proposal'];
         $invoice = array_map('strip_tags', $invoice);
         $invoice['proposal'] = strip_tags($proposal, config('general.allowed'));
+
+        DB::beginTransaction();
+        $lead = Lead::find($invoice['lead_id']);
+        $invoice['customer_id'] = $lead->client_id;
+        $invoice['branch_id'] = $lead->branch_id;
+
         $result = Quote::create($invoice);
 
         if ($result) {
-            // dd($result->id);
             $products = array();
+            $stock_update = array();
             $subtotal = 0;
             $total_qty = 0;
             $total_tax = 0;
-            $stock_update = array();
 
             foreach ($input['invoice_items']['numbering'] as $key => $value) {
                 $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
@@ -113,10 +115,8 @@ class QuoteRepository extends BaseRepository
                     'quote_id' => $result->id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
-                    //'code' => @$input['invoice_items']['code'][$key],
                     'product_qty' => numberClean(@$input['invoice_items']['product_qty'][$key]),
                     'product_price' => numberClean(@$input['invoice_items']['product_price'][$key]),
-                    //'product_tax' => numberClean(@$input['invoice_items']['product_tax'][$key]),
                     'product_exclusive' => numberClean(@$input['invoice_items']['product_exclusive'][$key]),
                     'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
                     'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
@@ -128,13 +128,11 @@ class QuoteRepository extends BaseRepository
                 );
             }
 
-            //dd($products);
             $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => numberClean($input['invoice_items']['product_qty'][$key]));
+            
             QuoteItem::insert($products);
+            
             $invoice_d = Quote::find($result->id);
-            // $invoice_d->subtotal = $subtotal;
-            //$invoice_d->tax = $total_tax;
-            //$invoice_d->discount = $total_discount;
             $invoice_d->items = $total_qty;
             $invoice_d->save();
 
@@ -228,6 +226,10 @@ class QuoteRepository extends BaseRepository
         $quote['invoiceduedate'] = date_for_database($duedate);
 
         DB::beginTransaction();
+        $lead = Lead::find($quote['lead_id']);
+        $quote['customer_id'] = $lead->client_id;
+        $quote['branch_id'] = $lead->branch_id;
+
         $result = Quote::where('id', $quote['id'])->update($quote);
 
         // quote items
@@ -307,6 +309,10 @@ class QuoteRepository extends BaseRepository
         $quote['client_type'] = 'lead';
 
         DB::beginTransaction();
+        $lead = Lead::find($quote['lead_id']);
+        $quote['customer_id'] = $lead->client_id;
+        $quote['branch_id'] = $lead->branch_id;
+
         $result = Quote::create($quote);
 
         // quote items
@@ -355,6 +361,10 @@ class QuoteRepository extends BaseRepository
         $quote['invoiceduedate'] = date_for_database($duedate);
 
         DB::beginTransaction();
+        $lead = Lead::find($quote['lead_id']);
+        $quote['customer_id'] = $lead->client_id;
+        $quote['branch_id'] = $lead->branch_id;
+
         $result = Quote::where('id', $quote['id'])->update($quote);
 
         // quote items
@@ -394,8 +404,7 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException('Error Updating PI');
     }
 
-
-    // convert array elements
+    // convert array to database collection format
     protected function array_items($count=0, $item=[], $extra=[])
     {
         $data_items = array();
