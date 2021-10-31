@@ -35,11 +35,10 @@ class EditResponse implements Responsable
         $quote = $this->quote;
         $leads = $this->quote->lead->get();
 
-        browser_log($this->quote);
-
         // edit proformer invoice
         if ($this->quote->bank_id ) {
             $banks = Bank::all();
+            
             return view('focus.quotes.edit_pi')
                 ->with(compact('quote', 'leads', 'banks'))
                 ->with(bill_helper(2, 4));

@@ -14,8 +14,10 @@ class UpdateBranchIdInLeads extends Migration
     public function up()
     {
         Schema::table('leads', function (Blueprint $table) {
-            DB::table('leads')->where(['id' => 4])->update(['branch_id' => 2]);
+            // 
         });
+
+        DB::table('leads')->where(['id' => 4])->update(['branch_id' => 2]);
     }
 
     /**
@@ -26,7 +28,9 @@ class UpdateBranchIdInLeads extends Migration
     public function down()
     {
         Schema::table('leads', function (Blueprint $table) {
-            DB::table('leads')->where(['id' => 4])->update(['branch_id' => 0]);
+            // 
         });
+
+        DB::table('leads')->where(['id' => 4])->update(['branch_id' => 0]);
     }
 }

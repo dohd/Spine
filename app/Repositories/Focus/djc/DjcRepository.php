@@ -187,7 +187,6 @@ class DjcRepository extends BaseRepository
             }
             $data_items[] = $row;
         }
-
         return $data_items;
     }
 }

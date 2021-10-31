@@ -281,7 +281,6 @@
 
     // equipment row counter;
     var counter = 1;
-
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i = 0) {
         return {
@@ -293,12 +292,11 @@
                     method: 'post',
                     data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
                     success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.customer + ' ' + item.name + ' ' + item.make_type + ' ' + item.capacity + ' ' + item.location,
-                                value: item.name,
-                                data: item
-                            };
+                        response($.map(data, function(itm) {
+                            const label = `${itm.customer} ${itm.name} ${itm.make_type} ${itm.capacity} ${itm.location}`;
+                            const value = itm.name;
+                            const data = itm;
+                            return {label, value, data};
                         }));
                     }
                 });
@@ -310,7 +308,6 @@
                 $('#equipment_type-'+i).val(data.unit_type);
                 $('#make-'+i).val(data.make_type);
                 $('#capacity-'+i).val(data.capacity);
-                $('#equipment_type-'+i).val(data.unit_type);
                 $('#location-'+i).val(data.location);
                 $('#last_service_date-'+i).val(data.last_maint_date);
                 $('#next_service_date-'+i).val(data.next_maintenance_date);
@@ -358,16 +355,13 @@
     // on clicking addproduct (equipment) button
     $('#addqproduct').on('click', function() {
         const cvalue = counter++;
-
         // add poduct row to equipment table
         const row = productRow(cvalue);
-        $('#equipment tr:last').after(row);
-        
+        $('#equipment tr:last').after(row);        
         // initialize datepicker
         $(`[data-toggle-${cvalue}="datepicker"]`)
             .datepicker({format: "{{config('core.user_date_format')}}"})
             .datepicker('setDate', new Date());
-
         // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
     });
@@ -375,11 +369,11 @@
     // on clicking equipment drop down options
     $("#equipment").on("click", ".up,.down,.removeProd", function() {
         var row = $(this).parents("tr:first");
-        // move row up on click up
+        // move row up 
         if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down on click down
+        // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row on click remove
+        // remove row
         if ($(this).is('.removeProd')) $(this).closest('tr').remove();
     });
     
