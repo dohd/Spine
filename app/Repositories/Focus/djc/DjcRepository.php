@@ -82,13 +82,17 @@ class DjcRepository extends BaseRepository
 
         DB::beginTransaction();
         $result = Djc::create($data);
-
+        // djc items
+        $item_count = count($input['data_item']['tag_number']);
+        $data_items = $this->items_array(
+            $item_count, 
+            $input['data_item'],
+            ['djc_id' => $result['id'], 'ins' => $result['ins']]
+        );
         // bulk insert djc items
-        if ($result) {
-            $data_items = $this->items_array($input['data_item'], $result->id, $result->ins);
+        if ($result && $item_count) {
             DjcItem::insert($data_items);
             DB::commit();
-            
             return $result;
         }
 
@@ -110,13 +114,17 @@ class DjcRepository extends BaseRepository
         $data['report_date'] = date_for_database($data['report_date']);
 
         DB::beginTransaction();
-        // update djc data
         $result = Djc::where('id', $data['id'])->update($data);
-        // djc_item input data
-        $data_items = $this->items_array($input['data_item'], $data['id'], $data['ins']);
+        // djc items
+        $item_count = count($input['data_item']['tag_number']);
+        $data_items = $this->items_array(
+            $item_count, 
+            $input['data_item'],
+            ['djc_id' => $data['id'], 'ins' => $data['ins']]
+        );
 
         // update or create new djc_item
-        if ($result && count($data_items)) {
+        if ($result && $item_count) {
             foreach($data_items as $item) {
                 $djc_item = DjcItem::firstOrNew([
                     'djc_id' => $item['djc_id'],
@@ -164,22 +172,22 @@ class DjcRepository extends BaseRepository
         return $file_name;
     }
 
-    // Generate data_items array
-    protected function items_array($item, $djc_id, $djc_ins)
+    // Convert array to database collection format
+    protected function items_array($count=0, $item=[], $extra=[])
     {
         $data_items = array();
-        for ($i = 0; $i < count($item['tag_number']); $i++) {
-            $tmp = array('djc_id' => $djc_id, 'ins' => $djc_ins);
+        for ($i = 0; $i < $count; $i++) {
+            $row = $extra;
             foreach (array_keys($item) as $key) {
                 $value = $item[$key][$i];
                 if ($key == 'last_service_date' || $key == 'next_service_date') {
                     $value = date_for_database($value);
                 }
-                $tmp[$key] = $value;
+                $row[$key] = $value;
             }
-            $data_items[] = $tmp;
+            $data_items[] = $row;
         }
-        
+
         return $data_items;
     }
 }
