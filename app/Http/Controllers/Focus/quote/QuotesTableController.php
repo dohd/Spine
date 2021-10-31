@@ -51,8 +51,6 @@ class QuotesTableController extends Controller
      */
     public function __invoke(ManageQuoteRequest $request)
     {
-
-
         $core = $this->quote->getForDataTable();
         return Datatables::of($core)
             ->addIndexColumn()
@@ -60,7 +58,7 @@ class QuotesTableController extends Controller
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote->tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
-               if(isset($quote->customer)) return $quote->client->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
+                if ($quote->customer) return $quote->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
                return null;
             })
             ->addColumn('created_at', function ($quote) {
