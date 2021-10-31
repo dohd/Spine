@@ -200,30 +200,12 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id">
-                                            @php
-                                                $tax_format='exclusive';
-                                                $tax_format_id=0;
-                                                $tax_format_type='exclusive';
-                                            @endphp
-                                            @foreach($additionals as $additional_tax)
-                                                @php
-                                                    $default = $additional_tax->id == $defaults[4][0]['feature_value'] && $additional_tax->class == 1;
-                                                    if ($default) {
-                                                        $tax_format=$additional_tax->type2;
-                                                        $tax_format_id=$additional_tax->id;
-                                                        $tax_format_type=$additional_tax->type3;
-                                                    }
-                                                @endphp                                                
-                                                @if ($default)
-                                                    <option value="{{ $additional_tax->value }}" selected>{{ $additional_tax->name }}</option>                                                    
-                                                @elseif ($additional_tax->class == 1)
-                                                    <option value="{{ $additional_tax->value }}" data-type1="data-type1">{{ $additional_tax->name }}</option>                                                    
-                                                @endif
-                                            @endforeach
-                                            <option value="0">{{trans('general.off')}}</option>
+                                        <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
+                                            <option value="16">16% VAT</option>
+                                            <option value="8">14% VAT</option>
+                                            <option value="0">Off</option>
                                         </select>
-                                        <input type="hidden" name="tax_format" value="{{ $tax_format }}">
+                                        <input type="hidden" name="tax_format" id="tax_format">
                                     </div>
                                 </div>
                             </div>
@@ -309,6 +291,15 @@
 
 @section('extra-scripts')
 <script>
+    // on select Tax change
+    function onTaxChange(e) {
+        if (Number(e.target.value) === 0) {
+            $('#tax_format').val('exclusive');
+            return;
+        }
+        $('#tax_format').val('inclusive');
+        console.log(e.target.value);
+    }
     
     // set default options
     $('#lead_id').val("{{ $quote->lead->id }}");

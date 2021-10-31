@@ -70,7 +70,6 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  round  select-box required" name="bank_id" id="bank_id">
-                                                <option>-- Select Bank --</option>
                                                 @foreach ($banks as $bank) 
                                                     <option value="{{ $bank->id }}">{{ $bank->name }}</option>
                                                 @endforeach
@@ -196,30 +195,12 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id">
-                                            @php
-                                                $tax_format='exclusive';
-                                                $tax_format_id=0;
-                                                $tax_format_type='exclusive';
-                                            @endphp
-                                            @foreach($additionals as $additional_tax)
-                                                @php
-                                                    $default = $additional_tax->id == $defaults[4][0]['feature_value'] && $additional_tax->class == 1;
-                                                    if ($default) {
-                                                        $tax_format=$additional_tax->type2;
-                                                        $tax_format_id=$additional_tax->id;
-                                                        $tax_format_type=$additional_tax->type3;
-                                                    }
-                                                @endphp                                                
-                                                @if ($default)
-                                                    <option value="{{ $additional_tax->value }}" selected>{{ $additional_tax->name }}</option>                                                    
-                                                @elseif ($additional_tax->class == 1)
-                                                    <option value="{{ $additional_tax->value }}" data-type1="data-type1">{{ $additional_tax->name }}</option>                                                    
-                                                @endif
-                                            @endforeach
-                                            <option value="0">{{trans('general.off')}}</option>
+                                        <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
+                                            <option value="16">16% VAT</option>
+                                            <option value="8">14% VAT</option>
+                                            <option value="0">Off</option>
                                         </select>
-                                        <input type="hidden" name="tax_format" value="{{ $tax_format }}">
+                                        <input type="hidden" name="tax_format" id="tax_format">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -309,7 +290,14 @@
 
 @section('extra-scripts')
 <script>
-    console.log('tid:',"{{ @$last_quote->tid }}")
+    // on select Tax change
+    function onTaxChange(e) {
+        if (Number(e.target.value) === 0) {
+            $('#tax_format').val('exclusive');
+            return;
+        }
+        $('#tax_format').val('inclusive');
+    }
     // set default options
     $('#lead_id').val("{{ $quote->lead->id }}");
     $('#bank_id').val("{{ $quote->bank_id }}");
@@ -318,7 +306,7 @@
     $('#currency').val("{{ $quote->currency }}");
     $('#term_id').val("{{ $quote->term_id }}");
     $('#revision').val("{{ $quote->revision }}" || '_r1');
-    $('#tax_id').val(Number("{{ $quote->tax_id }}").toFixed(2));
+    $('#tax_id').val("{{ $quote->tax_id }}");
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
@@ -375,8 +363,11 @@
         `;
     }
 
-    // on clicking Add Product button
+    // default product rows
     let cvalue = 0;
+    
+
+    // on clicking Add Product button
     $('#add-product').click(function() {
         // append row
         const row = productRow(cvalue);
