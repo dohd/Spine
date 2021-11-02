@@ -24,21 +24,13 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    @if (@$last_quote->tid)
-                        {{ Form::model($quote, ['route' => 'biller.quotes.store_pi', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-pi']) }}
-                    @else
-                        {{ Form::model($quote, ['route' => ['biller.quotes.update_pi', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'update-pi']) }}
-                    @endif
+                {{ Form::model($quote, ['route' => ['biller.quotes.update_pi', $quote->id], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'update-pi']) }}
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
-                                        @if (@$last_quote->tid)
-                                            <h3 class="title pl-1">Create Proformer Invoice Copy</h3>
-                                        @else
-                                            <h3 class="title pl-1">Edit Proformer Invoice</h3>
-                                        @endif
+                                        <h3 class="title pl-1">Edit Proformer Invoice</h3>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -108,11 +100,7 @@
                                         <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            @if (@$last_quote->tid)
-                                                {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
-                                            @else
-                                                {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
-                                            @endif
+                                            {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
                                         </div>
                                     </div>
                                 </div>
@@ -194,11 +182,11 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
-                                        <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
+                                    <label for="taxFormat" class="caption">Select {{trans('general.tax')}}</label>
                                         <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
-                                            <option value="16">16% VAT</option>
-                                            <option value="8">14% VAT</option>
                                             <option value="0">Off</option>
+                                            <option value="16">16% VAT</option>
+                                            <option value="8">8% VAT</option>                                            
                                         </select>
                                         <input type="hidden" name="tax_format" id="tax_format">
                                     </div>
@@ -262,20 +250,14 @@
                                         <div class="input-group m-bot15">
                                             <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Total Discount :</label>
-                                        <div class="input-group m-bot15">
-                                            <input readonly="readonly" type="text" value="0" name="after-disc" class="form-control" id="after-disc" placeholder="Discount">
-                                        </div>
-                                    </div>
+                                    </div>                                    
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
                                             <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
                                         </div>
                                     </div>
-                                    {{ Form::submit('Generate', ['class' => 'btn btn-success sub-btn btn-lg']) }}
+                                    {{ Form::submit('Update', ['class' => 'btn btn-primary sub-btn btn-lg']) }}
                                 </div>
                             </div>
                         </div>
@@ -290,15 +272,7 @@
 
 @section('extra-scripts')
 <script>
-    // on select Tax change
-    function onTaxChange(e) {
-        if (Number(e.target.value) === 0) {
-            $('#tax_format').val('exclusive');
-            return;
-        }
-        $('#tax_format').val('inclusive');
-    }
-    // set default options
+    // set default field values
     $('#lead_id').val("{{ $quote->lead->id }}");
     $('#bank_id').val("{{ $quote->bank_id }}");
     $('#pricing').val("{{ $quote->pricing }}");
@@ -318,35 +292,6 @@
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
 
-    // product row
-    function productRow(val) {
-        return `
-            <tr>
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
-                <td><select class="form-control unit" name="unit[]" id="unit-${val}" selected><option value="">Default Unit</option></select></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
-                <td class="text-center">${dropDown()}</td>
-            </tr>
-        `;
-    }
-
-    // product title row
-    function productTitleRow(val) {
-        return `
-            <tr>
-                <input type="hidden" name="custom_field_id[]" value="${val}" id="customfieldid-${val}">
-                <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
-                <td class="text-center">${dropDown()}</td>
-            </tr>
-        `;
-    }
-
     // row dropdown menu
     function dropDown(val) {
         return `
@@ -363,9 +308,77 @@
         `;
     }
 
-    // default product rows
+    // product row
+    function productRow(val) {
+        return `
+            <tr>
+                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id="itemname-${val}"></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td class="text-center">${dropDown()}</td>
+            </tr>
+        `;
+    }
+
+    // product title row
+    // with extra hidden input fields to imitate product row state
+    function productTitleRow(val) {
+        return `
+            <tr>
+                <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
+                <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="unit[]" value="">
+                <input type="hidden" name="product_qty[]" value="0">
+                <input type="hidden" name="product_price[]" value="0">
+                <input type="hidden" name="product_subtotal[]" value="0">
+            </tr>
+        `;
+    }    
+
+    // product row counter
     let cvalue = 0;
-    
+    // set default product rows
+    const quoteItems = @json($quote->products);
+    quoteItems.forEach(v => {
+        const i = cvalue;
+        const item = {...v};
+        // format float values to integer
+        const keys = ['product_price','product_qty','product_subtotal'];
+        keys.forEach(key => {
+            item[key] = parseFloat(item[key].replace(',',''));
+        });
+        // check if item has product row parameters
+        if (item.product_name && item.product_price) {
+            const row = productRow(cvalue);
+            $('#quotation tr:last').after(row);
+            $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
+            // set default values
+            $('#productid-'+i).val(item.product_id);
+            $('#numbering-'+i).val(item.numbering);
+            $('#itemname-'+i).val(item.product_name);
+            $('#unit-'+i).val(item.unit);                
+            $('#amount-'+i).val(1);
+            $('#price-'+i).val(item.product_price.toFixed(2));
+            $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
+            $('#result-'+i).text(item.product_subtotal.toFixed(2));
+        } else {
+            const row = productTitleRow(cvalue);
+            $('#quotation tr:last').after(row);
+            // set default values
+            $('#productid-'+i).val(item.product_id);
+            $('#numbering-'+i).val(item.numbering);
+            $('#itemname-'+i).val(item.product_name);
+        }
+        cvalue++;
+        totals();
+    });
 
     // on clicking Add Product button
     $('#add-product').click(function() {
@@ -398,13 +411,42 @@
         }
     });
 
+    // default tax
+    const tax = $('#tax_id').val();
+    const taxInt = parseFloat(tax.replace(',', ''));
+    let taxRate = (taxInt+100)/100;
+    // on select Tax change
+    function onTaxChange(e) {
+        const tax = Number(e.target.value); 
+        if (tax === 0) {
+            $('#tax_format').val('exclusive');
+        } else {
+            $('#tax_format').val('inclusive');
+        }
+        // loop throw product rows while adjusting values
+        taxRate = (tax+100)/100;
+        $('#quotation tr').each(function(i) {
+            if (!i) return;
+            const productQty = $(this).find('td').eq(3).children().val()
+            if (productQty) {
+                const productPrice = $(this).find('td').eq(4).children().val();
+
+                const rateInclusive = taxRate * parseFloat(productPrice.replace(',', ''));
+                $(this).find('td').eq(5).children().val(rateInclusive.toFixed(2));
+
+                const rowAmount = productQty * parseFloat(rateInclusive);
+                $(this).find('td').eq(6).find('.ttlText').text(rowAmount.toFixed(2))
+            }
+        });
+        totals();
+    }    
+
     // ajax setup
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
     // autocompleteProp returns autocomplete object properties
-    const dataTaxRate = {};
     function autocompleteProp(i) {
         return {
             source: function(request, response) {
@@ -431,21 +473,18 @@
                 const {data} = ui.item;
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
-                $('#unit-'+i).html(`<option value="${data.unit}">${data.unit}</option>`);                
+                $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
 
                 const productPrice = parseFloat(data.price.replace(',',''));
                 $('#price-'+i).val(productPrice.toFixed(2));
 
-                const tax = data.taxrate? parseFloat(data.taxrate) : 0;
-                const taxRate = (tax+100)/100;
-                // Initial values                
+                // Initial values
                 const rateInclusive = taxRate * productPrice;
                 $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
                 // displayed Amount
                 $('#result-'+i).text(rateInclusive.toFixed(2));
                 // Compute Totals
-                dataTaxRate[i] = taxRate;
                 totals();
             }
         };
@@ -461,7 +500,6 @@
         let productPrice = $('#price-'+indx).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const taxRate = dataTaxRate[indx];
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
@@ -480,7 +518,6 @@
         let productPrice = $('#'+id).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const taxRate = dataTaxRate[indx];
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 

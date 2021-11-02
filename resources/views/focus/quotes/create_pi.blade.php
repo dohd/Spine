@@ -183,31 +183,13 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
-                                        <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id">
-                                            @php
-                                                $tax_format='exclusive';
-                                                $tax_format_id=0;
-                                                $tax_format_type='exclusive';
-                                            @endphp
-                                            @foreach($additionals as $additional_tax)
-                                                @php
-                                                    $default = $additional_tax->id == $defaults[4][0]['feature_value'] && $additional_tax->class == 1;
-                                                    if ($default) {
-                                                        $tax_format=$additional_tax->type2;
-                                                        $tax_format_id=$additional_tax->id;
-                                                        $tax_format_type=$additional_tax->type3;
-                                                    }
-                                                @endphp                                                
-                                                @if ($default)
-                                                    <option value="{{ $additional_tax->value }}" selected>{{ $additional_tax->name }}</option>                                                    
-                                                @elseif ($additional_tax->class == 1)
-                                                    <option value="{{ $additional_tax->value }}" data-type1="data-type1">{{ $additional_tax->name }}</option>                                                    
-                                                @endif
-                                            @endforeach
-                                            <option value="0">{{trans('general.off')}}</option>
+                                        <label for="taxFormat" class="caption">Select {{trans('general.tax')}}</label>
+                                        <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
+                                            <option value="0">Off</option>
+                                            <option value="16">16% VAT</option>
+                                            <option value="8">8% VAT</option>                                            
                                         </select>
-                                        <input type="hidden" name="tax_format" value="{{ $tax_format }}">
+                                        <input type="hidden" name="tax_format" id="tax_format">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -269,13 +251,7 @@
                                         <div class="input-group m-bot15">
                                             <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Total Discount :</label>
-                                        <div class="input-group m-bot15">
-                                            <input readonly="readonly" type="text" value="0" name="after-disc" class="form-control" id="after-disc" placeholder="Discount">
-                                        </div>
-                                    </div>
+                                    </div>                                    
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
@@ -296,8 +272,7 @@
 @endsection
 
 @section('extra-scripts')
-<script>
-    
+<script>    
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
@@ -307,35 +282,6 @@
     $('[data-toggle="datepicker-qd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
-
-    // product row
-    function productRow(val) {
-        return `
-            <tr>
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
-                <td><select class="form-control unit" name="unit[]" id="unit-${val}" selected><option value="">Default Unit</option></select></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
-                <td class="text-center">${dropDown()}</td>
-            </tr>
-        `;
-    }
-
-    // product title row
-    function productTitleRow(val) {
-        return `
-            <tr>
-                <input type="hidden" name="custom_field_id[]" value="${val}" id="customfieldid-${val}">
-                <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
-                <td class="text-center">${dropDown()}</td>
-            </tr>
-        `;
-    }
 
     // row dropdown menu
     function dropDown(val) {
@@ -350,6 +296,40 @@
                     <a class="dropdown-item down" href="javascript:void(0);">Down</a>
                 </div>
             </div>            
+        `;
+    }
+
+    // product row
+    function productRow(val) {
+        return `
+            <tr>
+                <input type="hidden" name="product_id[]" id="productid-${val}" value="0">
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td class="text-center">${dropDown()}</td>
+            </tr>
+        `;
+    }
+
+    // product title row
+    // with extra hidden input fields to imitate product row state
+    function productTitleRow(val) {
+        return `
+            <tr>
+                <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}">
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
+                <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="unit[]" value="">
+                <input type="hidden" name="product_qty[]" value="0">
+                <input type="hidden" name="product_price[]" value="0">
+                <input type="hidden" name="product_subtotal[]" value="0">
+            </tr>
         `;
     }
 
@@ -385,13 +365,39 @@
         }
     });
 
+    // on select Tax change
+    let taxRate = 1;
+    function onTaxChange(e) {
+        const tax = Number(e.target.value); 
+        if (tax === 0) {
+            $('#tax_format').val('exclusive');
+        } else {
+            $('#tax_format').val('inclusive');
+        }
+        // loop throw product rows while adjusting values
+        taxRate = (tax+100)/100;
+        $('#quotation tr').each(function(i) {
+            if (!i) return;
+            const productQty = $(this).find('td').eq(3).children().val()
+            if (productQty) {
+                const productPrice = $(this).find('td').eq(4).children().val();
+
+                const rateInclusive = taxRate * parseFloat(productPrice.replace(',', ''));
+                $(this).find('td').eq(5).children().val(rateInclusive.toFixed(2));
+
+                const rowAmount = productQty * parseFloat(rateInclusive);
+                $(this).find('td').eq(6).find('.ttlText').text(rowAmount.toFixed(2))
+            }
+        });
+        totals();
+    }
+
     // ajax setup
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
     // autocompleteProp returns autocomplete object properties
-    const dataTaxRate = {};
     function autocompleteProp(i) {
         return {
             source: function(request, response) {
@@ -418,21 +424,18 @@
                 const {data} = ui.item;
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
-                $('#unit-'+i).html(`<option value="${data.unit}">${data.unit}</option>`);                
+                $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
 
                 const productPrice = parseFloat(data.price.replace(',',''));
                 $('#price-'+i).val(productPrice.toFixed(2));
 
-                const tax = data.taxrate? parseFloat(data.taxrate) : 0;
-                const taxRate = (tax+100)/100;
                 // Initial values
                 const rateInclusive = taxRate * productPrice;
                 $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
                 // displayed Amount
                 $('#result-'+i).text(rateInclusive.toFixed(2));
                 // Compute Totals
-                dataTaxRate[i] = taxRate;
                 totals();
             }
         };
@@ -448,7 +451,6 @@
         let productPrice = $('#price-'+indx).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const taxRate = dataTaxRate[indx]
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
@@ -467,7 +469,6 @@
         let productPrice = $('#'+id).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const taxRate = dataTaxRate[indx];
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
@@ -494,7 +495,7 @@
         });
 
         const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
-        $('#tax').val(taxTotal.toFixed(2));        
+        $('#tax').val(taxTotal.toFixed(2));
         $('#subtotal').val(subTotal.toFixed(2));
         $('#total').val(grandTotal.toFixed(2));
     }

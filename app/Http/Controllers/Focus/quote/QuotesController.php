@@ -108,16 +108,13 @@ class QuotesController extends Controller
     public function store(CreateQuoteRequest $request)
     {
         // filter request input fields
-        $invoice = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
-        $invoice_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
-        $data2 = $request->only(['custom_field']);
+        $data = $request->only(['tid', 'term_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $data_items = $request->only(['numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
 
-        $data2['ins'] = auth()->user()->ins;
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
 
-        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
+        $result = $this->repository->create(compact('invoice', 'invoice_items'));
 
         return new RedirectResponse(
             route('biller.quotes.index', [$result['id']]), 
@@ -252,12 +249,11 @@ class QuotesController extends Controller
         // filter request input fields
         $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $item_titles = $request->only(['title_numbering', 'product_title', 'custom_field_id']);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
 
-        $result = $this->repository->create_pi(compact('data', 'data_items', 'item_titles'));
+        $result = $this->repository->create_pi(compact('data', 'data_items'));
 
         return new RedirectResponse(
             route('biller.quotes.index', [$result['id']]), 
@@ -272,20 +268,21 @@ class QuotesController extends Controller
      * @param App\Models\quote\Quote $quote
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update_pi(EditQuoteRequest $request, Quote $quote)
+    public function update_pi(EditQuoteRequest $request, $id)
     {
+        // filter request fields
         $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
         $data_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $item_titles = $request->only(['title_numbering', 'product_title', 'custom_field_id']);
 
-        $data['ins'] = auth()->user()->ins;
+        $data['id'] = $id;
         $data['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
 
-        $this->repository->update_pi(compact('data', 'data_items', 'item_titles'));
+        $this->repository->update_pi(compact('data', 'data_items'));
 
         return new RedirectResponse(
-            route('biller.quotes.index', [$quote->id]), 
-            ['flash_success' => $this->flash_msg('Proformer Invoice updated', $quote->id)]
+            route('biller.quotes.index', [$id]), 
+            ['flash_success' => $this->flash_msg('Proformer Invoice updated', $id)]
         );
     }
 
