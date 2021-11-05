@@ -261,7 +261,7 @@
                             <li><a class="dropdown-item" href="{{ route( 'biller.quotes.create' ) }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route( 'biller.quotes.create_pi' ) }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI
+                            <li><a class="dropdown-item" href="{{ route( 'biller.quotes.create', 'page=pi' ) }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI
                                 </a>
                             </li>
                         </ul>

@@ -24,7 +24,7 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                {{ Form::open(['route' => 'biller.quotes.store_pi', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-pi']) }}
+                {{ Form::open(['route' => 'biller.quotes.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-pi']) }}
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
@@ -101,7 +101,7 @@
                                         <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
+                                            {{ Form::number('tid', @$last_invoice->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
                                         </div>
                                     </div>
                                 </div>
@@ -189,7 +189,7 @@
                                             <option value="16">16% VAT</option>
                                             <option value="8">8% VAT</option>                                            
                                         </select>
-                                        <input type="hidden" name="tax_format" id="tax_format">
+                                        <input type="hidden" name="tax_format" value="exclusive" id="tax_format">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -243,13 +243,13 @@
                                     <div class="form-group">
                                         <label>SubTotal (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="subtotal" id="subtotal" class="form-control">
+                                            <input type="text" required readonly="readonly" name="subtotal" id="subtotal" class="form-control" placeholder="subtotal">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label>{{trans('general.total_tax')}}</label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
+                                            <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control" placeholder="total tax">
                                         </div>
                                     </div>                                    
                                     <div class="form-group">
@@ -333,8 +333,14 @@
         `;
     }
 
+    // product row counter
+    let cvalue = 1;
+    // default row
+    const row = productRow(0);
+    $('#quotation tr:last').after(row);
+    $('#itemname-0').autocomplete(autocompleteProp(0));
+
     // on clicking Add Product button
-    let cvalue = 0;
     $('#add-product').click(function() {
         // append row
         const row = productRow(cvalue);

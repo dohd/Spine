@@ -24,7 +24,7 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                {{ Form::model($quote, ['route' => ['biller.quotes.update_pi', $quote->id], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'update-pi']) }}
+                {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-pi']) }}
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
@@ -272,6 +272,16 @@
 
 @section('extra-scripts')
 <script>
+    $('#edit-pi').submit(function(e) {
+        // e.preventDefault()
+        // console.log($(this).serializeArray());
+    });
+
+    // ajax setup
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+
     // set default field values
     $('#lead_id').val("{{ $quote->lead->id }}");
     $('#bank_id').val("{{ $quote->bank_id }}");
@@ -312,7 +322,6 @@
     function productRow(val) {
         return `
             <tr>
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id="itemname-${val}"></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
@@ -321,6 +330,9 @@
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
                 <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
+                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
             </tr>
         `;
     }
@@ -330,22 +342,24 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
                 <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
                 <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
+                <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
                 <input type="hidden" name="unit[]" value="">
                 <input type="hidden" name="product_qty[]" value="0">
                 <input type="hidden" name="product_price[]" value="0">
                 <input type="hidden" name="product_subtotal[]" value="0">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
             </tr>
         `;
-    }    
+    }
 
     // product row counter
     let cvalue = 0;
     // set default product rows
-    const quoteItems = @json($quote->products);
+    const quoteItems = @json($products);
     quoteItems.forEach(v => {
         const i = cvalue;
         const item = {...v};
@@ -359,7 +373,9 @@
             const row = productRow(cvalue);
             $('#quotation tr:last').after(row);
             $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
+
             // set default values
+            $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
@@ -372,6 +388,7 @@
             const row = productTitleRow(cvalue);
             $('#quotation tr:last').after(row);
             // set default values
+            $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
@@ -406,9 +423,21 @@
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
         if ($(this).is('.removeProd')) {
-            $(this).closest('tr').remove();
-            totals();
+            const response = window.confirm('Are you sure to delete this product ?');
+            if (response) {
+                const row = $(this).closest('tr');
+                row.remove();
+                const itemId = row.find('input[name="item_id[]"]').val();
+                // delete product api call 
+                $.ajax({
+                    url: baseurl + 'quotes/delete_product/' + itemId,
+                    dataType: "json",
+                    method: 'DELETE',
+                });
+            }
         }
+
+        totals();
     });
 
     // default tax
@@ -440,11 +469,6 @@
         });
         totals();
     }    
-
-    // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
 
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i) {
@@ -541,6 +565,8 @@
                 subTotal += Number(productQty) * parseFloat(productPrice);
                 grandTotal += Number(productQty) * parseFloat(rateInclusive);
             }
+            // update row_index
+            $(this).find('input[name="row_index[]"]').val($(this).index());
         });
 
         const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);

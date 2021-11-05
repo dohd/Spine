@@ -7,7 +7,7 @@
         <a href="{{ route('biller.quotes.create') }}" class="btn btn-pink  btn-lighten-3 round">
             <i class="fa fa-plus-circle"></i> Quote
         </a>
-        <a href="{{ route('biller.quotes.create_pi') }}" class="btn btn-pink  btn-lighten-3 round">
+        <a href="{{ route('biller.quotes.create', 'page=pi') }}" class="btn btn-pink  btn-lighten-3 round">
             <i class="fa fa-plus-circle"></i> PI
         </a>
         @endauth

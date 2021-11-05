@@ -236,13 +236,8 @@ Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
 
     Route::get('quotes/{id}/copy', 'QuotesController@copy')->name('quotes.copy');
-    Route::get('quotes/{id}/quote_items', 'QuotesController@quote_items')->name('quotes.quote_items');
 
-    // PI endpoints
-    Route::get('quotes/create_pi', 'QuotesController@create_pi')->name('quotes.create_pi');
-    Route::post('quotes/store_pi', 'QuotesController@store_pi')->name('quotes.store_pi');
-    Route::get('quotes/edit_pi', 'QuotesController@edit_pi')->name('quotes.edit_pi');
-    Route::patch('quotes/{id}/update_pi', 'QuotesController@update_pi')->name('quotes.update_pi');
+    Route::delete('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
 
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
