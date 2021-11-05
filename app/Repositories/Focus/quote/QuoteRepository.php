@@ -9,14 +9,9 @@ use App\Models\items\VerifiedItem;
 use App\Models\quote\Quote;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
-use App\Models\items\CustomEntry;
 use App\Models\lead\Lead;
-use App\Models\product\ProductVariation;
 use Illuminate\Support\Facades\DB;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
-use Carbon\Carbon;
 
 /**
  * Class QuoteRepository.
@@ -78,6 +73,8 @@ class QuoteRepository extends BaseRepository
         }
         $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
         $quote['invoiceduedate'] = date_for_database($duedate);
+        $quote['quote_type'] = 'lead';
+        $quote['client_type'] = 'lead';
 
         DB::beginTransaction();
         $lead = Lead::find($quote['lead_id']);
@@ -93,8 +90,7 @@ class QuoteRepository extends BaseRepository
             $input['data_items'], 
             ['quote_id' => $result['id'], 'ins' => $result['ins']]
         );
-
-        // update or create new quote_items
+        // bulk insert quote_items
         if ($result && $items_count) {
             QuoteItem::insert($quote_items);
             DB::commit();
@@ -191,26 +187,22 @@ class QuoteRepository extends BaseRepository
             $input['data_items'], 
             ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
         );
-        // grouped quote item titles
-        $titles_count = count($input['item_titles']['product_title']);
-        $item_titles = $this->array_items(
-            $titles_count,
-            $input['item_titles'],
-            ['rid' => $quote['id'], 'module' => 4, 'ins' => $quote['ins']]
-        );
 
-        // update or create new quote_items
+        // update or create new quote_item
         if ($result && $items_count) {
             foreach($quote_items as $item) {
                 $quote_item = QuoteItem::firstOrNew([
+                    'id' => $item['item_id'],
                     'quote_id' => $item['quote_id'],
-                    'product_name' => $item['product_name']
                 ]);
                 // assign properties to the item
                 foreach($item as $key => $value) {
-                    if ($key == 'quote_id' || $key == 'product_name') continue;
                     $quote_item[$key] = $value;
                 }
+                // remove stale attributes
+                if ($quote_item['id'] == 0) unset($quote_item['id']);
+                unset($quote_item['item_id']);
+
                 $quote_item->save();
             }
 
@@ -238,103 +230,19 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     * For Creating the respective model in storage
+     * For deleting the respective model from storage
      *
-     * @param array $input
+     * @param Quote $quote
      * @throws GeneralException
      * @return bool
      */
-    public function create_pi(array $input)
-    {
-        $quote = $input['data'];        
-        // format date
-        foreach ($quote as $key => $value) {
-            if ($key == 'invoicedate' || $key == 'reference_date') {
-                $quote[$key] = date_for_database($value);
-            }
+    public function delete_product($id)
+    {        
+        if (QuoteItem::destroy($id)) {
+            return true;
         }
-        $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
-        $quote['invoiceduedate'] = date_for_database($duedate);
-        $quote['quote_type'] = 'lead';
-        $quote['client_type'] = 'lead';
 
-        DB::beginTransaction();
-        $lead = Lead::find($quote['lead_id']);
-        $quote['customer_id'] = $lead->client_id;
-        $quote['branch_id'] = $lead->branch_id;
-
-        $result = Quote::create($quote);
-
-        // quote items
-        $items_count = count($input['data_items']['product_name']);
-        $quote_items = $this->array_items(
-            $items_count, 
-            $input['data_items'], 
-            ['quote_id' => $result['id'], 'ins' => $result['ins']]
-        );
-
-        if ($result && $items_count) {
-            QuoteItem::insert($quote_items);
-            DB::commit();
-            return $result;
-        }
-        
-        throw new GeneralException('Error Creating PI');
-    }
-
-    /**
-     * For Updating the respective model in storage
-     *
-     * @param array $input
-     * @throws GeneralException
-     * @return bool
-     */
-    public function update_pi(array $input)
-    {
-        $quote = $input['data'];        
-        // format date
-        foreach ($quote as $key => $value) {
-            if ($key == 'invoicedate' || $key == 'reference_date') {
-                $quote[$key] = date_for_database($value);
-            }
-        }
-        $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
-        $quote['invoiceduedate'] = date_for_database($duedate);
-
-        DB::beginTransaction();
-        $lead = Lead::find($quote['lead_id']);
-        $quote['customer_id'] = $lead->client_id;
-        $quote['branch_id'] = $lead->branch_id;
-
-        $result = Quote::where('id', $quote['id'])->update($quote);
-
-        // quote items
-        $items_count = count($input['data_items']['product_name']);
-        $quote_items = $this->array_items(
-            $items_count, 
-            $input['data_items'], 
-            ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
-        );
-
-        if ($result && $items_count) {
-            foreach($quote_items as $item) {
-                $quote_item = QuoteItem::firstOrNew([
-                    'quote_id' => $item['quote_id'],
-                    'product_name' => $item['product_name']
-                ]);
-                // assign properties to the item
-                foreach($item as $key => $value) {
-                    if ($key == 'quote_id' || $key == 'product_name') continue;
-                    $quote_item[$key] = $value;
-                }
-                $quote_item->save();
-            }
-
-            DB::commit();
-            return $result;
-        }
-        
-        throw new GeneralException('Error Updating PI');
+        throw new GeneralException(trans('Error deleting product'));
     }
 
     // convert array to database collection format
@@ -344,7 +252,9 @@ class QuoteRepository extends BaseRepository
         for ($i = 0; $i < $count; $i++) {
             $row = $extra;
             foreach (array_keys($item) as $key) {
-                $row[$key] = $item[$key][$i];
+                if (isset($item[$key][$i])) {
+                    $row[$key] = $item[$key][$i];
+                }
             }
             $data_items[] = $row;
         }
