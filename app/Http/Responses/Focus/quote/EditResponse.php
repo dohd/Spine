@@ -34,18 +34,19 @@ class EditResponse implements Responsable
     {
         $quote = $this->quote;
         $leads = $this->quote->lead->get();
+        $products = $this->quote->products()->orderBy('row_index', 'ASC')->get();
 
         // edit proformer invoice
         if ($this->quote->bank_id ) {
             $banks = Bank::all();
             
             return view('focus.quotes.edit_pi')
-                ->with(compact('quote', 'leads', 'banks'))
+                ->with(compact('quote', 'products', 'leads', 'banks'))
                 ->with(bill_helper(2, 4));
         }
 
         return view('focus.quotes.edit')
-            ->with(compact('quote','leads'))
+            ->with(compact('quote', 'products', 'leads'))
             ->with(bill_helper(2, 4));
     }
 }
