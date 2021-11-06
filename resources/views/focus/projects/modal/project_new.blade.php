@@ -36,26 +36,20 @@
                                 <select class="form-control  select-box" name="sales_account" id="sales_account" data-placeholder="Project Type/Sales Account">
                                     <option value="">Project Type/Sales Account</option>
                                     @foreach($accounts as $account)
-                                    <option value="{{$account['id']}}">{{$account['code']}} {{$account['holder']}}</option>
+                                        <option value="{{$account['id']}}">{{$account['code']}} {{$account['holder']}}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
                         </div>
                         <div class="row">
-                            <fieldset class="form-group position-relative has-icon-left  col-md-6">
+                            <fieldset class="form-group position-relative has-icon-right  col-md-6">
                                 <div><label for="quote">Primary / Main Quote</label></div>
                                 <select id="main_quote" name="main_quote" class="form-control required select-box" data-placeholder="Primary / Main Quote">
-                                    <option value="1">Quote 1</option>
-                                    <option value="2">Quote 2</option>
-                                    <option value="3">Quote 3</option>
                                 </select>
                             </fieldset>
-                            <fieldset class="form-group position-relative has-icon-left  col-md-6">
+                            <fieldset class="form-group position-relative has-icon-right  col-md-6">
                                 <div><label for="quote">Seconday / Other Quotes</label></div>
                                 <select multiple id="other_quote" name="other_quote" class="form-control required select-box" data-placeholder="Primary / Main Quote">
-                                    <option value="1">Quote 1</option>
-                                    <option value="2">Quote 2</option>
-                                    <option value="3">Quote 3</option>
                                 </select>
                             </fieldset>
                         </div>
