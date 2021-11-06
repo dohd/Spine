@@ -49,7 +49,7 @@
                             </fieldset>
                             <fieldset class="form-group position-relative has-icon-right  col-md-6">
                                 <div><label for="quote">Seconday / Other Quotes</label></div>
-                                <select multiple id="other_quote" name="other_quote" class="form-control required select-box" data-placeholder="Primary / Main Quote">
+                                <select multiple id="other_quote" name="other_quote" class="form-control required select-box" data-placeholder="Seconday / Other Quotes">
                                 </select>
                             </fieldset>
                         </div>
