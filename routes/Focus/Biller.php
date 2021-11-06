@@ -39,6 +39,8 @@ Route::group(['namespace' => 'banktransfer'], function () {
     Route::post('banktransfers/get', 'BanktransfersTableController')->name('banktransfers.get');
 });
 Route::group(['namespace' => 'branch'], function () {
+    Route::get('branches/branch_load', 'BranchesController@branch_load')->name('branches.branch_load');
+
     Route::resource('branches', 'BranchesController');
     //For Datatable
     Route::post('branches/get', 'BranchesTableController')->name('branches.get');
