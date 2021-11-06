@@ -44,7 +44,6 @@ Route::group(['namespace' => 'branch'], function () {
     Route::resource('branches', 'BranchesController');
     //For Datatable
     Route::post('branches/get', 'BranchesTableController')->name('branches.get');
-    Route::post('branches/branch_load', 'BranchesController@branch_load')->name('branches.branch_load');
 });
 Route::group(['namespace' => 'charge'], function () {
     Route::resource('charges', 'ChargesController');
@@ -239,8 +238,8 @@ Route::group(['namespace' => 'quote'], function () {
     Route::get('quotes/verify/{qt_id}', 'QuotesController@verify')->name('quotes.verify');
     Route::post('quotes/quotes_status', 'QuotesController@update_status')->name('quotes.bill_status');
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
-
     Route::delete('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
+    Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');
 
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
