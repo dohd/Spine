@@ -35,8 +35,6 @@ use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Http\Requests\Focus\quote\DeleteQuoteRequest;
-use App\Models\bank\Bank;
-use App\Models\lead\Lead;
 
 /**
  * QuotesController
@@ -240,6 +238,15 @@ class QuotesController extends Controller
     {
         $this->repository->delete_product($id);
         return response()->noContent();
+    }
+
+    // Load customer quotes
+    public function customer_quotes(ManageQuoteRequest $request)
+    {
+        $id = $request->input('id');
+        $quotes = Quote::where('customer_id', $id)->get(['id', 'notes', 'customer_id']);
+
+        return json_encode($quotes);
     }
 
     public function convert(InvoiceRepository $invoicerepository, ManageInvoiceRequest $request)
