@@ -499,6 +499,8 @@
                 subTotal += Number(productQty) * parseFloat(productPrice);
                 grandTotal += Number(productQty) * parseFloat(rateInclusive);
             }
+            // update row_index
+            $(this).find('input[name="row_index[]"]').val($(this).index());
         });
 
         const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
