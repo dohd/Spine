@@ -17,10 +17,7 @@ trait QuoteAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return '
-         '.$this->getViewButtonAttribute("quote-edit", "biller.quotes.show").'
-                '.$this->getEditButtonAttribute("quote-edit", "biller.quotes.edit").'
-                '.$this->getDeleteButtonAttribute("quote-delete", "biller.quotes.destroy").'
-                ';
+        return $this->getViewButtonAttribute("quote-edit", "biller.quotes.show")
+            .' '.$this->getDeleteButtonAttribute("quote-delete", "biller.quotes.destroy");
     }
 }

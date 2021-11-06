@@ -35,7 +35,7 @@
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
                                         @if (@$last_quote->tid)
-                                            <h3 class="title pl-1">Create Quote Copy</h3>
+                                            <h3 class="title pl-1">Copy Quote</h3>
                                         @else
                                             <h3 class="title pl-1">Edit Quote</h3>
                                         @endif
@@ -113,7 +113,7 @@
                                     <div class="col-sm-6">
                                         <label for="prepaired_by" class="caption"> Prepaired By</label>
                                         {{ Form::text('prepaired_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepaired_by']) }}
-                                    </div>
+                                    </div>                                      
                                 </div>
                             </div>
                         </div>
@@ -144,7 +144,7 @@
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
                                         </div>
-                                    </div>                                    
+                                    </div>                                                                      
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>
@@ -202,7 +202,7 @@
                                         <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
                                         <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
                                             <option value="16">16% VAT</option>
-                                            <option value="8">14% VAT</option>
+                                            <option value="8">8% VAT</option>
                                             <option value="0">Off</option>
                                         </select>
                                         <input type="hidden" name="tax_format" id="tax_format">
@@ -260,12 +260,7 @@
                                             <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Total Discount :</label>
-                                        <div class="input-group m-bot15">
-                                            <input readonly="readonly" type="text" value="0" name="after-disc" class="form-control" id="after-disc" placeholder="Discount">
-                                        </div>
-                                    </div>
+                                    
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
@@ -273,7 +268,7 @@
                                         </div>
                                     </div>
                                     @if (@$last_quote->tid)
-                                        {{ Form::submit('Create', ['class' => 'btn btn-primary btn-lg']) }}
+                                        {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                                     @else
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
                                     @endif
@@ -291,15 +286,10 @@
 
 @section('extra-scripts')
 <script>
-    // on select Tax change
-    function onTaxChange(e) {
-        if (Number(e.target.value) === 0) {
-            $('#tax_format').val('exclusive');
-            return;
-        }
-        $('#tax_format').val('inclusive');
-        console.log(e.target.value);
-    }
+    // ajax setup
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
     
     // set default options
     $('#lead_id').val("{{ $quote->lead->id }}");
@@ -320,35 +310,6 @@
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
 
-    // product row
-    function productRow(val) {
-        return `
-            <tr>
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
-                <td><select class="form-control unit" name="unit[]" id="unit-${val}" selected><option value="">Default Unit</option></select></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
-                <td class="text-center">${dropDown()}</td>
-            </tr>
-        `;
-    }
-
-    // product title row
-    function productTitleRow(val) {
-        return `
-            <tr>
-                <input type="hidden" name="custom_field_id[]" value="${val}" id="customfieldid-${val}">
-                <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
-                <td class="text-center">${dropDown()}</td>
-            </tr>
-        `;
-    }
-
     // row dropdown menu
     function dropDown(val) {
         return `
@@ -365,8 +326,85 @@
         `;
     }
 
-    // on clicking Add Product button
+    // product row
+    function productRow(val) {
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
+                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
+            </tr>
+        `;
+    }
+
+    // product title row
+    // with extra hidden input fields to imitate product row state
+    function productTitleRow(val) {
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
+                <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
+                <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
+                <input type="hidden" name="unit[]" value="">
+                <input type="hidden" name="product_qty[]" value="0">
+                <input type="hidden" name="product_price[]" value="0">
+                <input type="hidden" name="product_subtotal[]" value="0">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
+            </tr>
+        `;
+    }
+
+    // product row counter
     let cvalue = 0;
+    // set default product rows
+    const quoteItems = @json($products);
+    quoteItems.forEach(v => {
+        const i = cvalue;
+        const item = {...v};
+        // format float values to integer
+        const keys = ['product_price','product_qty','product_subtotal'];
+        keys.forEach(key => {
+            item[key] = parseFloat(item[key].replace(',',''));
+        });
+        // check if item has product row parameters
+        if (item.product_name && item.product_price) {
+            const row = productRow(cvalue);
+            $('#quotation tr:last').after(row);
+            $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
+
+            // set default values
+            $('#itemid-'+i).val(item.id);
+            $('#productid-'+i).val(item.product_id);
+            $('#numbering-'+i).val(item.numbering);
+            $('#itemname-'+i).val(item.product_name);
+            $('#unit-'+i).val(item.unit);                
+            $('#amount-'+i).val(1);
+            $('#price-'+i).val(item.product_price.toFixed(2));
+            $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
+            $('#result-'+i).text(item.product_subtotal.toFixed(2));
+        } else {
+            const row = productTitleRow(cvalue);
+            $('#quotation tr:last').after(row);
+            // set default values
+            $('#itemid-'+i).val(item.id);
+            $('#productid-'+i).val(item.product_id);
+            $('#numbering-'+i).val(item.numbering);
+            $('#itemname-'+i).val(item.product_name);
+        }
+        cvalue++;
+        totals();
+    });    
+
     $('#add-product').click(function() {
         // append row
         const row = productRow(cvalue);
@@ -392,18 +430,54 @@
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
         if ($(this).is('.removeProd')) {
-            $(this).closest('tr').remove();
-            totals();
+            const response = window.confirm('Are you sure to delete this product ?');
+            if (response) {
+                const row = $(this).closest('tr');
+                row.remove();
+                const itemId = row.find('input[name="item_id[]"]').val();
+                // delete product api call 
+                $.ajax({
+                    url: baseurl + 'quotes/delete_product/' + itemId,
+                    dataType: "json",
+                    method: 'DELETE',
+                });
+            }
         }
+
+        totals();
     });
 
-    // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    // default tax
+    const tax = $('#tax_id').val();
+    const taxInt = parseFloat(tax.replace(',', ''));
+    let taxRate = (taxInt+100)/100;
+    // on select Tax change
+    function onTaxChange(e) {
+        const tax = Number(e.target.value); 
+        if (tax === 0) {
+            $('#tax_format').val('exclusive');
+        } else {
+            $('#tax_format').val('inclusive');
+        }
+        // loop throw product rows while adjusting values
+        taxRate = (tax+100)/100;
+        $('#quotation tr').each(function(i) {
+            if (!i) return;
+            const productQty = $(this).find('td').eq(3).children().val()
+            if (productQty) {
+                const productPrice = $(this).find('td').eq(4).children().val();
+
+                const rateInclusive = taxRate * parseFloat(productPrice.replace(',', ''));
+                $(this).find('td').eq(5).children().val(rateInclusive.toFixed(2));
+
+                const rowAmount = productQty * parseFloat(rateInclusive);
+                $(this).find('td').eq(6).find('.ttlText').text(rowAmount.toFixed(2))
+            }
+        });
+        totals();
+    }    
 
     // autocompleteProp returns autocomplete object properties
-    const dataTaxRate = {};
     function autocompleteProp(i) {
         return {
             source: function(request, response) {
@@ -430,21 +504,18 @@
                 const {data} = ui.item;
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
-                $('#unit-'+i).html(`<option value="${data.unit}">${data.unit}</option>`);                
+                $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
 
                 const productPrice = parseFloat(data.price.replace(',',''));
                 $('#price-'+i).val(productPrice.toFixed(2));
 
-                const tax = data.taxrate? parseFloat(data.taxrate) : 0;
-                const taxRate = (tax+100)/100;
                 // Initial values                
                 const rateInclusive = taxRate * productPrice;
                 $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
                 // displayed Amount
                 $('#result-'+i).text(rateInclusive.toFixed(2));
                 // Compute Totals
-                dataTaxRate[i] = taxRate;
                 totals();
             }
         };
@@ -460,7 +531,6 @@
         let productPrice = $('#price-'+indx).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const taxRate = dataTaxRate[indx];
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
@@ -479,7 +549,6 @@
         let productPrice = $('#'+id).val();
         productPrice = parseFloat(productPrice.replace(',', ''));
 
-        const taxRate = dataTaxRate[indx];
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
 
@@ -503,6 +572,8 @@
                 subTotal += Number(productQty) * parseFloat(productPrice);
                 grandTotal += Number(productQty) * parseFloat(rateInclusive);
             }
+            // update row_index
+            $(this).find('input[name="row_index[]"]').val($(this).index());
         });
 
         const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);

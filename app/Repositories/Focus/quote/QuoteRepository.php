@@ -40,8 +40,7 @@ class QuoteRepository extends BaseRepository
             $q->whereBetween('invoicedate', [date_for_database(request('start_date')), date_for_database(request('end_date'))]);
         }
 
-        return
-            $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
+        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
     }
 
     public function getSelfDataTable($self_id = false)
@@ -50,8 +49,7 @@ class QuoteRepository extends BaseRepository
             $q = $this->query()->withoutGlobalScopes();
             $q->where('customer_id', '=', $self_id);
 
-            return
-                $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
+            return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
         }
     }
 
@@ -90,6 +88,7 @@ class QuoteRepository extends BaseRepository
             $input['data_items'], 
             ['quote_id' => $result['id'], 'ins' => $result['ins']]
         );
+        
         // bulk insert quote_items
         if ($result && $items_count) {
             QuoteItem::insert($quote_items);

@@ -21,7 +21,6 @@ namespace App\Http\Controllers\Focus\quote;
 use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
 use App\Models\quote\Quote;
 use App\Repositories\Focus\invoice\InvoiceRepository;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -151,9 +150,10 @@ class QuotesController extends Controller
      * @param EditQuoteRequestNamespace $request
      * @return \App\Http\Responses\Focus\quote\EditResponse
      */
-    public function edit(Quote $quote)
+    public function edit(EditQuoteRequest $request, Quote $quote)
     {
-        return new EditResponse($quote);
+        $page = $request->input('page');
+        return new EditResponse($quote, $page);
     }
 
     // verify
@@ -235,39 +235,12 @@ class QuotesController extends Controller
             . trans('general.list') . '</span> </a>';
     }
 
-    /**
-     * Show the form for Copying the resource in storage.
-     *
-     * @param App\Http\Requests\Focus\quote\EditQuoteRequest $request
-     * @param App\Models\quote\Quote $quote
-     * @return \App\Http\Responses\RedirectResponse
-     */
-    public function copy($id)
-    {
-        $quote = Quote::find($id);
-        $leads = Lead::all();
-        $last_quote = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
-
-        // edit proformer invoice
-        if ($quote->bank_id ) {
-            $banks = Bank::all();
-            return view('focus.quotes.edit_pi')
-                ->with(compact('quote', 'leads', 'last_quote', 'banks'))
-                ->with(bill_helper(2, 4));
-        }
-
-        return view('focus.quotes.edit')
-            ->with(compact('quote', 'leads', 'last_quote'))
-            ->with(bill_helper(2, 4));
-    }
-
     // Delete Quote product
     public function delete_product($id)
     {
         $this->repository->delete_product($id);
         return response()->noContent();
     }
-
 
     public function convert(InvoiceRepository $invoicerepository, ManageInvoiceRequest $request)
     {

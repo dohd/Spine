@@ -101,7 +101,7 @@
                                         <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{ Form::number('tid', @$last_invoice->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
+                                            {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
                                         </div>
                                     </div>
                                 </div>
@@ -303,15 +303,16 @@
     function productRow(val) {
         return `
             <tr>
-                <input type="hidden" name="product_id[]" id="productid-${val}" value="0">
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
                 <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="product_id[]" id="productid-${val}" value="0">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
             </tr>
         `;
     }
@@ -321,14 +322,15 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}">
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}"></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}" required></td>
                 <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}">
                 <input type="hidden" name="unit[]" value="">
                 <input type="hidden" name="product_qty[]" value="0">
                 <input type="hidden" name="product_price[]" value="0">
                 <input type="hidden" name="product_subtotal[]" value="0">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
             </tr>
         `;
     }
@@ -365,10 +367,9 @@
         // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
-        if ($(this).is('.removeProd')) {
-            $(this).closest('tr').remove();
-            totals();
-        }
+        if ($(this).is('.removeProd')) $(this).closest('tr').remove();
+
+        totals();
     });
 
     // on select Tax change

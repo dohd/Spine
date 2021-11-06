@@ -235,8 +235,6 @@ Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/quotes_status', 'QuotesController@update_status')->name('quotes.bill_status');
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
 
-    Route::get('quotes/{id}/copy', 'QuotesController@copy')->name('quotes.copy');
-
     Route::delete('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
 
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');

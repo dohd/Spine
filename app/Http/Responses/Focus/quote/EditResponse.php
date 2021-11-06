@@ -16,11 +16,17 @@ class EditResponse implements Responsable
     protected $quote;
 
     /**
+     * @var string 
+     */
+    protected $page;
+
+    /**
      * @param App\Models\quote\Quote $quote
      */
-    public function __construct($quote)
+    public function __construct($quote, $page)
     {
         $this->quote = $quote;
+        $this->page = $page;
     }
 
     /**
@@ -35,18 +41,37 @@ class EditResponse implements Responsable
         $quote = $this->quote;
         $leads = $this->quote->lead->get();
         $products = $this->quote->products()->orderBy('row_index', 'ASC')->get();
-
-        // edit proformer invoice
+        
+        // default parameters
+        $params = array('quote', 'products', 'leads');
         if ($this->quote->bank_id ) {
             $banks = Bank::all();
-            
-            return view('focus.quotes.edit_pi')
-                ->with(compact('quote', 'products', 'leads', 'banks'))
+        }
+
+        // condition to access copy page
+        if ($this->page == 'copy') {
+            $last_quote = $this->quote->orderBy('id', 'desc')->where('i_class', '=', 0)->first();
+            // copy proformer invoice
+            if (isset($banks)) {
+                return view('focus.quotes.edit_pi')
+                    ->with(compact('banks', 'last_quote', ...$params))
+                    ->with(bill_helper(2, 4));
+            }
+            // copy default quote
+            return view('focus.quotes.edit')
+                ->with(compact('last_quote', ...$params))
                 ->with(bill_helper(2, 4));
         }
 
+        // edit proformer invoice
+        if (isset($banks)) {            
+            return view('focus.quotes.edit_pi')
+                ->with(compact('banks', ...$params))
+                ->with(bill_helper(2, 4));
+        }
+        // edit quote
         return view('focus.quotes.edit')
-            ->with(compact('quote', 'products', 'leads'))
+            ->with(compact(...$params))
             ->with(bill_helper(2, 4));
     }
 }

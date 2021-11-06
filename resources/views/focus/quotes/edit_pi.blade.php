@@ -24,13 +24,21 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-pi']) }}
+                    @if (@$last_quote->tid)
+                        {{ Form::model($quote, ['route' => 'biller.quotes.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-pi']) }}
+                    @else
+                        {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-pi']) }}
+                    @endif                    
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
-                                        <h3 class="title pl-1">Edit Proformer Invoice</h3>
+                                        @if (@$last_quote->tid)
+                                            <h3 class="title pl-1">Copy Proformer Invoice</h3>
+                                        @else
+                                            <h3 class="title pl-1">Edit Proformer Invoice</h3>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -100,7 +108,11 @@
                                         <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            @if (@$last_quote->tid)
+                                                {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            @else
+                                                {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -140,8 +152,7 @@
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
                                         </div>
-                                    </div>
-                                                                     
+                                    </div>                                                                                                      
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>
@@ -167,7 +178,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>
+                                    </div>                                    
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
@@ -197,7 +208,21 @@
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
                                         </div>
-                                    </div>                                      
+                                    </div>
+                                    @if (!@$last_quote->tid)
+                                        <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                                <select class="form-control round  select-box" name="revision" id="revision">
+                                                    <option value="_r1">R1</option>
+                                                    <option value="_r2">R2</option>
+                                                    <option value="_r3">R3</option>
+                                                    <option value="_r4">R4</option>
+                                                    <option value="_r5">R5</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @endif                                      
                                 </div>
                             </div>
                         </div>                        
@@ -257,7 +282,11 @@
                                             <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
                                         </div>
                                     </div>
-                                    {{ Form::submit('Update', ['class' => 'btn btn-primary sub-btn btn-lg']) }}
+                                    @if (@$last_quote->tid)
+                                        {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
+                                    @else
+                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -272,11 +301,6 @@
 
 @section('extra-scripts')
 <script>
-    $('#edit-pi').submit(function(e) {
-        // e.preventDefault()
-        // console.log($(this).serializeArray());
-    });
-
     // ajax setup
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }

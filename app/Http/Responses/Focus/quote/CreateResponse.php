@@ -28,7 +28,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_invoice = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
+        $last_quote = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
         $leads = Lead::all();
 
         // create proformer invoice
@@ -36,12 +36,12 @@ class CreateResponse implements Responsable
             $banks = Bank::all();
             
             return view('focus.quotes.create_pi')
-                ->with(compact('last_invoice', 'leads', 'banks'))
+                ->with(compact('last_quote', 'leads', 'banks'))
                 ->with(bill_helper(2, 4));
         }
 
         return view('focus.quotes.create')
-            ->with(compact('last_invoice','leads'))
+            ->with(compact('last_quote','leads'))
             ->with(bill_helper(2, 4));
     }
 }

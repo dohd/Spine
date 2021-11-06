@@ -17,7 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\quote;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\quote\QuoteRepository;
@@ -71,7 +70,8 @@ class QuotesTableController extends Controller
                 return '<span class="st-' . $quote->status . '">' . trans('payments.' . $quote->status) . '</span>';
             })
             ->addColumn('actions', function ($quote) {
-                return $quote->action_buttons;
+                return '<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Copy">'.'<i class="fa fa-clone" aria-hidden="true"></i></a> '
+                    .$quote->action_buttons;
             })->rawColumns(['tid', 'customer', 'actions', 'status', 'total'])
             ->make(true);
     }
