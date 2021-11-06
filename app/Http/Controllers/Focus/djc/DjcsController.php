@@ -19,8 +19,6 @@
 namespace App\Http\Controllers\Focus\djc;
 
 use App\Models\djc\Djc;
-use App\Models\Company\ConfigMeta;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -28,12 +26,8 @@ use App\Http\Responses\Focus\djc\CreateResponse;
 use App\Http\Responses\Focus\djc\EditResponse;
 use App\Repositories\Focus\djc\DjcRepository;
 use App\Http\Requests\Focus\djc\ManageDjcRequest;
-use App\Models\branch\Branch;
-use App\Models\customer\Customer;
 use App\Models\items\DjcItem;
 use App\Models\lead\Lead;
-use Illuminate\Support\Facades\Response;
-use mPDF;
 
 /**
  * DjcsController
@@ -128,8 +122,10 @@ class DjcsController extends Controller
      */
     public function edit(Djc $djc, ManageDjcRequest $request)
     {
-        $leads=Lead::all();
-        return new EditResponse('focus.djcs.edit', compact('djc', 'leads'));
+        $leads = Lead::all();
+        $items = $djc->items()->orderBy('row_index', 'ASC')->get();
+
+        return new EditResponse('focus.djcs.edit', compact('djc', 'leads', 'items'));
     }
 
     /**
@@ -148,7 +144,7 @@ class DjcsController extends Controller
             'subject' => 'required'
         ]);
         $data = $request->only(['tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_item = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data_item = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         
         $data['ins'] = auth()->user()->ins;
         $data['id'] = $djc->id;
@@ -186,5 +182,13 @@ class DjcsController extends Controller
         $djc_items = DjcItem::where('djc_id', '=', $djc->id)->get();
 
         return new ViewResponse('focus.djcs.view', compact('djc', 'djc_items'));
+    }
+
+    // Delete djc item
+    public function delete_item($id)
+    {
+        $this->repository->delete_item($id);
+
+        return response()->noContent();
     }
 }
