@@ -120,7 +120,10 @@ Route::group(['namespace' => 'event'], function () {
 });
 
 Route::group(['namespace' => 'djc'], function () {
+    Route::delete('djcs/delete_item/{id}', 'DjcsController@delete_item')->name('djcs.delete_item');
+
     Route::resource('djcs', 'DjcsController');
+
     //  Route::post('leads/lead_search','LeadsController@lead_search' )->name('leads.lead_search');
     //For Datatable
     Route::post('djcs/get', 'DjcsTableController')->name('djcs.get');
