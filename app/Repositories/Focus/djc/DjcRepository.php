@@ -3,16 +3,11 @@
 namespace App\Repositories\Focus\djc;
 
 use DB;
-use Carbon\Carbon;
 use App\Models\items\DjcItem;
 use App\Models\djc\Djc;
-use App\Models\Access\User\User;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
-use App\Notifications\Rose;
 use Illuminate\Support\Facades\Storage;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class ProductcategoryRepository.
@@ -82,6 +77,7 @@ class DjcRepository extends BaseRepository
 
         DB::beginTransaction();
         $result = Djc::create($data);
+
         // djc items
         $item_count = count($input['data_item']['tag_number']);
         $data_items = $this->items_array(
@@ -89,6 +85,7 @@ class DjcRepository extends BaseRepository
             $input['data_item'],
             ['djc_id' => $result['id'], 'ins' => $result['ins']]
         );
+
         // bulk insert djc items
         if ($result && $item_count) {
             DjcItem::insert($data_items);
@@ -115,6 +112,7 @@ class DjcRepository extends BaseRepository
 
         DB::beginTransaction();
         $result = Djc::where('id', $data['id'])->update($data);
+
         // djc items
         $item_count = count($input['data_item']['tag_number']);
         $data_items = $this->items_array(
@@ -127,14 +125,16 @@ class DjcRepository extends BaseRepository
         if ($result && $item_count) {
             foreach($data_items as $item) {
                 $djc_item = DjcItem::firstOrNew([
+                    'id' => $item['item_id'],
                     'djc_id' => $item['djc_id'],
-                    'tag_number' => $item['tag_number']
                 ]);
-                // assign properties to the djc_item
+                // assign properties to the item
                 foreach($item as $key => $value) {
-                    if ($key == 'djc_id' || $key == 'tag_number') continue;
                     $djc_item[$key] = $value;
                 }
+                // remove stale attributes
+                if ($djc_item['id'] == 0) unset($djc_item['id']);
+                unset($djc_item['item_id']);
 
                 $djc_item->save();
             }
@@ -159,6 +159,16 @@ class DjcRepository extends BaseRepository
         if ($djc->items()->delete() && $djc->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
+    }
+
+    // Delete djc item from storage
+    public function delete_item($id)
+    {
+        if (DjcItem::destroy($id)) {
+            return true;
+        }
+
+        throw new GeneralException('Error deleting Djc Item');
     }
 
     // Upload file to storage
