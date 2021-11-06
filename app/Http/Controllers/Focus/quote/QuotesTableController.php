@@ -53,12 +53,19 @@ class QuotesTableController extends Controller
         $core = $this->quote->getForDataTable();
         return Datatables::of($core)
             ->addIndexColumn()
+            ->addColumn('notes', function($quote) {
+                return $quote->notes;
+            })
             ->addColumn('tid', function ($quote) {
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote->tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
-                if ($quote->customer) return $quote->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
-               return null;
+                if (isset($quote->customer) && isset($quote->lead->branch)) {
+                    return $quote->customer->name.' '
+                        .$quote->lead->branch->name.' '
+                        .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
+                }
+                return null;
             })
             ->addColumn('created_at', function ($quote) {
                 return dateFormat($quote->invoicedate);
@@ -72,7 +79,8 @@ class QuotesTableController extends Controller
             ->addColumn('actions', function ($quote) {
                 return '<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Copy">'.'<i class="fa fa-clone" aria-hidden="true"></i></a> '
                     .$quote->action_buttons;
-            })->rawColumns(['tid', 'customer', 'actions', 'status', 'total'])
+            })
+            ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
             ->make(true);
     }
 }
