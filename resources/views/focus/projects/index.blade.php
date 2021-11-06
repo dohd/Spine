@@ -32,10 +32,9 @@
                                 <a href="#" class="list-group-item list-group-item-action border-0">
                                     <i class="icon-bell mr-1"></i>
                                     <span>{{trans('general.messages')}}</span>
-                                    <span class="badge badge-danger badge-pill float-right">3</span> </a>
-
+                                    <span class="badge badge-danger badge-pill float-right">3</span> 
+                                </a>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -52,10 +51,7 @@
                 @include('focus.projects.modal.project_new')
                 <div class="card todo-details rounded-0">
                     <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
-                    <div class="search">
-
-                    </div>
-
+                    <div class="search"></div>
                     <div class="card-body">
                         <table id="projects-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                             <thead>
@@ -67,12 +63,9 @@
                                     <th>{{ trans('projects.status') }}</th>
                                     <th>{{ trans('projects.end_date') }}</th>
                                     <th>{{ trans('general.createdat') }}</th>
-
                                     <th>{{ trans('general.action') }}</th>
                                 </tr>
                             </thead>
-
-
                             <tbody>
                                 <tr>
                                     <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
@@ -216,23 +209,23 @@
     }
 
     $('#AddProjectModal').on('shown.bs.modal', function() {
-        $('[data-toggle="datepicker"]').datepicker({
-            format: "{{config('core.user_date_format')}}"
-        });
+        $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}" });
 
         $('.from_date')
             .datepicker('setDate', 'today')
             .datepicker({ format: "{{date(config('core.user_date_format'))}}" });
 
+        const d = new Date();
+        const days = (30 * 24 * 60 * 60 * 1000);
+        d.setTime(d.getTime() + days);
         $('.to_date')
-            .datepicker('setDate', "{{dateFormat(date('
-                Y - m - d ', strtotime(' + 30 days ', strtotime(date('
-                Y - m - d ')))))}}"
-            )
-            .datepicker({
-                format: "{{date(config('core.user_date_format '))}}"
-            });
+            .datepicker('setDate', d)
+            .datepicker({ format: "{{date(config('core.user_date_format '))}}" });
 
+        // initiate select2 select menu
+        $("#main_quote").select2();
+        $("#other_quote").select2();
+        $("#branch_id").select2();
         $("#tags").select2();
         $("#employee").select2();
         $("#sales_account").select2();
@@ -244,6 +237,7 @@
             }
         });
 
+        // customer select menu options
         $("#person").select2({
             tags: [],
             ajax: {
@@ -252,15 +246,13 @@
                 type: 'POST',
                 quietMillis: 50,
                 data: function(person) {
-                    return {
-                        person: person
-                    };
+                    return { person };
                 },
                 processResults: function(data) {
                     return {
                         results: $.map(data, function(item) {
                             return {
-                                text: item.name + ' - ' + item.company,
+                                text: `${item.name} - ${item.company}`,
                                 id: item.id
                             }
                         })
@@ -269,28 +261,16 @@
             }
         });
 
+        // on selecting customer
         $("#person").on('change', function() {
-            $("#branch_id").val('').trigger('change');
-            var tips = $('#person :selected').val();
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+            var id = $('#person :selected').val();
+
+            // fetch customer branches
             $("#branch_id").select2({
                 ajax: {
-                    url: "{{route('biller.branches.branch_load')}}?id=" + tips,
+                    url: "{{route('biller.branches.branch_load')}}?id=" + id,
                     dataType: 'json',
-                    type: 'POST',
                     quietMillis: 50,
-                    params: {
-                        'cat_id': tips
-                    },
-                    data: function(product) {
-                        return {
-                            product: product
-                        };
-                    },
                     processResults: function(data) {
                         return {
                             results: $.map(data, function(item) {
@@ -303,6 +283,38 @@
                     },
                 }
             });
+
+            // fetch customer quotes
+            $("#main_quote").select2({
+                ajax: {
+                    url: "{{route('biller.quotes.customer_quotes')}}?id=" + id,
+                    dataType: 'json',
+                    quietMillis: 50,
+                    processResults: function(data) {
+                        assignOtherQuotes(data)
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    text: `${item.id} - ${item.notes}`,
+                                    id: item.id
+                                }
+                            })
+                        };
+                    },
+                }
+            });
+
+            // assign other quotes
+            function assignOtherQuotes(data) {
+                $("#other_quote").select2({
+                    data: $.map(data, function(item) {
+                        return {
+                            text: `${item.id} - ${item.notes}`,
+                            id: item.id
+                        }
+                    })
+                });
+            }
         });
     });
 
