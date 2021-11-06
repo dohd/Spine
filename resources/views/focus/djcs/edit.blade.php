@@ -254,14 +254,25 @@
                         </div>
                     </div>
                 </td>
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${cvalue}">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${cvalue}">
             </tr>
         `;
     }
-    
+
+    // assign row index
+    function assignIndex() {
+        $('#equipment tr').each(function(i) {
+            if (!i) return;
+            const index = $(this).index();
+            $(this).find('input[name="row_index[]"]').val(index);
+        });
+    }
+
     // equipment row counter;
     var counter = 1;
     // set default djc items rows
-    const djcItems = @json($djc->items);
+    const djcItems = @json($items);
     djcItems.forEach(v => {
         const i = counter;
         // add poduct row to equipment table
@@ -270,9 +281,10 @@
         // initialize date picker with php parsed date
         $('[data-toggle="datepicker"]')
             .datepicker({format: "{{config('core.user_date_format')}}"});
-        // autocomplete on added product row
         $('#tag_number-' + i).autocomplete(autocompleteProp(i));
-        // fill row input with values
+
+        // default input with values
+        $('#itemid-'+i).val(v.id);
         $('#tag_number-'+i).val(v.tag_number);
         $('#joc_card-'+i).val(v.joc_card);
         $('#equipment_type-'+i).val(v.equipment_type);
@@ -281,6 +293,8 @@
         $('#location-'+i).val(v.location);
         $('#last_service_date-'+i).val(v.last_service_date);
         $('#next_service_date-'+i).val(v.next_service_date);
+
+        assignIndex();
         counter++;
     });
 
@@ -335,6 +349,8 @@
             .datepicker({format: "{{config('core.user_date_format')}}"});
         // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
+
+        assignIndex();
     });
 
     // on clicking equipment drop down options
@@ -345,7 +361,22 @@
         // move row down 
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
-        if ($(this).is('.removeProd')) $(this).closest('tr').remove();
+        if ($(this).is('.removeProd')) {
+            const response = window.confirm('Are you sure to delete this item ?');
+            if (response) {
+                const row = $(this).closest('tr');
+                row.remove();
+                const itemId = row.find('input[name="item_id[]"]').val();
+                // delete item api call 
+                $.ajax({
+                    url: baseurl + 'djcs/delete_item/' + itemId,
+                    dataType: "json",
+                    method: 'DELETE',
+                });
+            }
+        }
+
+        assignIndex();
     });
     
     // on selecting lead option, fetch lead details from the server
