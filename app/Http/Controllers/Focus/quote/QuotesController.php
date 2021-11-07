@@ -244,7 +244,7 @@ class QuotesController extends Controller
     public function customer_quotes(ManageQuoteRequest $request)
     {
         $id = $request->input('id');
-        $quotes = Quote::where('customer_id', $id)->get(['id', 'notes', 'customer_id']);
+        $quotes = Quote::where('customer_id', $id)->get(['id', 'tid', 'notes', 'customer_id']);
 
         return json_encode($quotes);
     }
