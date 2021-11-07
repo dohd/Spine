@@ -44,7 +44,7 @@
                         <div class="row">
                             <fieldset class="form-group position-relative has-icon-right  col-md-6">
                                 <div><label for="quote">Primary / Main Quote</label></div>
-                                <select id="main_quote" name="main_quote" class="form-control required select-box" data-placeholder="Primary / Main Quote">
+                                <select required id="main_quote" name="main_quote" class="form-control required select-box" data-placeholder="Primary / Main Quote">
                                 </select>
                             </fieldset>
                             <fieldset class="form-group position-relative has-icon-right  col-md-6">
