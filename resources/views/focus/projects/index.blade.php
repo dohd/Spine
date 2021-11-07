@@ -237,7 +237,7 @@
             }
         });
 
-        // customer select menu options
+        // fetch customers
         $("#person").select2({
             tags: [],
             ajax: {
@@ -262,9 +262,9 @@
         });
 
         // on selecting customer
+        const quoteData = [];
         $("#person").on('change', function() {
             var id = $('#person :selected').val();
-
             // fetch customer branches
             $("#branch_id").select2({
                 ajax: {
@@ -291,30 +291,28 @@
                     dataType: 'json',
                     quietMillis: 50,
                     processResults: function(data) {
-                        assignOtherQuotes(data)
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    text: `${item.id} - ${item.notes}`,
-                                    id: item.id
-                                }
-                            })
-                        };
+                        const results = $.map(data, function(item) {
+                            return {
+                                text: `${item.tid} - ${item.notes}`,
+                                id: item.id
+                            };
+                        });
+                        // replace array data
+                        quoteData.length = 0;
+                        quoteData.push.apply(quoteData, results);
+
+                        return { results };
                     },
                 }
             });
+        });
 
-            // assign other quotes
-            function assignOtherQuotes(data) {
-                $("#other_quote").select2({
-                    data: $.map(data, function(item) {
-                        return {
-                            text: `${item.id} - ${item.notes}`,
-                            id: item.id
-                        }
-                    })
-                });
-            }
+        // on selecting Main Quote update Other Quote with unselected options
+        $("#main_quote").change(function(e) {
+            const id = Number(e.target.value);
+            const data = quoteData.filter(function(item) { return id !== item.id; });
+            // update other quote 
+            $("#other_quote").html('').select2({ data });
         });
     });
 
