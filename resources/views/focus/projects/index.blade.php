@@ -215,6 +215,7 @@
             .datepicker('setDate', 'today')
             .datepicker({ format: "{{date(config('core.user_date_format'))}}" });
 
+        // Add thirty days to the current date
         const d = new Date();
         const days = (30 * 24 * 60 * 60 * 1000);
         d.setTime(d.getTime() + days);
@@ -266,7 +267,7 @@
         $("#person").on('change', function() {
             var id = $('#person :selected').val();
             // fetch customer branches
-            $("#branch_id").select2({
+            $("#branch_id").html('').select2({
                 ajax: {
                     url: "{{route('biller.branches.branch_load')}}?id=" + id,
                     dataType: 'json',
@@ -285,7 +286,7 @@
             });
 
             // fetch customer quotes
-            $("#main_quote").select2({
+            $("#main_quote").html('').select2({
                 ajax: {
                     url: "{{route('biller.quotes.customer_quotes')}}?id=" + id,
                     dataType: 'json',
@@ -293,7 +294,7 @@
                     processResults: function(data) {
                         const results = $.map(data, function(item) {
                             return {
-                                text: `${item.tid} - ${item.notes}`,
+                                text: `${item.bank_id ? '#PI' : '#QT'} ${item.tid} - ${item.notes}`,
                                 id: item.id
                             };
                         });
@@ -307,12 +308,15 @@
             });
         });
 
-        // on selecting Main Quote update Other Quote with unselected options
+        // On selecting Main Quote
         $("#main_quote").change(function(e) {
             const id = Number(e.target.value);
+            // set Other Quote select options 
             const data = quoteData.filter(function(item) { return id !== item.id; });
-            // update other quote 
             $("#other_quote").html('').select2({ data });
+            // set project title
+            const name = $(this).find(':selected').text().split(' - ')[1];
+            $('#project-name').val(name);
         });
     });
 
