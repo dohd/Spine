@@ -213,10 +213,11 @@ class QuotesController extends Controller
     {
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
+        $products = $quote->products()->orderBy('row_index', 'ASC')->get();
 
         $quote['bill_type'] = 4;
 
-        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features'));
+        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products'));
     }
 
 
