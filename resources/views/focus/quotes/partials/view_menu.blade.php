@@ -1,7 +1,10 @@
 <div class="row">
     @if ($quote['status'] != 'canceled')
         <div class="col">
-            <a href="{{$quote['id']}}/edit" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> {{trans('labels.backend.quotes.edit')}}</a>
+            <a href="{{$quote['id']}}/edit" class="btn btn-warning mb-1">
+                <i class="fa fa-pencil"></i>
+                {{ @$quote->bank_id ? 'Edit PI' : trans('labels.backend.quotes.edit') }}             
+            </a>
             @php
                 $qt_link = route('biller.quotes.verify',[$quote->id ]);
                 $valid_token = token_validator('', 'q' . $quote['id'].$quote['tid'], true);
