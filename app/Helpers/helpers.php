@@ -343,13 +343,12 @@ if (!function_exists('numberClean')) {
 function date_for_database($input)
 {
     $timestamp = strtotime($input);
-   if($timestamp) {
-       $date = new DateTime($input);
-       //$date->modify('+1 day');
-       $date = $date->format('Y-m-d');
-       return $date;
-   }
-   else return null;
+    if ($timestamp) {
+        $date = new DateTime($input);
+        //$date->modify('+1 day');
+        $date = $date->format('Y-m-d');
+        return $date;
+    } else return null;
 }
 
 function datetime_for_database($input, $c = true)
@@ -368,7 +367,6 @@ function amountFormat($number = 0, $currency = null)
         $thousand_sep = config('currency.thousand_sep');
         $symbol_position = config('currency.symbol_position');
         $symbol = config('currency.symbol');
-
     } else {
         $result = \App\Models\currency\Currency::withoutGlobalScopes()->where('id', '=', $currency)->first();
 
@@ -382,7 +380,6 @@ function amountFormat($number = 0, $currency = null)
 
             $number = $number / config('currency.rate');
         }
-
     }
 
     $number = number_format($number, $precision_point, $decimal_sep, $thousand_sep);
@@ -406,20 +403,20 @@ function numberFormat($number = 0, $currency = null, $precision_point_off = fals
         $thousand_sep = $result->thousand_sep;
     }
     if ($precision_point_off) $precision_point = 0;
-    $number=(float)$number;
+    $number = (float)$number;
     $number = number_format($number, $precision_point, $decimal_sep, $thousand_sep);
     return $number;
 }
 
 function dateFormat($date = '', $local = false)
 {
-    if ($local AND strtotime($date)) return date($local, strtotime($date));
+    if ($local and strtotime($date)) return date($local, strtotime($date));
     if (strtotime($date)) return date(config('core.main_date_format'), strtotime($date));
     return date(config('core.main_date_format'));
 }
 
 // Database date format
-function db_dateformat($date='')
+function db_dateformat($date = '')
 {
     return date('Y-m-d', strtotime($date));
 }
@@ -471,7 +468,6 @@ function custom_fields($fields, $col1 = 2, $col2 = 10)
                     </div>
                 </div>';
         }
-
     }
     return $html;
 }
@@ -484,12 +480,11 @@ function custom_fields_view($module_id = 0, $rel_id, $default = true, $public = 
             $fields = \App\Models\items\CustomEntry::withoutGlobalScopes()->where('ins', '=', $public)->WhereHas('customfield', function ($query) {
                 return $query->where('field_view', '=', 1);
             })->where('module', $module_id)->where('rid', $rel_id)->get();
-
         } else {
             $fields = \App\Models\items\CustomEntry::with('customfield')->where('module', $module_id)->where('rid', $rel_id)->get();
         }
 
-       if ($default === 2) {
+        if ($default === 2) {
             $html .= '<table width="100%">';
 
             foreach ($fields as $row) {
@@ -505,10 +500,9 @@ function custom_fields_view($module_id = 0, $rel_id, $default = true, $public = 
 
             foreach ($fields as $row) {
                 if ($row['data']) {
-                    $html .= '<br><strong>' . $row->customfield->name . '</strong> ' . $row['data'] ;
+                    $html .= '<br><strong>' . $row->customfield->name . '</strong> ' . $row['data'];
                 }
             }
-
         } elseif ($default) {
             foreach ($fields as $row) {
                 if ($row['data']) {
@@ -593,7 +587,7 @@ function bill_helper($term = 1, $module_id = 1)
     $customergroups = \App\Models\customergroup\Customergroup::all();
     $fields = custom_fields(\App\Models\customfield\Customfield::where('module_id', $module_id)->get()->groupBy('field_type'));
     $defaults = \App\Models\Company\ConfigMeta::get()->groupBy('feature_id');
-    return compact('warehouses', 'additionals', 'currencies', 'terms', 'customergroups', 'fields', 'defaults', 'projects','customers','branches', 'accounts', 'assert_accounts', 'income_accounts', 'expense_accounts', 'whts','selling_prices');
+    return compact('warehouses', 'additionals', 'currencies', 'terms', 'customergroups', 'fields', 'defaults', 'projects', 'customers', 'branches', 'accounts', 'assert_accounts', 'income_accounts', 'expense_accounts', 'whts', 'selling_prices');
 }
 
 function product_helper()
@@ -623,7 +617,6 @@ function token_validator($request_token, $data, $return_token = false)
     if ($return_token) return $valid_token;
     if (hash_equals($request_token, $valid_token)) return true;
     return false;
-
 }
 
 
@@ -652,7 +645,6 @@ function task_status($task, $c = false)
 {
     if ($c) return \App\Models\misc\Misc::withoutGlobalScopes()->where('ins', '=', $c)->where('section', '=', 2)->where('id', '=', $task)->first();
     return \App\Models\misc\Misc::where('section', '=', 2)->where('id', '=', $task)->first();
-
 }
 
 
@@ -679,7 +671,7 @@ function project_access($project_id)
             return true;
         }
 
-        if (@$project->users->find($user_d->id)->id AND ($project->project_share == 3 OR $project->project_share == 5)) {
+        if (@$project->users->find($user_d->id)->id and ($project->project_share == 3 or $project->project_share == 5)) {
             return true;
         }
     }
@@ -696,7 +688,7 @@ function project_view($project_id)
             return true;
         }
 
-        if (@$project->users->find($user_d->id)->id AND ($project->project_share > 0)) {
+        if (@$project->users->find($user_d->id)->id and ($project->project_share > 0)) {
             return true;
         }
     }
@@ -709,7 +701,7 @@ function project_client($project_id)
         $project = \App\Models\project\Project::withoutGlobalScopes()->find($project_id);
         $user_d = auth('crm')->user();
 
-        if (@$project->customer->id == $user_d->id AND $project->project_share == 4) {
+        if (@$project->customer->id == $user_d->id and $project->project_share == 4) {
 
             return true;
         }
@@ -747,7 +739,7 @@ function feature(int $id = 0)
 
 function single_ton()
 {
-    if (config('standard.type') AND access()->allow('super') OR !config('standard.type')) return true;
+    if (config('standard.type') and access()->allow('super') or !config('standard.type')) return true;
     return false;
 }
 
@@ -806,10 +798,10 @@ function parse_single($key, $val, $string)
 function active($request)
 {
     $p_file = public_path('conf.json');
-    if(!file_exists($p_file)) {
-       $nf= fopen($p_file,'wb');
-       fclose($nf);
-       chmod($p_file, 0755);
+    if (!file_exists($p_file)) {
+        $nf = fopen($p_file, 'wb');
+        fclose($nf);
+        chmod($p_file, 0755);
     }
     if (is_writeable($p_file)) {
         $config = config('version');
@@ -829,11 +821,11 @@ function active($request)
         $lc_en = json_decode($contents, true);
         file_put_contents($p_file, @$lc_en['code']);
         $lc = file_get_contents($p_file);
-        if (empty($lc) AND $lc_en['valid']) {
+        if (empty($lc) and $lc_en['valid']) {
             return array('flash_error' => 'Server write permissions denied');
         } else {
-             if ($lc_en['valid'] AND $lc_en['type'] == 'e') return array('flash_success' => 'License updated!');
-             if ($lc_en['valid'] AND $lc_en['type'] == 'r')  return array('flash_success' => 'License updated!');
+            if ($lc_en['valid'] and $lc_en['type'] == 'e') return array('flash_success' => 'License updated!');
+            if ($lc_en['valid'] and $lc_en['type'] == 'r')  return array('flash_success' => 'License updated!');
             if (!$lc_en['valid']) {
                 return array('flash_error' => 'License error! Purchase another copy</a> OR <a class="yellow" href="http://bit.ly/2IsOoFa" target="_blank"> Read the license terms!</a>');
             }
@@ -894,22 +886,23 @@ function in_array_r($needle, $haystack, $strict = false, $columns = null)
     return false;
 }
 
-function strip_tags_deep($value, $key = null){
-  if(is_array($value)){
-    return array_map('strip_tags_deep', $value, array_keys($value));
-  }else{
-    if($key === 'valuetest'){
-      return strip_tags($value);
+function strip_tags_deep($value, $key = null)
+{
+    if (is_array($value)) {
+        return array_map('strip_tags_deep', $value, array_keys($value));
+    } else {
+        if ($key === 'valuetest') {
+            return strip_tags($value);
+        }
+        return $value;
     }
-    return $value;
-  }
 }
 
 // log to the browser console when return type is a view
 function browser_log(...$logs)
 {
     foreach ($logs as $log) {
-        echo '<script>console.log('.json_encode($log).')</script>';
+        echo '<script>console.log(' . json_encode($log) . ')</script>';
     }
 }
 // log to the server console
