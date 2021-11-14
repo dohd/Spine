@@ -105,7 +105,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            <th>{{ trans('quotes.quote')}} #{{prefix(5 )}}</th>
+                                            <th>{{ trans('quotes.quote').' / PI' }}</th>
                                             <th>{{ trans('customers.customer') }}</th>
                                             <th>{{ trans('quotes.invoicedate') }}</th>
                                             <th>{{ trans('general.amount') }}</th>
