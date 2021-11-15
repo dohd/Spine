@@ -57,15 +57,16 @@ class QuotesTableController extends Controller
                 return $quote->notes;
             })
             ->addColumn('tid', function ($quote) {
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote->tid . '</a>';
+                $quote_type = $quote->bank_id ? '#PI '.$quote->tid : '#QT '.$quote->tid; 
+                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote_type . '</a>';
             })
             ->addColumn('customer', function ($quote) {
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
-                    return $quote->customer->name.' '
+                    return $quote->customer->name.' - '
                         .$quote->lead->branch->name.' '
                         .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
                 }
-                return null;
+                return;
             })
             ->addColumn('created_at', function ($quote) {
                 return dateFormat($quote->invoicedate);

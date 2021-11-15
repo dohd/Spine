@@ -296,7 +296,8 @@
                 <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
+                <input type="hidden" name="product_id[]" value="0" id="productid-${val}">
+                <input type="hidden" name="a_type" value="1" id="atype-${val}">
             </tr>
         `;
     }
@@ -315,6 +316,7 @@
                 <input type="hidden" name="product_price[]" value="0">
                 <input type="hidden" name="product_subtotal[]" value="0">
                 <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
+                <input type="hidden" name="a_type" value="2" id="atype-${val}">
             </tr>
         `;
     }

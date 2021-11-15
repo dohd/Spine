@@ -31,8 +31,7 @@
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-body">                    
-                    @include('focus.quotes.partials.view_menu')
-                    
+                    @include('focus.quotes.partials.view_menu')                    
                     @if ($quote['verified'] == "Yes")
                         <div class="badge text-center white d-block m-1">
                             <span class="bg-danger round p-1">
@@ -53,8 +52,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
-                            <h2>{{trans('quotes.quote')}}</h2>
-                            <p class="pb-3">{{prefix(5)}} # {{$quote['tid']}}</p>
+                            @if ($quote->bank_id)
+                                <h2>Proformer Invoice</h2>
+                                <p class="pb-3">#PI {{ $quote->tid }}</p>
+                            @else
+                                <h2>{{ trans('quotes.quote')}}</h2>
+                                <p class="pb-3">#{{ prefix(5) }} {{ $quote['tid'] }}</p>
+                            @endif
                             <ul class="px-0 list-unstyled">
                                 <li>{{trans('general.total')}}</li>
                                 <li class="lead text-bold-800">{{amountFormat($quote['total'])}}</li>
@@ -137,123 +141,126 @@
                         <div class="row">
                             <div class="table-responsive col-sm-12">
                                 <table class="table">
-                                    @if($quote['tax_format']=='exclusive' OR $quote['tax_format']=='inclusive')
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>{{trans('products.product_des')}}</th>
-                                            <th class="text-right">{{trans('products.price')}}</th>
-                                            <th class="text-right">{{trans('products.qty')}}</th>
-                                            <th class="text-right">{{trans('general.tax')}}</th>
-                                            <th class="text-right">{{trans('general.discount')}}</th>
-                                            <th class="text-right">{{trans('general.subtotal')}}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($quote->products as $product)
-                                        @if($product['a_type']==1)
-                                        <tr>
-                                            <th scope="row">{{ $product['numbering'] }}</th>
-                                            <td>
-                                                <p>{{$product['product_name']}}</p>
-                                                <p class="text-muted"> {!!$product['product_des'] !!} </p>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                            <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
-                                            <td class="text-right">{{amountFormat($product['total_tax'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
-                                            <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
-                                        </tr>
-                                        @elseif($product['a_type']==2)
-                                        <tr>
-                                            <th scope="row">{{ $product['numbering'] }}</th>
-                                            <td>
-                                                <p>{{$product['product_name']}}</p>
-                                            </td>
-                                            <td class="text-right"></td>
-                                            <td class="text-right"></td>
-                                            <td class="text-right"> </td>
-                                            <td class="text-right"></td>
-                                            <td class="text-right"></td>
-                                        </tr>
-                                        @endif
-                                        @endforeach
-                                        <tr>
-                                            <td colspan="7">{!! custom_fields_view(3,$product['product_id'],false) !!}</td>
-                                        </tr>
-                                    </tbody>
+                                    @if ($quote['tax_format']=='exclusive' OR $quote['tax_format']=='inclusive')
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>{{trans('products.product_des')}}</th>
+                                                <th class="text-right">{{trans('products.price')}}</th>
+                                                <th class="text-right">{{trans('products.qty')}}</th>
+                                                <th class="text-right">{{trans('general.tax')}}</th>
+                                                <th class="text-right">{{trans('general.discount')}}</th>
+                                                <th class="text-right">{{trans('general.subtotal')}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($products as $product)
+                                                @if ($product['a_type'] == 1)                                               
+                                                    <tr>
+                                                        <th scope="row">{{ $product['numbering'] }}</th>
+                                                        <td>
+                                                            <p>{{$product['product_name']}}</p>
+                                                            <p class="text-muted"> {!!$product['product_des'] !!} </p>
+                                                        </td>
+                                                        <td class="text-right">{{amountFormat($product['product_price'])}}</td>
+                                                        <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
+                                                        <td class="text-right">
+                                                            @php
+                                                                $price = (float) $product->product_price;
+                                                                $subtotal = (float) $product->product_subtotal;
+                                                                $tax_amount = amountFormat($subtotal - $price);
+                                                            @endphp
+                                                            {{ $tax_amount }}
+                                                            <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
+                                                        </td>
+                                                        <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
+                                                        <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
+                                                    </tr>
+                                                @elseif ($product['a_type'] == 2)
+                                                    <tr>
+                                                        <th scope="row">{{ $product['numbering'] }}</th>
+                                                        <td>
+                                                            <p>{{$product['product_name']}}</p>
+                                                        </td>
+                                                        <td class="text-right"></td>
+                                                        <td class="text-right"></td>
+                                                        <td class="text-right"> </td>
+                                                        <td class="text-right"></td>
+                                                        <td class="text-right"></td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                            <tr><td colspan="7"></td></tr>
+                                        </tbody>
                                     @endif
-                                    @if($quote['tax_format']=='cgst')
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>{{trans('products.product_des')}}</th>
-                                            <th class="text-right">{{trans('products.price')}}</th>
-                                            <th class="text-right">{{trans('products.qty')}}</th>
-                                            <th class="text-right">{{trans('general.cgst')}}</th>
-                                            <th class="text-right">{{trans('general.sgst')}}</th>
-                                            <th class="text-right">{{trans('general.discount')}}</th>
-                                            <th class="text-right">{{trans('general.subtotal')}}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($quote->products as $product)
-                                        <tr>
-                                            <th scope="row">{{ $loop->iteration }}</th>
-                                            <td>
-                                                <p>{{$product['product_name']}}</p>
-                                                <p class="text-muted"> {!!$product['product_des'] !!} </p>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                            <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
-                                            <td class="text-right">{{amountFormat($product['total_tax']/2)}}
-                                                <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2)}}%)</span>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['total_tax']/2)}}
-                                                <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2)}}%)</span>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
-                                            <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="8">{!! custom_fields_view(3,$product['product_id'],false) !!}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
+
+                                    @if ($quote['tax_format'] == 'cgst')
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>{{trans('products.product_des')}}</th>
+                                                <th class="text-right">{{trans('products.price')}}</th>
+                                                <th class="text-right">{{trans('products.qty')}}</th>
+                                                <th class="text-right">{{trans('general.cgst')}}</th>
+                                                <th class="text-right">{{trans('general.sgst')}}</th>
+                                                <th class="text-right">{{trans('general.discount')}}</th>
+                                                <th class="text-right">{{trans('general.subtotal')}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($quote->products as $product)
+                                                <tr>
+                                                    <th scope="row">{{ $loop->iteration }}</th>
+                                                    <td>
+                                                        <p>{{$product['product_name']}}</p>
+                                                        <p class="text-muted"> {!!$product['product_des'] !!} </p>
+                                                    </td>
+                                                    <td class="text-right">{{amountFormat($product['product_price'])}}</td>
+                                                    <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
+                                                    <td class="text-right">{{ amountFormat($product['product_tax']/2) }}
+                                                        <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2)}}%)</span>
+                                                    </td>
+                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
+                                                    <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="8">{!! custom_fields_view(3,$product['product_id'],false) !!}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
                                     @endif
                                     @if ($quote['tax_format'] == 'igst')
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>{{trans('products.product_des')}}</th>
-                                            <th class="text-right">{{trans('products.price')}}</th>
-                                            <th class="text-right">{{trans('products.qty')}}</th>
-                                            <th class="text-right">{{trans('general.igst')}}</th>
-                                            <th class="text-right">{{trans('general.discount')}}</th>
-                                            <th class="text-right">{{trans('general.subtotal')}}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($quote->products as $product)
-                                        <tr>
-                                            <th scope="row">{{ $loop->iteration }}</th>
-                                            <td>
-                                                <p>{{$product['product_name']}}</p>
-                                                <p class="text-muted"> {!!$product['product_des'] !!} </p>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                            <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
-                                            <td class="text-right">{{amountFormat($product['total_tax'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
-                                            </td>
-                                            <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
-                                            <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="7">{!! custom_fields_view(4,$product['product_id'],false) !!}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>{{trans('products.product_des')}}</th>
+                                                <th class="text-right">{{trans('products.price')}}</th>
+                                                <th class="text-right">{{trans('products.qty')}}</th>
+                                                <th class="text-right">{{trans('general.igst')}}</th>
+                                                <th class="text-right">{{trans('general.discount')}}</th>
+                                                <th class="text-right">{{trans('general.subtotal')}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($quote->products as $product)
+                                                <tr>
+                                                    <th scope="row">{{ $loop->iteration }}</th>
+                                                    <td>
+                                                        <p>{{$product['product_name']}}</p>
+                                                        <p class="text-muted"> {!!$product['product_des'] !!} </p>
+                                                    </td>
+                                                    <td class="text-right">{{amountFormat($product['product_price'])}}</td>
+                                                    <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
+                                                    <td class="text-right">{{amountFormat($product['total_tax'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
+                                                    </td>
+                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
+                                                    <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="7">{!! custom_fields_view(4,$product['product_id'],false) !!}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
                                     @endif
                                 </table>
                             </div>

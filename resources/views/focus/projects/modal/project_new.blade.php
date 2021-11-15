@@ -9,17 +9,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <fieldset class="form-group col-8">
-                                <div><label for="projectTitle">Project Title</label></div>
-                                <input type="text" class="new-todo-item form-control required" placeholder="{{trans('projects.name')}}" name="name">
-                            </fieldset>
-                            <fieldset class="form-group col-4">
-                                <div><label for="projectNumber">Project No.</label></div>
-                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number">
-                            </fieldset>
-                        </div>
+                    <div class="modal-body">     
                         <div class="row">
                             <fieldset class="form-group position-relative has-icon-left  col-md-4">
                                 <div><label for="customer">Search Customer</label></div>
@@ -41,6 +31,7 @@
                                 </select>
                             </fieldset>
                         </div>
+                   
                         <div class="row">
                             <fieldset class="form-group position-relative has-icon-right  col-md-6">
                                 <div><label for="quote">Primary / Main Quote</label></div>
@@ -54,6 +45,17 @@
                             </fieldset>
                         </div>
                         
+                        <div class="row">
+                            <fieldset class="form-group col-8">
+                                <div><label for="projectTitle">Project Title</label></div>
+                                <input type="text" class="new-todo-item form-control required" placeholder="{{trans('projects.name')}}" name="name" id="project-name">
+                            </fieldset>
+                            <fieldset class="form-group col-4">
+                                <div><label for="projectNumber">Project No.</label></div>
+                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number">
+                            </fieldset>
+                        </div>
+
                         <div class="row">
                             <fieldset class="form-group col-md-4">
                                 <div><label for="status">Status</label></div>

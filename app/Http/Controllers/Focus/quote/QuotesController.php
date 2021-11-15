@@ -213,10 +213,11 @@ class QuotesController extends Controller
     {
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
+        $products = $quote->products()->orderBy('row_index', 'ASC')->get();
 
         $quote['bill_type'] = 4;
 
-        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features'));
+        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products'));
     }
 
 
@@ -244,7 +245,7 @@ class QuotesController extends Controller
     public function customer_quotes(ManageQuoteRequest $request)
     {
         $id = $request->input('id');
-        $quotes = Quote::where('customer_id', $id)->get(['id', 'tid', 'notes', 'customer_id']);
+        $quotes = Quote::where('customer_id', $id)->get(['id', 'tid', 'notes', 'customer_id', 'bank_id']);
 
         return json_encode($quotes);
     }
