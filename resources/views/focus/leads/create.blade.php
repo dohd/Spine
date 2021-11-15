@@ -34,14 +34,13 @@
 
                                 <div class="card-body">
                                     {{ Form::open(['route' => 'biller.leads.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-productcategory']) }}
-                                    <div class="form-group">
-                                        {{-- Including Form blade file --}}
-                                        @include("focus.leads.form")
-                                        <div class="edit-form-btn">
-                                            {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-lg pull-right']) }}
-                                            <div class="clearfix"></div>
+                                        <div class="form-group">
+                                            @include("focus.leads.form")
+                                            <div class="edit-form-btn">
+                                                {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-lg pull-right']) }}
+                                                <div class="clearfix"></div>
+                                            </div>
                                         </div>
-                                    </div>
                                     {{ Form::close() }}
                                 </div>
                             </div>
