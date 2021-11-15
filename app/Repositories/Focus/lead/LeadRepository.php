@@ -2,14 +2,9 @@
 
 namespace App\Repositories\Focus\lead;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\lead\Lead;
-use App\Models\Access\User\User;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
-use App\Notifications\Rose;
 
 /**
  * Class ProductcategoryRepository.
@@ -29,16 +24,7 @@ class LeadRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        $q = $this->query();
-        // $q->when(!request('rel_type'), function ($q) {
-        // return $q->where('c_type', '=',request('rel_type',0));
-        //});
-        //$q->when(request('rel_type'), function ($q) {
-        // return $q->where('rel_id', '=',request('rel_id',0));
-        // });
-
-        return $q->get();
+        return $this->query()->get();
     }
 
     /**
@@ -51,6 +37,11 @@ class LeadRepository extends BaseRepository
     public function create(array $input)
     {
         $input['date_of_request'] = date_for_database($input['date_of_request']);
+        // increament reference
+        $tid = Lead::orderBy('reference', 'desc')->first('reference')->reference;
+        if ($input['reference'] <= $tid) {
+            $input['reference'] = $tid + 1;
+        }
 
         $result = Lead::create($input);
 
