@@ -16,8 +16,8 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $lead = Lead::orderBy('reference', 'desc')->first('reference');
+        $tid = Lead::orderBy('reference', 'desc')->first('reference')->reference;
 
-        return view('focus.leads.create', compact('lead'));
+        return view('focus.leads.create', compact('tid'));
     }
 }
