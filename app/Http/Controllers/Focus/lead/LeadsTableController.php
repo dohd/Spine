@@ -77,6 +77,9 @@ class LeadsTableController extends Controller
                 if ($lead->status == 0) return '<span class="badge badge-secondary">Open</span>';
                 return '<span class="badge badge-success">Closed</span>';
             })
+            ->addColumn('reason', function($lead) {
+                return $lead->reason;
+            })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
             })

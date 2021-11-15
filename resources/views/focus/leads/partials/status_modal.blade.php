@@ -7,13 +7,21 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            {{ Form::model($lead, ['route' => ['biller.leads.edit_status', $lead->id], ]) }}
+            {{ Form::model($lead, ['route' => ['biller.leads.update_status', $lead->id], ]) }}
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select class="form-control" name="status" id="status">
                             <option value="0">Open</option>
                             <option value="1">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <select class="form-control" name="reason" id="reason">
+                            <option value="new">New</option>
+                            <option value="won">Won</option>
+                            <option value="lost">Lost</option>
                         </select>
                     </div>
                 </div>

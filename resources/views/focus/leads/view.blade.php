@@ -41,7 +41,9 @@
                     <tr>
                         <th>Status</th>
                         @if ($lead->status)
-                            <td class='text-success'>Closed</td>
+                            <td class='text-success'>Closed
+                                <span style='color:black'> || {{ $lead->reason }}</span> 
+                            </td>
                         @else
                             <td class='font-weight-bold'>Open</td>
                         @endif
@@ -106,5 +108,6 @@
 <script>
     // default status modal select value
     $('#status').val("{{ $lead->status }}");
+    $('#reason').val("{{ $lead->reason }}");
 </script>
 @endsection

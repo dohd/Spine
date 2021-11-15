@@ -42,10 +42,10 @@
                                             <th>Source</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>Status</th>
+                                            <th>Reason</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
-
                                     <tbody>
                                         <tr>
                                             <td colspan="100%" class="text-center text-success font-large-1">
@@ -121,11 +121,15 @@
                 },
                 {
                     data: 'created_at',
-                    name: "{{config('module.leads.table ')}}.created_at"
+                    name: "{{config('module.leads.table')}}.created_at"
                 },
                 {
                     data: 'status',
                     name: 'status'
+                },
+                {
+                    data: 'reason',
+                    name: 'reason'
                 },
                 {
                     data: 'actions',
