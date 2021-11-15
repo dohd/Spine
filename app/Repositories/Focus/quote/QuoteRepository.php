@@ -71,6 +71,12 @@ class QuoteRepository extends BaseRepository
         }
         $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
         $quote['invoiceduedate'] = date_for_database($duedate);
+        // increament tid
+        $ref = Quote::orderBy('tid', 'desc')->first('tid')->tid;
+        if ($quote['tid'] <= $ref) {
+            $quote['tid'] = $ref + 1;
+        }
+        // defaults
         $quote['quote_type'] = 'lead';
         $quote['client_type'] = 'lead';
 

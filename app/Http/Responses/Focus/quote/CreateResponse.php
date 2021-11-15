@@ -28,7 +28,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_quote = Quote::orderBy('id', 'desc')->where('i_class', '=', 0)->first();
+        $last_quote = Quote::orderBy('tid', 'desc')->first();
         $leads = Lead::where('status', 0)->get();
 
         // create proformer invoice
