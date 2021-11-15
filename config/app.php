@@ -178,7 +178,7 @@ return [
 
         Collective\Html\HtmlServiceProvider::class,
         Yajra\DataTables\DataTablesServiceProvider::class,
-        OwenIt\Auditing\AuditingServiceProvider::class,
+        // OwenIt\Auditing\AuditingServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -249,7 +249,7 @@ return [
          */
         'Form'        => Collective\Html\FormFacade::class,
         'Html'        => Collective\Html\HtmlFacade::class,
-        'Bitly' => Shivella\Bitly\Facade\Bitly::class,
-        'Excel' =>  Maatwebsite\Excel\Facades\Excel::class,
+        'Bitly'       => Shivella\Bitly\Facade\Bitly::class,
+        'Excel'       => Maatwebsite\Excel\Facades\Excel::class,
     ],
 ];
