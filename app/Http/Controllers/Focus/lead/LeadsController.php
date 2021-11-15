@@ -56,10 +56,6 @@ class LeadsController extends Controller
      */
     public function index()
     {
-
-        // $core = $this->lead->getForDataTable();
-        // dd($core );
-
         return new ViewResponse('focus.leads.index');
     }
 
@@ -71,7 +67,6 @@ class LeadsController extends Controller
      */
     public function create()
     {
-
         return new CreateResponse('focus.leads.create');
     }
 
