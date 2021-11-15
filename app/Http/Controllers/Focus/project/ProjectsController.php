@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\project;
 
 use App\Models\Company\ConfigMeta;
@@ -74,7 +75,8 @@ class ProjectsController extends Controller
         $mics = Misc::all();
         $employees = Hrm::all();
         $accounts = Account::where('account_type', '=', 'Income')->get();
-        return new ViewResponse('focus.projects.index', compact('mics', 'employees','accounts'));
+        
+        return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts'));
     }
 
 
@@ -186,7 +188,7 @@ class ProjectsController extends Controller
         $input = $request->except(['_token', 'ins']);
         if (!project_access($input['project_id'])) exit;
         switch ($input['obj_type']) {
-            case 2 :
+            case 2:
                 $milestone = ProjectMileStone::create(array('project_id' => $input['project_id'], 'name' => $input['name'], 'note' => $input['description'], 'color' => $input['color'], 'due_date' => date_for_database($input['duedate']) . ' ' . $input['time_to'] . ':00', 'user_id' => auth()->user()->id));
                 $result = '<li class=" " id="m_' . $milestone->id . '">
                                     <div class="timeline-badge" style="background-color: ' . $milestone->color . ' ;">*</div>
@@ -211,7 +213,7 @@ class ProjectsController extends Controller
                 ProjectLog::create(array('project_id' => $milestone->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.new') . '] ' . $input['name'], 'user_id' => auth()->user()->id));
                 return json_encode(array('status' => 'Success', 'message' => trans('general.success'), 't_type' => 2, 'meta' => $result));
                 break;
-            case 5 :
+            case 5:
 
                 $p_log = ProjectLog::create(array('project_id' => $request->project_id, 'value' => $request->name, 'user_id' => auth()->user()->id));
 
@@ -231,23 +233,19 @@ class ProjectsController extends Controller
 
                 break;
         }
-
-
     }
 
     public function delete_meta(ManageProjectRequest $request)
     {
         $input = $request->except(['_token', 'ins']);
         switch ($input['obj_type']) {
-            case 2 :
+            case 2:
                 $milestone = ProjectMileStone::find($input['object_id']);
                 ProjectLog::create(array('project_id' => $milestone->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 'user_id' => auth()->user()->id));
                 $milestone->delete();
                 return json_encode(array('status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']));
                 break;
-
         }
-
     }
 
     public function log_history(ManageProjectRequest $request)
@@ -264,10 +262,8 @@ class ProjectsController extends Controller
             })
             ->addColumn('user', function ($project) {
                 return user_data($project->user_id)['first_name'];
-
             })
             ->make(true);
-
     }
 
     public function invoices(InvoiceRepository $invoice)
@@ -298,7 +294,6 @@ class ProjectsController extends Controller
                 return $invoice->action_buttons;
             })->rawColumns(['tid', 'customer', 'actions', 'status', 'total'])
             ->make(true);
-
     }
 
     public function load(ManageProjectRequest $request)
@@ -330,7 +325,7 @@ class ProjectsController extends Controller
 
     public function project_search(Request $request, $bill_type)
     {
-    
+
         if (!access()->allow('product_search')) return false;
 
         $q = $request->post('keyword');
@@ -338,25 +333,24 @@ class ProjectsController extends Controller
         $s = $request->post('serial_mode');
         if ($bill_type == 'label') $q = @$q['term'];
         $wq = compact('q', 'w');
-            
 
-         $project = Project::where('name', 'LIKE', '%' . $q . '%')
-           -> orWhereHas('customer', function ($query) use ($wq) {
+
+        $project = Project::where('name', 'LIKE', '%' . $q . '%')
+            ->orWhereHas('customer', function ($query) use ($wq) {
                 $query->where('company', 'LIKE', '%' . $wq['q'] . '%');
                 return $query;
-            })-> orWhereHas('branch', function ($query) use ($wq) {
+            })->orWhereHas('branch', function ($query) use ($wq) {
                 $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
                 return $query;
             })->limit(6)->get();
-            $output = array();
+        $output = array();
 
-            foreach ($project as $row) {
+        foreach ($project as $row) {
 
-                 if ($row->id > 0) {
-                $output[] = array('name' => $row->customer_project->company . ' '.$row->branch->name.'  - ' . $row->name.' - ' . $row->project_number, 'id' => $row['id'], 'client_id' => $row->customer_project->id, 'branch_id' => $row->branch->id);
+            if ($row->id > 0) {
+                $output[] = array('name' => $row->customer_project->company . ' ' . $row->branch->name . '  - ' . $row->name . ' - ' . $row->project_number, 'id' => $row['id'], 'client_id' => $row->customer_project->id, 'branch_id' => $row->branch->id);
             }
-                
-            }
+        }
 
         if (count($output) > 0)
 
@@ -371,20 +365,16 @@ class ProjectsController extends Controller
         $q = $request->post('keyword');
 
         $projects = Project::where('project_number', 'LIKE', '%' . $q . '%')
-           -> orWhereHas('customer', function ($query) use ($q) {
+            ->orWhereHas('customer', function ($query) use ($q) {
                 $query->where('company', 'LIKE', '%' . $q . '%');
                 return $query;
-            })-> orWhereHas('branch', function ($query) use ($q) {
-                $query->where('name', 'LIKE', '%' . $q. '%');
+            })->orWhereHas('branch', function ($query) use ($q) {
+                $query->where('name', 'LIKE', '%' . $q . '%');
                 return $query;
             })->limit(6)->get();
 
 
-           if (count($projects) > 0) return view('focus.projects.partials.search')->with(compact('projects'));
-
-
-
-          
+        if (count($projects) > 0) return view('focus.projects.partials.search')->with(compact('projects'));
     }
 
 
@@ -413,31 +403,25 @@ class ProjectsController extends Controller
 
                 break;
         }
-
-
     }
 
-       public function project_load(Request $request)
+    public function project_load(Request $request)
     {
 
-          $q = $request->get('id');
-        if($q==1){
-       $result = Equipment::all()->where('rel_id', '=', $q);
-        return json_encode($result);
-
-        }else{
-            $result="";
-             return json_encode($result);
+        $q = $request->get('id');
+        if ($q == 1) {
+            $result = Equipment::all()->where('rel_id', '=', $q);
+            return json_encode($result);
+        } else {
+            $result = "";
+            return json_encode($result);
         }
-      
     }
 
-     public function project_load_select(Request $request)
+    public function project_load_select(Request $request)
     {
         $q = $request->get('id');
         $result = Project::all()->where('customer_id', '=', $q)->where('status', '=', 1);
         return json_encode($result);
     }
-
-
 }
