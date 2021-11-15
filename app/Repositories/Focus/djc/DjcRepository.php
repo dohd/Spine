@@ -64,7 +64,13 @@ class DjcRepository extends BaseRepository
     {
         // djc input data
         $data = $input['data'];
+        
         $data['report_date'] = date_for_database($data['report_date']);
+        // increament tid
+        $ref =  Djc::orderBy('tid', 'desc')->first('tid')->tid;
+        if ($data['tid'] <= $ref) {
+            $data['tid'] = $ref + 1;
+        }
         
         // upload files
         foreach($data as $key => $value) {

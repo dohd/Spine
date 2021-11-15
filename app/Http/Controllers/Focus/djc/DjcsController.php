@@ -70,8 +70,7 @@ class DjcsController extends Controller
     public function create(ManageDjcRequest $request)
     {
         $leads=Lead::all();
-        $djc =  Djc::orderBy('tid', 'desc')->first();
-        $tid = $djc->tid + 1;
+        $tid =  Djc::orderBy('tid', 'desc')->first('tid')->tid + 1;
 
         return new CreateResponse('focus.djcs.create', compact('leads','tid'));
     }
