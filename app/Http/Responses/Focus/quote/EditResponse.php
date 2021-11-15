@@ -39,7 +39,7 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-        $leads = $this->quote->lead->get();
+        $leads = $this->quote->lead->where('status', 0)->get();
         $products = $this->quote->products()->orderBy('row_index', 'ASC')->get();
         
         // default parameters

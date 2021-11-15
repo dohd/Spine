@@ -285,7 +285,6 @@ class QuotesController extends Controller
         $approved_date = date_for_database($request->input('approved_date'));
         $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
         if ($quote_o->id) {
-
             $quote_o->status = $input['status'];
             $quote_o->approved_method = $input['approved_method'];
             $quote_o->approved_by = $input['approved_by'];
