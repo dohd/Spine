@@ -76,7 +76,7 @@
                     <div class="col-sm-6"><label for="reference" class="caption">Lead ID*</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                            {{ Form::number('reference', @$lead->reference+1, ['class' => 'form-control round', 'placeholder' => 'Lead ID', 'id' => 'reference']) }}
+                            {{ Form::number('reference', @$tid + 1, ['class' => 'form-control round', 'placeholder' => 'Lead ID', 'id' => 'reference']) }}
                         </div>
                     </div>
 
@@ -148,7 +148,6 @@
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 
 <script type="text/javascript">
-
     // on selecting a payer type
     $("input[name=client_status]").on('change', function () {
         var payerType = $('input[name=client_status]:checked').val();
