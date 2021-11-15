@@ -52,7 +52,7 @@
                             </fieldset>
                             <fieldset class="form-group col-4">
                                 <div><label for="projectNumber">Project No.</label></div>
-                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number">
+                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number" id="project-number">
                             </fieldset>
                         </div>
 
