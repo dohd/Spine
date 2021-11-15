@@ -227,12 +227,13 @@ class LeadsController extends Controller
         return false;
     }
 
-    // edit lead status
-    public function edit_status(Request $request, $id)
+    // update Lead status
+    public function update_status(Request $request, $id)
     {
         $status = $request->post('status');
+        $reason = $request->post('reason');
 
-        Lead::find($id)->update(compact('status'));
+        Lead::find($id)->update(compact('status', 'reason'));
 
         return redirect()->back();
     }
