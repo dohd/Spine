@@ -220,8 +220,8 @@
         const days = (30 * 24 * 60 * 60 * 1000);
         d.setTime(d.getTime() + days);
         $('.to_date')
-            .datepicker('setDate', d)
-            .datepicker({ format: "{{date(config('core.user_date_format '))}}" });
+            .datepicker({ format: "{{ config('core.user_date_format') }}" })
+            .datepicker('setDate', d);
 
         // initiate select2 select menu
         $("#main_quote").select2();
