@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management')." | Edit Quote" )
+@section ('title', trans('labels.backend.quotes.management').' | '.'Edit Quote')
 
 @section('page-header')
     <h1>{{ trans('labels.backend.quotes.management') }}</h1>
