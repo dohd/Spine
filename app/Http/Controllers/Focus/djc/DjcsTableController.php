@@ -54,15 +54,16 @@ class DjcsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($djc) {
-                return $djc->client->company . ' ' . $djc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
+                return $djc->client->company . ' - ' . $djc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
             })
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
             })
             ->addColumn('actions', function ($djc) {
                 $valid_token = token_validator('', 'd' . $djc->id, true);
-                $link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
-                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="List"><i class="fa fa-print"></i></a> ' . $djc->action_buttons;
+                
+                return '<a href="' . route('biller.print_djc', [$djc->id, 10, $valid_token, 1]) . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
+                        . $djc->action_buttons;
             })
             ->make(true);
     }
