@@ -72,7 +72,7 @@ class QuotesTableController extends Controller
                 return dateFormat($quote->invoicedate);
             })
             ->addColumn('total', function ($quote) {
-                return amountFormat($quote->total);
+                return number_format($quote->total, 2);
             })
             ->addColumn('status', function ($quote) {
                 return '<span class="st-' . $quote->status . '">' . trans('payments.' . $quote->status) . '</span>';
