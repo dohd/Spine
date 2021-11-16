@@ -396,6 +396,20 @@
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
 <script type="text/javascript">
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+
+    // On delete quote
+    $('.quote-delete').click(function(e) {
+        if (confirm('Are you sure to delete this item ?')) {
+            $(this).children('form').submit();
+        }
+        return;
+    });
+
+
+
     $('[data-toggle="datepicker"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
@@ -451,11 +465,6 @@
             e.preventDefault();
             var aurl = $(this).attr('data-url');
             var obj = $(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
             $.ajax({
                 url: aurl,
                 type: 'POST',
