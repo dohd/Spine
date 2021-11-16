@@ -24,57 +24,57 @@
             </div>
         </div>
         @if($segment)
-        @php
-        $total=$segment->invoices->sum('total');
-        $paid=$segment->invoices->sum('pamnt');
-        $due=$total-$paid;
-        @endphp
-        <div class="card">
+            @php
+                $total=$segment->invoices->sum('total');
+                $paid=$segment->invoices->sum('pamnt');
+                $due=$total-$paid;
+            @endphp
+            <div class="card">
 
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-2">
-                        <p>{{$words['name']}} </p>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <p>{{$words['name']}} </p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p>{{$words['name_data']}}</p>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <p>{{$words['name_data']}}</p>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <p>{{trans('customers.email')}}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p>{{$segment->email}}</p>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-2">
-                        <p>{{trans('customers.email')}}</p>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <p>{{trans('general.total_amount')}}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p>{{amountFormat($total)}}</p>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <p>{{$segment->email}}</p>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <p>{{trans('payments.paid_amount')}}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p>{{amountFormat($paid)}}</p>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-2">
-                        <p>{{trans('general.total_amount')}}</p>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <p>{{trans('general.balance_due')}}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p>{{amountFormat($due)}}</p>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <p>{{amountFormat($total)}}</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-2">
-                        <p>{{trans('payments.paid_amount')}}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p>{{amountFormat($paid)}}</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-2">
-                        <p>{{trans('general.balance_due')}}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p>{{amountFormat($due)}}</p>
-                    </div>
-                </div>
 
+                </div>
             </div>
-        </div>
         @endif
         <div class="content-body">
             <div class="row">
@@ -105,11 +105,12 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            <th>{{ trans('quotes.quote').' / PI' }}</th>
+                                            <th>{{ trans('quotes.quote') }} / PI</th>
                                             <th>{{ trans('customers.customer') }}</th>
                                             <th>{{ trans('quotes.invoicedate') }}</th>
-                                            <th>{{ trans('general.amount') }}</th>
+                                            <th>{{ trans('general.amount') }} (Ksh.)</th>
                                             <th>{{ trans('general.status') }}</th>
+                                            <th>Verified</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -208,6 +209,10 @@
                 {
                     data: 'status',
                     name: 'status'
+                },
+                {
+                    data: 'verified',
+                    name: 'verified'
                 },
                 {
                     data: 'actions',

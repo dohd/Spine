@@ -77,6 +77,9 @@ class QuotesTableController extends Controller
             ->addColumn('status', function ($quote) {
                 return '<span class="st-' . $quote->status . '">' . trans('payments.' . $quote->status) . '</span>';
             })
+            ->addColumn('verified', function ($quote) {
+                return $quote->verified;
+            })
             ->addColumn('actions', function ($quote) {
                 return '<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Copy">'.'<i class="fa fa-clone" aria-hidden="true"></i></a> '
                     .$quote->action_buttons;

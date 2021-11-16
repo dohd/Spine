@@ -40,7 +40,7 @@ class QuoteRepository extends BaseRepository
             $q->whereBetween('invoicedate', [date_for_database(request('start_date')), date_for_database(request('end_date'))]);
         }
 
-        return $q->get(['id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'bank_id']);
+        return $q->get(['id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'bank_id', 'verified']);
     }
 
     public function getSelfDataTable($self_id = false)
