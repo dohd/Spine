@@ -64,7 +64,7 @@ class QuotesTableController extends Controller
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
                     return $quote->customer->name.' - '
                         .$quote->lead->branch->name.' '
-                        .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
+                        .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
                 }
                 return;
             })
@@ -81,7 +81,10 @@ class QuotesTableController extends Controller
                 return $quote->verified;
             })
             ->addColumn('actions', function ($quote) {
-                return '<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Copy">'.'<i class="fa fa-clone" aria-hidden="true"></i></a> '
+                $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
+
+                return '<a href="'.route('biller.print_bill', [$quote->id, 4, $valid_token, 1]).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
+                    .'<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Copy"><i class="fa fa-clone" aria-hidden="true"></i></a> '
                     .$quote->action_buttons;
             })
             ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
