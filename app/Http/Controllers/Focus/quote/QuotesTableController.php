@@ -57,7 +57,7 @@ class QuotesTableController extends Controller
                 return $quote->notes;
             })
             ->addColumn('tid', function ($quote) {
-                $quote_type = $quote->bank_id ? '#PI '.$quote->tid : '#QT '.$quote->tid; 
+                $quote_type = $quote->bank_id ? '#PI'.' '.$quote->tid : '#QT'.' '.$quote->tid; 
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote_type . '</a>';
             })
             ->addColumn('customer', function ($quote) {
