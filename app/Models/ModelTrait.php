@@ -10,9 +10,7 @@ trait ModelTrait
     public function getEditButtonAttribute($permission, $route)
     {
         if (access()->allow($permission)) {
-            return '<a href="' . route($route, $this) . '" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit">
-                    <i  class="fa fa-pencil "></i>
-                </a>';
+            return '<a href="' . route($route, $this) . '" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="fa fa-pencil "></i></a>';
         }
     }
 
@@ -22,9 +20,7 @@ trait ModelTrait
     public function getViewButtonAttribute($permission, $route)
     {
         if (access()->allow($permission)) {
-            return '<a href="' . route($route, $this) . '" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View">
-                    <i  class="fa fa-eye"></i>
-                </a>';
+            return '<a href="' . route($route, $this) . '" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i  class="fa fa-eye"></i></a>';
         }
     }
 
@@ -35,12 +31,13 @@ trait ModelTrait
     {
         if (access()->allow($permission)) {
             return '<a href="' . route($route, $this) . '" 
-                    class="btn btn-danger round" ' . $d_type . '-method="delete"
-                    data-trans-button-cancel="' . trans('buttons.general.cancel') . '"
-                    data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '"
-                    data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete">
+                        class="btn btn-danger round" ' . $d_type . '-method="delete"
+                        data-trans-button-cancel="' . trans('buttons.general.cancel') . '"
+                        data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '"
+                        data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"
+                    >
                         <i  class="fa fa-trash"></i>
-                </a>';
+                    </a>';
         }
     }
 }
