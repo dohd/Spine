@@ -94,6 +94,7 @@ class QuotesController extends Controller
     public function create(CreateQuoteRequest $request)
     {
         $page = $request->input('page');
+        
         return new CreateResponse($page);
     }
 
@@ -114,10 +115,7 @@ class QuotesController extends Controller
 
         $result = $this->repository->create(compact('data', 'data_items'));
 
-        return new RedirectResponse(
-            route('biller.quotes.index', [$result['id']]), 
-            ['flash_success' => $this->flash_msg('Quote generated', $result['id'])]
-        );
+        return new RedirectResponse(route('biller.quotes.index', [$result['id']]), ['flash_success' => trans('alerts.backend.quotes.created')]);
     }
 
 
@@ -151,15 +149,24 @@ class QuotesController extends Controller
     public function edit(EditQuoteRequest $request, Quote $quote)
     {
         $page = $request->input('page');
+        
         return new EditResponse($quote, $page);
     }
 
-    // verify
-    public function verify(Quote $quote, $qt_id)
+    /**
+     * Show the form for verifying the specified resource.
+     *
+     * @param string $id
+     * @return \App\Http\Responses\Focus\quote\EditResponse
+     */
+    public function verify($id)
     {
-        $quote = Quote::find($qt_id);
+        $quote = Quote::find($id);
+        $products = $quote->products()->orderBy('row_index')->get();
 
-        return view('focus.quotes.verify')->with(array('quote' => $quote))->with(bill_helper(2, 4));
+        return view('focus.quotes.verify')
+            ->with(compact('quote', 'products'))
+            ->with(bill_helper(2, 4));
     }
 
     /**
@@ -180,10 +187,7 @@ class QuotesController extends Controller
 
         $result = $this->repository->update(compact('data', 'data_items'));
 
-        return new RedirectResponse(
-            route('biller.quotes.index', [$quote->id]), 
-            ['flash_success' => $this->flash_msg('Quote updated', $quote->id)]
-        );
+        return new RedirectResponse(route('biller.quotes.index', [$quote->id]), ['flash_success' => trans('alerts.backend.quotes.updated')]);
     }
 
     /**
@@ -193,11 +197,10 @@ class QuotesController extends Controller
      * @param App\Models\quote\Quote $quote
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Quote $quote, DeleteQuoteRequest $request)
+    public function destroy(Quote $quote)
     {
-        //Calling the delete method on repository
         $this->repository->delete($quote);
-        //returning with successfull message
+
         return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => trans('alerts.backend.quotes.deleted')]);
     }
 
@@ -209,7 +212,7 @@ class QuotesController extends Controller
      * @param App\Models\quote\Quote $quote
      * @return \App\Http\Responses\ViewResponse ViewResponse
      */
-    public function show(Quote $quote, ManageQuoteRequest $request)
+    public function show(Quote $quote)
     {
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
@@ -220,24 +223,11 @@ class QuotesController extends Controller
         return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products'));
     }
 
-
-    // default flash message format
-    protected function flash_msg($message="", $id="")
-    {
-        return $message 
-            . ' <a href="' . route('biller.quotes.index', [$id]) 
-            . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
-            . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.quotes.create') 
-            . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
-            . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.quotes.index') 
-            . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
-            . trans('general.list') . '</span> </a>';
-    }
-
     // Delete Quote product
     public function delete_product($id)
     {
         $this->repository->delete_product($id);
+
         return response()->noContent();
     }
 
