@@ -24,7 +24,7 @@
     
     <div class="card">
         <div class="card-header">
-            <button type="button" class="btn btn-sm btn-success font-weight-bold" data-toggle="modal" data-target="#status-modal">
+            <button type="button" class="btn btn-success font-weight-bold" data-toggle="modal" data-target="#status-modal">
                 <i class="fa fa-pencil"></i> Status
             </button>
             @include('focus.leads.partials.status_modal')
