@@ -336,7 +336,7 @@
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
