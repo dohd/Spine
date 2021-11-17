@@ -118,27 +118,6 @@ class QuotesController extends Controller
         return new RedirectResponse(route('biller.quotes.index', [$result['id']]), ['flash_success' => trans('alerts.backend.quotes.created')]);
     }
 
-
-    public function storeverified(ManageQuoteRequest $request)
-    {
-        //filter request input fields
-        $invoice = $request->only(['quote_id', 'verified_amount', 'verified_disc', 'verified_tax', 'verified_amount']);
-        $invoice_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
-        $data2 = $request->only(['custom_field']);
-
-        $data2['ins'] = auth()->user()->ins;
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-
-        $result = $this->repository->verify(compact('invoice', 'invoice_items', 'data2'));
-
-        return new RedirectResponse(
-            route('biller.quotes.index', [$result->id]), 
-            ['flash_success' => $this->flash_msg('Quote verified', $result->id)]
-        );
-    }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -151,22 +130,6 @@ class QuotesController extends Controller
         $page = $request->input('page');
         
         return new EditResponse($quote, $page);
-    }
-
-    /**
-     * Show the form for verifying the specified resource.
-     *
-     * @param string $id
-     * @return \App\Http\Responses\Focus\quote\EditResponse
-     */
-    public function verify($id)
-    {
-        $quote = Quote::find($id);
-        $products = $quote->products()->orderBy('row_index')->get();
-
-        return view('focus.quotes.verify')
-            ->with(compact('quote', 'products'))
-            ->with(bill_helper(2, 4));
     }
 
     /**
@@ -221,6 +184,45 @@ class QuotesController extends Controller
         $quote['bill_type'] = 4;
 
         return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products'));
+    }
+
+    /**
+     * Show the form for verifying the specified resource.
+     *
+     * @param string $id
+     * @return \App\Http\Responses\Focus\quote\EditResponse
+     */
+    public function verify($id)
+    {
+        $quote = Quote::find($id);
+        $products = $quote->products()->orderBy('row_index')->get();
+
+        return view('focus.quotes.verify')
+            ->with(compact('quote', 'products'))
+            ->with(bill_helper(2, 4));
+    }
+
+    /**
+     * Show the form for storing the verified resource.
+     *
+     * @param \App\Http\Requests\Focus\quote\ManageQuoteRequest $request;
+     * @return \App\Http\Responses\RedirectResponse
+     */
+    public function storeverified(ManageQuoteRequest $request)
+    {
+        //filter request input fields
+        $invoice = $request->only(['quote_id', 'verified_tax', 'verified_amount']);
+        $invoice_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
+        $data2 = $request->only(['custom_field']);
+
+        $data2['ins'] = auth()->user()->ins;
+        $invoice['ins'] = auth()->user()->ins;
+        $invoice['user_id'] = auth()->user()->id;
+        $invoice_items['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->verify(compact('invoice', 'invoice_items', 'data2'));
+
+        return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => 'Quote successfully verified']);
     }
 
     // Delete Quote product
