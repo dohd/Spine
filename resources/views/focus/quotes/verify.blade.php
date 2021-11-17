@@ -29,31 +29,39 @@
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
-                                    <div class="fcol-sm-12"><h3 class="title pl-1">Verify Quote / Proformer Invoice</h3></div>
+                                    <div class="fcol-sm-12"><h3 class="title pl-1">Verify Quote / Proforma Invoice</h3></div>
                                 </div>
                                 <div class="form-group row">                                    
-                                    <div class="col-sm-4">
+                                    <div class="col-sm-6">
                                         <label for="client" class="caption">Client</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                                             {{ Form::text('client', @$quote->client->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
                                         </div>
                                     </div>
-                                    <div class="col-sm-4">
+                                    <div class="col-sm-6">
                                         <label for="branch" class="caption">Branch</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                                             {{ Form::text('branch', @$quote->branch->name, ['class' => 'form-control round', 'id' => 'branch', 'disabled']) }}
                                         </div>
                                     </div>
-                                    <div class="col-sm-4">
+                                </div> 
+                                <div class="form-group row">
+                                    <div class="col-sm-6"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-qd','autocomplete'=>'false', 'disabled']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
                                         <label for="serial_no" class="caption">{{trans('general.serial_no')}}. #{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
                                             {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                         </div>
-                                    </div>
-                                </div> 
+                                    </div>                                    
+                                </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
                                         <label for="subject" class="caption">Subject / Title</label>
@@ -84,22 +92,39 @@
                                             {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false', 'disabled']) }}
                                         </div>
                                     </div>
-                                    <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-qd','autocomplete'=>'false', 'disabled']) }}
-                                        </div>
-                                    </div>                                                                      
-                                </div>
-                                <div class="form-group row">                                    
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-4">
                                         <label for="verification" class="caption">Verification No.</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            {{ Form::number('verification', null, ['class' => 'form-control round', 'id' => 'verification']) }}
+                                            {{ Form::text('verification', null, ['class' => 'form-control round', 'id' => 'verification']) }}
                                         </div>
+                                    </div>                                                                                                       
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <table id="jobcard" class="table-responsive pb-2 tfr">
+                                            <thead class="bg-gradient-directional-blue white pb-1">
+                                                <tr>
+                                                    <th class="text-center" width="23%">Reference No.</th>
+                                                    <th class="text-center" width="22%">Date</th>
+                                                    <th class="text-center" width="50%">Technician</th>
+                                                    <th class="text-center" width="5%">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><input type="text" class="form-control" name="reference[]" id="reference-1"></td>
+                                                    <td><input type="text" class="form-control" name="date[]" id="date-1"></td>
+                                                    <td><input type="text" class="form-control" name="technician[]" id="technician-1"></td>
+                                                    <th class="text-center">#</th>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button type="button" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
+                                            <i class="fa fa-plus-square"></i> Add Job Card
+                                        </button>                                            
                                     </div>
-                                </div>                                 
+                                </div>                                                                
                             </div>
                         </div>                        
                     </div>                  
@@ -167,7 +192,7 @@
 @endsection
 
 @section('extra-scripts')
-<script>
+<script>    
     // ajax setup
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
@@ -182,6 +207,31 @@
     $('[data-toggle="datepicker-qd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+
+    // job card row
+    function jobCardRow(n) {
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="reference[]" id="reference-${n}"></td>
+                <td><input type="text" class="form-control" name="date[]" id="date-${n}"></td>
+                <td><input type="text" class="form-control" name="technician[]" id="technician-${n}"></td>
+                <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
+            </tr>
+        `;
+    }
+    //job card row counter
+    let jobCardNo = 1;
+    // addjob card row
+    $('#add-jobcard').click(function() {
+        // append row
+        const row = jobCardRow(jobCardNo);
+        $('#jobcard tr:last').after(row);
+        jobCardNo++;
+    });
+    // remove job card row
+    $('#jobcard').on('click', '.removeJc', function() {
+        if ($(this).is('.removeJc')) $(this).closest('tr').remove();
+    });
 
     // row dropdown menu
     function dropDown(val) {
@@ -209,7 +259,7 @@
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
@@ -278,6 +328,7 @@
         totals();
     });    
 
+    // On click Add Product
     $('#add-product').click(function() {
         // append row
         const row = productRow(cvalue);
@@ -286,7 +337,7 @@
         $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
         cvalue++;
     });
-    // on clicking Add Title button
+    // on click Add Title button
     $('#add-title').click(function() {
         // append row
         const row = productTitleRow(cvalue);
