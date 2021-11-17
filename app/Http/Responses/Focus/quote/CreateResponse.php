@@ -31,7 +31,7 @@ class CreateResponse implements Responsable
         $last_quote = Quote::orderBy('tid', 'desc')->first();
         $leads = Lead::where('status', 0)->get();
 
-        // create proformer invoice
+        // create proforma invoice
         if ($this->page == 'pi') {
             $banks = Bank::all();
             

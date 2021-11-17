@@ -30,7 +30,7 @@
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
-                                        <h3 class="title pl-1">Create Proformer Invoice</h3>
+                                        <h3 class="title pl-1">Create Proforma Invoice</h3>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -309,7 +309,7 @@
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="product_id[]" id="productid-${val}" value="0">
                 <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">

@@ -35,9 +35,9 @@
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
                                         @if (@$last_quote->tid)
-                                            <h3 class="title pl-1">Copy Proformer Invoice</h3>
+                                            <h3 class="title pl-1">Copy Proforma Invoice</h3>
                                         @else
-                                            <h3 class="title pl-1">Edit Proformer Invoice</h3>
+                                            <h3 class="title pl-1">Edit Proforma Invoice</h3>
                                         @endif
                                     </div>
                                 </div>
@@ -352,7 +352,7 @@
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><span class="currenty">{{config('currency.symbol')}}</span><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value=0 id="productid-${val}">

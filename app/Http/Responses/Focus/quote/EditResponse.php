@@ -51,7 +51,7 @@ class EditResponse implements Responsable
         // condition to access copy page
         if ($this->page == 'copy') {
             $last_quote = $this->quote->orderBy('id', 'desc')->where('i_class', '=', 0)->first();
-            // copy proformer invoice
+            // copy proforma invoice
             if (isset($banks)) {
                 return view('focus.quotes.edit_pi')
                     ->with(compact('banks', 'last_quote', ...$params))
@@ -63,7 +63,7 @@ class EditResponse implements Responsable
                 ->with(bill_helper(2, 4));
         }
 
-        // edit proformer invoice
+        // edit proforma invoice
         if (isset($banks)) {            
             return view('focus.quotes.edit_pi')
                 ->with(compact('banks', ...$params))

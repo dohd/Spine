@@ -53,7 +53,7 @@
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
                             @if ($quote->bank_id)
-                                <h2>Proformer Invoice</h2>
+                                <h2>Proforma Invoice</h2>
                                 <p class="pb-3">#PI {{ $quote->tid }}</p>
                             @else
                                 <h2>{{ trans('quotes.quote')}}</h2>
