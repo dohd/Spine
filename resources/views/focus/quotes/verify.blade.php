@@ -24,23 +24,42 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::model($quote, ['route' => '', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'verify-quote']) }}                   
+                    {{ Form::model($quote, ['route' => ['biller.quotes.verify', $quote->id], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'verify-quote']) }}                   
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
-                                    <div class="fcol-sm-12"><h3 class="title pl-1">Verify Quote / PI</h3></div>
+                                    <div class="fcol-sm-12"><h3 class="title pl-1">Verify Quote / Proformer Invoice</h3></div>
                                 </div>
-                                
                                 <div class="form-group row">                                    
-                                    <div class="col-sm-3">
-                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
+                                    <div class="col-sm-4">
+                                        <label for="client" class="caption">Client</label>
                                         <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {{ Form::text('client', @$quote->client->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
                                         </div>
                                     </div>
-                                </div>                                
+                                    <div class="col-sm-4">
+                                        <label for="branch" class="caption">Branch</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {{ Form::text('branch', @$quote->branch->name, ['class' => 'form-control round', 'id' => 'branch', 'disabled']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="serial_no" class="caption">{{trans('general.serial_no')}}. #{{prefix(5)}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
+                                            {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="subject" class="caption">Subject / Title</label>
+                                        {{ Form::text('notes', null, ['class' => 'form-control round required', 'id'=>'subject', 'disabled']) }}
+                                    </div>
+                                </div>                                                                 
                             </div>
                         </div>
 
@@ -48,7 +67,7 @@
                             <div class="inner-cmp-pnl">
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <h3 class="title">{{trans('quotes.properties')}}</h3>
+                                        <h3 class="title">Properties</h3>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -56,62 +75,34 @@
                                         <label for="invocieno" class="caption">{{trans('general.reference')}} (Diagnosis JobCard)</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference')]) }}
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'disabled']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Reference {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false', 'disabled']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-qd','autocomplete'=>'false', 'disabled']) }}
                                         </div>
                                     </div>                                                                      
                                 </div>
                                 <div class="form-group row">                                    
                                     <div class="col-sm-3">
-                                        <label for="verification" class="caption">Verification</label>
+                                        <label for="verification" class="caption">Verification No.</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            {{ Form::number('verification', null, ['class' => 'form-control round', 'placeholder' => 'verification', 'id' => 'verification']) }}
+                                            {{ Form::number('verification', null, ['class' => 'form-control round', 'id' => 'verification']) }}
                                         </div>
                                     </div>
-                                </div>  
-                                <div class="form-group row">
-                                    <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="term_id" name="term_id" class="form-control round  selectpicker required">
-                                                <option value="0">No Terms</option>
-                                                @foreach($terms as $term)
-                                                    <option value="{{$term->id}}">{{$term->title}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
-                                            <option value="16">16% VAT</option>
-                                            <option value="8">8% VAT</option>
-                                            <option value="0">Off</option>
-                                        </select>
-                                        <input type="hidden" name="tax_format" id="tax_format">
-                                    </div>
-                                </div>
+                                </div>                                 
                             </div>
                         </div>                        
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-10">
-                            <label for="subject" class="caption">Subject / Title</label>
-                            {{ Form::text('notes', null, ['class' => 'form-control round required', 'placeholder' => 'Subject Or Title','autocomplete'=>'false','id'=>'subject']) }}
-                        </div>
-                    </div>
+                    </div>                  
 
                     <div>                            
                         <table id="quotation" class="table-responsive pb-5 tfr my_stripe_single">
@@ -162,11 +153,7 @@
                                             <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
                                         </div>
                                     </div>
-                                    @if (@$last_quote->tid)
-                                        {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
-                                    @else
-                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
-                                    @endif
+                                    {{ Form::submit('Verify & Save', ['class' => 'btn btn-success btn-lg']) }}
                                 </div>
                             </div>
                         </div>
@@ -186,15 +173,6 @@
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
     
-    // set default options
-    $('#lead_id').val("{{ $quote->lead->id }}");
-    $('#pricing').val("{{ $quote->pricing }}");
-    $('#validity').val("{{ $quote->validity }}");
-    $('#currency').val("{{ $quote->currency }}");
-    $('#term_id').val("{{ $quote->term_id }}");
-    $('#revision').val("{{ $quote->revision }}" || '_r1');
-    $('#tax_id').val("{{ $quote->tax_id }}");
-
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
@@ -324,53 +302,15 @@
         // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
-        if ($(this).is('.removeProd')) {
-            const response = window.confirm('Are you sure to delete this product ?');
-            if (response) {
-                const row = $(this).closest('tr');
-                row.remove();
-                const itemId = row.find('input[name="item_id[]"]').val();
-                // delete product api call 
-                $.ajax({
-                    url: baseurl + 'quotes/delete_product/' + itemId,
-                    dataType: "json",
-                    method: 'DELETE',
-                });
-            }
-        }
+        if ($(this).is('.removeProd')) $(this).closest('tr').remove();
 
         totals();
     });
 
     // default tax
-    const tax = $('#tax_id').val();
+    const tax = "{{ $quote->tax_id }}";
     const taxInt = parseFloat(tax.replace(',', ''));
     let taxRate = (taxInt+100)/100;
-    // on select Tax change
-    function onTaxChange(e) {
-        const tax = Number(e.target.value); 
-        if (tax === 0) {
-            $('#tax_format').val('exclusive');
-        } else {
-            $('#tax_format').val('inclusive');
-        }
-        // loop throw product rows while adjusting values
-        taxRate = (tax+100)/100;
-        $('#quotation tr').each(function(i) {
-            if (!i) return;
-            const productQty = $(this).find('td').eq(3).children().val()
-            if (productQty) {
-                const productPrice = $(this).find('td').eq(4).children().val();
-
-                const rateInclusive = taxRate * parseFloat(productPrice.replace(',', ''));
-                $(this).find('td').eq(5).children().val(rateInclusive.toFixed(2));
-
-                const rowAmount = productQty * parseFloat(rateInclusive);
-                $(this).find('td').eq(6).find('.ttlText').text(rowAmount.toFixed(2))
-            }
-        });
-        totals();
-    }    
 
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i) {
