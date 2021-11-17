@@ -470,6 +470,9 @@
     }
     // on price input change
     function priceChange(e) {
+        // change value to float
+        e.target.value = Number(e.target.value).toFixed(2);
+
         const id = e.target.id;
         indx = id.split('-')[1];
 
