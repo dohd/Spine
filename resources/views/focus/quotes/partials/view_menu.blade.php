@@ -10,15 +10,16 @@
             <a href="{{ route('biller.quotes.edit', $quote) }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
             @if (access()->allow('quote-delete'))
                 <a class="btn btn-danger mb-1 quote-delete" href="javascript:void(0);"><i class="fa fa-trash"></i> Delete
-                    {{ Form::open(['url' => route('biller.quotes.destroy', $quote), 'method' => 'delete']) }} {{ Form::close() }}               
+                    {{ Form::open(['route' => ['biller.quotes.destroy', $quote], 'method' => 'delete']) }} {{ Form::close() }}               
                 </a>
             @endif
 
             @php
                 $valid_token = token_validator('', 'q'.$quote->id . $quote->tid, true);
             @endphp
-            <div class="btn-group ">
-                @if ($quote->status == 'approved')
+            
+            @if ($quote->status == 'approved')
+                <div class="btn-group ">
                     <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-repeat"></i> Verify & Download
                     </button>
@@ -26,11 +27,9 @@
                         <a class="dropdown-item" href="{{ route('biller.quotes.verify', $quote->id) }}">Verify</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('biller.print_bill', [$quote->id, 4, $valid_token, 2]) }}">{{trans('general.pdf')}}</a>
-                    </div>
-                @else
-                    <button type="button" class="btn btn-success mb-1 btn-min-width" disabled><i class="fa fa-repeat"></i> Verify & Download</button>
-                @endif                
-            </div>                                
+                    </div>                                  
+                </div>                                
+            @endif 
             <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="btn btn-large btn-blue mb-1" title="Change Status">
                 <span class="fa fa-check"></span> {{trans('general.change_status')}}
             </a>
