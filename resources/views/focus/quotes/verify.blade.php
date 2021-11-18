@@ -24,7 +24,8 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::model($quote, ['route' => ['biller.quotes.verify', $quote->id], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'verify-quote']) }}                   
+                    {{ Form::model($quote, ['route' => 'biller.quotes.storeverified', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST']) }}                   
+                    <input type="hidden" name="id" value="{{ $quote->id }}">
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
@@ -51,7 +52,7 @@
                                     <div class="col-sm-6"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-qd','autocomplete'=>'false', 'disabled']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'id'=>'invoicedate','autocomplete'=>'false', 'disabled']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
@@ -89,16 +90,17 @@
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Reference {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false', 'disabled']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'id'=>'reference-date', 'autocomplete'=>'false', 'disabled']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
-                                        <label for="verification" class="caption">Verification No.</label>
+                                        <label for="verify_no" class="caption">Verification No.</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            {{ Form::text('verification', null, ['class' => 'form-control round', 'id' => 'verification']) }}
+                                            {{ Form::text('verify_no', $quote->tid.'_v1', ['class' => 'form-control round', 'id' => 'verify_no', 'disabled']) }}
+                                            <input type="hidden" name="verify_no" value="1">
                                         </div>
-                                    </div>                                                                                                       
+                                    </div>                                                                             
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
@@ -113,9 +115,9 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td><input type="text" class="form-control" name="reference[]" id="reference-1"></td>
-                                                    <td><input type="text" class="form-control" name="date[]" id="date-1"></td>
-                                                    <td><input type="text" class="form-control" name="technician[]" id="technician-1"></td>
+                                                    <td><input type="text" class="form-control" name="reference[]" id="reference-0" required></td>
+                                                    <td><input type="text" class="form-control" name="date[]" id="date-0" required></td>
+                                                    <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
                                                     <th class="text-center">#</th>
                                                 </tr>
                                             </tbody>
@@ -199,14 +201,18 @@
     });
     
     // initialize Reference Date datepicker
-    $('[data-toggle="datepicker-rd"]')
+    $('#reference-date')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->reference_date }}"));
 
     // initialize Quote Date datepicker
-    $('[data-toggle="datepicker-qd"]')
+    $('#invoicedate')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+
+    $('#date-0')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date());
 
     // job card row
     function jobCardRow(n) {
@@ -226,6 +232,10 @@
         // append row
         const row = jobCardRow(jobCardNo);
         $('#jobcard tr:last').after(row);
+        // initalize datepicker
+        $('#date-'+jobCardNo)
+            .datepicker({ format: "{{ config('core.user_date_format') }}"  })
+            .datepicker('setDate', new Date());
         jobCardNo++;
     });
     // remove job card row
@@ -427,6 +437,9 @@
     }
     // on price input change
     function priceChange(e) {
+        // change value to float
+        e.target.value = Number(e.target.value).toFixed(2);
+
         const id = e.target.id;
         indx = id.split('-')[1];
 
@@ -440,7 +453,6 @@
 
         const rowAmount = productQty * parseFloat(rateInclusive);
         $('#result-'+indx).text(rowAmount.toFixed(2));
-
         totals();
     }
 
