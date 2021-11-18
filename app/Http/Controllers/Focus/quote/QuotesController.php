@@ -35,6 +35,7 @@ use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Http\Requests\Focus\quote\DeleteQuoteRequest;
+use App\Models\items\VerifiedItem;
 
 /**
  * QuotesController
@@ -108,7 +109,7 @@ class QuotesController extends Controller
     {
         // filter request input fields
         $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
-        $data_items = $request->only(['row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
+        $data_items = $request->only(['row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'unit']);
 
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
@@ -196,9 +197,16 @@ class QuotesController extends Controller
     {
         $quote = Quote::find($id);
         $products = $quote->products()->orderBy('row_index')->get();
+        $verify_no = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first()->verify_no;
+        // increament verify_no if it exists
+        $verify_no = isset($verify_no) ? $verify_no+1 : 1;
+        // fetch verified_items
+        if ($verify_no > 1) {
+            $products = VerifiedItem::where('quote_id', $id)->orderBy('row_index')->get();
+        }
 
         return view('focus.quotes.verify')
-            ->with(compact('quote', 'products'))
+            ->with(compact('quote', 'products', 'verify_no'))
             ->with(bill_helper(2, 4));
     }
 
@@ -212,8 +220,10 @@ class QuotesController extends Controller
     {
         //filter request input fields
         $quote = $request->only(['id', 'verify_no']);
-        $quote_items = $request->only(['row_index', 'item_id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $quote_items = $request->only(['row_index', 'item_id', 'a_type', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
         $job_cards = $request->only(['reference', 'date', 'technician']);
+
+        $quote['ins'] = auth()->user()->ins;
 
         $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
 
@@ -227,6 +237,23 @@ class QuotesController extends Controller
 
         return response()->noContent();
     }
+
+    // Delete Verified Quote Item
+    public function delete_verified_item($id)
+    {
+        $this->repository->delete_verified_item($id);
+
+        return response()->noContent();
+    }
+
+    // Delete Verified Job card
+    public function delete_verified_jcs($id)
+    {
+        $this->repository->delete_verified_jcs($id);
+
+        return response()->noContent();
+    }
+
 
     // Load customer quotes
     public function customer_quotes(ManageQuoteRequest $request)
