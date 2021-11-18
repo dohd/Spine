@@ -107,6 +107,10 @@ class QuoteRepository extends BaseRepository
 
     public function verify(array $input)
     {
+        print_log('+++  Verify Quote ++++', $input);
+        return;
+
+
         DB::beginTransaction();
 
         $result = Quote::find($input['invoice']['quote_id']);
@@ -227,9 +231,7 @@ class QuoteRepository extends BaseRepository
      */
     public function delete(Quote $quote)
     {
-        if ($quote->delete()) {
-            return true;
-        }
+        if ($quote->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
     }
@@ -243,9 +245,7 @@ class QuoteRepository extends BaseRepository
      */
     public function delete_product($id)
     {        
-        if (QuoteItem::destroy($id)) {
-            return true;
-        }
+        if (QuoteItem::destroy($id)) return true;
 
         throw new GeneralException(trans('Error deleting product'));
     }
