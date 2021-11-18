@@ -5,12 +5,18 @@ namespace App\Models\quote\Traits;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\lead\Lead;
+use App\Models\verifiedjcs\VerifiedJc;
 
 /**
  * Class QuoteRelationship
  */
 trait QuoteRelationship
 {
+    public function verified_jcs()
+    {
+        return $this->hasMany(VerifiedJc::class);
+    }
+
     public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
