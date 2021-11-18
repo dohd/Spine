@@ -11,6 +11,7 @@ use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
+use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -105,63 +106,6 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException('Error Creating Quote');
     }
 
-    public function verify(array $input)
-    {
-        print_log('+++  Verify Quote ++++', $input);
-        return;
-
-
-        DB::beginTransaction();
-
-        $result = Quote::find($input['invoice']['quote_id']);
-        $result->verified = 'Yes';
-        $result->verified_total = numberClean(@$input['invoice']['verified_total']);
-        $result->verified_disc = numberClean(@$input['invoice']['verified_disc']);
-        $result->verified_tax = numberClean(@$input['invoice']['verified_tax']);
-        $result->verified_amount = numberClean(@$input['invoice']['verified_amount']);
-        $result->verified_by = $input['invoice']['user_id'];
-        $result->verification_date = date('Y-m-d');
-        $result->save();
-
-        if ($result) {
-            VerifiedItem::where('quote_id', $result->id)->delete();
-
-            $products = array();
-            $subtotal = 0;
-            $total_qty = 0;
-            $total_tax = 0;
-            $stock_update = array();
-
-            foreach ($input['invoice_items']['numbering'] as $key => $value) {
-                $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $total_qty += numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $total_tax += numberClean(@$input['invoice_items']['total_tax'][$key]);
-                $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array(
-                    'quote_id' => $result->id,
-                    'product_id' => $input['invoice_items']['product_id'][$key],
-                    'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
-                    'product_qty' => numberClean(@$input['invoice_items']['product_qty'][$key]),
-                    'product_price' => numberClean(@$input['invoice_items']['product_price'][$key]),
-                    'product_exclusive' => numberClean(@$input['invoice_items']['product_exclusive'][$key]),
-                    'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
-                    'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
-                    'total_discount' => numberClean(@$input['invoice_items']['total_discount'][$key]),
-                    'a_type' => numberClean(@$input['invoice_items']['a_type'][$key]),
-                    'numbering' => strip_tags(@$input['invoice_items']['numbering'][$key]),
-                    'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins
-                );
-            }
-
-            VerifiedItem::insert($products);
-
-            DB::commit();
-            return $result;
-        }
-        throw new GeneralException(trans('exceptions.backend.quotes.create_error'));
-    }
-
     /**
      * For updating the respective Model in storage
      *
@@ -208,10 +152,9 @@ class QuoteRepository extends BaseRepository
                 foreach($item as $key => $value) {
                     $quote_item[$key] = $value;
                 }
-                // remove stale attributes
+                // remove stale attributes and save
                 if ($quote_item['id'] == 0) unset($quote_item['id']);
                 unset($quote_item['item_id']);
-
                 $quote_item->save();
             }
 
@@ -236,13 +179,7 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
     }
 
-    /**
-     * For deleting the respective model from storage
-     *
-     * @param Quote $quote
-     * @throws GeneralException
-     * @return bool
-     */
+    // Delete Quote product
     public function delete_product($id)
     {        
         if (QuoteItem::destroy($id)) return true;
@@ -250,6 +187,89 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException(trans('Error deleting product'));
     }
 
+    public function verify(array $input)
+    {
+        // quote properties
+        $quote_id = $input['quote']['id'];
+        $ins = $input['quote']['ins'];
+        $verify_no = $input['quote']['verify_no'];
+
+        // quote items
+        $items_count = count($input['quote_items']['product_name']);
+        $quote_items = $this->array_items(
+            $items_count, 
+            $input['quote_items'],
+            compact('quote_id', 'ins')
+        );
+        
+        // job cards
+        $job_cards = array();
+        $jc_count = count($input['job_cards']['reference']);
+        $item = $input['job_cards'];
+        for ($i = 0; $i < $jc_count; $i++) {
+            $row = compact('quote_id', 'verify_no');
+            foreach (array_keys($item) as $key) {
+                if ($key == 'date') {
+                    $item[$key][$i] = date_for_database($item[$key][$i]);
+                }
+                $row[$key] = $item[$key][$i];             
+            }
+            $job_cards[] = $row;
+        }
+
+        DB::beginTransaction();
+        if ($items_count && $jc_count) {
+            // update or create new quote_item
+            foreach($quote_items as $item) {
+                $quote_item = VerifiedItem::firstOrNew([
+                    'id' => $item['item_id'],
+                    'quote_id' => $item['quote_id'],
+                ]);
+                // assign properties to the item
+                foreach($item as $key => $value) {
+                    $quote_item[$key] = $value;
+                }
+                // remove stale attributes and save
+                if ($quote_item['id'] == 0) unset($quote_item['id']);
+                unset($quote_item['item_id']);
+                $quote_item->save();
+            }
+            // update or create new job_card
+            foreach($job_cards as $item) {
+                $job_card = VerifiedJc::firstOrNew([
+                    'quote_id' => $item['quote_id'],
+                    'reference' => $item['reference']
+                ]);
+                // assign properties to the item
+                foreach($item as $key => $value) {
+                    $job_card[$key] = $value;
+                }
+                $job_card->save();
+            }
+        }
+
+        $result = Quote::where('id', $quote_id)->update(['verified' => 'Yes']);
+        if ($result) return DB::commit();
+        
+        throw new GeneralException('Error Verifying Quote');
+    }
+
+    // Delete verified Quote product
+    public function delete_verified_item($id)
+    {        
+        if (VerifiedItem::destroy($id)) return true;
+
+        throw new GeneralException(trans('Error deleting verified product'));
+    }
+
+    // Delete verified Job card
+    public function delete_verified_jcs($id)
+    {        
+        if (VerifiedJc::destroy($id)) return true;
+
+        throw new GeneralException(trans('Error deleting verified job card'));
+    }
+    
     // convert array to database collection format
     protected function array_items($count=0, $item=[], $extra=[])
     {
