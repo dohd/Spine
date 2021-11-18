@@ -96,9 +96,9 @@
                                     <div class="col-sm-4">
                                         <label for="verify_no" class="caption">Verification No.</label>
                                         <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            {{ Form::text('verify_no', $quote->tid.'_v1', ['class' => 'form-control round', 'id' => 'verify_no', 'disabled']) }}
-                                            <input type="hidden" name="verify_no" value="1">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                            
+                                            {{ Form::text('verify_text', $quote->tid.'_v'.$verify_no, ['class' => 'form-control round', 'disabled']) }}
+                                            <input type="hidden" name="verify_no" value="{{ $verify_no }}">
                                         </div>
                                     </div>                                                                             
                                 </div>
@@ -218,9 +218,9 @@
     function jobCardRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="reference[]" id="reference-${n}"></td>
-                <td><input type="text" class="form-control" name="date[]" id="date-${n}"></td>
-                <td><input type="text" class="form-control" name="technician[]" id="technician-${n}"></td>
+                <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
+                <td><input type="text" class="form-control" name="date[]" id="date-${n}" required></td>
+                <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
                 <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
             </tr>
         `;
@@ -363,8 +363,20 @@
         // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
-        if ($(this).is('.removeProd')) $(this).closest('tr').remove();
-
+        if ($(this).is('.removeProd')) {
+            const row = $(this).closest('tr');
+            row.remove();
+            if (Number("{{ $verify_no }}") > 1) {
+                if (confirm('Are you sure to delete this item?')) {
+                    const itemId = row.find('input[name="item_id[]"]').val();
+                    // delete product api call 
+                    $.ajax({
+                        url: baseurl + 'quotes/verified_item/' + itemId,
+                        method: 'DELETE',
+                    });
+                }
+            }            
+        }
         totals();
     });
 
