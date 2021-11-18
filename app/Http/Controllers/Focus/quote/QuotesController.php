@@ -203,7 +203,7 @@ class QuotesController extends Controller
     }
 
     /**
-     * Show the form for storing the verified resource.
+     * Store verified resource in storage.
      *
      * @param \App\Http\Requests\Focus\quote\ManageQuoteRequest $request;
      * @return \App\Http\Responses\RedirectResponse
@@ -211,16 +211,11 @@ class QuotesController extends Controller
     public function storeverified(ManageQuoteRequest $request)
     {
         //filter request input fields
-        $invoice = $request->only(['quote_id', 'verified_tax', 'verified_amount']);
-        $invoice_items = $request->only(['numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'total_discount', 'unit']);
-        $data2 = $request->only(['custom_field']);
+        $quote = $request->only(['id', 'verify_no']);
+        $quote_items = $request->only(['row_index', 'item_id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $job_cards = $request->only(['reference', 'date', 'technician']);
 
-        $data2['ins'] = auth()->user()->ins;
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-
-        $result = $this->repository->verify(compact('invoice', 'invoice_items', 'data2'));
+        $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
 
         return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => 'Quote successfully verified']);
     }
