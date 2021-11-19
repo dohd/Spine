@@ -36,6 +36,7 @@ use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Http\Requests\Focus\quote\DeleteQuoteRequest;
 use App\Models\items\VerifiedItem;
+use App\Models\verifiedjcs\VerifiedJc;
 
 /**
  * QuotesController
@@ -151,7 +152,7 @@ class QuotesController extends Controller
 
         $result = $this->repository->update(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.quotes.index', [$quote->id]), ['flash_success' => trans('alerts.backend.quotes.updated')]);
+        return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => trans('alerts.backend.quotes.updated')]);
     }
 
     /**
@@ -197,9 +198,9 @@ class QuotesController extends Controller
     {
         $quote = Quote::find($id);
         $products = $quote->products()->orderBy('row_index')->get();
-        $verify_no = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first()->verify_no;
+        $verified_jc = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first();
         // increament verify_no if it exists
-        $verify_no = isset($verify_no) ? $verify_no+1 : 1;
+        $verify_no = isset($verified_jc) ? $verified_jc->verify_no+1 : 1;
         // fetch verified_items
         if ($verify_no > 1) {
             $products = VerifiedItem::where('quote_id', $id)->orderBy('row_index')->get();
@@ -230,6 +231,14 @@ class QuotesController extends Controller
         return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => 'Quote successfully verified']);
     }
 
+    // Fetch Verified Job cards
+    public function fetch_verified_jcs($id)
+    {
+        $verified_jcs = VerifiedJc::where('quote_id', $id)->get();
+
+        return json_encode($verified_jcs);
+    }
+
     // Delete Quote product
     public function delete_product($id)
     {
@@ -254,6 +263,14 @@ class QuotesController extends Controller
         return response()->noContent();
     }
 
+    // Delete all Quote verified items and job cards
+    public function reset_verified($id)
+    {
+        VerifiedItem::where('quote_id', $id)->delete();
+        Quote::find($id)->verified_jcs()->delete();
+
+        return response()->noContent();
+    } 
 
     // Load customer quotes
     public function customer_quotes(ManageQuoteRequest $request)
