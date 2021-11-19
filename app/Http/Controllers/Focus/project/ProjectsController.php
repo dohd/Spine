@@ -23,8 +23,6 @@ use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\note\Note;
 use App\Models\account\Account;
-use App\Models\branch\Branch;
-use App\Models\customer\Customer;
 use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMileStone;
@@ -41,8 +39,9 @@ use App\Http\Requests\Focus\project\CreateProjectRequest;
 use App\Http\Requests\Focus\project\EditProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
 use App\Http\Requests\Focus\project\DeleteProjectRequest;
+use App\Models\rjc\Rjc;
+use App\Repositories\Focus\rjc\RjcRepository;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\product\ProductVariation;
 
 /**
  * ProjectsController
@@ -75,7 +74,7 @@ class ProjectsController extends Controller
         $mics = Misc::all();
         $employees = Hrm::all();
         $accounts = Account::where('account_type', '=', 'Income')->get();
-        
+
         return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts'));
     }
 
@@ -92,7 +91,14 @@ class ProjectsController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-        $result = $this->repository->create($input);
+        // $result = $this->repository->create($input);
+
+        print_log('++++ Create project ++++', compact('input'));
+
+        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
+
+
+
         //return with successfull message
         $tg = '';
         foreach ($result->tags as $row) {
@@ -422,6 +428,36 @@ class ProjectsController extends Controller
     {
         $q = $request->get('id');
         $result = Project::all()->where('customer_id', '=', $q)->where('status', '=', 1);
+        
         return json_encode($result);
     }
+
+    // Load form for creating Rjcs
+    public function create_rjc(Request $request)
+    {
+        $projects =  Project::all(['id', 'name', 'project_number']);
+        $tid =  Rjc::orderBy('tid', 'desc')->first('tid')->tid + 1;
+
+        return view('focus.projects.rjc_create')->with(compact('projects', 'tid'));
+    }
+
+    // Store Rjcs
+    public function store_rjc(Request $request)
+    {
+        $request->validate([
+            'attention' => 'required',
+            'prepared_by' => 'required',
+            'technician' => 'required',
+            'subject' => 'required'
+        ]);
+
+        $data = $request->only(['tid', 'project_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data['ins'] = auth()->user()->ins;
+
+        $repository = new RjcRepository();
+        $repository->create(compact('data', 'data_items'));
+
+        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Repair Job Card created Successfully']);
+    }    
 }
