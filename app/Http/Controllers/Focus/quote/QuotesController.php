@@ -196,6 +196,7 @@ class QuotesController extends Controller
      */
     public function verify($id)
     {
+        // default Quote items
         $quote = Quote::find($id);
         $products = $quote->products()->orderBy('row_index')->get();
         $verified_jc = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first();
@@ -222,7 +223,7 @@ class QuotesController extends Controller
         //filter request input fields
         $quote = $request->only(['id', 'verify_no']);
         $quote_items = $request->only(['row_index', 'item_id', 'a_type', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $job_cards = $request->only(['reference', 'date', 'technician']);
+        $job_cards = $request->only(['jcitem_id', 'reference', 'date', 'technician']);
 
         $quote['ins'] = auth()->user()->ins;
 
@@ -263,11 +264,17 @@ class QuotesController extends Controller
         return response()->noContent();
     }
 
-    // Delete all Quote verified items and job cards
+    // Reset verified Quote
     public function reset_verified($id)
     {
+        // delete verified_items
         VerifiedItem::where('quote_id', $id)->delete();
-        Quote::find($id)->verified_jcs()->delete();
+
+        $quote = Quote::find($id);
+        // delete verified job cards
+        $quote->verified_jcs()->delete();
+        // reset verified status to No
+        $quote->update(['verified' => 'No']);
 
         return response()->noContent();
     } 
