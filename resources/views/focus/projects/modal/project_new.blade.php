@@ -148,9 +148,9 @@
                         <div class="row">
                             <fieldset class="form-group position-relative has-icon-left col-md-4">
                                 <div><label for="taskAssign">Assign To</label></div>
-                                <select class="form-control  select-box" name="employees[]" id="employee" data-placeholder="{{trans('tasks.assign')}}" multiple>
+                                <select class="form-control  select-box" name="employees[]" id="employee" data-placeholder="{{ trans('tasks.assign') }}" multiple>
                                     @foreach($employees as $employee)
-                                    <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
+                                        <option value="{{ $employee['id'] }}">{{ $employee['first_name'] }} {{ $employee['last_name'] }}</option>
                                     @endforeach
                                 </select>
                             </fieldset>                            
@@ -162,7 +162,7 @@
                                 <span class="d-none d-lg-block">{{trans('projects.new_project')}}</span></button>
                         </fieldset>
                     </div>
-                    <input type="hidden" value="{{route('biller.projects.store')}}" id="action-url">
+                    <input type="hidden" value="{{ route('biller.projects.store') }}" id="action-url">
                 </form>
             </section>
         </div>
