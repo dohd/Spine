@@ -119,6 +119,7 @@
                                                     <td><input type="text" class="form-control" name="date[]" id="date-0" required></td>
                                                     <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
                                                     <th class="text-center">#</th>
+                                                    <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-0">
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -240,6 +241,7 @@
                 <td><input type="text" class="form-control" name="date[]" id="date-${n}" required></td>
                 <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
                 <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
+                <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-${n}">
             </tr>
         `;
     }
@@ -426,8 +428,8 @@
             row.remove();
             if (Number("{{ $verify_no }}") > 1) {
                 if (confirm('Are you sure to delete this item?')) {
+                    // delete verified product ajax call 
                     const itemId = row.find('input[name="item_id[]"]').val();
-                    // delete product api call 
                     $.ajax({
                         url: baseurl + 'quotes/verified_item/' + itemId,
                         method: 'DELETE',
