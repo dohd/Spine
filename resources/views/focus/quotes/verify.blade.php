@@ -269,7 +269,22 @@
             method: 'GET',
             dataType: 'json',
             success: function(data) {
-                console.log('jcs:', data);
+                // set default job card rows
+                data.forEach((v, i) => {
+                    // append additional rows
+                    if (i) {
+                        const row = jobCardRow(i);
+                        $('#jobcard tr:last').after(row);
+                        jobCardNo++;
+                    }
+                    // set values
+                    $('#jcitemid-'+i).val(v.id);
+                    $('#reference-'+i).val(v.reference);
+                    $('#technician-'+i).val(v.technician);
+                    $('#date-'+i)
+                        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+                        .datepicker('setDate', new Date(v.date));
+                });
             }
         });
     }
