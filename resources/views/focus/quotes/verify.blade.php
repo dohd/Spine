@@ -181,6 +181,11 @@
                                         </div>
                                     </div>
                                     {{ Form::submit('Verify & Save', ['class' => 'btn btn-success btn-lg']) }}
+                                    @if ($verify_no > 1)
+                                        <button type="button" class="btn btn-danger btn-lg" aria-label="Left Align" id="reset-items">
+                                            <i class="fa fa-refresh"></i> Reset
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
