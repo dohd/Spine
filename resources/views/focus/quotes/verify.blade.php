@@ -149,8 +149,7 @@
                         </table>
 
                         <div class="row">
-                            <div class="col-md-8 col-xs-7 payment-method last-item-row sub_c">
-                                <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-20 mg-lg-t-0-force"></div>
+                            <div class="col-md-8 col-xs-7">
                                 <button type="button" class="btn btn-success" aria-label="Left Align" id="add-product">
                                     <i class="fa fa-plus-square"></i> Add Product
                                 </button>
@@ -214,7 +213,7 @@
     $('#invoicedate')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
-
+    // initalize default job card row datepicker
     $('#date-0')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
@@ -261,6 +260,19 @@
     $('#jobcard').on('click', '.removeJc', function() {
         if ($(this).is('.removeJc')) $(this).closest('tr').remove();
     });
+
+    // On next verifications other than the first
+    if (Number("{{ $verify_no }}") > 1) {
+        // fetch job cards
+        $.ajax({
+            url: baseurl + 'quotes/verified_jcs/' + "{{ $quote->id }}",
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                console.log('jcs:', data);
+            }
+        });
+    }
 
     // row dropdown menu
     function dropDown(val) {
