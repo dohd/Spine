@@ -436,7 +436,8 @@ class ProjectsController extends Controller
     public function create_rjc(Request $request)
     {
         $projects =  Project::all(['id', 'name', 'project_number']);
-        $tid =  Rjc::orderBy('tid', 'desc')->first('tid')->tid + 1;
+        $rjc =  Rjc::orderBy('tid', 'desc')->first('tid');
+        $tid = isset($rjc) ? $rjc->tid+1 : 1;
 
         return view('focus.projects.rjc_create')->with(compact('projects', 'tid'));
     }
