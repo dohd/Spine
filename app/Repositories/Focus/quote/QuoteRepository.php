@@ -217,38 +217,40 @@ class QuoteRepository extends BaseRepository
             $job_cards[] = $row;
         }
 
-        DB::beginTransaction();
-        if ($items_count && $jc_count) {
-            // update or create new quote_item
-            foreach($quote_items as $item) {
-                $quote_item = VerifiedItem::firstOrNew([
-                    'id' => $item['item_id'],
-                    'quote_id' => $item['quote_id'],
-                ]);
-                // assign properties to the item
-                foreach($item as $key => $value) {
-                    $quote_item[$key] = $value;
-                }
-                // remove stale attributes and save
-                if ($quote_item['id'] == 0) unset($quote_item['id']);
-                unset($quote_item['item_id']);
-                $quote_item->save();
-            }
-            // update or create new job_card
-            foreach($job_cards as $item) {
-                $job_card = VerifiedJc::firstOrNew([
-                    'quote_id' => $item['quote_id'],
-                    'reference' => $item['reference']
-                ]);
-                // assign properties to the item
-                foreach($item as $key => $value) {
-                    $job_card[$key] = $value;
-                }
-                $job_card->save();
-            }
-        }
 
-        $result = Quote::where('id', $quote_id)->update(['verified' => 'Yes']);
+        DB::beginTransaction();
+        // update or create new quote_item
+        foreach($quote_items as $item) {
+            $quote_item = VerifiedItem::firstOrNew([
+                'id' => $item['item_id'],
+                'quote_id' => $item['quote_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $quote_item[$key] = $value;
+            }
+            // remove stale attributes and save
+            if ($quote_item['id'] == 0) unset($quote_item['id']);
+            unset($quote_item['item_id']);
+            $quote_item->save();
+        }
+        // update or create new job_card
+        foreach($job_cards as $item) {
+            $job_card = VerifiedJc::firstOrNew([
+                'id' => $item['jcitem_id'],
+                'quote_id' => $item['quote_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $job_card[$key] = $value;
+            }
+            // remove stale attributes and save
+            if ($job_card['id'] == 0) unset($job_card['id']);
+            unset($job_card['jcitem_id']);                
+            $job_card->save();
+        }
+        
+        $result = Quote::find($quote_id)->update(['verified' => 'Yes']);
         if ($result) return DB::commit();
         
         throw new GeneralException('Error Verifying Quote');
