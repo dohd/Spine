@@ -71,7 +71,7 @@ class DjcsController extends Controller
     {
         $leads=Lead::all();
         $tid =  Djc::orderBy('tid', 'desc')->first('tid')->tid + 1;
-
+        
         return new CreateResponse('focus.djcs.create', compact('leads','tid'));
     }
 
