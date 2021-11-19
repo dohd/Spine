@@ -15,12 +15,18 @@ use App\Models\project\ProjectMeta;
 use App\Models\project\ProjectMileStone;
 use App\Models\project\ProjectRelations;
 use App\Models\project\Task;
+use App\Models\rjc\Rjc;
 
 /**
  * Class ProjectRelationship
  */
 trait ProjectRelationship
 {
+    public function rjcs()
+    {
+        return $this->hasMany(Rjc::class)->withoutGlobalScopes;
+    }
+
     public function tags()
     {
         return $this->hasManyThrough(Misc::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('section', '=', 1)->withoutGlobalScopes();
