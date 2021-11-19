@@ -219,6 +219,20 @@
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
 
+    // reset Quote Verification 
+    $('#reset-items').click(function() {
+        const msg = 'This is a destructive process! Are you sure to reset all previously verified items ?'
+        if (confirm(msg)) {
+            $.ajax({
+                url: baseurl + 'quotes/reset_verified/' + "{{ $quote->id }}",
+                method: 'DELETE',
+                success: function() {
+                    return location.reload();
+                }
+            })
+        }
+    });
+
     // job card row
     function jobCardRow(n) {
         return `
