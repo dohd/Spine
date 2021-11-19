@@ -235,14 +235,16 @@ Route::group(['namespace' => 'projectequipment'], function () {
 });
 Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/convert', 'QuotesController@convert')->name('quotes.convert');
-    Route::get('quotes/verify/{id}', 'QuotesController@verify')->name('quotes.verify');
     Route::post('quotes/quotes_status', 'QuotesController@update_status')->name('quotes.bill_status');
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
     Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');
+    Route::get('quotes/verify/{id}', 'QuotesController@verify')->name('quotes.verify');
+    Route::get('quotes/verified_jcs/{id}', 'QuotesController@fetch_verified_jcs')->name('quotes.fetch_verified_jcs');
 
     Route::delete('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
     Route::delete('quotes/verified_item/{id}', 'QuotesController@delete_verified_item')->name('quotes.delete_verified_item');
     Route::delete('quotes/verified_jcs/{id}', 'QuotesController@delete_verified_jcs')->name('quotes.delete_verified_jcs');
+    Route::delete('quotes/reset_verified/{id}', 'QuotesController@reset_verified')->name('quotes.reset_verified');
 
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
