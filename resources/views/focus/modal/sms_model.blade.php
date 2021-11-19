@@ -8,7 +8,11 @@
             <div id="request_sms" class="m-2 text-center">
                 <span class="fa fa-hourglass-half spinner font-large-2 blue" aria-hidden="true"></span>
             </div>
-            <div class="modal-body" id="sms_body" style="display: none;">
+            <div class="modal-body">
+                <div>SmS modal</div>
+            </div>
+            {{--
+            <div class="modal-body" id="sms_body" style="display: initial;">
                 <form id="send_sms">
                     <div class="row">
                         <div class="col">
@@ -35,6 +39,7 @@
                     <input type="hidden" id="sms_action_url_send" value="{{route('biller.send_bill_sms')}}">
                 </form>
             </div>
+            --}}
             <div class="modal-footer">
                 <button type="button" class="btn btn-warning" data-dismiss="modal">{{trans('general.close')}}</button>
                 <button type="button" class="btn btn-primary" id="sms_sendNow">{{trans('general.send')}}</button>
