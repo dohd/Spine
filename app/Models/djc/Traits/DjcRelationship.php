@@ -6,8 +6,6 @@ use App\Models\branch\Branch;
 use App\Models\customer\Customer;
 use App\Models\lead\Lead;
 
-use DB;
-
 /**
  * Class ProductcategoryRelationship
  */
