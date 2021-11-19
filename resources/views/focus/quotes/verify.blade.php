@@ -258,7 +258,19 @@
     });
     // remove job card row
     $('#jobcard').on('click', '.removeJc', function() {
-        if ($(this).is('.removeJc')) $(this).closest('tr').remove();
+        if ($(this).is('.removeJc')) {
+            const row = $(this).closest('tr');
+            row.remove();
+            if (Number("{{ $verify_no }}") > 1) {
+                if (confirm('Are you sure to delete this job card ?')) {
+                    const itemId = row.find('input[name="jcitem_id[]"]').val();
+                    $.ajax({
+                        url: baseurl + 'quotes/verified_jcs/' + itemId,
+                        method: 'DELETE'
+                    });
+                }
+            }
+        }
     });
 
     // On next verifications other than the first
