@@ -135,13 +135,12 @@
                             <p>{!! $quote['proposal'] !!}</p>
                         </div>
                     </div>
-                    <!--/ Invoice Customer Details -->
                     <!-- Invoice Items Details -->
                     <div id="invoice-items-details" class="pt-2">
                         <div class="row">
                             <div class="table-responsive col-sm-12">
                                 <table class="table">
-                                    @if ($quote['tax_format']=='exclusive' OR $quote['tax_format']=='inclusive')
+                                    @if ($quote['tax_format'] == 'exclusive' OR $quote['tax_format'] == 'inclusive')
                                         <thead>
                                             <tr>
                                                 <th>#</th>
@@ -149,7 +148,6 @@
                                                 <th class="text-right">{{trans('products.price')}}</th>
                                                 <th class="text-right">{{trans('products.qty')}}</th>
                                                 <th class="text-right">{{trans('general.tax')}}</th>
-                                                <th class="text-right">{{trans('general.discount')}}</th>
                                                 <th class="text-right">{{trans('general.subtotal')}}</th>
                                             </tr>
                                         </thead>
@@ -164,16 +162,14 @@
                                                         </td>
                                                         <td class="text-right">{{amountFormat($product['product_price'])}}</td>
                                                         <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
+                                                        @php
+                                                            $price = (float) $product->product_price;
+                                                            $subtotal = (float) $product->product_subtotal;
+                                                            $tax_amount = amountFormat($subtotal - $price);
+                                                        @endphp
                                                         <td class="text-right">
-                                                            @php
-                                                                $price = (float) $product->product_price;
-                                                                $subtotal = (float) $product->product_subtotal;
-                                                                $tax_amount = amountFormat($subtotal - $price);
-                                                            @endphp
-                                                            {{ $tax_amount }}
-                                                            <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
+                                                            {{ $tax_amount }} <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
                                                         </td>
-                                                        <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
                                                         <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
                                                     </tr>
                                                 @elseif ($product['a_type'] == 2)
@@ -185,7 +181,6 @@
                                                         <td class="text-right"></td>
                                                         <td class="text-right"></td>
                                                         <td class="text-right"> </td>
-                                                        <td class="text-right"></td>
                                                         <td class="text-right"></td>
                                                     </tr>
                                                 @endif
@@ -203,7 +198,6 @@
                                                 <th class="text-right">{{trans('products.qty')}}</th>
                                                 <th class="text-right">{{trans('general.cgst')}}</th>
                                                 <th class="text-right">{{trans('general.sgst')}}</th>
-                                                <th class="text-right">{{trans('general.discount')}}</th>
                                                 <th class="text-right">{{trans('general.subtotal')}}</th>
                                             </tr>
                                         </thead>
@@ -220,7 +214,6 @@
                                                     <td class="text-right">{{ amountFormat($product['product_tax']/2) }}
                                                         <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2)}}%)</span>
                                                     </td>
-                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
                                                     <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
                                                 </tr>
                                                 <tr>
@@ -237,7 +230,6 @@
                                                 <th class="text-right">{{trans('products.price')}}</th>
                                                 <th class="text-right">{{trans('products.qty')}}</th>
                                                 <th class="text-right">{{trans('general.igst')}}</th>
-                                                <th class="text-right">{{trans('general.discount')}}</th>
                                                 <th class="text-right">{{trans('general.subtotal')}}</th>
                                             </tr>
                                         </thead>
@@ -253,7 +245,6 @@
                                                     <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
                                                     <td class="text-right">{{amountFormat($product['total_tax'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
                                                     </td>
-                                                    <td class="text-right">{{amountFormat($product['total_discount'])}}</td>
                                                     <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
                                                 </tr>
                                                 <tr>
@@ -289,28 +280,23 @@
                                                 <td>{{trans('general.subtotal')}}</td>
                                                 <td class="text-right">{{amountFormat($quote['subtotal'])}}</td>
                                             </tr>
-                                            @if($quote['tax']>0)
-                                            <tr>
-                                                <td>{{trans('general.tax')}}</td>
-                                                <td class="text-right">{{amountFormat($quote['tax'])}}</td>
-                                            </tr>@endif
-                                            @if($quote['discount']>0)
-                                            <tr>
-                                                <td>{{trans('general.discount')}}</td>
-                                                <td class="text-right">{{amountFormat($quote['discount'])}}</td>
-                                            </tr>@endif
-                                            @if($quote['shipping']>0)
-                                            <tr>
-                                                <td>{{trans('general.shipping')}}</td>
-                                                <td class="text-right">{{amountFormat($quote['shipping'])}}</td>
-                                            </tr>
-                                            @if($quote['ship_tax']>0)
-                                            <tr>
-                                                <td>{{trans('general.shipping_tax')}}
-                                                    ({{trans('general.'.$quote['ship_tax_type'])}})
-                                                </td>
-                                                <td class="text-right">{{amountFormat($quote['ship_tax'])}}</td>
-                                            </tr>@endif
+                                            @if ($quote['tax'] > 0)
+                                                <tr>
+                                                    <td>{{trans('general.tax')}}</td>
+                                                    <td class="text-right">{{amountFormat($quote['tax'])}}</td>
+                                                </tr>
+                                            @endif                                            
+                                            @if ($quote['shipping'] > 0)
+                                                <tr>
+                                                    <td>{{trans('general.shipping')}}</td>
+                                                    <td class="text-right">{{amountFormat($quote['shipping'])}}</td>
+                                                </tr>
+                                                @if ($quote['ship_tax']  >0)
+                                                    <tr>
+                                                        <td>{{trans('general.shipping_tax')}} ({{trans('general.'.$quote['ship_tax_type'])}})</td>
+                                                        <td class="text-right">{{amountFormat($quote['ship_tax'])}}</td>
+                                                    </tr
+                                                >@endif
                                             @endif
                                             <tr>
                                                 <td class="text-bold-800">{{trans('general.total')}}</td>
@@ -344,8 +330,11 @@
                                 <p>{!! @$quote->term->terms !!}</p>
                             </div>
                             <div class="col-md-5 col-sm-12 text-center">
-                                @if($quote['status']!='canceled') <a href="#sendEmail" data-toggle="modal" data-remote="false" data-type="6" data-type1="proposal" class="btn btn-primary btn-lg my-1 send_bill"><i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
-                                </a>@endif
+                                @if ($quote['status'] != 'canceled') 
+                                    <a href="#sendEmail" data-toggle="modal" data-remote="false" data-type="6" data-type1="proposal" class="btn btn-primary btn-lg my-1 send_bill">
+                                        <i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -368,11 +357,17 @@
                     </div>
                     <!-- The container for the uploaded files -->
                     <table id="files" class="files table table-striped mt-2">
-                        @foreach($quote->attachment as $row)
-                        <tr>
-                            <td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id={{$row['id']}}" class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> <a href="{{ Storage::disk('public')->url('app/public/files/' . $row['value']) }}" class="purple"><i class="btn-sm fa fa-eye"></i> {{$row['value']}}</a>
-                            </td>
-                        </tr>
+                        @foreach ($quote->attachment as $row)
+                            <tr>
+                                <td>
+                                    <a data-url="{{route('biller.bill_attachment')}}?op=delete&id={{$row['id']}}" class="aj_delete red">
+                                        <i class="btn-sm fa fa-trash"></i>
+                                    </a> 
+                                    <a href="{{ Storage::disk('public')->url('app/public/files/' . $row['value']) }}" class="purple">
+                                        <i class="btn-sm fa fa-eye"></i> {{$row['value']}}
+                                    </a>
+                                </td>
+                            </tr>
                         @endforeach
                     </table>
                     <br>
@@ -389,7 +384,6 @@
 @include("focus.modal.lpo_model")
 @include('focus.modal.sms_model', array('category'=>4))
 @include('focus.modal.email_model', array('category'=>4))
-
 @endsection
 
 @section('extra-scripts')
@@ -405,10 +399,7 @@
         if (confirm('Are you sure to delete this item ?')) {
             $(this).children('form').submit();
         }
-        return;
     });
-
-
 
     $('[data-toggle="datepicker"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
@@ -436,42 +427,41 @@
         $(function() {
             'use strict';
             // Change this to the location of your server-side upload handler:
-            var url = "{{route('biller.bill_attachment')}}";
-            $('#fileupload').fileupload({
-                url: url,
-                dataType: 'json',
-                formData: {
-                    _token: "{{ csrf_token() }}",
-                    id: "{{$quote['id ']}}",
-                    'bill': 4
-                },
-                done: function(e, data) {
-                    $.each(data.result, function(index, file) {
-                        $('#files').append('<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
-                    });
-                },
-                progressall: function(e, data) {
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
-                    $('#progress .progress-bar').css(
-                        'width',
-                        progress + '%'
-                    );
-                }
-            }).prop('disabled', !$.support.fileInput)
-            .parent().addClass($.support.fileInput ? undefined : 'disabled');
+            const url = "{{ route('biller.bill_attachment') }}"
+            $('#fileupload')
+                .fileupload({
+                    url,
+                    dataType: 'json',
+                    formData: {
+                        _token: "{{ csrf_token() }}",
+                        id: "{{$quote['id ']}}",
+                        bill: 4
+                    },
+                    done: function(e, data) {
+                        $.each(data.result, function(index, file) {
+                            const row = `<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id=${file.id}" class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a>${file.name}</td></tr>`;
+                            $('#files').append(row);
+                        });
+                    },
+                    progressall: function(e, data) {
+                        var progress = parseInt(data.loaded / data.total * 100, 10);
+                        $('#progress .progress-bar').css('width', progress + '%');
+                    }
+                })
+                .prop('disabled', !$.support.fileInput)
+                .parent().addClass($.support.fileInput ? undefined : 'disabled');
         });
 
         $(document).on('click', ".aj_delete", function(e) {
             e.preventDefault();
-            var aurl = $(this).attr('data-url');
-            var obj = $(this);
+            var url = $(this).attr('data-url');
             $.ajax({
-                url: aurl,
+                url: url,
                 type: 'POST',
                 dataType: 'json',
                 success: function(data) {
-                    obj.closest('tr').remove();
-                    obj.remove();
+                    $(this).closest('tr').remove();
+                    $(this).remove();
                 }
             });
         });
