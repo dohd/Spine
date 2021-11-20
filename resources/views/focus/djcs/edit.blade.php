@@ -63,7 +63,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <div class="col-sm-12">
-                                            <label for="attention" class="attention">Attention *</label>
+                                            <label for="attention" class="attention">Attention <span class="text-danger">*</span></label>
                                             {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Atrtention','autocomplete'=>'false','id'=>'attention']) }}
                                         </div>
                                     </div>
@@ -95,15 +95,15 @@
                                             <label for="region" class="caption"> Region</label>
                                             {{ Form::text('region', null, ['class' => 'form-control round ', 'placeholder' => 'Region','autocomplete'=>'false','id'=>'region']) }}
                                         </div>
-                                        <div class="col-sm-4"><label for="prepared_by" class="caption">Prepaired By *</label>
+                                        <div class="col-sm-4"><label for="prepared_by" class="caption">Prepared By <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepaired By']) }}
+                                                {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepared By']) }}
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
-                                            <label for="technician" class="caption"> Technician *</label>
+                                            <label for="technician" class="caption"> Technician <span class="text-danger">*</span></label>
                                             {{ Form::text('technician', null, ['class' => 'form-control round required', 'placeholder' => 'Technician','autocomplete'=>'false','id'=>'prepaired_by','required' => 'required']) }}
                                         </div>
                                     </div>
@@ -148,7 +148,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <div class="col-sm-12">
-                                            <label for="subject" class="caption">Subject / Title *</label>
+                                            <label for="subject" class="caption">Subject / Title <span class="text-danger">*</span></label>
                                             {{ Form::text('subject', null, ['class' => 'form-control round required', 'placeholder' => 'Subject / Title','autocomplete'=>'false','id'=>'subject']) }}
                                         </div>
                                     </div>
