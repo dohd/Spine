@@ -33,6 +33,9 @@ class QuoteRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        if (request('pi_page') == 1) $q->where('bank_id', '>', 0);        
+
         $q->when(request('i_rel_type') == 1, function ($q) {
             return $q->where('customer_id', '=', request('i_rel_id', 0));
         });
@@ -70,14 +73,19 @@ class QuoteRepository extends BaseRepository
                 $quote[$key] = date_for_database($value);
             }
         }
-        $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
+        $duedate = $quote['invoicedate'] . ' + ' . $quote['validity'] . ' days';
         $quote['invoiceduedate'] = date_for_database($duedate);
+
         // increament tid
-        $ref = Quote::orderBy('tid', 'desc')->first('tid')->tid;
-        if ($quote['tid'] <= $ref) {
-            $quote['tid'] = $ref + 1;
+        $ref = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
+        if (isset($quote['bank_id'])) {
+            $ref = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
         }
-        // defaults
+        if (isset($ref->tid) && $quote['tid'] <= $ref->tid) {
+            $quote['tid'] = $ref->tid + 1;
+        }  
+
+        // default fields
         $quote['quote_type'] = 'lead';
         $quote['client_type'] = 'lead';
 
