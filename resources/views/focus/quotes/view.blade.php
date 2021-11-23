@@ -72,43 +72,42 @@
                             <p class="text-muted">{{trans('invoices.bill_to')}}</p>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-left">
-                            @php
-                                if ($quote->lead_id) {
+                            @php                        
+                                $customername = $quote->client_name;
+                                $email = $quote->client_email;
+                                $cell = $quote->client_contact;
+                                $branchname = "";
+                                $adrress = "";
+
+                                if ($quote->customer_id) {
+                                    $customername = $quote->customer->name ;
+                                    $branchname = $quote->customer_branch->name ;
+                                    $adrress = $quote->customer->address;
+                                    $email = @$quote->customer->email ;
+                                    $cell = $quote->customer->phone;
+                                } 
+                                if ($quote->lead_id) {                                    
+                                    $customername = $quote->lead->client_name;
+                                    $branchname = "";
+                                    $adrress = "";
+                                    $email = $quote->lead->client_email;
+                                    $cell = $quote->lead->client_contact; 
+
                                     if($quote->lead->client_status == 'customer') {
                                         $customername = $quote->client->name ;
                                         $branchname = $quote->branch->name ;
                                         $adrress = $quote->client->address;
                                         $email = @$quote->client->email ;
                                         $cell = $quote->client->phone;
-                                    } else {
-                                        $customername = $quote->lead->client_name;
-                                        $branchname = "";
-                                        $adrress = "";
-                                        $email = $quote->lead->client_email;
-                                        $cell = $quote->lead->client_contact; 
-                                    }
-                                } else {
-                                    if ($quote->customer_id) {
-                                        $customername = $quote->customer->name ;
-                                        $branchname = $quote->customer_branch->name ;
-                                        $adrress = $quote->customer->address;
-                                        $email = @$quote->customer->email ;
-                                        $cell = $quote->customer->phone;
-                                    } else {
-                                        $customername = $quote->client_name;
-                                        $branchname = "";
-                                        $adrress = "";
-                                        $email = $quote->client_email;
-                                        $cell = $quote->client_contact;
                                     }
                                 }
                             @endphp
                             <ul class="px-0 list-unstyled">
-                                <li>{{$customername}},</li>
-                                <li>{{$branchname}},</li>
-                                <li>{{$adrress}},</li>
-                                <li>{{$email}},</li>
-                                <li>{{$cell}},</li>
+                                <li>{{ $customername }},</li>
+                                <li>{{ $branchname }},</li>
+                                <li>{{ $adrress }},</li>
+                                <li>{{ $email }},</li>
+                                <li>{{ $cell }},</li>
                                 @if ($quote->customer)
                                     {!! custom_fields_view(1, $quote->customer->id, false) !!}
                                 @endif
@@ -393,17 +392,18 @@
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
+    
+    // initialize datepicker
+    $('[data-toggle="datepicker"]')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date());
 
-    // On delete quote
+    // On delete Quote
     $('.quote-delete').click(function(e) {
         if (confirm('Are you sure to delete this item ?')) {
             $(this).children('form').submit();
         }
     });
-
-    $('[data-toggle="datepicker"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
 
     $(function() {
         $('.summernote').summernote({
