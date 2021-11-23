@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\communication;
 
 use App\Http\Responses\RedirectResponse;
@@ -46,6 +47,7 @@ use PayPal\Api\RedirectUrls;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use Illuminate\Support\Facades\Response;
+
 class BillsController extends Controller
 {
     public $pheight;
@@ -61,7 +63,6 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
         session(['bill_url' => $data['link']['preview']]);
         return view('focus.bill.preview', $data);
-
     }
 
 
@@ -76,40 +77,60 @@ class BillsController extends Controller
             if ($request->pdf == 2) {
                 return $pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'D');
             } else {
-                   $headers = array(
-                        "Content-type" => "application/pdf",
-                        "Pragma" => "no-cache",
-                        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                        "Expires" => "0"
+                $headers = array(
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
                 );
-                return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf','I'), 200, $headers);
-
+                return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
             }
         }
     }
-      public function print_djc_pdf(Request $request)
-    {
-        
-        $data = $this->bill_details($request);
-        if ($request->pdf) {
 
+    public function print_djc_pdf(Request $request)
+    {
+        $data = $this->bill_details($request);        
+        if ($request->pdf) {
             $html = view('focus.bill.print_djc', $data)->render();
             $pdf = new \Mpdf\Mpdf(config('pdf'));
             $pdf->WriteHTML($html);
-            /*if ($request->pdf == 2) {
-                return $pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'D');
-            } else {*/
-                   $headers = array(
-                        "Content-type" => "application/pdf",
-                        "Pragma" => "no-cache",
-                        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                        "Expires" => "0"
-                );
-                return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf','I'), 200, $headers);
+            $headers = array(
+                "Content-type" => "application/pdf",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
 
-            //}
+            return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
         }
     }
+
+    public function print_quote_pdf(Request $request)
+    {
+        $data = $this->bill_details($request);
+        print_log('++++ Print Quote ++++', json_encode($data, JSON_PRETTY_PRINT));
+
+        return response()->noContent();
+
+
+        if ($request->pdf) {
+            $html = view('focus.bill.print_quote', $data)->render();
+
+            $pdf = new \Mpdf\Mpdf(config('pdf'));
+            $pdf->WriteHTML($html);
+            $headers = array(
+                "Content-type" => "application/pdf",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+
+            return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
+        }
+
+    }
+
 
 
     public function print_compact(Request $request)
@@ -155,17 +176,15 @@ class BillsController extends Controller
         if ($gateway) {
             $data['gateway'] = $gateway;
             switch ($gateway->id) {
-                case 1 :
+                case 1:
                     return view('focus.gateways.vendors.stripe', $data);
                     break;
-                case 2 :
+                case 2:
                     session(['signature_one' => Str::random(8), 'cid' => $ins]);
                     return view('focus.gateways.vendors.paypal', $data);
                     break;
             }
         }
-
-
     }
 
     public function process_payment(Request $request)
@@ -195,7 +214,7 @@ class BillsController extends Controller
 
 
             switch ($gateway->id) {
-                case 1 :
+                case 1:
                     $stripe_amount = ($surcharge + $amount) * 100;
                     $output = $this->stripe($request, $stripe_amount);
                     if ($output['status'] == 'succeeded') {
@@ -236,11 +255,8 @@ class BillsController extends Controller
                                             class="fa fa-eye"></i> ' . trans('general.view') . ' </a>';
 
                 echo json_encode($response);
-
             }
         }
-
-
     }
 
 
@@ -252,7 +268,6 @@ class BillsController extends Controller
         $data['banks'] = Bank::withoutGlobalScopes()->where('ins', '=', $data['company']['company']['id'])->where('enable', '=', 'Yes')->get();
 
         return view('focus.bill.banks', $data);
-
     }
 
 
@@ -306,7 +321,6 @@ class BillsController extends Controller
                 if ($due <= 0.00) {
                     $bill->pamnt = $bill->total;
                     $bill->status = 'paid';
-
                 } elseif ($due2 < $bill->total and $transaction['credit'] > 0) {
 
                     $bill->pamnt = $bill->pamnt + $transaction['credit'];
@@ -328,10 +342,7 @@ class BillsController extends Controller
                 $transaction['row'] = ' <tr><th scope="row">*</th><td><p class="text-muted">' . $transaction['payment_date'] . '</p></td><td><p class="text-muted">' . $transaction['method'] . '</p></td><td class="text-right">' . amountFormat(0) . '</td><td class="text-right">' . numberFormat($transaction['credit']) . '</td><td class="">' . $transaction['note'] . '</td></tr>';
 
                 echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.transactions.created') . ' <a href="" class="btn btn-primary btn-lg"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '</a> &nbsp; &nbsp;', 'par1' => trans('payments.' . $bill->status), 'par2' => trans('payments.' . $transaction['method']), 'par3' => $transaction['row'], 'payment_made' => numberFormat($bill->pamnt), 'payment_due' => numberFormat($due), 'remains' => numberFormat($due)));
-
             }
-
-
         } else {
             echo json_encode(array('status' => 'Error', 'message' => trans('general.error')));
         }
@@ -344,168 +355,176 @@ class BillsController extends Controller
     {
         $flag = false;
 
+        $getAttr = function ($type, $title, $custom, $person, $person_id, $url) { 
+            return compact('type', 'title', 'person', 'person_id', 'url'); 
+        };
+        $getGeneral = function ($bill_type, $lang_bill_number, $lang_bill_date, $lang_bill_due_date, $person, $direction, $prefix, $status_block) {
+            return compact('bill_type', 'lang_bill_number', 'lang_bill_date', 'lang_bill_due_date', 'person', 'direction', 'prefix', 'status_block');
+        };
+
         switch ($request->type) {
-            case 1 :
+            case 1:
                 //invoice
-                $invoice = Invoice::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                $invoice['type'] = 1;
+                $invoice = Invoice::find($request->id);
+                $attributes = $getAttr(1, 'invoice', 2, 1, $invoice->customer_id, route('biller.invoices.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
+
                 $prefix = 1;
                 $title = trans('invoices.invoice_title');
-                $invoice['custom'] = 2;
-                $invoice['person'] = 1;
-                $invoice['person_id'] = $invoice['customer_id'];
-                $invoice['url'] = route('biller.invoices.show', $invoice->id);
-                $invoice['title'] = 'invoice';
-                if ($invoice['i_class'] > 1) {
-                    $prefix = 6;
-                    $title = trans('invoices.subscription');
-                } else if ($invoice['i_class'] == 1) {
+                if ($invoice->i_class == 1) {
                     $prefix = 10;
                     $title = trans('invoices.pos');
                 }
-                $flag = token_validator($request->token, 'i' . $invoice['id'] . $invoice['tid']);
-                $general = array('bill_type' => $title,
-                    'lang_bill_number' => trans('invoices.tid'),
-                    'lang_bill_date' => trans('invoices.invoice_date'),
-                    'lang_bill_due_date' => trans('invoices.invoice_due_date'
-                    ), 'direction' => 'ltr',
-                    'person' => trans('customers.customer'),
-                    'prefix' => $prefix, 'status_block' => true,);
-                $valid_token = token_validator('', 'i' . $invoice['id'] . $invoice['tid'], true);
+                if ($invoice->i_class > 1) {
+                    $prefix = 6;
+                    $title = trans('invoices.subscription');
+                }
+                $flag = token_validator($request->token, 'i' . $invoice->id . $invoice->tid);
+                $general = $getGeneral(
+                    $title, 
+                    trans('invoices.tid'), 
+                    trans('invoices.invoice_date'), 
+                    trans('invoices.invoice_due_date'),
+                    trans('customers.customer'),
+                    'ltr', $prefix, true
+                );
+                $valid_token = token_validator('', 'i' . $invoice->id . $invoice->tid, true);
                 break;
-            case 3 :
+            case 3:
                 //invoice proforma
-                $invoice = Bill::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                $invoice['url'] = route('biller.invoices.show', $invoice->id);
-                $invoice['type'] = 3;
-                $invoice['custom'] = 2;
-                $invoice['person'] = 1;
-                $invoice['title'] = 'proforma';
-                $invoice['person_id'] = $invoice['customer_id'];
-                $flag = token_validator($request->token, 'i' . $invoice['id'] . $invoice['tid']);
-                $general = array('bill_type' => trans('invoices.proforma'),
-                    'lang_bill_number' => trans('invoices.proforma_tid'),
-                    'lang_bill_date' => trans('invoices.invoice_date'),
-                    'lang_bill_due_date' => trans('invoices.invoice_due_date'
-                    ), 'direction' => 'ltr',
-                    'person' => trans('customers.customer'),
-                    'prefix' => 3, 'status_block' => false);
-                $valid_token = token_validator('', 'i' . $invoice['id'] . $invoice['tid'], true);
+                $invoice = Bill::find($request->id);
+                $attributes = $getAttr(3, 'proformer', 2, 1, $invoice->customer_id, route('biller.invoices.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
+
+                $flag = token_validator($request->token, 'i' . $invoice->id . $invoice->tid,);
+                $general = $getGeneral(
+                    trans('invoices.proforma'),
+                    trans('invoices.proforma_tid'),
+                    trans('invoices.invoice_date'),
+                    trans('invoices.invoice_due_date'), 
+                    trans('customers.customer'),
+                    'ltr', 3, false
+                );
+                $valid_token = token_validator('', 'i' . $invoice->id . $invoice->tid, true);
                 break;
-            case 4 :
-                $invoice = Quote::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                $invoice['url'] = route('biller.quotes.show', $invoice->id);
-                $invoice['type'] = 4;
-                $invoice['custom'] = 2;
-                $invoice['person'] = 1;
-                $invoice['title'] = 'quote';
-                $invoice['person_id'] = $invoice['customer_id'];
-                $flag = token_validator($request->token, 'q' . $invoice['id'] . $invoice['tid']);
-                $general = array('bill_type' => trans('quotes.quote'),
-                    'lang_bill_number' => trans('quotes.quote'),
-                    'lang_bill_date' => trans('quotes.invoicedate'),
-                    'lang_bill_due_date' => trans('quotes.invoiceduedate'
-                    ), 'direction' => 'ltr',
-                    'person' => trans('customers.customer'),
-                    'prefix' => 5, 'status_block' => false);
-                $valid_token = token_validator('', 'q' . $invoice['id'] . $invoice['tid'], true);
+            case 4:
+                $invoice = Quote::find($request->id);
+                $attributes = $getAttr(1, 'quote', 2, 1, $invoice->customer_id, route('biller.quotes.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
+
+                $flag = token_validator($request->token, 'q' . $invoice->id . $invoice->tid);
+                $general = $getGeneral(
+                    trans('quotes.quote'),
+                    trans('quotes.quote'),
+                    trans('quotes.invoicedate'),
+                    trans('quotes.invoiceduedate'),
+                    trans('customers.customer'),
+                    'ltr', 5, false
+                );
+                $valid_token = token_validator('', 'q' . $invoice->id . $invoice->tid, true);
                 break;
-            case 5 :
-                $invoice = Order::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                $invoice['url'] = route('biller.orders.show', $invoice->id);
-                $invoice['type'] = 5;
-                $invoice['custom'] = 5;
-                $invoice['person'] = 1;
-                $invoice['title'] = 'order';
+            case 5:
+                $invoice = Order::find($request->id);
+                $attributes = $getAttr(5, 'order', 5, 1, $invoice->customer_id, route('biller.orders.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
+
                 $title = trans('orders.credit_note');
                 $prefix = 7;
                 $person = trans('customers.customer');
-                $invoice['person_id'] = $invoice['customer_id'];
-                $flag = token_validator($request->token, 'o' . $invoice['id'] . $invoice['tid']);
-                if ($invoice['i_class'] == 3) {
+                $flag = token_validator($request->token, 'o' . $invoice->id . $invoice->tid);
+                if ($invoice->i_class == 3) {
                     $prefix = 8;
                     $title = trans('orders.stock_return');
                     $person = trans('suppliers.supplier');
                 }
-                $general = array('bill_type' => $title,
-                    'lang_bill_number' => trans('orders.order'),
-                    'lang_bill_date' => trans('general.date'),
-                    'lang_bill_due_date' => trans('orders.invoiceduedate'
-                    ), 'direction' => 'ltr',
-                    'person' => $person,
-                    'prefix' => $prefix, 'status_block' => false);
-                $valid_token = token_validator('', 'o' . $invoice['id'] . $invoice['tid'], true);
+                $general = $getGeneral(
+                    $title, 
+                    trans('orders.order'),
+                    trans('general.date'),
+                    trans('orders.invoiceduedate'),
+                    $person, 'ltr', $prefix, false
+                );
+                $valid_token = token_validator('', 'o' . $invoice->id . $invoice->tid, true);
                 break;
-            case 9 :
-                $invoice = Purchaseorder::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                $invoice['url'] = route('biller.purchaseorders.show', $invoice->id);
-                $invoice['type'] = 9;
-                $invoice['custom'] = 9;
-                $invoice['person'] = 1;
-                $invoice['title'] = 'purchase_order';
-                $invoice['person_id'] = $invoice['customer_id'];
-                $flag = token_validator($request->token, 'po' . $invoice['id'] . $invoice['tid']);
-                $general = array('bill_type' => trans('purchaseorders.purchaseorder'),
-                    'lang_bill_number' => trans('purchaseorders.purchaseorder'),
-                    'lang_bill_date' => trans('purchaseorders.invoicedate'),
-                    'lang_bill_due_date' => trans('purchaseorders.invoiceduedate'
-                    ), 'direction' => 'ltr',
-                    'person' => trans('suppliers.supplier'),
-                    'prefix' => 9, 'status_block' => false);
-                $valid_token = token_validator('', 'po' . $invoice['id'] . $invoice['tid'], true);
-                break;
-                case 10 :
-                $invoice = Djc::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                $invoice['url'] = route('biller.purchaseorders.show', $invoice->id);
-                $invoice['type'] = 9;
-                $invoice['custom'] = 9;
-                $invoice['person'] = 1;
-                $invoice['title'] = 'djc_report';
-                $invoice['person_id'] = $invoice['customer_id'];
-                $flag = token_validator($request->token, 'd' . $invoice['id']);
-                $general = array('bill_type' => trans('purchaseorders.purchaseorder'),
-                    'lang_bill_number' => trans('purchaseorders.purchaseorder'),
-                    'lang_bill_date' => trans('purchaseorders.invoicedate'),
-                    'lang_bill_due_date' => trans('purchaseorders.invoiceduedate'
-                    ), 'direction' => 'ltr',
-                    'person' => trans('suppliers.supplier'),
-                    'prefix' => 9, 'status_block' => false);
-                $valid_token = token_validator('', 'd' . $invoice['id'], true);
-                break;
+            case 9:
+                $invoice = Purchaseorder::find($request->id);
+                $attributes = $getAttr(9, 'purchase_order', 9, 1, $invoice->customer_id, route('biller.purchaseorders.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
 
+                $flag = token_validator($request->token, 'po' . $invoice->id . $invoice->tid);
+                $general = $getGeneral(
+                    trans('purchaseorders.purchaseorder'),
+                    trans('purchaseorders.purchaseorder'),
+                    trans('purchaseorders.invoicedate'),
+                    trans('purchaseorders.invoiceduedate'),                    
+                    trans('suppliers.supplier'),
+                    'ltr', 9, false
+                );
+                $valid_token = token_validator('', 'po' . $invoice->id . $invoice->tid, true);
+                break;
+            case 10:
+                $invoice = Djc::find($request->id);
+                $attributes = $getAttr(9, 'djc_report', 9, 1, $invoice->customer_id, route('biller.purchaseorders.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
+
+                $flag = token_validator($request->token, 'd' . $invoice->id);
+                $general = $getGeneral(
+                    trans('purchaseorders.purchaseorder'),
+                    trans('purchaseorders.purchaseorder'),
+                    trans('purchaseorders.invoicedate'),
+                    trans('purchaseorders.invoiceduedate'), 
+                    trans('suppliers.supplier'),
+                    'ltr', 9, false
+                );
+                $valid_token = token_validator('', 'd' . $invoice->id, true);
+                break;
         }
+
         if ($flag) {
-            $company = Company::where('id', '=', $invoice['ins'])->first();
-            $online_payment = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 5)->where('ins', '=', $company['id'])->first();
-            $online_pay_account = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 6)->where('ins', '=', $company['id'])->first('feature_value');
-            $gateway = UserGateway::whereHas('config', function ($q) use ($company) {
-                $q->where('ins', '=', $company['id']);
+            $company = Company::find($invoice->ins);
 
-            })->get();
+            $online_payment = ConfigMeta::where(['feature_id' => 5, 'ins' => $company->id])->first();
+            $online_pay_account = ConfigMeta::where(['feature_id' => 6, 'ins' => $company->id])->first('feature_value');
 
-            config([
-                'currency' => ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 2)->where('ins', '=', $company['id'])->first()->currency
-            ]);
+            $gateway = UserGateway::whereHas('config', function ($q) use ($company) { $q->where('ins', $company->id); })->get();
+
+            config([ 'currency' => ConfigMeta::where(['feature_id' => 2, 'ins' => $company->id])->first()->currency ]);
 
             $general['tax_string_total'] = trans('general.total_tax');
             $general['tax_id'] = trans('general.tax_id');
-            if ($invoice['tax_format'] == 'igst' or $invoice['tax_format'] == 'cgst') {
+            if ($invoice->tax_format == 'igst' or $invoice->tax_format == 'cgst') {
                 $general['tax_string_total'] = trans('general.total_gst');
                 $general['tax_id'] = trans('general.gstin');
             }
 
-            $link['link'] = route('biller.print_bill', [$invoice['id'], $invoice['type'], $valid_token, 1]);
-            $link['download'] = route('biller.print_bill', [$invoice['id'], $invoice['type'], $valid_token, 2]);
-            $link['preview'] = route('biller.view_bill', [$invoice['id'], $invoice['type'], $valid_token, 0]);
-            $link['bank'] = route('biller.view_bank', [$invoice['id'], $invoice['type'], $valid_token]);
-            $link['payment'] = route('biller.pay_card', [$invoice['id'], $invoice['type'], $valid_token]);
+            $link = array(
+                'link' => route('biller.print_bill', [$invoice->id, $invoice->type, $valid_token, 1]),
+                'download' => route('biller.print_bill', [$invoice->id, $invoice->type, $valid_token, 2]),
+                'preview' => route('biller.view_bill', [$invoice->id, $invoice->type, $valid_token, 0]),
+                'bank' => route('biller.view_bank', [$invoice->id, $invoice->type, $valid_token]),
+                'payment' => route('biller.pay_card', [$invoice->id, $invoice->type, $valid_token])
+            );
 
-            $data = array('general' => $general, 'invoice' => $invoice, 'company' => $company, 'online_payment' => $online_payment['feature_value'], 'gateway' => $gateway, 'online_pay_account' => $online_pay_account['feature_value'], 'link' => $link);
+            $data = compact('general', 'invoice', 'company', 'gateway', 'link');
+            $data['online_payment'] = $online_payment->feature_value;
+            $data['online_pay_account'] = $online_pay_account->feature_value;
 
             return $data;
-        } else {
-            exit('Error');
         }
+
+        exit('Bill details error');
     }
 
     //gateways
@@ -526,7 +545,6 @@ class BillsController extends Controller
         try {
             if ($request->paymentMethodId != null) {
                 $intent = \Stripe\PaymentIntent::create(['amount' => $price, 'currency' => $stripe['currency'], 'payment_method' => $request->paymentMethodId, 'confirmation_method' => "manual", 'confirm' => true, 'use_stripe_sdk' => true]);
-
             } else if ($request->paymentIntentId != null) {
 
                 $intent = \Stripe\PaymentIntent::retrieve($request->paymentIntentId);
@@ -554,7 +572,6 @@ class BillsController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
-
     }
 
     public function paypal_process(Request $request)
@@ -570,7 +587,6 @@ class BillsController extends Controller
                     return new RedirectResponse($result['url'], ['flash_success' => $result['message']]);
                 }
             }
-
         } elseif ($request->post()) {
 
             //for paypal
@@ -624,7 +640,6 @@ class BillsController extends Controller
 
                         try {
                             $payment->create($apiContext);
-
                         } catch (\Exception $e) {
 
                             throw new \Exception('Unable to create link for payment' . $e->getMessage());
@@ -642,8 +657,6 @@ class BillsController extends Controller
                 return new RedirectResponse(route('biller.pay_card', [$invoice_id, 1, $token]) . '?g=2', ['flash_error' => 'Gateway Communication failed! PayPal Server communication interrupted']);
             }
         }
-
-
     }
 
     public function paypal_response(Request $request)
@@ -700,23 +713,17 @@ class BillsController extends Controller
 
 
                 return $response;
-
             } else {
                 exit('Request Expired');
             }
-
-
         } catch (\Exception $e) {
 
             return array('status' => 'Error', 'message' => 'Payment Error! #R321 ' . $e->getCode());
-
         }
-
     }
 
     public function paypal_error(Request $request)
     {
         return redirect(session('bill_url'));
     }
-
 }
