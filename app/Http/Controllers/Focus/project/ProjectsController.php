@@ -418,10 +418,10 @@ class ProjectsController extends Controller
         if ($q == 1) {
             $result = Equipment::all()->where('rel_id', '=', $q);
             return json_encode($result);
-        } else {
-            $result = "";
-            return json_encode($result);
-        }
+        } 
+
+        $result = "";
+        return json_encode($result);
     }
 
     public function project_load_select(Request $request)
