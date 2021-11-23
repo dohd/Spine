@@ -84,7 +84,7 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-3">
-                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
+                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}} #{{prefix(5)}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                                             {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
