@@ -9,16 +9,6 @@ use App\Models\lead\Lead;
 
 class CreateResponse implements Responsable
 {
-    protected $page;
-
-    /**
-     * @param string $quote
-     */
-    public function __construct($page)
-    {
-        $this->page = $page;
-    }
-
     /**
      * To Response
      *
@@ -28,12 +18,13 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_quote = Quote::orderBy('tid', 'desc')->first();
+        $last_quote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
         $leads = Lead::where('status', 0)->get();
-
+        
         // create proforma invoice
-        if ($this->page == 'pi') {
+        if (request('page') == 'pi') {
             $banks = Bank::all();
+            $last_quote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
             
             return view('focus.quotes.create_pi')
                 ->with(compact('last_quote', 'leads', 'banks'))
