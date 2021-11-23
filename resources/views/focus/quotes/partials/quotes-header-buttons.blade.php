@@ -1,6 +1,10 @@
-<div class="">
+<div>
     <div class="btn-group" role="group" aria-label="quotes">
-        <a href="{{ route( 'biller.quotes.index' ) }}" class="btn btn-info  btn-lighten-2 round">
+        @php
+            $is_pi = request()->getQueryString();
+            $url = $is_pi ? route('biller.quotes.index', $is_pi) : route('biller.quotes.index');
+        @endphp
+        <a href="{{ $url }}" class="btn btn-info  btn-lighten-2 round">
             <i class="fa fa-list-alt"></i> {{trans('general.list')}}
         </a>
         @permission('quote-create')
@@ -13,4 +17,3 @@
         @endauth
     </div>
 </div>
-<div class="clearfix"></div>
