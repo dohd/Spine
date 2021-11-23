@@ -34,9 +34,10 @@ use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
-use App\Http\Requests\Focus\quote\DeleteQuoteRequest;
 use App\Models\items\VerifiedItem;
+use App\Models\lead\Lead;
 use App\Models\verifiedjcs\VerifiedJc;
+use Illuminate\Support\Facades\DB;
 
 /**
  * QuotesController
@@ -93,11 +94,9 @@ class QuotesController extends Controller
      * @param CreateQuoteRequestNamespace $request
      * @return \App\Http\Responses\Focus\quote\CreateResponse
      */
-    public function create(CreateQuoteRequest $request)
+    public function create()
     {
-        $page = $request->input('page');
-        
-        return new CreateResponse($page);
+        return new CreateResponse();
     }
 
     /**
@@ -109,7 +108,7 @@ class QuotesController extends Controller
     public function store(CreateQuoteRequest $request)
     {
         // filter request input fields
-        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
         $data_items = $request->only(['row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'unit']);
 
         $data['user_id'] = auth()->user()->id;
@@ -117,7 +116,7 @@ class QuotesController extends Controller
 
         $result = $this->repository->create(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.quotes.index', [$result['id']]), ['flash_success' => trans('alerts.backend.quotes.created')]);
+        return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => trans('alerts.backend.quotes.created')]);
     }
 
     /**
@@ -318,20 +317,20 @@ class QuotesController extends Controller
 
     public function update_status(ManageQuoteRequest $request)
     {
+        // filter request input fields
+        $data = $request->only(['bill_id', 'status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
+        $data['approved_date'] = date_for_database($data['approved_date']);
 
-        $input = $request->only(['bill_id', 'status', 'approved_method', 'approved_by', 'approval_note']);
-        $approved_date = date_for_database($request->input('approved_date'));
-        $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
-        if ($quote_o->id) {
-            $quote_o->status = $input['status'];
-            $quote_o->approved_method = $input['approved_method'];
-            $quote_o->approved_by = $input['approved_by'];
-            $quote_o->approval_note = $input['approval_note'];
-            $quote_o->approved_date = $approved_date;
-            $quote_o->save();
-        }
-        //return with successfull message
-        echo json_encode(array('status' => 'Success', 'message' => trans('general.bill_status_update'), 'bill_status' => trans('payments.' . $input['status'])));
+        DB::beginTransaction();
+        $quote = Quote::find($data['bill_id']);
+        // filter bill_id from data then update quote
+        unset($data['bill_id']);
+        $quote->update($data);
+        // update Lead status to closed(1) reason won
+        Lead::find($quote->lead_id)->update(['status' => 1, 'reason' => 'won']);
+        DB::commit();
+
+        return json_encode(['status' => 'Success', 'message' => trans('general.bill_status_update'), 'refresh' => 1]);
     }
 
     public function update_lpo(ManageQuoteRequest $request)
