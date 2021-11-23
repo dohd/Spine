@@ -1,4 +1,5 @@
 <?php
+
 /**
  * core
  *
@@ -16,17 +17,19 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
     Route::get('stripe_token', 'communication\BillsController@stripe_api_request')->name('stripe_api_request');
     Route::get('cron/{method}', 'general\JobController@index')->name('cron.jobs');
     //paypal
-  Route::group(['namespace' => 'communication'], function () {
-      Route::get('paypal_process', 'BillsController@paypal_process');
-      Route::post('paypal_process', 'BillsController@paypal_process')->name('paypal_process');
-      Route::get('paypal_response', 'BillsController@paypal_response')->name('paypal_response');
-      Route::get('paypal_error', 'BillsController@paypal_error')->name('paypal_error');
-  });
+    Route::group(['namespace' => 'communication'], function () {
+        Route::get('paypal_process', 'BillsController@paypal_process');
+        Route::post('paypal_process', 'BillsController@paypal_process')->name('paypal_process');
+        Route::get('paypal_response', 'BillsController@paypal_response')->name('paypal_response');
+        Route::get('paypal_error', 'BillsController@paypal_error')->name('paypal_error');
+    });
 
     Route::group(['namespace' => 'communication', 'middleware' => 'valid_token'], function () {
         Route::get('view_bill/{id}/{type}/{token}/{pdf}', 'BillsController@index')->name('view_bill');
         Route::get('print_bill/{id}/{type}/{token}/{pdf}', 'BillsController@print_pdf')->name('print_bill');
-       Route::get('print_djc/{id}/{type}/{token}/{pdf}', 'BillsController@print_djc_pdf')->name('print_djc');
+        Route::get('print_djc/{id}/{type}/{token}/{pdf}', 'BillsController@print_djc_pdf')->name('print_djc');
+        Route::get('print_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_quote_pdf')->name('print_quote');
+
         Route::get('print_compact/{id}/{type}/{token}/{pdf}', 'BillsController@print_compact')->name('print_compact');
         Route::get('view_bank/{id}/{type}/{token}', 'BillsController@view_bank')->name('view_bank');
         Route::get('pay_card/{id}/{type}/{token}', 'BillsController@pay_card')->name('pay_card');
@@ -51,7 +54,7 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
     Route::group(['namespace' => 'payment', 'middleware' => 'biller'], function () {
         Route::post('bill_payment', 'PaymentsController@payment')->name('bill_payment');
         Route::post('bulk_payment', 'PaymentsController@bill_bulk_payment')->name('bill_bulk_payment');
-         Route::post('receive_payment', 'PaymentsController@receive_payment')->name('receive_payment');
+        Route::post('receive_payment', 'PaymentsController@receive_payment')->name('receive_payment');
     });
 
     //public
@@ -106,16 +109,14 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
         Route::get('u/read_notification', 'UserController@read_notifications')->name('read_notification');
         Route::get('/clear-cache', 'CompanyController@clear_cache')->name('clear_cache');
 
-         Route::get('business/dev', 'CompanyController@dev_manager')->name('business.dev_manager');
-          Route::post('business/dev','CompanyController@dev_manager')->name('business.dev_manager');
+        Route::get('business/dev', 'CompanyController@dev_manager')->name('business.dev_manager');
+        Route::post('business/dev', 'CompanyController@dev_manager')->name('business.dev_manager');
     });
 });
 
 Route::group(['namespace' => 'Multi\Auth', 'as' => 'frontend.auth.', 'prefix' => 'app'], function () {
-       Route::get('password/reset', 'ForgotPasswordController@showLinkRequestForm')->name('password.email');
-        Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-        Route::get('password/reset/{token}', 'ResetPasswordController@showResetForm')->name('password.reset.form');
-        Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
+    Route::get('password/reset', 'ForgotPasswordController@showLinkRequestForm')->name('password.email');
+    Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::get('password/reset/{token}', 'ResetPasswordController@showResetForm')->name('password.reset.form');
+    Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
 });
-
-
