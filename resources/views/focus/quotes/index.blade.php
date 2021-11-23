@@ -1,9 +1,14 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management'))
+@php
+    $is_pi = request()->getQueryString();
+    $quote_label = $is_pi ? 'PI Management' : trans('labels.backend.quotes.management');
+@endphp
+
+@section ('title', $quote_label)
 
 @section('page-header')
-<h1>{{ trans('labels.backend.quotes.management') }}</h1>
+<h1>{{ $quote_label }}</h1>
 @endsection
 
 @section('content')
@@ -11,12 +16,10 @@
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
-
+                <h4 class="content-header-title mb-0">{{ $quote_label }}</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
-
                     <div class="media-body media-right text-right">
                         @include('focus.quotes.partials.quotes-header-buttons')
                     </div>
@@ -30,7 +33,6 @@
                 $due=$total-$paid;
             @endphp
             <div class="card">
-
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm-2">
@@ -137,14 +139,12 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     $(function() {
-        setTimeout(function() {
-            draw_data()
-        }, "{{ config('master.delay') }}");
+        setTimeout(() => draw_data() , "{{ config('master.delay') }}");
 
         $('#search').click(function() {
             var start_date = $('#start_date').val();
             var end_date = $('#end_date').val();
-            if (start_date != '' && end_date != '') {
+            if (!start_date && !end_date) {
                 $('#quotes-table').DataTable().destroy();
                 draw_data(start_date, end_date);
             } else {
@@ -163,23 +163,23 @@
         }
     });
 
+    const datatableLang = { @lang('datatable.strings') };
     function draw_data(start_date = '', end_date = '') {
         var dataTable = $('#quotes-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: { @lang('datatable.strings')},
+            language: datatableLang,
             ajax: {
                 url: '{{ route("biller.quotes.get") }}',
                 type: 'post',
                 data: {
-                    @if($segment) 
-                        i_rel_id: "{{$segment['id ']}}",
-                        i_rel_type: "{{$input['rel_type']}}",
-                    @endif 
+                    i_rel_id: "{{ $segment }}" && "{{ $segment['id '] }}",
+                    i_rel_type: "{{ $segment }}" && "{{ $input['rel_type'] }}",
                     start_date: start_date,
-                    end_date: end_date
+                    end_date: end_date,
+                    pi_page: window.location.href.includes('page=pi') ? 1 : 0
                 },
             },
             columns: [{
