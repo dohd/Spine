@@ -125,14 +125,13 @@
             addObject(form_data, true);
         });
 
+        const tableLang = { @lang('datatable.strings') };
         var dataTable = $('#projects-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: {
-                @lang('datatable.strings')
-            },
+            language: tableLang,
             ajax: {
                 url: '{{ route("biller.projects.get") }}',
                 type: 'post'
@@ -165,8 +164,6 @@
                     data: 'created_at',
                     name: 'created_at'
                 },
-
-
                 {
                     data: 'actions',
                     name: 'actions',
@@ -217,8 +214,8 @@
 
         // Add thirty days to the current date
         const d = new Date();
-        const days = (30 * 24 * 60 * 60 * 1000);
-        d.setTime(d.getTime() + days);
+        const days_in_ms = (30 * 24 * 60 * 60 * 1000);
+        d.setTime(d.getTime() + days_in_ms);
         $('.to_date')
             .datepicker({ format: "{{ config('core.user_date_format') }}" })
             .datepicker('setDate', d);
