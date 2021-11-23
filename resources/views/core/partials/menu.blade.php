@@ -253,14 +253,21 @@
                     </li>
                     @endauth
                     @permission('quote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Quotes / PI Management</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Quotes Management</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('quotes.management') }}
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.quotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}
                                 </a>
-                            </li>
+                            </li>                            
+                        </ul>
+                    </li>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>PI Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.quotes.index', 'page=pi') }}" data-toggle="dropdown"><i class="ft-file-text"></i>PI Management
+                                </a>
+                            </li>                            
                             <li><a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI
                                 </a>
                             </li>
