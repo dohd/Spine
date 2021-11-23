@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management')." | Create PI" )
+@section ('title', "PI Management | Create PI" )
 
 @section('page-header')
     <h1>Create PI</h1>
@@ -10,7 +10,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
+            <h4 class="content-header-title mb-0">PI Management</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
@@ -42,10 +42,9 @@
                                                 <option>-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
+                                                        $name = $lead->client_name;
                                                         if ($lead->client_status == "customer") {
                                                             $name = $lead->customer->company.' '. $lead->branch->name;                                                                
-                                                        } else {
-                                                            $name = $lead->client_name;
                                                         }
                                                     @endphp
                                                     <option value="{{ $lead['id'] }}">
@@ -85,20 +84,19 @@
                                             <input type="hidden" id="document_type" value="QUOTE" name="document_type">
                                         </div>
                                     </div>
-                                    <div class="col-sm-3"><label for="pricing" class="caption"> Pricing</label>
+                                    <div class="col-sm-3"><label for="pricing" class="caption">Pricing</label>
                                         <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                            </div>
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                                             <select id="pricing" name="pricing" class="form-control round required  ">
                                                 <option value="0">Default </option>
-                                                @foreach($selling_prices as $selling_price)
-                                                    <option value="{{$selling_price->id}}">{{$selling_price->name}}</option>
+                                                @foreach ($selling_prices as $selling_price)
+                                                    <option value="{{$selling_price->id}}">{{ $selling_price->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-sm-3">
-                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
+                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}} #PI</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                                             {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
@@ -114,8 +112,8 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="prepared_by" class="caption"> Prepared By</label>
-                                        {{ Form::text('prepaired_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepaired_by']) }}
+                                        <label for="prepared_by" class="caption">Prepared By</label>
+                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepared By','autocomplete'=>'false', 'id'=>'prepared_by']) }}
                                     </div>
                                 </div>
                             </div>
