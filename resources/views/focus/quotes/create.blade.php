@@ -42,10 +42,9 @@
                                                 <option>-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
+                                                        $name = $lead->client_name;
                                                         if ($lead->client_status == "customer") {
                                                             $name = $lead->customer->company.' '. $lead->branch->name;                                                                
-                                                        } else {
-                                                            $name = $lead->client_name;
                                                         }
                                                     @endphp
                                                     <option value="{{ $lead['id'] }}">
