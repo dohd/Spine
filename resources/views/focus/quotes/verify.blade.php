@@ -96,8 +96,11 @@
                                     <div class="col-sm-4">
                                         <label for="verify_no" class="caption">Verification No.</label>
                                         <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                            
-                                            {{ Form::text('verify_text', $quote->tid.'_v'.$verify_no, ['class' => 'form-control round', 'disabled']) }}
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            @php
+                                                $verify_text = $quote->tid . ' (v' . $verify_no . ')';
+                                            @endphp                                            
+                                            {{ Form::text('verify_text', $verify_text, ['class' => 'form-control round', 'disabled']) }}
                                             <input type="hidden" name="verify_no" value="{{ $verify_no }}">
                                         </div>
                                     </div>                                                                             
