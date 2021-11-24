@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\bill\Bill;
+use App\Models\Company\ConfigMeta;
 use App\Models\invoice\Invoice;
 use App\Models\order\Order;
 use App\Models\purchaseorder\Purchaseorder;
@@ -21,40 +22,38 @@ class ValidTokenMiddleware
      _ @param  \Closure  $next
      _ @return mixed
      */
-    public function handle($request, Closure $next, $guard = "crm")
+    public function handle($request, Closure $next)
     {
-        if (App::environment('production')) {
-            error_reporting(0);
-        }
+        if (App::environment('production')) error_reporting(0);
+        
         if (isset($request->type)) {
             switch ($request->type) {
-                case 1 :
+                case 1:
                     $invoice = Invoice::withoutGlobalScopes()->where('id', '=', $request->id)->first('ins');
                     break;
-                case 3 :
+                case 3:
                     $invoice = Bill::withoutGlobalScopes()->where('id', '=', $request->id)->first();
                     break;
-                case 4 :
+                case 4:
                     $invoice = Quote::withoutGlobalScopes()->where('id', '=', $request->id)->first();
                     break;
-                case 5 :
+                case 5:
                     $invoice = Order::withoutGlobalScopes()->where('id', '=', $request->id)->first();
                     break;
-                case 9 :
+                case 9:
                     $invoice = Purchaseorder::withoutGlobalScopes()->where('id', '=', $request->id)->first();
                     break;
-                    case 10 :
+                case 10:
                     $invoice = Djc::withoutGlobalScopes()->where('id', '=', $request->id)->first();
                     break;
             }
-           if(isset($invoice->ins)) {
-               $u = \App\Models\Company\ConfigMeta::withoutGlobalScopes()->where('ins', '=', $invoice->ins)->where('feature_id', '=', 15)->first('value1')->value1;
-               session(['theme' => $u]);
-               return $next($request);
-           } else {
-               abort(404, 'Access denied');
-           }
+
+            if (isset($invoice->ins)) {
+                session(['theme' => ConfigMeta::withoutGlobalScopes()->where(['ins' => $invoice->ins, 'feature_id' => 15])->first('value1')->value1]);
+                return $next($request);
+            }
         }
 
+        abort(404, 'Access denied');
     }
 }
