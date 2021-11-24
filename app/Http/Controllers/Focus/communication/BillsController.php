@@ -47,6 +47,7 @@ use PayPal\Api\RedirectUrls;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\URL;
 
 class BillsController extends Controller
 {
@@ -109,26 +110,22 @@ class BillsController extends Controller
     public function print_quote_pdf(Request $request)
     {
         $data = $this->bill_details($request);
-        print_log('++++ Print Quote ++++', json_encode($data, JSON_PRETTY_PRINT));
+        $html = view('focus.bill.print_quote', $data)->render();
 
-        return response()->noContent();
+        print_log(json_encode($data, JSON_PRETTY_PRINT));
 
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
 
-        if ($request->pdf) {
-            $html = view('focus.bill.print_quote', $data)->render();
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+        $title = $data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf';
 
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-
-            return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
-        }
-
+        return Response::stream($pdf->Output($title, 'I'), 200, $headers);
     }
 
 
@@ -376,11 +373,11 @@ class BillsController extends Controller
                 if ($invoice->i_class == 1) {
                     $prefix = 10;
                     $title = trans('invoices.pos');
-                }
-                if ($invoice->i_class > 1) {
+                } elseif ($invoice->i_class > 1) {
                     $prefix = 6;
                     $title = trans('invoices.subscription');
                 }
+
                 $flag = token_validator($request->token, 'i' . $invoice->id . $invoice->tid);
                 $general = $getGeneral(
                     $title, 
@@ -412,6 +409,7 @@ class BillsController extends Controller
                 $valid_token = token_validator('', 'i' . $invoice->id . $invoice->tid, true);
                 break;
             case 4:
+                // quote
                 $invoice = Quote::find($request->id);
                 $attributes = $getAttr(1, 'quote', 2, 1, $invoice->customer_id, route('biller.quotes.show', $invoice->id));
                 foreach($attributes as $key => $val) {
@@ -430,6 +428,7 @@ class BillsController extends Controller
                 $valid_token = token_validator('', 'q' . $invoice->id . $invoice->tid, true);
                 break;
             case 5:
+                // order
                 $invoice = Order::find($request->id);
                 $attributes = $getAttr(5, 'order', 5, 1, $invoice->customer_id, route('biller.orders.show', $invoice->id));
                 foreach($attributes as $key => $val) {
@@ -455,6 +454,7 @@ class BillsController extends Controller
                 $valid_token = token_validator('', 'o' . $invoice->id . $invoice->tid, true);
                 break;
             case 9:
+                // purchase order
                 $invoice = Purchaseorder::find($request->id);
                 $attributes = $getAttr(9, 'purchase_order', 9, 1, $invoice->customer_id, route('biller.purchaseorders.show', $invoice->id));
                 foreach($attributes as $key => $val) {
@@ -473,6 +473,7 @@ class BillsController extends Controller
                 $valid_token = token_validator('', 'po' . $invoice->id . $invoice->tid, true);
                 break;
             case 10:
+                // djc
                 $invoice = Djc::find($request->id);
                 $attributes = $getAttr(9, 'djc_report', 9, 1, $invoice->customer_id, route('biller.purchaseorders.show', $invoice->id));
                 foreach($attributes as $key => $val) {
