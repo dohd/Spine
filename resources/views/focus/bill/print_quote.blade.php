@@ -5,85 +5,112 @@
 			font-family: "Times New Roman", Times, serif;
 			font-size: 10pt;
 		}
-		p {
-			margin: 0pt;
-		}
-		table.items {
-			border: 0.1mm solid #000000;
-		}
-		table.itemsboarder {
-			border: 0.1mm solid #000000;
-		}
 		table {
 			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			font-size: 10pt;
 		}
-		td {
-			vertical-align: top;
-		}
-		.items td {
-			border-left: 0.1mm solid #000000;
-			border-right: 0.1mm solid #000000;
-		}
 		table thead td {
 			background-color: #BAD2FA;
 			text-align: center;
-			border: 0.1mm solid #000000;
+			border: 0.1mm solid black;
 			font-variant: small-caps;
 		}
-		.items td.blanktotal {
-			background-color: #EEEEEE;
-			border: 0.1mm solid #000000;
-			background-color: #FFFFFF;
-			border: 0mm none #000000;
-			border-top: 0.1mm solid #000000;
-			border-right: 0.1mm solid #000000;
-		}
-		.items td.totals {
-			text-align: right;
-			border: 0.1mm solid #000000;
-		}
-		.items td.totalsss {
-			text-align: right;
-		}
-		.items td.mytotals {
-			text-align: left;
-			border: 0.1mm solid #000000;
-		}
-		.items td.mytotalss {
-			text-align: left;
-		}
-		.items td.totalss {
-			text-align: right;
-			border: 0.1mm solid #000000;
-			text-transform: uppercase;
-		}
-		.items td.cost {
-			text-align: "."center;
-		}
-		.invoice-title h1 {
-			font-size: 50px;
-			font-weight: lighter;
-			text-align: center;
-			margin: 0;
-			text-transform: uppercase;
-			padding: 5px;
-			letter-spacing: 2px;
-		}
-		.itemss {
-			text-transform: uppercase;
-		}
-		h5 {
-			text-decoration: underline;
+		td {
+			vertical-align: top;
 		}
 		.bullets {
 			width: 8px;
 		}
-		/* .top-row td {
-			border-top: 1pt solid black;
-		} */
-		.items tbody tr:nth-last-child(3) td {
-			border-top: 1pt solid black;
+		.items {
+			border-bottom: 0.1mm solid black;
+			font-size: 10pt; 
+			border-collapse: collapse;
+			width: 100%;
+			font-family: sans-serif;
+		}
+		.items td {
+			border-left: 0.1mm solid black;
+			border-right: 0.1mm solid black;
+		}
+
+		.align-r {
+			text-align: right;
+		}
+		.align-c {
+			text-align: center;
+		}
+		.bd {
+			border: 1px solid black;
+		}
+		.bd-t {
+			border-top: 1px solid
+		}
+		.ref {
+			width: 100%;
+			font-family: serif;
+			font-size: 10pt;
+		}
+		.ref tr td {
+			border: 0.1mm solid #888888; 
+		}
+		.customer-dt {
+			width: 100%;
+			font-family: serif;
+			font-size: 10pt;
+		}
+		.customer-dt tr td:nth-child(1) {
+			border: 0.1mm solid #888888;
+		}
+		.customer-dt tr td:nth-child(3) {
+			border: 0.1mm solid #888888;
+		}
+		.customer-dt-title {
+			font-size: 7pt; 
+			color: #555555; 
+			font-family: sans;
+		}
+		.doc-title-td {
+			text-align: center;
+			width: 100%;
+		}
+		.doc-title {
+			font-size: 15pt;
+			color: #0f4d9b;
+		}
+		.doc-table {
+			font-size: 10pt;
+			margin-top:5px;
+			width: 100%;
+		}
+
+		.header-table {
+			width: 100%;
+			border-bottom: 0.8mm solid #0f4d9b;
+		}
+		.header-table tr td:first-child {
+			color: #0f4d9b;
+			font-size: 9pt;
+			width: 60%;
+			text-align: left;
+		}
+		.address {
+			color: #0f4d9b;
+			font-size: 10pt;
+			width: 40%;
+			text-align: right;
+		}
+		.header-table-text {
+			color:#0f4d9b; 
+			font-size:9pt; 
+			margin: 0;
+		}
+		.header-table-child {
+			color:#0f4d9b; 
+			font-size:8pt;
+		}
+		.header-table-child tr:nth-child(2) td {
+			font-size:9pt; 
+			padding-left:50px;
 		}
 	</style>
 </head>
@@ -94,12 +121,12 @@
 		</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
-	<table width="100%" style="border-bottom: 0.8mm solid #0f4d9b;">
+	<table class="header-table">
 		<tr>
-			<td width="60%" align="left" style="color:#0f4d9b;font-size:9pt;">
+			<td>
 				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br>
-				<p style="color:#0f4d9b;font-size:9pt;"> Supply, Installation, Maintenance & Repair of:</p>
-				<table style="color:#0f4d9b; font-size:8pt;">
+				<p class="header-table-text"> Supply, Installation, Maintenance & Repair of:</p>
+				<table class="header-table-child">
 					<tr>
 						<td>
 							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Air Conditioners & Refrigerators </div>
@@ -112,10 +139,10 @@
 							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Raised Floors / Access Panels</div>
 						</td>
 					</tr>
-					<tr><td style="font-size:9pt; padding-left:50px;">... and General Suppliers</td></tr>
+					<tr><td>... and General Suppliers</td></tr>
 				</table>								
 			</td>
-			<td width="40%" align="right" style="color:#0f4d9b;font-size:10pt;"><br><br>
+			<td class="address"><br><br>
 				Lean Aircons Building, Opp NextGen Mall<br>
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
@@ -125,17 +152,17 @@
 			</td>
 		</tr>
 	</table>
-	<table width="100%" style="font-size: 10pt;margin-top:5px;">
+	<table class="doc-table">
 		<tr>
-			<td style="text-align: center;" width="100%" class="headerData"><span style="font-size:15pt;color:#0f4d9b;text-transform: uppercase;">
-				<b>QUOTATION</b></span>
+			<td class="doc-title-td">
+				<span class='doc-title'><b>QUOTATION</b></span>
 			</td>
 		</tr>
 	</table><br>
-	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
+	<table class="customer-dt" cellpadding="10">
 		<tr>
-			<td width="50%" style="border: 0.1mm solid #888888;">
-				<span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br /><br />
+			<td width="50%">
+				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br /><br />
 				<b>Client Name :</b> {{ $invoice->client->company }}<br />
 				<b>Branch :</b> {{ $invoice->branch->name }}<br />
 				<b>Address :</b> {{ $invoice->client->address }}<br />
@@ -143,38 +170,24 @@
 				<b>Cell :</b> {{ $invoice->client->phone }}<br />
 				<b>Attention :</b> {{ $invoice->attention }}<br />
 			<td width="5%">&nbsp;</td>
-			<td width="45%" style="border: 0.1mm solid #888888;"><span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br /><br />
+			<td width="45%">
+				<span class="customer-dt-title">REFERENCE DETAILS:</span><br /><br />
 				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br />
-				@php
-				 	/** Prepend initial zeroes */
-					$tid = $invoice->tid;
-					switch(strlen(''.$tid)) {
-						case 1:
-							$tid = sprintf('%04d', $tid);
-							break;
-						case 2:
-							$tid = sprintf('%04d', $tid);
-							break;
-						case 3:
-							$tid = sprintf('%04d', $tid);
-							break;
-					}
-				@endphp
-				<b>Quotation No :</b> {{ 'QT/' . $tid }}<br />
+				<b>Quotation No :</b> {{ 'QT/' . sprintf('%04d', $invoice->tid) }}<br />
 				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br />
 				<b>Currency :</b> Kenya Shilling <br />
 			</td>
 		</tr>
 	</table><br />
-	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
+	<table  class="ref" cellpadding="10">
 		<tr>
-			<td style="border: 0.1mm solid #888888; ">
+			<td>
 				Ref : <b>{{ $invoice->notes }}</b>
 			</td>
 		</tr>
 	</table>
 	<br>
-	<table class="items" width="100%" style="font-size: 10pt; border-collapse: collapse;" cellpadding="8">
+	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
 				<td width="8%">No.</td>
@@ -187,29 +200,40 @@
 		</thead>
 		<tbody>
 			@foreach($invoice->products as $product)
-				<tr>
-					<td>{{ $product->numbering }}</td>
-					<td>{{ $product->product_name }}</td>
-					<td>{{ (int) $product->product_qty }}</td>
-					<td>{{ $product->unit }}</td>
-					<td>{{ number_format($product->product_price, 2) }}</td>
-					<td>{{ number_format($product->product_subtotal, 2) }}</td>
-				</tr>
+				@if ($product->a_type == 2)		
+					<tr>
+						<td><b>{{ $product->numbering }}<b></td>
+						<td><b>{{ $product->product_name }}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				@else
+					<tr>
+						<td>{{ $product->numbering }}</td>
+						<td>{{ $product->product_name }}</td>
+						<td class="align-c">{{ (int) $product->product_qty }}</td>
+						<td class="align-c">{{ $product->unit }}</td>
+						<td class="align-r">{{ number_format($product->product_price, 2) }}</td>
+						<td class="align-r">{{ number_format($product->product_subtotal, 2) }}</td>
+					</tr>
+				@endif
 			@endforeach
-			<tr class="top-row">
-				<td colspan="4"></td>
-				<td>Sub Total:</td>
-				<td>{{ number_format($invoice->subtotal, 2) }}</td>				
+			<tr>
+				<td colspan="4" class="bd-t"></td>
+				<td class="bd align-r">Sub Total:</td>
+				<td class="bd align-r">{{ number_format($invoice->subtotal, 2) }}</td>			
 			</tr>
 			<tr>
 				<td colspan="4"></td>
-				<td>Tax 16%</td>
-				<td>{{ number_format($invoice->tax, 2) }}</td>
+				<td class="align-r">Tax 16%</td>
+				<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
 			</tr>
 			<tr>
-				<td colspan="4">Prepared By : <b>{{ $invoice->prepared_by }}</b></td>
-				<td>Grand Total</td>
-				<td>{{ number_format($invoice->total, 2) }}</td>
+				<td colspan="4"><em>Prepared By : </em><b>{{ $invoice->prepared_by }}</b></td>
+				<td class="bd align-r"><b>Grand Total:</b></td>
+				<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
 			</tr>
 		</tbody>
 	</table>
