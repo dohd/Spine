@@ -112,7 +112,8 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
         $html = view('focus.bill.print_quote', $data)->render();
 
-        print_log(json_encode($data, JSON_PRETTY_PRINT));
+        // print_log(json_encode($data, JSON_PRETTY_PRINT));
+        // return $html;
 
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
