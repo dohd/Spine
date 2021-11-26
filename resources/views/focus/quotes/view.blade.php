@@ -389,6 +389,13 @@
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
 <script type="text/javascript">
+    // check if previous page was pi or quote
+    if (document.referrer.includes('page=pi')) {
+        // if pi add query-string and redirect to make it dynamic
+        location.href = location.href + '?page=pi';
+    }
+
+
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
