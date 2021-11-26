@@ -12,6 +12,7 @@ use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
 use App\Models\verifiedjcs\VerifiedJc;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -34,7 +35,12 @@ class QuoteRepository extends BaseRepository
     {
         $q = $this->query();
 
-        if (request('pi_page') == 1) $q->where('bank_id', '>', 0);        
+        // distinguish pi from quote
+        if (request('pi_page') == 1) {
+            $q->where('bank_id', '>', 0);
+        } else {
+            $q->where('bank_id', 0);
+        }
 
         $q->when(request('i_rel_type') == 1, function ($q) {
             return $q->where('customer_id', '=', request('i_rel_id', 0));
@@ -103,10 +109,16 @@ class QuoteRepository extends BaseRepository
             $input['data_items'], 
             ['quote_id' => $result['id'], 'ins' => $result['ins']]
         );
-        
-        // bulk insert quote_items
-        if ($result && $items_count) {
-            QuoteItem::insert($quote_items);
+
+        // assign unit field if non-existant
+        foreach ($quote_items as $key => $val) {
+            if (!isset($val['unit'])) {
+                $quote_items[$key]['unit'] = '';
+            }
+        }
+
+        QuoteItem::insert($quote_items);
+        if ($result) {
             DB::commit();
             return $result;
         }
