@@ -138,6 +138,16 @@
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    // Replace view link dynamically on href
+    // $('#quotes-table tr').each(function() {
+    //     console.log('tr')
+    //     if(!$(this).index()) return;
+    //     const td = $(this).find('td').eq(1);
+    //     console.log(td);
+    // })
+
+
+
     $(function() {
         setTimeout(() => draw_data() , "{{ config('master.delay') }}");
 
