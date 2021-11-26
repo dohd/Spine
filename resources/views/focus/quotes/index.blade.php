@@ -107,7 +107,11 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            <th>{{ trans('quotes.quote') }} / PI</th>
+                                            @if ($is_pi)
+                                                <th>#PI</th>
+                                            @else
+                                                <th>#{{ trans('quotes.quote') }}</th>
+                                            @endif
                                             <th>{{ trans('customers.customer') }}</th>
                                             <th>{{ trans('quotes.invoicedate') }}</th>
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
@@ -161,10 +165,10 @@
                 alert("Date range is Required");
             }
         });
+
         $('[data-toggle="datepicker"]')
             .datepicker({ format: "{{ config('core.user_date_format') }}" })
             .datepicker('setDate', new Date());
-
     });
 
     $.ajaxSetup({
