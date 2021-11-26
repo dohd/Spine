@@ -156,7 +156,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4"><label for="ref_type" class="caption">Currency *</label>
+                                    <div class="col-sm-4"><label for="ref_type" class="caption">Currency <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  select-box " name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
@@ -169,13 +169,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
+                                    <div class="col-sm-4"><label for="source" class="caption">Quotation Terms <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select id="term_id" name="term_id" class="form-control round  selectpicker required">
-                                                <option value="0">No Terms</option>
+                                                <option value="">-- Select Term --</option>
                                                 @foreach($terms as $term)
-                                                    <option value="{{$term->id}}">{{$term->title}}</option>
+                                                    <option value="{{ $term->id }}">{{ $term->title }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -311,7 +311,7 @@
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="product_id[]" id="productid-${val}" value="0">
                 <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="a_type" value="1" id="atype-${val}">
+                <input type="hidden" name="a_type[]" value="1" id="atype-${val}">
             </tr>
         `;
     }
@@ -330,7 +330,7 @@
                 <input type="hidden" name="product_price[]" value="0">
                 <input type="hidden" name="product_subtotal[]" value="0">
                 <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="a_type" value="2" id="atype-${val}">
+                <input type="hidden" name="a_type[]" value="2" id="atype-${val}">
             </tr>
         `;
     }
