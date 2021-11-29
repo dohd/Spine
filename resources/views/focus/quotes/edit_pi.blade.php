@@ -50,10 +50,9 @@
                                                 <option>-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
+                                                        $name = $lead->client_name;
                                                         if ($lead->client_status == "customer") {
                                                             $name = $lead->customer->company.' '. $lead->branch->name;                                                                
-                                                        } else {
-                                                            $name = $lead->client_name;
                                                         }
                                                     @endphp
                                                     <option value="{{ $lead['id'] }}">
@@ -126,7 +125,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="prepared_by" class="caption"> Prepared By</label>
-                                        {{ Form::text('prepaired_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepaired_by']) }}
+                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepared By','autocomplete'=>'false','id'=>'prepared_by']) }}
                                     </div>
                                 </div>
                             </div>
@@ -315,6 +314,10 @@
     $('#term_id').val("{{ $quote->term_id }}");
     $('#revision').val("{{ $quote->revision }}" || '_r1');
     $('#tax_id').val("{{ $quote->tax_id }}");
+
+    const printType = @json($quote->print_type);
+    if (printType === 'inclusive') $('#colorCheck6').prop('checked', true);
+    if (printType === 'exclusive') $('#colorCheck7').prop('checked', true);
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')

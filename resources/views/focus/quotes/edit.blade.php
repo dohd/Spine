@@ -49,10 +49,9 @@
                                             <select class="form-control  round  select-box required" name="lead_id" id="lead_id">                                                 
                                                 @foreach ($leads as $lead)
                                                     @php
+                                                        $name = $lead->client_name;
                                                         if ($lead->client_status == "customer") {
                                                             $name = $lead->customer->company.' '. $lead->branch->name;                                                                
-                                                        } else {
-                                                            $name = $lead->client_name;
                                                         }
                                                     @endphp
                                                     <option value="{{ $lead['id'] }}">
@@ -66,7 +65,7 @@
                                 <div class="form-group row">
                                     <div class='col-md-6'>
                                         <div class='col m-1'>
-                                            {{ Form::label( 'method', 'Print Type',['class' => 'col-12 control-label']) }}
+                                            {{ Form::label('method', 'Print Type', ['class' => 'col-12 control-label']) }}
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
                                                 <input type="radio" class="custom-control-input bg-primary" name="print_type" id="colorCheck6" value="inclusive" checked="">
                                                 <label class="custom-control-label" for="colorCheck6">VATInclusive</label>
@@ -111,8 +110,8 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="prepaired_by" class="caption"> Prepaired By</label>
-                                        {{ Form::text('prepaired_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepaired_by']) }}
+                                        <label for="prepared_by" class="caption"> Prepared By</label>
+                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepared By','autocomplete'=>'false','id'=>'prepared_by']) }}
                                     </div>                                      
                                 </div>
                             </div>
@@ -299,6 +298,10 @@
     $('#term_id').val("{{ $quote->term_id }}");
     $('#revision').val("{{ $quote->revision }}" || '_r1');
     $('#tax_id').val("{{ $quote->tax_id }}");
+
+    const printType = @json($quote->print_type);
+    if (printType === 'inclusive') $('#colorCheck6').prop('checked', true);
+    if (printType === 'exclusive') $('#colorCheck7').prop('checked', true);
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
