@@ -68,7 +68,8 @@ class QuotesController extends Controller
     public function index(ManageQuoteRequest $request)
     {
         $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
+        
+        $segment = array();
         $words = array();
         if (isset($input['rel_id']) and isset($input['rel_type'])) {
             switch ($input['rel_type']) {
@@ -150,7 +151,7 @@ class QuotesController extends Controller
     public function update(EditQuoteRequest $request, Quote $quote)
     {
         //filter request input fields
-        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepaired_by', 'print_type']);
+        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
         $data_items = $request->only(['row_index', 'item_id', 'numbering', 'a_type', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
 
         $data['id'] = $quote->id;
@@ -158,7 +159,14 @@ class QuotesController extends Controller
 
         $result = $this->repository->update(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => trans('alerts.backend.quotes.updated')]);
+        $route = route('biller.quotes.index');
+        $msg = trans('alerts.backend.quotes.updated');
+        if ($result['bank_id']) {
+            $route = route('biller.quotes.index', 'page=pi');
+            $msg = 'PI updated successfully';
+        }
+
+        return new RedirectResponse($route, ['flash_success' => $msg]);
     }
 
     /**
@@ -235,7 +243,14 @@ class QuotesController extends Controller
 
         $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
 
-        return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => 'Quote successfully verified']);
+        $route = route('biller.quotes.index');
+        $msg = 'Quote verified successfully';
+        if (request()->getQueryString()) {
+            $route = route('biller.quotes.index', 'page=pi');
+            $msg = 'PI verified successfully';
+        }
+
+        return new RedirectResponse($route, ['flash_success' => $msg]);
     }
 
     // Fetch Verified Job cards
@@ -280,7 +295,7 @@ class QuotesController extends Controller
         // delete verified job cards
         $quote->verified_jcs()->delete();
         // reset verified status to No
-        $quote->update(['verified' => 'No']);
+        $quote->update(['verified' => 'No', 'verification_date' => null]);
 
         return response()->noContent();
     } 
@@ -322,6 +337,7 @@ class QuotesController extends Controller
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
     }
 
+    // Approve quotation
     public function update_status(ManageQuoteRequest $request)
     {
         // filter request input fields
