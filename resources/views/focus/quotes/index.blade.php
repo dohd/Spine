@@ -95,11 +95,9 @@
                                     <div class="col-md-2">
                                         <input type="text" name="end_date" id="end_date" class="form-control form-control-sm" data-toggle="datepicker" autocomplete="off" />
                                     </div>
-
                                     <div class="col-md-2">
                                         <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
                                     </div>
-
                                 </div>
                                 <hr>
                                 <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -127,8 +125,6 @@
                                     </tbody>
                                 </table>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -143,22 +139,21 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     // Replace view link dynamically on href
-    // $('#quotes-table tr').each(function() {
-    //     console.log('tr')
-    //     if(!$(this).index()) return;
-    //     const td = $(this).find('td').eq(1);
-    //     console.log(td);
-    // })
-
-
+    // $('#quotes-table').each(function(i) {
+    //     console.log('tr', i)
+    //     const td = $(this).find('td').eq(0);
+    //     console.log(td.html());
+    // });
 
     $(function() {
-        setTimeout(() => draw_data() , "{{ config('master.delay') }}");
+        setTimeout(() => {
+            draw_data();
+        }, "{{ config('master.delay') }}");
 
         $('#search').click(function() {
             var start_date = $('#start_date').val();
             var end_date = $('#end_date').val();
-            if (!start_date && !end_date) {
+            if (start_date && end_date) {
                 $('#quotes-table').DataTable().destroy();
                 draw_data(start_date, end_date);
             } else {
@@ -172,28 +167,29 @@
     });
 
     $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
-    const datatableLang = { @lang('datatable.strings') };
     function draw_data(start_date = '', end_date = '') {
-        var dataTable = $('#quotes-table').dataTable({
+        const segment = @json($segment);
+        const input = @json($input);
+        const tableLang = { @lang('datatable.strings') };
+
+        const table = $('#quotes-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: datatableLang,
+            language: tableLang,
             ajax: {
                 url: '{{ route("biller.quotes.get") }}',
                 type: 'post',
                 data: {
-                    i_rel_id: "{{ $segment }}" && "{{ $segment['id '] }}",
-                    i_rel_type: "{{ $segment }}" && "{{ $input['rel_type'] }}",
+                    i_rel_id: segment['id'],
+                    i_rel_type: input['rel_type'],
                     start_date: start_date,
                     end_date: end_date,
-                    pi_page: window.location.href.includes('page=pi') ? 1 : 0
+                    pi_page: location.href.includes('page=pi') ? 1 : 0
                 },
             },
             columns: [{
