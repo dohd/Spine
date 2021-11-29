@@ -7,7 +7,12 @@
         </div>
     @else
         <div class="col">
-            <a href="{{ route('biller.quotes.edit', $quote) }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
+            @php
+                $is_pi = request()->getQueryString();
+                $edit_url = $is_pi ? route('biller.quotes.edit', [$quote, $is_pi]) : route('biller.quotes.edit', $quote);
+            @endphp
+            <a href="{{ $edit_url }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
+
             @if (access()->allow('quote-delete'))
                 <a class="btn btn-danger mb-1 quote-delete" href="javascript:void(0);"><i class="fa fa-trash"></i> Delete
                     {{ Form::open(['route' => ['biller.quotes.destroy', $quote], 'method' => 'delete']) }} {{ Form::close() }}               
@@ -24,9 +29,17 @@
                         <i class="fa fa-repeat"></i> Verify & Download
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{{ route('biller.quotes.verify', $quote->id) }}">Verify</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ route('biller.print_bill', [$quote->id, 4, $valid_token, 2]) }}">{{trans('general.pdf')}}</a>
+                        @if ($is_pi)
+                            <a class="dropdown-item" href="{{ route('biller.quotes.verify', [$quote->id, $is_pi]) }}">Verify</a>
+                        @else
+                            <a class="dropdown-item" href="{{ route('biller.quotes.verify', $quote->id) }}">Verify</a>
+                        @endif
+                        @if ($quote->verified == 'Yes')
+                            <hr>
+                            <a class="dropdown-item" href="{{ route('biller.print_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']) }}" target="_blank">
+                                {{trans('general.pdf')}}
+                            </a>
+                        @endif
                     </div>                                  
                 </div>                                
             @endif 
