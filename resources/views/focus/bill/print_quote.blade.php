@@ -49,9 +49,13 @@
 			width: 100%;
 			font-family: serif;
 			font-size: 10pt;
+			border-collapse: collapse;
 		}
 		.ref tr td {
 			border: 0.1mm solid #888888; 
+		}
+		.ref tr:nth-child(2) td {
+			width: 50%;
 		}
 		.customer-dt {
 			width: 100%;
@@ -152,10 +156,19 @@
 			</td>
 		</tr>
 	</table>
+	@php
+		$is_verified = request()->getQueryString();
+	@endphp
 	<table class="doc-table">
 		<tr>
 			<td class="doc-title-td">
-				<span class='doc-title'><b>QUOTATION</b></span>
+				@if ($is_verified)
+					<span class='doc-title'><b>WORKDONE VERIFICATION</b></span>
+				@elseif ($invoice->bank_id)
+					<span class='doc-title'><b>PROFORMA INVOICE</b></span>
+				@else
+					<span class='doc-title'><b>QUOTATION</b></span>
+				@endif
 			</td>
 		</tr>
 	</table><br>
@@ -169,22 +182,53 @@
 				<b>Email :</b> {{ $invoice->client->email }}<br />
 				<b>Cell :</b> {{ $invoice->client->phone }}<br />
 				<b>Attention :</b> {{ $invoice->attention }}<br />
+			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br /><br />
 				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br />
-				<b>Quotation No :</b> {{ 'QT/' . sprintf('%04d', $invoice->tid) }}<br />
-				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br />
-				<b>Currency :</b> Kenya Shilling <br />
+				@php
+					$tid = sprintf('%04d', $invoice->tid);
+					$field_name = 'Quotation No';
+					$field_value = 'QT/' . $tid;
+					if ($invoice->bank_id) {
+						$field_name = 'Proforma No';
+						$field_value = 'PI/' . $tid;
+					}
+					if ($is_verified) {
+						$field_name = 'Verification No';
+						$v_no =  ' (v' . $invoice->verified_jcs[0]->verify_no . ')';
+						$field_value = $field_value . $v_no;
+					}
+				@endphp
+				<b>{{ $field_name }} :</b> {{ $field_value }}<br />
+				@if ($is_verified)
+					<b>Verification Date :</b> {{ dateFormat($invoice->verification_date, 'd-M-Y') }} <br />
+				@else
+					<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br />
+				@endif
+				<b>Currency :</b> Kenya Shillings <br />
 			</td>
 		</tr>
 	</table><br />
 	<table  class="ref" cellpadding="10">
 		<tr>
-			<td>
+			<td colspan="2">
 				Ref : <b>{{ $invoice->notes }}</b>
 			</td>
 		</tr>
+		@if ($is_verified)
+			<tr>
+				<td>RJC :
+					<b>
+						@foreach ($invoice->verified_jcs as $jc)
+							{{ $jc->reference }},
+						@endforeach
+					</b> 
+				</td>
+				<td>DNOTE : </td>
+			</tr>
+		@endif
 	</table>
 	<br>
 	<table class="items" cellpadding="8">
@@ -198,9 +242,34 @@
 				<td width="15%">AMOUNT</td>
 			</tr>
 		</thead>
+		@php
+			$products = $invoice->products;
+			if ($is_verified) {
+				$products = $invoice->verified_items;
+			}
+		@endphp
 		<tbody>
-			@foreach($invoice->products as $product)
-				@if ($product->a_type == 2)		
+			@foreach($products as $product)
+				@if ($product->a_type == 1)	
+					@php
+						$product_qty = (int) $product->product_qty;
+						$product_subtotal = (int) $product->product_subtotal;
+						$product_price = (int) $product->product_price;
+					@endphp
+					<tr>
+						<td>{{ $product->numbering }}</td>
+						<td>{{ $product->product_name }}</td>
+						<td class="align-c">{{ $product_qty }}</td>
+						<td class="align-c">{{ $product->unit }}</td>
+						@if ($invoice->print_type == 'inclusive')
+							<td class="align-r">{{ number_format($product_subtotal, 2) }}</td>
+							<td class="align-r">{{ number_format($product_qty * $product_subtotal, 2) }}</td>
+						@else
+							<td class="align-r">{{ number_format($product_price, 2) }}</td>
+							<td class="align-r">{{ number_format($product_qty * $product_price, 2) }}</td>
+						@endif
+					</tr>
+				@else
 					<tr>
 						<td><b>{{ $product->numbering }}<b></td>
 						<td><b>{{ $product->product_name }}</b></td>
@@ -209,26 +278,34 @@
 						<td></td>
 						<td></td>
 					</tr>
-				@else
-					<tr>
-						<td>{{ $product->numbering }}</td>
-						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ (int) $product->product_qty }}</td>
-						<td class="align-c">{{ $product->unit }}</td>
-						<td class="align-r">{{ number_format($product->product_price, 2) }}</td>
-						<td class="align-r">{{ number_format($product->product_subtotal, 2) }}</td>
-					</tr>
-				@endif
+				@endif				
 			@endforeach
 			<tr>
-				<td colspan="4" class="bd-t"></td>
+				<td colspan="4" class="bd-t" rowspan="2">
+					@if ($invoice->bank_id)
+						<span class="customer-dt-title">BANK DETAILS:</span><br />
+						<b>Account Name :</b> Lean Ventures Limited<br />
+						<b>Account Number :</b> 1267496231<br />
+						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br />
+						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br />
+						(KCB Mpesa Paybill: 522 522)
+					@endif
+				</td>
 				<td class="bd align-r">Sub Total:</td>
-				<td class="bd align-r">{{ number_format($invoice->subtotal, 2) }}</td>			
+				@if ($invoice->print_type == 'inclusive')
+					<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>			
+				@else
+					<td class="bd align-r">{{ number_format($invoice->subtotal, 2) }}</td>
+				@endif
 			</tr>
 			<tr>
-				<td colspan="4"></td>
-				<td class="align-r">Tax 16%</td>
-				<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
+				@if ($invoice->print_type == 'inclusive')
+					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
+					<td class="align-r">INCLUSIVE</td>
+				@else
+					<td class="align-r">Tax {{ $invoice->tax_id }}%</td>
+					<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
+				@endif
 			</tr>
 			<tr>
 				<td colspan="4"><em>Prepared By : </em><b>{{ $invoice->prepared_by }}</b></td>
