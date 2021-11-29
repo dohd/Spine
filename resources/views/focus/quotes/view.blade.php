@@ -80,10 +80,10 @@
                                 $adrress = "";
 
                                 if ($quote->customer_id) {
-                                    $customername = $quote->customer->name ;
-                                    $branchname = $quote->customer_branch->name ;
+                                    $customername = $quote->customer->name;
+                                    //$branchname = $quote->customer_branch->name ;
                                     $adrress = $quote->customer->address;
-                                    $email = @$quote->customer->email ;
+                                    $email = $quote->customer->email;
                                     $cell = $quote->customer->phone;
                                 } 
                                 if ($quote->lead_id) {                                    
@@ -160,18 +160,17 @@
                                                             <p class="text-muted"> {!!$product['product_des'] !!} </p>
                                                         </td>
                                                         <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                                        <td class="text-right">{{numberFormat($product['product_qty'])}} {{$product['unit']}}</td>
+                                                        <td class="text-right">{{ (int) $product['product_qty'] }} {{$product['unit']}}</td>
                                                         @php
                                                             $price = (float) $product->product_price;
                                                             $subtotal = (float) $product->product_subtotal;
-                                                            $tax_amount = amountFormat($subtotal - $price);
                                                         @endphp
                                                         <td class="text-right">
-                                                            {{ $tax_amount }} <span class="font-size-xsmall">({{numberFormat($product['product_tax'])}}%)</span>
+                                                            {{ amountFormat($subtotal - $price) }} <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                         </td>
                                                         <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
                                                     </tr>
-                                                @elseif ($product['a_type'] == 2)
+                                                @else
                                                     <tr>
                                                         <th scope="row">{{ $product['numbering'] }}</th>
                                                         <td>
@@ -392,7 +391,9 @@
     // check if previous page was pi or quote
     if (document.referrer.includes('page=pi')) {
         // if pi add query-string and redirect to make it dynamic
-        location.href = location.href + '?page=pi';
+        if (!location.href.includes('page=pi')) {
+            location.href = location.href + '?page=pi';
+        }
     }
 
 
