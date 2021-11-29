@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\items\VerifiedItem;
 use Endroid\QrCode\QrCode;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -47,7 +48,6 @@ use PayPal\Api\RedirectUrls;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\URL;
 
 class BillsController extends Controller
 {
@@ -110,10 +110,9 @@ class BillsController extends Controller
     public function print_quote_pdf(Request $request)
     {
         $data = $this->bill_details($request);
-        $html = view('focus.bill.print_quote', $data)->render();
 
+        $html = view('focus.bill.print_quote', $data)->render();
         // print_log(json_encode($data, JSON_PRETTY_PRINT));
-        // return $html;
 
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
@@ -169,7 +168,6 @@ class BillsController extends Controller
         $gateway = UserGateway::where('id', '=', $gateway_id)->whereHas('config', function ($q) use ($ins) {
             $q->where('ins', '=', $ins);
         })->first();
-
 
         if ($gateway) {
             $data['gateway'] = $gateway;
@@ -415,6 +413,11 @@ class BillsController extends Controller
                 $attributes = $getAttr(1, 'quote', 2, 1, $invoice->customer_id, route('biller.quotes.show', $invoice->id));
                 foreach($attributes as $key => $val) {
                     $invoice[$key] = $val;
+                }
+
+                $invoice['products'] = $invoice->products()->orderBy('row_index')->get();
+                if ($invoice->verified == 'Yes') {
+                    $invoice['verified_items'] = VerifiedItem::where('quote_id', $invoice->id)->orderBy('row_index')->get();
                 }
 
                 $flag = token_validator($request->token, 'q' . $invoice->id . $invoice->tid);
