@@ -23,7 +23,7 @@
                             </fieldset>
                             <fieldset class="form-group col-md-4">
                                 <div><label for="projectType">Project Type / Sales Account</label></div>
-                                <select class="form-control  select-box" name="sales_account" id="sales_account" data-placeholder="Project Type/Sales Account">
+                                <select class="form-control  select-box" name="sales_account" id="sales_account" data-placeholder="Project Type/Sales Account" required>
                                     <option value="">Project Type/Sales Account</option>
                                     @foreach($accounts as $account)
                                         <option value="{{$account['id']}}">{{$account['code']}} {{$account['holder']}}</option>
@@ -39,8 +39,8 @@
                                 </select>
                             </fieldset>
                             <fieldset class="form-group position-relative has-icon-right  col-md-6">
-                                <div><label for="quote">Seconday / Other Quotes</label></div>
-                                <select multiple id="other_quote" name="other_quote" class="form-control required select-box" data-placeholder="Seconday / Other Quotes">
+                                <div><label for="quote">Secondary / Other Quotes</label></div>
+                                <select multiple id="other_quote" name="other_quote[]" class="form-control required select-box" data-placeholder="Seconday / Other Quotes">
                                 </select>
                             </fieldset>
                         </div>
@@ -52,7 +52,7 @@
                             </fieldset>
                             <fieldset class="form-group col-4">
                                 <div><label for="projectNumber">Project No.</label></div>
-                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number" id="project-number">
+                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number" id="project-number" required>
                             </fieldset>
                         </div>
 
@@ -77,7 +77,7 @@
                             </fieldset>
                             <fieldset class="form-group col-md-4">
                                 <div><label for="tags">Tags</label></div>
-                                <select class="form-control select-box" name="tags[]" id="tags" data-placeholder="{{trans('tags.select')}}" multiple>
+                                <select class="form-control select-box" name="tags[]" id="tags" data-placeholder="-- {{ trans('tags.select') }} --" multiple required>
                                     @foreach($mics->where('section','=',1) as $tag)
                                         <option value="{{$tag['id']}}">{{$tag['name']}}</option>
                                     @endforeach
@@ -130,7 +130,7 @@
                             </fieldset>
                             <fieldset class="form-group col-md-3">
                                 <div><label for="projectBudget">Project Budget</label></div>
-                                <input type="text" class="new-todo-item form-control" placeholder="{{trans('projects.worth')}}" name="worth">
+                                <input type="text" class="new-todo-item form-control" placeholder="{{trans('projects.worth')}}" name="worth" required>
                             </fieldset>
                             <fieldset class="form-group col-md-3">
                                 <div><label for="projectShare">Project Share</label></div>
