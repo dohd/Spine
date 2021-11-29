@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management').' | '.'Verify Quote')
+@section ('title', 'Verify Quote / PI')
 
 @section('page-header')
     <h1>{{ trans('labels.backend.quotes.management') }}</h1>
@@ -10,7 +10,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
+            <h4 class="content-header-title mb-0">VERIFICATION</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
@@ -20,11 +20,13 @@
             </div>
         </div>
     </div>
-
+    @php
+        $url = request()->getQueryString() ? route('biller.quotes.storeverified', 'page=pi') : route('biller.quotes.storeverified');
+    @endphp
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::model($quote, ['route' => 'biller.quotes.storeverified', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST']) }}                   
+                    {{ Form::model($quote, ['url' => $url, 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST']) }}                   
                     <input type="hidden" name="id" value="{{ $quote->id }}">
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
