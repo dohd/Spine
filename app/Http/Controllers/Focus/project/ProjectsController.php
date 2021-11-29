@@ -87,34 +87,19 @@ class ProjectsController extends Controller
      */
     public function store(CreateProjectRequest $request)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        // $result = $this->repository->create($input);
+        // extract input fields from request
+        $project = $request->only([
+            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc', 
+            'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
+        ]);
+        $project_quotes = $request->only(['main_quote', 'other_quote']);
+        $rest = $request->only(['tags', 'time_from',  'time_to', 'color',  'employees']);
 
-        print_log('++++ Create project ++++', compact('input'));
+        $project['ins'] = auth()->user()->ins;
 
-        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
+        $result = $this->repository->create(compact('project', 'project_quotes', 'rest'));
 
-
-
-        //return with successfull message
-        $tg = '';
-        foreach ($result->tags as $row) {
-            $tg .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
-        }
-
-        $p_status = task_status($result->status);
-        $p_status = '<span class="badge" style="background-color:' . $p_status['color'] . '">' . $p_status['name'] . '</span> ' . numberFormat($result->progress) . ' %';
-
-        $btn = '';
-        $btn .= '<a href="' . route("biller.projects.show", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="View" class="success"><i  class="ft-eye"></i></a> ';
-        $btn .= '&nbsp;&nbsp;<a href="' . route("biller.projects.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
-        $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.projects.destroy", [$result->id]) . '" data-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
-
-
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.projects.created') . ' <a href="' . route('biller.projects.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;', 'title' => $result->name, 'short_desc' => $result->short_desc, 'row' => '<tr><td><span class="badge badge-danger" >' . trans('general.new') . '</span></td><td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.projects.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tg . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td><td>' . $result->priority . '</td><td>' . $p_status . '</td><td>' . dateTimeFormat($result->end_date) . '</td><td>' . $btn . '</td></tr>'));
+        return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.projects.created'), 'refresh' => 1]);
     }
 
     /**
