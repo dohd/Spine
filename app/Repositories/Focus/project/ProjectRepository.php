@@ -8,12 +8,12 @@ use App\Models\event\EventRelation;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectRelations;
 use App\Notifications\Rose;
-use DB;
-use Carbon\Carbon;
 use App\Models\project\Project;
 use App\Exceptions\GeneralException;
+use App\Models\project\ProjectQuote;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Class ProjectRepository.
@@ -59,62 +59,73 @@ class ProjectRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function create(array $input)
+    public function create(array $data)
     {
-        $employees = @$input['employees'];
-        $tags = @$input['tags'];
-        $calender = @$input['link_to_calender'];
-        $color = @$input['color'];
-        $customer = @$input['customer'];
+        DB::beginTransaction();
 
-        unset($input['tags']);
-        unset($input['employees']);
-         unset($input['customer']);
-        unset($input['link_to_calender']);
-        unset($input['color']);
-        $user_id = auth()->user()->id;
+        $project = $data['project'];
+        $project['start_date'] = datetime_for_database($project['start_date'] . ' ' . $data['rest']['time_from']);
+        $project['end_date'] = datetime_for_database($project['end_date'] . ' ' . $data['rest']['time_to']);
+        $result = Project::create($project);
 
-        $input['start_date'] = datetime_for_database($input['start_date'] . ' ' . $input['time_from']);
-        $input['end_date'] = datetime_for_database($input['end_date'] . ' ' . $input['time_to']);
-        unset($input['time_from']);
-        unset($input['time_to']);
-        $input = array_map( 'strip_tags', $input);
-        $result = Project::create($input);
+        // project quotes
+        $main_quote = $data['project_quotes']['main_quote'];
+        $quotes[] = array('project_id' => $result['id'], 'quote_id' => $main_quote, 'main' => 1);
+        if (isset($data['project_quotes']['other_quote'])) {
+            $other_quote = $data['project_quotes']['other_quote'];
+            foreach ($other_quote as $value) {
+                $quotes[] = array('project_id' => $result['id'], 'quote_id' => $value, 'main' => 0);
+            }            
+        }
+        ProjectQuote::insert($quotes);
+
+        // project relations tags
+        $rel_tags = array(
+            ['project_id' => $result['id'], 'related' => 3, 'rid' => auth()->user()->id],
+            ['project_id' => $result['id'], 'related' => 8, 'rid' => $result['customer_id']]
+        );
+        $tags = $data['rest']['tags'];
+        foreach ($tags as $value) {
+            $rel_tags[] = array('project_id' => $result['id'], 'related' => 1, 'rid' => $value);
+        }
+        $employees = $data['rest']['employees'];
+        foreach ($employees as $value) {
+            $rel_tags[] = array('project_id' => $result['id'], 'related' => 2, 'rid' => $value);
+        }
+        ProjectRelations::insert($rel_tags);
+
+        // project log
+        $text = '[' . trans('general.create') . '] ' . $result['name'];
+        ProjectLog::create(['project_id' => $result['id'], 'value' => $text, 'user_id' => auth()->user()->id]);
+
+        // event
+        $event = Event::create([
+            'title' => trans('projects.project') . ' - ' . $result['name'], 
+            'description' => $result['short_desc'], 
+            'start' => $result['start_date'], 
+            'end' => $result['end_date'], 
+            'color' => $data['rest']['color'], 
+            'user_id' => auth()->user()->id, 
+            'ins' => $result['ins']
+        ]);
+        EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $result['id']]);
+
+        $message = [
+            'title' => trans('projects.project') . ' - ' . $result['name'], 
+            'icon' => 'fa-bullhorn', 
+            'background' => 'bg-success', 
+            'data' => $result['short_desc']
+        ];
+        if ($employees) {
+            $users = User::whereIn('id', $employees)->get();
+            Notification::send($users, new Rose('', $message));
+        } else {
+            $notification = new Rose(auth()->user(), $message);
+            auth()->user()->notify($notification);
+        }
 
         if ($result) {
-            $tag_group = array();
-            if (is_array($tags)) {
-                foreach ($tags as $row) {
-                    $tag_group[] = array('project_id' => $result->id, 'related' => 1, 'rid' => $row);
-                }
-            }
-
-            if (is_array($employees)) {
-                $emp_group = array();
-                foreach ($employees as $row) {
-                    $tag_group[] = array('project_id' => $result->id, 'related' => 2, 'rid' => $row);
-                    $emp_group[] = $row;
-                }
-            }
-            if ($customer > 0) {
-                $tag_group[] = array('project_id' => $result->id, 'related' => 8, 'rid' => $customer);
-            }
-            $tag_group[] = array('project_id' => $result->id, 'related' => 3, 'rid' => $user_id);
-            ProjectRelations::insert($tag_group);
-            ProjectLog::create(array('project_id' => $result->id, 'value' => '[' . trans('general.create') . '] ' . $result->name, 'user_id' => $user_id));
-            if ($calender) {
-                $event = Event::create(array('title' => trans('projects.project') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start_date'], 'end' => $input['end_date'], 'color' => $color, 'user_id' => $user_id, 'ins' => $input['ins']));
-                EventRelation::create(array('event_id' => $event->id, 'related' => 1, 'r_id' => $result->id));
-            }
-            $message = array('title' => trans('projects.project') . ' - ' . $result->name, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']);
-
-            if (is_array(@$emp_group)) {
-                $users = User::whereIn('id', $emp_group)->get();
-                \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
-            } else {
-                $notification = new Rose(auth()->user(), $message);
-                auth()->user()->notify($notification);
-            }
+            DB::commit();
             return $result;
         }
 
