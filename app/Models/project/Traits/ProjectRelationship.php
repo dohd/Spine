@@ -13,6 +13,7 @@ use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
 use App\Models\project\ProjectMileStone;
+use App\Models\project\ProjectQuote;
 use App\Models\project\ProjectRelations;
 use App\Models\project\Task;
 use App\Models\rjc\Rjc;
@@ -22,6 +23,11 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
+    public function quotes() 
+    {
+        return $this->hasMany(ProjectQuote::class);
+    }
+
     public function rjcs()
     {
         return $this->hasMany(Rjc::class)->withoutGlobalScopes;
