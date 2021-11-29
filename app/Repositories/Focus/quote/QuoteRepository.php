@@ -12,7 +12,6 @@ use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
 use App\Models\verifiedjcs\VerifiedJc;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -161,27 +160,27 @@ class QuoteRepository extends BaseRepository
             ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
         );
 
-        // update or create new quote_item
-        if ($result && $items_count) {
-            foreach($quote_items as $item) {
-                $quote_item = QuoteItem::firstOrNew([
-                    'id' => $item['item_id'],
-                    'quote_id' => $item['quote_id'],
-                ]);
-                // assign properties to the item
-                foreach($item as $key => $value) {
-                    $quote_item[$key] = $value;
-                }
-                // remove stale attributes and save
-                if ($quote_item['id'] == 0) unset($quote_item['id']);
-                unset($quote_item['item_id']);
-                $quote_item->save();
+        // update or create new quote item
+        foreach($quote_items as $item) {
+            $quote_item = QuoteItem::firstOrNew([
+                'id' => $item['item_id'],
+                'quote_id' => $item['quote_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $quote_item[$key] = $value;
             }
-
-            DB::commit();
-            return $result;
+            // remove stale attributes and save
+            if ($quote_item['id'] == 0) unset($quote_item['id']);
+            unset($quote_item['item_id']);
+            $quote_item->save();
         }
-        
+
+        if ($result) {
+            DB::commit();
+            return $quote;    
+        }
+
         throw new GeneralException('Error Updating Quote');
     }
 
@@ -270,7 +269,7 @@ class QuoteRepository extends BaseRepository
             $job_card->save();
         }
         
-        $result = Quote::find($quote_id)->update(['verified' => 'Yes']);
+        $result = Quote::find($quote_id)->update(['verified' => 'Yes', 'verification_date' => date('Y-m-d')]);
         if ($result) return DB::commit();
         
         throw new GeneralException('Error Verifying Quote');
