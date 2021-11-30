@@ -13,9 +13,9 @@ use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
 use App\Models\project\ProjectMileStone;
-use App\Models\project\ProjectQuote;
 use App\Models\project\ProjectRelations;
 use App\Models\project\Task;
+use App\Models\quote\Quote;
 use App\Models\rjc\Rjc;
 
 /**
@@ -23,9 +23,9 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
-    public function quotes() 
+    public function quotes()
     {
-        return $this->hasMany(ProjectQuote::class);
+        return $this->belongsToMany(Quote::class, 'project_quotes', 'project_id', 'quote_id');
     }
 
     public function rjcs()
@@ -52,13 +52,12 @@ trait ProjectRelationship
     {
         return $this->hasOneThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 3)->withoutGlobalScopes();
     }
-     public function branch()
+    public function branch()
     {
-         return $this->belongsTo(Branch::class,'branch_id');
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-
-        public function customer()
+    public function customer()
     {
         return $this->hasOneThrough(Customer::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 8)->withoutGlobalScopes();
     }
@@ -88,30 +87,23 @@ trait ProjectRelationship
         return $this->hasMany(ProjectMeta::class, 'project_id', 'id')->where('meta_key', '=', 1)->orderBy('id', 'desc')->withoutGlobalScopes();
     }
 
-        public function notes()
+    public function notes()
     {
-         return $this->hasManyThrough(Note::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 6)->withoutGlobalScopes();
+        return $this->hasManyThrough(Note::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 6)->withoutGlobalScopes();
     }
 
-        public function project()
+    public function project()
     {
         return $this->hasOne(Project::class, 'project_id', 'id')->withoutGlobalScopes();
     }
 
-          public function events()
+    public function events()
     {
-        return $this->hasOneThrough(Event::class, EventRelation::class, 'r_id','id','id','event_id')->where( 'related','=', 1)->withoutGlobalScopes();
+        return $this->hasOneThrough(Event::class, EventRelation::class, 'r_id', 'id', 'id', 'event_id')->where('related', '=', 1)->withoutGlobalScopes();
     }
 
-     public function customer_project()
+    public function customer_project()
     {
-         return $this->belongsTo(Customer::class,'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
-
-
-
-
-
-
-
 }
