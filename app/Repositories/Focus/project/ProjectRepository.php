@@ -64,12 +64,15 @@ class ProjectRepository extends BaseRepository
         DB::beginTransaction();
 
         $project = $data['project'];
+        $main_quote = $data['project_quotes']['main_quote'];
+
+        $project['ins'] = auth()->user()->ins;
+        $project['main_quote_id'] = $main_quote;
         $project['start_date'] = datetime_for_database($project['start_date'] . ' ' . $data['rest']['time_from']);
         $project['end_date'] = datetime_for_database($project['end_date'] . ' ' . $data['rest']['time_to']);
         $result = Project::create($project);
 
         // project quotes
-        $main_quote = $data['project_quotes']['main_quote'];
         $quotes[] = array('project_id' => $result['id'], 'quote_id' => $main_quote, 'main' => 1);
         if (isset($data['project_quotes']['other_quote'])) {
             $other_quote = $data['project_quotes']['other_quote'];
