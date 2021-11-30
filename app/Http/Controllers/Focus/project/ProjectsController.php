@@ -95,8 +95,6 @@ class ProjectsController extends Controller
         $project_quotes = $request->only(['main_quote', 'other_quote']);
         $rest = $request->only(['tags', 'time_from',  'time_to', 'color',  'employees']);
 
-        $project['ins'] = auth()->user()->ins;
-
         $result = $this->repository->create(compact('project', 'project_quotes', 'rest'));
 
         return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.projects.created'), 'refresh' => 1]);
