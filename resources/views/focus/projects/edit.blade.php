@@ -30,7 +30,7 @@
                         <div class="card">
                             <div class="card-content">
                                 <div class="card-body">
-                                    {{ Form::model($projects, ['route' => ['biller.projects.update', $projects], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-project']) }}
+                                    {{ Form::model($project, ['route' => ['biller.projects.update', $project], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-project']) }}
                                         <div class="form-group">
                                             {{-- Including Form blade file --}}
                                             @include("focus.projects.form")
@@ -53,50 +53,130 @@
 @section('after-styles')
     {!! Html::style('focus/css/bootstrap-colorpicker.min.css') !!}
 @endsection
+
 @section('after-scripts')
-    {{-- For DataTables --}}
-    {{ Html::script(mix('js/dataTable.js')) }}
-    {{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}
-    {{ Html::script('core/app-assets/vendors/js/extensions/fullcalendar.min.js') }}
-    {{ Html::script('core/app-assets/vendors/js/extensions/dragula.min.js') }}
-    {{ Html::script('core/app-assets/js/scripts/pages/app-todo.js') }}
-    {{ Html::script('focus/js/bootstrap-colorpicker.min.js') }}
-    {{ Html::script('focus/js/select2.min.js') }}
-    <script>
-        $('[data-toggle="datepicker"]').datepicker({
-            autoHide: true,
-            format: '{{config('core.user_date_format')}}'
+{{-- For DataTables --}}
+{{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}
+{{ Html::script('core/app-assets/vendors/js/extensions/fullcalendar.min.js') }}
+{{ Html::script('core/app-assets/vendors/js/extensions/dragula.min.js') }}
+{{ Html::script('core/app-assets/js/scripts/pages/app-todo.js') }}
+{{ Html::script('focus/js/bootstrap-colorpicker.min.js') }}
+{{ Html::script('focus/js/select2.min.js') }}
+<script>
+    // form default values
+    $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}" });
+    $('.from_date').datepicker('setDate', "{{ dateFormat($project->start_date) }}");
+    $('.from_date').datepicker({ format: "{{ config('core.user_date_format') }}" });
+    $('.to_date').datepicker('setDate', "{{ dateFormat($project->end_date) }}");
+    $('.to_date').datepicker({ format: "{{ config('core.user_date_format') }}"});
+
+    $('#color').colorpicker();
+
+    $("#tags").select2();
+    $("#employee").select2();
+    $("#main_quote").select2();
+    $("#other_quote").select2();
+    $("#branch_id").select2();
+
+    console.log(@json($project))
+
+    // customer
+    const customer = @json($project->customer);
+    $("#person").append(new Option(customer.name, customer.id, 'selected', true));
+    // branch
+    const branch = @json($branch);
+    $("#branch_id").append(new Option(branch.name, branch.id, 'selected', true));
+    // quotes
+    const quotes = @json($project->quotes);
+    const qt_id = @json($project->main_quote_id);
+
+    const mainqt = quotes.filter(v => v.id === qt_id)[0];
+    const text = `${mainqt.bank_id? '#PI' : '#QT'} ${mainqt.tid} - ${mainqt.notes}`;
+    $("#main_quote").append(new Option(text, mainqt.id, 'selected', true));
+
+    const otherqt = quotes.filter(v => v.id !== qt_id);
+    otherqt.forEach(v => {
+        const text = `${v.bank_id? '#PI' : '#QT'} ${v.tid} - ${v.notes}`;
+        $("#other_quote").append(new Option(text, v.id, 'selected', true));
+    });
+
+    $("#person").select2({
+        tags: [],
+        ajax: {
+            url: "{{ route('biller.customers.select') }}",
+            dataType: 'json',
+            type: 'POST',
+            quietMillis: 50,
+            data: function (person) {
+                return { person };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            },
+        }
+    });
+    // on selecting customer
+    $("#person").on('change', function() {
+        var id = $('#person :selected').val();
+        // fetch customer branches
+        $("#branch_id").html('').select2({
+            ajax: {
+                url: "{{route('biller.branches.branch_load')}}?id=" + id,
+                dataType: 'json',
+                quietMillis: 50,
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                text: item.name,
+                                id: item.id
+                            }
+                        })
+                    };
+                },
+            }
         });
-        $('.from_date').datepicker('setDate', '{{dateFormat($projects->start_date)}}');
-        $('.from_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
-        $('.to_date').datepicker('setDate', '{{dateFormat($projects->end_date)}}');
-        $('.to_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
-        $("#tags").select2();
-        $("#employee").select2();
-          $("#person").select2({
-                tags: [],
-                ajax: {
-                    url: '{{route('biller.customers.select')}}',
-                    dataType: 'json',
-                    type: 'POST',
-                    quietMillis: 50,
-                    data: function (person) {
+
+        // fetch customer quotes
+        const quoteData = [];
+        $("#main_quote").html('').select2({
+            ajax: {
+                url: "{{route('biller.quotes.customer_quotes')}}?id=" + id,
+                dataType: 'json',
+                quietMillis: 50,
+                processResults: function(data) {
+                    const results = $.map(data, function(item) {
                         return {
-                            person: person
+                            text: `${item.bank_id ? '#PI' : '#QT'} ${item.tid} - ${item.notes}`,
+                            id: item.id
                         };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: $.map(data, function (item) {
-                                return {
-                                    text: item.name,
-                                    id: item.id
-                                }
-                            })
-                        };
-                    },
-                }
-            });
-        $('#color').colorpicker();
-    </script>
+                    });
+                    // replace array data
+                    quoteData.length = 0;
+                    quoteData.push.apply(quoteData, results);
+
+                    return { results };
+                },
+            }
+        });
+    });
+
+    // On selecting Main Quote
+    $("#main_quote").change(function(e) {
+        // set Other Quote select options 
+        const data = quoteData.filter(v => v.id !== Number($(this).val()));
+        $("#other_quote").html('').select2({ data });
+        // set project title
+        const name = $(this).find(':selected').text().split(' - ')[1];
+        $('#project-name').val(name);
+    });
+</script>
 @endsection
