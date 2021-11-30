@@ -91,18 +91,12 @@ function addObject(action, trigger_n = false) {
             data: action['form'],
             dataType: 'json',
             success: function (data) {
-                if (data.status == "Success") {
-                    $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
-                    $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
-                    $("html, body").scrollTop($("body").offset().top);
-                    $("#data_form").remove();
-                    if (trigger_n) trigger(data);
-                } else {
-                    $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
-                    $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
-                    $("html, body").scrollTop($("body").offset().top);
-                     $("#submit-data").show();
-                }
+                $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+                $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
+                $("html, body").scrollTop($("body").offset().top);
+                $("#data_form").remove();
+                if (trigger_n) trigger(data);
+                if (data.refresh) setTimeout(() => location.reload(), 1500);
             },
             error: function (data) {
                 var message = '';
