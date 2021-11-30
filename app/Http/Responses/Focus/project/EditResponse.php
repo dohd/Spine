@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\project;
 
+use App\Models\account\Account;
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use Illuminate\Contracts\Support\Responsable;
@@ -32,7 +33,10 @@ class EditResponse implements Responsable
     {
         $mics = Misc::all();
         $employees = Hrm::all();
-        $projects =$this->projects;
-        return view('focus.projects.edit',compact('mics','employees','projects'));
+        $accounts = Account::where('account_type', 'Income')->get();
+
+        $projects = $this->projects;
+
+        return view('focus.projects.edit', compact('mics','employees','projects','accounts'));
     }
 }
