@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\project;
 
 use App\Models\account\Account;
+use App\Models\branch\Branch;
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use Illuminate\Contracts\Support\Responsable;
@@ -12,14 +13,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\project\Project
      */
-    protected $projects;
+    protected $project;
 
     /**
      * @param App\Models\project\Project $projects
      */
-    public function __construct($projects)
+    public function __construct($project)
     {
-        $this->projects = $projects;
+        $this->project = $project;
     }
 
     /**
@@ -31,12 +32,13 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $project = $this->project;
+
         $mics = Misc::all();
         $employees = Hrm::all();
         $accounts = Account::where('account_type', 'Income')->get();
+        $branch = Branch::find($project->branch_id, ['id', 'name']);
 
-        $projects = $this->projects;
-
-        return view('focus.projects.edit', compact('mics','employees','projects','accounts'));
+        return view('focus.projects.edit', compact('mics', 'employees', 'project', 'accounts', 'branch'));
     }
 }
