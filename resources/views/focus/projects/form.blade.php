@@ -2,7 +2,7 @@
     <div class="row">
         <fieldset class="form-group position-relative has-icon-left  col-md-4">
             <div><label for="customer">Search Customer</label></div>
-            <select id="person" name="customer_id" class="form-control required select-box" data-placeholder="{{trans('customers.customer')}}">
+            <select id="person" name="customer_id" class="form-control required select-box" data-placeholder="{{ trans('customers.customer') }}">
             </select>
         </fieldset>
         <fieldset class="form-group position-relative has-icon-left  col-md-4">
@@ -37,11 +37,11 @@
     <div class="row">
         <fieldset class="form-group col-8">
             <div><label for="projectTitle">Project Title</label></div>
-            <input type="text" class="new-todo-item form-control required" placeholder="{{trans('projects.name')}}" name="name" id="project-name">
+            {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => trans('projects.name')]) }}
         </fieldset>
         <fieldset class="form-group col-4">
             <div><label for="projectNumber">Project No.</label></div>
-            <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number" id="project-number" required>
+            {{ Form::text('project_number', null, ['class' => 'form-control']) }}
         </fieldset>
     </div>
 
@@ -77,10 +77,10 @@
     <div><label for="Description">Description</label></div>
     <fieldset class="form-group position-relative has-icon-left col-12">                            
         <div class="form-control-position"><i class="icon-emoticon-smile"></i></div>
-        <input type="text" id="new-todo-desc" class="new-todo-desc form-control required" placeholder="{{trans('tasks.short_desc')}}" name="short_desc">
+        {{ Form::text('short_desc', null, ['class' => 'form-control']) }}
     </fieldset>
     <fieldset class="form-group col-12">
-        <textarea class="new-todo-item form-control required" placeholder="{{trans('tasks.description')}}" rows="6" name="note"></textarea>
+        {{ Form::textarea('note', null, ['class' => 'form-control', 'rows' => 6]) }}
     </fieldset>
 
     <div class="form-group row">
@@ -107,7 +107,7 @@
                 <label class="col-sm-4 col-xs-6 control-label" for="sdate">{{trans('tasks.link_to_calender')}}</label>
                 <div class="col-sm-6 col-xs-6">
                     <input type="checkbox" class="form-control" name="link_to_calender">
-                    {{ Form::text('color', '#0b97f4', ['class' => 'form-control round', 'id'=>'color','placeholder' => trans('miscs.color'),'autocomplete'=>'off']) }}
+                    {{ Form::text('color', '#0b97f4', ['class' => 'form-control round', 'id'=>'color', 'placeholder' => trans('miscs.color'), 'autocomplete'=>'off']) }}
                 </div>
             </div>
         </div>
@@ -119,7 +119,7 @@
         </fieldset>
         <fieldset class="form-group col-md-3">
             <div><label for="projectBudget">Project Budget</label></div>
-            <input type="text" class="new-todo-item form-control" placeholder="{{trans('projects.worth')}}" name="worth" required>
+            {{ Form::text('worth', null, ['class' => 'form-control new-todo-item', 'placeholder' => trans('projects.worth')]) }}
         </fieldset>
         <fieldset class="form-group col-md-3">
             <div><label for="projectShare">Project Share</label></div>
