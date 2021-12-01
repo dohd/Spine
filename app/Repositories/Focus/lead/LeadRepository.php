@@ -34,16 +34,16 @@ class LeadRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function create(array $input)
+    public function create(array $data)
     {
-        $input['date_of_request'] = date_for_database($input['date_of_request']);
+        $data['date_of_request'] = date_for_database($data['date_of_request']);
         // increament reference
         $tid = Lead::orderBy('reference', 'desc')->first('reference')->reference;
-        if ($input['reference'] <= $tid) {
-            $input['reference'] = $tid + 1;
+        if ($data['reference'] <= $tid) {
+            $data['reference'] = $tid + 1;
         }
 
-        $result = Lead::create($input);
+        $result = Lead::create($data);
 
         if ($result) return $result;
 
@@ -58,11 +58,10 @@ class LeadRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Lead $lead, array $input)
+    public function update(Lead $lead, array $data)
     {
-        $input = array_map('strip_tags', $input);
-        if ($lead->update($input))
-            return true;
+        $data = array_map('strip_tags', $data);
+        if ($lead->update($data)) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
