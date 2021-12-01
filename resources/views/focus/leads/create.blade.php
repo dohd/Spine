@@ -29,9 +29,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-
                             <div class="card-content">
-
                                 <div class="card-body">
                                     {{ Form::open(['route' => 'biller.leads.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-productcategory']) }}
                                         <div class="form-group">
