@@ -119,7 +119,7 @@ class QuotesController extends Controller
 
         $route = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.created');
-        if ($result['bank_id']) {
+        if (isset($result['bank_id'])) {
             $route = route('biller.quotes.index', 'page=pi');
             $msg = 'PI created successfully';
         }
@@ -159,7 +159,7 @@ class QuotesController extends Controller
 
         $route = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.updated');
-        if ($result['bank_id']) {
+        if (isset($result['bank_id'])) {
             $route = route('biller.quotes.index', 'page=pi');
             $msg = 'PI updated successfully';
         }
