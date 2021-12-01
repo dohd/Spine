@@ -71,6 +71,8 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        DB::beginTransaction();
+
         $quote = $input['data'];
         // format date values
         foreach ($quote as $key => $value) {
@@ -94,7 +96,6 @@ class QuoteRepository extends BaseRepository
         $quote['quote_type'] = 'lead';
         $quote['client_type'] = 'lead';
 
-        DB::beginTransaction();
         $lead = Lead::find($quote['lead_id']);
         $quote['customer_id'] = $lead->client_id;
         $quote['branch_id'] = $lead->branch_id;
@@ -115,8 +116,8 @@ class QuoteRepository extends BaseRepository
                 $quote_items[$key]['unit'] = '';
             }
         }
-
         QuoteItem::insert($quote_items);
+        
         if ($result) {
             DB::commit();
             return $result;
@@ -135,6 +136,8 @@ class QuoteRepository extends BaseRepository
      */
     public function update(array $input)
     {
+        DB::beginTransaction();
+
         $quote = $input['data'];
         // change date values to database format
         foreach ($quote as $key => $value) {
@@ -145,7 +148,6 @@ class QuoteRepository extends BaseRepository
         $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
         $quote['invoiceduedate'] = date_for_database($duedate);
 
-        DB::beginTransaction();
         $lead = Lead::find($quote['lead_id']);
         $quote['customer_id'] = $lead->client_id;
         $quote['branch_id'] = $lead->branch_id;

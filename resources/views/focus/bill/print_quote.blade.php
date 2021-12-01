@@ -208,6 +208,7 @@
 					<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br />
 				@endif
 				<b>Currency :</b> Kenya Shillings <br />
+				<b>Client Ref: </b>
 			</td>
 		</tr>
 	</table><br />

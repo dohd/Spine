@@ -196,6 +196,12 @@
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
                                         </div>
+                                    </div> 
+                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference']) }}
+                                        </div>
                                     </div>                                      
                                 </div>
                             </div>

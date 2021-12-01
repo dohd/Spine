@@ -170,20 +170,12 @@
                                             </select>
                                         </div>
                                     </div>
-                                    @if (!@$last_quote->tid)
-                                        <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control round  select-box" name="revision" id="revision">
-                                                    <option value="_r1">R1</option>
-                                                    <option value="_r2">R2</option>
-                                                    <option value="_r3">R3</option>
-                                                    <option value="_r4">R4</option>
-                                                    <option value="_r5">R5</option>
-                                                </select>
-                                            </div>
+                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference']) }}
                                         </div>
-                                    @endif
+                                    </div> 
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
@@ -206,6 +198,20 @@
                                         </select>
                                         <input type="hidden" name="tax_format" id="tax_format">
                                     </div>
+                                    @if (!isset($last_quote->tid))
+                                        <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                                <select class="form-control round  select-box" name="revision" id="revision">
+                                                    <option value="_r1">R1</option>
+                                                    <option value="_r2">R2</option>
+                                                    <option value="_r3">R3</option>
+                                                    <option value="_r4">R4</option>
+                                                    <option value="_r5">R5</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>                        

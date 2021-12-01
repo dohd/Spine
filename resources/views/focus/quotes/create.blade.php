@@ -74,7 +74,7 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
                                             </div>
-                                            <select id="pricing" name="pricing" class="form-control round required  ">
+                                            <select id="pricing" name="pricing" class="form-control round required">
                                                 <option value="0">Default </option>
                                                 @foreach($selling_prices as $selling_price)
                                                     <option value="{{$selling_price->id}}">{{$selling_price->name}}</option>
@@ -99,8 +99,8 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="prepaired_by" class="caption"> Prepaired By</label>
-                                        {{ Form::text('prepaired_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepaired_by']) }}
+                                        <label for="prepared_by" class="caption"> Prepared By</label>
+                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepaired By','autocomplete'=>'false','id'=>'prepared_by']) }}
                                     </div>
                                 </div>
                             </div>
@@ -158,7 +158,13 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>                                    
+                                    </div>
+                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference']) }}
+                                        </div>
+                                    </div>                                                                          
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms <span class="text-danger">*</span></label>

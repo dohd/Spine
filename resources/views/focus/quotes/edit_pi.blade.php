@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management')." | Edit PI" )
+@section ('title', 'PI Management | Edit PI' )
 
 @section('page-header')
     <h1>Edit PI</h1>
@@ -10,7 +10,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
+            <h4 class="content-header-title mb-0">PI MANAGEMENT</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
@@ -151,7 +151,13 @@
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
                                         </div>
-                                    </div>                                                                                                      
+                                    </div>   
+                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference']) }}
+                                        </div>
+                                    </div> 
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>

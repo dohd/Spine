@@ -109,7 +109,7 @@ class QuotesController extends Controller
     public function store(CreateQuoteRequest $request)
     {
         // filter request input fields
-        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
+        $data = $request->only(['client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
         $data_items = $request->only(['row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'unit']);
 
         $data['user_id'] = auth()->user()->id;
@@ -151,7 +151,7 @@ class QuotesController extends Controller
     public function update(EditQuoteRequest $request, Quote $quote)
     {
         //filter request input fields
-        $data = $request->only(['tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
+        $data = $request->only(['client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
         $data_items = $request->only(['row_index', 'item_id', 'numbering', 'a_type', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
 
         $data['id'] = $quote->id;
