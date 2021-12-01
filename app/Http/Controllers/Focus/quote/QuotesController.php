@@ -134,11 +134,9 @@ class QuotesController extends Controller
      * @param EditQuoteRequestNamespace $request
      * @return \App\Http\Responses\Focus\quote\EditResponse
      */
-    public function edit(EditQuoteRequest $request, Quote $quote)
-    {
-        $page = $request->input('page');
-        
-        return new EditResponse($quote, $page);
+    public function edit(Quote $quote)
+    {        
+        return new EditResponse($quote);
     }
 
     /**

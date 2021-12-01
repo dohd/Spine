@@ -8,6 +8,8 @@ use App\Models\items\CustomEntry;
 use App\Models\lead\Lead;
 use Illuminate\Contracts\Support\Responsable;
 
+use function GuzzleHttp\json_encode;
+
 class EditResponse implements Responsable
 {
     /**
@@ -16,17 +18,11 @@ class EditResponse implements Responsable
     protected $quote;
 
     /**
-     * @var string 
-     */
-    protected $page;
-
-    /**
      * @param App\Models\quote\Quote $quote
      */
-    public function __construct($quote, $page)
+    public function __construct($quote)
     {
         $this->quote = $quote;
-        $this->page = $page;
     }
 
     /**
@@ -39,17 +35,15 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-        $leads = $this->quote->lead->where('status', 0)->get();
-        $products = $this->quote->products()->orderBy('row_index', 'ASC')->get();
-        
+        $leads = $this->quote->lead()->get();
+        $products = $this->quote->products()->orderBy('row_index')->get();
+
         // default parameters
         $params = array('quote', 'products', 'leads');
-        if ($this->quote->bank_id ) {
-            $banks = Bank::all();
-        }
-
+        if ($this->quote->bank_id ) $banks = Bank::all();
+        
         // condition to access copy page
-        if ($this->page == 'copy') {
+        if (request('page') == 'copy') {
             $last_quote = $this->quote->orderBy('id', 'desc')->where('i_class', '=', 0)->first();
             // copy proforma invoice
             if (isset($banks)) {
