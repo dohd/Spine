@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddClientrefToLeads extends Migration
+class AddClientRefColumnToLeadsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddClientrefToLeads extends Migration
     public function up()
     {
         Schema::table('leads', function (Blueprint $table) {
-            $table->integer('client_ref');
+            $table->string('client_ref');
         });
     }
 
