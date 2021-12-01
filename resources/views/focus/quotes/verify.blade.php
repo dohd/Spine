@@ -388,7 +388,7 @@
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
             $('#unit-'+i).val(item.unit);                
-            $('#amount-'+i).val(1);
+            $('#amount-'+i).val(parseFloat(item.product_qty));
             $('#price-'+i).val(item.product_price.toFixed(2));
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
             $('#result-'+i).text(item.product_subtotal.toFixed(2));
@@ -437,10 +437,13 @@
                 if (confirm('Are you sure to delete this item?')) {
                     // delete verified product ajax call 
                     const itemId = row.find('input[name="item_id[]"]').val();
-                    $.ajax({
-                        url: baseurl + 'quotes/verified_item/' + itemId,
-                        method: 'DELETE',
-                    });
+                    if (itemId) {
+                        $.ajax({
+                            url: baseurl + 'quotes/delete_product/' + itemId,
+                            dataType: "json",
+                            method: 'DELETE',
+                        });
+                    }
                 }
             }            
         }

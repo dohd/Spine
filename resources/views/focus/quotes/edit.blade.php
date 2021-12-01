@@ -399,7 +399,7 @@
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
             $('#unit-'+i).val(item.unit);                
-            $('#amount-'+i).val(1);
+            $('#amount-'+i).val(parseFloat(item.product_qty));
             $('#price-'+i).val(item.product_price.toFixed(2));
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
             $('#result-'+i).text(item.product_subtotal.toFixed(2));
@@ -447,11 +447,13 @@
                 row.remove();
                 const itemId = row.find('input[name="item_id[]"]').val();
                 // delete product api call 
-                $.ajax({
-                    url: baseurl + 'quotes/delete_product/' + itemId,
-                    dataType: "json",
-                    method: 'DELETE',
-                });
+                if (itemId) {
+                    $.ajax({
+                        url: baseurl + 'quotes/delete_product/' + itemId,
+                        dataType: "json",
+                        method: 'DELETE',
+                    });
+                }
             }
         }
 
@@ -517,7 +519,6 @@
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
-
                 const productPrice = parseFloat(data.price.replace(',',''));
                 $('#price-'+i).val(productPrice.toFixed(2));
 
