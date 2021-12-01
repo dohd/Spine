@@ -437,7 +437,7 @@
                 if (confirm('Are you sure to delete this item?')) {
                     // delete verified product ajax call 
                     const itemId = row.find('input[name="item_id[]"]').val();
-                    if (itemId) {
+                    if (Number(itemId)) {
                         $.ajax({
                             url: baseurl + 'quotes/delete_product/' + itemId,
                             dataType: "json",
@@ -447,6 +447,7 @@
                 }
             }            
         }
+        
         totals();
     });
 
