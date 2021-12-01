@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\branch;
 
 use App\Models\branch\Branch;
@@ -70,9 +71,8 @@ class BranchesController extends Controller
      * @param CreateProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\CreateResponse
      */
-    public function create(StoreBranchRequest $request)
+    public function create()
     {
-
         return new CreateResponse('focus.branches.create');
     }
 
@@ -92,7 +92,7 @@ class BranchesController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-         
+
         $id = $this->repository->create($input);
         //return with successfull message
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Created' . ' <a href="' . route('biller.branches.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
@@ -111,18 +111,12 @@ class BranchesController extends Controller
         return new EditResponse($branch);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateProductcategoryRequestNamespace $request
-     * @param App\Models\productcategory\Productcategory $productcategory
-     * @return \App\Http\Responses\RedirectResponse
-     */
-
-     public function branch_load(Request $request)
+    // Load customer branches
+    public function branch_load(Request $request)
     {
         $id = $request->get('id');
         $result = Customer::find($id)->branches;
+
         return json_encode($result);
     }
 
@@ -139,7 +133,6 @@ class BranchesController extends Controller
         $this->repository->update($branch, $input);
         //return with successfull message
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Updated'  . ' <a href="' . route('biller.branches.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-
     }
 
     /**
@@ -168,9 +161,6 @@ class BranchesController extends Controller
      */
     public function show(branch $branch, ManageBranchRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.branches.view', compact('branch'));
     }
-
 }
