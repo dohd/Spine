@@ -87,35 +87,15 @@ class LeadsController extends Controller
 
         ]);
         // filter request input fields
-        $input = $request->except(['_token', 'ins']);
+        $data = $request->except(['_token', 'ins']);
 
-        $input['ins'] = auth()->user()->ins;
-        $input['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
         //Create the model using repository create method
-        $result = $this->repository->create($input);
+        $this->repository->create($data);
 
-        return new RedirectResponse(
-            route('biller.leads.index'),
-            [
-                'flash_success' => 'Lead  Successfully Created'
-                    . ' <a href="'
-                    . route('biller.leads.show', $result['id'])
-                    . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> '
-                    . trans('general.view')
-                    . '  </a> &nbsp; &nbsp;'
-                    . ' <a href="'
-                    . route('biller.leads.create')
-                    . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> '
-                    . trans('general.create')
-                    . '  </a>&nbsp; &nbsp;'
-                    . ' <a href="'
-                    . route('biller.leads.index')
-                    . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">'
-                    . trans('general.list')
-                    . '</span> </a>'
-            ]
-        );
+        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Lead  Successfully Created']);
     }
 
     /**
@@ -139,7 +119,7 @@ class LeadsController extends Controller
      */
     public function update(Request $request, Lead $lead)
     {
-        // fields to validate
+        // validate fields
         $fields = [
             'reference' => 'required',
             'date_of_request' => 'required',
@@ -148,33 +128,15 @@ class LeadsController extends Controller
             'assign_to' => 'required',
         ];
         $request->validate($fields);
-        $input = $request->except(['_token', 'ins']);
-        $input['date_of_request'] = date_for_database($input['date_of_request']);
+
+        // update input fields from request
+        $data = $request->except(['_token', 'ins']);
+        $data['date_of_request'] = date_for_database($data['date_of_request']);
 
         //Update the model using repository update method
-        $this->repository->update($lead, $input);
+        $this->repository->update($lead, $data);
 
-        return new RedirectResponse(
-            route('biller.leads.index'),
-            [
-                'flash_success' => 'Lead Successfully Updated'
-                    . '<a href="'
-                    . route('biller.leads.show', [$lead->id])
-                    . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> '
-                    . trans('general.view')
-                    . '  </a> &nbsp; &nbsp;'
-                    . ' <a href="'
-                    . route('biller.leads.create')
-                    . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> '
-                    . trans('general.create')
-                    . '  </a>&nbsp; &nbsp;'
-                    . ' <a href="'
-                    . route('biller.leads.index')
-                    . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">'
-                    . trans('general.list')
-                    . '</span> </a>'
-            ]
-        );
+        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Lead Successfully Updated']);
     }
 
     /**
@@ -209,7 +171,8 @@ class LeadsController extends Controller
     public function lead_load(Request $request)
     {
         $id = $request->get('id');
-        $result = Lead::all()->where('rel_id', '=', $id);
+        $result = Lead::all()->where('rel_id', $id);
+
         return json_encode($result);
     }
     
@@ -218,8 +181,8 @@ class LeadsController extends Controller
     {
         $q = $request->post('keyword');
         $lead = Lead::where('id', $q)->first();
-        if ($lead) return $lead;
-        return false;
+        if (!isset($lead)) return false;
+        return $lead;        
     }
 
     // update Lead status
@@ -230,6 +193,7 @@ class LeadsController extends Controller
 
         Lead::find($id)->update(compact('status', 'reason'));
 
+        // reload the same page
         return redirect()->back();
     }
 }
