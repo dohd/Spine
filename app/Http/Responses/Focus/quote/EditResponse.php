@@ -35,16 +35,17 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-        $leads = $this->quote->lead()->get();
-        $products = $this->quote->products()->orderBy('row_index')->get();
+
+        $products = $quote->products()->orderBy('row_index')->get();
+        $leads = Lead::all();
 
         // default parameters
         $params = array('quote', 'products', 'leads');
-        if ($this->quote->bank_id ) $banks = Bank::all();
+        if ($quote->bank_id ) $banks = Bank::all();
         
         // condition to access copy page
         if (request('page') == 'copy') {
-            $last_quote = $this->quote->orderBy('id', 'desc')->where('i_class', '=', 0)->first();
+            $last_quote = $quote->orderBy('id', 'desc')->where('i_class', '=', 0)->first();
             // copy proforma invoice
             if (isset($banks)) {
                 return view('focus.quotes.edit_pi')
