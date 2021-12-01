@@ -46,8 +46,8 @@
                                         <label for="ref_type" class="caption">Leads</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">
-                                                <option>-- Select Lead --</option>
+                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>
+                                                <option value="0">-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
