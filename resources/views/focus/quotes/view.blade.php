@@ -1,15 +1,12 @@
 @extends('core.layouts.app')
-@section('title', trans('labels.backend.quotes.management') . ' | ' . trans('labels.backend.quotes.create'))
+@section('title', 'Quote / PI Management')
 
 @section('after-styles')
 {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
 @endsection
 
 @section('page-header')
-<h1>
-    {{ trans('labels.backend.quotes.management') }}
-    <small>{{ trans('labels.backend.quotes.create') }}</small>
-</h1>
+<h1>Quote / PI Management </h1>
 @endsection
 
 @section('content')
@@ -17,7 +14,7 @@
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title mb-0">{{ trans('labels.backend.quotes.management') }}</h4>
+                <h4 class="content-header-title mb-0">QUOTE / PI MANAGEMENT</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
@@ -32,7 +29,7 @@
             <section class="card">
                 <div id="invoice-template" class="card-body">                    
                     @include('focus.quotes.partials.view_menu')                    
-                    @if ($quote['verified'] == "Yes")
+                    @if ($quote->verified == "Yes")
                         <div class="badge text-center white d-block m-1">
                             <span class="bg-danger round p-1">
                                 &nbsp;&nbsp;This Quote/PI has been verified&nbsp;&nbsp;
