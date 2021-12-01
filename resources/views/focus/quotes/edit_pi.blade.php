@@ -458,13 +458,12 @@
         if ($(this).is('.down')) row.insertAfter(row.next());
         // remove row
         if ($(this).is('.removeProd')) {
-            const response = window.confirm('Are you sure to delete this product ?');
-            if (response) {
+            if (confirm('Are you sure to delete this product ?')) {
                 const row = $(this).closest('tr');
                 row.remove();
                 const itemId = row.find('input[name="item_id[]"]').val();
                 // delete product api call 
-                if (itemId) {
+                if (Number(itemId)) {
                     $.ajax({
                         url: baseurl + 'quotes/delete_product/' + itemId,
                         dataType: "json",
