@@ -281,6 +281,15 @@
 					</tr>
 				@endif				
 			@endforeach
+			<!-- empty row -->
+			<tr>
+				<td {!! 'style="height:'. strval(400-30*count($products)) .'px;"' !!}></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
 			<tr>
 				<td colspan="4" class="bd-t" rowspan="2">
 					@if ($invoice->bank_id)
