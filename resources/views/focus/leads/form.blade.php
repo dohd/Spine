@@ -134,7 +134,7 @@
                         <div class="col-sm-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                             <div class="input-group">
                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                {{ Form::number('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref']) }}
+                                {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref']) }}
                             </div>
                         </div>
                     </div>
@@ -265,7 +265,7 @@
             ajax: {
                 url: "{{route('biller.branches.branch_load')}}?id=" + id,
                 dataType: 'json',
-                type: 'POST',
+                type: 'GET',
                 quietMillis: 50,
                 params: {'cat_id': id},
                 data: function (product) {
