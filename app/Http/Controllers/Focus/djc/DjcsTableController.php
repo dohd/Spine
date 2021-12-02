@@ -54,7 +54,10 @@ class DjcsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($djc) {
-                return $djc->client->company . ' - ' . $djc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
+                if (isset($djc->client) && isset($djc->branch)) {
+                    return $djc->client->company . ' - ' . $djc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
+                }
+                return;
             })
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
@@ -63,7 +66,7 @@ class DjcsTableController extends Controller
                 $valid_token = token_validator('', 'd' . $djc->id, true);
                 
                 return '<a href="' . route('biller.print_djc', [$djc->id, 10, $valid_token, 1]) . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
-                        . $djc->action_buttons;
+                    . $djc->action_buttons;
             })
             ->make(true);
     }
