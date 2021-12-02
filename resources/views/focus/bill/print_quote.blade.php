@@ -116,11 +116,15 @@
 			font-size:9pt; 
 			padding-left:50px;
 		}
+		.footer {
+			font-size: 9pt;
+			text-align: center;
+		}
 	</style>
 </head>
 <body>
 	<htmlpagefooter name="myfooter">
-		<div style=" font-size: 9pt; text-align: center; padding-top: 3mm; ">
+		<div class="footer">
 			Page {PAGENO} of {nb}
 		</div>
 	</htmlpagefooter>
@@ -151,7 +155,7 @@
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
 				Cell : +254 732 345 393, +254 787 391 015<br>
-				info@leanventures.co.ke<br />
+				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
 		</tr>
@@ -175,18 +179,18 @@
 	<table class="customer-dt" cellpadding="10">
 		<tr>
 			<td width="50%">
-				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br /><br />
-				<b>Client Name :</b> {{ $invoice->client->company }}<br />
-				<b>Branch :</b> {{ $invoice->branch->name }}<br />
-				<b>Address :</b> {{ $invoice->client->address }}<br />
-				<b>Email :</b> {{ $invoice->client->email }}<br />
-				<b>Cell :</b> {{ $invoice->client->phone }}<br />
-				<b>Attention :</b> {{ $invoice->attention }}<br />
+				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
+				<b>Client Name :</b> {{ $invoice->client->company }}<br>
+				<b>Branch :</b> {{ $invoice->branch->name }}<br>
+				<b>Address :</b> {{ $invoice->client->address }}<br>
+				<b>Email :</b> {{ $invoice->client->email }}<br>
+				<b>Cell :</b> {{ $invoice->client->phone }}<br>
+				<b>Attention :</b> {{ $invoice->attention }}<br>
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
-				<span class="customer-dt-title">REFERENCE DETAILS:</span><br /><br />
-				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br />
+				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>
+				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
 				@php
 					$tid = sprintf('%04d', $invoice->tid);
 					$field_name = 'Quotation No';
@@ -201,17 +205,17 @@
 						$field_value = $field_value . $v_no;
 					}
 				@endphp
-				<b>{{ $field_name }} :</b> {{ $field_value }}<br />
+				<b>{{ $field_name }} :</b> {{ $field_value }}<br>
 				@if ($is_verified)
-					<b>Verification Date :</b> {{ dateFormat($invoice->verification_date, 'd-M-Y') }} <br />
+					<b>Verification Date :</b> {{ dateFormat($invoice->verification_date, 'd-M-Y') }} <br>
 				@else
-					<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br />
+					<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
 				@endif
-				<b>Currency :</b> Kenya Shillings <br />
+				<b>Currency :</b> Kenya Shillings <br><br>
 				<b>Client Ref: </b> {{ $invoice->client_ref }}
 			</td>
 		</tr>
-	</table><br />
+	</table><br>
 	<table  class="ref" cellpadding="10">
 		<tr>
 			<td colspan="2">
@@ -281,7 +285,7 @@
 					</tr>
 				@endif				
 			@endforeach
-			<!-- empty row -->
+			<!-- empty row with dynamic height-->
 			<tr>
 				<td {!! 'style="height:'. strval(400-30*count($products)) .'px;"' !!}></td>
 				<td></td>
@@ -293,11 +297,11 @@
 			<tr>
 				<td colspan="4" class="bd-t" rowspan="2">
 					@if ($invoice->bank_id)
-						<span class="customer-dt-title">BANK DETAILS:</span><br />
-						<b>Account Name :</b> Lean Ventures Limited<br />
-						<b>Account Number :</b> 1267496231<br />
-						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br />
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br />
+						<span class="customer-dt-title">BANK DETAILS:</span><br>
+						<b>Account Name :</b> Lean Ventures Limited<br>
+						<b>Account Number :</b> 1267496231<br>
+						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br>
+						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br>
 						(KCB Mpesa Paybill: 522 522)
 					@endif
 				</td>
