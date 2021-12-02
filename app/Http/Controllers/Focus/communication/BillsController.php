@@ -123,9 +123,12 @@ class BillsController extends Controller
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         );
-        $title = $data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf';
 
-        return Response::stream($pdf->Output($title, 'I'), 200, $headers);
+        $tid = sprintf('%04d', $data['invoice']['tid']);
+        $name = 'QT-';
+        if ($data['invoice']['bank_id']) $name = 'PI-';
+
+        return Response::stream($pdf->Output($name . $tid . '.pdf', 'I'), 200, $headers);
     }
 
 
