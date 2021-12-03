@@ -62,16 +62,15 @@ class DjcRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // djc input data
+        DB::beginTransaction();
+
         $data = $input['data'];
-        
         $data['report_date'] = date_for_database($data['report_date']);
         // increament tid
         $ref =  Djc::orderBy('tid', 'desc')->first('tid')->tid;
         if ($data['tid'] <= $ref) {
             $data['tid'] = $ref + 1;
-        }
-        
+        }        
         // upload files
         foreach($data as $key => $value) {
             if ($key == 'image_one' || $key == 'image_two' || $key == 'image_three' || $key == 'image_four') {
@@ -80,8 +79,6 @@ class DjcRepository extends BaseRepository
                 }                
             }
         }
-
-        DB::beginTransaction();
         $result = Djc::create($data);
 
         // djc items
@@ -91,10 +88,10 @@ class DjcRepository extends BaseRepository
             $input['data_item'],
             ['djc_id' => $result['id'], 'ins' => $result['ins']]
         );
+        DjcItem::insert($data_items);
 
         // bulk insert djc items
-        if ($result && $item_count) {
-            DjcItem::insert($data_items);
+        if ($result) {
             DB::commit();
             return $result;
         }
