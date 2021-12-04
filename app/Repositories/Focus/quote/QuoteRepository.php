@@ -112,9 +112,8 @@ class QuoteRepository extends BaseRepository
 
         // assign unit field if non-existant
         foreach ($quote_items as $key => $val) {
-            if (!isset($val['unit'])) {
-                $quote_items[$key]['unit'] = '';
-            }
+            if (isset($val['unit'])) continue;
+            $quote_items[$key]['unit'] = null;
         }
         QuoteItem::insert($quote_items);
         
