@@ -234,8 +234,8 @@ class QuotesController extends Controller
     {
         //filter request input fields
         $quote = $request->only(['id', 'verify_no']);
-        $quote_items = $request->only(['row_index', 'item_id', 'a_type', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
-        $job_cards = $request->only(['jcitem_id', 'reference', 'date', 'technician']);
+        $quote_items = $request->only(['remark', 'row_index', 'item_id', 'a_type', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $job_cards = $request->only(['type', 'jcitem_id', 'reference', 'date', 'technician']);
 
         $quote['ins'] = auth()->user()->ins;
 
