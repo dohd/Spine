@@ -301,8 +301,10 @@ class QuotesController extends Controller
     // Load customer quotes
     public function customer_quotes(ManageQuoteRequest $request)
     {
-        $id = $request->input('id');
-        $quotes = Quote::where('customer_id', $id)->get(['id', 'tid', 'notes', 'customer_id', 'bank_id']);
+        $id = request('id');
+        $quotes = Quote::where(['customer_id' => $id, 'status' => 'approved'])
+            ->orderBy('id', 'desc')
+            ->get(['id', 'tid', 'notes', 'customer_id', 'bank_id']);
 
         return json_encode($quotes);
     }
