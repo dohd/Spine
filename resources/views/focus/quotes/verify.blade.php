@@ -113,6 +113,7 @@
                                             <thead class="bg-gradient-directional-blue white pb-1">
                                                 <tr>
                                                     <th class="text-center" width="23%">Reference No.</th>
+                                                    <th class="text-center" width="23%">Type</th>
                                                     <th class="text-center" width="22%">Date</th>
                                                     <th class="text-center" width="50%">Technician</th>
                                                     <th class="text-center" width="5%">Action</th>
@@ -121,6 +122,13 @@
                                             <tbody>
                                                 <tr>
                                                     <td><input type="text" class="form-control" name="reference[]" id="reference-0" required></td>
+                                                    <td>
+                                                        <select name="type[]" id="type-0" class="form-control" required>
+                                                            <option value="0">-- Type --</option>
+                                                            <option value="1">JobCard</option>
+                                                            <option value="2">DNote</option> 
+                                                        </select>
+                                                    </td>
                                                     <td><input type="text" class="form-control" name="date[]" id="date-0" required></td>
                                                     <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
                                                     <th class="text-center">#</th>
@@ -129,7 +137,7 @@
                                             </tbody>
                                         </table>
                                         <button type="button" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
-                                            <i class="fa fa-plus-square"></i> Add Job Card
+                                            <i class="fa fa-plus-square"></i> Add Jobcard / DNote
                                         </button>                                            
                                     </div>
                                 </div>                                                                
@@ -144,10 +152,11 @@
                                     <th width="7%" class="text-center">Numbering</th>
                                     <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
                                     <th width="7%" class="text-center">UOM</th>
-                                    <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
-                                    <th width="14%" class="text-center">{{trans('general.rate')}} Exclusive</th>
-                                    <th width="14%" class="text-center">{{trans('general.rate')}} Inclusive</th>
+                                    <th width="5%" class="text-center">{{trans('general.quantity')}}</th>
+                                    <th width="12%" class="text-center">{{trans('general.rate')}} Exclusive</th>
+                                    <th width="12%" class="text-center">{{trans('general.rate')}} Inclusive</th>
                                     <th width="10%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
+                                    <th width="7%" class="text-center">Remark</th>
                                     <th width="5%" class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -243,6 +252,13 @@
         return `
             <tr>
                 <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
+                <td>
+                    <select name="type[]" id="type-${n}" class="form-control" required>
+                        <option value="0">-- Type --</option>
+                        <option value="1">JobCard</option>
+                        <option value="2">DNote</option> 
+                    </select>
+                </td>
                 <td><input type="text" class="form-control" name="date[]" id="date-${n}" required></td>
                 <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
                 <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
@@ -299,6 +315,7 @@
                     // set values
                     $('#jcitemid-'+i).val(v.id);
                     $('#reference-'+i).val(v.reference);
+                    $('#type-'+i).val(v.type);
                     $('#technician-'+i).val(v.technician);
                     $('#date-'+i)
                         .datepicker({ format: "{{ config('core.user_date_format') }}" })
@@ -335,6 +352,7 @@
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
                 <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><textarea class="form-control" name="remark[]" id="remark-${val}"></textarea></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
@@ -350,7 +368,7 @@
         return `
             <tr>
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
+                <td colspan="7"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
@@ -372,7 +390,7 @@
         const i = cvalue;
         const item = {...v};
         // format float values to integer
-        const keys = ['product_price','product_qty','product_subtotal'];
+        const keys = ['product_price', 'product_qty', 'product_subtotal'];
         keys.forEach(key => {
             item[key] = parseFloat(item[key].replace(',',''));
         });
@@ -387,7 +405,8 @@
             $('#productid-'+i).val(item.product_id);
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
-            $('#unit-'+i).val(item.unit);                
+            $('#unit-'+i).val(item.unit); 
+            $('#remark-'+i).val(item.remark);
             $('#amount-'+i).val(parseFloat(item.product_qty));
             $('#price-'+i).val(item.product_price.toFixed(2));
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
