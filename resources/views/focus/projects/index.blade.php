@@ -104,9 +104,7 @@
 
 <script>
     $(function() {
-        setTimeout(function() { 
-            draw_data() 
-        }, "{{ config('master.delay') }}");
+        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
     });
 
     $.ajaxSetup({
@@ -259,7 +257,7 @@
             }
         });
 
-        // on selecting customer
+        // on selecting customer fetch branches
         const quoteData = [];
         $("#person").on('change', function() {
             var id = $('#person :selected').val();
@@ -285,7 +283,7 @@
             // fetch customer quotes
             $("#main_quote").html('').select2({
                 ajax: {
-                    url: "{{route('biller.quotes.customer_quotes')}}?id=" + id,
+                    url: "{{ route('biller.quotes.customer_quotes') }}?id=" + id,
                     dataType: 'json',
                     quietMillis: 50,
                     processResults: function(data) {
