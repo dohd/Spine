@@ -97,8 +97,12 @@ class QuoteRepository extends BaseRepository
         $quote['client_type'] = 'lead';
 
         $lead = Lead::find($quote['lead_id']);
-        $quote['customer_id'] = $lead->client_id;
-        $quote['branch_id'] = $lead->branch_id;
+        if (isset($lead->client_id) && isset($lead->branch_id)) {
+            $quote['customer_id'] = $lead->client_id;
+            $quote['branch_id'] = $lead->branch_id;    
+        }
+        // update Lead status to closed(1) reason won
+        $lead->update(['status' => 1, 'reason' => 'won']);
 
         $result = Quote::create($quote);
 
@@ -116,7 +120,7 @@ class QuoteRepository extends BaseRepository
             $quote_items[$key]['unit'] = null;
         }
         QuoteItem::insert($quote_items);
-        
+
         if ($result) {
             DB::commit();
             return $result;

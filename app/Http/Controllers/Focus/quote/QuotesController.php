@@ -342,14 +342,10 @@ class QuotesController extends Controller
         $data = $request->only(['bill_id', 'status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
         $data['approved_date'] = date_for_database($data['approved_date']);
 
-        DB::beginTransaction();
         $quote = Quote::find($data['bill_id']);
         // filter bill_id from data then update quote
         unset($data['bill_id']);
         $quote->update($data);
-        // update Lead status to closed(1) reason won
-        Lead::find($quote->lead_id)->update(['status' => 1, 'reason' => 'won']);
-        DB::commit();
 
         return json_encode(['status' => 'Success', 'message' => trans('general.bill_status_update'), 'refresh' => 1]);
     }
