@@ -240,6 +240,7 @@
                         </ul>
                     </li>
                     @endauth
+
                     @permission('project-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Djc Report</a>
                         <ul class="dropdown-menu">
@@ -252,6 +253,7 @@
                         </ul>
                     </li>
                     @endauth
+
                     @permission('quote-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Quotes Management</a>
                         <ul class="dropdown-menu">
@@ -272,6 +274,36 @@
                                 </a>
                             </li>
                         </ul>
+                    </li>
+                    @endauth
+
+                    @permission('project-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> {{ trans('labels.backend.projects.management') }}</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('projects.projects')}}
+                                    <span class="badge badge-sm badge-primary">Beta</span>
+                                </a>                                
+                            </li>
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('project-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Rjc Report</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Rjc Report</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('biller.projects.create_rjc') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Rjc Report</a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('quote-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Verification</a>
                     </li>
                     @endauth
                     
@@ -679,18 +711,6 @@
             @if(access()->allow('project-manage') || access()->allow('task-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-briefcase"></i><span>{{trans('features.project_tasks')}}</span></a>
                 <ul class="dropdown-menu">
-                    @permission('project-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> {{ trans('labels.backend.projects.management') }}</a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('projects.projects')}}
-                                    <span class="badge badge-sm badge-primary">Beta</span>
-                                </a>
-                                <a class="dropdown-item" href="{{ route('biller.projects.create_rjc') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Rjc Report</a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endauth
                     @permission('task-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item" href="{{ route('biller.tasks.index') }}"><i class="icon-directions"></i> {{ trans('labels.backend.tasks.management') }}</a>
                     </li>
