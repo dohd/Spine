@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Crm;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -59,30 +59,23 @@ class ProjectsTableController extends Controller
             ->addIndexColumn()
             ->addColumn('name', function ($project) {
                 $tg = '';
-                $user = '';
                 foreach ($project->tags as $row) {
                     $tg .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
                 }
-
                 return '<div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("crm.projects.show", [$project->id]) . '" >' . $project->name . '</a><div class="float-right">' . $tg . '</div></div><span class="todo-desc">' . $project->short_desc . '</span></div> </div>';
             })
             ->addColumn('priority', function ($project) {
                 return '<span class="">' . $project->priority . '</span> ';
             })
             ->addColumn('progress', function ($project) {
-
                 return numberFormat($project->progress) . ' %';
             })
             ->addColumn('deadline', function ($project) {
                 return dateTimeFormat($project->end_date);
             })
             ->addColumn('actions', function ($project) {
-                $btn = '';
-                $btn .= '<a href="#" title="View" class="view_project success" data-toggle="modal"
-                                        data-target="#ViewProjectModal" data-item="' . $project->id . '"><i  class="ft-eye"></i></a> ';
-
-
-                return $btn;
+                return '<a href="#" title="View" class="view_project success" data-toggle="modal" data-target="#ViewProjectModal" data-item="' 
+                    . $project->id . '"><i  class="ft-eye"></i></a> ';
             })
             ->make(true);
     }
