@@ -63,9 +63,17 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <div class="col-sm-12">
+                                        <div class="col-sm-8">
                                             <label for="attention" class="attention">Attention <span class="text-danger">*</span></label>
-                                            {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Atrtention','autocomplete'=>'false','id'=>'attention']) }}
+                                            {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Attention','autocomplete'=>'false','id'=>'attention']) }}
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label for="jobcard" class="jobcard">Job Card</label>
+                                            <div class="input-group">
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
+                                                </div>
+                                                {{ Form::text('job_card', null, ['class' => 'form-control round required', 'placeholder' => 'Job Card', 'id'=>'jobcard']) }}
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="form-group row">

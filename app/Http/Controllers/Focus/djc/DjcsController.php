@@ -55,9 +55,8 @@ class DjcsController extends Controller
      * @param App\Http\Requests\Focus\account\ManageAccountRequest $request
      * @return \App\Http\Responses\ViewResponse
      */
-    public function index(ManageDjcRequest $request)
+    public function index()
     {
-
         return new ViewResponse('focus.djcs.index');
     }
 
@@ -90,26 +89,14 @@ class DjcsController extends Controller
             'subject' => 'required'
         ]);
 
-        $data = $request->only(['tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data = $request->only(['job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
         $data_item = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         $data['ins'] = auth()->user()->ins;
 
         //Create the model using repository create method
         $result = $this->repository->create(compact('data', 'data_item'));
 
-        return new RedirectResponse(
-            route('biller.djcs.index', [$result['id']]), 
-            [
-                'flash_success' => 'Djc Report Created' 
-                . ' <a href="' . route('biller.djcs.index', [$result['id']]) 
-                . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
-                . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.create') 
-                . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
-                . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.djcs.index') 
-                . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
-                . trans('general.list') . '</span> </a>'
-            ]
-        );
+        return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created']);
     }
 
     /**
@@ -142,7 +129,7 @@ class DjcsController extends Controller
             'technician' => 'required',
             'subject' => 'required'
         ]);
-        $data = $request->only(['tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data = $request->only(['job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
         $data_item = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         
         $data['ins'] = auth()->user()->ins;
