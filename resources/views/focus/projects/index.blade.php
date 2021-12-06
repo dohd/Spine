@@ -60,8 +60,9 @@
                                     <th>{{ trans('projects.project') }}</th>
                                     <th>Project ID</th>
                                     <th>{{ trans('projects.priority') }}</th>
-                                    <th>{{ trans('projects.status') }}</th>
+                                    <th>Project Started</th>                                    
                                     <th>{{ trans('projects.end_date') }}</th>
+                                    <th>{{ trans('projects.status') }}</th>
                                     <th>{{ trans('general.createdat') }}</th>
                                     <th>{{ trans('general.action') }}</th>
                                 </tr>
@@ -151,12 +152,16 @@
                     name: 'priority'
                 },
                 {
-                    data: 'progress',
-                    name: 'progress'
+                    data: 'started_status',
+                    name: 'started_status'
                 },
                 {
                     data: 'deadline',
                     name: 'deadline'
+                },
+                {
+                    data: 'progress',
+                    name: 'progress'
                 },
                 {
                     data: 'created_at',
