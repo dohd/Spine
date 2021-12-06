@@ -324,10 +324,6 @@
             location.href = location.href + '?page=pi';
         }
     }
-
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
     
     // initialize datepicker
     $('[data-toggle="datepicker"]')
@@ -339,6 +335,15 @@
         if (confirm('Are you sure to delete this item ?')) {
             $(this).children('form').submit();
         }
+    });
+
+    // On cancel Quote
+    $('.quote-cancel').click(function(e) {
+        $(this).children('form').submit();
+    });
+
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
     $(function() {
