@@ -352,6 +352,13 @@ class QuotesController extends Controller
         return json_encode(['status' => 'Success', 'message' => trans('general.bill_status_update'), 'refresh' => 1]);
     }
 
+    // Cancel quotation
+    public function cancel_quote(Quote $quote) 
+    {
+        $quote->update(['status' => 'cancelled']);
+        return new RedirectResponse(route('biller.quotes.show', $quote), ['flash_success' => trans('general.bill_status_update')]);
+    }
+
     public function update_lpo(ManageQuoteRequest $request)
     {
 
