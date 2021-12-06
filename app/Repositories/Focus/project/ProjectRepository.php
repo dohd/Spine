@@ -49,7 +49,7 @@ class ProjectRepository extends BaseRepository
                 return $s->where('rid', '=', auth('crm')->user()->id);
             });
         }
-        return $q->get(['id', 'name', 'status', 'project_number', 'priority', 'progress', 'end_date', 'created_at']);
+        return $q->get(['id', 'name', 'status', 'project_number', 'priority', 'started_status', 'progress', 'end_date', 'created_at']);
     }
 
     /**

@@ -17,7 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\project;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\project\ProjectRepository;
@@ -68,6 +67,12 @@ class ProjectsTableController extends Controller
             ->addColumn('priority', function ($project) {
                 return '<span class="">' . $project->priority . '</span> ';
             })
+            ->addColumn('started_status', function ($project) {
+                if ($project->started_status == 'running') {
+                    return '<span class="badge badge-success">'.$project->started_status.'</span>';
+                }
+                return '<span class="badge badge-primary">'.$project->started_status.'</span>'; 
+            })
             ->addColumn('progress', function ($project) {
                 $task_back = task_status($project->status);
                 return '<a href="#" class="view_project"  data-toggle="modal"
@@ -80,12 +85,9 @@ class ProjectsTableController extends Controller
                 return dateFormat($project->created_at);
             })
             ->addColumn('actions', function ($project) {
-                $btn = '';
-                $btn .= '<a href="#" title="View" class="view_project success" data-toggle="modal"
-                                        data-target="#ViewProjectModal" data-item="' . $project->id . '"><i  class="ft-eye"></i></a> ';
+                $btn = '<a href="#" title="View" class="view_project success" data-toggle="modal" data-target="#ViewProjectModal" data-item="' . $project->id . '"><i  class="ft-eye"></i></a> ';
                 if ($project->creator->id == auth()->user()->id) {
                     $btn .= '&nbsp;&nbsp;<a href="' . route("biller.projects.edit", [$project->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
-
                     $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.projects.destroy", [$project->id]) . '" data-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
                 }
 
