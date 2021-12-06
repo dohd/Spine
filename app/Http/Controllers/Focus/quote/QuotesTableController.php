@@ -74,7 +74,21 @@ class QuotesTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('status', function ($quote) {
-                return '<span class="st-' . $quote->status . '">' . trans('payments.' . $quote->status) . '</span>';
+                switch($quote->status) {
+                    case 'approved':
+                        $bg = 'bg-primary';
+                        break;
+                    case 'client_approved':
+                        $bg = 'bg-success';
+                        break;
+                    case 'cancelled':
+                        $bg = 'bg-danger';
+                        break;
+                    case 'pending':
+                        $bg = 'bg-secondary';
+                        break;               
+                }
+                return '<span class="badge ' . $bg . '">' . $quote->status . '</span>';
             })
             ->addColumn('verified', function ($quote) {
                 return $quote->verified;
