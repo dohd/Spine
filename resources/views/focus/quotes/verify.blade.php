@@ -15,7 +15,11 @@
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    @include('focus.quotes.partials.quotes-header-buttons')
+                    <div class="btn-group float-right" role="group" aria-label="quotes">
+                        <a href="{{ route('biller.quotes.project_quotes') }}" class="btn btn-info  btn-lighten-2">
+                            <i class="fa fa-list-alt"></i> {{trans('general.list')}}
+                        </a>
+                    </div>                    
                 </div>
             </div>
         </div>
