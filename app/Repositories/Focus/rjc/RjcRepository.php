@@ -92,9 +92,10 @@ class RjcRepository extends BaseRepository
             ['rjc_id' => $result['id'], 'ins' => $result['ins']]
         );
 
+        RjcItem::insert($data_items);
+
         // bulk insert rjc items
-        if ($result && $item_count) {
-            RjcItem::insert($data_items);
+        if ($result) {
             DB::commit();
             return $result;
         }
@@ -128,23 +129,24 @@ class RjcRepository extends BaseRepository
         );
 
         // update or create new rjc_item
-        if ($result && $item_count) {
-            foreach($data_items as $item) {
-                $rjc_item = RjcItem::firstOrNew([
-                    'id' => $item['item_id'],
-                    'rjc_id' => $item['rjc_id'],
-                ]);
-                // assign properties to the item
-                foreach($item as $key => $value) {
-                    $rjc_item[$key] = $value;
-                }
-                // remove stale attributes
-                if ($rjc_item['id'] == 0) unset($rjc_item['id']);
-                unset($rjc_item['item_id']);
-
-                $rjc_item->save();
+        foreach($data_items as $item) {
+            $rjc_item = RjcItem::firstOrNew([
+                'id' => $item['item_id'],
+                'rjc_id' => $item['rjc_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $rjc_item[$key] = $value;
             }
+            // remove stale attributes
+            if ($rjc_item['id'] == 0) unset($rjc_item['id']);
+            unset($rjc_item['item_id']);
 
+            $rjc_item->save();
+        }
+
+
+        if ($result) {
             DB::commit();
             return $result;
         }
