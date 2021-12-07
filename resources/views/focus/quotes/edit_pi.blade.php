@@ -35,7 +35,7 @@
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
                                         @if (@$last_quote->tid)
-                                            <h3 class="title pl-1">Copy Proforma Invoice</h3>
+                                            <h3 class="title pl-1">Proforma Invoice Copy</h3>
                                         @else
                                             <h3 class="title pl-1">Edit Proforma Invoice</h3>
                                         @endif
@@ -69,6 +69,7 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  round  select-box required" name="bank_id" id="bank_id">
+                                                <option value="0">-- Select Bank --</option>
                                                 @foreach ($banks as $bank) 
                                                     <option value="{{ $bank->id }}">{{ $bank->name }}</option>
                                                 @endforeach
@@ -313,7 +314,7 @@
 
     // set default field values
     $('#lead_id').val("{{ $quote->lead->id }}");
-    $('#bank_id').val("{{ $quote->bank_id }}");
+    $('#bank_id').val("{{ $quote->bank_id }}" || 0);
     $('#pricing').val("{{ $quote->pricing }}");
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
