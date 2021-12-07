@@ -293,10 +293,10 @@
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Rjc Report</a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Rjc Report</a>
+                                <a class="dropdown-item" href="{{ route('biller.rjcs.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Rjc Report</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('biller.projects.create_rjc') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Rjc Report</a>
+                                <a class="dropdown-item" href="{{ route('biller.rjcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Rjc Report</a>
                             </li>
                         </ul>
                     </li>
@@ -304,6 +304,11 @@
 
                     @permission('quote-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Verification</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('biller.quotes.project_quotes') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Verification</a>
+                            </li>                            
+                        </ul>                        
                     </li>
                     @endauth
                     
