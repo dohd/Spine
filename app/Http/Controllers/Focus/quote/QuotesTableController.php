@@ -61,8 +61,7 @@ class QuotesTableController extends Controller
             })
             ->addColumn('customer', function ($quote) {
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
-                    return $quote->customer->name.' - '
-                        .$quote->lead->branch->name.' '
+                    return $quote->customer->name.' - '.$quote->lead->branch->name.' '
                         .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
                 }
                 return;
