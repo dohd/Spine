@@ -3,12 +3,8 @@
 namespace App\Http\Responses\Focus\quote;
 
 use App\Models\bank\Bank;
-use App\Models\customfield\Customfield;
-use App\Models\items\CustomEntry;
 use App\Models\lead\Lead;
 use Illuminate\Contracts\Support\Responsable;
-
-use function GuzzleHttp\json_encode;
 
 class EditResponse implements Responsable
 {
@@ -43,19 +39,40 @@ class EditResponse implements Responsable
         $params = array('quote', 'products', 'leads');
         if ($quote->bank_id ) $banks = Bank::all();
         
-        // condition to access copy page
+        // if copy page 
         if (request('page') == 'copy') {
-            $last_quote = $quote->orderBy('id', 'desc')->where('i_class', '=', 0)->first();
             // copy proforma invoice
             if (isset($banks)) {
+                $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
+
                 return view('focus.quotes.edit_pi')
                     ->with(compact('banks', 'last_quote', ...$params))
                     ->with(bill_helper(2, 4));
             }
-            // copy default quote
+
+            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
             return view('focus.quotes.edit')
                 ->with(compact('last_quote', ...$params))
                 ->with(bill_helper(2, 4));
+        }
+
+        // copy quote to pi page
+        if (request('page') == 'copy_to_pi') {
+            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
+            $banks = Bank::all();
+
+            return view('focus.quotes.edit_pi')
+                ->with(compact('banks', 'last_quote', ...$params))
+                ->with(bill_helper(2, 4));
+        }
+
+        // copy pi to quote page
+        if (request('page') == 'copy_to_qt') {
+            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
+            $copy_from_pi = true;
+            return view('focus.quotes.edit')
+                ->with(compact('last_quote', 'copy_from_pi', ...$params))
+                ->with(bill_helper(2, 4));        
         }
 
         // edit proforma invoice
