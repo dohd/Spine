@@ -414,34 +414,4 @@ class ProjectsController extends Controller
         
         return json_encode($result);
     }
-
-    // Load form for creating Rjcs
-    public function create_rjc(Request $request)
-    {
-        $projects =  Project::all(['id', 'name', 'project_number']);
-        $rjc =  Rjc::orderBy('tid', 'desc')->first('tid');
-        $tid = isset($rjc) ? $rjc->tid+1 : 1;
-
-        return view('focus.projects.rjc_create')->with(compact('projects', 'tid'));
-    }
-
-    // Store Rjcs
-    public function store_rjc(Request $request)
-    {
-        $request->validate([
-            'attention' => 'required',
-            'prepared_by' => 'required',
-            'technician' => 'required',
-            'subject' => 'required'
-        ]);
-
-        $data = $request->only(['tid', 'project_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
-        $data['ins'] = auth()->user()->ins;
-
-        $repository = new RjcRepository();
-        $repository->create(compact('data', 'data_items'));
-
-        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Repair Job Card created Successfully']);
-    }    
 }
