@@ -1,14 +1,14 @@
 @php
-    $is_pi = request()->getQueryString();
-    $edit_url = $is_pi ? route('biller.quotes.edit', [$quote, $is_pi]) : route('biller.quotes.edit', $quote);
+    $query_str = request()->getQueryString();
+    $edit_url = $query_str ? route('biller.quotes.edit', [$quote, $query_str]) : route('biller.quotes.edit', $quote);
 @endphp
 <div class="row">
     <div class="col">
         <a href="{{ $edit_url }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
         @if ($quote->bank_id)
-            <a href="#" class="btn btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i></i> Quote Copy</a>
+            <a href="{{ route('biller.quotes.edit', [$quote, 'page=copy_to_qt']) }}" class="btn btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i></i> Quote Copy</a>
         @else
-            <a href="#" class="btn btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i></i> PI Copy</a>
+            <a href="{{ route('biller.quotes.edit', [$quote, 'page=copy_to_pi']) }}" class="btn btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i></i> PI Copy</a>
         @endif
 
         @if (access()->allow('quote-delete'))
@@ -28,10 +28,10 @@
                     <i class="fa fa-repeat"></i> Verify & Download
                 </button>
                 <div class="dropdown-menu">
-                    @if ($is_pi)
-                        <a class="dropdown-item" href="{{ route('biller.quotes.verify', [$quote->id, $is_pi]) }}">Verify</a>
+                    @if ($query_str)
+                        <a class="dropdown-item" href="{{ route('biller.quotes.verify', [$quote, $query_str]) }}">Verify</a>
                     @else
-                        <a class="dropdown-item" href="{{ route('biller.quotes.verify', $quote->id) }}">Verify</a>
+                        <a class="dropdown-item" href="{{ route('biller.quotes.verify', $quote) }}">Verify</a>
                     @endif
                     @if ($quote->verified == 'Yes')
                         <hr>
@@ -44,7 +44,7 @@
         @endif 
         <div class="btn-group">
             <button type="button" class="btn btn-large btn-blue mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="fa fa-check"></span> {{trans('general.change_status')}}
+                <i class="fa fa-check"></i> {{trans('general.change_status')}}
             </button>
             <div class="dropdown-menu">
                 <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="dropdown-item" title="Change Status">
