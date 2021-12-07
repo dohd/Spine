@@ -18,9 +18,6 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
 });
 
 Route::group(['namespace' => 'project'], function () {
-  Route::get('projects/create_rjc', 'ProjectsController@create_rjc')->name('projects.create_rjc');
-  Route::post('projects/store_rjc', 'ProjectsController@store_rjc')->name('projects.store_rjc');
-
   Route::resource('projects', 'ProjectsController');
   Route::post('projects/search', 'ProjectsController@search')->name('projects.search');
   //For Datatable
