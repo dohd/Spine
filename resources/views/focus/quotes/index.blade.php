@@ -1,8 +1,9 @@
 @extends ('core.layouts.app')
 
 @php
-    $is_pi = request()->getQueryString();
-    $quote_label = $is_pi ? 'PI Management' : trans('labels.backend.quotes.management');
+    $query_str = request()->getQueryString();
+    $quote_label = trans('labels.backend.quotes.management');
+    if ($query_str == 'page=pi') $quote_label = 'PI Management';
 @endphp
 
 @section ('title', $quote_label)
@@ -82,9 +83,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-
                         <div class="card-content">
-
                             <div class="card-body">
                                 <div class="row">
 
@@ -105,7 +104,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            @if ($is_pi)
+                                            @if ($query_str == 'page=pi')
                                                 <th>#PI</th>
                                             @else
                                                 <th>#{{ trans('quotes.quote') }}</th>
@@ -138,17 +137,8 @@
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    // Replace view link dynamically on href
-    // $('#quotes-table').each(function(i) {
-    //     console.log('tr', i)
-    //     const td = $(this).find('td').eq(0);
-    //     console.log(td.html());
-    // });
-
     $(function() {
-        setTimeout(() => {
-            draw_data();
-        }, "{{ config('master.delay') }}");
+        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
         $('#search').click(function() {
             var start_date = $('#start_date').val();
@@ -156,9 +146,9 @@
             if (start_date && end_date) {
                 $('#quotes-table').DataTable().destroy();
                 draw_data(start_date, end_date);
-            } else {
-                alert("Date range is Required");
-            }
+                return;
+            } 
+            alert("Date range is Required");            
         });
 
         $('[data-toggle="datepicker"]')
