@@ -122,13 +122,20 @@ Route::group(['namespace' => 'event'], function () {
 
 Route::group(['namespace' => 'djc'], function () {
     Route::delete('djcs/delete_item/{id}', 'DjcsController@delete_item')->name('djcs.delete_item');
-
+    
     Route::resource('djcs', 'DjcsController');
-
-    //  Route::post('leads/lead_search','LeadsController@lead_search' )->name('leads.lead_search');
     //For Datatable
     Route::post('djcs/get', 'DjcsTableController')->name('djcs.get');
 });
+
+Route::group(['namespace' => 'rjc'], function () {
+    Route::delete('rjcs/delete_item/{id}', 'RjcsController@delete_item')->name('rjcs.delete_item');
+
+    Route::resource('rjcs', 'RjcsController');
+    //For Datatable
+    Route::post('rjcs/get', 'RjcsTableController')->name('rjcs.get');
+});
+
 
 
 Route::group(['namespace' => 'jobschedule'], function () {
@@ -238,8 +245,10 @@ Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/quotes_status', 'QuotesController@update_status')->name('quotes.bill_status');
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
     Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');
-    Route::get('quotes/verify/{id}', 'QuotesController@verify')->name('quotes.verify');
+    Route::get('quotes/verify/{quote}', 'QuotesController@verify')->name('quotes.verify');
     Route::get('quotes/verified_jcs/{id}', 'QuotesController@fetch_verified_jcs')->name('quotes.fetch_verified_jcs');
+
+    Route::get('quotes/project_quotes', 'QuotesController@project_quotes')->name('quotes.project_quotes');
 
     Route::delete('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
     Route::delete('quotes/verified_item/{id}', 'QuotesController@delete_verified_item')->name('quotes.delete_verified_item');
@@ -251,6 +260,7 @@ Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
     //For Datatable
+    Route::post('quotes/get_project', 'ProjectQuotesTableController')->name('quotes.get_project');
     Route::post('quotes/get', 'QuotesTableController')->name('quotes.get');
 });
 
