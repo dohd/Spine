@@ -14,7 +14,6 @@
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
                 <h4 class=" mb-0">Djc Report Management</h4>
-
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
