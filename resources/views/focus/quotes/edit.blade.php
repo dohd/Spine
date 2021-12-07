@@ -35,7 +35,7 @@
                                 <div class="form-group row">
                                     <div class="fcol-sm-12">
                                         @if (@$last_quote->tid)
-                                            <h3 class="title pl-1">Copy Quote</h3>
+                                            <h3 class="title pl-1">Quote Copy</h3>
                                         @else
                                             <h3 class="title pl-1">Edit Quote</h3>
                                         @endif
@@ -264,8 +264,7 @@
                                         <div class="input-group m-bot15">
                                             <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
                                         </div>
-                                    </div>
-                                    
+                                    </div>                                    
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
@@ -281,6 +280,9 @@
                             </div>
                         </div>
                     </div>
+                    @isset($copy_from_pi)
+                       <input type="hidden" name="bank_id" value="0">                                 
+                    @endisset 
                     {{ Form::close() }}
                 </div>
             </div>   
