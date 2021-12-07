@@ -1,10 +1,13 @@
 <div>
     <div class="btn-group" role="group" aria-label="quotes">
         @php
-            $is_pi = request()->getQueryString();
-            $url = $is_pi ? route('biller.quotes.index', $is_pi) : route('biller.quotes.index');
+            $link = route('biller.quotes.index');
+            $prev_url = url()->previous();
+            if (strpos($prev_url, 'page=pi')) $link = route('biller.quotes.index', 'page=pi');
+            $curr_uri = $_SERVER['REQUEST_URI'];
+            if (strpos($curr_uri, 'page=pi')) $link = route('biller.quotes.index', 'page=pi');
         @endphp
-        <a href="{{ $url }}" class="btn btn-info  btn-lighten-2 round">
+        <a href="{{ $link }}" class="btn btn-info  btn-lighten-2 round">
             <i class="fa fa-list-alt"></i> {{trans('general.list')}}
         </a>
         @permission('quote-create')
