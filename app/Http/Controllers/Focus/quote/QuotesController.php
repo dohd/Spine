@@ -206,17 +206,16 @@ class QuotesController extends Controller
      * @param string $id
      * @return \App\Http\Responses\Focus\quote\EditResponse
      */
-    public function verify($id)
+    public function verify(Quote $quote)
     {
         // default Quote items
-        $quote = Quote::find($id);
         $products = $quote->products()->orderBy('row_index')->get();
         $verified_jc = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first();
         // increament verify_no if it exists
         $verify_no = isset($verified_jc) ? $verified_jc->verify_no+1 : 1;
         // fetch verified_items
         if ($verify_no > 1) {
-            $products = VerifiedItem::where('quote_id', $id)->orderBy('row_index')->get();
+            $products = VerifiedItem::where('quote_id', $quote->id)->orderBy('row_index')->get();
         }
 
         return view('focus.quotes.verify')
@@ -361,18 +360,38 @@ class QuotesController extends Controller
 
     public function update_lpo(ManageQuoteRequest $request)
     {
-
         $input = $request->only(['bill_id', 'lpo_number']);
-        $lpo_amount = numberClean($request->input('lpo_amount'));
-        $lpo_date = date_for_database($request->input('lpo_date'));
-        $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
-        if ($quote_o->id) {
-            $quote_o->lpo_number = $input['lpo_number'];
-            $quote_o->lpo_date = $lpo_date;
-            $quote_o->lpo_amount = $lpo_amount;
-            $quote_o->save();
+        $lpo_amount = numberClean(request('lpo_amount'));
+        $lpo_date = date_for_database(request('lpo_date'));
+
+        $quote = Quote::find($input['bill_id']);
+        $quote->update(['lpo_number' => $input['lpo_number'], ...compact('lpo_date','lpo_amount')]);
+
+        return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully' ]);
+    }
+
+    // List approved project Quotes 
+    public function project_quotes(ManageQuoteRequest $request)
+    {
+        $input = $request->only('rel_type', 'rel_id');
+        
+        $segment = array();
+        $words = array();
+        if (isset($input['rel_id']) and isset($input['rel_type'])) {
+            switch ($input['rel_type']) {
+                case 1:
+                    $segment = Customer::find($input['rel_id']);
+                    $words['name'] = trans('customers.title');
+                    $words['name_data'] = $segment->name;
+                    break;
+                case 2:
+                    $segment = Hrm::find($input['rel_id']);
+                    $words['name'] = trans('hrms.employee');
+                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
+                    break;
+            }
         }
-        //return with successfull message
-        echo json_encode(array('status' => 'Success', 'message' => 'Record Updated Successfully ' . $quote_o->id . ' ', 'bill_status' => trans('payments.' . $input['status'])));
+
+        return new ViewResponse('focus.quotes.approved.index', compact('input', 'segment', 'words'));
     }
 }
