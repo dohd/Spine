@@ -62,26 +62,23 @@ class RjcRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        DB::beginTransaction();
+
         // rjc input data
         $data = $input['data'];
         
         $data['report_date'] = date_for_database($data['report_date']);
         // increament tid
-        $ref =  Rjc::orderBy('tid', 'desc')->first('tid')->tid;
-        if ($data['tid'] <= $ref) {
-            $data['tid'] = $ref + 1;
-        }
-        
+        $ref =  Rjc::orderBy('tid', 'desc')->first('tid');
+        if (isset($ref) && $data['tid'] <= $ref->tid) {
+            $data['tid'] = $ref->tid + 1;
+        }        
         // upload files
         foreach($data as $key => $value) {
             if ($key == 'image_one' || $key == 'image_two' || $key == 'image_three' || $key == 'image_four') {
-                if ($value) {
-                    $data[$key] = $this->uploadFile($value);
-                }                
+                if ($value) $data[$key] = $this->uploadFile($value);
             }
         }
-
-        DB::beginTransaction();
         $result = Rjc::create($data);
 
         // rjc items
@@ -91,10 +88,8 @@ class RjcRepository extends BaseRepository
             $input['data_items'],
             ['rjc_id' => $result['id'], 'ins' => $result['ins']]
         );
-
         RjcItem::insert($data_items);
 
-        // bulk insert rjc items
         if ($result) {
             DB::commit();
             return $result;
@@ -113,11 +108,12 @@ class RjcRepository extends BaseRepository
      */
     public function update(array $input)
     {
+        DB::beginTransaction();
+
         // rjc input data
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
 
-        DB::beginTransaction();
         $result = Rjc::where('id', $data['id'])->update($data);
 
         // rjc items
@@ -138,10 +134,9 @@ class RjcRepository extends BaseRepository
             foreach($item as $key => $value) {
                 $rjc_item[$key] = $value;
             }
-            // remove stale attributes
+            // remove stale attributes and save
             if ($rjc_item['id'] == 0) unset($rjc_item['id']);
             unset($rjc_item['item_id']);
-
             $rjc_item->save();
         }
 
@@ -164,7 +159,7 @@ class RjcRepository extends BaseRepository
     public function delete(Rjc $rjc)
     {
         // delete rjc_items items then delete rjc
-        if ($rjc->items()->delete() && $rjc->delete()) return true;
+        if ($rjc->rjc_items()->delete() && $rjc->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
@@ -172,9 +167,7 @@ class RjcRepository extends BaseRepository
     // Delete rjc item from storage
     public function delete_item($id)
     {
-        if (RjcItem::destroy($id)) {
-            return true;
-        }
+        if (RjcItem::destroy($id)) return true;
 
         throw new GeneralException('Error deleting Rjc Item');
     }

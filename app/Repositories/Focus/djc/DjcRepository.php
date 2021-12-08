@@ -67,16 +67,14 @@ class DjcRepository extends BaseRepository
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
         // increament tid
-        $ref =  Djc::orderBy('tid', 'desc')->first('tid')->tid;
-        if ($data['tid'] <= $ref) {
-            $data['tid'] = $ref + 1;
+        $ref =  Djc::orderBy('tid', 'desc')->first('tid');
+        if (isset($ref) && $data['tid'] <= $ref->tid) {
+            $data['tid'] = $ref->tid + 1;
         }        
         // upload files
         foreach($data as $key => $value) {
             if ($key == 'image_one' || $key == 'image_two' || $key == 'image_three' || $key == 'image_four') {
-                if ($value) {
-                    $data[$key] = $this->uploadFile($value);
-                }                
+                if ($value) $data[$key] = $this->uploadFile($value);
             }
         }
         $result = Djc::create($data);
@@ -109,11 +107,12 @@ class DjcRepository extends BaseRepository
      */
     public function update(array $input)
     {
+        DB::beginTransaction();
+
         // djc input data
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
 
-        DB::beginTransaction();
         $result = Djc::where('id', $data['id'])->update($data);
 
         // djc items
@@ -125,23 +124,22 @@ class DjcRepository extends BaseRepository
         );
 
         // update or create new djc_item
-        if ($result && $item_count) {
-            foreach($data_items as $item) {
-                $djc_item = DjcItem::firstOrNew([
-                    'id' => $item['item_id'],
-                    'djc_id' => $item['djc_id'],
-                ]);
-                // assign properties to the item
-                foreach($item as $key => $value) {
-                    $djc_item[$key] = $value;
-                }
-                // remove stale attributes
-                if ($djc_item['id'] == 0) unset($djc_item['id']);
-                unset($djc_item['item_id']);
-
-                $djc_item->save();
+        foreach($data_items as $item) {
+            $djc_item = DjcItem::firstOrNew([
+                'id' => $item['item_id'],
+                'djc_id' => $item['djc_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $djc_item[$key] = $value;
             }
+            // remove stale attributes and save
+            if ($djc_item['id'] == 0) unset($djc_item['id']);
+            unset($djc_item['item_id']);
+            $djc_item->save();
+        }
 
+        if ($result) {
             DB::commit();
             return $result;
         }
@@ -167,9 +165,7 @@ class DjcRepository extends BaseRepository
     // Delete djc item from storage
     public function delete_item($id)
     {
-        if (DjcItem::destroy($id)) {
-            return true;
-        }
+        if (DjcItem::destroy($id)) return true;        
 
         throw new GeneralException('Error deleting Djc Item');
     }
