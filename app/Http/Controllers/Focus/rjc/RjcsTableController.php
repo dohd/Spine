@@ -52,19 +52,16 @@ class RjcsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('customer', function ($rjc) {
-                if (isset($rjc->client) && isset($rjc->branch)) {
-                    return $rjc->client->company . ' - ' . $rjc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$rjc->client->id]) . '"><i class="ft-eye"></i></a>';
-                }
-                return;
+            ->addColumn('project_no', function ($rjc) {
+                return $rjc->project->project_number;
             })
             ->addColumn('created_at', function ($rjc) {
                 return dateFormat($rjc->created_at);
             })
             ->addColumn('actions', function ($rjc) {
                 $valid_token = token_validator('', 'd' . $rjc->id, true);
-                
-                return '<a href="' . route('biller.print_djc', [$rjc->id, 10, $valid_token, 1]) . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
+                $link = route('biller.print_djc', [$rjc->id, 10, $valid_token, 1]);
+                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
                     . $rjc->action_buttons;
             })
             ->make(true);
