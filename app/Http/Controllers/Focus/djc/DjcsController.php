@@ -69,7 +69,8 @@ class DjcsController extends Controller
     public function create(ManageDjcRequest $request)
     {
         $leads=Lead::all();
-        $tid =  Djc::orderBy('tid', 'desc')->first('tid')->tid + 1;
+        $djc =  Djc::orderBy('tid', 'desc')->first('tid');
+        $tid =  isset($djc)? $djc->tid+1 : 1;
         
         return new CreateResponse('focus.djcs.create', compact('leads','tid'));
     }
@@ -102,11 +103,10 @@ class DjcsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param App\Models\djc\Account $djc
-     * @param EditAccountRequestNamespace $request
+     * @param App\Models\djc\Djc $djc
      * @return \App\Http\Responses\Focus\djc\EditResponse
      */
-    public function edit(Djc $djc, ManageDjcRequest $request)
+    public function edit(Djc $djc)
     {
         $leads = Lead::all();
         $items = $djc->items()->orderBy('row_index', 'ASC')->get();
@@ -139,7 +139,7 @@ class DjcsController extends Controller
         $this->repository->update(compact('data', 'data_item'));
 
         //return with successfull message
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'DJC Report Updated']);
+        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated']);
     }
 
     /**
@@ -165,7 +165,7 @@ class DjcsController extends Controller
      */
     public function show(Djc $djc)
     {
-        $djc_items = DjcItem::where('djc_id', '=', $djc->id)->get();
+        $djc_items = DjcItem::where('djc_id', $djc->id)->get();
 
         return new ViewResponse('focus.djcs.view', compact('djc', 'djc_items'));
     }

@@ -125,6 +125,7 @@ class ProjectsController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
+        
         //Update the model using repository update method
         if ($project->creator->id == auth()->user()->id) {
             $this->repository->update($project, $input);
