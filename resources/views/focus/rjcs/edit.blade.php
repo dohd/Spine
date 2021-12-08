@@ -80,13 +80,6 @@
                                                 {{ Form::number('tid', null, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
-                                            <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'reference']) }}
-                                            </div>
-                                        </div>
                                         <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
@@ -94,6 +87,13 @@
                                                 {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
                                             </div>
                                         </div>
+                                        <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
+                                            <div class="input-group">
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
+                                                </div>
+                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'reference']) }}
+                                            </div>
+                                        </div>                                        
                                     </div>
                                     <div class="form-group row">
                                         <div class="col-sm-4">
