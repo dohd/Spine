@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Focus\rjc;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Focus\rjc\ManageRjcRequest;
+use App\Http\Responses\Focus\rjc\EditResponse;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\items\RjcItem;
 use App\Models\project\Project;
 use App\Models\rjc\Rjc;
 use App\Repositories\Focus\rjc\RjcRepository;
@@ -61,12 +65,11 @@ class RjcsController extends Controller
             'subject' => 'required'
         ]);
 
-        $data = $request->only(['tid', 'project_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data = $request->only(['job_card', 'tid', 'project_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
         $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         $data['ins'] = auth()->user()->ins;
 
-        $repository = new RjcRepository();
-        $repository->create(compact('data', 'data_items'));
+        $result = $this->repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Repair Job Card created Successfully']);
     }    
@@ -77,9 +80,11 @@ class RjcsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Rjc $rjc)
     {
-        //
+        $rjc_items = RjcItem::where('rjc_id', $rjc->id)->get();
+
+        return new ViewResponse('focus.rjcs.view', compact('rjc', 'rjc_items'));
     }
 
     /**
@@ -88,9 +93,12 @@ class RjcsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Rjc $rjc)
     {
-        //
+        $projects =  Project::all(['id', 'name', 'project_number']);
+        $items = $rjc->rjc_items()->orderBy('row_index', 'ASC')->get();
+
+        return new EditResponse('focus.rjcs.edit', compact('rjc', 'projects', 'items'));
     }
 
     /**
@@ -100,9 +108,25 @@ class RjcsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ManageRjcRequest $request, Rjc $rjc)
     {
-        //
+        $request->validate([
+            'attention' => 'required',
+            'prepared_by' => 'required',
+            'technician' => 'required',
+            'subject' => 'required'
+        ]);
+        $data = $request->only(['job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data_item = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        
+        $data['ins'] = auth()->user()->ins;
+        $data['id'] = $rjc->id;
+
+        // Update using repository update method
+        $this->repository->update(compact('data', 'data_item'));
+
+        //return with successfull message
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc report updated']);
     }
 
     /**
@@ -111,8 +135,11 @@ class RjcsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Rjc $rjc)
     {
-        //
+        //Calling the delete method on repository
+        $this->repository->delete($rjc);
+        //returning with successfull message
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc report deleted']);
     }
 }
