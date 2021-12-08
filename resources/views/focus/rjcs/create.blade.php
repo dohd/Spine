@@ -40,8 +40,8 @@
                                     <div class="form-group row">
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Search Project </label>
                                             <div class="input-group">
-                                                <select class="form-control  round  select-box" name="project_id" id="project" required="required">
-                                                    <option>-- Select Project --</option>
+                                                <select class="form-control  round  select-box" name="project_id" id="project" required>
+                                                    <option value="0">-- Select Project --</option>
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}">{{ $project->project_number }} - {{ $project->name }}</option>
                                                     @endforeach
