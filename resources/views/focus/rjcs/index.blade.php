@@ -12,11 +12,9 @@
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
                 <h4 class=" mb-0">Rjc Report Management</h4>
-
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
-
                     <div class="media-body media-right text-right">
                         @include('focus.rjcs.partials.rjcs-header-buttons')
                     </div>
@@ -36,7 +34,7 @@
                                             <th>Rjc ID</th>
                                             <th>Reference</th>
                                             <th>Subject</th>
-                                            <th>Client & Branch</th>
+                                            <th>Project No</th>
                                             <th>Job Card</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -91,7 +89,7 @@
                     {data: 'tid', name: 'tid'},
                     {data: 'reference', name: 'reference'},
                     {data: 'subject', name: 'subject'},
-                    {data: 'customer', name: 'customer'},
+                    {data: 'project_no', name: 'project_no'},
                     {data: 'job_card', name: 'job_card'},
                     {data: 'created_at', name: "{{config('module.rjcs.table')}}.created_at"},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
