@@ -39,21 +39,18 @@
                                             <h3 class="title pl-1"> Rjc Details</h3>
                                         </div>
                                     </div>
-
                                     <div class="form-group row">
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required="required">
-                                                    @foreach ($leads as $lead)
-                                                        @php
-                                                            if ($lead->client_status == "customer") {
-                                                                $name = $lead->customer->company.' '. $lead->branch->name;
-                                                            } else {
-                                                                $name = $lead->client_name;
-                                                            }
-                                                        @endphp
-                                                        <option value="{{ $lead->id }}">{{$lead->reference}} - {{$name}} - {{$lead->title}}</option>
+                                                <select class="form-control  round  select-box" name="project_id" id="project" required="required">
+                                                    <option value="0">-- Select Project --</option>
+                                                    @foreach ($projects as $project)
+                                                        @if ($rjc->project->id == $project->id)
+                                                            <option value="{{ $project->id }}" selected>{{ $project->project_number }} - {{ $project->name }}</option>
+                                                        @else
+                                                            <option value="{{ $project->id }}">{{ $project->project_number }} - {{ $project->name }}</option>
+                                                        @endif
                                                     @endforeach
                                                 </select>
                                                 <input type="hidden" name="client_id" id="client_id" value="{{ $rjc->client_id }}">
