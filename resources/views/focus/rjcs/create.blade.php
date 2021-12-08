@@ -260,13 +260,12 @@
     // on project select, update subject/title
     const projects = @json($projects);
     $('#project').change(function() {
-        const projectId = $(this).val();
         projects.forEach(v => {
-            if (Number(projectId) === v.id) {
+            if (v.id == $(this).val()) {
                 $('#subject').val(v.name);
             }
-        })
-    })
+        });
+    });
 
     // product row
     function productRow(cvalue=0) {            
