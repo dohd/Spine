@@ -42,7 +42,7 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" onchange="onSelectChange(event);" required="required">
+                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" required="required">
                                                     <option>-- Select Lead --</option>
                                                         @foreach ($leads as $lead)
                                                             @php
@@ -253,22 +253,24 @@
 </div>
 @endsection
 
-@section('extra-scripts')
+@section('extra-style')
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+@endsection
+
+@section('extra-scripts')
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
  
 <script type="text/javascript">
     // dynamically assign client_id and branch_id inputs
     const leads = @json($leads);
-    function onSelectChange(e) {
-        const leadId = Number(e.target.value);
+    $('#lead_id').change(function() {
         leads.forEach(v => {
-            if (v.id === leadId) {
+            if (v.id == $(this).val()) {
                 $('#client_id').val(v.client_id);
                 $('#branch_id').val(v.branch_id);
             }
         });
-    }
+    });
 
     // initialize html editor
     editor();
