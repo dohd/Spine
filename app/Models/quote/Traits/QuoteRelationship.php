@@ -17,6 +17,7 @@ trait QuoteRelationship
     {
         return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
     }
+
     public function verified_jcs()
     {
         return $this->hasMany(VerifiedJc::class);

@@ -2,12 +2,15 @@
 
 namespace App\Models\rjc;
 
+use App\Models\ModelTrait;
+use App\Models\rjc\Traits\RjcAttribute;
 use App\Models\rjc\Traits\RjcRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class Rjc extends Model
 {
-    use RjcRelationship;
+    use ModelTrait, RjcAttribute, RjcRelationship;
+
     
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
