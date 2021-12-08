@@ -147,18 +147,14 @@
 </div>
 @endsection
 
-
 @section('extra-scripts')
 <script type="text/javascript">
-    // create a temporary div element
-    const div = document.createElement('div');
-    // loop through td elements
-    $('#others-table td').each(function(i, td) {
-        if (i === 0) return;
-        // append td value to div
-        div.innerHTML = td.innerText;
-        // replace camel case in div text with a space prefix 
-        td.innerText = div.innerText.replace(/[A-Z]/g, function(el) { return ` ${el}`; });
+    const temp_div = document.createElement('div');
+    $('#others-table td').each(function() {
+        if (!$(this).index()) return;
+        $(temp_div).html($(this).text());
+        const td_text = $(temp_div).text().replace(/[A-Z]/g, function(el) { return ' ' + el; });
+        $(this).text(td_text);
     });
 </script>
 @endsection
