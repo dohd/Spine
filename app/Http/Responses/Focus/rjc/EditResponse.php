@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Responses\Focus\djc;
+namespace App\Http\Responses\Focus\rjc;
 
 use Illuminate\Contracts\Support\Responsable;
 
