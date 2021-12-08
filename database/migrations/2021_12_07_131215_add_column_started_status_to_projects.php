@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddColumnStartedStatusToProjectsTable extends Migration
+class AddColumnStartedStatusToProjects extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddColumnStartedStatusToProjectsTable extends Migration
     public function up()
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->string('started_status')->default('started');
+            $table->string('started_status')->default('pending');
         });
     }
 
