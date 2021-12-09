@@ -46,15 +46,17 @@ class DjcsTableController extends Controller
     /**
      * This method returns the datatable view
      */
-    public function __invoke(ManageDjcRequest $request)
+    public function __invoke()
     {
         $core = $this->djc->getForDataTable();
+                
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($djc) {
                 if (isset($djc->client) && isset($djc->branch)) {
-                    return $djc->client->company . ' - ' . $djc->branch->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
+                    return $djc->client->company . ' - ' . $djc->branch->name 
+                        .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
                 }
                 return;
             })
@@ -63,8 +65,8 @@ class DjcsTableController extends Controller
             })
             ->addColumn('actions', function ($djc) {
                 $valid_token = token_validator('', 'd' . $djc->id, true);
-                
-                return '<a href="' . route('biller.print_djc', [$djc->id, 10, $valid_token, 1]) . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
+                $link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
+                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
                     . $djc->action_buttons;
             })
             ->make(true);

@@ -49,7 +49,6 @@ class DjcRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-
         return $q->get();
     }
 
