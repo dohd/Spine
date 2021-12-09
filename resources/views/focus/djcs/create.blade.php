@@ -78,23 +78,21 @@
                                     <div class="form-group row">
                                         <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
                                             <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::number('tid', $tid, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                                {{ Form::text('tid', 'DJC-' . sprintf('%04d', $tid), ['class' => 'form-control round', 'readonly']) }}
+                                                <input type="hidden" name="tid" value="{{ $tid }}">
                                             </div>
                                         </div>                                        
                                         <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
                                             <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
-                                                </div>
+                                                <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                                 {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
+                                        <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'reference']) }}
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'reference']) }}
                                             </div>
                                         </div>
                                     </div>
@@ -105,8 +103,7 @@
                                         </div>
                                         <div class="col-sm-4"><label for="prepared_by" class="caption">Prepared By <span class="text-danger">*</span></label>
                                             <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                                                 {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepared By']) }}
                                             </div>
                                         </div>
@@ -261,17 +258,6 @@
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
  
 <script type="text/javascript">
-    // dynamically assign client_id and branch_id inputs
-    const leads = @json($leads);
-    $('#lead_id').change(function() {
-        leads.forEach(v => {
-            if (v.id == $(this).val()) {
-                $('#client_id').val(v.client_id);
-                $('#branch_id').val(v.branch_id);
-            }
-        });
-    });
-
     // initialize html editor
     editor();
 
@@ -283,6 +269,22 @@
     // ajax setup
     $.ajaxSetup({ 
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+    });
+
+    // on selecting lead
+    $('#lead_id').change(function() {
+        // fetch lead details from the server
+        $.ajax({
+            type: "POST",
+            url: baseurl + 'leads/lead_search',
+            data: 'keyword=' + $(this).val(),
+            success: function(data) {
+                $("#subject").val(data.note);
+                $("#client_id").val(data.client_id);
+                $("#branch_id").val(data.branch_id);
+                $('#reference').val(data.client_ref);
+            }
+        });
     });
 
     // product row
@@ -316,10 +318,9 @@
 
     // assign row index
     function assignIndex() {
-        $('#equipment tr').each(function(i) {
-            if (!i) return;
-            const index = $(this).index();
-            $(this).find('input[name="row_index[]"]').val(index);
+        $('#equipment tr').each(function() {
+            if (!$(this).index()) return;
+            $(this).find('input[name="row_index[]"]').val($(this).index());
         });
     }
 
@@ -397,20 +398,6 @@
         };
     }
     
-    // on selecting lead option, fetch lead details from the server
-    $("#lead_id").on('change', function() {
-        $.ajax({
-            type: "POST",
-            url: baseurl + 'leads/lead_search',
-            data: 'keyword=' + $(this).val(),
-            success: function(data) {
-                $("#subject").val(data.note);
-                $("#client_id").val(data.client_id);
-                $("#branch_id").val(data.branch_id);
-            }
-        });
-    });
-
     // check if file input has file and set caption validation to required
     const keys = ['one', 'two', 'three', 'four'];
     keys.forEach(v => {

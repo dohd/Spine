@@ -78,9 +78,9 @@
                                     <div class="form-group row">
                                         <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
                                             <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::number('tid', null, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                                {{ Form::text('tid', 'DJC-' . sprintf('%04d', $djc->tid), ['class' => 'form-control round', 'readonly']) }}
+                                                <input type="hidden" name="tid" value="{{ $djc->tid }}">
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
@@ -90,11 +90,10 @@
                                                 {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
+                                        <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'reference']) }}
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                                {{ Form::text('reference', null, ['class' => 'form-control round', 'id' => 'reference']) }}
                                             </div>
                                         </div>                                        
                                     </div>
@@ -387,8 +386,9 @@
         assignIndex();
     });
     
-    // on selecting lead option, fetch lead details from the server
-    $("#lead_id").on('change', function() {
+    // on selecting lead
+    $('#lead_id').change(function() {
+        // fetch lead details from the server
         $.ajax({
             type: "POST",
             url: baseurl + 'leads/lead_search',
@@ -397,6 +397,7 @@
                 $("#subject").val(data.note);
                 $("#client_id").val(data.client_id);
                 $("#branch_id").val(data.branch_id);
+                $('#reference').val(data.client_ref);
             }
         });
     });
