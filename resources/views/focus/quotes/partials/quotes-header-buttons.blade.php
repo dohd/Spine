@@ -10,13 +10,17 @@
         <a href="{{ $link }}" class="btn btn-info  btn-lighten-2 round">
             <i class="fa fa-list-alt"></i> {{trans('general.list')}}
         </a>
+
         @permission('quote-create')
-        <a href="{{ route('biller.quotes.create') }}" class="btn btn-pink  btn-lighten-3 round">
-            <i class="fa fa-plus-circle"></i> Quote
-        </a>
-        <a href="{{ route('biller.quotes.create', 'page=pi') }}" class="btn btn-pink  btn-lighten-3 round">
-            <i class="fa fa-plus-circle"></i> PI
-        </a>
+            @if (request()->getQueryString() == 'page=pi')
+                <a href="{{ route('biller.quotes.create', 'page=pi') }}" class="btn btn-pink  btn-lighten-3 round">
+                    <i class="fa fa-plus-circle"></i> PI
+                </a>
+            @else
+                <a href="{{ route('biller.quotes.create') }}" class="btn btn-pink  btn-lighten-3 round">
+                    <i class="fa fa-plus-circle"></i> Quote
+                </a>
+            @endif
         @endauth
     </div>
 </div>
