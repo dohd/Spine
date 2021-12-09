@@ -35,8 +35,8 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Djc ID</th>
-                                            <th>Reference</th>
+                                            <th>Report No.</th>
+                                            <th>Client Ref</th>
                                             <th>Subject</th>
                                             <th>Client & Branch</th>
                                             <th>Job Card</th>
@@ -98,7 +98,7 @@
                     {data: 'created_at', name: "{{config('module.djcs.table')}}.created_at"},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
-                order: [[0, "asc"]],
+                order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: {
