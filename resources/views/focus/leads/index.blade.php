@@ -12,11 +12,9 @@
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
                 <h4 class=" mb-0">Leads Management</h4>
-
             </div>
             <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right">
-
+                <div class="media width-250 float-right mr-3">
                     <div class="media-body media-right text-right">
                         @include('focus.leads.partials.leads-header-buttons')
                     </div>
@@ -27,9 +25,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-
                         <div class="card-content">
-
                             <div class="card-body">
                                 <table id="leads-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
