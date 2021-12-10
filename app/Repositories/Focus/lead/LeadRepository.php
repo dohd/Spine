@@ -38,9 +38,9 @@ class LeadRepository extends BaseRepository
     {
         $data['date_of_request'] = date_for_database($data['date_of_request']);
         // increament reference
-        $tid = Lead::orderBy('reference', 'desc')->first('reference')->reference;
-        if ($data['reference'] <= $tid) {
-            $data['reference'] = $tid + 1;
+        $lead = Lead::orderBy('reference', 'desc')->first('reference');
+        if (isset($lead) && $data['reference'] <= $lead->reference) {
+            $data['reference'] = $lead->reference + 1;
         }
 
         $result = Lead::create($data);
