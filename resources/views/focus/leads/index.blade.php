@@ -31,7 +31,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Lead ID</th>
+                                            <th>Lead No</th>
                                             <th>Title</th>
                                             <th>New/Existing</th>
                                             <th>Client & Branch</th>
@@ -134,9 +134,7 @@
                     sortable: false
                 }
             ],
-            order: [
-                [0, "asc"]
-            ],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {
