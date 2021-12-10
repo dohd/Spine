@@ -20,7 +20,6 @@ namespace App\Http\Controllers\Focus\quote;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\quote\QuoteRepository;
-use App\Http\Requests\Focus\quote\ManageQuoteRequest;
 
 /**
  * Class QuotesTableController.
@@ -44,20 +43,23 @@ class QuotesTableController extends Controller
 
     /**
      * This method return the data of the model
-     * @param ManageQuoteRequest $request
-     *
      * @return mixed
      */
-    public function __invoke(ManageQuoteRequest $request)
+    public function __invoke()
     {
         $core = $this->quote->getForDataTable();
+        
         return Datatables::of($core)
             ->addIndexColumn()
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
             })
             ->addColumn('tid', function ($quote) {
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote->tid . '</a>';
+                $tid = sprintf('%04d', $quote->tid);
+                $tid = ($quote->bank_id) ? 'PI-'.$tid : 'QT-'.$tid;
+                if ($quote->revision) $tid .= $quote->revision;
+
+                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
