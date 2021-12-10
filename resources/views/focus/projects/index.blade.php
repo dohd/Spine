@@ -58,7 +58,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>{{ trans('projects.project') }}</th>
-                                    <th>Project ID</th>
+                                    <th>Project No</th>
                                     <th>{{ trans('projects.priority') }}</th>
                                     <th>Project Started</th>                                    
                                     <th>{{ trans('projects.end_date') }}</th>
@@ -104,10 +104,10 @@
 {{ Html::script('focus/js/select2.min.js') }}
 
 <script>
-    $(function() {
-        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-    });
+    // draw dataTable data
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
+    // ajax header set up
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
