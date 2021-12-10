@@ -26,7 +26,7 @@
 
     </div>
         <div class="form-group row">
-            <div class="col-sm-6"><label for="client_id" class="caption">Customer*</label>
+            <div class="col-sm-6"><label for="client_id" class="caption">Customer <span class="text-danger">*</span></label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o"aria-hidden="true"></span></div>
                     <select id="person" name="client_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}" ></select>
@@ -73,38 +73,44 @@
                     <div class="col-sm-12"><h3 class="title">Lead Info</h3></div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-6"><label for="reference" class="caption">Lead ID*</label>
+                    <div class="col-sm-6"><label for="reference" class="caption">Lead No</span></label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                            {{ Form::number('reference', @$tid + 1, ['class' => 'form-control round', 'placeholder' => 'Lead ID', 'id' => 'reference']) }}
+                            @if (isset($tid))
+                                {{ Form::text('reference', 'Tkt-' . sprintf('%04d', $tid+1), ['class' => 'form-control round', 'disabled']) }}
+                                <input type="hidden" name="reference" value="{{ $tid+1 }}">
+                            @else
+                                {{ Form::text('reference', 'Tkt-' . sprintf('%04d', $lead->reference), ['class' => 'form-control round', 'disabled']) }}
+                                <input type="hidden" name="reference" value="{{ $lead->reference }}">
+                            @endif
                         </div>
                     </div>
 
-                        <div class="col-sm-6"><label for="date_of_request" class="caption">Date Of Request*</label>
+                        <div class="col-sm-6"><label for="date_of_request" class="caption">Callout Date</label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                            {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'placeholder' => trans('purchaseorders.invoicedate'),'data-toggle'=>'datepicker','autocomplete'=>'false', 'id' => 'date_of_request']) }}
+                            {{ Form::text('date_of_request', null, ['class' => 'form-control round required', 'data-toggle'=>'datepicker', 'id' => 'date_of_request']) }}
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group row">            
-                        <div class="col-sm-12"><label for="title" class="caption"> Subject / Title*</label>
+                        <div class="col-sm-12"><label for="title" class="caption"> Subject / Title <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-bookmark-o"
                                 aria-hidden="true"></span>
                             </div>
-                            {{ Form::text('title', null, ['class' => 'form-control round required', 'placeholder' => 'Title']) }}
+                            {{ Form::text('title', null, ['class' => 'form-control round', 'placeholder' => 'Title', 'required']) }}
                         </div>
                     </div>
                 </div>                
 
                 <div class="form-group row">
-                    <div class="col-sm-6"><label for="source" class="caption">Source*</label>
+                    <div class="col-sm-6"><label for="source" class="caption">Source <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o"aria-hidden="true"></span></div>
-                            <select id="ref_type" name="source" class="form-control round required  ">
-                                <option value="">-- Select Source --</option>
+                            <select id="ref_type" name="source" class="form-control round" required>
+                                <option value="0">-- Select Source --</option>
                                 <option value="Emergency Call">Emergency Call</option>
                                 <option value="RFQ" >RFQ</option>
                                 <option value="Site Survey" >Site Survey</option>
@@ -113,10 +119,10 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-6"><label for="employee_id" class="caption">Assign To*</label>
+                    <div class="col-sm-6"><label for="employee_id" class="caption">Assign To <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                            {{ Form::text('assign_to', null, ['class' => 'form-control round required', 'placeholder' => 'Assign To ']) }}
+                            {{ Form::text('assign_to', null, ['class' => 'form-control round', 'placeholder' => 'Assign To', 'required']) }}
                         </div>
                     </div>
                 </div>

@@ -18,7 +18,6 @@
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right">
-
                         <div class="media-body media-right text-right">
                             @include('focus.leads.partials.leads-header-buttons')
                         </div>
