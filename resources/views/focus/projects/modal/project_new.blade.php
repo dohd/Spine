@@ -48,19 +48,24 @@
                         <div class="row">
                             <fieldset class="form-group col-8">
                                 <div><label for="projectTitle">Project Title</label></div>
-                                <input type="text" class="new-todo-item form-control required" placeholder="{{trans('projects.name')}}" name="name" id="project-name">
+                                <input type="text" class="new-todo-item form-control" placeholder="{{trans('projects.name')}}" name="name" id="project-name">
                             </fieldset>
                             <fieldset class="form-group col-4">
-                                <div><label for="projectNumber">Project No.</label></div>
-                                <input type="text" class="new-todo-item form-control required" placeholder="Project Number" name="project_number" id="project-number" required>
+                                <label for="projectNumber">Project No</label>
+                                <div class="input-group">
+                                    <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                    <input type="text" value="{{ 'P-'.sprintf('%04d', $tid) }}"  class="form-control" disabled>
+                                    <input type="hidden" name="project_number" value="{{ $tid }}" >
+                                </div>
                             </fieldset>
                         </div>
 
+                        {{-- Hidden fields 
                         <div class="row">
                             <fieldset class="form-group col-md-4">
                                 <div><label for="status">Status</label></div>
                                 <select class="custom-select" id="todo-select" name="status">
-                                    @foreach($mics->where('section','=',2) as $row)
+                                    @foreach($mics->where('section', 2) as $row)
                                         <option value="{{$row['id']}}">{{$row['name']}}</option>
                                     @endforeach
                                 </select>
@@ -78,22 +83,26 @@
                             <fieldset class="form-group col-md-4">
                                 <div><label for="tags">Tags</label></div>
                                 <select class="form-control select-box" name="tags[]" id="tags" data-placeholder="-- {{ trans('tags.select') }} --" multiple required>
-                                    @foreach($mics->where('section','=',1) as $tag)
+                                    @foreach($mics->where('section', 1) as $tag)
                                         <option value="{{$tag['id']}}">{{$tag['name']}}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
                         </div>
+                        --}}
 
                         <div><label for="Description">Description</label></div>
-                        <fieldset class="form-group position-relative has-icon-left col-12">                            
+                        {{-- Hidden fields 
+                        <fieldset class="form-group position-relative has-icon-left">                            
                             <div class="form-control-position"><i class="icon-emoticon-smile"></i></div>
-                            <input type="text" id="new-todo-desc" class="new-todo-desc form-control required" placeholder="{{trans('tasks.short_desc')}}" name="short_desc">
+                            <input type="text" id="new-todo-desc" class="new-todo-desc form-control" placeholder="{{trans('tasks.short_desc')}}" name="short_desc">
                         </fieldset>
-                        <fieldset class="form-group col-12">
-                            <textarea class="new-todo-item form-control required" placeholder="{{trans('tasks.description')}}" rows="6" name="note"></textarea>
+                        --}}
+                        <fieldset class="form-group">
+                            <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}" rows="6" name="note"></textarea>
                         </fieldset>
-
+                        
+                        {{-- Hidden fields
                         <div class="form-group row">
                             <div class="col-md-4 col-xs-12 mt-1">
                                 <div class="row">
@@ -155,7 +164,9 @@
                                 </select>
                             </fieldset>                            
                         </div>
+                        --}}
                     </div>
+
                     <div class="modal-footer">
                         <fieldset class="form-group position-relative has-icon-left mb-0">
                             <button type="button" id="submit-data_project" class="btn btn-info add-todo-item" data-dismiss="modal"><i class="fa fa-paper-plane-o d-block d-lg-none"></i>
