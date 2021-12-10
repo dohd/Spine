@@ -40,11 +40,15 @@
             {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => trans('projects.name')]) }}
         </fieldset>
         <fieldset class="form-group col-4">
-            <div><label for="projectNumber">Project No.</label></div>
-            {{ Form::text('project_number', null, ['class' => 'form-control']) }}
+            <div><label for="projectNumber">Project No</label></div>
+            <div class="input-group">
+                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                {{ Form::text('project_number', 'P-'.sprintf('%04d', $project->project_number), ['class' => 'form-control', 'disabled']) }}
+            </div>
         </fieldset>
     </div>
 
+    {{-- Hidden fields 
     <div class="row">
         <fieldset class="form-group col-md-4">
             <div><label for="status">Status</label></div>
@@ -73,16 +77,20 @@
             </select>
         </fieldset>
     </div>
+    --}}
 
     <div><label for="Description">Description</label></div>
-    <fieldset class="form-group position-relative has-icon-left col-12">                            
+    {{-- Hidden fields 
+    <fieldset class="form-group position-relative has-icon-left">                            
         <div class="form-control-position"><i class="icon-emoticon-smile"></i></div>
         {{ Form::text('short_desc', null, ['class' => 'form-control']) }}
     </fieldset>
-    <fieldset class="form-group col-12">
+    --}}
+    <fieldset class="form-group">
         {{ Form::textarea('note', null, ['class' => 'form-control', 'rows' => 6]) }}
     </fieldset>
-
+    
+    {{-- Hidden fields 
     <div class="form-group row">
         <div class="col-md-4 col-xs-12 mt-1">
             <div class="row">
@@ -144,4 +152,5 @@
             </select>
         </fieldset>                            
     </div>
+    --}}
 </div>
