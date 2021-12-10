@@ -35,21 +35,45 @@ class QuoteRepository extends BaseRepository
         $q = $this->query();
 
         // distinguish pi from quote
-        if (request('pi_page') == 1) {
-            $q->where('bank_id', '>', 0);
-        } else {
-            $q->where('bank_id', 0);
-        }
-
+        if (request('pi_page') == 1) $q->where('bank_id', '>', 0);
+        else $q->where('bank_id', 0);
+        
         $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', '=', request('i_rel_id', 0));
+            return $q->where('customer_id', request('i_rel_id', 0));
         });
 
         if (request('start_date')) {
-            $q->whereBetween('invoicedate', [date_for_database(request('start_date')), date_for_database(request('end_date'))]);
+            $q->whereBetween('invoicedate', [
+                date_for_database(request('start_date')), 
+                date_for_database(request('end_date'))
+            ]);
         }
 
-        return $q->get(['id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'bank_id', 'verified']);
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
+            'total', 'status', 'bank_id', 'verified', 'revision'
+        ]);
+    }
+
+    public function getForVerifiedDataTable()
+    {
+        $q = $this->query();
+
+        $q->when(request('i_rel_type') == 1, function ($q) {
+            return $q->where('customer_id', request('i_rel_id', 0));
+        });
+
+        if (request('start_date')) {
+            $q->whereBetween('invoicedate', [
+                date_for_database(request('start_date')), 
+                date_for_database(request('end_date'))
+            ]);
+        }
+
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
+            'total', 'status', 'bank_id', 'verified', 'revision', 'lpo_number'
+        ]);
     }
 
     public function getSelfDataTable($self_id = false)
