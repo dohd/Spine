@@ -53,12 +53,14 @@ class DjcsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function($djc) {
+                return 'Djc-' . sprintf('%04d', $djc->tid);
+            })
             ->addColumn('customer', function ($djc) {
                 if (isset($djc->client) && isset($djc->branch)) {
                     return $djc->client->company . ' - ' . $djc->branch->name 
                         .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
                 }
-                return;
             })
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
