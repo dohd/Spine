@@ -145,10 +145,9 @@
             var end_date = $('#end_date').val();
             if (start_date && end_date) {
                 $('#quotes-table').DataTable().destroy();
-                draw_data(start_date, end_date);
-                return;
+                return draw_data(start_date, end_date);
             } 
-            alert("Date range is Required");            
+            else alert("Date range is Required");            
         });
 
         $('[data-toggle="datepicker"]')
@@ -226,7 +225,6 @@
             dom: 'Blfrtip',
             buttons: {
                 buttons: [
-
                     {
                         extend: 'csv',
                         footer: true,
