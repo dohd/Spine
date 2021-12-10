@@ -24,7 +24,7 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                {{ Form::open(['route' => 'biller.quotes.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'id' => 'create-pi']) }}
+                {{ Form::open(['route' => 'biller.quotes.store', 'class' => 'form-horizontal', 'method' => 'POST']) }}
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
@@ -38,8 +38,8 @@
                                         <label for="ref_type" class="caption">Leads</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">
-                                                <option>-- Select Lead --</option>
+                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>
+                                                <option value="0">-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
@@ -47,8 +47,8 @@
                                                             $name = $lead->customer->company.' '. $lead->branch->name;                                                                
                                                         }
                                                     @endphp
-                                                    <option value="{{ $lead['id'] }}">
-                                                        {{$lead['reference']}} - {{$name}} - {{dateFormat($lead->date_of_request)}} - {{$lead->employee_id}} - {{$lead->title}}
+                                                    <option value="{{ $lead->id }}">
+                                                        {{$lead->reference }} - {{ $name }} - {{ dateFormat($lead->date_of_request) }} - {{ $lead->employee_id }} - {{ $lead->title }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -60,8 +60,8 @@
                                         <label for="ref_type" class="caption">Bank Details</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="bank_id" id="bank_id">
-                                                <option>-- Select Bank --</option>
+                                            <select class="form-control round select-box" name="bank_id" id="bank_id" required>
+                                                <option value="0">-- Select Bank --</option>
                                                 @foreach ($banks as $bank) 
                                                     <option value="{{ $bank->id }}">{{ $bank->name }}</option>
                                                 @endforeach
@@ -72,14 +72,14 @@
                                 <div class="form-group row">
                                     <div class='col-md-6'>
                                         <div class='col m-1'>
-                                            {{ Form::label( 'method', 'Print Type',['class' => 'col-12 control-label']) }}
+                                            {{ Form::label('method', 'Print Type', ['class' => 'col-12 control-label']) }}
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" id="colorCheck6" value="inclusive" checked="">
-                                                <label class="custom-control-label" for="colorCheck6">VATInclusive</label>
+                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" value="inclusive" id="colorCheck6">
+                                                <label class="custom-control-label" for="colorCheck6">VAT-Inclusive</label>
                                             </div>
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7">
-                                                <label class="custom-control-label" for="colorCheck7">VATExclusive</label>
+                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7" checked>
+                                                <label class="custom-control-label" for="colorCheck7">VAT-Exclusive</label>
                                             </div>
                                             <input type="hidden" id="document_type" value="QUOTE" name="document_type">
                                         </div>
@@ -87,8 +87,8 @@
                                     <div class="col-sm-3"><label for="pricing" class="caption">Pricing</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            <select id="pricing" name="pricing" class="form-control round required  ">
-                                                <option value="0">Default </option>
+                                            <select id="pricing" name="pricing" class="form-control round">
+                                                <option value="0" selected>Default </option>
                                                 @foreach ($selling_prices as $selling_price)
                                                     <option value="{{$selling_price->id}}">{{ $selling_price->name }}</option>
                                                 @endforeach
@@ -96,10 +96,11 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-3">
-                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}} #PI</label>
+                                        <label for="invocieno" class="caption">#PI {{trans('general.serial_no')}} </label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
+                                            {{ Form::text('tid', 'PI-' . sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                                            <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}">
                                         </div>
                                     </div>
                                 </div>
@@ -128,26 +129,25 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4">
-                                        <label for="invocieno" class="caption">{{trans('general.reference')}} (Diagnosis JobCard)</label>
+                                        <label for="invocieno" class="caption">Djc Reference</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference')]) }}
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference']) }}
                                         </div>
                                     </div>
-                                    <div class="col-sm-4"><label for="reference_date" class="caption">Reference {{trans('general.date')}}</label>
+                                    <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
                                         </div>
-                                    </div>
-                                                                     
+                                    </div>                                                                     
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control round  select-box" name="validity" id="validity" data-placeholder="{{trans('tasks.assign')}}">
-                                                <option value="0">On Reciept</option>
+                                                <option value="0" selected>On Reciept</option>
                                                 <option value="14">Valid For 14 Days</option>
                                                 <option value="30">Valid For 30 Days</option>
                                                 <option value="45">Valid For 45 Days</option>
@@ -160,9 +160,9 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  select-box " name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
-                                                <option value="0">Default</option>
+                                                <option value="0" selected>Default</option>
                                                 @foreach($currencies as $currency)
-                                                    <option value="{{$currency->id}}">{{$currency->symbol}} - {{$currency->code}}</option>
+                                                    <option value="{{ $currency->id }}">{{ $currency->symbol }} - {{ $currency->code }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -172,8 +172,8 @@
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="term_id" name="term_id" class="form-control round  selectpicker required">
-                                                <option value="">-- Select Term --</option>
+                                            <select id="term_id" name="term_id" class="form-control round  selectpicker" required>
+                                                <option value="0">-- Select Term --</option>
                                                 @foreach($terms as $term)
                                                     <option value="{{ $term->id }}">{{ $term->title }}</option>
                                                 @endforeach
@@ -182,11 +182,11 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <label for="taxFormat" class="caption">Select {{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
+                                        <select class="form-control round" name='tax_id' id="tax_id">
+                                            <option value="16" selected>16% VAT</option>
+                                            <option value="8">8% VAT</option>
                                             <option value="0">Off</option>
-                                            <option value="16">16% VAT</option>
-                                            <option value="8">8% VAT</option>                                            
-                                        </select>
+                                        </select>                                        
                                         <input type="hidden" name="tax_format" value="exclusive" id="tax_format">
                                     </div>
                                 </div>
@@ -197,10 +197,10 @@
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
                                         </div>
                                     </div> 
-                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference</label>
+                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference']) }}
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference', 'id' => 'client_ref']) }}
                                         </div>
                                     </div>                                      
                                 </div>
@@ -213,7 +213,6 @@
                             {{ Form::text('notes', null, ['class' => 'form-control round required', 'placeholder' => 'Subject Or Title','autocomplete'=>'false','id'=>'subject']) }}
                         </div>
                     </div>
-
                     <div>                            
                         <table id="quotation" class="table-responsive pb-5 tfr my_stripe_single">
                             <thead>
@@ -230,7 +229,6 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-
                         <div class="row">
                             <div class="col-md-8 col-xs-7 payment-method last-item-row sub_c">
                                 <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-20 mg-lg-t-0-force"></div>
@@ -245,24 +243,27 @@
                             <div class="col-md-4 col-xs-5 invoice-block pull-right">
                                 <div class="unstyled amounts">
                                     <div class="form-group">
-                                        <label>SubTotal (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
+                                        <label>SubTotal ({{ config('currency.symbol') }})</label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="subtotal" id="subtotal" class="form-control" placeholder="subtotal">
+                                            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>{{trans('general.total_tax')}}</label>
+                                        <label id="tax-label">{{ trans('general.total_tax') }}
+                                            <span>16%</span>
+                                            <span class="text-danger">VAT-Exclusive (print type)</span>
+                                        </label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control" placeholder="total tax">
+                                            <input type="text" name="tax" id="tax" class="form-control" readonly>
                                         </div>
                                     </div>                                    
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
-                                            <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
+                                            <input type="text" name="total" class="form-control" id="total" readonly>
                                         </div>
                                     </div>
-                                    {{ Form::submit('Generate', ['class' => 'btn btn-success sub-btn btn-lg']) }}
+                                    {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                                 </div>
                             </div>
                         </div>
@@ -286,6 +287,29 @@
     $('[data-toggle="datepicker-qd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
+
+    // on selecting lead
+    $('#lead_id').change(function() {
+        const leads = @json($leads);
+        leads.forEach(v => {
+            if (v.id == $(this).val()) {
+                $('#subject').val(v.title);
+                $('#client_ref').val(v.client_ref);
+            }
+        });
+    });
+
+    // Check if radio button is checked
+    $('input[type="radio"]').change(function() {
+        const $span = $('#tax-label').find('span').eq(1);
+        if ($(this).is(':checked')) {
+            if ($(this).val() === 'exclusive') {
+                $span.text('VAT-Exclusive (print type)');
+            } else if ($(this).val() === 'inclusive') {
+                $span.text('VAT-Inclusive (print type)');
+            }
+        }
+    });
 
     // row dropdown menu
     function dropDown(val) {
@@ -378,15 +402,21 @@
         totals();
     });
 
+    // default tax
+    let taxRate = 1.16;
     // on select Tax change
-    let taxRate = 1;
-    function onTaxChange(e) {
-        const tax = Number(e.target.value); 
-        if (tax === 0) {
-            $('#tax_format').val('exclusive');
-        } else {
+    $('#tax_id').change(function() {
+        const tax = Number($(this).val()); 
+        const $span = $('#tax-label').find('span').eq(0);
+
+        if (tax) {
             $('#tax_format').val('inclusive');
+            $span.text(tax+'%');
+        } else {
+            $('#tax_format').val('exclusive');
+            $span.text('OFF');
         }
+       
         // loop throw product rows while adjusting values
         taxRate = (tax+100)/100;
         $('#quotation tr').each(function(i) {
@@ -403,7 +433,7 @@
             }
         });
         totals();
-    }
+    });
 
     // ajax setup
     $.ajaxSetup({
@@ -498,8 +528,8 @@
     function totals() {
         let subTotal = 0;
         let grandTotal = 0;
-        $('#quotation tr').each(function(i) {
-            if (!i) return;
+        $('#quotation tr').each(function() {
+            if (!$(this).index()) return;
             const productQty = $(this).find('td').eq(3).children().val()
             if (productQty) {
                 const productPrice = $(this).find('td').eq(4).children().val();

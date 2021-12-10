@@ -46,7 +46,8 @@
                                         <label for="ref_type" class="caption">Search Lead</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">                                                 
+                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id" required>
+                                                <option value="0">-- Select Lead --</option>                                                 
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
@@ -67,7 +68,7 @@
                                         <div class='col m-1'>
                                             {{ Form::label('method', 'Print Type', ['class' => 'col-12 control-label']) }}
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" id="colorCheck6" value="inclusive" checked="">
+                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" id="colorCheck6" value="inclusive">
                                                 <label class="custom-control-label" for="colorCheck6">VATInclusive</label>
                                             </div>
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
@@ -90,13 +91,15 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-3">
-                                        <label for="invocieno" class="caption">{{trans('general.serial_no')}}#{{prefix(5)}}</label>
+                                        <label for="invocieno" class="caption">#{{prefix(5)}} {{trans('general.serial_no')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            @if (@$last_quote->tid)
-                                                {{ Form::number('tid', @$last_quote->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                            @if (isset($last_quote))
+                                                {{ Form::text('tid', 'QT-'.sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'disabled']) }}
+                                                <input type="hidden" name="tid", value="{{ $last_quote->tid+1 }}">
                                             @else
-                                                {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid'), 'id' => 'tid']) }}
+                                                {{ Form::text('tid', 'QT-' . sprintf('%04d', $quote->tid) . $quote->revision, ['class' => 'form-control round', 'disabled']) }}
+                                                <input type="hidden" name="tid", value="{{ $quote->tid }}">
                                             @endif
                                         </div>
                                     </div>
@@ -126,13 +129,13 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-4">
-                                        <label for="invocieno" class="caption">{{trans('general.reference')}} (Diagnosis JobCard)</label>
+                                        <label for="invocieno" class="caption">Djc Reference</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                                             {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference')]) }}
                                         </div>
                                     </div>
-                                    <div class="col-sm-4"><label for="reference_date" class="caption">Reference {{trans('general.date')}}</label>
+                                    <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
@@ -170,10 +173,10 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference</label>
+                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference']) }}
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'id' => 'client_ref']) }}
                                         </div>
                                     </div> 
                                 </div>
@@ -191,14 +194,14 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id" onchange="onTaxChange(event);">
+                                        <select class="form-control round" name='tax_id' id="tax_id">
                                             <option value="16">16% VAT</option>
                                             <option value="8">8% VAT</option>
                                             <option value="0">Off</option>
                                         </select>
                                         <input type="hidden" name="tax_format" id="tax_format">
                                     </div>
-                                    @if (!isset($last_quote->tid))
+                                    @if (!isset($last_quote))
                                         <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
@@ -260,7 +263,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>{{trans('general.total_tax')}}</label>
+                                        <label id="tax-label">{{ trans('general.total_tax') }}
+                                            <span>16%</span>
+                                            <span class="text-danger">VAT-Exclusive (print type)</span>
+                                        </label>
                                         <div class="input-group m-bot15">
                                             <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
                                         </div>
@@ -308,8 +314,23 @@
     $('#tax_id').val("{{ $quote->tax_id }}");
 
     const printType = @json($quote->print_type);
-    if (printType === 'inclusive') $('#colorCheck6').prop('checked', true);
-    if (printType === 'exclusive') $('#colorCheck7').prop('checked', true);
+    if (printType === 'inclusive') {
+        $('#colorCheck6').prop('checked', true);
+    } else if (printType === 'exclusive') {
+        $('#colorCheck7').prop('checked', true);
+    }
+
+    // Check if radio button is checked
+    $('input[type="radio"]').change(function() {
+        const $span = $('#tax-label').find('span').eq(1);
+        if ($(this).is(':checked')) {
+            if ($(this).val() === 'exclusive') {
+                $span.text('VAT-Exclusive (print type)');
+            } else if ($(this).val() === 'inclusive') {
+                $span.text('VAT-Inclusive (print type)');
+            }
+        }
+    });
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
@@ -320,6 +341,17 @@
     $('[data-toggle="datepicker-qd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+
+    // on selecting lead
+    $('#lead_id').change(function() {
+        const leads = @json($leads);
+        leads.forEach(v => {
+            if (v.id == $(this).val()) {
+                $('#subject').val(v.title);
+                $('#client_ref').val(v.client_ref);
+            }
+        });
+    });    
 
     // row dropdown menu
     function dropDown(val) {
@@ -462,21 +494,25 @@
     });
 
     // default tax
-    const tax = $('#tax_id').val();
-    const taxInt = parseFloat(tax.replace(',', ''));
+    const taxInt = Number($('#tax_id').val());
     let taxRate = (taxInt+100)/100;
     // on select Tax change
-    function onTaxChange(e) {
-        const tax = Number(e.target.value); 
-        if (tax === 0) {
-            $('#tax_format').val('exclusive');
-        } else {
+    $('#tax_id').change(function() {
+        const tax = Number($(this).val()); 
+        const $span = $('#tax-label').find('span').eq(0);
+
+        if (tax) {
             $('#tax_format').val('inclusive');
+            $span.text(tax+'%');
+        } else {
+            $('#tax_format').val('exclusive');
+            $span.text('OFF');
         }
+       
         // loop throw product rows while adjusting values
         taxRate = (tax+100)/100;
-        $('#quotation tr').each(function(i) {
-            if (!i) return;
+        $('#quotation tr').each(function() {
+            if (!$(this).index()) return;
             const productQty = $(this).find('td').eq(3).children().val()
             if (productQty) {
                 const productPrice = $(this).find('td').eq(4).children().val();
@@ -489,7 +525,7 @@
             }
         });
         totals();
-    }    
+    });    
 
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i) {

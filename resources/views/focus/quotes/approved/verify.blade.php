@@ -15,18 +15,24 @@
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    @include('focus.quotes.partials.quotes-header-buttons')
+                    <div class="btn-group float-right" role="group" aria-label="quotes">
+                        <a href="{{ route('biller.quotes.project_quotes') }}" class="btn btn-info  btn-lighten-2">
+                            <i class="fa fa-list-alt"></i> {{trans('general.list')}}
+                        </a>
+                    </div>                    
                 </div>
             </div>
         </div>
     </div>
-    @php
-        $url = request()->getQueryString() ? route('biller.quotes.storeverified', 'page=pi') : route('biller.quotes.storeverified');
-    @endphp
     <div class="content-body">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::model($quote, ['url' => $url, 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST']) }}                   
+                    @php
+                        $query_str = request()->getQueryString();
+                        $link = route('biller.quotes.storeverified');
+                        if ($query_str == 'page=pi') $link = route('biller.quotes.storeverified', 'page=pi');
+                    @endphp
+                    {{ Form::model($quote, ['url' => $link, 'class' => 'form-horizontal', 'method' => 'POST']) }}                   
                     <input type="hidden" name="id" value="{{ $quote->id }}">
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
@@ -34,6 +40,12 @@
                                 <div class="form-group row">
                                     <div class="fcol-sm-12"><h3 class="title pl-1">Verify Quote / Proforma Invoice</h3></div>
                                 </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="subject" class="caption">Subject / Title</label>
+                                        {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                                    </div>
+                                </div>   
                                 <div class="form-group row">                                    
                                     <div class="col-sm-6">
                                         <label for="client" class="caption">Client</label>
@@ -58,19 +70,36 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="serial_no" class="caption">{{trans('general.serial_no')}}. #{{prefix(5)}}</label>
+                                        @php
+                                            $prefix = '#Qt';
+                                            $tid = 'QT-'.sprintf('%04d', $quote->tid);
+                                            if ($quote->bank_id) {
+                                                $prefix = '#PI';
+                                                $tid = 'PI-'.sprintf('%04d', $quote->tid);
+                                            }
+                                        @endphp
+                                        <label for="serial_no" class="caption">{{ $prefix }} {{trans('general.serial_no')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                                            {{ Form::text('tid', $tid, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                         </div>
                                     </div>                                    
                                 </div>
                                 <div class="form-group row">
-                                    <div class="col-sm-12">
-                                        <label for="subject" class="caption">Subject / Title</label>
-                                        {{ Form::text('notes', null, ['class' => 'form-control round required', 'id'=>'subject', 'disabled']) }}
+                                    <div class="col-sm-6">
+                                        <label for="invocieno" class="caption">Djc Reference</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'disabled']) }}
+                                        </div>
                                     </div>
-                                </div>                                                                 
+                                    <div class="col-sm-6"><label for="reference_date" class="caption">Djc Reference Date</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round', 'id'=>'reference-date', 'disabled']) }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -81,54 +110,49 @@
                                         <h3 class="title">Properties</h3>
                                     </div>
                                 </div>
+                                
                                 <div class="form-group row">
                                     <div class="col-sm-4">
-                                        <label for="invocieno" class="caption">{{trans('general.reference')}} (Diagnosis JobCard)</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4"><label for="reference_date" class="caption">Reference {{trans('general.date')}}</label>
+                                        <label for="client_ref" class="caption">Client Ref / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'id'=>'reference-date', 'autocomplete'=>'false', 'disabled']) }}
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference', 'id' => 'client_ref', 'disabled']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
-                                        <label for="verify_no" class="caption">Verification No.</label>
+                                        <label for="verify_no" class="caption">Verification</label>
                                         <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            @php
-                                                $verify_text = $quote->tid . ' (v' . $verify_no . ')';
-                                            @endphp                                            
-                                            {{ Form::text('verify_text', $verify_text, ['class' => 'form-control round', 'disabled']) }}
-                                            <input type="hidden" name="verify_no" value="{{ $verify_no }}">
+                                            <select class="form-control" name="verify_no" id="verify_no" required>
+                                                <option value="1" selected>V1</option>
+                                                <option value="2">V2</option>
+                                                <option value="3">V3</option>
+                                                <option value="4">V4</option>
+                                                <option value="5">V5</option>
+                                            </select>
                                         </div>
-                                    </div>                                                                             
+                                    </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
                                         <table id="jobcard" class="table-responsive pb-2 tfr">
                                             <thead class="bg-gradient-directional-blue white pb-1">
                                                 <tr>
-                                                    <th class="text-center" width="23%">Reference No.</th>
                                                     <th class="text-center" width="23%">Type</th>
-                                                    <th class="text-center" width="22%">Date</th>
+                                                    <th class="text-center" width="23%">Reference No</th>                                                    
+                                                    <th class="text-center" width="22%">Reference Date</th>
                                                     <th class="text-center" width="50%">Technician</th>
                                                     <th class="text-center" width="5%">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td><input type="text" class="form-control" name="reference[]" id="reference-0" required></td>
                                                     <td>
                                                         <select name="type[]" id="type-0" class="form-control" required>
-                                                            <option value="0">-- Type --</option>
-                                                            <option value="1">JobCard</option>
+                                                            <option value="1" selected>JobCard</option>
                                                             <option value="2">DNote</option> 
                                                         </select>
                                                     </td>
+                                                    <td><input type="text" class="form-control" name="reference[]" id="reference-0" required></td>
                                                     <td><input type="text" class="form-control" name="date[]" id="date-0" required></td>
                                                     <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
                                                     <th class="text-center">#</th>
@@ -171,6 +195,10 @@
                                 <button type="button" class="btn btn-primary" aria-label="Left Align" id="add-title">
                                     <i class="fa fa-plus-square"></i> Add Title
                                 </button>
+                                <div class="form-group mt-3">
+                                    <div><label for="remark" class="caption">General Remark</label></div>
+                                    <textarea class="form-control" name="gen_remark" id="gen_remark" cols="30" rows="10"></textarea>
+                                </div>
                             </div>
 
                             <div class="col-md-4 col-xs-5 invoice-block pull-right">
@@ -251,14 +279,13 @@
     function jobCardRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
                 <td>
                     <select name="type[]" id="type-${n}" class="form-control" required>
-                        <option value="0">-- Type --</option>
-                        <option value="1">JobCard</option>
+                        <option value="1" selected>JobCard</option>
                         <option value="2">DNote</option> 
                     </select>
                 </td>
+                <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
                 <td><input type="text" class="form-control" name="date[]" id="date-${n}" required></td>
                 <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
                 <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
