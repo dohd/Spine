@@ -70,12 +70,9 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-
                         <div class="card-content">
-
                             <div class="card-body">
                                 <div class="row">
-
                                     <div class="col-md-2">{{ trans('general.search_date')}} </div>
                                     <div class="col-md-2">
                                         <input type="text" name="start_date" id="start_date" data-toggle="datepicker" class="date30 form-control form-control-sm" autocomplete="off" />
@@ -97,8 +94,8 @@
                                             <th>Title</th>                                            
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
                                             <th>{{ trans('quotes.invoicedate') }}</th>
-                                            <th># Project Ref</th>
-                                            <th>LPO Ref</th>
+                                            <th>Project No</th>
+                                            <th>LPO No</th>
                                             <th>Verified</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -132,9 +129,8 @@
             if (start_date && end_date) {
                 $('#quotes-table').DataTable().destroy();
                 draw_data(start_date, end_date);
-            } else {
-                alert("Date range is Required");
-            }
+            } 
+            else alert("Date range is Required");            
         });
 
         $('[data-toggle="datepicker"]')
@@ -193,12 +189,12 @@
                     name: 'created_at'
                 },
                 {
-                    data: 'project_ref',
-                    name: 'project_ref'
+                    data: 'project_number',
+                    name: 'project_number'
                 },
                 {
-                    data: 'lpo_no',
-                    name: 'lpo_no'
+                    data: 'lpo_number',
+                    name: 'lpo_number'
                 },
                 {
                     data: 'verified',
@@ -211,14 +207,11 @@
                     sortable: false
                 }
             ],
-            order: [
-                [2, "desc"]
-            ],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {
                 buttons: [
-
                     {
                         extend: 'csv',
                         footer: true,
