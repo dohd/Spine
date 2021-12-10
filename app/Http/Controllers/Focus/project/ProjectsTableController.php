@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\project;
 
 use App\Http\Controllers\Controller;
@@ -57,31 +58,32 @@ class ProjectsTableController extends Controller
             ->addIndexColumn()
             ->addColumn('name', function ($project) {
                 $tg = '';
-                $user = '';
                 foreach ($project->tags as $row) {
                     $tg .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
                 }
-
                 return '<div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.projects.show", [$project->id]) . '" >' . $project->name . '</a><div class="float-right">' . $tg . '</div></div><span class="todo-desc">' . $project->short_desc . '</span></div> </div>';
+            })
+            ->addColumn('project_number', function($project) {
+                return 'P-'.sprintf('%04d', $project->project_number);
             })
             ->addColumn('priority', function ($project) {
                 return '<span class="">' . $project->priority . '</span> ';
             })
             ->addColumn('started_status', function ($project) {
-                if ($project->started_status == 'running') {
-                    return '<span class="badge badge-success">'.$project->started_status.'</span>';
-                }
-                return '<span class="badge badge-primary">'.$project->started_status.'</span>'; 
+                $badge = 'badge-secondary';
+                if ($project->started_status == 'running') $badge = 'badge-success';
+                            
+                return '<span class="badge '. $badge .'">' . $project->started_status . '</span>';
             })
             ->addColumn('progress', function ($project) {
                 $task_back = task_status($project->status);
-                return '<a href="#" class="view_project"  data-toggle="modal"
-                                        data-target="#ViewProjectModal" data-item="' . $project->id . '"><span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span></a> ' . numberFormat($project->progress) . ' %';
+                return '<a href="#" class="view_project" data-toggle="modal" data-target="#ViewProjectModal" data-item="' 
+                    . $project->id . '"><span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span></a> ' . numberFormat($project->progress) . ' %';
             })
             ->addColumn('deadline', function ($project) {
                 return dateTimeFormat($project->end_date);
             })
-             ->addColumn('created_at', function ($project) {
+            ->addColumn('created_at', function ($project) {
                 return dateFormat($project->created_at);
             })
             ->addColumn('actions', function ($project) {
