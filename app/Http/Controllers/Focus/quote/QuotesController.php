@@ -35,9 +35,7 @@ use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Models\items\VerifiedItem;
-use App\Models\lead\Lead;
 use App\Models\verifiedjcs\VerifiedJc;
-use Illuminate\Support\Facades\DB;
 
 /**
  * QuotesController
@@ -218,7 +216,7 @@ class QuotesController extends Controller
             $products = VerifiedItem::where('quote_id', $quote->id)->orderBy('row_index')->get();
         }
 
-        return view('focus.quotes.verify')
+        return view('focus.quotes.approved.verify')
             ->with(compact('quote', 'products', 'verify_no'))
             ->with(bill_helper(2, 4));
     }
