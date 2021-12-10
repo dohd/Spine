@@ -20,7 +20,6 @@ namespace App\Http\Controllers\Focus\quote;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\quote\QuoteRepository;
-use App\Http\Requests\Focus\quote\ManageQuoteRequest;
 
 /**
  * Class QuotesTableController.
@@ -44,23 +43,23 @@ class ProjectQuotesTableController extends Controller
 
     /**
      * This method return the data of the model
-     * @param ManageQuoteRequest $request
-     *
      * @return mixed
      */
-    public function __invoke(ManageQuoteRequest $request)
+    public function __invoke()
     {
-        $core = $this->quote->getForDataTable();
+        $core = $this->quote->getForVerifiedDataTable();
+
         return Datatables::of($core)
             ->addIndexColumn()
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
             })
-            ->addColumn('project_ref', function($quote) {
-                return 'P-0001';
-            })
             ->addColumn('tid', function ($quote) {
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $quote->tid . '</a>';
+                $tid = sprintf('%04d', $quote->tid);
+                if ($quote->bank_id) $tid = 'PI-'.$tid;
+                else $tid = 'QT-'.$tid;
+
+                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
@@ -75,11 +74,18 @@ class ProjectQuotesTableController extends Controller
             ->addColumn('total', function ($quote) {
                 return number_format($quote->total, 2);
             })
+            ->addColumn('project_number', function($quote) {
+                return 'P-0001';
+            })
             ->addColumn('verified', function ($quote) {
+                $badge = 'badge-secondary';
+                if ($quote->verified == 'Yes') $badge = 'badge-success';
+
+                // return '<span class="badge '. $badge .'">'. $quote->verified .'</span>';
                 return $quote->verified;
             })
-            ->addColumn('lpo_no', function($quote) {
-                return 'lpo-0001';
+            ->addColumn('lpo_number', function($quote) {
+                return $quote->lpo_number;
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
