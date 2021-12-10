@@ -18,7 +18,6 @@
 
 namespace App\Http\Controllers\Focus\lead;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\lead\LeadRepository;
@@ -54,17 +53,17 @@ class LeadsTableController extends Controller
     public function __invoke(ManageLeadRequest $request)
     {
         $core = $this->lead->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('reference', function ($lead) {
-                $href = route("biller.leads.index").'/'.$lead->id;
-                return sprintf('<a class="font-weight-bold" href="%s">%d</a>', $href, $lead->reference);
+                return 'Tkt-'.sprintf('%04d', $lead->reference);
             })
             ->addColumn('client_name', function ($lead) {
                 switch ($lead->client_status) {
                     case 'customer':
-                        return  $lead->customer->company.'&nbsp;'. $lead->branch->name;
+                        return  $lead->customer->company. '&nbsp;' . $lead->branch->name;
                     case 'new':
                         return  $lead->client_name;
                 }
@@ -74,8 +73,8 @@ class LeadsTableController extends Controller
                 return dateFormat($lead->created_at);
             })
             ->addColumn('status', function($lead) {
-                if ($lead->status == 0) return '<span class="badge badge-secondary">Open</span>';
-                return '<span class="badge badge-success">Closed</span>';
+                if ($lead->status == 0) return '<span class="badge badge-success">Open</span>';
+                return '<span class="badge badge-secondary">Closed</span>';
             })
             ->addColumn('reason', function($lead) {
                 return $lead->reason;
