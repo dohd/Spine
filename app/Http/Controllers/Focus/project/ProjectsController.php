@@ -73,9 +73,11 @@ class ProjectsController extends Controller
     {
         $mics = Misc::all();
         $employees = Hrm::all();
-        $accounts = Account::where('account_type', '=', 'Income')->get();
+        $accounts = Account::where('account_type', 'Income')->get();
+        $ref = Project::orderBy('project_number', 'desc')->first('project_number');
+        $tid = isset($ref) ? $ref->project_number+1 : 1;
 
-        return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts'));
+        return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts', 'tid'));
     }
 
 
