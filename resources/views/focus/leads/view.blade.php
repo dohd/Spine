@@ -36,7 +36,7 @@
                 <tbody>
                     <tr>
                         <th>Reference</th>
-                        <td>{{ $lead->reference }}</td>
+                        <td>{{ 'Tkt-'.sprintf('%04d', $lead->reference) }}</td>
                     </tr>
                     <tr>
                         <th>Status</th>
