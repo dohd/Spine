@@ -47,13 +47,15 @@
                                                 <select class="form-control  round  select-box" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required="required">
                                                     @foreach ($leads as $lead)
                                                         @php
+                                                            $name = $lead->client_name;
+                                                            $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
                                                             if ($lead->client_status == "customer") {
-                                                                $name = $lead->customer->company.' '. $lead->branch->name;
-                                                            } else {
-                                                                $name = $lead->client_name;
+                                                                $name = $lead->customer->company.' - '. $lead->branch->name;
                                                             }
                                                         @endphp
-                                                        <option value="{{ $lead->id }}">{{$lead->reference}} - {{$name}} - {{$lead->title}}</option>
+                                                        <option value="{{ $lead->id }}">
+                                                            {{ $tid }} - {{ $name }} - {{ $lead->title }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                                 <input type="hidden" name="client_id" id="client_id" value="{{ $djc->client_id }}">
@@ -77,7 +79,7 @@
                                         <div class="col-sm-3">
                                             <label for="jobcard" class="jobcard">Job Card Date</label>
                                             <div class="input-group">
-                                                {{ Form::text('jobcard_date', null, ['class' => 'form-control', 'data-toggle'=>'datepicker', 'id'=>'jobcard_date']) }}
+                                                {{ Form::text('jobcard_date', null, ['class' => 'form-control', 'data-toggle' => 'jc-datepicker']) }}
                                             </div>
                                         </div>
                                     </div>                                    <div class="form-group row">
@@ -92,13 +94,13 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
+                                                {{ Form::text('report_date', null, ['class' => 'form-control round', 'data-toggle'=>'rd-datepicker']) }}
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round', 'id' => 'reference']) }}
+                                                {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref']) }}
                                             </div>
                                         </div>                                        
                                     </div>
@@ -238,9 +240,14 @@
     editor();
 
     // initialize datepicker
-    $('[data-toggle="datepicker"]')
-        .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date("{{ $djc->report_date }}"));
+    $('[data-toggle="rd-datepicker"]')
+    .datepicker({format: "{{ config('core.user_date_format') }}"})
+    .datepicker('setDate', new Date("{{ $djc->report_date }}"));
+
+    $('[data-toggle="jc-datepicker"]')
+    .datepicker({format: "{{ config('core.user_date_format') }}"})
+    .datepicker('setDate', new Date("{{ $djc->jobcard_date }}"));
+    
 
     // product (equipment) row
     function equipmentRow(cvalue) {
@@ -252,8 +259,8 @@
                 <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle="datepicker"></td>
+                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" data-toggle="datepicker"></td>
+                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" data-toggle="datepicker"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -274,10 +281,9 @@
 
     // assign row index
     function assignIndex() {
-        $('#equipment tr').each(function(i) {
-            if (!i) return;
-            const index = $(this).index();
-            $(this).find('input[name="row_index[]"]').val(index);
+        $('#equipment tr').each(function() {
+            if (!$(this).index()) return;
+            $(this).find('input[name="row_index[]"]').val($(this).index());
         });
     }
 
@@ -290,9 +296,6 @@
         // add poduct row to equipment table
         const row = equipmentRow(i);
         $('#equipment tr:last').after(row);
-        // initialize date picker with php parsed date
-        $('[data-toggle="datepicker"]')
-            .datepicker({format: "{{config('core.user_date_format')}}"});
         $('#tag_number-' + i).autocomplete(autocompleteProp(i));
 
         // default input with values
@@ -303,8 +306,10 @@
         $('#make-'+i).val(v.make);
         $('#capacity-'+i).val(v.capacity);
         $('#location-'+i).val(v.location);
-        $('#last_service_date-'+i).val(v.last_service_date);
-        $('#next_service_date-'+i).val(v.next_service_date);
+
+        $('[data-toggle="datepicker"]').datepicker({ format: "{{ config('core.user_date_format') }}" });
+        $('#last_service_date-'+i).datepicker('setDate', new Date(v.last_service_date));
+        $('#next_service_date-'+i).datepicker('setDate', new Date(v.next_service_date));
 
         assignIndex();
         counter++;
@@ -343,8 +348,10 @@
                 $('#make-'+i).val(data.make_type);
                 $('#capacity-'+i).val(data.capacity);
                 $('#location-'+i).val(data.location);
-                $('#last_service_date-'+i).val(data.last_maint_date);
-                $('#next_service_date-'+i).val(data.next_maintenance_date);
+
+                $('[data-toggle="datepicker"]').datepicker({ format: "{{ config('core.user_date_format') }}" });
+                $('#last_service_date-'+i).datepicker('setDate', new Date(data.last_maint_date));
+                $('#next_service_date-'+i).datepicker('setDate', new Date(data.next_maintenance_date));
             }
         };
     }
@@ -356,9 +363,13 @@
         const row = equipmentRow(cvalue);
         // add poduct row to equipment table
         $('#equipment tr:last').after(row);
+        // add jobcard value   
+        $('#joc_card-'+cvalue).val($("#jobcard").val());
         // initialize date picker with php parsed date
         $('[data-toggle="datepicker"]')
-            .datepicker({format: "{{config('core.user_date_format')}}"});
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date());
+
         // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
 
@@ -402,7 +413,7 @@
                 $("#subject").val(data.note);
                 $("#client_id").val(data.client_id);
                 $("#branch_id").val(data.branch_id);
-                $('#reference').val(data.client_ref);
+                $('#client_ref').val(data.client_ref);
             }
         });
     });
