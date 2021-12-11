@@ -46,19 +46,22 @@
                                         <label for="ref_type" class="caption">Leads</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>
+                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
                                                 <option value="0">-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
+                                                        $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
                                                         if ($lead->client_status == "customer") {
-                                                            $name = $lead->customer->company.' '. $lead->branch->name;                                                                
+                                                            $name = $lead->customer->company.' - '. $lead->branch->name;                                                                
                                                         }
                                                     @endphp
-                                                    <option value="{{ $lead->id }}">
-                                                        {{$lead->reference }} - {{ $name }} - {{ dateFormat($lead->date_of_request) }} - {{ $lead->employee_id }} - {{ $lead->title }}
-                                                    </option>
-                                                @endforeach
+                                                    @if ($lead->id == $quote->lead_id)
+                                                        <option value="{{ $lead->id }}" selected>{{ $tid }} - {{ $name }} - {{ $lead->title }}</option>
+                                                    @else
+                                                        <option value="{{ $lead->id }}">{{ $tid }} - {{ $name }} - {{ $lead->title }}</option>
+                                                    @endif
+                                                @endforeach                                                                                             
                                             </select>
                                         </div>
                                     </div>
@@ -216,7 +219,7 @@
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
                                         </div>
                                     </div>
-                                    @if (!@$last_quote->tid)
+                                    @if (!isset($last_quote))
                                         <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
@@ -291,8 +294,12 @@
                                         <div class="input-group m-bot15">
                                             <input type="text" name="total" class="form-control" id="total" readonly>
                                         </div>
-                                    </div>
-                                    {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
+                                    </div>                                    
+                                    @if (isset($last_quote))
+                                        {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
+                                    @else
+                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -313,14 +320,15 @@
     });
 
     // set default field values
-    $('#lead_id').val("{{ $quote->lead->id }}");
-    $('#bank_id').val("{{ $quote->bank_id }}" || 0);
+    $('#bank_id').val("{{ $quote->bank_id }}");
     $('#pricing').val("{{ $quote->pricing }}");
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
     $('#term_id').val("{{ $quote->term_id }}");
     $('#revision').val("{{ $quote->revision }}" || '_r1');
     $('#tax_id').val("{{ $quote->tax_id }}");
+    $('#client_ref').val("{{ $quote->client_ref }}");
+    $('#tax_format').val("{{ $quote->tax_format }}");
 
     // initialize Reference Date datepicker
     $('[data-toggle="datepicker-rd"]')
