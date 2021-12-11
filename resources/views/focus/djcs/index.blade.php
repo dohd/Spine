@@ -91,7 +91,7 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'tid', name: 'tid'},
-                    {data: 'reference', name: 'reference'},
+                    {data: 'client_ref', name: 'client_ref'},
                     {data: 'subject', name: 'subject'},
                     {data: 'customer', name: 'customer'},
                     {data: 'job_card', name: 'job_card'},
