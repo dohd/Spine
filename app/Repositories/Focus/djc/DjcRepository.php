@@ -65,6 +65,7 @@ class DjcRepository extends BaseRepository
 
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
+        $data['jobcard_date'] = date_for_database($data['jobcard_date']);
         // increament tid
         $ref =  Djc::orderBy('tid', 'desc')->first('tid');
         if (isset($ref) && $data['tid'] <= $ref->tid) {
@@ -111,7 +112,8 @@ class DjcRepository extends BaseRepository
         // djc input data
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
-
+        $data['jobcard_date'] = date_for_database($data['jobcard_date']);
+        
         $result = Djc::where('id', $data['id'])->update($data);
 
         // djc items
