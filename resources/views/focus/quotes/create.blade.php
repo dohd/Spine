@@ -38,17 +38,18 @@
                                         <label for="ref_type" class="caption">Search Lead</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id">                                                 
-                                                <option>-- Select Lead --</option>
+                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
+                                                <option value="0">-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
+                                                        $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
                                                         if ($lead->client_status == "customer") {
-                                                            $name = $lead->customer->company.' '. $lead->branch->name;                                                                
+                                                            $name = $lead->customer->company.' - '. $lead->branch->name;                                                                
                                                         }
                                                     @endphp
-                                                    <option value="{{ $lead['id'] }}">
-                                                        {{$lead['reference']}} - {{$name}} - {{dateFormat($lead->date_of_request)}} - {{$lead->employee_id}} - {{$lead->title}}
+                                                    <option value="{{ $lead->id }}">
+                                                        {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                     </option>
                                                 @endforeach                                                                                             
                                             </select>
