@@ -91,20 +91,25 @@ class BillsController extends Controller
 
     public function print_djc_pdf(Request $request)
     {
-        $data = $this->bill_details($request);        
-        if ($request->pdf) {
-            $html = view('focus.bill.print_djc', $data)->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
+        $data = $this->bill_details($request);
 
-            return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
-        }
+        $html = view('focus.bill.print_djc', $data)->render();
+        // print_log(json_encode($data, JSON_PRETTY_PRINT));
+
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $tid = $data['invoice']['tid'];
+        $name = 'Djc-' . sprintf('%04d', $tid) . '.pdf';
+
+        return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
     }
 
     public function print_quote_pdf(Request $request)
@@ -124,14 +129,14 @@ class BillsController extends Controller
             "Expires" => "0"
         );
 
-        $tid = sprintf('%04d', $data['invoice']['tid']);
-        $name = 'QT-';
-        if ($data['invoice']['bank_id']) $name = 'PI-';
+        $tid = $data['invoice']['tid'];
+        $name = 'QT-' . sprintf('%04d', $tid) . '.pdf';
+        if ($data['invoice']['bank_id']) {
+            $name = 'PI-' . sprintf('%04d', $tid) . '.pdf';
+        }
 
-        return Response::stream($pdf->Output($name . $tid . '.pdf', 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
     }
-
-
 
     public function print_compact(Request $request)
     {
@@ -258,7 +263,6 @@ class BillsController extends Controller
         }
     }
 
-
     public function view_bank(Request $request)
     {
         $data['company'] = $this->bill_details($request);
@@ -270,8 +274,7 @@ class BillsController extends Controller
     }
 
 
-    //protected core methods
-
+    //protected core method
     private function store_payment($transaction, $sign = '+', $message = true)
     {
         switch ($transaction['relation_id']) {
@@ -348,7 +351,6 @@ class BillsController extends Controller
 
         DB::commit();
     }
-
 
     protected function bill_details($request)
     {
