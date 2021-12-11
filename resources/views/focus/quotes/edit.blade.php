@@ -46,18 +46,21 @@
                                         <label for="ref_type" class="caption">Search Lead</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box required" name="lead_id" id="lead_id" required>
-                                                <option value="0">-- Select Lead --</option>                                                 
+                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
+                                                <option value="0">-- Select Lead --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
+                                                        $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
                                                         if ($lead->client_status == "customer") {
-                                                            $name = $lead->customer->company.' '. $lead->branch->name;                                                                
+                                                            $name = $lead->customer->company.' - '. $lead->branch->name;                                                                
                                                         }
                                                     @endphp
-                                                    <option value="{{ $lead['id'] }}">
-                                                        {{$lead['reference']}} - {{$name}} - {{dateFormat($lead->date_of_request)}} - {{$lead->employee_id}} - {{$lead->title}}
-                                                    </option>
+                                                    @if ($lead->id == $quote->lead_id)
+                                                        <option value="{{ $lead->id }}" selected>{{ $tid }} - {{ $name }} - {{ $lead->title }}</option>
+                                                    @else
+                                                        <option value="{{ $lead->id }}">{{ $tid }} - {{ $name }} - {{ $lead->title }}</option>
+                                                    @endif
                                                 @endforeach                                                                                             
                                             </select>
                                         </div>
@@ -259,7 +262,7 @@
                                     <div class="form-group">
                                         <label>SubTotal (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="subtotal" id="subtotal" class="form-control">
+                                            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -268,16 +271,20 @@
                                             <span class="text-danger">VAT-Exclusive (print type)</span>
                                         </label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
+                                            <input type="text" name="tax" id="tax" class="form-control" readonly>
                                         </div>
                                     </div>                                    
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
-                                            <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
+                                            <input type="text" name="total" class="form-control" id="total" placeholder="Total" readonly>
                                         </div>
                                     </div>
-                                    @if (@$last_quote->tid)
+                                    @isset($copy_from_pi)
+                                        <input type="hidden" name="bank_id" value="0">                                 
+                                    @endisset
+                                     
+                                    @if (isset($last_quote))
                                         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                                     @else
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
@@ -286,9 +293,6 @@
                             </div>
                         </div>
                     </div>
-                    @isset($copy_from_pi)
-                       <input type="hidden" name="bank_id" value="0">                                 
-                    @endisset 
                     {{ Form::close() }}
                 </div>
             </div>   
@@ -303,15 +307,16 @@
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
-    
+
     // set default options
-    $('#lead_id').val("{{ $quote->lead->id }}");
     $('#pricing').val("{{ $quote->pricing }}");
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
     $('#term_id').val("{{ $quote->term_id }}");
     $('#revision').val("{{ $quote->revision }}" || '_r1');
     $('#tax_id').val("{{ $quote->tax_id }}");
+    $('#client_ref').val("{{ $quote->client_ref }}");
+    $('#tax_format').val("{{ $quote->tax_format }}");
 
     const printType = @json($quote->print_type);
     if (printType === 'inclusive') {
