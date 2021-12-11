@@ -28,7 +28,7 @@
             <div class="card">
                 <div class="card-content">
                     <div class="card-body">
-                        {{ Form::open(['route' => 'biller.djcs.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST','files' => true, 'id' => 'create-djc']) }}
+                        {{ Form::open(['route' => 'biller.djcs.store', 'class' => 'form-horizontal', 'method' => 'POST', 'files' => true ]) }}
                         <div class="row">
                             <div class="col-sm-6">
                                 <div>
@@ -42,17 +42,18 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" required="required">
-                                                    <option>-- Select Lead --</option>
+                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>
+                                                    <option value="0">-- Select Lead --</option>
                                                         @foreach ($leads as $lead)
                                                             @php
                                                                 $name = $lead->client_name;
+                                                                $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
                                                                 if ($lead->client_status == "customer") {
-                                                                    $name = $lead->customer->company.' '. $lead->branch->name;
+                                                                    $name = $lead->customer->company.' - '. $lead->branch->name;
                                                                 }
                                                             @endphp
                                                             <option value="{{ $lead->id }}">
-                                                                {{$lead->reference}} - {{$name}} - {{$lead->title}}
+                                                                {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                             </option>
                                                         @endforeach
                                                     </select>                                                
@@ -69,8 +70,7 @@
                                         <div class="col-sm-4">
                                             <label for="jobcard" class="jobcard">Job Card</label>
                                             <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
+                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                                                 {{ Form::text('job_card', null, ['class' => 'form-control round required', 'placeholder' => 'Job Card', 'id'=>'jobcard']) }}
                                             </div>
                                         </div>
@@ -98,7 +98,7 @@
                                         <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'reference']) }}
+                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'id' => 'client_ref']) }}
                                             </div>
                                         </div>
                                     </div>
@@ -288,17 +288,22 @@
                 $("#subject").val(data.note);
                 $("#client_id").val(data.client_id);
                 $("#branch_id").val(data.branch_id);
-                $('#reference').val(data.client_ref);
+                $("#client_ref").val(data.client_ref);
             }
         });
     });
 
+    // add jobcard value to default equipment row
+    $("#jobcard").change(function() {
+        $('input[name="joc_card[]"]').val($(this).val());
+    });
+    
     // product row
     function productRow(cvalue=0) {            
         return `
             <tr>
-                <td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control"  required name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}"></td>
                 <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
@@ -347,7 +352,9 @@
         const cvalue = counter++;
         // add poduct row to equipment table
         const row = productRow(cvalue);
-        $('#equipment tr:last').after(row);        
+        $('#equipment tr:last').after(row);
+        // add jobcard value   
+        $('input[name="joc_card[]"]').val($("#jobcard").val());     
         // initialize datepicker
         $(`[data-toggle-${cvalue}="datepicker"]`)
             .datepicker({format: "{{config('core.user_date_format')}}"})
