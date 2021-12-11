@@ -63,7 +63,7 @@ class LeadsTableController extends Controller
             ->addColumn('client_name', function ($lead) {
                 switch ($lead->client_status) {
                     case 'customer':
-                        return  $lead->customer->company. '&nbsp;' . $lead->branch->name;
+                        return  $lead->customer->company. ' - ' . $lead->branch->name;
                     case 'new':
                         return  $lead->client_name;
                 }
