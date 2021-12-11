@@ -33,7 +33,7 @@ class EditResponse implements Responsable
         $quote = $this->quote;
 
         $products = $quote->products()->orderBy('row_index')->get();
-        $leads = Lead::all();
+        $leads = Lead::where('status', 0)->get();
 
         // default parameters
         $params = array('quote', 'products', 'leads');
@@ -70,11 +70,13 @@ class EditResponse implements Responsable
         if (request('page') == 'copy_to_qt') {
             $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
             $copy_from_pi = true;
+
             return view('focus.quotes.edit')
                 ->with(compact('last_quote', 'copy_from_pi', ...$params))
                 ->with(bill_helper(2, 4));        
         }
 
+        $leads = Lead::all();
         // edit proforma invoice
         if (isset($banks)) {            
             return view('focus.quotes.edit_pi')
