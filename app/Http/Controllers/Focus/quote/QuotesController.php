@@ -117,7 +117,7 @@ class QuotesController extends Controller
 
         $route = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.created');
-        if (isset($result['bank_id'])) {
+        if ($result['bank_id']) {
             $route = route('biller.quotes.index', 'page=pi');
             $msg = 'PI created successfully';
         }
