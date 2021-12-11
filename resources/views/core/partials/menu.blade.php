@@ -311,45 +311,6 @@
                         </ul>
                     </li>
                     @endauth
-                    
-                    @permission('project-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> IRD Jobcard</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> IRD Report
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create IRD Report
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endauth
-                    @permission('invoice-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-umbrella"></i> {{ trans('invoices.subscriptions') }}</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.invoices.index')}}?md=sub" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('invoices.subscriptions')}}
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}?sub=true" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('invoices.create_subscription') }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endauth
-                    @permission('creditnote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.credit_notes') }}</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=creditnote" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
-                                </a>
-                            </li>
-                            @permission('data-creditnote')
-                            <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=creditnote" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
                 </ul>
             </li>
             @endif
@@ -853,6 +814,47 @@
                     @endauth
                     @permission('manage-event')
                     <li><a class="dropdown-item" href="{{route('biller.events.index')}}" data-toggle="dropdown"><i class="icon-calendar"></i> {{trans('features.calendar')}}</a>
+                    </li>
+                    @endauth
+
+                    @permission('project-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> IRD Jobcard</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> IRD Report
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create IRD Report
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('invoice-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-umbrella"></i> {{ trans('invoices.subscriptions') }}</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{route('biller.invoices.index')}}?md=sub" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('invoices.subscriptions')}}
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}?sub=true" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('invoices.create_subscription') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endauth
+                    
+                    @permission('creditnote-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.credit_notes') }}</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=creditnote" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
+                                </a>
+                            </li>
+                            @permission('data-creditnote')
+                            <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=creditnote" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
                     </li>
                     @endauth
                 </ul>
