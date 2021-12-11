@@ -90,7 +90,7 @@ class DjcsController extends Controller
             'subject' => 'required'
         ]);
 
-        $data = $request->only(['job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
         $data_item = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         $data['ins'] = auth()->user()->ins;
 
@@ -129,7 +129,8 @@ class DjcsController extends Controller
             'technician' => 'required',
             'subject' => 'required'
         ]);
-        $data = $request->only(['job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        
+        $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
         $data_item = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         
         $data['ins'] = auth()->user()->ins;
@@ -151,10 +152,9 @@ class DjcsController extends Controller
      */
     public function destroy(Djc $djc)
     {
-        //Calling the delete method on repository
         $this->repository->delete($djc);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => trans('alerts.backend.djcs.deleted')]);
+        
+        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc deleted successfully']);
     }
 
     /**
