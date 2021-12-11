@@ -50,7 +50,7 @@
                         <tbody>
                             <tr>
                                 <th>Client</th>
-                                <td>{{ @$djc->customer->name ?: @$djc->lead->client_name }}</td>
+                                <td>{{ @$djc->client->company }}</td>
                             </tr>
                             <tr>
                                 <th>Branch</th>
@@ -67,15 +67,15 @@
                             <tr><th></th></tr>
                             <tr>
                                 <th>Report No</th>
-                                <td>{{ $djc->tid }}</td>
+                                <td>{{ 'Djc-'.sprintf('%04d', $djc->tid) }}</td>
                             </tr>
                             <tr>
                                 <th>Date</th>
                                 <td>{{ dateFormat($djc->report_date) }}</td>
                             </tr>
                             <tr>
-                                <th>Client Ref No.</th>
-                                <td>{{ $djc->reference }}</td>
+                                <th>Client Ref No</th>
+                                <td>{{ $djc->client_ref}}</td>
                             </tr>
                             <tr>
                                 <th>Prepared By</th>
