@@ -59,7 +59,7 @@
 			text-transform: uppercase;
 		}
 		.items td.cost {
-			text-align: "."center;
+			text-align: center;
 		}
 		.invoice-title h1 {
 			font-size: 50px;
@@ -91,13 +91,14 @@
 		</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
+	
 	<table width="100%" style="border-bottom: 0.8mm solid #0f4d9b;">
 		<tr>
 			<td width="60%" align="left" style="color:#0f4d9b;font-size:8pt;">
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br><span style="color:#0f4d9b;font-size:9pt;"> Supply, Installation, Maintenance & Repair of:</span><br />
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }} " style="width:8px;" /> Air Conditioners & Refrigerators &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;margin-left:6px;" /> Laboratory Fume Cupboards <br>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Coldrooms & Chillers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;margin-left:62px;" /> Steam Bath and Saunas<br />
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Mechanical Ventilation Systems &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px; " /> Raised Floors / Access Panels <br /> <br />
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br><span style="color:#0f4d9b;font-size:9pt;"> Supply, Installation, Maintenance & Repair of:</span><br>
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Air Conditioners & Refrigerators &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;margin-left:6px;" /> Laboratory Fume Cupboards <br>
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Coldrooms & Chillers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;margin-left:62px;" /> Steam Bath and Saunas<br>
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Mechanical Ventilation Systems &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px; " /> Raised Floors / Access Panels <br> <br>
 				<span style="color:#0f4d9b;font-size:9pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;and General Suppliers</span>
 			</td>
 			<td width="40%" align="right" style="color:#0f4d9b;font-size:10pt; ">
@@ -106,7 +107,7 @@
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
 				Cell : +254 732 345 393, +254 787 391 015<br>
-				info@leanventures.co.ke<br />
+				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
 		</tr>
@@ -119,24 +120,24 @@
 	</table><br>
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
-			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br /><br />
-				<b>Client Name :</b> {{$invoice->client->company}}<br />
-				<b>Branch Name : </b>{{$invoice->branch->name}}<br />
-				<b>Region : </b> {{$invoice->region}}<br />
-				<b>Attention :</b> {{$invoice['attention']}}<br />
+			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
+				<b>Client Name :</b>{{ $invoice->client->company }}<br>
+				<b>Branch Name :</b>{{ $invoice->branch->name }}<br>
+				<b>Region :</b>{{ $invoice->region }}<br>
+				<b>Attention :</b> {{ $invoice->attention }}<br>
 			<td width="5%">&nbsp;</td>
-			<td width="45%" style="border: 0.1mm solid #888888;"><span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br /><br />
-				<b>Report No :</b> {{$invoice['tid']}}<br />
-				<b>Date :</b> {{dateFormat($invoice['report_date'],$company['main_date_format'])}}<br />
-				<b>Client Ref No :</b> {{$invoice->reference}}<br />
-				<b>Prepared By : </b>{{$invoice->prepared_by}} <br />
+			<td width="45%" style="border: 0.1mm solid #888888;"><span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
+				<b>Report No :</b> {{ $invoice->tid }}<br>
+				<b>Date :</b>{{ dateFormat($invoice->report_date, $company->main_date_format) }}<br>
+				<b>Client Ref No :</b>{{ $invoice->client_ref }}<br>
+				<b>Prepared By :</b>{{ $invoice->prepared_by }}<br>
 			</td>
 		</tr>
-	</table><br />
+	</table><br>
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td style="border: 0.1mm solid #888888; ">
-				Ref : <b>{{$invoice->subject}}</b>
+				Ref :<b>{{ $invoice->subject }}</b>
 			</td>
 		</tr>
 	</table>
@@ -157,34 +158,34 @@
 			<!-- ITEMS HERE -->
 			@foreach($invoice->items as $item)
 			<tr class="dotted">
-				<td class="mytotalss">{{$item->tag_number}}</td>
-				<td class="mytotalss">{{$item->joc_card}}</td>
-				<td class="mytotalss">{{$item->make}}</td>
-				<td class="mytotalss">{{$item->capacity}}</td>
-				<td class="mytotalss">{{$item->location}}</td>
-				<td class="mytotalss">{{dateFormat($item->last_service_date,$company['main_date_format'])}}</td>
-				<td class="mytotalss">{{dateFormat($item->next_service_date,$company['main_date_format'])}}</td>
+				<td class="mytotalss">{{ $item->tag_number }}</td>
+				<td class="mytotalss">{{ $item->joc_card }}</td>
+				<td class="mytotalss">{{ $item->make }}</td>
+				<td class="mytotalss">{{ $item->capacity }}</td>
+				<td class="mytotalss">{{ $item->location }}</td>
+				<td class="mytotalss">{{ dateFormat($item->last_service_date, $company->main_date_format) }}</td>
+				<td class="mytotalss">{{ dateFormat($item->next_service_date, $company->main_date_format) }}</td>
 			</tr>
 			@endforeach
 			<!-- END ITEMS HERE -->
 		</tbody>
 	</table><br>
-	<i align="center">Work was attended by the following technician(s) : <b>{{$invoice->technician}}</b> </i>
+	<i align="center">Work was attended by the following technician(s) : <b>{{ $invoice->technician }}</b></i>
 	<div>
 		<h5>Call Description</h5>
-		<p>{{$invoice->lead->note}} </p>
+		<p>{{ $invoice->lead->note }} </p>
 	</div>
 	<div>
 		<h5> Findings & Root Cause</h5>
-		<p>{!! $invoice['root_cause'] !!}</p>
+		<p>{!! $invoice->root_cause !!}</p>
 	</div>
 	<div>
 		<h5>Action Taken</h5>
-		<p>{!! $invoice['action_taken'] !!}</p>
+		<p>{!! $invoice->action_taken !!}</p>
 	</div>
 	<div>
 		<h5>Recommendation</h5>
-		<p>{!! $invoice['recommendations'] !!}</p>
+		<p>{!! $invoice->recommendations !!}</p>
 	</div>
 	<br>
 	<table class="items" width="100%" style="font-size: 10pt; border-collapse: collapse;height: 700px;" cellpadding="8">
@@ -199,31 +200,31 @@
 		</tr>
 		<tr class="dotted">
 			<td>
-				@if(isset($invoice->image_one))
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice['image_one']) }}" alt="" border=3 height=200 width=300></img>
-				@endif
-			</th>
+				@isset($invoice->image_one)
+					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_one) }}" alt="" border=3 height=200 width=300></img>
+				@endisset
+			</td>
 			<td>
-				@if(isset($invoice->image_two))
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice['image_two']) }}" alt="" border=3 height=200 width=300></img>
-				@endif</th>
-				<!-- considering it is on the same folder that .html file -->
+				@isset($invoice->image_two)
+					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_two) }}" alt="" border=3 height=200 width=300></img>
+				@endisset
+			</td>
 			<td>
-				@if(isset($invoice->image_three))
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice['image_three']) }}" alt="" border=3 height=200 width=300></img>
-				@endif
-			</th>
+				@isset($invoice->image_three)
+					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_three) }}" alt="" border=3 height=200 width=300></img>
+				@endisset
+			</td>
 			<td>
-				@if(isset($invoice->image_four))
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice['image_four']) }}" alt="" border=3 height=200 width=300></img>
-				@endif
-			</th>
+				@isset($invoice->image_four)
+					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_four) }}" alt="" border=3 height=200 width=300></img>
+				@endisset
+			</td>
 		</tr>
 		<tr>
-			<td class="cost">{{$invoice->caption_one}}</th>
-			<td class="cost">{{$invoice->caption_two}}</th>
-			<td class="cost">{{$invoice->caption_three}}</th>
-			<td class="cost">{{$invoice->caption_four}}</th>
+			<td class="cost">{{ $invoice->caption_one }}</td>
+			<td class="cost">{{ $invoice->caption_two }}</td>
+			<td class="cost">{{ $invoice->caption_three }}</td>
+			<td class="cost">{{ $invoice->caption_four }}</td>
 		</tr>
 	</table>
 </body>
