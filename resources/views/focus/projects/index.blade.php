@@ -59,8 +59,9 @@
                                     <th>#</th>
                                     <th>{{ trans('projects.project') }}</th>
                                     <th>Project No</th>
+                                    <th>#Quote / PI No</th>
                                     <th>{{ trans('projects.priority') }}</th>
-                                    <th>Project Started</th>                                    
+                                    <th>Started</th>                                    
                                     <th>{{ trans('projects.end_date') }}</th>
                                     <th>{{ trans('projects.status') }}</th>
                                     <th>{{ trans('general.createdat') }}</th>
@@ -148,6 +149,10 @@
                     name: 'project_number'
                 },
                 {
+                    data: 'quote_no',
+                    name: 'quote_no'
+                },
+                {
                     data: 'priority',
                     name: 'priority'
                 },
@@ -174,9 +179,7 @@
                     sortable: false
                 }
             ],
-            order: [
-                [0, "asc"]
-            ],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {
