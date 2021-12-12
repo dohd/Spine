@@ -51,7 +51,7 @@ class QuoteRepository extends BaseRepository
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'status', 'bank_id', 'verified', 'revision'
+            'total', 'status', 'bank_id', 'verified', 'revision', 'client_ref'
         ]);
     }
 
@@ -72,7 +72,7 @@ class QuoteRepository extends BaseRepository
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'status', 'bank_id', 'verified', 'revision', 'lpo_number'
+            'total', 'status', 'bank_id', 'verified', 'revision', 'lpo_number', 'client_ref'
         ]);
     }
 
