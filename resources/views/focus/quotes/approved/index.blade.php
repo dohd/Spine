@@ -7,65 +7,25 @@
 @endsection
 
 @section('content')
-<div class="">
+<div>
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
                 <h4 class="content-header-title mb-0">Verification Management</h4>
-            </div>            
-        </div>
-        @if($segment)
-            @php
-                $total=$segment->invoices->sum('total');
-                $paid=$segment->invoices->sum('pamnt');
-                $due=$total-$paid;
-            @endphp
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{$words['name']}} </p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{$words['name_data']}}</p>
+            </div>   
+            <div class="content-header-right col-md-6 col-12">
+                <div class="media width-250 float-right">
+                    <div class="media-body media-right text-right">
+                        <div class="btn-group">
+                            <a href="{{ route('biller.rjcs.index') }}" class="btn btn-success  btn-lighten-3">
+                                <i class="fa fa-list-alt"></i> Rjc
+                            </a>                         
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('customers.email')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{$segment->email}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('general.total_amount')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($total)}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('payments.paid_amount')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($paid)}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('general.balance_due')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($due)}}</p>
-                        </div>
-                    </div>
-
                 </div>
-            </div>
-        @endif
+            </div>                     
+        </div>
+        
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
@@ -93,9 +53,10 @@
                                             <th># {{ trans('quotes.quote') }} / PI</th>
                                             <th>Title</th>                                            
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                            <th>{{ trans('quotes.invoicedate') }}</th>
+                                            <th>Quote / PI Date</th>
                                             <th>Project No</th>
                                             <th>LPO No</th>
+                                            <th>Client Ref</th>
                                             <th>Verified</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -128,9 +89,9 @@
             var end_date = $('#end_date').val();
             if (start_date && end_date) {
                 $('#quotes-table').DataTable().destroy();
-                draw_data(start_date, end_date);
+                return draw_data(start_date, end_date);
             } 
-            else alert("Date range is Required");            
+            alert("Date range is Required");            
         });
 
         $('[data-toggle="datepicker"]')
@@ -195,6 +156,10 @@
                 {
                     data: 'lpo_number',
                     name: 'lpo_number'
+                },
+                {
+                    data: 'client_ref',
+                    name: 'client_ref'
                 },
                 {
                     data: 'verified',
