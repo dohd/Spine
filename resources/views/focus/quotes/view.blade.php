@@ -14,7 +14,7 @@
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title mb-0">QUOTE / PI MANAGEMENT</h4>
+                <h4 class="content-header-title">QUOTE / PI MANAGEMENT</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
@@ -317,11 +317,11 @@
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
 <script type="text/javascript">
-    // check if previous page was pi or quote
+    // check if previous page was pi page and add 'page=pi' querystring to current page
     if (document.referrer.includes('page=pi')) {
-        // if pi add query-string and redirect to make it dynamic
-        if (!location.href.includes('page=pi')) {
-            location.href = location.href + '?page=pi';
+        const queryString = location.search;
+        if (!queryString.includes('page=pi')) {
+            location.href = location.href + queryString;
         }
     }
     
