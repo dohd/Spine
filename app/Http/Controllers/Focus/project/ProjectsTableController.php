@@ -66,6 +66,9 @@ class ProjectsTableController extends Controller
             ->addColumn('project_number', function($project) {
                 return 'P-'.sprintf('%04d', $project->project_number);
             })
+            ->addColumn('quote_no', function($project) {
+                return 'QT-001, PI-001';
+            })
             ->addColumn('priority', function ($project) {
                 return '<span class="">' . $project->priority . '</span> ';
             })
