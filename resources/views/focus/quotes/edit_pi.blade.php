@@ -1,6 +1,11 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'PI Management | Edit PI' )
+@php
+    $query_str = request()->getQueryString();
+    $part_title = preg_match('/page=copy/', $query_str) ? ' | Copy' : ' | Edit PI';
+@endphp
+
+@section ('title', 'PI Management' . $part_title )
 
 @section('page-header')
     <h1>Edit PI</h1>

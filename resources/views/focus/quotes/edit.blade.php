@@ -1,6 +1,11 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management').' | '.'Edit Quote')
+@php
+    $query_str = request()->getQueryString();
+    $part_title = preg_match('/page=copy/', $query_str) ? ' | Copy' : ' | Edit Quote';
+@endphp
+
+@section ('title', trans('labels.backend.quotes.management') . $part_title)
 
 @section('page-header')
     <h1>{{ trans('labels.backend.quotes.management') }}</h1>
