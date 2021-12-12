@@ -27,58 +27,7 @@
                 </div>
             </div>
         </div>
-        @if($segment)
-            @php
-                $total=$segment->invoices->sum('total');
-                $paid=$segment->invoices->sum('pamnt');
-                $due=$total-$paid;
-            @endphp
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{$words['name']}} </p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{$words['name_data']}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('customers.email')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{$segment->email}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('general.total_amount')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($total)}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('payments.paid_amount')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($paid)}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('general.balance_due')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($due)}}</p>
-                        </div>
-                    </div>
 
-                </div>
-            </div>
-        @endif
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
@@ -86,7 +35,6 @@
                         <div class="card-content">
                             <div class="card-body">
                                 <div class="row">
-
                                     <div class="col-md-2">{{ trans('general.search_date')}} </div>
                                     <div class="col-md-2">
                                         <input type="text" name="start_date" id="start_date" data-toggle="datepicker" class="date30 form-control form-control-sm" autocomplete="off" />
@@ -114,6 +62,7 @@
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
                                             <th>{{ trans('general.status') }}</th>
                                             <th>Verified</th>
+                                            <th>Client Ref</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -138,7 +87,19 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     $(function() {
-        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+        const delay = @json(config('master.delay'));
+        setTimeout(() => draw_data(), delay);
+        // access td after dataTable has been drawn
+        setTimeout(() => {
+            const queryString = location.search;
+            $('#quotes-table tbody tr').each(function() {
+                const $a = $(this).find('td').eq(8).find('a').eq(2);
+                const href = $a.attr('href');
+                if (queryString.includes('page=pi')) {
+                    $a.attr('href', href + queryString);
+                }
+            });
+        }, delay+300);
 
         $('#search').click(function() {
             var start_date = $('#start_date').val();
@@ -147,7 +108,7 @@
                 $('#quotes-table').DataTable().destroy();
                 return draw_data(start_date, end_date);
             } 
-            else alert("Date range is Required");            
+            alert("Date range is Required");            
         });
 
         $('[data-toggle="datepicker"]')
@@ -212,6 +173,10 @@
                 {
                     data: 'verified',
                     name: 'verified'
+                },
+                {
+                    data: 'client_ref',
+                    name: 'client_ref'
                 },
                 {
                     data: 'actions',
