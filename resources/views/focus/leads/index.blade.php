@@ -11,7 +11,7 @@
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class=" mb-0">Leads Management</h4>
+                <h4>Leads Management</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right mr-3">
@@ -21,6 +21,7 @@
                 </div>
             </div>
         </div>
+
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
@@ -38,7 +39,7 @@
                                             <th>Source</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>Status</th>
-                                            <th>Reason</th>
+                                            <th>Client Ref</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -124,8 +125,8 @@
                     name: 'status'
                 },
                 {
-                    data: 'reason',
-                    name: 'reason'
+                    data: 'client_ref',
+                    name: 'client_ref'
                 },
                 {
                     data: 'actions',
