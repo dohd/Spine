@@ -21,7 +21,6 @@ namespace App\Http\Controllers\Focus\lead;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\lead\LeadRepository;
-use App\Http\Requests\Focus\lead\ManageLeadRequest;
 
 /**
  * Class BranchTableController.
@@ -46,11 +45,9 @@ class LeadsTableController extends Controller
 
     /**
      * This method return the data of the model
-     * @param ManageProductcategoryRequest $request
-     *
      * @return mixed
      */
-    public function __invoke(ManageLeadRequest $request)
+    public function __invoke()
     {
         $core = $this->lead->getForDataTable();
 
@@ -75,9 +72,6 @@ class LeadsTableController extends Controller
             ->addColumn('status', function($lead) {
                 if ($lead->status == 0) return '<span class="badge badge-success">Open</span>';
                 return '<span class="badge badge-secondary">Closed</span>';
-            })
-            ->addColumn('reason', function($lead) {
-                return $lead->reason;
             })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
