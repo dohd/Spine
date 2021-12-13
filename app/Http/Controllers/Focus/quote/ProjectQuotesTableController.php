@@ -47,7 +47,7 @@ class ProjectQuotesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->quote->getForVerifiedDataTable();
+        $core = $this->quote->getForVerifyDataTable();
 
         return Datatables::of($core)
             ->addIndexColumn()
@@ -78,10 +78,6 @@ class ProjectQuotesTableController extends Controller
                 return 'P-0001';
             })
             ->addColumn('verified', function ($quote) {
-                $badge = 'badge-secondary';
-                if ($quote->verified == 'Yes') $badge = 'badge-success';
-
-                // return '<span class="badge '. $badge .'">'. $quote->verified .'</span>';
                 return $quote->verified;
             })
             ->addColumn('lpo_number', function($quote) {
