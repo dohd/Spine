@@ -45,13 +45,10 @@ class ProjectsTableController extends Controller
 
     /**
      * This method return the data of the model
-     * @param ManageProjectRequest $request
-     *
      * @return mixed
      */
-    public function __invoke(ManageProjectRequest $request)
+    public function __invoke()
     {
-        //
         $core = $this->project->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
@@ -66,8 +63,15 @@ class ProjectsTableController extends Controller
             ->addColumn('project_number', function($project) {
                 return 'P-'.sprintf('%04d', $project->project_number);
             })
-            ->addColumn('quote_no', function($project) {
-                return 'QT-001, PI-001';
+            ->addColumn('quote_tid', function($project) {
+                print_log($project->id . ' - ' . count($project->quotes));
+                $tids = '';                
+                foreach ($project->quotes as $quote) {
+                    $tid = sprintf('%04d', $quote->tid);
+                    if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
+                    else $tids .= 'QT-'. $tid . ', ';
+                }
+                return $tids;
             })
             ->addColumn('priority', function ($project) {
                 return '<span class="">' . $project->priority . '</span> ';
@@ -91,7 +95,7 @@ class ProjectsTableController extends Controller
             })
             ->addColumn('actions', function ($project) {
                 $btn = '<a href="#" title="View" class="view_project success" data-toggle="modal" data-target="#ViewProjectModal" data-item="' . $project->id . '"><i  class="ft-eye"></i></a> ';
-                if ($project->creator->id == auth()->user()->id) {
+                if (isset($project->creator) && $project->creator->id == auth()->user()->id) {
                     $btn .= '&nbsp;&nbsp;<a href="' . route("biller.projects.edit", [$project->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
                     $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.projects.destroy", [$project->id]) . '" data-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
                 }
