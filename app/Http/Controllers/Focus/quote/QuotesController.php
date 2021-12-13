@@ -295,15 +295,15 @@ class QuotesController extends Controller
         return response()->noContent();
     } 
 
-    // Load customer quotes
-    public function customer_quotes(ManageQuoteRequest $request)
+    // Load Approved Customer Quotes not in any project
+    public function customer_quotes()
     {
-        $id = request('id');
-        $quotes = Quote::where(['customer_id' => $id, 'status' => 'approved'])
+        $quotes = Quote::whereNotIn('id', function($q) { $q->select('quote_id')->from('project_quotes'); })
+            ->where(['customer_id' => request('id'), 'status' => 'approved'])
             ->orderBy('id', 'desc')
             ->get(['id', 'tid', 'notes', 'customer_id', 'bank_id']);
 
-        return json_encode($quotes);
+        return response()->json($quotes);
     }
 
     public function convert(InvoiceRepository $invoicerepository, ManageInvoiceRequest $request)
@@ -356,6 +356,7 @@ class QuotesController extends Controller
         return new RedirectResponse(route('biller.quotes.show', $quote), ['flash_success' => trans('general.bill_status_update')]);
     }
 
+    // Update LPO
     public function update_lpo(ManageQuoteRequest $request)
     {
         $input = $request->only(['bill_id', 'lpo_number']);
@@ -369,7 +370,7 @@ class QuotesController extends Controller
         return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully' ]);
     }
 
-    // List approved project Quotes 
+    // List approved project Quotes in Verirication page
     public function project_quotes(ManageQuoteRequest $request)
     {
         $input = $request->only('rel_type', 'rel_id');
