@@ -55,7 +55,7 @@ class QuoteRepository extends BaseRepository
         ]);
     }
 
-    public function getForVerifiedDataTable()
+    public function getForVerifyDataTable()
     {
         $q = $this->query();
 
@@ -69,6 +69,9 @@ class QuoteRepository extends BaseRepository
                 date_for_database(request('end_date'))
             ]);
         }
+
+        // project quotes
+        $q->whereNotNull('project_quote_id');
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
