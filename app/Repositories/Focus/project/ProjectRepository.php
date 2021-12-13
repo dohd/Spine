@@ -2,18 +2,16 @@
 
 namespace App\Repositories\Focus\project;
 
-use App\Models\Access\User\User;
 use App\Models\event\Event;
 use App\Models\event\EventRelation;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectRelations;
-use App\Notifications\Rose;
 use App\Models\project\Project;
 use App\Exceptions\GeneralException;
 use App\Models\project\ProjectQuote;
+use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 
 /**
  * Class ProjectRepository.
@@ -33,18 +31,18 @@ class ProjectRepository extends BaseRepository
      */
     public function getForDataTable($c = true)
     {
-
         $q = $this->query()->withoutGlobalScopes();
+
         if ($c) {
-            $q->whereHas('creator', function ($s) {
             // $q->WhereHas('creator', function ($s) {
             //     return $s->where('rid', '=', auth()->user()->id);
             // });
             // $q->orWhereHas('users', function ($s) {
             //     return $s->where('rid', '=', auth()->user()->id);
             // });
+        } else {
             $q->where('project_share','=',4);
-             $q->orWhere('project_share','=',6);
+            $q->orWhere('project_share','=',6);
             $q->whereHas('customer', function ($s) {
                 return $s->where('rid', '=', auth('crm')->user()->id);
             });
@@ -64,67 +62,27 @@ class ProjectRepository extends BaseRepository
         DB::beginTransaction();
 
         $project = $data['project'];
-        $main_quote = $data['project_quotes']['main_quote'];
-
         $project['ins'] = auth()->user()->ins;
+        $project['status'] = 1;
+
+        $main_quote = $data['project_quotes']['main_quote'];
         $project['main_quote_id'] = $main_quote;
-        $project['start_date'] = datetime_for_database($project['start_date'] . ' ' . $data['rest']['time_from']);
-        $project['end_date'] = datetime_for_database($project['end_date'] . ' ' . $data['rest']['time_to']);
+        // $project['start_date'] = datetime_for_database($project['start_date'] . ' ' . $data['rest']['time_from']);
+        // $project['end_date'] = datetime_for_database($project['end_date'] . ' ' . $data['rest']['time_to']);
         $result = Project::create($project);
 
         // project quotes
-        $quotes[] = array('project_id' => $result['id'], 'quote_id' => $main_quote, 'main' => 1);
+        $proj_quotes[] = array('project_id' => $result['id'], 'quote_id' => $main_quote);
         if (isset($data['project_quotes']['other_quote'])) {
             $other_quote = $data['project_quotes']['other_quote'];
             foreach ($other_quote as $value) {
-                $quotes[] = array('project_id' => $result['id'], 'quote_id' => $value, 'main' => 0);
+                $proj_quotes[] = array('project_id' => $result['id'], 'quote_id' => $value);
             }            
         }
-        ProjectQuote::insert($quotes);
-
-        // project relations tags
-        $rel_tags = array(
-            ['project_id' => $result['id'], 'related' => 3, 'rid' => auth()->user()->id],
-            ['project_id' => $result['id'], 'related' => 8, 'rid' => $result['customer_id']]
-        );
-        $tags = $data['rest']['tags'];
-        foreach ($tags as $value) {
-            $rel_tags[] = array('project_id' => $result['id'], 'related' => 1, 'rid' => $value);
-        }
-        $employees = $data['rest']['employees'];
-        foreach ($employees as $value) {
-            $rel_tags[] = array('project_id' => $result['id'], 'related' => 2, 'rid' => $value);
-        }
-        ProjectRelations::insert($rel_tags);
-
-        // project log
-        $text = '[' . trans('general.create') . '] ' . $result['name'];
-        ProjectLog::create(['project_id' => $result['id'], 'value' => $text, 'user_id' => auth()->user()->id]);
-
-        // event
-        $event = Event::create([
-            'title' => trans('projects.project') . ' - ' . $result['name'], 
-            'description' => $result['short_desc'], 
-            'start' => $result['start_date'], 
-            'end' => $result['end_date'], 
-            'color' => $data['rest']['color'], 
-            'user_id' => auth()->user()->id, 
-            'ins' => $result['ins']
-        ]);
-        EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $result['id']]);
-
-        $message = [
-            'title' => trans('projects.project') . ' - ' . $result['name'], 
-            'icon' => 'fa-bullhorn', 
-            'background' => 'bg-success', 
-            'data' => $result['short_desc']
-        ];
-        if ($employees) {
-            $users = User::whereIn('id', $employees)->get();
-            Notification::send($users, new Rose('', $message));
-        } else {
-            $notification = new Rose(auth()->user(), $message);
-            auth()->user()->notify($notification);
+        // create project quote and update related foreign key
+        foreach($proj_quotes as $value) {
+            $id = ProjectQuote::insertGetId($value);
+            Quote::find($value['quote_id'])->update(['project_quote_id' => $id]);
         }
 
         if ($result) {
@@ -133,6 +91,55 @@ class ProjectRepository extends BaseRepository
         }
 
         throw new GeneralException(trans('exceptions.backend.projects.create_error'));
+
+
+        /**
+         * Initial logic of the commented out browser fields
+         */
+        // project relations tags
+        // $rel_tags = array(
+        //     ['project_id' => $result['id'], 'related' => 3, 'rid' => auth()->user()->id],
+        //     ['project_id' => $result['id'], 'related' => 8, 'rid' => $result['customer_id']]
+        // );
+        // $tags = $data['rest']['tags'];
+        // foreach ($tags as $value) {
+        //     $rel_tags[] = array('project_id' => $result['id'], 'related' => 1, 'rid' => $value);
+        // }
+        // $employees = $data['rest']['employees'];
+        // foreach ($employees as $value) {
+        //     $rel_tags[] = array('project_id' => $result['id'], 'related' => 2, 'rid' => $value);
+        // }
+        // ProjectRelations::insert($rel_tags);
+
+        // // project log
+        // $text = '[' . trans('general.create') . '] ' . $result['name'];
+        // ProjectLog::create(['project_id' => $result['id'], 'value' => $text, 'user_id' => auth()->user()->id]);
+
+        // // event
+        // $event = Event::create([
+        //     'title' => trans('projects.project') . ' - ' . $result['name'], 
+        //     'description' => $result['short_desc'], 
+        //     'start' => $result['start_date'], 
+        //     'end' => $result['end_date'], 
+        //     'color' => $data['rest']['color'], 
+        //     'user_id' => auth()->user()->id, 
+        //     'ins' => $result['ins']
+        // ]);
+        // EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $result['id']]);
+
+        // $message = [
+        //     'title' => trans('projects.project') . ' - ' . $result['name'], 
+        //     'icon' => 'fa-bullhorn', 
+        //     'background' => 'bg-success', 
+        //     'data' => $result['short_desc']
+        // ];
+        // if ($employees) {
+        //     $users = User::whereIn('id', $employees)->get();
+        //     Notification::send($users, new Rose('', $message));
+        // } else {
+        //     $notification = new Rose(auth()->user(), $message);
+        //     auth()->user()->notify($notification);
+        // }
     }
 
     /**
