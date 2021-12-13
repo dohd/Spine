@@ -13,6 +13,7 @@ use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
 use App\Models\project\ProjectMileStone;
+use App\Models\project\ProjectQuote;
 use App\Models\project\ProjectRelations;
 use App\Models\project\Task;
 use App\Models\quote\Quote;
@@ -25,7 +26,7 @@ trait ProjectRelationship
 {
     public function quotes()
     {
-        return $this->belongsToMany(Quote::class, 'project_quotes', 'project_id', 'quote_id');
+        return $this->hasManyThrough(Quote::class, ProjectQuote::class);
     }
 
     public function rjcs()
