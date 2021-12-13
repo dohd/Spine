@@ -37,12 +37,12 @@ class ProjectRepository extends BaseRepository
         $q = $this->query()->withoutGlobalScopes();
         if ($c) {
             $q->whereHas('creator', function ($s) {
-                return $s->where('rid', '=', auth()->user()->id);
-            });
-            $q->orWhereHas('users', function ($s) {
-                return $s->where('rid', '=', auth()->user()->id);
-            });
-        } else {
+            // $q->WhereHas('creator', function ($s) {
+            //     return $s->where('rid', '=', auth()->user()->id);
+            // });
+            // $q->orWhereHas('users', function ($s) {
+            //     return $s->where('rid', '=', auth()->user()->id);
+            // });
             $q->where('project_share','=',4);
              $q->orWhere('project_share','=',6);
             $q->whereHas('customer', function ($s) {
