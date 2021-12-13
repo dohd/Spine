@@ -149,8 +149,8 @@
                     name: 'project_number'
                 },
                 {
-                    data: 'quote_no',
-                    name: 'quote_no'
+                    data: 'quote_tid',
+                    name: 'quote_tid'
                 },
                 {
                     data: 'priority',
@@ -296,8 +296,9 @@
                     quietMillis: 50,
                     processResults: function(data) {
                         const results = $.map(data, function(item) {
+                            const tid = String(item.tid).length < 4 ? ('000'+item.tid).slice(-4) : item.tid;
                             return {
-                                text: `${item.bank_id ? '#PI' : '#QT'} ${item.tid} - ${item.notes}`,
+                                text: `${item.bank_id ? '#PI-' : '#QT-'} ${tid} - ${item.notes}`,
                                 id: item.id
                             };
                         });
