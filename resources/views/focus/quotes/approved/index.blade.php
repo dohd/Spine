@@ -17,7 +17,7 @@
                 <div class="media width-250 float-right">
                     <div class="media-body media-right text-right">
                         <div class="btn-group">
-                            <a href="{{ route('biller.rjcs.index') }}" class="btn btn-success  btn-lighten-3">
+                            <a href="{{ route('biller.rjcs.index') }}" class="btn btn-cyan">
                                 <i class="fa fa-list-alt"></i> Rjc
                             </a>                         
                         </div>
