@@ -54,7 +54,7 @@ class DjcsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function($djc) {
-                return 'Djc-' . sprintf('%04d', $djc->tid);
+                return 'DjR-' . sprintf('%04d', $djc->tid);
             })
             ->addColumn('customer', function ($djc) {
                 if (isset($djc->client) && isset($djc->branch)) {

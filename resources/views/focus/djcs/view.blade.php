@@ -65,7 +65,7 @@
                             <tr><th></th></tr>
                             <tr>
                                 <th>Report No</th>
-                                <td>{{ 'Djc-'.sprintf('%04d', $djc->tid) }}</td>
+                                <td>{{ 'DjR-'.sprintf('%04d', $djc->tid) }}</td>
                             </tr>
                             <tr>
                                 <th>Date</th>

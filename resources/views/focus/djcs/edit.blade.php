@@ -86,7 +86,7 @@
                                         <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                                {{ Form::text('tid', 'Djc-' . sprintf('%04d', $djc->tid), ['class' => 'form-control round', 'disabled']) }}
+                                                {{ Form::text('tid', 'DjR-' . sprintf('%04d', $djc->tid), ['class' => 'form-control round', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $djc->tid }}">
                                             </div>
                                         </div>
