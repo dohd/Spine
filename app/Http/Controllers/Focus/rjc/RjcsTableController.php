@@ -52,8 +52,12 @@ class RjcsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function ($rjc) {
+                return 'Rjc-'.sprintf('%04d', $rjc->tid);
+            })
             ->addColumn('project_no', function ($rjc) {
-                return $rjc->project->project_number;
+                $no = $rjc->project->project_number;
+                return 'P-'.sprintf('%04d', $no);
             })
             ->addColumn('created_at', function ($rjc) {
                 return dateFormat($rjc->created_at);
