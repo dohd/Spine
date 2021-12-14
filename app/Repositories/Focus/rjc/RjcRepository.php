@@ -114,7 +114,8 @@ class RjcRepository extends BaseRepository
         $data = $input['data'];
         $data['report_date'] = date_for_database($data['report_date']);
 
-        $result = Rjc::where('id', $data['id'])->update($data);
+        $rjc = Rjc::find($data['id']);
+        $result = $rjc->update($data);
 
         // rjc items
         $item_count = count($input['data_items']['tag_number']);
@@ -143,7 +144,7 @@ class RjcRepository extends BaseRepository
 
         if ($result) {
             DB::commit();
-            return $result;
+            return $rjc;
         }
 
         throw new GeneralException('Error Updating Rjc');
