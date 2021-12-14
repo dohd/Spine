@@ -199,6 +199,34 @@ class QuotesController extends Controller
     }
 
     /**
+     *  List approved project Quotes
+     */
+    public function project_quotes(ManageQuoteRequest $request)
+    {
+        $input = $request->only('rel_type', 'rel_id');
+        
+        $segment = array();
+        $words = array();
+        if (isset($input['rel_id']) and isset($input['rel_type'])) {
+            switch ($input['rel_type']) {
+                case 1:
+                    $segment = Customer::find($input['rel_id']);
+                    $words['name'] = trans('customers.title');
+                    $words['name_data'] = $segment->name;
+                    break;
+                case 2:
+                    $segment = Hrm::find($input['rel_id']);
+                    $words['name'] = trans('hrms.employee');
+                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
+                    break;
+            }
+        }
+
+        return new ViewResponse('focus.quotes.approved.index', compact('input', 'segment', 'words'));
+    }
+
+
+    /**
      * Show the form for verifying the specified resource.
      *
      * @param string $id
@@ -230,22 +258,20 @@ class QuotesController extends Controller
     public function storeverified(ManageQuoteRequest $request)
     {
         //filter request input fields
-        $quote = $request->only(['id', 'verify_no']);
-        $quote_items = $request->only(['remark', 'row_index', 'item_id', 'a_type', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $quote = $request->only(['id', 'verify_no', 'gen_remark']);
+        $quote_items = $request->only([
+            'remark', 'row_index', 'item_id', 'a_type', 'numbering', 'product_id', 
+            'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit'
+        ]);
         $job_cards = $request->only(['type', 'jcitem_id', 'reference', 'date', 'technician']);
 
-        $quote['ins'] = auth()->user()->ins;
+        $result = $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
 
-        $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
+        $tid = '';
+        if ($result->bank_id) $tid .= 'PI-'.sprintf('%04d', $result->tid);
+        else $tid .= 'QT-'.sprintf('%04d', $result->tid);
 
-        $route = route('biller.quotes.index');
-        $msg = 'Quote verified successfully';
-        if (request()->getQueryString()) {
-            $route = route('biller.quotes.index', 'page=pi');
-            $msg = 'PI verified successfully';
-        }
-
-        return new RedirectResponse($route, ['flash_success' => $msg]);
+        return new RedirectResponse(route('biller.quotes.project_quotes'), ['flash_success' => $tid . ' verification successful']);
     }
 
     // Fetch Verified Job cards
@@ -290,7 +316,12 @@ class QuotesController extends Controller
         // delete verified job cards
         $quote->verified_jcs()->delete();
         // reset verified status to No
-        $quote->update(['verified' => 'No', 'verification_date' => null]);
+        $quote->update([
+            'verified' => 'No', 
+            'verification_date' => null,
+            'verified_by' => null,
+            'gen_remark' => null
+        ]);
 
         return response()->noContent();
     } 
@@ -368,30 +399,5 @@ class QuotesController extends Controller
         $quote->update($data);
 
         return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully' ]);
-    }
-
-    // List approved project Quotes in Verirication page
-    public function project_quotes(ManageQuoteRequest $request)
-    {
-        $input = $request->only('rel_type', 'rel_id');
-        
-        $segment = array();
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-            }
-        }
-
-        return new ViewResponse('focus.quotes.approved.index', compact('input', 'segment', 'words'));
     }
 }
