@@ -95,8 +95,8 @@ class BillsController extends Controller
 
         $html = view('focus.bill.print_djc', $data)->render();
         // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
-        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
+        $pdf = new \Mpdf\Mpdf($pdf_config);
         $pdf->WriteHTML($html);
 
         $headers = array(
@@ -107,7 +107,7 @@ class BillsController extends Controller
         );
 
         $tid = $data['invoice']['tid'];
-        $name = 'Djc-' . sprintf('%04d', $tid) . '.pdf';
+        $name = 'DjR-' . sprintf('%04d', $tid) . '.pdf';
 
         return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
     }
