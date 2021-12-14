@@ -43,7 +43,10 @@
                                                 <select class="form-control  round  select-box" name="project_id" id="project" required>
                                                     <option value="0">-- Select Project --</option>
                                                     @foreach ($projects as $project)
-                                                        <option value="{{ $project->id }}">{{ $project->project_number }} - {{ $project->name }}</option>
+                                                        @php
+                                                            $tid = 'P-'.sprintf('%04d', $project->project_number);
+                                                        @endphp
+                                                        <option value="{{ $project->id }}">{{ $tid }} - {{ $project->name }}</option>
                                                     @endforeach
                                                 </select>                                                
                                             </div>
@@ -52,7 +55,7 @@
                                     <div class="form-group row">
                                         <div class="col-sm-8">
                                             <label for="attention" class="attention">Attention <span class="text-danger">*</span></label>
-                                            {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Attention','autocomplete'=>'false','id'=>'attention']) }}
+                                            {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention']) }}
                                         </div>
                                         <div class="col-sm-4">
                                             <label for="jobcard" class="jobcard">Job Card</label>
@@ -68,7 +71,8 @@
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::number('tid', $tid, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
+                                                {{ Form::text('tid', 'Rjc-'.sprintf('%04d', $tid), ['class' => 'form-control round', 'disabled']) }}
+                                                <input type="hidden" name="tid" value="{{ $tid }}">
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
@@ -78,11 +82,11 @@
                                                 {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
+                                        <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'reference']) }}
+                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'client_ref']) }}
                                             </div>
                                         </div>                                        
                                     </div>
@@ -271,7 +275,7 @@
     function productRow(cvalue=0) {            
         return `
             <tr>
-                <td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
@@ -311,6 +315,10 @@
     $('[data-toggle-0="datepicker"]')
         .datepicker({format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date());
+    // add jobcard
+    $('#jobcard').change(function() {
+        $('input[name="joc_card[]"]').val($(this).val());
+    });
     // autocomplete on default product row
     $('#tag_number-0').autocomplete(autocompleteProp());
     assignIndex();
@@ -326,6 +334,8 @@
         $(`[data-toggle-${cvalue}="datepicker"]`)
             .datepicker({format: "{{config('core.user_date_format')}}"})
             .datepicker('setDate', new Date());
+        // add jobcard
+        $('#joc_card-' + cvalue).val($('#jobcard').val());
         // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
         assignIndex();
