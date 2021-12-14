@@ -46,15 +46,16 @@
                                                 <select class="form-control  round  select-box" name="project_id" id="project" required="required">
                                                     <option value="0">-- Select Project --</option>
                                                     @foreach ($projects as $project)
+                                                        @php
+                                                            $tid = 'P-'.sprintf('%04d', $project->project_number);
+                                                        @endphp
                                                         @if ($rjc->project->id == $project->id)
-                                                            <option value="{{ $project->id }}" selected>{{ $project->project_number }} - {{ $project->name }}</option>
+                                                            <option value="{{ $project->id }}" selected>{{ $tid }} - {{ $project->name }}</option>
                                                         @else
-                                                            <option value="{{ $project->id }}">{{ $project->project_number }} - {{ $project->name }}</option>
+                                                            <option value="{{ $project->id }}">{{ $tid }} - {{ $project->name }}</option>
                                                         @endif
                                                     @endforeach
                                                 </select>
-                                                <input type="hidden" name="client_id" id="client_id" value="{{ $rjc->client_id }}">
-                                                <input type="hidden" name="branch_id" id="branch_id" value="{{ $rjc->branch_id }}">
                                             </div>
                                         </div>
                                     </div>
@@ -77,7 +78,8 @@
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::number('tid', null, ['class' => 'form-control round', 'placeholder' => 'reference','required' => 'required']) }}
+                                                {{ Form::text('tid', 'Rjc-'.sprintf('%04d', $rjc->tid), ['class' => 'form-control round', 'disabled']) }}
+                                                <input type="hidden" name="tid" value="{{ $rjc->tid }}">
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
@@ -87,11 +89,11 @@
                                                 {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4"><label for="reference" class="caption">Reference</label>
+                                        <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('reference', null, ['class' => 'form-control round ', 'placeholder' => 'reference']) }}
+                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'client_ref']) }}
                                             </div>
                                         </div>                                        
                                     </div>
@@ -351,7 +353,10 @@
         $('#equipment tr:last').after(row);
         // initialize date picker with php parsed date
         $('[data-toggle="datepicker"]')
-            .datepicker({format: "{{config('core.user_date_format')}}"});
+            .datepicker({format: "{{config('core.user_date_format')}}"})
+            .datepicker('setDate', new Date());
+        // add jobcard
+        $('#joc_card-' + cvalue).val($('#jobcard').val());
         // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
 
@@ -382,20 +387,6 @@
         }
 
         assignIndex();
-    });
-    
-    // on selecting lead option, fetch lead details from the server
-    $("#lead_id").on('change', function() {
-        $.ajax({
-            type: "POST",
-            url: baseurl + 'leads/lead_search',
-            data: 'keyword=' + $(this).val(),
-            success: function(data) {
-                $("#subject").val(data.note);
-                $("#client_id").val(data.client_id);
-                $("#branch_id").val(data.branch_id);
-            }
-        });
     });
 </script>
 @endsection
