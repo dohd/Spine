@@ -78,7 +78,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('tid', 'Rjc-'.sprintf('%04d', $rjc->tid), ['class' => 'form-control round', 'disabled']) }}
+                                                {{ Form::text('tid', 'RjR-'.sprintf('%04d', $rjc->tid), ['class' => 'form-control round', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $rjc->tid }}">
                                             </div>
                                         </div>

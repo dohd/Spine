@@ -53,7 +53,7 @@ class RjcsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($rjc) {
-                return 'Rjc-'.sprintf('%04d', $rjc->tid);
+                return 'RjR-'.sprintf('%04d', $rjc->tid);
             })
             ->addColumn('project_no', function ($rjc) {
                 $no = $rjc->project->project_number;
