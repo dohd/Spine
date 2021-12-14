@@ -240,10 +240,12 @@ class QuoteRepository extends BaseRepository
 
     public function verify(array $input)
     {
+        DB::beginTransaction();
+
         // quote properties
         $quote_id = $input['quote']['id'];
-        $ins = $input['quote']['ins'];
         $verify_no = $input['quote']['verify_no'];
+        $ins = auth()->user()->ins;
 
         // quote items
         $items_count = count($input['quote_items']['product_name']);
@@ -268,8 +270,6 @@ class QuoteRepository extends BaseRepository
             $job_cards[] = $row;
         }
 
-
-        DB::beginTransaction();
         // update or create new quote_item
         foreach($quote_items as $item) {
             $quote_item = VerifiedItem::firstOrNew([
@@ -301,8 +301,17 @@ class QuoteRepository extends BaseRepository
             $job_card->save();
         }
         
-        $result = Quote::find($quote_id)->update(['verified' => 'Yes', 'verification_date' => date('Y-m-d')]);
-        if ($result) return DB::commit();
+        $qt = Quote::find($quote_id);
+        $result = $qt->update([
+            'verified' => 'Yes', 
+            'verification_date' => date('Y-m-d'),
+            'verified_by' => $ins,
+            'gen_remark' => $input['quote']['gen_remark'],
+        ]);
+        if ($result) {
+            DB::commit();
+            return $qt;
+        }
         
         throw new GeneralException('Error Verifying Quote');
     }
