@@ -43,7 +43,7 @@ class RjcsController extends Controller
      */
     public function create()
     {
-        $projects =  Project::all(['id', 'name', 'project_number']);
+        $projects =  Project::orderBy('id', 'desc')->get(['id', 'name', 'project_number']);
         $rjc =  Rjc::orderBy('tid', 'desc')->first('tid');
         $tid = isset($rjc) ? $rjc->tid+1 : 1;
 
@@ -65,13 +65,17 @@ class RjcsController extends Controller
             'subject' => 'required'
         ]);
 
-        $data = $request->only(['job_card', 'tid', 'project_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
+        $data = $request->only([
+            'job_card', 'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 
+            'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 
+            'caption_two', 'caption_three', 'caption_four'
+        ]);
         $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         $data['ins'] = auth()->user()->ins;
 
         $result = $this->repository->create(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Repair Job Card created Successfully']);
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully created']);
     }    
 
     /**
@@ -116,17 +120,19 @@ class RjcsController extends Controller
             'technician' => 'required',
             'subject' => 'required'
         ]);
-        $data = $request->only(['job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_item = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data = $request->only([
+            'job_card', 'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 
+            'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 
+            'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four'
+        ]);
+        $data_items = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         
         $data['ins'] = auth()->user()->ins;
         $data['id'] = $rjc->id;
 
-        // Update using repository update method
-        $this->repository->update(compact('data', 'data_item'));
+        $this->repository->update(compact('data', 'data_items'));
 
-        //return with successfull message
-        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc report updated']);
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully updated']);
     }
 
     /**
@@ -137,9 +143,8 @@ class RjcsController extends Controller
      */
     public function destroy(Rjc $rjc)
     {
-        //Calling the delete method on repository
         $this->repository->delete($rjc);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc report deleted']);
+
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc report successfully deleted']);
     }
 }
