@@ -11,9 +11,6 @@
 		table.items {
 			border: 0.1mm solid #000000;
 		}
-		table.itemsboarder {
-			border: 0.1mm solid #000000;
-		}
 		table {
 			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			font-size: 10pt;
@@ -25,19 +22,11 @@
 			border-left: 0.1mm solid #000000;
 			border-right: 0.1mm solid #000000;
 		}
-		table thead td {
+		table thead th {
 			background-color: #BAD2FA;
 			text-align: center;
 			border: 0.1mm solid #000000;
-			font-variant: small-caps;
-		}
-		.items td.blanktotal {
-			background-color: #EEEEEE;
-			border: 0.1mm solid #000000;
-			background-color: #FFFFFF;
-			border: 0mm none #000000;
-			border-top: 0.1mm solid #000000;
-			border-right: 0.1mm solid #000000;
+			font-weight: normal;
 		}
 		.items td.totals {
 			text-align: right;
@@ -61,18 +50,6 @@
 		.items td.cost {
 			text-align: center;
 		}
-		.invoice-title h1 {
-			font-size: 50px;
-			font-weight: lighter;
-			text-align: center;
-			margin: 0;
-			text-transform: uppercase;
-			padding: 5px;
-			letter-spacing: 2px;
-		}
-		.itemss {
-			text-transform: uppercase;
-		}
 		.dotted td {
 			border-bottom: dotted 1px black;
 		}
@@ -81,14 +58,28 @@
 		}
 		h5 {
 			text-decoration: underline;
+			font-size: 1em;
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: bold;
+		}
+		h5 span {
+			text-decoration: none;
+		}
+		.footer {
+			font-size: 9pt; 
+			text-align: center; 
+		}
+		.items-table {
+			font-size: 10pt; 
+			border-collapse: collapse;
+			height: 700px;
+			width: 100%;
 		}
 	</style>
 </head>
 <body>
 	<htmlpagefooter name="myfooter">
-		<div style=" font-size: 9pt; text-align: center; padding-top: 3mm; ">
-			Page {PAGENO} of {nb}
-		</div>
+		<div class="footer">Page {PAGENO} of {nb}</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
 	
@@ -114,118 +105,136 @@
 	</table>
 	<table width="100%" style="font-size: 10pt;margin-top:5px;">
 		<tr>
-			<td style="text-align: center;" width="100%" class="headerData"><span style="font-size:15pt;color:#0f4d9b;text-transform: uppercase;"><b>DIAGNOSIS REPORT</b></span>
+			<td style="text-align: center;" width="100%" class="headerData">
+				<span style="font-size:15pt;color:#0f4d9b;"><b>DIAGNOSIS / SITE SURVEY REPORT</b></span>
 			</td>
 		</tr>
 	</table><br>
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name :</b>{{ $invoice->client->company }}<br>
-				<b>Branch Name :</b>{{ $invoice->branch->name }}<br>
-				<b>Region :</b>{{ $invoice->region }}<br>
-				<b>Attention :</b> {{ $invoice->attention }}<br>
+				<b>Client Name : </b>{{ $invoice->client->company }}<br>
+				<b>Site / Branch Name : </b>{{ $invoice->branch->name }}<br>
+				<b>Region : </b>{{ $invoice->region }}<br>
+				<b>Attention : </b> {{ $invoice->attention }}<br>
 			<td width="5%">&nbsp;</td>
-			<td width="45%" style="border: 0.1mm solid #888888;"><span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
-				<b>Report No :</b> {{ $invoice->tid }}<br>
-				<b>Date :</b>{{ dateFormat($invoice->report_date, $company->main_date_format) }}<br>
-				<b>Client Ref No :</b>{{ $invoice->client_ref }}<br>
-				<b>Prepared By :</b>{{ $invoice->prepared_by }}<br>
+			<td width="45%" style="border: 0.1mm solid #888888;">
+				<span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
+				<b>Report No : </b> {{ 'DjR-'.sprintf('%04d', $invoice->tid) }}<br>
+				<b>Date : </b>{{ dateFormat($invoice->report_date, 'd-M-Y') }}<br><br>
+				<b>Prepared By : </b>{{ $invoice->prepared_by }}<br>
 			</td>
 		</tr>
 	</table><br>
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
-			<td style="border: 0.1mm solid #888888; ">
-				Ref :<b>{{ $invoice->subject }}</b>
+			<td style="border: 0.1mm solid #888888;">
+				Ref : <b>{{ $invoice->lead->title }}</b>
 			</td>
 		</tr>
 	</table>
-	<br>
-	<table class="items" width="100%" style="font-size: 10pt; border-collapse: collapse;height: 700px;" cellpadding="8">
+	<h5><span>a.</span> Equipment Details</h5>
+	<table class="items items-table" cellpadding=8>
 		<thead>
 			<tr>
-				<td width="10%">Tag No</td>
-				<td width="15%">Job Card</td>
-				<td width="15%">Make</td>
-				<td width="15%">Capacity</td>
-				<td width="15%">Location</td>
-				<td width="15%">Last Service Date</td>
-				<td width="15%">Next Service Date</td>
+				<th width="10%">Tag No</th>
+				<th width="15%">Type</th>
+				<th width="15%">Make</th>
+				<th width="15%">Capacity</th>
+				<th width="15%">Location</th>
+				<th width="15%">Last Service Date</th>
+				<th width="15%">Next Service Date</th>
 			</tr>
 		</thead>
 		<tbody>
 			<!-- ITEMS HERE -->
 			@foreach($invoice->items as $item)
-			<tr class="dotted">
-				<td class="mytotalss">{{ $item->tag_number }}</td>
-				<td class="mytotalss">{{ $item->joc_card }}</td>
-				<td class="mytotalss">{{ $item->make }}</td>
-				<td class="mytotalss">{{ $item->capacity }}</td>
-				<td class="mytotalss">{{ $item->location }}</td>
-				<td class="mytotalss">{{ dateFormat($item->last_service_date, $company->main_date_format) }}</td>
-				<td class="mytotalss">{{ dateFormat($item->next_service_date, $company->main_date_format) }}</td>
-			</tr>
+				<tr class="dotted">
+					<td class="mytotalss">{{ $item->tag_number }}</td>
+					<td class="mytotalss">{{ $item->equipment_type }}</td>
+					<td class="mytotalss">{{ $item->make }}</td>
+					<td class="mytotalss">{{ $item->capacity }}</td>
+					<td class="mytotalss">{{ $item->location }}</td>
+					<td class="mytotalss">{{ dateFormat($item->last_service_date, $company->main_date_format) }}</td>
+					<td class="mytotalss">{{ dateFormat($item->next_service_date, $company->main_date_format) }}</td>
+				</tr>
 			@endforeach
 			<!-- END ITEMS HERE -->
 		</tbody>
-	</table><br>
-	<i align="center">Work was attended by the following technician(s) : <b>{{ $invoice->technician }}</b></i>
+	</table>
 	<div>
-		<h5>Call Description</h5>
-		<p>{{ $invoice->lead->note }} </p>
+		<h5><span>b.</span> Call Out Details</h5>
+		<p>
+			{{ $invoice->lead->title }} <b>on</b> <i>{{ dateFormat($invoice->lead->date_of_request, 'd-M-Y') }}</i> <b>as
+			per reference</b> <i>{{ $invoice->lead->client_ref }}</i>
+		</p><br>
+		<table class="items items-table" cellpadding=8>
+			<thead>
+				<tr>
+					<th width="30%" >Djc Number</th>
+					<th width="30%">Djc Date</th>
+					<th width="40%">Diagnosis Technician(s)</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="dotted">
+					<td>{{ $invoice->job_card }}</td>
+					<td>{{ dateFormat($invoice->report_date, 'd-M-Y') }}</td>
+					<td>{{ $invoice->technician }}</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 	<div>
-		<h5> Findings & Root Cause</h5>
+		<h5><span>c.</span> Findings & Root Cause</h5>
 		<p>{!! $invoice->root_cause !!}</p>
 	</div>
 	<div>
-		<h5>Action Taken</h5>
+		<h5><span>d.</span> Action Taken</h5>
 		<p>{!! $invoice->action_taken !!}</p>
 	</div>
 	<div>
-		<h5>Recommendation</h5>
+		<h5><span>e.</span> Recommendation</h5>
 		<p>{!! $invoice->recommendations !!}</p>
 	</div>
-	<br>
-	<table class="items" width="100%" style="font-size: 10pt; border-collapse: collapse;height: 700px;" cellpadding="8">
-		<tr>
-			<th colspan="4">PICTORIAL</th>
-		</tr>
-		<tr class="dottedt">
-			<th width="25%"></th>
-			<th width="25%"></th>
-			<th width="25%"></th>
-			<th width="25%"></th>
-		</tr>
-		<tr class="dotted">
-			<td>
-				@isset($invoice->image_one)
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_one) }}" alt="" border=3 height=200 width=300></img>
-				@endisset
-			</td>
-			<td>
-				@isset($invoice->image_two)
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_two) }}" alt="" border=3 height=200 width=300></img>
-				@endisset
-			</td>
-			<td>
-				@isset($invoice->image_three)
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_three) }}" alt="" border=3 height=200 width=300></img>
-				@endisset
-			</td>
-			<td>
-				@isset($invoice->image_four)
-					<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_four) }}" alt="" border=3 height=200 width=300></img>
-				@endisset
-			</td>
-		</tr>
-		<tr>
-			<td class="cost">{{ $invoice->caption_one }}</td>
-			<td class="cost">{{ $invoice->caption_two }}</td>
-			<td class="cost">{{ $invoice->caption_three }}</td>
-			<td class="cost">{{ $invoice->caption_four }}</td>
-		</tr>
-	</table>
+	<h5><span>f.</span> Pictorials</h5>
+	@if(isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four))
+		<table class="items items-table" cellpadding="8">		
+			<tr class="dottedt">
+				<th width="25%"></th>
+				<th width="25%"></th>
+				<th width="25%"></th>
+				<th width="25%"></th>
+			</tr>
+			<tr class="dotted">
+				<td>
+					@isset($invoice->image_one)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_one) }}" alt="" border=3 height=200 width=300></img>
+					@endisset
+				</td>
+				<td>
+					@isset($invoice->image_two)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_two) }}" alt="" border=3 height=200 width=300></img>
+					@endisset
+				</td>
+				<td>
+					@isset($invoice->image_three)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_three) }}" alt="" border=3 height=200 width=300></img>
+					@endisset
+				</td>
+				<td>
+					@isset($invoice->image_four)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_four) }}" alt="" border=3 height=200 width=300></img>
+					@endisset
+				</td>
+			</tr>
+			<tr>
+				<td class="cost">{{ $invoice->caption_one }}</td>
+				<td class="cost">{{ $invoice->caption_two }}</td>
+				<td class="cost">{{ $invoice->caption_three }}</td>
+				<td class="cost">{{ $invoice->caption_four }}</td>
+			</tr>
+		</table>
+	@endif
 </body>
 </html>
