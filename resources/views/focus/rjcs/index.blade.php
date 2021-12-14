@@ -3,7 +3,7 @@
 @section ('title', 'Rjc Report Management')
 
 @section('page-header')
-    <h1>Rjc Report Management</h1>
+<h1>Rjc Report Management</h1>
 @endsection
 
 @section('content')
@@ -31,8 +31,8 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Rjc ID</th>
-                                            <th>Reference</th>
+                                            <th>Report No</th>
+                                            <th>Client Ref</th>
                                             <th>Subject</th>
                                             <th>Project No</th>
                                             <th>Job Card</th>
@@ -57,54 +57,99 @@
 @endsection
 
 @section('after-scripts')
-    {{-- For DataTables --}}
-    {{ Html::script(mix('js/dataTable.js')) }}
+{{-- For DataTables --}}
+{{ Html::script(mix('js/dataTable.js')) }}
 
-    <script>
-        $(function () {
-            setTimeout(function () { draw_data(); }, "{{config('master.delay')}}");
+<script>
+    $(function() {
+        setTimeout(() => draw_data(), "{{config('master.delay')}}");
+    });
+
+    function draw_data() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         });
 
-        function draw_data() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        const tableLang = {@lang('datatable.strings')};
+        var dataTable = $('#rjc-table').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            language: tableLang,
+            ajax: {
+                url: '{{ route("biller.rjcs.get") }}',
+                type: 'post',
+                data: {
+                    c_type: 0
                 }
-            });
-
-            const lang = {@lang('datatable.strings')};
-
-            var dataTable = $('#rjc-table').dataTable({
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                language: lang,
-                ajax: {
-                    url: '{{ route("biller.rjcs.get") }}',
-                    type: 'post',
-                    data: {c_type: 0}
+            },
+            columns: [{
+                    data: 'DT_Row_Index',
+                    name: 'id'
                 },
-                columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'tid', name: 'tid'},
-                    {data: 'reference', name: 'reference'},
-                    {data: 'subject', name: 'subject'},
-                    {data: 'project_no', name: 'project_no'},
-                    {data: 'job_card', name: 'job_card'},
-                    {data: 'created_at', name: "{{config('module.rjcs.table')}}.created_at"},
-                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
-                ],
-                order: [[0, "asc"]],
-                searchDelay: 500,
-                dom: 'Blfrtip',
-                buttons: {
-                    buttons: [
-                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
-                    ]
+                {
+                    data: 'tid',
+                    name: 'tid'
+                },
+                {
+                    data: 'client_ref',
+                    name: 'client_ref'
+                },
+                {
+                    data: 'subject',
+                    name: 'subject'
+                },
+                {
+                    data: 'project_no',
+                    name: 'project_no'
+                },
+                {
+                    data: 'job_card',
+                    name: 'job_card'
+                },
+                {
+                    data: 'created_at',
+                    name: "{{config('module.rjcs.table')}}.created_at"
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    searchable: false,
+                    sortable: false
                 }
-            });
-        }
-    </script>
+            ],
+            order: [
+                [0, "desc"]
+            ],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons: {
+                buttons: [{
+                        extend: 'csv',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1]
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1]
+                        }
+                    }
+                ]
+            }
+        });
+    }
+</script>
 @endsection
