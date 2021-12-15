@@ -130,7 +130,7 @@ class ProjectsController extends Controller
         
         //Update the model using repository update method
         if ($project->creator->id == auth()->user()->id) {
-            $this->repository->update($project, $input);
+            // $this->repository->update($project, $input);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
