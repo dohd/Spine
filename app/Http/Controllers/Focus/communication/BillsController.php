@@ -163,6 +163,32 @@ class BillsController extends Controller
         return Response::stream($pdf->Output($name, 'I'), 200, $headers);
     }
 
+    public function print_verified_quote_pdf(Request $request)
+    {
+        $data = $this->bill_details($request);
+
+        $html = view('focus.bill.print_verified_quote', $data)->render();
+        // print_log(json_encode($data, JSON_PRETTY_PRINT));
+
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $tid = $data['invoice']['tid'];
+        $name = 'QT-' . sprintf('%04d', $tid) . '-V.pdf';
+        if ($data['invoice']['bank_id']) {
+            $name = 'PI-' . sprintf('%04d', $tid) . '-V.pdf';
+        }
+
+        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+    }
+
     public function print_compact(Request $request)
     {
 
