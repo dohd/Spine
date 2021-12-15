@@ -21,7 +21,8 @@
         @php
             $valid_token = token_validator('', 'q'.$quote->id . $quote->tid, true);
         @endphp
-        
+
+        {{-- Hidden Quote verification button 
         @if ($quote->status == 'approved')
             <div class="btn-group ">
                 <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -42,6 +43,8 @@
                 </div>                                  
             </div>                                
         @endif 
+        --}}
+        
         <div class="btn-group">
             <button type="button" class="btn btn-large btn-blue mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-check"></i> {{trans('general.change_status')}}
