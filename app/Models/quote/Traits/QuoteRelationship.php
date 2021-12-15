@@ -5,6 +5,7 @@ namespace App\Models\quote\Traits;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\lead\Lead;
+use App\Models\project\ProjectQuote;
 use App\Models\verifiedjcs\VerifiedJc;
 
 /**
@@ -12,6 +13,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function project_quote()
+    {
+        return $this->hasOne(ProjectQuote::class);
+    }
+
     public function verified_jcs()
     {
         return $this->hasMany(VerifiedJc::class);
