@@ -9,9 +9,9 @@ use App\Models\order\Order;
 use App\Models\purchaseorder\Purchaseorder;
 use App\Models\quote\Quote;
 use App\Models\djc\Djc;
+use App\Models\rjc\Rjc;
 use Closure;
 use Illuminate\Support\Facades\App;
-
 
 class ValidTokenMiddleware
 {
@@ -24,36 +24,40 @@ class ValidTokenMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if (App::environment('production')) error_reporting(0);
+        if (App::environment('production')) error_reporting(0);        
+        if (!isset($request->type)) return abort(403, 'Access denied');
         
-        if (isset($request->type)) {
-            switch ($request->type) {
-                case 1:
-                    $invoice = Invoice::withoutGlobalScopes()->where('id', '=', $request->id)->first('ins');
-                    break;
-                case 3:
-                    $invoice = Bill::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                    break;
-                case 4:
-                    $invoice = Quote::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                    break;
-                case 5:
-                    $invoice = Order::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                    break;
-                case 9:
-                    $invoice = Purchaseorder::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                    break;
-                case 10:
-                    $invoice = Djc::withoutGlobalScopes()->where('id', '=', $request->id)->first();
-                    break;
-            }
-
-            if (isset($invoice->ins)) {
-                session(['theme' => ConfigMeta::withoutGlobalScopes()->where(['ins' => $invoice->ins, 'feature_id' => 15])->first('value1')->value1]);
-                return $next($request);
-            }
+        switch ($request->type) {
+            case 1:
+                $invoice = Invoice::withoutGlobalScopes()->find($request->id);
+                break;
+            case 3:
+                $invoice = Bill::withoutGlobalScopes()->find($request->id);
+                break;
+            case 4:
+                $invoice = Quote::withoutGlobalScopes()->find($request->id);
+                break;
+            case 5:
+                $invoice = Order::withoutGlobalScopes()->find($request->id);
+                break;
+            case 9:
+                $invoice = Purchaseorder::withoutGlobalScopes()->find($request->id);
+                break;
+            case 10:
+                $invoice = Djc::withoutGlobalScopes()->find($request->id);
+                break;
+            case 11:
+                $invoice = Rjc::withoutGlobalScopes()->find($request->id);
+                break;
         }
 
-        abort(404, 'Access denied');
+        if (isset($invoice->ins)) {
+            session(['theme' => ConfigMeta::withoutGlobalScopes()
+                ->where(['ins' => $invoice->ins, 'feature_id' => 15])
+                ->first('value1')->value1
+            ]);
+        }
+        
+        return $next($request);
     }
 }
