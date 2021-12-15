@@ -117,8 +117,9 @@ class BillsController extends Controller
     {
         $data = $this->bill_details($request);
         
-        print_log(json_encode($data, JSON_PRETTY_PRINT));
+        // print_log(json_encode($data, JSON_PRETTY_PRINT));
         $html = view('focus.bill.print_rjc', $data)->render();
+        
         $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
         $pdf = new \Mpdf\Mpdf($pdf_config);
         $pdf->WriteHTML($html);
@@ -531,6 +532,10 @@ class BillsController extends Controller
                 foreach($attributes as $key => $val) {
                     $invoice[$key] = $val;
                 }
+                // main project quote
+                $invoice['quote'] = $invoice->project->quotes->find($invoice->project->main_quote_id);
+                // All djcs sharing lead of the main project quote
+                $invoice['djcs'] = Djc::where('lead_id', $invoice->quote->lead->id)->get(['tid', 'report_date']);
 
                 $flag = token_validator($request->token, 'd' . $invoice->id);
                 $general = $getGeneral(
