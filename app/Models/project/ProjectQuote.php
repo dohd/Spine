@@ -11,4 +11,9 @@ class ProjectQuote extends Model
     protected $fillable = [
         'project_id', 'quote_id'
     ];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }
