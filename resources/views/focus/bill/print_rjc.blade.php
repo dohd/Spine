@@ -113,14 +113,14 @@
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name : </b>{{ '' }}<br>
-				<b>Site / Branch Name : </b>{{ '' }}<br>
+				<b>Client Name : </b>{{ $invoice->quote->client->company }}<br>
+				<b>Site / Branch : </b>{{ $invoice->quote->branch->name }}<br>
 				<b>Region : </b>{{ $invoice->region }}<br>
 				<b>Attention : </b> {{ $invoice->attention }}<br>
 			<td width="5%">&nbsp;</td>
 			<td width="45%" style="border: 0.1mm solid #888888;">
 				<span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
-				<b>Report No : </b> {{ 'DjR-'.sprintf('%04d', $invoice->tid) }}<br>
+				<b>Report No : </b> {{ 'RjR-'.sprintf('%04d', $invoice->tid) }}<br>
 				<b>Date : </b>{{ dateFormat($invoice->report_date, 'd-M-Y') }}<br><br>
 				<b>Prepared By : </b>{{ $invoice->prepared_by }}<br>
 			</td>
@@ -129,7 +129,7 @@
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td style="border: 0.1mm solid #888888;">
-				Ref : <b>{{ '' }}</b>
+				Ref : <b>{{ $invoice->quote->lead->title }}</b>
 			</td>
 		</tr>
 	</table>
@@ -165,22 +165,47 @@
 	<div>
 		<h5><span>b.</span> Call Out Details</h5>
 		<p>
-			{{ '' }} <b>on</b> <i>{{ '' }}</i> <b>as
-			per reference</b> <i>{{ '' }}</i>
+			{{ $invoice->quote->lead->title }} <b>on</b> <i>{{ dateFormat($invoice->quote->lead->date_of_request, 'd-M-Y') }}</i> <b>as
+			per reference</b> <i>{{ $invoice->quote->lead->client_ref }}</i>
 		</p><br>
 		<table class="items items-table" cellpadding=8>
 			<thead>
 				<tr>
-					<th width="30%" >Djc Number</th>
-					<th width="30%">Djc Date</th>
-					<th width="40%">Diagnosis Technician(s)</th>
+					<th width="24%">Diagnosis Job Card Report <br>(Number, Date)</th>
+					<th width="16%">Quote (Number, Date)</th>
+					<th width="16%">Quote (Djc Ref, Djc Date)</th>
+					<th width="44">Repair Job Card <br>(Number, Date, Technician)</th>			
 				</tr>
 			</thead>
 			<tbody>
 				<tr class="dotted">
-					<td>{{ $invoice->job_card }}</td>
-					<td>{{ dateFormat($invoice->report_date, 'd-M-Y') }}</td>
-					<td>{{ $invoice->technician }}</td>
+					<td>
+						@foreach ($invoice->djcs as $djc)
+							{{ 'DjR-'.sprintf('%04d', $djc->tid) }} ; 
+							{{ dateFormat($djc->report_date, 'd-m-Y') }} 
+							<br>
+						@endforeach
+					</td>
+					@php
+						$tid = sprintf('%04d', $invoice->quote->tid);
+						if ($invoice->quote->bank_id) $tid = 'PI-'.$tid;
+						else $tid = 'QT-'.$tid;
+					@endphp
+					<td>{{ $tid }} ; {{ dateFormat($invoice->quote->invoicedate, 'd-m-Y') }}</td>
+					<td>
+						{{ $invoice->quote->reference }} ; 
+						{{ dateFormat($invoice->quote->reference_date, 'd-m-Y') }}
+					</td>
+					<td>
+						@foreach ($invoice->quote->verified_jcs as $rjc)
+							@if ($rjc->type == 2)
+								DN-{{ $rjc->reference }} ; {{ dateFormat($rjc->date, 'd-m-Y') }} ; {{ $rjc->technician }}
+							@else
+								JC-{{ $rjc->reference }} ; {{ dateFormat($rjc->date, 'd-m-Y') }} ; {{ $rjc->technician }}
+							@endif							
+							<br>
+						@endforeach
+					</td>					
 				</tr>
 			</tbody>
 		</table>
