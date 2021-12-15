@@ -66,7 +66,7 @@ class RjcsController extends Controller
         ]);
 
         $data = $request->only([
-            'job_card', 'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 
+            'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 
             'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 
             'caption_two', 'caption_three', 'caption_four'
         ]);
@@ -121,7 +121,7 @@ class RjcsController extends Controller
             'subject' => 'required'
         ]);
         $data = $request->only([
-            'job_card', 'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 
+            'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 
             'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 
             'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four'
         ]);

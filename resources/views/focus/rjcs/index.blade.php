@@ -35,7 +35,6 @@
                                             <th>Client Ref</th>
                                             <th>Subject</th>
                                             <th>Project No</th>
-                                            <th>Job Card</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -104,10 +103,6 @@
                 {
                     data: 'project_no',
                     name: 'project_no'
-                },
-                {
-                    data: 'job_card',
-                    name: 'job_card'
                 },
                 {
                     data: 'created_at',
