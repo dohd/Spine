@@ -4,7 +4,6 @@
  * core
  *
  */
-
 //General Application
 Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('install')->name('login');
 Route::get('test', 'Focus\general\TestController@showLoginForm')->name('test');
@@ -29,6 +28,7 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
         Route::get('print_bill/{id}/{type}/{token}/{pdf}', 'BillsController@print_pdf')->name('print_bill');
         Route::get('print_djc/{id}/{type}/{token}/{pdf}', 'BillsController@print_djc_pdf')->name('print_djc');
         Route::get('print_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_quote_pdf')->name('print_quote');
+        Route::get('print_rjc/{id}/{type}/{token}/{pdf}', 'BillsController@print_rjc_pdf')->name('print_rjc');
 
         Route::get('print_compact/{id}/{type}/{token}/{pdf}', 'BillsController@print_compact')->name('print_compact');
         Route::get('view_bank/{id}/{type}/{token}', 'BillsController@view_bank')->name('view_bank');
