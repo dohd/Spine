@@ -28,6 +28,7 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
         Route::get('print_bill/{id}/{type}/{token}/{pdf}', 'BillsController@print_pdf')->name('print_bill');
         Route::get('print_djc/{id}/{type}/{token}/{pdf}', 'BillsController@print_djc_pdf')->name('print_djc');
         Route::get('print_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_quote_pdf')->name('print_quote');
+        Route::get('print_verified_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_verified_quote_pdf')->name('print_verified_quote');
         Route::get('print_rjc/{id}/{type}/{token}/{pdf}', 'BillsController@print_rjc_pdf')->name('print_rjc');
 
         Route::get('print_compact/{id}/{type}/{token}/{pdf}', 'BillsController@print_compact')->name('print_compact');
