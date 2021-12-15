@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\items\VerifiedItem;
+use App\Models\rjc\Rjc;
 use Endroid\QrCode\QrCode;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -108,6 +109,29 @@ class BillsController extends Controller
 
         $tid = $data['invoice']['tid'];
         $name = 'DjR-' . sprintf('%04d', $tid) . '.pdf';
+
+        return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
+    }
+
+    public function print_rjc_pdf(Request $request)
+    {
+        $data = $this->bill_details($request);
+        
+        print_log(json_encode($data, JSON_PRETTY_PRINT));
+        $html = view('focus.bill.print_rjc', $data)->render();
+        $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
+        $pdf = new \Mpdf\Mpdf($pdf_config);
+        $pdf->WriteHTML($html);
+
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $tid = $data['invoice']['tid'];
+        $name = 'RjR-' . sprintf('%04d', $tid) . '.pdf';
 
         return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
     }
@@ -500,6 +524,26 @@ class BillsController extends Controller
                 );
                 $valid_token = token_validator('', 'd' . $invoice->id, true);
                 break;
+            case 11:
+                //rjc
+                $invoice = Rjc::find($request->id);
+                $attributes = $getAttr(9, 'rjc_report', 9, 1, $invoice->customer_id, route('biller.purchaseorders.show', $invoice->id));
+                foreach($attributes as $key => $val) {
+                    $invoice[$key] = $val;
+                }
+
+                $flag = token_validator($request->token, 'd' . $invoice->id);
+                $general = $getGeneral(
+                    trans('purchaseorders.purchaseorder'),
+                    trans('purchaseorders.purchaseorder'),
+                    trans('purchaseorders.invoicedate'),
+                    trans('purchaseorders.invoiceduedate'), 
+                    trans('suppliers.supplier'),
+                    'ltr', 9, false
+                );
+                $valid_token = token_validator('', 'd' . $invoice->id, true);
+                break;
+
         }
 
         if ($flag) {
