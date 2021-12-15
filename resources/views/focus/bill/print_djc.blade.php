@@ -114,7 +114,7 @@
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
 				<b>Client Name : </b>{{ $invoice->client->company }}<br>
-				<b>Site / Branch Name : </b>{{ $invoice->branch->name }}<br>
+				<b>Site / Branch : </b>{{ $invoice->branch->name }}<br>
 				<b>Region : </b>{{ $invoice->region }}<br>
 				<b>Attention : </b> {{ $invoice->attention }}<br>
 			<td width="5%">&nbsp;</td>
