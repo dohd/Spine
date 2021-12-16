@@ -43,10 +43,9 @@
                                                 <select class="form-control  round  select-box" name="project_id" id="project" required>
                                                     <option value="0">-- Select Project --</option>
                                                     @foreach ($projects as $project)
-                                                        @php
-                                                            $tid = 'P-'.sprintf('%04d', $project->project_number);
-                                                        @endphp
-                                                        <option value="{{ $project->id }}">{{ $tid }} - {{ $project->name }}</option>
+                                                        <option value="{{ $project->id }}">
+                                                            {{ 'P-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>                                                
                                             </div>
