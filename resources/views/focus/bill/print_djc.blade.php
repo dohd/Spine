@@ -129,7 +129,7 @@
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td style="border: 0.1mm solid #888888;">
-				Ref : <b>{{ $invoice->lead->title }}</b>
+				Ref : <b>{{ $invoice->subject }}</b>
 			</td>
 		</tr>
 	</table>
