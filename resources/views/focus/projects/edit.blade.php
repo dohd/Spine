@@ -79,10 +79,8 @@
     $("#other_quote").select2();
     $("#branch_id").select2();
 
-    console.log(@json($project))
-
     // customer
-    const customer = @json($project->customer);
+    const customer = @json($project->customer_project);
     $("#person").append(new Option(customer.name, customer.id, 'selected', true));
     // branch
     const branch = @json($branch);
