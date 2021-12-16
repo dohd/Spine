@@ -200,11 +200,10 @@
 	<h5><span>f.</span> Pictorials</h5>
 	@if(isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four))
 		<table class="items items-table" cellpadding="8">		
-			<tr class="dottedt">
-				<th width="25%"></th>
-				<th width="25%"></th>
-				<th width="25%"></th>
-				<th width="25%"></th>
+			<tr class="dottedt">				
+				@for ($i=0; $i < 4; $i++)
+					<th width="25%"></th>
+				@endfor		
 			</tr>
 			<tr class="dotted">
 				<td>
