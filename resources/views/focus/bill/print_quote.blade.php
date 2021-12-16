@@ -160,19 +160,18 @@
 			</td>
 		</tr>
 	</table>
-	@php
-		$is_verified = request()->getQueryString();
-	@endphp
 	<table class="doc-table">
 		<tr>
 			<td class="doc-title-td">
-				@if ($is_verified)
-					<span class='doc-title'><b>WORKDONE VERIFICATION</b></span>
-				@elseif ($invoice->bank_id)
-					<span class='doc-title'><b>PROFORMA INVOICE</b></span>
-				@else
-					<span class='doc-title'><b>QUOTATION</b></span>
-				@endif
+				<span class='doc-title'>
+					<b>
+						@if ($invoice->bank_id)
+							PROFORMA INVOICE
+						@else
+							QUOTATION
+						@endif
+					</b>
+				</span>				
 			</td>
 		</tr>
 	</table><br>
@@ -199,41 +198,16 @@
 						$field_name = 'Proforma No';
 						$field_value = 'PI/' . $tid;
 					}
-					if ($is_verified) {
-						$field_name = 'Verification No';
-						$v_no =  ' (v' . $invoice->verified_jcs[0]->verify_no . ')';
-						$field_value = $field_value . $v_no;
-					}
 				@endphp
-				<b>{{ $field_name }} :</b> {{ $field_value }}<br>
-				@if ($is_verified)
-					<b>Verification Date :</b> {{ dateFormat($invoice->verification_date, 'd-M-Y') }} <br>
-				@else
-					<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
-				@endif
+				<b>{{ $field_name }} :</b> {{ $field_value }}<br>				
+				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
 				<b>Currency :</b> Kenya Shillings <br><br>
 				<b>Client Ref: </b> {{ $invoice->client_ref }}
 			</td>
 		</tr>
 	</table><br>
 	<table  class="ref" cellpadding="10">
-		<tr>
-			<td colspan="2">
-				Ref : <b>{{ $invoice->notes }}</b>
-			</td>
-		</tr>
-		@if ($is_verified)
-			<tr>
-				<td>RJC :
-					<b>
-						@foreach ($invoice->verified_jcs as $jc)
-							{{ $jc->reference }},
-						@endforeach
-					</b> 
-				</td>
-				<td>DNOTE : </td>
-			</tr>
-		@endif
+		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
 	</table>
 	<br>
 	<table class="items" cellpadding="8">
@@ -247,14 +221,8 @@
 				<td width="15%">AMOUNT</td>
 			</tr>
 		</thead>
-		@php
-			$products = $invoice->products;
-			if ($is_verified) {
-				$products = $invoice->verified_items;
-			}
-		@endphp
 		<tbody>
-			@foreach($products as $product)
+			@foreach($invoice->products as $product)
 				@if ($product->a_type == 1)	
 					@php
 						$product_qty = (int) $product->product_qty;
@@ -278,21 +246,18 @@
 					<tr>
 						<td><b>{{ $product->numbering }}<b></td>
 						<td><b>{{ $product->product_name }}</b></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
+						@for($i=0; $i < 4; $i++) 
+							<td></td>
+						@endfor
 					</tr>
 				@endif				
 			@endforeach
 			<!-- empty row with dynamic height-->
 			<tr>
-				<td {!! 'style="height:'. strval(400-30*count($products)) .'px;"' !!}></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td height="{{ strval(400-30*count($invoice->products)) }}"></td>
+				@for($i=0; $i < 5; $i++) 
+                    <td></td>
+                @endfor
 			</tr>
 			<tr>
 				<td colspan="4" class="bd-t" rowspan="2">
