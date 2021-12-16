@@ -23,7 +23,6 @@ use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\note\Note;
 use App\Models\account\Account;
-use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMileStone;
 use App\Models\project\ProjectRelations;
@@ -36,11 +35,8 @@ use App\Http\Responses\Focus\project\EditResponse;
 use App\Repositories\Focus\project\ProjectRepository;
 use App\Http\Requests\Focus\project\ManageProjectRequest;
 use App\Http\Requests\Focus\project\CreateProjectRequest;
-use App\Http\Requests\Focus\project\EditProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
-use App\Http\Requests\Focus\project\DeleteProjectRequest;
-use App\Models\rjc\Rjc;
-use App\Repositories\Focus\rjc\RjcRepository;
+use App\Models\project\Project;
 use Yajra\DataTables\Facades\DataTables;
 
 /**
@@ -95,9 +91,9 @@ class ProjectsController extends Controller
             'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
         ]);
         $project_quotes = $request->only(['main_quote', 'other_quote']);
-        $rest = $request->only(['tags', 'time_from',  'time_to', 'color',  'employees']);
+        // $rest = $request->only(['tags', 'time_from',  'time_to', 'color',  'employees']);
 
-        $result = $this->repository->create(compact('project', 'project_quotes', 'rest'));
+        $result = $this->repository->create(compact('project', 'project_quotes'));
 
         return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.projects.created'), 'refresh' => 1]);
     }
@@ -109,11 +105,10 @@ class ProjectsController extends Controller
      * @param EditProjectRequestNamespace $request
      * @return \App\Http\Responses\Focus\project\EditResponse
      */
-    public function edit(Project $project, EditProjectRequest $request)
+    public function edit(Project $project)
     {
-        if ($project->creator->id == auth()->user()->id) {
-            return new EditResponse($project);
-        }
+        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
+        if (true) return new EditResponse($project);        
     }
 
     /**
@@ -125,14 +120,18 @@ class ProjectsController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
+        // extract input fields from request
+        $data = $request->only([
+            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc', 
+            'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
+        ]);
+        $quotes = $request->only(['main_quote', 'other_quote']);
+
+        $data['id'] = $project->id;
         
-        //Update the model using repository update method
-        if ($project->creator->id == auth()->user()->id) {
-            // $this->repository->update($project, $input);
-        }
-        //return with successfull message
+        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
+        if (true) $this->repository->update($project, compact('data', 'quotes'));
+        
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
     }
 
@@ -143,11 +142,10 @@ class ProjectsController extends Controller
      * @param App\Models\project\Project $project
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Project $project, DeleteProjectRequest $request)
+    public function destroy(Project $project)
     {
-        //Calling the delete method on repository
         $this->repository->delete($project);
-        //returning with successfull message
+
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.deleted')]);
     }
 
@@ -160,7 +158,6 @@ class ProjectsController extends Controller
      */
     public function show(Project $project, ManageProjectRequest $request)
     {
-
         if (project_view($project->id)) {
             //returning with successfull message
             $employees = Hrm::all();
