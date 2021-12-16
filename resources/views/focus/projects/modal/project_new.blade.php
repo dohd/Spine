@@ -24,7 +24,7 @@
                             <fieldset class="form-group col-md-4">
                                 <div><label for="projectType">Project Type / Sales Account</label></div>
                                 <select class="form-control  select-box" name="sales_account" id="sales_account" data-placeholder="Project Type/Sales Account" required>
-                                    <option value="">Project Type/Sales Account</option>
+                                    <option value="0">Project Type/Sales Account</option>
                                     @foreach($accounts as $account)
                                         <option value="{{$account['id']}}">{{$account['code']}} {{$account['holder']}}</option>
                                     @endforeach
