@@ -33,21 +33,25 @@ class ProjectRepository extends BaseRepository
     {
         $q = $this->query()->withoutGlobalScopes();
 
-        if ($c) {
-            // $q->WhereHas('creator', function ($s) {
-            //     return $s->where('rid', '=', auth()->user()->id);
-            // });
-            // $q->orWhereHas('users', function ($s) {
-            //     return $s->where('rid', '=', auth()->user()->id);
-            // });
-        } else {
-            $q->where('project_share','=',4);
-            $q->orWhere('project_share','=',6);
-            $q->whereHas('customer', function ($s) {
-                return $s->where('rid', '=', auth('crm')->user()->id);
-            });
-        }
-        return $q->get(['id', 'name', 'status', 'project_number', 'priority', 'started_status', 'progress', 'end_date', 'created_at']);
+        // if ($c) {
+        //     $q->WhereHas('creator', function ($s) {
+        //         return $s->where('rid', '=', auth()->user()->id);
+        //     });
+        //     $q->orWhereHas('users', function ($s) {
+        //         return $s->where('rid', '=', auth()->user()->id);
+        //     });
+        // } else {
+        //     $q->where('project_share', 4);
+        //     $q->orWhere('project_share', 6);
+        //     $q->whereHas('customer', function ($s) {
+        //         return $s->where('rid', auth('crm')->user()->id);
+        //     });
+        // }
+
+        return $q->get([
+            'id', 'name', 'status', 'project_number', 'priority', 'started_status', 'progress', 
+            'end_date', 'created_at'
+        ]);
     }
 
     /**
@@ -150,65 +154,93 @@ class ProjectRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Project $project, array $input)
+    public function update($project, array $input)
     {
-        $employees = @$input['employees'];
-        $tags = @$input['tags'];
-        $calender = @$input['link_to_calender'];
-        $color = @$input['color'];
-        $customer = @$input['customer'];
+        DB::beginTransaction();
+        // update project
+        $quotes = $input['quotes'];
+        $data = array_merge($input['data'], ['main_quote_id' => $quotes['main_quote']]);
+        $result = $project->update($data);
 
-        unset($input['tags']);
-        unset($input['employees']);
-        unset($input['link_to_calender']);
-        unset($input['color']);
-           unset($input['customer']);
-        $user_id = auth()->user()->id;
-
-        $input['start_date'] = datetime_for_database($input['start_date'] . ' ' . $input['time_from']);
-        $input['end_date'] = datetime_for_database($input['end_date'] . ' ' . $input['time_to']);
-        unset($input['time_from']);
-        unset($input['time_to']);
-        $input = array_map( 'strip_tags', $input);
-        $result = $project->update($input);
-
-
-        if ($result) {
-            ProjectRelations::where(['related' => 1, 'project_id' => $project->id])->delete();
-            ProjectRelations::where(['related' => 2, 'project_id' => $project->id])->delete();
-            ProjectRelations::where(['related' => 3, 'project_id' => $project->id])->delete();
-            $er = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
-            if ($er) {
-                $er->event->delete();
-                $er->delete();
-            }
-            $tag_group = array();
-            if (is_array($tags)) {
-                foreach ($tags as $row) {
-                    $tag_group[] = array('project_id' => $project->id, 'related' => 1, 'rid' => $row);
-                }
-            }
-
-            if (is_array($employees)) {
-                foreach ($employees as $row) {
-                    $tag_group[] = array('project_id' => $project->id, 'related' => 2, 'rid' => $row);
-                }
-            }
-               if ($customer > 0) {
-                $tag_group[] = array('project_id' => $project->id, 'related' => 8, 'rid' => $customer);
-            }
-            $tag_group[] = array('project_id' => $project->id, 'related' => 3, 'rid' => $user_id);
-            ProjectRelations::insert($tag_group);
-            ProjectLog::create(array('project_id' => $project->id, 'value' => '[' . trans('general.create') . '] ' . $project->name, 'user_id' => $user_id));
-            if ($calender) {
-                $event = Event::create(array('title' => trans('projects.project') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start_date'], 'end' => $input['end_date'], 'color' => $color, 'user_id' => $user_id, 'ins' => $project->ins));
-                EventRelation::create(array('event_id' => $event->id, 'related' => 1, 'r_id' => $project->id));
-            }
-            return $result;
+        // project quotes
+        $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $quotes['main_quote']);
+        if (isset($input['quotes']['other_quote'])) {
+            $other_quote = $input['quotes']['other_quote'];
+            foreach ($other_quote as $value) {
+                $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $value);
+            }         
+        }
+        // create or update project quotes
+        foreach($proj_quotes as $value) {
+            $quote = ProjectQuote::firstOrNew($value);
+            $quote->save();
+            Quote::find($value['quote_id'])->update(['project_quote_id' => $quote->id]);
         }
 
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.projects.update_error'));
+
+        /**
+         * Initial logic of the commented out browser fields
+         */
+        // $employees = @$input['employees'];
+        // $tags = @$input['tags'];
+        // $calender = @$input['link_to_calender'];
+        // $color = @$input['color'];
+        // $customer = @$input['customer'];
+
+        // unset($input['tags']);
+        // unset($input['employees']);
+        // unset($input['link_to_calender']);
+        // unset($input['color']);
+        //    unset($input['customer']);
+        // $user_id = auth()->user()->id;
+
+        // $input['start_date'] = datetime_for_database($input['start_date'] . ' ' . $input['time_from']);
+        // $input['end_date'] = datetime_for_database($input['end_date'] . ' ' . $input['time_to']);
+        // unset($input['time_from']);
+        // unset($input['time_to']);
+        // $input = array_map( 'strip_tags', $input);
+        // $result = $project->update($input);
+
+
+        // if ($result) {
+        //     ProjectRelations::where(['related' => 1, 'project_id' => $project->id])->delete();
+        //     ProjectRelations::where(['related' => 2, 'project_id' => $project->id])->delete();
+        //     ProjectRelations::where(['related' => 3, 'project_id' => $project->id])->delete();
+        //     $er = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
+        //     if ($er) {
+        //         $er->event->delete();
+        //         $er->delete();
+        //     }
+        //     $tag_group = array();
+        //     if (is_array($tags)) {
+        //         foreach ($tags as $row) {
+        //             $tag_group[] = array('project_id' => $project->id, 'related' => 1, 'rid' => $row);
+        //         }
+        //     }
+
+        //     if (is_array($employees)) {
+        //         foreach ($employees as $row) {
+        //             $tag_group[] = array('project_id' => $project->id, 'related' => 2, 'rid' => $row);
+        //         }
+        //     }
+        //        if ($customer > 0) {
+        //         $tag_group[] = array('project_id' => $project->id, 'related' => 8, 'rid' => $customer);
+        //     }
+        //     $tag_group[] = array('project_id' => $project->id, 'related' => 3, 'rid' => $user_id);
+        //     ProjectRelations::insert($tag_group);
+        //     ProjectLog::create(array('project_id' => $project->id, 'value' => '[' . trans('general.create') . '] ' . $project->name, 'user_id' => $user_id));
+        //     if ($calender) {
+        //         $event = Event::create(array('title' => trans('projects.project') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start_date'], 'end' => $input['end_date'], 'color' => $color, 'user_id' => $user_id, 'ins' => $project->ins));
+        //         EventRelation::create(array('event_id' => $event->id, 'related' => 1, 'r_id' => $project->id));
+        //     }
+        //     return $result;
+        // }
     }
 
     /**
@@ -220,13 +252,15 @@ class ProjectRepository extends BaseRepository
      */
     public function delete(Project $project)
     {
-        if ($project->creator->id == auth()->user()->id) {
+        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
+        if (true) {
             if ($project->delete()) {
-                $er = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
-                if ($er) {
-                    $er->event->delete();
-                    $er->delete();
+                $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
+                if (isset($event_rel)) {
+                    $event_rel->event->delete();
+                    $event_rel->delete();
                 }
+
                 return true;
             }
         }
