@@ -73,6 +73,10 @@ class ProjectRepository extends BaseRepository
         $project['main_quote_id'] = $main_quote;
         // $project['start_date'] = datetime_for_database($project['start_date'] . ' ' . $data['rest']['time_from']);
         // $project['end_date'] = datetime_for_database($project['end_date'] . ' ' . $data['rest']['time_to']);
+        $ref = Project::orderBy('project_number', 'desc')->first('project_number');
+        if (isset($ref) && $project['project_number'] <= $ref->project_number) {
+            $project['project_number'] = $ref->project_number + 1;
+        }
         $result = Project::create($project);
 
         // project quotes
