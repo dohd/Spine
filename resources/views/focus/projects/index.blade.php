@@ -133,7 +133,7 @@
             stateSave: true,
             language: tableLang,
             ajax: {
-                url: '{{ route("biller.projects.get") }}',
+                url: "{{ route('biller.projects.get') }}",
                 type: 'post'
             },
             columns: [{
