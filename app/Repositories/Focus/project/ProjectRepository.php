@@ -250,7 +250,7 @@ class ProjectRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function delete(Project $project)
+    public function delete($project)
     {
         // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
         if (true) {
