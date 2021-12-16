@@ -285,7 +285,7 @@
             url: baseurl + 'leads/lead_search',
             data: 'keyword=' + $(this).val(),
             success: function(data) {
-                $("#subject").val(data.note);
+                $("#subject").val(data.title);
                 $("#client_id").val(data.client_id);
                 $("#branch_id").val(data.branch_id);
                 $("#client_ref").val(data.client_ref);
