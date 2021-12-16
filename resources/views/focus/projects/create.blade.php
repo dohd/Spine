@@ -15,11 +15,9 @@
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
                     <h4 class="content-header-title mb-0">{{ trans('labels.backend.projects.create') }}</h4>
-
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right">
-
                         <div class="media-body media-right text-right">
                             @include('focus.projects.partials.projects-header-buttons')
                         </div>
@@ -30,13 +28,9 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-
                             <div class="card-content">
-
                                 <div class="card-body">
                                     {{ Form::open(['route' => 'biller.projects.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-project']) }}
-
-
                                     <div class="form-group">
                                         {{-- Including Form blade file --}}
                                         @include("focus.projects.form")
@@ -46,11 +40,8 @@
                                             <div class="clearfix"></div>
                                         </div><!--edit-form-btn-->
                                     </div><!-- form-group -->
-
                                     {{ Form::close() }}
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
