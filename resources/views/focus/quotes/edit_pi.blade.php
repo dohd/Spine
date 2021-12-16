@@ -165,7 +165,7 @@
                                     <div class="col-sm-4"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference', 'id' => 'client_ref']) }}
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference', 'id' => 'client_ref', 'required']) }}
                                         </div>
                                     </div> 
                                 </div>
@@ -229,6 +229,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control round  select-box" name="revision" id="revision">
+                                                    <option value="0">-- Select Revision --</option>
                                                     <option value="_r1">R1</option>
                                                     <option value="_r2">R2</option>
                                                     <option value="_r3">R3</option>
@@ -330,7 +331,7 @@
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
     $('#term_id').val("{{ $quote->term_id }}");
-    $('#revision').val("{{ $quote->revision }}" || '_r1');
+    if (@json($quote->revision)) $('#revision').val("{{ $quote->revision }}");
     $('#tax_id').val("{{ $quote->tax_id }}");
     $('#client_ref').val("{{ $quote->client_ref }}");
     $('#tax_format').val("{{ $quote->tax_format }}");
@@ -511,18 +512,26 @@
 
     // default tax
     const taxInt = Number($('#tax_id').val());
+
+    const $span = $('#tax-label').find('span').eq(0);
+    $('#tax_format').val('exclusive');
+    $span.text('OFF');
+    if (taxInt) {
+        $('#tax_format').val('inclusive');
+        $span.text(tax+'%');
+    }
+        
     let taxRate = (taxInt+100)/100;
     // on select Tax change
     $('#tax_id').change(function() {
         const tax = Number($(this).val()); 
         const $span = $('#tax-label').find('span').eq(0);
 
+        $('#tax_format').val('exclusive');
+        $span.text('OFF');
         if (tax) {
             $('#tax_format').val('inclusive');
             $span.text(tax+'%');
-        } else {
-            $('#tax_format').val('exclusive');
-            $span.text('OFF');
         }
        
         // loop throw product rows while adjusting values
