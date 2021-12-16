@@ -98,7 +98,7 @@
                                         <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'id' => 'client_ref']) }}
+                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'id' => 'client_ref', 'required']) }}
                                             </div>
                                         </div>
                                     </div>

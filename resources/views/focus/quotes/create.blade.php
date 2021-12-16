@@ -164,7 +164,7 @@
                                     <div class="col-sm-4"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round required', 'placeholder' => 'Client Reference', 'id' => 'client_ref']) }}
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference', 'id' => 'client_ref', 'required']) }}
                                         </div>
                                     </div>                                                                          
                                 </div>

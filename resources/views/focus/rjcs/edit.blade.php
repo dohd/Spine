@@ -85,7 +85,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'client_ref']) }}
+                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'client_ref', 'required']) }}
                                             </div>
                                         </div>                                        
                                     </div>
