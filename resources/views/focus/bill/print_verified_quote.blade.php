@@ -182,17 +182,14 @@
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>
-				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
 				@php
 					$tid = sprintf('%04d', $invoice->tid);
-					$field_value = 'QT/' . $tid;
-					if ($invoice->bank_id) $field_value = 'PI/' . $tid;
-                    $field_name = 'Verification No';
-                    $v_no =  ' (v' . $invoice->verified_jcs[0]->verify_no . ')';
-                    $field_value = $field_value . $v_no;
+					$v_no =  ' (v' . $invoice->verified_jcs[0]->verify_no . ')';
+					$field_value = 'QT-' . $tid;
+					if ($invoice->bank_id) $field_value = 'PI-' . $tid;
 				@endphp
-				<b>{{ $field_name }} :</b> {{ $field_value }}<br>
-                <b>Verification Date :</b> {{ dateFormat($invoice->verification_date, 'd-M-Y') }} <br>
+				<b>Reference No :</b> {{ $field_value . $v_no }}<br>
+                <b>Reference Date :</b> {{ dateFormat($invoice->verification_date, 'd-M-Y') }} <br>
 				<b>Currency :</b> Kenya Shillings <br><br>
 				<b>Client Ref: </b> {{ $invoice->client_ref }}
 			</td>
@@ -267,13 +264,18 @@
 			@endforeach
 			<!-- empty row with dynamic height-->
 			<tr>
-                <td height="{{ 350-30*count($invoice->verified_items) }}"></td>
+				@php
+					$items_height = 30 * count($invoice->verified_items);
+					$height = 370 - $items_height;
+					if ($invoice->bank_id) $height = 340 - $items_height;									
+				@endphp
+				<td height="{{ $height }}"></td>				
                 @for($i=0; $i < 6; $i++) 
                     <td></td>
                 @endfor
 			</tr>
 			<tr>
-				<td colspan="4" class="bd-t" rowspan="2">
+				<td colspan="4" class="bd-t">
 					@if ($invoice->bank_id)
 						<span class="customer-dt-title">BANK DETAILS:</span><br>
 						<b>Account Name :</b> Lean Ventures Limited<br>
@@ -294,6 +296,9 @@
                 <td class="bd-t" style="border-right: none;"></td>
 			</tr>
 			<tr>
+				<td colspan="4">
+					General Remark : <i>{{ $invoice->gen_remark }}<i>
+				</td>
 				@if ($invoice->print_type == 'inclusive')
 					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
 					<td class="align-r">
@@ -312,13 +317,7 @@
 				<td colspan="4" style="border-bottom: 1px solid;"><em>Prepared By : </em><b>{{ $invoice->prepared_by }}</b></td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
-                <td style="border-right: none;"></td>
 			</tr>
-            <tr>
-                <td colspan="6" style="border-bottom: 1px solid;">
-                    General Remark : <br><br> <i>{{ $invoice->gen_remark }}<i>
-                </td>
-            </tr>
 		</tbody>
 	</table>
 </body>
