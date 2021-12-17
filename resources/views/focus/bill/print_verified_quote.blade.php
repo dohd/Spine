@@ -124,9 +124,7 @@
 </head>
 <body>
 	<htmlpagefooter name="myfooter">
-		<div class="footer">
-			Page {PAGENO} of {nb}
-		</div>
+		<div class="footer">Page {PAGENO} of {nb}</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
 	<table class="header-table">
@@ -293,11 +291,11 @@
                         {{ number_format($invoice->subtotal, 2) }}
                     @endif
                 </td>				
-                <td class="bd-t" style="border-right: none;"></td>
+                <td class="bd-t"></td>
 			</tr>
 			<tr>
 				<td colspan="4">
-					General Remark : <i>{{ $invoice->gen_remark }}<i>
+					<b>General Remark</b> : <i>{{ $invoice->gen_remark }}<i>
 				</td>
 				@if ($invoice->print_type == 'inclusive')
 					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
@@ -312,11 +310,13 @@
 					<td class="align-r">Tax {{ $invoice->tax_id }}%</td>
 					<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
 				@endif
+				<td></td>
 			</tr>
 			<tr>
 				<td colspan="4" style="border-bottom: 1px solid;"><em>Prepared By : </em><b>{{ $invoice->prepared_by }}</b></td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
+				<td style="border-bottom: 1px solid;"></td>
 			</tr>
 		</tbody>
 	</table>
