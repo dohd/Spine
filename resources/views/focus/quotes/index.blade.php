@@ -3,7 +3,7 @@
 @php
     $query_str = request()->getQueryString();
     $quote_label = trans('labels.backend.quotes.management');
-    if ($query_str == 'page=pi') $quote_label = 'PI Management';
+    if ($query_str == 'page=pi') $quote_label = 'Proforma Invoice Management';
 @endphp
 
 @section ('title', $quote_label)
@@ -54,11 +54,13 @@
                                             <th>Title</th>
                                             @if ($query_str == 'page=pi')
                                                 <th>#PI</th>
+                                                <th>{{ trans('customers.customer') }}</th>
+                                                <th>PI Date</th>
                                             @else
                                                 <th>#{{ trans('quotes.quote') }}</th>
-                                            @endif
-                                            <th>{{ trans('customers.customer') }}</th>
-                                            <th>{{ trans('quotes.invoicedate') }}</th>
+                                                <th>{{ trans('customers.customer') }}</th>
+                                                <th>{{ trans('quotes.invoicedate') }}</th>
+                                            @endif                                            
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
                                             <th>{{ trans('general.status') }}</th>
                                             <th>Verified</th>
@@ -93,7 +95,7 @@
         setTimeout(() => {
             const queryString = location.search;
             $('#quotes-table tbody tr').each(function() {
-                const $a = $(this).find('td').eq(8).find('a').eq(2);
+                const $a = $(this).find('td').eq(9).find('a').eq(2);
                 const href = $a.attr('href');
                 if (queryString.includes('page=pi')) {
                     $a.attr('href', href + queryString);
