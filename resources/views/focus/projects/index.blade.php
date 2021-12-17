@@ -44,6 +44,15 @@
     <div class="content-right">
         <div class="content-wrapper">
             <div class="content-header row">
+                <div class="content-header-right col">
+                    <div class="media width-250 float-right">
+                        <div class="media-body media-right text-right">
+                            <a href="{{ route('biller.quotes.project_quotes') }}" class="btn btn-success">
+                                <i class="fa fa-list-alt"></i> Verification
+                            </a>                            
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="content-body">
                 <div class="content-overlay"></div>
