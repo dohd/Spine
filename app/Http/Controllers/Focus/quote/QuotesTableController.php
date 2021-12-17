@@ -58,8 +58,8 @@ class QuotesTableController extends Controller
                 $tid = sprintf('%04d', $quote->tid);
                 $tid = ($quote->bank_id) ? 'PI-'.$tid : 'QT-'.$tid;
                 if ($quote->revision) $tid .= $quote->revision;
-
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
+                $link = ($quote->bank_id) ? route('biller.quotes.show', [$quote->id, 'page=pi']) : route('biller.quotes.show', [$quote->id]);
+                return '<a class="font-weight-bold" href="' . $link . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
@@ -96,9 +96,9 @@ class QuotesTableController extends Controller
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-
+                $copy_text = ($quote->bank_id) ? 'PI Copy' : 'Quote Copy';
                 return '<a href="'.route('biller.print_quote', [$quote->id, 4, $valid_token, 1]).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
-                    .'<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Copy"><i class="fa fa-clone" aria-hidden="true"></i></a> '
+                    .'<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="'. $copy_text .'"><i class="fa fa-clone" aria-hidden="true"></i></a> '
                     .$quote->action_buttons;
             })
             ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
