@@ -43,10 +43,21 @@ class RjcsController extends Controller
      */
     public function create()
     {
-        $projects =  Project::orderBy('id', 'desc')->get(['id', 'name', 'project_number']);
         $rjc =  Rjc::orderBy('tid', 'desc')->first('tid');
         $tid = isset($rjc) ? $rjc->tid+1 : 1;
 
+        $projects =  Project::orderBy('id', 'desc')->get(['id', 'name', 'project_number', 'main_quote_id']);
+        // append quote numbers
+        foreach($projects as $project) {
+            $tids = '';                
+            foreach ($project->quotes as $quote) {
+                $tid = sprintf('%04d', $quote->tid);
+                if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
+                else $tids .= 'QT-'. $tid . ', ';
+            }
+            $project['quote_nos'] = '[ ' . $tids . ']';            
+        }
+        
         return view('focus.rjcs.create')->with(compact('projects', 'tid'));
     }
 
