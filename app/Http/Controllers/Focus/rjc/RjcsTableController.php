@@ -57,7 +57,7 @@ class RjcsTableController extends Controller
             })
             ->addColumn('project_no', function ($rjc) {
                 $no = $rjc->project->project_number;
-                return 'P-'.sprintf('%04d', $no);
+                return 'Prj-'.sprintf('%04d', $no);
             })
             ->addColumn('created_at', function ($rjc) {
                 return dateFormat($rjc->created_at);

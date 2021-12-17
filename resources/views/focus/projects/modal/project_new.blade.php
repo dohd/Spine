@@ -54,7 +54,7 @@
                                 <label for="projectNumber">Project No</label>
                                 <div class="input-group">
                                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                    <input type="text" value="{{ 'P-'.sprintf('%04d', $tid) }}"  class="form-control" disabled>
+                                    <input type="text" value="{{ 'Prj-'.sprintf('%04d', $tid) }}"  class="form-control" disabled>
                                     <input type="hidden" name="project_number" value="{{ $tid }}" >
                                 </div>
                             </fieldset>

@@ -47,7 +47,7 @@
                                                     <option value="0">-- Select Project --</option>
                                                     @foreach ($projects as $project)
                                                         @php
-                                                            $tid = 'P-'.sprintf('%04d', $project->project_number);
+                                                            $tid = 'Prj-'.sprintf('%04d', $project->project_number);
                                                         @endphp
                                                         @if ($rjc->project->id == $project->id)
                                                             <option value="{{ $project->id }}" selected>{{ $tid }} - {{ $project->name }}</option>

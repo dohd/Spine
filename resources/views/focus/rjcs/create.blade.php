@@ -44,7 +44,7 @@
                                                     <option value="0">-- Select Project --</option>
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}">
-                                                            {{ 'P-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
+                                                            {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
                                                         </option>
                                                     @endforeach
                                                 </select>                                                

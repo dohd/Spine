@@ -61,7 +61,7 @@ class ProjectsTableController extends Controller
                 return '<div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.projects.show", [$project->id]) . '" >' . $project->name . '</a><div class="float-right">' . $tg . '</div></div><span class="todo-desc">' . $project->short_desc . '</span></div> </div>';
             })
             ->addColumn('project_number', function($project) {
-                return 'P-'.sprintf('%04d', $project->project_number);
+                return 'Prj-'.sprintf('%04d', $project->project_number);
             })
             ->addColumn('quote_tid', function($project) {
                 $tids = '';                

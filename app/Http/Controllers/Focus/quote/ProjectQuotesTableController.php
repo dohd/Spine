@@ -77,7 +77,7 @@ class ProjectQuotesTableController extends Controller
             ->addColumn('project_number', function($quote) {
                 $tid = '';
                 if (isset($quote->project_quote->project)) {
-                    $tid = 'P-'.sprintf('%04d', $quote->project_quote->project->project_number);
+                    $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
                 }
                 return $tid;
             })
