@@ -245,14 +245,26 @@
                     <div id="invoice-footer">
                         <div class="row">
                             <div class="col-md-7 col-sm-12">
-                                <h5>Approvals</h5>
-                                <hr>
-                                <h5> <span class="text-muted">Approved By :</span> <span class=" text-danger">{{$quote['approved_by']}}</span> <span class="text-muted">Approval Date :</span> <span class=" text-danger">{{dateFormat($quote['approved_date'])}}</span> <span class="text-muted">Approval Method :</span><span class=" text-danger">{{$quote['approved_method']}}</span></h5>
-                                <p><span class="text-muted">LPO Date :</span> <span class=" text-danger">{{dateFormat($quote['lpo_date'])}}</span> <span class="text-muted">LPO Number :</span> <span class=" text-danger">{{$quote['lpo_number']}}</span> <span class="text-muted">LPO Amount :</span><span class=" text-danger">{{numberFormat($quote['lpo_amount'])}}</span></p>
+                                <h5>Approvals</h5><hr>
+                                <h5>
+                                    <span class="text-muted">Approved By :</span> 
+                                    <span class="text-danger">{{$quote['approved_by']}}</span> 
+                                    <span class="text-muted">Approval Date :</span> 
+                                    <span class=" text-danger">{{dateFormat($quote['approved_date'])}}</span> 
+                                    <span class="text-muted">Approval Method :</span>
+                                    <span class=" text-danger">{{$quote['approved_method']}}</span>
+                                </h5>
+                                <p>
+                                    <span class="text-muted">LPO Date :</span> 
+                                    <span class=" text-danger">{{dateFormat($quote['lpo_date'])}}</span> 
+                                    <span class="text-muted">LPO Number :</span> 
+                                    <span class=" text-danger">{{$quote['lpo_number']}}</span> 
+                                    <span class="text-muted">LPO Amount :</span>
+                                    <span class=" text-danger">{{numberFormat($quote['lpo_amount'])}}</span>
+                                </p>
                             </div>
                             <div class="col-md-7 col-sm-12">
-                                <h5>{{trans('general.payment_terms')}}</h5>
-                                <hr>
+                                <h5>{{trans('general.payment_terms')}}</h5><hr>
                                 <h5>{{@$quote->term->title}}</h5>
                                 <p>{!! @$quote->term->terms !!}</p>
                             </div>
