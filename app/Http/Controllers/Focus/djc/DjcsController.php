@@ -68,7 +68,7 @@ class DjcsController extends Controller
      */
     public function create(ManageDjcRequest $request)
     {
-        $leads=Lead::all();
+        $leads = Lead::orderBy('id', 'desc')->get();
         $djc =  Djc::orderBy('tid', 'desc')->first('tid');
         $tid =  isset($djc)? $djc->tid+1 : 1;
         
