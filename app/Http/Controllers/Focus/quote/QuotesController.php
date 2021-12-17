@@ -395,9 +395,9 @@ class QuotesController extends Controller
         $lpo_date = date_for_database(request('lpo_date'));
 
         $quote = Quote::find($input['bill_id']);
-        $data = array_merge(['lpo_number' => $input['lpo_number'], compact('lpo_date','lpo_amount')]);
+        $data = array_merge(compact('lpo_date','lpo_amount'), ['lpo_number' => $input['lpo_number']]);
         $quote->update($data);
 
-        return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully' ]);
+        return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully', 'refresh' => 1 ]);
     }
 }
