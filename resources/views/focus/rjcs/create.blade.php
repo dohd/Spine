@@ -45,6 +45,7 @@
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}">
                                                             {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
+                                                            {{ $project->quote_nos }}
                                                         </option>
                                                     @endforeach
                                                 </select>                                                
@@ -252,12 +253,18 @@
         .datepicker({format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date());
 
-    // on project select, update subject/title
+    // on project select
     const projects = @json($projects);
     $('#project').change(function() {
-        projects.forEach(v => {
-            if (v.id == $(this).val()) {
-                $('#subject').val(v.name);
+        projects.forEach(prj => {
+            if (prj.id == $(this).val()) {
+                $('#subject').val(prj.name);
+
+                prj.quotes.forEach(qt => {
+                    if (qt.id == prj.main_quote_id) {
+                        $('#client_ref').val(qt.client_ref).prop('readonly', true);
+                    }
+                });
             }
         });
     });
