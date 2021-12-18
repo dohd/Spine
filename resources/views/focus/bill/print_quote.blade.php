@@ -193,10 +193,10 @@
 				@php
 					$tid = sprintf('%04d', $invoice->tid);
 					$field_name = 'Quotation No';
-					$field_value = 'QT/' . $tid;
+					$field_value = 'QT-' . $tid;
 					if ($invoice->bank_id) {
 						$field_name = 'Proforma No';
-						$field_value = 'PI/' . $tid;
+						$field_value = 'PI-' . $tid;
 					}
 				@endphp
 				<b>{{ $field_name }} :</b> {{ $field_value }}<br>				
