@@ -13,20 +13,20 @@
                         <div class="row">
                             <fieldset class="form-group position-relative has-icon-left  col-md-4">
                                 <div><label for="customer">Search Customer</label></div>
-                                <select id="person" name="customer_id" class="form-control required select-box" data-placeholder="{{trans('customers.customer')}}">
+                                <select id="person" name="customer_id" class="form-control select-box" data-placeholder="{{trans('customers.customer')}}" required>
                                 </select>
                             </fieldset>
                             <fieldset class="form-group position-relative has-icon-left  col-md-4">
                                 <div><label for="branch">Branch</label></div>
-                                <select id="branch_id" name="branch_id" class="form-control  select-box" data-placeholder="Branch">
+                                <select id="branch_id" name="branch_id" class="form-control select-box" data-placeholder="Branch">
                                 </select>
                             </fieldset>
                             <fieldset class="form-group col-md-4">
                                 <div><label for="projectType">Project Type / Sales Account</label></div>
-                                <select class="form-control  select-box" name="sales_account" id="sales_account" data-placeholder="Project Type/Sales Account" required>
-                                    <option value="0">Project Type/Sales Account</option>
+                                <select class="form-control select-box" name="sales_account" id="sales_account" data-placeholder="Project Type/Sales Account" required>
+                                    <option value="0">-- Select Project Type --</option>
                                     @foreach($accounts as $account)
-                                        <option value="{{$account['id']}}">{{$account['code']}} {{$account['holder']}}</option>
+                                        <option value="{{ $account['id'] }}">{{ $account['code'] }} {{ $account['holder'] }}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
