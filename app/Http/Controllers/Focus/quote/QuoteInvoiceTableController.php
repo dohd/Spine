@@ -24,7 +24,7 @@ use App\Repositories\Focus\quote\QuoteRepository;
 /**
  * Class QuotesTableController.
  */
-class ProjectQuotesTableController extends Controller
+class QuoteInvoiceTableController extends Controller
 {
     /**
      * variable to store the repository object
@@ -47,10 +47,13 @@ class ProjectQuotesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->quote->getForVerifyDataTable();
+        $core = $this->quote->getForVerifyNotInvoicedDataTable();
 
         return Datatables::of($core)
             ->addIndexColumn()
+            ->addColumn('mass_select', function ($quote) {
+                return  '<input type="checkbox" class="row-select" value="' . $quote->id .'">' ;
+            })
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
             })
@@ -63,7 +66,7 @@ class ProjectQuotesTableController extends Controller
             })
             ->addColumn('customer', function ($quote) {
                 if (isset($quote->customer) && isset($quote->lead->branch)) {
-                    return $quote->customer->name.' - '.$quote->lead->branch->name.' '
+                    return $quote->customer->company.' - '.$quote->lead->branch->name.' '
                         .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
                 }
                 return $quote->lead->client_name;
@@ -73,6 +76,9 @@ class ProjectQuotesTableController extends Controller
             })
             ->addColumn('total', function ($quote) {
                 return number_format($quote->total, 2);
+            })
+            ->addColumn('verified_total', function ($quote) {
+                return number_format($quote->verified_total, 2);
             })
             ->addColumn('project_number', function($quote) {
                 $tid = '';
@@ -87,13 +93,8 @@ class ProjectQuotesTableController extends Controller
             ->addColumn('lpo_number', function($quote) {
                 return $quote->lpo_number;
             })
-            ->addColumn('actions', function ($quote) {
-                $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-
-                return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
-                    .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify"><i class="fa fa-check"></i></a>';
-            })
-            ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
+         
+            ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total','mass_select'])
             ->make(true);
     }
 }

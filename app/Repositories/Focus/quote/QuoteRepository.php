@@ -13,6 +13,7 @@ use App\Repositories\BaseRepository;
 use App\Models\lead\Lead;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
+use App\Models\customer\Customer;
 
 /**
  * Class QuoteRepository.
@@ -346,5 +347,48 @@ class QuoteRepository extends BaseRepository
             $data_items[] = $row;
         }
         return $data_items;
+    }
+
+    public function getForVerifyNotInvoicedDataTable()
+    {
+        $q = $this->query();
+
+        $q->when(request('i_rel_type') == 1, function ($q) {
+            return $q->where('customer_id', request('i_rel_id', 0));
+        });
+
+
+        if (request('customer_id')) {
+            $q->where('customer_id', request('customer_id'));
+        }
+
+
+        if (request('lpo_number')) {
+            $q->where('lpo_number', request('lpo_number'));
+        }
+
+        if (request('project_id')) {
+            $q->where('project_quote_id', request('project_id'));
+        }
+
+        
+
+
+        if (request('start_date')) {
+            $q->whereBetween('invoicedate', [
+                date_for_database(request('start_date')), 
+                date_for_database(request('end_date'))
+            ]);
+        }
+     // Verified and Not invoiced 
+       $q->where(['invoiced'=>'No','verified'=>'Yes']);
+
+   
+   
+
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
+            'total', 'status', 'bank_id', 'verified', 'revision', 'lpo_number', 'client_ref'
+        ]);
     }
 }

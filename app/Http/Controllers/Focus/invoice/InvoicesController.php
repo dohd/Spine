@@ -38,6 +38,8 @@ use App\Http\Requests\Focus\invoice\CreateInvoiceRequest;
 use App\Http\Requests\Focus\invoice\EditInvoiceRequest;
 use App\Http\Requests\Focus\invoice\DeleteInvoiceRequest;
 use Illuminate\Support\Facades\Response;
+use App\Models\quote\Quote;
+use App\Models\project\Project;
 use mPDF;
 use Bitly;
 
@@ -164,7 +166,11 @@ class InvoicesController extends Controller
             $input['pre'] = 1;
         }
 
-        return new ViewResponse('focus.invoices.project_invoice', compact('input', 'segment', 'words'));
+        $customers=Customer::where('active','1')->pluck('company','id');
+        $lpos=Quote::whereNotNull('lpo_number')->distinct('lpo_number')->pluck('lpo_number','lpo_number');
+        $projects=Project::pluck('name','id');
+
+        return new ViewResponse('focus.invoices.project_invoice', compact('input', 'segment', 'words','customers','lpos','projects'));
     }
 
 
