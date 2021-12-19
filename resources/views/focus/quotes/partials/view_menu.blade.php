@@ -1,15 +1,22 @@
 @php
     $query_str = request()->getQueryString();
-    $edit_url = $query_str ? route('biller.quotes.edit', [$quote, $query_str]) : route('biller.quotes.edit', $quote);
+    $edit_link = ($query_str == 'page=pi') ? route('biller.quotes.edit', [$quote, $query_str]) : route('biller.quotes.edit', $quote);
+    $copy_link = $quote->bank_id ? route('biller.quotes.edit', [$quote, 'page=copy_to_qt']) : route('biller.quotes.edit', [$quote, 'page=copy_to_pi']);
+    $valid_token = token_validator('', 'q'.$quote->id . $quote->tid, true);
 @endphp
 <div class="row">
     <div class="col">
-        <a href="{{ $edit_url }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
-        @if ($quote->bank_id)
-            <a href="{{ route('biller.quotes.edit', [$quote, 'page=copy_to_qt']) }}" class="btn btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i></i> Quote Copy</a>
-        @else
-            <a href="{{ route('biller.quotes.edit', [$quote, 'page=copy_to_pi']) }}" class="btn btn-cyan mb-1"><i class="fa fa-clone" aria-hidden="true"></i></i> PI Copy</a>
-        @endif
+        <a href="{{ $edit_link }}" class="btn btn-warning mb-1">
+            <i class="fa fa-pencil"></i> Edit
+        </a>
+        <a href="{{ $copy_link }}" class="btn btn-cyan mb-1">
+            <i class="fa fa-clone" aria-hidden="true"></i></i>
+            @if ($quote->bank_id)
+                Quote Copy
+            @else
+                PI Copy
+            @endif
+        </a>
 
         @if (access()->allow('quote-delete'))
             <a class="btn btn-danger mb-1 quote-delete" href="javascript:void(0);">
@@ -18,10 +25,6 @@
             </a>
         @endif
 
-        @php
-            $valid_token = token_validator('', 'q'.$quote->id . $quote->tid, true);
-        @endphp
-
         {{-- Hidden Quote verification button 
         @if ($quote->status == 'approved')
             <div class="btn-group ">
@@ -29,7 +32,7 @@
                     <i class="fa fa-repeat"></i> Verify & Download
                 </button>
                 <div class="dropdown-menu">
-                    @if ($query_str)
+                    @if ($query_str == 'page=pi')
                         <a class="dropdown-item" href="{{ route('biller.quotes.verify', [$quote, $query_str]) }}">Verify</a>
                     @else
                         <a class="dropdown-item" href="{{ route('biller.quotes.verify', $quote) }}">Verify</a>
@@ -50,7 +53,7 @@
                 <i class="fa fa-check"></i> {{trans('general.change_status')}}
             </button>
             <div class="dropdown-menu">
-                <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="dropdown-item" title="Change Status">
+                <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="dropdown-item quote-approve" title="Change Status">
                     Approve
                 </a>
                 <a href="javascript:void(0);" class="dropdown-item text-danger quote-cancel">
