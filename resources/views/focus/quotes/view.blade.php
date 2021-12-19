@@ -350,7 +350,6 @@
 
     // On Approve Quote
     $('.quote-approve').click(function(e) {
-        console.log('approve');
         const customerId = @json($quote->customer_id);
         if (customerId) return;
         $(this).attr('href', '#');
