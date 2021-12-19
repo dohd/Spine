@@ -56,13 +56,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
-                            @if ($quote->bank_id)
-                                <h2>Proforma Invoice</h2>
-                                <p class="pb-3">#PI {{ $quote->tid }}</p>
-                            @else
-                                <h2>{{ trans('quotes.quote')}}</h2>
-                                <p class="pb-3">#{{ prefix(5) }} {{ $quote['tid'] }}</p>
-                            @endif
+                            @php
+                                $tid = sprintf('%04d', $quote->tid);
+                                $ref = ($quote->bank_id) ? '#PI-'.$tid : '#QT-'.$tid;
+                                $label = ($quote->bank_id) ? 'Proforma Invoice' : trans('quotes.quote');
+                            @endphp
+                            <h2>{{ $label }}</h2>
+                            <p class="pb-3">{{ $ref }}</p>                            
                             <ul class="px-0 list-unstyled">
                                 <li>{{trans('general.total')}}</li>
                                 <li class="lead text-bold-800">{{amountFormat($quote['total'])}}</li>
