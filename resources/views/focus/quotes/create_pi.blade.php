@@ -10,7 +10,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">PI Management</h4>
+            <h4 class="content-header-title">PROFORMA INVOICE MANAGEMENT</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
@@ -408,14 +408,13 @@
     // on select Tax change
     $('#tax_id').change(function() {
         const tax = Number($(this).val()); 
-        const $span = $('#tax-label').find('span').eq(0);
 
+        const $span = $('#tax-label').find('span').eq(0);
+        $('#tax_format').val('exclusive');
+        $span.text('OFF');
         if (tax) {
             $('#tax_format').val('inclusive');
             $span.text(tax+'%');
-        } else {
-            $('#tax_format').val('exclusive');
-            $span.text('OFF');
         }
        
         // loop throw product rows while adjusting values

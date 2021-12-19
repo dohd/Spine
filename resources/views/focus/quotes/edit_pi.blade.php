@@ -15,7 +15,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">PI MANAGEMENT</h4>
+            <h4 class="content-header-title">PROFORMA INVOICE MANAGEMENT</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
@@ -287,8 +287,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label id="tax-label">{{ trans('general.total_tax') }}
-                                            <span>16%</span>
+                                        <label id="tax-label">{{ trans('general.total_tax') }}<span>16%</span>
                                             <span class="text-danger">VAT-Exclusive (print type)</span>
                                         </label>
                                         <div class="input-group m-bot15">
@@ -512,21 +511,20 @@
 
     // default tax
     const taxInt = Number($('#tax_id').val());
-
     const $span = $('#tax-label').find('span').eq(0);
     $('#tax_format').val('exclusive');
     $span.text('OFF');
     if (taxInt) {
         $('#tax_format').val('inclusive');
-        $span.text(tax+'%');
+        $span.text(taxInt+'%');
     }
         
     let taxRate = (taxInt+100)/100;
     // on select Tax change
     $('#tax_id').change(function() {
         const tax = Number($(this).val()); 
+        
         const $span = $('#tax-label').find('span').eq(0);
-
         $('#tax_format').val('exclusive');
         $span.text('OFF');
         if (tax) {
