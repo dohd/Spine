@@ -258,7 +258,7 @@ class QuotesController extends Controller
     public function storeverified(ManageQuoteRequest $request)
     {
         //filter request input fields
-        $quote = $request->only(['id', 'verify_no', 'gen_remark']);
+        $quote = $request->only(['id', 'verify_no', 'gen_remark', 'total', 'tax', 'subtotal']);
         $quote_items = $request->only([
             'remark', 'row_index', 'item_id', 'a_type', 'numbering', 'product_id', 
             'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit'
@@ -271,7 +271,7 @@ class QuotesController extends Controller
         if ($result->bank_id) $tid .= 'PI-'.sprintf('%04d', $result->tid);
         else $tid .= 'QT-'.sprintf('%04d', $result->tid);
 
-        return new RedirectResponse(route('biller.quotes.project_quotes'), ['flash_success' => $tid . ' verification successful']);
+        return new RedirectResponse(route('biller.quotes.project_quotes'), ['flash_success' => $tid . ' verified successfully']);
     }
 
     // Fetch Verified Job cards

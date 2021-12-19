@@ -243,8 +243,9 @@ class QuoteRepository extends BaseRepository
         DB::beginTransaction();
 
         // quote properties
-        $quote_id = $input['quote']['id'];
-        $verify_no = $input['quote']['verify_no'];
+        $quote_data = $input['quote'];
+        $quote_id = $quote_data['id'];
+        $verify_no = $quote_data['verify_no'];
         $ins = auth()->user()->ins;
 
         // quote items
@@ -305,8 +306,11 @@ class QuoteRepository extends BaseRepository
         $result = $qt->update([
             'verified' => 'Yes', 
             'verification_date' => date('Y-m-d'),
-            'verified_by' => $ins,
-            'gen_remark' => $input['quote']['gen_remark'],
+            'verified_by' => auth()->user()->id,
+            'gen_remark' => $quote_data['gen_remark'],
+            'verified_amount' => $quote_data['subtotal'],
+            'verified_total' => $quote_data['total'],
+            'verified_tax' => $quote_data['tax']
         ]);
         if ($result) {
             DB::commit();

@@ -66,7 +66,7 @@
                                     <div class="col-sm-6"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'id'=>'invoicedate','autocomplete'=>'false', 'disabled']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id'=>'invoicedate', 'disabled']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
@@ -96,7 +96,7 @@
                                     <div class="col-sm-6"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round', 'id'=>'reference-date', 'disabled']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id'=>'reference-date', 'disabled']) }}
                                         </div>
                                     </div>
                                 </div>
@@ -153,7 +153,7 @@
                                                         </select>
                                                     </td>
                                                     <td><input type="text" class="form-control" name="reference[]" id="reference-0" required></td>
-                                                    <td><input type="text" class="form-control" name="date[]" id="date-0" required></td>
+                                                    <td><input type="text" class="form-control datepicker" name="date[]" id="date-0" required></td>
                                                     <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
                                                     <th class="text-center">#</th>
                                                     <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-0">
@@ -196,7 +196,7 @@
                                     <i class="fa fa-plus-square"></i> Add Title
                                 </button>
                                 <div class="form-group mt-3">
-                                    <div><label for="remark" class="caption">General Remark</label></div>
+                                    <div><label for="gen_remark" class="caption">General Remark</label></div>
                                     <textarea class="form-control" name="gen_remark" id="gen_remark" cols="30" rows="10"></textarea>
                                 </div>
                             </div>
@@ -206,20 +206,20 @@
                                     <div class="form-group">
                                         <label>SubTotal (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="subtotal" id="subtotal" class="form-control">
+                                            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label>{{trans('general.total_tax')}}</label>
                                         <div class="input-group m-bot15">
-                                            <input type="text" required readonly="readonly" name="tax" id="tax" class="form-control">
+                                            <input type="text" name="tax" id="tax" class="form-control" readonly>
                                         </div>
                                     </div>
                                     
                                     <div class="form-group">
                                         <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
                                         <div class="input-group m-bot15">
-                                            <input required readonly="readonly" type="text" name="total" class="form-control" id="total" placeholder="Total">
+                                            <input type="text" name="total" class="form-control" id="total" placeholder="Total" readonly>
                                         </div>
                                     </div>
                                     {{ Form::submit('Verify & Save', ['class' => 'btn btn-success btn-lg']) }}
@@ -246,20 +246,15 @@
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
-    
-    // initialize Reference Date datepicker
-    $('#reference-date')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date("{{ $quote->reference_date }}"));
 
-    // initialize Quote Date datepicker
-    $('#invoicedate')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
-    // initalize default job card row datepicker
-    $('#date-0')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
+    // Intialize datepicker
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" });
+    $('#reference-date').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
+    $('#invoicedate').datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+    $('#date-0').datepicker('setDate', new Date());
+
+    // set general remark
+    $('#gen_remark').val("{{ $quote->gen_remark }}");
 
     // reset Quote Verification 
     $('#reset-items').click(function() {
