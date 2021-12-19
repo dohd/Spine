@@ -215,23 +215,10 @@
                                                 <td>{{trans('general.subtotal')}}</td>
                                                 <td class="text-right">{{amountFormat($quote['subtotal'])}}</td>
                                             </tr>
-                                            @if ($quote['tax'] > 0)
-                                                <tr>
-                                                    <td>{{trans('general.tax')}}</td>
-                                                    <td class="text-right">{{amountFormat($quote['tax'])}}</td>
-                                                </tr>
-                                            @elseif ($quote['shipping'] > 0)
-                                                <tr>
-                                                    <td>{{trans('general.shipping')}}</td>
-                                                    <td class="text-right">{{amountFormat($quote['shipping'])}}</td>
-                                                </tr>
-                                                @if ($quote['ship_tax'] > 0)
-                                                    <tr>
-                                                        <td>{{trans('general.shipping_tax')}} ({{trans('general.'.$quote['ship_tax_type'])}})</td>
-                                                        <td class="text-right">{{amountFormat($quote['ship_tax'])}}</td>
-                                                    </tr>
-                                                @endif
-                                            @endif
+                                            <tr>
+                                                <td>{{trans('general.tax')}}</td>
+                                                <td class="text-right">{{amountFormat($quote['tax'])}}</td>
+                                            </tr>
                                             <tr>
                                                 <td class="text-bold-800">{{trans('general.total')}}</td>
                                                 <td class="text-bold-800 text-right">{{amountFormat($quote['total'])}}</td>
@@ -359,6 +346,15 @@
     // On cancel Quote
     $('.quote-cancel').click(function(e) {
         $(this).children('form').submit();
+    });
+
+    // On Approve Quote
+    $('.quote-approve').click(function(e) {
+        console.log('approve');
+        const customerId = @json($quote->customer_id);
+        if (customerId) return;
+        $(this).attr('href', '#');
+        $('.approve-alert').removeClass('d-none');
     });
 
     $.ajaxSetup({
