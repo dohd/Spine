@@ -10,8 +10,15 @@
 @endsection
 
 @section('content')
-<div class="app-content m-1">
+<div class="app-content">
     <div class="content-wrapper">
+        <div class="alert alert-danger alert-dismissible fade show d-none approve-alert" role="alert">
+            <strong>Forbidden!</strong> Update customer details
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
                 <h4 class="content-header-title">QUOTE / PI MANAGEMENT</h4>
