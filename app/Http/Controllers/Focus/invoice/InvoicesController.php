@@ -40,6 +40,8 @@ use App\Http\Requests\Focus\invoice\DeleteInvoiceRequest;
 use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
+use App\Models\transaction\Transaction;
+use App\Models\bank\Bank;
 use mPDF;
 use Bitly;
 
@@ -120,57 +122,72 @@ class InvoicesController extends Controller
 
 
 
+    public function create_project_invoice(ManageInvoiceRequest $request)
+    {
+
+        if(!empty($request->only(['customer']))){
+
+            $customer_id = $request->only(['customer']);
+
+
+            if (!empty($request->input('selected_products'))) {
+            $quotation_id = explode(',', $request->input('selected_products'));
+            //$data['action'] = 1;
+
+            $quotes=Quote::whereIn('id', $quotation_id)->get();
+            $customer=Customer::find($customer_id)->first();
+
+            
+            $last_invoice = Invoice::orderBy('id', 'desc')->first();
+            $last_tr = Transaction::orderBy('id', 'desc')->first();
+            $banks = Bank::all();
+
+            
+
+
+            return view('focus.invoices.create_project_invoice')->with(array('quotes' => $quotes,'customer'=>$customer,'last_invoice'=>$last_invoice,'last_tr'=>$last_tr,'banks' => $banks,))->with(bill_helper(1, 2));
+           
+           // return new ViewResponse('focus.invoices.create_project_invoice', compact('quotes', 'customer','last_invoice'));
+
+
+
+        }else{
+
+            $customers=Customer::where('active','1')->pluck('company','id');
+            $lpos=Quote::whereNotNull('lpo_number')->distinct('lpo_number')->pluck('lpo_number','lpo_number');
+            $projects=Project::pluck('name','id');
+    
+            return new ViewResponse('focus.invoices.project_invoice', compact('customers','lpos','projects'));
+
+            
+        }
+
+       
+     }
+
+
+    
+
+    
+
+
+  
+    
+    }
+
+
 
     public function project_invoice(ManageInvoiceRequest $request)
     {
 
-        $input = $request->only('rel_type', 'rel_id', 'md');
-        $segment = false;
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1 :
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-
-            }
-        }
-
-        if (isset($input['md'])) {
-            if ($input['md'] == 'sub') {
-                $input['sub_json'] = "sub: 1";
-                $input['sub_url'] = '?md=sub';
-                $input['title'] = trans('invoices.subscriptions');
-                $input['meta'] = 'sub';
-                $input['pre'] = 6;
-            } elseif ($input['md'] == 'pos') {
-                $input['sub_json'] = "sub: 2";
-                $input['sub_url'] = '?md=pos';
-                $input['title'] = trans('invoices.pos');
-                $input['meta'] = 'pos';
-                $input['pre'] = 10;
-            }
-        } else {
-
-            $input['sub_json'] = "sub: 0";
-            $input['sub_url'] = '';
-            $input['title'] = trans('labels.backend.invoices.management');
-            $input['meta'] = 'sub';
-            $input['pre'] = 1;
-        }
+        
 
         $customers=Customer::where('active','1')->pluck('company','id');
         $lpos=Quote::whereNotNull('lpo_number')->distinct('lpo_number')->pluck('lpo_number','lpo_number');
         $projects=Project::pluck('name','id');
+        
 
-        return new ViewResponse('focus.invoices.project_invoice', compact('input', 'segment', 'words','customers','lpos','projects'));
+        return new ViewResponse('focus.invoices.project_invoice', compact('customers','lpos','projects'));
     }
 
 
@@ -380,6 +397,13 @@ echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend
         }*/
 
     }
+
+    public function store_project_invoice(CreateInvoiceRequest $request)
+    {
+
+    }
+
+    
 
     /**
      * Show the form for editing the specified resource.
