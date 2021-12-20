@@ -353,9 +353,7 @@ class QuoteRepository extends BaseRepository
     {
         $q = $this->query();
 
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
-        });
+     
 
 
         if (request('customer_id')) {
@@ -374,12 +372,7 @@ class QuoteRepository extends BaseRepository
         
 
 
-        if (request('start_date')) {
-            $q->whereBetween('invoicedate', [
-                date_for_database(request('start_date')), 
-                date_for_database(request('end_date'))
-            ]);
-        }
+      
      // Verified and Not invoiced 
        $q->where(['invoiced'=>'No','verified'=>'Yes']);
 
