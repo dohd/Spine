@@ -38,7 +38,15 @@
                                 <div class="col-sm-3">
 
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-xs btn-success update_product_location mt-2" data-type="add">Invoice Selected</button>
+
+                                        {{ Form::open(['route' => 'biller.invoices.create_project_invoice', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'mass_add_form']) }}
+                                        {!! Form::hidden('selected_products', null, ['id' => 'selected_products']); !!}
+                                        {!! Form::text('customer', null, ['id' => 'customer']); !!}
+                          
+                                       
+                                       {!! Form::submit('Add Selected', array('class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected')) !!}    
+                                          {{ Form::close() }}
+                                      
                                   
 
 
@@ -105,11 +113,9 @@
                                                 <th>Title</th>                                            
                                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
                                                 <th>Verified (Ksh.)</th>
-                                                
-                                                
                                                 <th>Project No</th>
                                               
-                                                <th>Verified</th>
+                                               
                                               
                                             </tr>
                                         </thead>
@@ -129,15 +135,10 @@
             </div>
         </div>
     </div>
-    @if(@$segment->group_data)
-        @php
-            $customergroup= $segment->group_data;
-        @endphp
-        @include("focus.modal.group_email_model")
-    @endif
-    @include("focus.customers.modal.selected_email")
-    @include("focus.customers.modal.selected_sms")
-    @include("focus.customers.modal.selected_delete")
+
+  
+
+
 @endsection
 
 
@@ -167,9 +168,9 @@
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
     
-        function draw_data(start_date = '', end_date = '',customer_id='', lpo_number='',project_id='') {
-            const segment = @json($segment);
-            const input = @json($input);
+        function draw_data(customer_id='', lpo_number='',project_id='') {
+            
+         
             const tableLang = { @lang('datatable.strings') };
     
             const table = $('#quotes-table').dataTable({
@@ -182,10 +183,6 @@
                     url: '{{ route("biller.quotes.get_univoiced_quote") }}',
                     type: 'post',
                     data: {
-                        i_rel_id: segment['id'],
-                        i_rel_type: input['rel_type'],
-                        start_date: start_date,
-                        end_date: end_date,
                         customer_id: customer_id,
                         lpo_number:lpo_number,
                         project_id:project_id,
@@ -232,12 +229,9 @@
                     {
                         data: 'project_number',
                         name: 'project_number'
-                    },
-                   
-                    {
-                        data: 'verified',
-                        name: 'verified'
                     }
+                   
+                  
                   
                 ],
                 order: [[0, "desc"]],
@@ -276,13 +270,16 @@
             var customer_id=$('#customer_id').val()
             var lpo_number=$('#lpo_number').val()
             var project_id=$('#project_id').val()
-            console.log(project_id);
+            $('#customer').val(customer_id)
+           // console.log(project_id);
            // console.log(lpo_number);
+
+        
             
-            var start_date='';
-            var end_date='';
+            
+          
             $('#quotes-table').DataTable().destroy();
-            return draw_data(start_date, end_date, customer_id, lpo_number,project_id);
+            return draw_data(customer_id, lpo_number,project_id);
      
     });
 
@@ -313,5 +310,69 @@
             });
     }
 });
+
+
+//add selected
+$(document).on('click', '#add-selected', function(e){
+                e.preventDefault();
+
+                var customer_id=$('#customer_id').val();
+
+                if(customer_id==''){
+                    swal('Filter Customer');
+
+                }else{
+
+             //select 
+
+
+             var selected_rows = getSelectedRows();
+
+//console.log(selected_rows);
+
+if(selected_rows.length > 0){
+ $('input#selected_products').val(selected_rows);
+
+// console.log(selected_rows);
+ swal({
+     title: 'Are You  Sure?',
+     icon: "warning",
+     buttons: true,
+     dangerMode: true,
+     showCancelButton: true,
+ }, function() {
+    $('form#mass_add_form').submit();
+
+ }
+ 
+ );
+} else{
+ $('input#selected_products').val('');
+ swal('No record Selected');
+} 
+
+
+
+               }
+
+
+
+
+            });
+
+
+//get selecte items
+      function getSelectedRows() {
+            var selected_rows = [];
+            var i = 0;
+            $('.row-select:checked').each(function () {
+                selected_rows[i++] = $(this).val();
+            });
+
+            return selected_rows; 
+        }
+
+
+
     </script>
 @endsection
