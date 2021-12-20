@@ -52,7 +52,7 @@ class QuoteInvoiceTableController extends Controller
         return Datatables::of($core)
             ->addIndexColumn()
             ->addColumn('mass_select', function ($quote) {
-                return  '<input type="checkbox" class="row-select" value="' . $quote->id .'">' ;
+                return  '<input type="checkbox"  class="row-select" value="' . $quote->id .'">' ;
             })
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
