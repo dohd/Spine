@@ -4,7 +4,7 @@
             <section class="todo-form">
                 <form id="data_form_project" class="todo-input">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="data_project">{{trans('projects.new_project')}}</h5>
+                        <h5 class="modal-title content-header-title" id="data_project">Project Management</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>

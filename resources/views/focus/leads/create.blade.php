@@ -14,10 +14,10 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="mb-0">Create Lead</h4>
+                    <h4 class="content-header-title">Leads Management</h4>
                 </div>
                 <div class="content-header-right col-md-6 col-12">
-                    <div class="media width-250 float-right">
+                    <div class="media width-250 float-right mr-3">
                         <div class="media-body media-right text-right">
                             @include('focus.leads.partials.leads-header-buttons')
                         </div>

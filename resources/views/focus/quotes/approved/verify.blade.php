@@ -10,7 +10,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">VERIFICATION</h4>
+            <h4 class="content-header-title">Verification Management</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
