@@ -287,29 +287,21 @@ class ProjectsController extends Controller
 
     public function load(ManageProjectRequest $request)
     {
-
-        $project = Project::where('id', '=', $request->project_id)->first();
-        $project['start_date'] = dateTimeFormat($project['start_date']);
-        $project['end_date'] = dateTimeFormat($project['end_date']);
-        $project['creator'] = $project->creator->first_name . ' ' . $project->creator->last_name;
-        $c = '';
-        foreach ($project->users as $row) {
-            $c .= $row['first_name'] . ' ' . $row['last_name'] . ', ';
-        }
-        $project['assigned'] = $c;
+        $project = Project::find($request->project_id);
+        $project->start_date = dateTimeFormat($project['start_date']);
+        $project->view = route('biller.projects.show', [$project->id]);
 
         $task_back = task_status($project->status);
-        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ';
-        $project['status'] = $status;
+        $project->status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ';
+
         $s = '';
         foreach (status_list() as $row) {
-            if ($row['id'] == $task_back->id) $s .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
-            $s .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
+            if ($row['id'] == $task_back->id) $s .= '<option value="' . $row['id'] . '" selected>' . $row['name'] . '</option>';
+            else $s .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
         }
-
         $project['status_list'] = $s;
-        $project['view'] = route('biller.projects.show', [$project->id]);
-        return json_encode($project->only('id', 'name', 'status', 'start_date', 'end_date', 'note', 'short_desc', 'priority', 'creator', 'assigned', 'status', 'status_list', 'view'));
+
+        return response()->json($project);
     }
 
     public function project_search(Request $request, $bill_type)
@@ -346,9 +338,6 @@ class ProjectsController extends Controller
             return view('focus.products.partials.search')->withDetails($output);
     }
 
-
-
-
     public function search(Request $request)
     {
         $q = $request->post('keyword');
@@ -366,10 +355,9 @@ class ProjectsController extends Controller
         if (count($projects) > 0) return view('focus.projects.partials.search')->with(compact('projects'));
     }
 
-
-
     public function update_status(ManageProjectRequest $request)
     {
+        print_log('+++ Update status called +++',$request->all());
         //Update the model using repository update method
         switch ($request->r_type) {
             case 1:
@@ -396,7 +384,6 @@ class ProjectsController extends Controller
 
     public function project_load(Request $request)
     {
-
         $q = $request->get('id');
         if ($q == 1) {
             $result = Equipment::all()->where('rel_id', '=', $q);
