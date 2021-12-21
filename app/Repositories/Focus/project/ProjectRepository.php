@@ -48,10 +48,7 @@ class ProjectRepository extends BaseRepository
         //     });
         // }
 
-        return $q->get([
-            'id', 'name', 'status', 'project_number', 'priority', 'started_status', 'progress', 
-            'end_date', 'created_at'
-        ]);
+        return $q->get();
     }
 
     /**
