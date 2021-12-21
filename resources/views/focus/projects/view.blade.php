@@ -16,12 +16,9 @@
                 <div class="row breadcrumbs-top">
                     <div class="breadcrumb-wrapper col-12">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{route('biller.dashboard')}}">{{trans('core.home')}}</a>
-                            </li>
-                            <li class="breadcrumb-item"><a href="{{route('biller.projects.index')}}">{{trans('projects.projects')}}</a>
-                            </li>
-                            <li class="breadcrumb-item active">{{trans('projects.project_summary')}}
-                            </li>
+                            <li class="breadcrumb-item"><a href="{{route('biller.dashboard')}}">{{trans('core.home')}}</a></li>
+                            <li class="breadcrumb-item"><a href="{{route('biller.projects.index')}}">{{trans('projects.projects')}}</a></li>
+                            <li class="breadcrumb-item active">{{trans('projects.project_summary')}}</li>
                         </ol>
                     </div>
                 </div>
@@ -49,20 +46,22 @@
                         <li class="nav-item">
                             <a class="nav-link" id="tab3" data-toggle="tab" href="#tab_data3" aria-controls="tab_data3" role="tab" aria-selected="true"><i class="icon-directions"></i> {{trans('tasks.tasks')}}</a>
                         </li>
-                        @if($project->creator->id==auth()->user()->id)
+                        {{-- @if($project->creator->id==auth()->user()->id) --}}
                         <li class="nav-item">
                             <a class="nav-link" id="tab4" data-toggle="tab" href="#tab_data4" aria-controls="tab_data4" role="tab" aria-selected="true"><i class="fa fa-list-ol"></i> {{trans('projects.activity')}}</a>
-                        </li> @endif
+                        </li> 
+                        {{-- @endif --}}
                         <li class="nav-item">
                             <a class="nav-link" id="tab5" data-toggle="tab" href="#tab_data5" aria-controls="tab_data5" role="tab" aria-selected="true"><i class="fa fa-paperclip"></i> {{trans('general.files')}}</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="tab6" data-toggle="tab" href="#tab_data6" aria-controls="tab_data6" role="tab" aria-selected="true"><i class="icon-note"></i> {{trans('general.notes')}}</a>
                         </li>
-                        @if($project->creator->id==auth()->user()->id)
+                        {{-- @if($project->creator->id==auth()->user()->id) --}}
                         <li class="nav-item">
                             <a class="nav-link" id="tab7" data-toggle="tab" href="#tab_data7" aria-controls="tab_data7" role="tab" aria-selected="true"><i class="ft-file-text"></i> {{trans('invoices.invoices')}}</a>
-                        </li> @endif
+                        </li> 
+                        {{-- @endif --}}
                         <li class="nav-item">
                             <a class="nav-link" id="tab8" data-toggle="tab" href="#tab_data8" aria-controls="tab_data8" role="tab" aria-selected="true"><i class="ft-users"></i> {{trans('projects.users')}}</a>
                         </li>
@@ -83,7 +82,7 @@
                                             @endforeach
                                         </div>
                                         <ul class="list-inline list-inline-pipe text-center p-1 border-bottom-grey border-bottom-lighten-3">
-                                            <li>{{trans('projects.owner')}}: <span class="text-muted text-bold-600 blue">{{$project->creator->first_name.' '.$project->creator->last_name}}</span>
+                                            <li>{{trans('projects.owner')}}: <span class="text-muted text-bold-600 blue">{{-- $project->creator->first_name.' '.$project->creator->last_name --}}</span>
                                             </li>
                                             <li>{{trans('customers.customer')}}: <span class="text-bold-600 primary"><a href="{{route('biller.customers.show',[$project->customer->id])}}">{{$project->customer->name}} ({{$project->customer->company}})</a></span>
                                             </li>
@@ -209,7 +208,7 @@
                                         </div>
                                         @endif
                                         <small class="text-muted"><i class="fa fa-user"></i>
-                                            <strong>{{$row->creator->first_name}} {{$row->creator->last_name}}</strong>
+                                            <strong>{{-- $row->creator->first_name --}} {{-- $row->creator->last_name --}}</strong>
                                             <i class="fa fa-clock-o"></i> {{trans('general.created')}} {{dateTimeFormat($row['created_at'])}}
                                         </small>
                                     </div>
@@ -310,7 +309,7 @@
                             </div>
                         </div>
                         <div class="tab-pane" id="tab_data7" aria-labelledby="tab7" role="tabpanel">
-                            @if($project->creator->id==auth()->user()->id)
+                            {{-- @if($project->creator->id==auth()->user()->id) --}}
                             <a class="btn btn-info" href="{{route('biller.invoices.create')}}?p={{$project->id}}">
                                 {{trans('invoices.create')}}
                             </a>
@@ -331,7 +330,7 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
-                            @endif
+                            {{-- @endif --}}
                         </div>
                         <div class="tab-pane" id="tab_data8" aria-labelledby="tab8" role="tabpanel">
                             <div class="card">
