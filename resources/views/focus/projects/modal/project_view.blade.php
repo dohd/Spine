@@ -35,7 +35,8 @@
                     </div>
                     <div class="modal-footer">
                         <fieldset class="form-group position-relative has-icon-left mb-0">
-                            <a href="" class="btn btn-blue" id="d_view">{{trans('projects.detailed_view')}}</a>
+                            {{-- <a href="" class="btn btn-blue" id="d_view">{{trans('projects.detailed_view')}}</a> --}}
+                            <a href="#" class="btn btn-blue">{{trans('projects.detailed_view')}}</a>
                             <button type="button" data-dismiss="modal" class="btn btn-default">{{trans('general.close')}}</button>
                         </fieldset>
                     </div>
