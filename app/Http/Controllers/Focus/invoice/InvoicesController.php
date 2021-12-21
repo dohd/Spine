@@ -142,7 +142,7 @@ class InvoicesController extends Controller
             $last_tr = Transaction::orderBy('id', 'desc')->first();
             $banks = Bank::all();
 
-            
+         
 
 
             return view('focus.invoices.create_project_invoice')->with(array('quotes' => $quotes,'customer'=>$customer,'last_invoice'=>$last_invoice,'last_tr'=>$last_tr,'banks' => $banks,))->with(bill_helper(1, 2));
@@ -400,6 +400,26 @@ echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend
 
     public function store_project_invoice(CreateInvoiceRequest $request)
     {
+
+
+        // filter request input fields
+        $invoice_data = $request->only(['customer_id','taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 'notes', 'subtotal', 'tax', 'total','term_id']);
+        $dr_data = $request->only(['customer_name', 'dr_account_id','tid']);
+        $cr_data = $request->only(['cr_account_id']);
+        $tax_data = $request->only(['tax']);
+        $data_items = $request->only(['description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id']);
+        //check if KRA input is empty
+        if(numberClean($request->input('tax'))>0 && empty($request->input('tax_id'))){
+            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
+            exit;
+           }
+        $invoice_data['user_id'] = auth()->user()->id;
+        $invoice_data['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->create_poroject_invoice(compact('invoice_data', 'dr_data','cr_data','tax_data','data_items'));
+
+        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;'));
+        
 
     }
 
