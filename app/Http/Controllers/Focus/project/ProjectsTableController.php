@@ -97,7 +97,7 @@ class ProjectsTableController extends Controller
                 // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
                 if (true) {
                     $btn .= '&nbsp;&nbsp;<a href="'.route("biller.projects.edit", [$project->id]).'" data-toggle="tooltip" data-placement="top" title="Edit"><i class="ft-edit fa-lg"></i></a>';
-                    $btn .= '&nbsp;&nbsp;<a class="danger" href="'.route("biller.projects.destroy", [$project->id]).'" data-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash fa-lg"></i></a>';
+                    // $btn .= '&nbsp;&nbsp;<a class="danger" href="'.route("biller.projects.destroy", [$project->id]).'" data-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash fa-lg"></i></a>';
                 }
 
                 return $btn;
