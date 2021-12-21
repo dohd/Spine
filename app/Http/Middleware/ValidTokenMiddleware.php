@@ -25,7 +25,7 @@ class ValidTokenMiddleware
     public function handle($request, Closure $next)
     {
         if (App::environment('production')) error_reporting(0);        
-        if (!isset($request->type)) return abort(403, 'Access denied');
+        if (!isset($request->type)) abort(403, 'Access denied');
         
         switch ($request->type) {
             case 1:
