@@ -5,95 +5,58 @@
 @section('page-header')
 <h1>{{ trans('labels.backend.projects.management') }}</h1>
 @endsection
-@section('content')
-<div class="">
-    <div class="sidebar-left">
-        <div class="sidebar">
-            <div class="sidebar-content sidebar-todo">
-                <div class="card">
-                    <div class="card-body">
-                        @permission( 'project-create' )
-                        <div class="form-group form-group-compose text-center">
-                            <button type="button" class="btn btn-info btn-block" id="addt" data-toggle="modal" data-target="#AddProjectModal">
-                                {{trans('projects.new_project')}}
-                            </button>
-                        </div> @endauth
-                        <div class="sidebar-todo-container">
-                            <h6 class="text-muted text-bold-500 my-1">{{trans('general.messages')}}</h6>
-                            <div class="list-group list-group-messages">
-                                <a href="{{route('biller.dashboard')}}" class="list-group-item list-group-item-action border-0">
-                                    <i class="icon-home mr-1"></i>
-                                    <span>{{trans('navs.frontend.dashboard')}}</span>
-                                </a>
-                                <a href="{{route('biller.todo')}}" class="list-group-item list-group-item-action border-0">
-                                    <i class="icon-list mr-1"></i>
-                                    <span>{{trans('general.tasks')}}</span><span class="badge badge-secondary badge-pill float-right">8</span>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action border-0">
-                                    <i class="icon-bell mr-1"></i>
-                                    <span>{{trans('general.messages')}}</span>
-                                    <span class="badge badge-danger badge-pill float-right">3</span> 
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="content-right">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-right col">
-                    <div class="media width-250 float-right">
-                        <div class="media-body media-right text-right">
-                            <a href="{{ route('biller.quotes.project_quotes') }}" class="btn btn-success">
-                                <i class="fa fa-list-alt"></i> Verification
-                            </a>                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="content-body">
-                <div class="content-overlay"></div>
-                <!-- Modal -->
-                @include('focus.projects.modal.project_new')
-                <div class="card todo-details rounded-0">
-                    <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
-                    <div class="search"></div>
-                    <div class="card-body">
-                        <table id="projects-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>{{ trans('projects.project') }}</th>
-                                    <th>Project No</th>
-                                    <th>#Quote / PI No</th>
-                                    <th>{{ trans('projects.priority') }}</th>
-                                    <th>Started</th>                                    
-                                    <th>{{ trans('projects.end_date') }}</th>
-                                    <th>{{ trans('projects.status') }}</th>
-                                    <th>{{ trans('general.createdat') }}</th>
-                                    <th>{{ trans('general.action') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
 
+@section('content')
+<div>    
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <h4 class="content-header-title">Project Management</h4>
+            </div>
+            <div class="content-header-right col">
+                <div class="media width-250 float-right">
+                    <div class="media-body media-right text-right">
+                        @include('focus.projects.partials.projects-header-buttons')
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        <div class="content-body">
+            <div class="card todo-details rounded-0">
+                <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
+                <div class="search"></div>
+                <div class="card-body">
+                    <table id="projects-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{{ trans('projects.project') }}</th>
+                                <th>Project No</th>
+                                <th>#Quote / PI No</th>
+                                <th>{{ trans('projects.priority') }}</th>
+                                <th>Started</th>                                    
+                                <th>{{ trans('projects.end_date') }}</th>
+                                <th>{{ trans('projects.status') }}</th>
+                                <th>{{ trans('general.createdat') }}</th>
+                                <th>{{ trans('general.action') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>    
 </div>
 <!-- END: Content-->
 <div class="sidenav-overlay"></div>
 <div class="drag-target"></div>
 <input type="hidden" id="loader_url" value="{{route('biller.projects.load')}}">
+@include('focus.projects.modal.project_new')
 @include('focus.projects.modal.project_view')
 @endsection
 
