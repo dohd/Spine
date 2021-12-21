@@ -75,11 +75,11 @@ class ProjectsTableController extends Controller
             ->addColumn('priority', function ($project) {
                 return '<span class="">' . $project->priority . '</span> ';
             })
-            ->addColumn('started_status', function ($project) {
+            ->addColumn('start_status', function ($project) {
                 $badge = 'badge-secondary';
-                if ($project->started_status == 'running') $badge = 'badge-success';
+                if ($project->start_status == 'running') $badge = 'badge-success';
                             
-                return '<span class="badge '. $badge .'">' . $project->started_status . '</span>';
+                return '<span class="badge '. $badge .'">' . $project->start_status . '</span>';
             })
             ->addColumn('progress', function ($project) {
                 $task_back = task_status($project->status);

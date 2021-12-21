@@ -166,8 +166,8 @@
                     name: 'priority'
                 },
                 {
-                    data: 'started_status',
-                    name: 'started_status'
+                    data: 'start_status',
+                    name: 'start_status'
                 },
                 {
                     data: 'deadline',
