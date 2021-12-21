@@ -158,15 +158,17 @@ class ProjectsController extends Controller
      */
     public function show(Project $project, ManageProjectRequest $request)
     {
-        if (project_view($project->id)) {
-            //returning with successfull message
+        // $auth_view = project_view($project->id);
+        if (true) {
             $employees = Hrm::all();
             $mics = Misc::all();
-            $user = auth()->user()->id;
             $features = ConfigMeta::where('feature_id', 9)->first();
+
+            $user = auth()->user();
             $project_select = Project::whereHas('users', function ($q) use ($user) {
-                return $q->where('rid', '=', $user);
+                return $q->where('rid', $user->id);
             })->get();
+
             return new ViewResponse('focus.projects.view', compact('project', 'employees', 'mics', 'project_select', 'features'));
         }
     }
