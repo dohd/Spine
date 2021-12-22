@@ -1,501 +1,280 @@
-<!doctype html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Print {{$general['bill_type']}} {{$invoice['tid']}}</title>
-    <style>
-        body {
-            color: #2B2000;
-            font-family: 'Helvetica';
-            font-size: 11pt;
-        }
+	<style>
+		body {
+			font-family: "Times New Roman", Times, serif;
+			font-size: 10pt;
+		}
+		table {
+			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
+			font-size: 10pt;
+		}
+		table thead td {
+			background-color: #BAD2FA;
+			text-align: center;
+			border: 0.1mm solid black;
+			font-variant: small-caps;
+		}
+		td {
+			vertical-align: top;
+		}
+		.bullets {
+			width: 8px;
+		}
+		.items {
+			border-bottom: 0.1mm solid black;
+			font-size: 10pt; 
+			border-collapse: collapse;
+			width: 100%;
+			font-family: sans-serif;
+		}
+		.items td {
+			border-left: 0.1mm solid black;
+			border-right: 0.1mm solid black;
+		}
 
-        @page {
-            margin: 3mm;
-        }
+		.align-r {
+			text-align: right;
+		}
+		.align-c {
+			text-align: center;
+		}
+		.bd {
+			border: 1px solid black;
+		}
+		.bd-t {
+			border-top: 1px solid
+		}
+		.ref {
+			width: 100%;
+			font-family: serif;
+			font-size: 10pt;
+			border-collapse: collapse;
+		}
+		.ref tr td {
+			border: 0.1mm solid #888888; 
+		}
+		.ref tr:nth-child(2) td {
+			width: 50%;
+		}
+		.customer-dt {
+			width: 100%;
+			font-family: serif;
+			font-size: 10pt;
+		}
+		.customer-dt tr td:nth-child(1) {
+			border: 0.1mm solid #888888;
+		}
+		.customer-dt tr td:nth-child(3) {
+			border: 0.1mm solid #888888;
+		}
+		.customer-dt-title {
+			font-size: 7pt; 
+			color: #555555; 
+			font-family: sans;
+		}
+		.doc-title-td {
+			text-align: center;
+			width: 100%;
+		}
+		.doc-title {
+			font-size: 15pt;
+			color: #0f4d9b;
+		}
+		.doc-table {
+			font-size: 10pt;
+			margin-top:5px;
+			width: 100%;
+		}
 
-        .invoice-box {
-            width: 210mm;
-            padding: 0mm;
-            border: 0;
-            font-size: 11pt;
-            line-height: 12pt;
-            color: #000;
-        }
-
-        .party {
-            border: #ccc 1px solid;
-        }
-
-        table tr.heading td {
-            background: #515151;
-            color: #FFF;
-            padding: 6pt;
-        }
-
-        .company {
-            width: 300pt;
-        }
-
-        .customer {
-            width: 290pt;
-        }
-
-        .bill_info {
-            font-size: 10pt;
-        }
-
-        .heading {
-            width: 900pt;
-        }
-
-        .m_fill {
-            background-color: #eee;
-        }
-
-        .product_list td {
-            padding: 4px;
-        }
-
-        .product_row td {
-            border: 1px solid #ddd;
-        }
-
-        .summary td {
-            padding-left: 8pt;
-            padding-right: 8pt;
-            margin: 2px;
-            border: 1px solid #ccc;
-
-
-        }
-
-        .sign {
-            text-align: center;
-            margin-bottom: 4pt
-        }
-
-        .logo_box {
-            width: 60%;
-            align: left;
-        }
-
-        .date_box {
-            width: 30%;
-            align: right;
-        }
-
-        .text_center {
-            text-align: center;
-        }
-
-        .text_right {
-            text-align: right;
-        }
-
-        .sign_box {
-            display: block;
-            margin-left: 400pt;
-            width: 100pt;
-            align: right;
-        }
-
-        .row {
-            width: 100%;
-        }
-
-
-    </style>
+		.header-table {
+			width: 100%;
+			border-bottom: 0.8mm solid #0f4d9b;
+		}
+		.header-table tr td:first-child {
+			color: #0f4d9b;
+			font-size: 9pt;
+			width: 60%;
+			text-align: left;
+		}
+		.address {
+			color: #0f4d9b;
+			font-size: 10pt;
+			width: 40%;
+			text-align: right;
+		}
+		.header-table-text {
+			color:#0f4d9b; 
+			font-size:9pt; 
+			margin: 0;
+		}
+		.header-table-child {
+			color:#0f4d9b; 
+			font-size:8pt;
+		}
+		.header-table-child tr:nth-child(2) td {
+			font-size:9pt; 
+			padding-left:50px;
+		}
+		.footer {
+			font-size: 9pt;
+			text-align: center;
+		}
+	</style>
 </head>
-<body dir="{{$general['direction']}}">
-<div class="information">
-    <table width="100%">
-        <tr>
-            <td class="logo_box">
-                <img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company['logo']) }}"
-                     class="top_logo" height="120">
-            </td>
-
-            <td class="date_box">
-                <table class="bill_info">
-                    <tr>
-                        <td colspan="1" class="text_right"><h4>{{$general['bill_type']}}</h4></td>
-                    </tr>
-                    <tr>
-                        <td>{{$general['lang_bill_number']}}</td>
-                        <td>: {{prefix($general['prefix'],$invoice['ins'])}} # {{$invoice['tid']}}</td>
-                    </tr>
-                    <tr>
-                        <td>{{$general['lang_bill_date']}}</td>
-                        <td>: {{dateFormat($invoice['invoicedate'],$company['main_date_format'])}}</td>
-                    </tr>
-                    <tr>
-                        <td>{{$general['lang_bill_due_date']}}</td>
-                        <td>: {{dateFormat($invoice['invoiceduedate'],$company['main_date_format'])}}</td>
-                    </tr>
-                    @if($invoice['refer'])
-                        <tr>
-                            <td>{{trans('general.reference')}}</td>
-                            <td>: {{$invoice['refer']}}</td>
-                        </tr>
-                    @endif
-                </table>
-
-
-            </td>
-        </tr>
-    </table>
-</div>
-<br>
-<div class="invoice-box">
-
-    <table class="party">
-        <thead>
-        <tr class="heading">
-            <td> {{trans('general.our_info')}}:</td>
-            <td>{{$general['person']}}:</td>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td class="company">
-                 <strong>{{$company['cname']}}</strong><br>
-                {{$company['address']}},<br>
-                {{$company['city']}}, {{$company['region']}}<br>
-                {{$company['country']}} - {{$company['postbox']}}<br>
-                {{trans('general.phone')}}: {{$company['phone']}}<br>
-                {{trans('general.email')}}: {{$company['email']}}<br>
-                @if($company['taxid'])
-                    {{$general['tax_id']}}: {{$company['taxid']}}
-                @endif
-                 {!! custom_fields_view(6,$invoice->ins,3,$invoice->ins) !!}
-            </td>
-            <td class="customer">
-               <strong> {{$invoice->customer->name}}</strong><br>   <strong> {{$invoice->customer->company}}</strong><br>
-                {{$invoice->customer->address}}, {{$invoice->customer->city}}<br>
-                {{$invoice->customer->region}}, {{$invoice->customer->country}} - {{$invoice->customer->postbox}}<br>
-                {{trans('general.phone')}} : {{$invoice->customer->phone}}<br>
-                {{trans('general.email')}} : {{$invoice->customer->email}}<br>
-                @if($invoice->customer->taxid) {{$general['tax_id']}}: {{$invoice->customer->taxid}}<br>
-                @endif
-                {!! custom_fields_view($invoice['person'],$invoice['person_id'],2,$invoice['ins']) !!}
-            </td>
-        </tr>@if ($invoice->customer->name_s)
-            <tr>
-                <td><br><strong>{{trans('customers.address_s')}}</strong><br> {{$invoice->customer->name_s}}<br>
-                    {{$invoice->customer->address_s}}, {{$invoice->customer->city_s}}<br>
-                    {{$invoice->customer->region_s}}, {{$invoice->customer->country_s}}
-                    - {{$invoice->customer->postbox_s}}<br>
-                    {{trans('general.phone')}} : {{$invoice->customer->phone_s}}<br>
-                    {{trans('general.email')}} : {{$invoice->customer->email_s}}</td>
-            </tr>
-        @endif
-        </tbody>
-    </table>
-    <br>
-    @php
-        $fill = true;
-    @endphp
-    <table class="product_list" cellpadding="0" cellspacing="0" width="100%">
-
-        {{--  exclusive --}}
-        @if($invoice['tax_format']=='exclusive' OR $invoice['tax_format']=='inclusive')
-            <tr class="heading">
-                <td style="width: 1rem;">
-                    #
-                </td>
-                <td>
-                    {{trans('products.product_des')}}
-                </td>
-                <td>
-                    {{trans('products.qty')}}
-                </td>
-                <td>
-                    {{trans('products.price')}}
-                </td>
-                @if($invoice['tax']>0)
-                    <td>{{trans('general.tax')}}</td>@endif
-                @if($invoice['discount']>0)
-                    <td>{{trans('general.discount')}}</td>@endif
-                <td>
-                    {{trans('general.subtotal')}}
-                </td>
-            </tr>
-
-            @foreach($invoice->products as $product)
+<body>
+	<htmlpagefooter name="myfooter">
+		<div class="footer">
+			Page {PAGENO} of {nb}
+		</div>
+	</htmlpagefooter>
+	<sethtmlpagefooter name="myfooter" value="on" />
+	<table class="header-table">
+		<tr>
+			<td>
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br>
+				<p class="header-table-text"> Supply, Installation, Maintenance & Repair of:</p>
+				<table class="header-table-child">
+					<tr>
+						<td>
+							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Air Conditioners & Refrigerators </div>
+							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Coldrooms & Chillers </div>
+							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Mechanical Ventilation Systems</div>
+						</td>
+						<td>
+							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Laboratory Fume Cupboards</div>
+							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Steam Bath and Saunas</div>
+							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Raised Floors / Access Panels</div>
+						</td>
+					</tr>
+					<tr><td>... and General Suppliers</td></tr>
+				</table>								
+			</td>
+			<td class="address"><br><br>
+				Lean Aircons Building, Opp NextGen Mall<br>
+				Mombasa Road, Nairobi - Kenya<br>
+				P.O Box 36082 - 00200.<br>
+				Cell : +254 732 345 393, +254 787 391 015<br>
+				info@leanventures.co.ke<br>
+				leannventures@gmail.com
+			</td>
+		</tr>
+	</table>
+	<table class="doc-table">
+		<tr>
+			<td class="doc-title-td">
+				<span class='doc-title'>
+					<b>
+                        INVOICE
+					
+					</b>
+				</span>				
+			</td>
+		</tr>
+	</table><br>
+	<table class="customer-dt" cellpadding="10">
+		<tr>
+			<td width="50%">
+				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
+				<b>Client Name :</b> {{ $invoice->customer->company }}<br>
+				<b>Branch :</b> Head Office<br>
+				<b>Address :</b> {{  $invoice->customer->address }}<br>
+				<b>Email :</b> {{  $invoice->customer->email }}<br>
+				<b>Cell :</b> {{ $invoice->customer->phone }}<br>
+			
+			</td>
+			<td width="5%">&nbsp;</td>
+			<td width="45%">
+				<span class="customer-dt-title">REFERENCE DETAILS:</span><br>
                 @php
-                    if ($fill == true) {
-                      $flag = ' m_fill';
-                  } else {
-                      $flag = '';
-                  }
-                   $fill = !$fill;
-                $col_span=4;
-                @endphp
-                <tr class="product_row {{$flag}}">
-                    <td style="width: 1rem;">
-                        {{ $loop->iteration }}
-                    </td>
-                    <td>
-                        {{$product['product_name']}} @if(isset($product['serial'])){{$product['serial']}}@endif
-                    </td>
-                    <td>
-                        {{numberFormat($product['product_qty'],$invoice['currency'])}} {{$product['unit']}}
-                    </td>
-                    <td>
-                        {{amountFormat($product['product_price'],$invoice['currency'])}}
-                    </td>
-                    @if($invoice['tax']>0)
-                        @php $col_span++ @endphp
-                        <td>{{amountFormat($product['total_tax'],$invoice['currency'])}}</td> @endif
-                    @if($invoice['discount']>0)
-                        @php $col_span++ @endphp
-                        <td>{{amountFormat($product['total_discount'],$invoice['currency'])}}</td>
-                    @endif
-                    <td>
-                        {{amountFormat($product['product_subtotal'],$invoice['currency'])}}
-                    </td>
-                </tr>
-                @if($product['product_des'])
-                    <tr class="product_row  {{$flag}}">
-                        <td style="width: 1rem;">
-
-                        </td>
-                        <td class="" colspan="{{$col_span}}"> {!!$product['product_des'] !!} </td>
-
-                    </tr>
-                @endif
-
-            @endforeach
-        @endif
-
-        {{--  cgst --}}
-
-        @if($invoice['tax_format']=='cgst')
-            <tr class="heading">
-                <td style="width: 1rem;">
-                    #
-                </td>
-                <td>
-                    {{trans('products.product_des')}}
-                </td>
-                <td>
-                    {{trans('products.qty')}}
-                </td>
-                <td>
-                    {{trans('products.price')}}
-                </td>
-
-                <td>{{trans('general.cgst')}}</td>
-                <td>{{trans('general.sgst')}}</td>
-                @if($invoice['discount']>0)
-                    <td>{{trans('general.discount')}}</td>@endif
-                <td>
-                    {{trans('general.subtotal')}}
-                </td>
-            </tr>
-
-            @foreach($invoice->products as $product)
-                @php
-                    if ($fill == true) {
-                      $flag = ' m_fill';
-                  } else {
-                      $flag = '';
-                  }
-                   $fill = !$fill;
-                $col_span=5;
-                @endphp
-                <tr class="product_row {{$flag}}">
-                    <td style="width: 1rem;">
-                        {{ $loop->iteration }}
-                    </td>
-                    <td>
-                        {{$product['product_name']}}
-                    </td>
-                    <td>
-                        {{numberFormat($product['product_qty'],$invoice['currency'])}} {{$product['unit']}}
-                    </td>
-                    <td>
-                        {{amountFormat($product['product_price'],$invoice['currency'])}}
-                    </td>
-
-
-                    <td>{{amountFormat($product['total_tax']/2,$invoice['currency'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$invoice['currency'])}}%)</span>
-                    </td>
-                    <td>{{amountFormat($product['total_tax']/2,$invoice['currency'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$invoice['currency'])}}%)</span>
-                    </td>
-                    @if($invoice['discount']>0)
-                        @php $col_span++ @endphp
-                        <td>{{amountFormat($product['total_discount'],$invoice['currency'])}}</td>
-                    @endif
-                    <td>
-                        {{amountFormat($product['product_subtotal'],$invoice['currency'])}}
-                    </td>
-                </tr>
-                @if($product['product_des'])
-                    <tr class="product_row  {{$flag}}">
-                        <td style="width: 1rem;">
-
-                        </td>
-                        <td class="" colspan="7">{{$product['product_des']}}</td>
-
-                    </tr>
-                @endif
-
-            @endforeach
-        @endif
-
-        {{--  igst --}}
-
-        @if($invoice['tax_format']=='igst')
-            <tr class="heading">
-                <td style="width: 1rem;">
-                    #
-                </td>
-                <td>
-                    {{trans('products.product_des')}}
-                </td>
-                <td>
-                    {{trans('products.qty')}}
-                </td>
-                <td>
-                    {{trans('products.price')}}
-                </td>
-
-                <td>{{trans('general.igst')}}</td>
-                @if($invoice['discount']>0)
-                    <td>{{trans('general.discount')}}</td>@endif
-                <td>
-                    {{trans('general.subtotal')}}
-                </td>
-            </tr>
-
-            @foreach($invoice->products as $product)
-                @php
-                    if ($fill == true) {
-                      $flag = ' m_fill';
-                  } else {
-                      $flag = '';
-                  }
-                   $fill = !$fill;
-                $col_span=5;
-                @endphp
-                <tr class="product_row {{$flag}}">
-                    <td style="width: 1rem;">
-                        {{ $loop->iteration }}
-                    </td>
-                    <td>
-                        {{$product['product_name']}}
-                    </td>
-                    <td>
-                        {{numberFormat($product['product_qty'],$invoice['currency'])}} {{$product['unit']}}
-                    </td>
-                    <td>
-                        {{amountFormat($product['product_price'],$invoice['currency'])}}
-                    </td>
-
-
-                    <td>{{amountFormat($product['total_tax'],$invoice['currency'])}} <span class="font-size-xsmall">({{numberFormat($product['product_tax'],$invoice['currency'])}}%)</span>
-                    </td>
-                    @if($invoice['discount']>0)
-                        @php $col_span++ @endphp
-                        <td>{{amountFormat($product['total_discount'],$invoice['currency'])}}</td>
-                    @endif
-                    <td>
-                        {{amountFormat($product['product_subtotal'],$invoice['currency'])}}
-                    </td>
-                </tr>
-                @if($product['product_des'])
-                    <tr class="product_row  {{$flag}}">
-                        <td style="width: 1rem;">
-
-                        </td>
-                        <td class="" colspan="7">{{$product['product_des']}}</td>
-
-                    </tr>
-                @endif
-
-            @endforeach
-        @endif
-    </table>
-    <br>
-
-    <table class="summary" width="100%" cellspacing="0" cellpadding="0">
-        <tr>
-            <td style="width: 50%" rowspan="6"><br>
-                <p style="font-size: large"><strong>{{trans('general.status')}}
-                        : {{trans('payments.'.$invoice['status'])}} {{$invoice['pmethod']}}</strong></p><br>
-                @if($general['status_block'])
-
-                    <p>{{trans('general.grand_total')}} : {{amountFormat($invoice['total'],$invoice['currency'])}}</p>
-
-
-                    <p>{{trans('general.round_off')}}: 0</p><br>
-                    <p>{{trans('payments.paid_amount')}}: {{amountFormat($invoice['pamnt'],$invoice['currency'])}}</p>
-                @endif
-                @if(@$invoice['proposal'])
-                    <hr>
-                    {{trans('general.proposal')}}: </br></br>
-                    <small>{!! $invoice['proposal']  !!}</small>
-                @endif
-            </td>
-            <td class="text_right"><strong> {{trans('general.summary')}}</strong></td>
-            <td></td>
-
-        </tr>
-        <tr>
-            <td class="text_right"> {{trans('general.subtotal')}}</td>
-            <td> {{amountFormat($invoice['subtotal'],$invoice['currency'])}}</td>
-        </tr>
-        @if($invoice['tax']>0)
-            <tr>
-                <td class="text_right">{{$general['tax_string_total']}}</td>
-                <td> {{amountFormat($invoice['tax'],$invoice['currency'])}}</td>
-            </tr>
-            <tr>
-                @endif
-                @if($invoice['discount']>0)
-                    <td class="text_right"> {{trans('general.discount')}}</td>
-                    <td> {{amountFormat($invoice['discount'],$invoice['currency'])}}</td>
-            </tr>
-        @endif
-        @if($invoice['shipping']>0)
-            <tr>
-                <td class="text_right"> {{trans('general.shipping')}}</td>
-                <td> {{amountFormat($invoice['shipping'],$invoice['currency'])}}</td>
-            </tr>
-        @endif
-
-        @if((($invoice['total']-$invoice['pamnt'])>0) AND ($general['status_block']))
-            <tr>
-                <td class="text_right"> {{trans('general.balance_due')}}</td>
-                <td> {{amountFormat($invoice['total']-$invoice['pamnt'],$invoice['currency'])}}</td>
-            </tr>
-        @else
-            <tr>
-                <td class="text_right"> {{trans('general.grand_total')}}</td>
-                <td> {{amountFormat($invoice['total'],$invoice['currency'])}}</td>
-            </tr>
-        @endif
-    </table>
-    <br>
-    <div class="sign_box">
-        <div class="sign">{{trans('general.authorized_person')}}</div>
-        <div class="sign"><img
-                    src="{{Storage::disk('public')->url('app/public/img/signs/' . $invoice->user->signature)}}"
-                    width="160"
-                    height="50" border="0" alt=""></div>
-        <div class="sign">({{$invoice->user->first_name}} {{$invoice->user->last_name}})</div>
-    </div>
-    {!! custom_fields_view($invoice['custom'],$invoice['id'],2,true) !!}
-    <div class="terms">{{$invoice['notes']}}
-        <hr>
-        <h6>{{trans('general.payment_terms')}}:</h6>
-
-        <strong>{{@$invoice->term->title}}</strong><br>{!!@$invoice->term->terms  !!}
-    </div>
-</div>
-
-
+                $tid = sprintf('%04d', $invoice->tid);
+            
+            @endphp
+            	<b>Invoice No :</b> {{  $tid }}<br>	<br>	
+				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
+                <b>KRA PIN : </b>P051516705D<br>
+                <b>LPO REF : </b>{{ $invoice->lpo_ref }}<br>
+			    <b>Overdue after :</b> {{ $invoice->validity }} days <br>
+			
+			
+			</td>
+		</tr>
+	</table><br>
+	
+	
+	<table class="items" cellpadding="8">
+		<thead>
+			<tr>
+				<td width="6%">No.</td>
+				<td width="24%"> DESCRIPTION</td>
+                <td width="24%"> REFERENCE</td>
+				<td width="8%">QTY</td>
+				<td width="8%">UoM</td>
+				<td width="14%">RATE</td>
+				<td width="14%">AMOUNT(Ksh)</td>
+			</tr>
+		</thead>
+		<tbody>
+            @php
+                $i=0;
+            @endphp
+			@foreach($invoice->products as $product)
+			
+					@php
+                      $i++;
+						$product_qty = (int) $product->product_qty;
+						$product_subtotal = (int) $product->product_subtotal;
+						$product_price = (int) $product->product_price;
+					@endphp
+					<tr>
+						<td>{{ $i }}</td>
+						<td>{{ $product->description }}</td>
+						<td >{{ $product->reference }}</td>
+                        <td class="align-c">{{ $product_qty }}</td>
+						<td class="align-c">{{ $product->unit }}</td>
+					    <td class="align-r">{{ number_format($product_price, 2) }}</td>
+						<td class="align-r">{{ number_format($product_qty * $product_price, 2) }}</td>
+						
+					</tr>
+					
+			@endforeach
+			<!-- empty row with dynamic height-->
+			<tr>
+				<td height="{{ 400-30*count($invoice->products) }}"></td>
+				@for($i=0; $i < 6; $i++) 
+                    <td></td>
+                @endfor
+			</tr>
+			<tr>
+				<td colspan="5" class="bd-t" rowspan="2">
+					@if ($invoice->bank_id)
+						<span class="customer-dt-title">BANK DETAILS:</span><br>
+						<b>Account Name :</b> Lean Ventures Limited<br>
+						<b>Account Number :</b> 1267496231<br>
+						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br>
+						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br>
+						(KCB Mpesa Paybill: 522 522)
+					@endif
+				</td>
+				<td class="bd align-r">Sub Total:</td>
+				@if ($invoice->print_type == 'inclusive')
+					<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>			
+				@else
+					<td class="bd align-r">{{ number_format($invoice->subtotal, 2) }}</td>
+				@endif
+			</tr>
+			<tr>
+			
+					<td class="align-r">Tax {{ $invoice->tax_id }}%</td>
+					<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
+				
+			</tr>
+			<tr>
+				<td colspan="5"></td>
+				<td class="bd align-r"><b>Grand Total:</b></td>
+				<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>
