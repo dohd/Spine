@@ -403,7 +403,7 @@ echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend
 
 
         // filter request input fields
-        $invoice_data = $request->only(['customer_id','taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 'notes', 'subtotal', 'tax', 'total','term_id']);
+        $invoice_data = $request->only(['customer_id','taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 'notes', 'subtotal', 'tax', 'total','term_id','lpo_ref']);
         $dr_data = $request->only(['customer_name', 'dr_account_id','tid']);
         $cr_data = $request->only(['cr_account_id']);
         $tax_data = $request->only(['tax']);
@@ -418,7 +418,10 @@ echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend
 
         $result = $this->repository->create_poroject_invoice(compact('invoice_data', 'dr_data','cr_data','tax_data','data_items'));
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;'));
+        $valid_token = token_validator('','i' . $result['id'].$result['tid'],true);
+       
+
+        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'],1,$valid_token,1]) . '" target="_blank" class="btn btn-success btn-md"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;'));
         
 
     }
