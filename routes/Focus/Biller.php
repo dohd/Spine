@@ -4,7 +4,6 @@
  * FocusRoutes
  *
  */
-
 Route::group(['namespace' => 'account'], function () {
     Route::get('accounts/balancesheet/{type}', 'AccountsController@balance_sheet')->name('accounts.balance_sheet');
     Route::get('accounts/trialbalance/{type}', 'AccountsController@trial_balance')->name('accounts.trial_balance');
@@ -217,6 +216,13 @@ Route::group(['namespace' => 'projectstocktransfer'], function () {
     //For Datatable
     Route::post('projectstocktransfers/get', 'ProjectstocktransfersTableController')->name('projectstocktransfers.get');
 });
+
+Route::group(['namespace' => 'stockissuance'], function () {
+    Route::resource('stockissuance', 'StockIssuanceController');
+    // for dataTable
+    Route::post('stockissuance/get', 'StockIssuanceTableController')->name('stockissuance.get');
+});
+
 Route::group(['namespace' => 'productvariable'], function () {
     Route::resource('productvariables', 'ProductvariablesController');
     //For Datatable
