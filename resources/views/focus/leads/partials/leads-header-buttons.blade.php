@@ -2,7 +2,7 @@
 <div>
     <div class="btn-group" role="group" aria-label="Basic example">
         <a href="{{ route('biller.leads.index') }}" class="btn btn-info  btn-lighten-2">
-            <i class="fa fa-list-alt"></i> {{trans( 'general.list' )}}
+            <i class="fa fa-list-alt"></i> {{ trans('general.list') }}
         </a>
         @permission('customer-create' ) 
             <a href="{{ route('biller.leads.create') }}" class="btn btn-pink  btn-lighten-3">
