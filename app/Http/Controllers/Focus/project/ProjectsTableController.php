@@ -58,7 +58,7 @@ class ProjectsTableController extends Controller
                 foreach ($project->tags as $row) {
                     $tg .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
                 }
-                return '<div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.projects.show", [$project->id]) . '" >' . $project->name . '</a><div class="float-right">' . $tg . '</div></div><span class="todo-desc">' . $project->short_desc . '</span></div> </div>';
+                return '<div class="todo-item media"><div class="media-body"><div class="todo-title">'.$project->name.'<div>' . $tg . '</div></div></div></div>';
             })
             ->addColumn('project_number', function($project) {
                 return 'Prj-'.sprintf('%04d', $project->project_number);
