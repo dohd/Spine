@@ -106,7 +106,7 @@
                                     <div class="col-sm-6 cmp-pnl">
                                         <div class="inner-cmp-pnl">
                                             <div class="form-group row">
-                                                <div class="col-sm-6"><label for="tid"
+                                                <div class="col-sm-4"><label for="tid"
                                                         class="caption">Transaction ID*</label>
                                                     <div class="input-group">
                                                         <div class="input-group-addon"><span class="icon-file-text-o"
@@ -115,7 +115,7 @@
                                                         {{ Form::number('tid', @$last_tr->tid + 1, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid')]) }}
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-6"><label for="invoice_no"
+                                                <div class="col-sm-4"><label for="invoice_no"
                                                         class="caption">Invoice Number*</label>
                                                     <div class="input-group">
                                                         <div class="input-group-addon"><span class="icon-bookmark-o"
@@ -124,6 +124,15 @@
                                                         {{ Form::text('invoice_no', @$last_invoice->tid + 1, ['class' => 'form-control round required', 'placeholder' => trans('general.reference')]) }}
                                                     </div>
                                                 </div>
+                                                <div class="col-sm-4"><label for="lpo_ref"
+                                                    class="caption">LPO Ref*</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-addon"><span class="icon-bookmark-o"
+                                                            aria-hidden="true"></span>
+                                                    </div>
+                                                    {{ Form::text('lpo_ref', null, ['class' => 'form-control round required', 'placeholder' =>'LPO Reference']) }}
+                                                </div>
+                                            </div>
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col-sm-6"><label for="invoicedate"
