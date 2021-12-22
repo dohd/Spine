@@ -21,7 +21,6 @@ namespace App\Http\Controllers\Focus\project;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\project\ProjectRepository;
-use App\Http\Requests\Focus\project\ManageProjectRequest;
 
 /**
  * Class ProjectsTableController.
@@ -64,17 +63,18 @@ class ProjectsTableController extends Controller
                 return 'Prj-'.sprintf('%04d', $project->project_number);
             })
             ->addColumn('quote_tid', function($project) {
-                $tids = '';                
+                $tids = array();                
                 foreach ($project->quotes as $quote) {
                     $tid = sprintf('%04d', $quote->tid);
-                    if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
-                    else $tids .= 'QT-'. $tid . ', ';
+                    $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
+                    $tids[] = '<a href="#" data-toggle="tooltip" title="List-items"><b>'. $tid .'</b></a>';
                 }
-                return $tids;
+
+                return implode(', ', $tids);
             })
-            ->addColumn('priority', function ($project) {
-                return '<span class="">' . $project->priority . '</span> ';
-            })
+            // ->addColumn('priority', function ($project) {
+            //     return '<span class="">' . $project->priority . '</span> ';
+            // })
             ->addColumn('start_status', function ($project) {
                 $badge = 'badge-secondary';
                 if ($project->start_status == 'running') $badge = 'badge-success';
@@ -86,9 +86,9 @@ class ProjectsTableController extends Controller
                 return '<a href="#" class="view_project" data-toggle="modal" data-target="#ViewProjectModal" data-item="' 
                     . $project->id . '"><span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span></a> ' . numberFormat($project->progress) . ' %';
             })
-            ->addColumn('deadline', function ($project) {
-                return dateTimeFormat($project->end_date);
-            })
+            // ->addColumn('deadline', function ($project) {
+            //     return dateTimeFormat($project->end_date);
+            // })
             ->addColumn('created_at', function ($project) {
                 return dateFormat($project->created_at);
             })

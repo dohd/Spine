@@ -33,9 +33,11 @@
                                 <th>{{ trans('projects.project') }}</th>
                                 <th>Project No</th>
                                 <th>#Quote / PI No</th>
-                                <th>{{ trans('projects.priority') }}</th>
-                                <th>Started</th>                                    
-                                <th>{{ trans('projects.end_date') }}</th>
+                                <th>Started</th>  
+                                {{-- 
+                                    <th>{{ trans('projects.priority') }}</th>
+                                    <th>{{ trans('projects.end_date') }}</th> 
+                                --}}
                                 <th>{{ trans('projects.status') }}</th>
                                 <th>{{ trans('general.createdat') }}</th>
                                 <th>{{ trans('general.action') }}</th>
@@ -125,17 +127,17 @@
                     name: 'quote_tid'
                 },
                 {
-                    data: 'priority',
-                    name: 'priority'
-                },
-                {
                     data: 'start_status',
                     name: 'start_status'
                 },
-                {
-                    data: 'deadline',
-                    name: 'deadline'
-                },
+                // {
+                //     data: 'priority',
+                //     name: 'priority'
+                // },
+                // {
+                //     data: 'deadline',
+                //     name: 'deadline'
+                // },
                 {
                     data: 'progress',
                     name: 'progress'
