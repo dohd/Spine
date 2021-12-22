@@ -24,7 +24,7 @@ use App\Repositories\Focus\quote\QuoteRepository;
 /**
  * Class QuotesTableController.
  */
-class ProjectQuotesTableController extends Controller
+class QuoteVerifyTableController extends Controller
 {
     /**
      * variable to store the repository object
@@ -74,18 +74,18 @@ class ProjectQuotesTableController extends Controller
             ->addColumn('total', function ($quote) {
                 return number_format($quote->total, 2);
             })
+            ->addColumn('verified', function ($quote) {
+                return $quote->verified;
+            })
+            ->addColumn('lpo_number', function($quote) {
+                return $quote->lpo_number;
+            })
             ->addColumn('project_number', function($quote) {
                 $tid = '';
                 if (isset($quote->project_quote->project)) {
                     $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
                 }
                 return $tid;
-            })
-            ->addColumn('verified', function ($quote) {
-                return $quote->verified;
-            })
-            ->addColumn('lpo_number', function($quote) {
-                return $quote->lpo_number;
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);

@@ -266,7 +266,7 @@ Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
     //For Datatable
-    Route::post('quotes/get_project', 'ProjectQuotesTableController')->name('quotes.get_project');
+    Route::post('quotes/get_project', 'QuoteVerifyTableController')->name('quotes.get_project');
     Route::post('quotes/get', 'QuotesTableController')->name('quotes.get');
 });
 
