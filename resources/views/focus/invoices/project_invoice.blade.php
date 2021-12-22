@@ -41,7 +41,7 @@
 
                                         {{ Form::open(['route' => 'biller.invoices.create_project_invoice', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'mass_add_form']) }}
                                         {!! Form::hidden('selected_products', null, ['id' => 'selected_products']); !!}
-                                        {!! Form::text('customer', null, ['id' => 'customer']); !!}
+                                        {!! Form::hidden('customer', null, ['id' => 'customer']); !!}
                           
                                        
                                        {!! Form::submit('Add Selected', array('class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected')) !!}    
