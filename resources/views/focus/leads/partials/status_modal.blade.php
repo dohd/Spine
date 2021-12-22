@@ -7,7 +7,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            {{ Form::model($lead, ['route' => ['biller.leads.update_status', $lead->id], ]) }}
+            {{ Form::model($lead, ['route' => ['biller.leads.update_status', $lead->id] ]) }}
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="status">Status</label>
