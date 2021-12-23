@@ -4,7 +4,6 @@
  * project
  *
  */
-
 Route::group(['namespace' => 'project', 'middleware' => 'project'], function () {
   Route::post('projects/load', 'ProjectsController@load')->name('projects.load');
   Route::post('projects/update_status', 'ProjectsController@update_status')->name('projects.update_status');
@@ -13,6 +12,7 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/log_history', 'ProjectsController@log_history')->name('projects.log_history');
   Route::post('projects/notes', 'ProjectsController@notes')->name('projects.notes');
   Route::post('projects/invoices', 'ProjectsController@invoices')->name('projects.invoices');
+  Route::get('projects/quote_items/{quote}', 'ProjectsController@quote_items')->name('projects.quote_items');
 });
 
 Route::group(['namespace' => 'project'], function () {
