@@ -37,6 +37,7 @@ use App\Http\Requests\Focus\project\ManageProjectRequest;
 use App\Http\Requests\Focus\project\CreateProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
 use App\Models\project\Project;
+use App\Models\quote\Quote;
 use Yajra\DataTables\Facades\DataTables;
 
 /**
@@ -171,6 +172,14 @@ class ProjectsController extends Controller
 
             return new ViewResponse('focus.projects.view', compact('project', 'employees', 'mics', 'project_select', 'features'));
         }
+    }
+
+    // Project Quote/PI list-items
+    public function quote_items(Quote $quote)
+    {
+        $products = $quote->products()->orderBy('row_index')->get();
+
+        return view('focus.projects.quote_items')->with(compact('quote', 'products'));
     }
 
     public function store_meta(ManageProjectRequest $request)
