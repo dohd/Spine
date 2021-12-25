@@ -174,12 +174,12 @@ class ProjectsController extends Controller
         }
     }
 
-    // Project Quote/PI list-items
-    public function quote_items(Quote $quote)
+    // Project Quote Budget
+    public function quote_budget(Quote $quote)
     {
         $products = $quote->products()->orderBy('row_index')->get();
 
-        return view('focus.projects.quote_items')->with(compact('quote', 'products'));
+        return view('focus.projects.quote_budget')->with(compact('quote', 'products'));
     }
 
     public function store_meta(ManageProjectRequest $request)

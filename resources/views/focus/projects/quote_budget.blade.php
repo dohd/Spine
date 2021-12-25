@@ -1,20 +1,19 @@
 @extends('core.layouts.app')
 
-@section('title', 'Project Quote / PI')
+@section('title', 'Project Budget')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            @php
-                $title = $quote->bank_id ? 'Project Proforma Invoice' : 'Project Quote';
-            @endphp
-            <h4 class="content-header-title">{{ $title }}</h4>
+            <h4 class="content-header-title">Project Budget</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    <a href="{{ route('biller.projects.index') }}" class="btn btn-warning"><i class="ft-list"></i> Projects</a>
+                    <a href="{{ route('biller.projects.index') }}" class="btn btn-primary btn-lighten-2">
+                        <i class="ft-list"></i> Projects
+                    </a>
                 </div>
             </div>
         </div>
@@ -23,10 +22,13 @@
     <div class="content-body">
             <div class="card">
                 <div class="card-body">                    
-                    {{ Form::model($quote, ['route' => ['biller.projects.quote_items', $quote], 'method' => 'PATCH' ]) }}
+                    {{ Form::model($quote, ['route' => ['biller.projects.quote_budget', $quote], 'method' => 'PATCH' ]) }}
                     <div class="form-group row">
                         <div class="col-12">
-                            <h3 class="title">Update List-items</h3>                                        
+                            @php
+                                $title = $quote->bank_id ? 'Project Proforma Invoice' : 'Project Quote';
+                            @endphp
+                            <h3 class="title">{{ $title }}</h3>                                        
                         </div>
                     </div>
                     <div class="form-group row">
@@ -39,7 +41,7 @@
                         <div class="col-12 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">                        
                                 <div class="form-group row">                                  
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <label for="invoiceno" class="caption">
                                             @if ($quote->bank_id)
                                                 #PI {{ trans('general.serial_no') }}
@@ -56,13 +58,13 @@
                                             {{ Form::text('tid', $tid, ['class' => 'form-control round', 'disabled']) }}
                                         </div>
                                     </div>
-                                    <div class="col-3"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                                    <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round', 'data-toggle' => 'datepicker-qd', 'disabled']) }}
                                         </div>
                                     </div>                                                                
-                                    <div class="col-3"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
+                                    <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                             {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
@@ -74,25 +76,56 @@
                     </div>                    
 
                     <div>                            
-                        <table id="quotation" class="table-responsive pb-5 tfr my_stripe_single">
+                        <table id="quotation" class="table-responsive tfr my_stripe_single mb-1">
                             <thead>
                                 <tr class="item_header bg-gradient-directional-blue white">
-                                    <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
+                                    <th width="39%" class="text-center">{{trans('general.item_name')}}</th>
                                     <th width="7%" class="text-center">UOM</th>
-                                    <th width="8%" class="text-center">{{trans('general.quantity')}}</th>                                    
-                                    <th width="5%" class="text-center">Action</th>
+                                    <th width="8%" class="text-center">{{trans('general.quantity')}}</th> 
+                                    <th width="8%" class="text-center">Request Quantity</th>     
+                                    <th width="16%" class="text-center">Price (VAT Exc)</th>
+                                    <th width="16%" class="text-center">Amount</th>                             
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
-
-                        <div class="row">
-                            <div class="col-10 payment-method last-item-row sub_c">
-                                <button type="button" class="btn btn-success" aria-label="Left Align" id="add-product">
+                        <div class="row mb-1">
+                            <div class="col-12 payment-method last-item-row sub_c">
+                                <button type="button" class="btn btn-success" id="add-product">
                                     <i class="fa fa-plus-square"></i> Add Item
                                 </button>
-                                {{ Form::submit(trans('buttons.general.crud.update') . ' Items', ['class' => 'btn btn-success btn-lg float-right']) }}
-                            </div>
+                            </div>                            
+                        </div>
+                        <div class="row mb-1">
+                            <div class="col-8">
+                                <table id="labour" class="table-responsive tfr my_stripe_single">
+                                    <thead>
+                                        <tr class="item_header bg-gradient-directional-blue white">
+                                            <th width="40%" class="text-center">Skill Type</th>
+                                            <th width="15%" class="text-center">Working Hrs</th>
+                                            <th width="15%" class="text-center">No. of Technicians</th> 
+                                            <th width="20%" class="text-center">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                <button type="button" class="btn btn-success mt-1" id="add-skill">
+                                    <i class="fa fa-plus-square"></i> Add Skill
+                                </button>
+                            </div>  
+                            <div class="col-4">
+                                <div><label for="tools">Tools Required</label></div>
+                                <textarea name="tools" id="tools" cols="45" rows="6" class="form-control"></textarea>   
+                                <div class="form-group mt-2">
+                                    <div><label for="quote-total">Total Quote <span class="text-danger">(VAT Exclusive)</span></label></div>
+                                    <div><input type="text" class="form-control" id="subtotal" readonly></div>
+                                </div>
+                                <div class="form-group">
+                                    <div><label for="budget-total">Total Budget</label></div>
+                                    <div><input type="text" value="20,000.00" class="form-control" readonly></div>
+                                </div>
+                                {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
+                            </div>                              
                         </div>
                     </div>
                     {{ Form::close() }}
@@ -112,6 +145,7 @@
 
     // set default options
     $('#pricing').val("{{ $quote->pricing }}");
+    $('#subtotal').val("{{ number_format($quote->subtotal, 2) }}");
     
     $('#tax_id').val("{{ $quote->tax_id }}");
     $('#client_ref').val("{{ $quote->client_ref }}");
@@ -122,37 +156,56 @@
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
 
-    // row dropdown menu
-    function dropDown(val) {
-        return `
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Action
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item removeProd" href="javascript:void(0);">Remove</a>
-                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
-                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
-                </div>
-            </div>            
-        `;
-    }
 
     // product row
     function productRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" readonly></td>
-                <td class="text-center">${dropDown()}</td>
+                <td><input type="text" class="form-control" name="product_name[]" id="itemname-${val}"></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
+                <td><input type="number" class="form-control" name="product_qty[]" id="amount-${val}" readonly></td>
+                <td><input type="number" class="form-control" name="required_qty[]" id="requiredqty-${val}"></td>
+                <td><input type="text" class="form-control" name="price[]" id="buyprice-${val}"></td>
+                <td class="text-center"><span>0</span></td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
+                <input type="hidden" name="product_id[]" value="0" id="productid-${val}">
                 <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
                 <input type="hidden" name="a_type[]" value="1" id="atype-${val}">
             </tr>
         `;
     }
+
+    // labour row
+    function skillRow(v) {
+        return `
+            <tr>
+                <td>
+                    <select class="form-control" id="skilltype-${v}" required>
+                        <option value="0" class="text-center">-- Select Skill Type --</option>
+                        <option value="350">Contract</option>
+                        <option value="200">Casual</option>
+                        <option>Outsourced</option>
+                    </select>    
+                </td>
+                <td><input type="number" class="form-control" name="hours[]" id="hours-${v}"></td>                
+                <td><input type="number" class="form-control" name="no_tech[]" id="notech-${v}"></td>
+                <td class="text-center"><span>0</span></td>
+            </tr>
+        `;
+    }
+
+    // default labour row
+    let skillIndx = 0;
+    $('#labour tr:last').after(skillRow(0));
+    $('#add-skill').click(function() {
+        skillIndx++;
+        // append row
+        const row = skillRow(skillIndx);
+        $('#labour tr:last').after(skillRow(0));
+        // autocomplete on added product row
+        $('#itemname-'+cvalue).autocomplete(autocompleteProp(skillIndx));
+    });
+
 
     // product row counter
     let cvalue = 0;
@@ -166,8 +219,9 @@
         keys.forEach(key => {
             item[key] = parseFloat(item[key].replace(',',''));
         });
-        // check if item has product row parameters
-        if (item.product_name && item.product_price) {
+
+        // check type if item is product (a_type = 1)
+        if (item.a_type === 1) {
             const row = productRow(cvalue);
             $('#quotation tr:last').after(row);
             $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
