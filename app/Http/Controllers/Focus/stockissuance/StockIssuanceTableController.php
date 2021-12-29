@@ -58,7 +58,8 @@ class StockIssuanceTableController extends Controller
             ->addColumn('project_number', function($quote) {
                 $tid = '';
                 if (isset($quote->project_quote->project)) {
-                    $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
+                    $no = $quote->project_quote->project->project_number;
+                    $tid = 'Prj-'.sprintf('%04d', $no);
                 }
                 return $tid;
             })
@@ -66,7 +67,7 @@ class StockIssuanceTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('actions', function ($quote) {
-                return '<a href="#" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify"><i class="fa fa-check"></i></a>';
+                return '<a href="'. route('biller.stockissuance.issue_stock', $quote) .'" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Issue"><i class="ft-list "></i></a>';
             })
             ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
             ->make(true);
