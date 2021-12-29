@@ -38,6 +38,17 @@ class StockIssuanceController extends Controller
     }
 
     /**
+     * Show the form for issueing stock.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function issue_stock(Quote $quote)
+    {
+        return view('focus.stockissuance.issue_stock')->with(compact('quote'));
+    }
+
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
