@@ -174,12 +174,29 @@ class ProjectsController extends Controller
         }
     }
 
-    // Project Quote Budget
+    /**
+     * show form for Project Quote Budget
+     * @param App\Models\quote\Quote quote
+     */
     public function quote_budget(Quote $quote)
     {
         $products = $quote->products()->orderBy('row_index')->get();
 
         return view('focus.projects.quote_budget')->with(compact('quote', 'products'));
+    }
+
+    /**
+     * store a newly created Project Quote Budget
+     * @param Request request
+     */
+    public function store_quote_budget(Request $request)
+    {
+        // extract request input
+        $budget = $request->only('budget_total', 'quote_total', 'tools');
+        $budget_items = $request->only('product_name', 'unit', 'new_qty', 'price', );
+
+        $this->repository->store_budget(1);
+        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Budget created successfully']);
     }
 
     public function store_meta(ManageProjectRequest $request)
