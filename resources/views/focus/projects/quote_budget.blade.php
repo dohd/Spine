@@ -27,7 +27,7 @@
     <div class="content-body">
         <div class="card">
             <div class="card-body">                    
-                {{ Form::model($quote, ['route' => ['biller.projects.quote_budget', $quote], 'method' => 'PATCH' ]) }}
+                {{ Form::model($quote, ['route' => ['biller.projects.store_quote_budget'], 'method' => 'POST' ]) }}
                 <div class="form-group row">
                     <div class="col-12">
                         <h3 class="title">
@@ -127,11 +127,11 @@
                             <textarea name="tools" id="tools" cols="45" rows="6" class="form-control"></textarea>   
                             <div class="form-group mt-2">
                                 <div><label for="quote-total">Total Quote <span class="text-danger">(VAT Exclusive)</span></label></div>
-                                <div><input type="text" class="form-control" id="quote-total" readonly></div>
+                                <div><input type="text" class="form-control" id="quote-total" name="quote_total" readonly></div>
                             </div>
                             <div class="form-group">
                                 <div><label for="budget-total">Total Budget</label></div>
-                                <div><input type="text" value="0" class="form-control" id="budget-total" readonly></div>
+                                <div><input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly></div>
                             </div>
                             {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                         </div>                              
@@ -208,8 +208,6 @@
                 <td><button type="button" class="btn btn-primary removeItem">Remove</button></td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
             </tr>
         `;
     }
