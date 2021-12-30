@@ -154,4 +154,13 @@ class ProjectRepository extends BaseRepository
 
         throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
     }
+
+    /**
+     * store a newly created Project Quote Budget
+     * @param Request request
+     */
+    public function store_budget($input)
+    {
+        return true;
+    }    
 }
