@@ -5,7 +5,7 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        <div class="alert alert-warning alert-dismissible fade show col-12 d-none budget-alert" role="alert">
+        <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
             <strong>Budget Limit Exceeded!</strong> You should check on your list items.
         </div>
     </div>
@@ -30,10 +30,12 @@
                 {{ Form::model($quote, ['route' => ['biller.projects.quote_budget', $quote], 'method' => 'PATCH' ]) }}
                 <div class="form-group row">
                     <div class="col-12">
-                        @php
-                            $title = $quote->bank_id ? 'Project Proforma Invoice' : 'Project Quote';
-                        @endphp
-                        <h3 class="title">{{ $title }}</h3>                                        
+                        <h3 class="title">
+                            @php
+                                $title = $quote->bank_id ? 'Project Proforma Invoice' : 'Project Quote';
+                            @endphp
+                            {{ $title }}
+                        </h3>                                        
                     </div>
                 </div>
                 <div class="form-group row">
@@ -149,14 +151,11 @@
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
-    // set default options
-    $('#pricing').val("{{ $quote->pricing }}");
-    $('#quote-total').val("{{ number_format($quote->subtotal, 2) }}");
+    // set default values
+    const data = @json($quote);
+    $('#client_ref').val(data['client_ref']);
+    $('#quote-total').val(parseFloat(data['subtotal']).toLocaleString());
     
-    $('#tax_id').val("{{ $quote->tax_id }}");
-    $('#client_ref').val("{{ $quote->client_ref }}");
-    $('#tax_format').val("{{ $quote->tax_format }}");
-
     // initialize Quote Date datepicker
     $('.datepicker')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
@@ -260,19 +259,15 @@
         return {
             source: function(request, response) {
                 $.ajax({
-                    url: baseurl + 'products/quotesearch/' + billtype,
+                    url: baseurl + 'products/quotesearch/'+i,
                     dataType: "json",
                     method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&pricing=' 
-                        + $("#pricing").val(),
                     success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.name,
-                                value: item.name,
-                                data: item
-                            };
-                        }));
+                        response(data.map(v => ({
+                            label: v.name,
+                            value: v.name,
+                            data: v
+                        })));
                     }
                 });
             },
@@ -283,15 +278,9 @@
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#amount-'+i).val(1);
-                const productPrice = parseFloat(data.price.replace(',',''));
-                $('#price-'+i).val(productPrice.toFixed(2));
 
-                // Initial values                
-                const rateInclusive = taxRate * productPrice;
-                $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
-                // displayed Amount
-                $('#result-'+i).text(rateInclusive.toFixed(2));
+                const price = parseFloat(data.purchase_price.replace(/,/g, ''));
+                $('#price-'+i).val(price.toLocaleString());
             }
         };
     }
