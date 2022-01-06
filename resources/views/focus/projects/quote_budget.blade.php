@@ -26,8 +26,9 @@
 
     <div class="content-body">
         <div class="card">
-            <div class="card-body">                    
+            <div class="card-body">                
                 {{ Form::model($quote, ['route' => ['biller.projects.store_quote_budget'], 'method' => 'POST' ]) }}
+                <input type="hidden" name="quote_id" value="{{ $quote->id }}">
                 <div class="form-group row">
                     <div class="col-12">
                         <h3 class="title">
@@ -109,10 +110,11 @@
                             <table id="skill-item" class="table-responsive tfr my_stripe_single">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="30%" class="text-center">Skill Type</th>
+                                        <th width="20%" class="text-center">Skill Type</th>
+                                        <th width="15%" class="text-center">Charge</th>
                                         <th width="15%" class="text-center">Working Hrs</th>
-                                        <th width="15%" class="text-center">No. of Technicians</th> 
-                                        <th width="20%" class="text-center">Amount</th>
+                                        <th width="15%" class="text-center">No. Technicians</th> 
+                                        <th width="15%" class="text-center">Amount</th>
                                         <th width="10%" class="text-center">Action</th>
                                     </tr>
                                 </thead>
@@ -121,18 +123,28 @@
                             <button type="button" class="btn btn-success mt-1" id="add-skill">
                                 <i class="fa fa-plus-square"></i> Add Skill
                             </button>
+                            <div class="form-group float-right mt-1">
+                                <div><label for="budget-total">Total Amount</label></div>
+                                <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
+                            </div>
                         </div>  
                         <div class="col-4">
-                            <div><label for="tools">Tools Required</label></div>
-                            <textarea name="tools" id="tools" cols="45" rows="6" class="form-control"></textarea>   
-                            <div class="form-group mt-2">
+                            <div class="form-group">
+                                <div><label for="tool">Tools Required & Notes</label></div>
+                                <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">
+                                    @isset($budget)
+                                        {{ $budget->tool }}
+                                    @endisset
+                                </textarea>   
+                            </div>                                                     
+                            <div class="form-group">
                                 <div><label for="quote-total">Total Quote <span class="text-danger">(VAT Exclusive)</span></label></div>
                                 <div><input type="text" class="form-control" id="quote-total" name="quote_total" readonly></div>
                             </div>
                             <div class="form-group">
                                 <div><label for="budget-total">Total Budget</label></div>
                                 <div><input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly></div>
-                            </div>
+                            </div>                            
                             {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                         </div>                              
                     </div>
@@ -146,15 +158,17 @@
 
 @section('extra-scripts')
 <script>
+    // initialize html editor
+    editor();
+
     // ajax setup
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
     // set default values
-    const data = @json($quote);
-    $('#client_ref').val(data['client_ref']);
-    $('#quote-total').val(parseFloat(data['subtotal']).toLocaleString());
+    const subtotal = @json($quote->subtotal);
+    $('#quote-total').val(parseFloat(subtotal).toLocaleString());
     
     // initialize Quote Date datepicker
     $('.datepicker')
@@ -166,78 +180,163 @@
         return `
             <tr>
                 <td>
-                    <select class="form-control update" id="skilltype-${v}" required>
-                        <option value="0" class="text-center">-- Select Skill Type --</option>
-                        <option value="350">Contract</option>
-                        <option value="200">Casual</option>
-                        <option value="500">Outsourced</option>
+                    <select class="form-control update" name="skill[]" id="skill-${v}" required>
+                        <option value="0" class="text-center">-- Select Skill Type --</option>                        
+                        <option value="casual">Casual</option>
+                        <option value="contract">Contract</option>
+                        <option value="outsourced">Outsourced</option>
                     </select>
                 </td>
-                <td><input type="number" class="form-control update" name="hours[]" id="hours-${v}"></td>                
-                <td><input type="number" class="form-control update" name="no_tech[]" id="notech-${v}"></td>
+                <td><input type="number" class="form-control update" name="charge[]" id="charge-${v}" required readonly></td>
+                <td><input type="number" class="form-control update" name="hours[]" id="hours-${v}" required></td>               
+                <td><input type="number" class="form-control update" name="no_technician[]" id="notech-${v}" required></td>
                 <td class="text-center"><span>0</span></td>
                 <td><button type="button" class="btn btn-primary removeItem">Remove</button></td>
+                <input type="hidden" name="skillitem_id[]" value="0" id="skillitemid-${v}">
             </tr>
         `;
     }
-    // default skill row
-    let skillIndx = 0;
-    $('#skill-item tbody').append(skillRow(0));
-    $('#add-skill').click(function() {
-        // append row
-        skillIndx++;
-        $('#skill-item tbody').append(skillRow(skillIndx));
-    });
-    // Remove skill row
-    $('#skill-item').on('click', '.removeItem', function() {
-        $(this).closest('tr').remove();
+
+    // On skill-item update
+    $('#skill-item').on('change', '.update', function() {
+        if (!$(this).val()) $(this).val(0);
+
+        const id = $(this).attr('id');
+        const rowIndx = id.split('-')[1]; 
+
+        const $input = $('#charge-'+rowIndx).attr('readonly', true);
+        switch ($('#skill-'+rowIndx).val()) {
+            case 'casual': $input.val(200); break;
+            case 'contract': $input.val(350); break;
+            case 'outsourced': $input.attr('readonly', false); break;
+        }
+        const hr = $('#hours-'+rowIndx).val();
+        const notech = $('#notech-'+rowIndx).val();
+        const charge = $('#charge-'+rowIndx).val();
+
+        const amount = charge * hr * notech;
+        const amountStr = parseFloat(amount).toLocaleString();
+        $(this).parentsUntil('tbody').eq(1).children().eq(4).children().text(amountStr);
+
         calcBudget();
     });
 
+    // default skill row
+    const skillset = @json($skillset);
+    let skillIndx = 0;
+    if (skillset.length) {
+        skillset.forEach(v => {
+            assignSkill(skillIndx, v);
+            skillIndx++;
+        })
+    } else {
+        $('#skill-item tbody').append(skillRow(0));
+    }
+
+    $('#add-skill').click(function() {
+        // append row
+        $('#skill-item tbody').append(skillRow(skillIndx));
+        skillIndx++;
+    });
+    // Remove skill row
+    $('#skill-item').on('click', '.removeItem', function() {
+        const itemId = $(this).parent().next('input[type=hidden]').val();
+        if (itemId != 0) {
+            if (confirm('Are you sure to delete this item ?')) {
+                $.ajax({
+                    url: baseurl + 'projects/quote_budget/delete_skillset/' + itemId,
+                    method: 'DELETE',
+                    dataType: 'json'
+                });
+            }
+        }
+
+        $(this).closest('tr').remove();
+        calcBudget();
+    });
+    function assignSkill(i, v) {
+        $('#skill-item tbody').append(skillRow(i));
+        $('#skillitemid-'+i).val(v.id);
+        $('#charge-'+i).val(v.charge);
+        $('#hours-'+i).val(v.hours);
+        $('#notech-'+i).val(v.no_technician);
+        $('#skill-'+i).val(v.skill).change();
+    }
+
+    // On quote-item update
+    $('#quote-item').on('change', '.update', function() {
+        if (!$(this).val()) $(this).val(0);
+
+        const id = $(this).attr('id');
+        const rowIndx = id.split('-')[1];        
+        const price = $('#price-'+rowIndx).val().replace(/,/g, '');
+        const qty = $('#newqty-'+rowIndx).val();
+
+        const amount = qty * parseFloat(price);
+        const amountStr = parseFloat(amount).toLocaleString();
+        if (id.includes('price')) {
+            const n = $(this).val();
+            $(this).val(parseFloat(n).toLocaleString());
+            $(this).parent().next().children().text(amountStr);
+        } else if (price) {
+            $(this).parent().next().next().children().text(amountStr);
+        }
+
+        calcBudget();
+    });
 
     // product row
     function productRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}"></td>
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}"></td>                
-                <td><input type="number" class="form-control" name="product_qty[]" id="amount-${n}" readonly></td>
-                <td><input type="number" class="form-control update" name="new_qty[]" id="newqty-${n}"></td>
-                <td><input type="text" class="form-control update" name="price[]" id="price-${n}"></td>
+                <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
+                <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>
+                <td><input type="number" class="form-control update" name="new_qty[]" id="newqty-${n}" required></td>
+                <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
                 <td class="text-center"><span>0</span></td>
                 <td><button type="button" class="btn btn-primary removeItem">Remove</button></td>
-                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
             </tr>
         `;
     }
 
-    // product row counter
-    let productIndx = 0;
-    // set default product rows
-    const quoteItems = @json($products);
-    quoteItems.forEach(v => {
-        const i = productIndx;
-        const item = {...v};
-        // format float values to integer
-        const keys = ['product_price','product_qty','product_subtotal'];
-        keys.forEach(key => {
-            item[key] = parseFloat(item[key].replace(/,/g, ''));
-        });
+    function assignVal(i, v) {
+        $('#quote-item tbody').append(productRow(i));
+        $('#itemname-'+i).autocomplete(autocompleteProp(i));
+        // set default values
+        $('#itemid-'+i).val(v.id);
+        $('#productid-'+i).val(v.product_id);
+        $('#itemname-'+i).val(v.product_name);
+        $('#unit-'+i).val(v.unit);                
+        $('#amount-'+i).val(parseFloat(v.product_qty));
 
-        // check type if item is product (a_type = 1)
-        if (item.a_type === 1) {
-            $('#quote-item tbody').append(productRow(i));
-            $('#itemname-'+productIndx).autocomplete(autocompleteProp(productIndx));
-            // set default values
-            $('#itemid-'+i).val(item.id);
-            $('#productid-'+i).val(item.product_id);
-            $('#itemname-'+i).val(item.product_name);
-            $('#unit-'+i).val(item.unit);                
-            $('#amount-'+i).val(parseFloat(item.product_qty));
-        } 
-        productIndx++;
-    });
+        if (v.new_qty && v.price) {
+            $('#newqty-'+i).val(v.new_qty);
+            $('#price-'+i).val(parseFloat(v.price).toLocaleString());
+            $('#price-'+i).change();
+        }
+    }
+
+    // set default product rows
+    const budgetItems = @json($budget_items);
+    const quoteItems = @json($products);
+    let productIndx = 0;
+
+    if (budgetItems.length) {
+        budgetItems.forEach(v => {
+            assignVal(productIndx, v);        
+            productIndx++;
+        });
+    } else {
+        quoteItems.forEach(v => {
+            // check type if item is product (a_type = 1)
+            if (v.a_type === 1) assignVal(productIndx, v);        
+            productIndx++;
+        });
+    }
+
     // add product row
     $('#add-product').click(function() {
         const i = productIndx;
@@ -248,6 +347,17 @@
     });
     // remove product row
     $('#quote-item').on('click', '.removeItem', function() {
+        const itemId = $(this).parent().next().next('input[type=hidden]').val();
+        if (itemId != 0) {
+            if (confirm('Are you sure to delete this item ?')) {
+                $.ajax({
+                    url: baseurl + 'projects/quote_budget/delete_budget_item/' + itemId,
+                    method: 'DELETE',
+                    dataType: 'json'
+                });
+            }
+        }
+
         $(this).closest('tr').remove();
         calcBudget();
     });
@@ -283,59 +393,23 @@
         };
     }
 
-    // On quote-item update
-    $('#quote-item').on('change', '.update', function() {
-        if (!$(this).val()) $(this).val(0);
-
-        const id = $(this).attr('id');
-        const rowIndx = id.split('-')[1];        
-        const priceStr = $('#price-'+rowIndx).val().replace(/,/g, '');
-        const qtyStr = $('#newqty-'+rowIndx).val();
-
-        const amount = qtyStr * parseFloat(priceStr);
-        const amountStr = parseFloat(amount).toLocaleString();
-        if (id.includes('price')) {
-            const n = $(this).val();
-            $(this).val(parseFloat(n).toLocaleString());
-            $(this).parent().next().children().text(amountStr);
-        } else if (priceStr) {
-            $(this).parent().next().next().children().text(amountStr);
-        }
-
-        calcBudget();
-    });
-
-    // On skill-item update
-    $('#skill-item').on('change', '.update', function() {
-        if (!$(this).val()) $(this).val(0);
-
-        const id = $(this).attr('id');
-        const rowIndx = id.split('-')[1];   
-        const hrStr = $('#hours-'+rowIndx).val();
-        const notechStr = $('#notech-'+rowIndx).val();
-        const skilltypeStr = $('#skilltype-'+rowIndx).val();
-
-        const amount = hrStr * notechStr * skilltypeStr;
-        const amountStr = parseFloat(amount).toLocaleString();
-        $(this).parentsUntil('tbody').eq(1).children().eq(3).children().text(amountStr);
-
-        calcBudget();
-    });
-
     // total budget
     function calcBudget() {
         let total = 0;
+        let labourTotal = 0;
         $('#quote-item tbody tr').each(function() {
             const spanText = $(this).find('td').eq(5).children().text();
             const amount = parseFloat(spanText.replace(/,/g, ''));
             total += amount;
         });
         $('#skill-item tbody tr').each(function() {
-            const spanText = $(this).find('td').eq(3).children().text();
+            const spanText = $(this).find('td').eq(4).children().text();
             const amount = parseFloat(spanText.replace(/,/g, ''));
             total += amount;
+            labourTotal += amount;
         });
         $('#budget-total').val(parseFloat(total).toLocaleString());
+        $('#labour-total').val(parseFloat(labourTotal).toLocaleString());
 
         // budget limit
         $('.budget-alert').addClass('d-none');
