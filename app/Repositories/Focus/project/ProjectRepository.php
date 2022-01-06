@@ -5,6 +5,9 @@ namespace App\Repositories\Focus\project;
 use App\Models\event\EventRelation;
 use App\Models\project\Project;
 use App\Exceptions\GeneralException;
+use App\Models\project\Budget;
+use App\Models\project\BudgetItem;
+use App\Models\project\BudgetSkillset;
 use App\Models\project\ProjectQuote;
 use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
@@ -160,7 +163,117 @@ class ProjectRepository extends BaseRepository
      * @param Request request
      */
     public function store_budget($input)
-    {
-        return true;
-    }    
+    {                
+        DB::beginTransaction();
+        // convert strings to float
+        $keys = array('quote_total', 'budget_total', 'labour_total');
+        foreach ($input['budget'] as $key => $val) {
+            if (in_array($key, $keys)) {
+                $input['budget'][$key] = numberClean($val);
+            }
+        }
+        // set budget version
+        $latest_budget = Budget::where('quote_id', $input['budget']['quote_id'])
+            ->orderBy('version', 'desc')
+            ->first('version');
+        if (isset($latest_budget)) $input['budget']['version'] = $latest_budget->version + 1; 
+        else $input['budget']['version'] = 1; 
+               
+        $budget = Budget::create($input['budget']);
+
+        $budget_items = array();
+        for ($i = 0; $i < count($input['budget_items']['product_name']); $i++) {
+            $row = array('budget_id' => $budget->id);
+            foreach (array_keys($input['budget_items']) as $key) {
+                $val = $input['budget_items'][$key][$i];
+                if ($key == 'price') $row[$key] = numberClean($val);
+                else $row[$key] = $val;
+            }
+            $budget_items[] = $row;
+        }
+        BudgetItem::insert($budget_items);
+
+        $budget_skillset = array();
+        for ($i = 0; $i < count($input['budget_skillset']['skill']); $i++) {
+            $row = array('budget_id' => $budget->id);
+            foreach (array_keys($input['budget_skillset']) as $key) {
+                $row[$key] = $input['budget_skillset'][$key][$i];
+            }
+            $budget_skillset[] = $row;
+        }
+        BudgetSkillset::insert($budget_skillset);
+
+        if ($budget) return DB::commit();
+    }
+    
+    /**
+     * Update a newly created Project Quote Budget
+     * @param Request request
+     */
+    public function update_budget($budget, $input)
+    {   
+        DB::beginTransaction();
+        // convert strings to float
+        $keys = array('quote_total', 'budget_total', 'labour_total');
+        foreach ($input['budget'] as $key => $val) {
+            if (in_array($key, $keys)) {
+                $input['budget'][$key] = numberClean($val);
+            }
+        }
+        $budget->update($input['budget']);
+
+        $budget_items = array();
+        for ($i = 0; $i < count($input['budget_items']['product_name']); $i++) {
+            $row = array('budget_id' => $budget->id);
+            foreach (array_keys($input['budget_items']) as $key) {
+                $val = $input['budget_items'][$key][$i];
+                if ($key == 'price') $row[$key] = numberClean($val);
+                else $row[$key] = $val;
+            }
+            $budget_items[] = $row;
+        }
+        // update or create new budget_item
+        foreach($budget_items as $item) {
+            $budget_item = BudgetItem::firstOrNew([
+                'id' => $item['item_id'],
+                'budget_id' => $item['budget_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $budget_item[$key] = $value;
+            }
+            // remove stale attributes and save
+            unset($budget_item['item_id']);
+            if ($budget_item['id'] == 0) unset($budget_item['id']);
+            $budget_item->save();
+        }
+
+
+        $budget_skillset = array();
+        for ($i = 0; $i < count($input['budget_skillset']['skill']); $i++) {
+            $row = array('budget_id' => $budget->id);
+            foreach (array_keys($input['budget_skillset']) as $key) {
+                $row[$key] = $input['budget_skillset'][$key][$i];
+            }
+            $budget_skillset[] = $row;
+        }
+        // update or create new budget_skillset
+        foreach($budget_skillset as $item) {
+            $skillset = BudgetSkillset::firstOrNew([
+                'id' => $item['skillitem_id'],
+                'budget_id' => $item['budget_id'],
+            ]);
+            // assign properties to the item
+            foreach($item as $key => $value) {
+                $skillset[$key] = $value;
+            }
+            // remove stale attributes and save
+            unset($skillset['skillitem_id']);
+            if ($skillset['id'] == 0) unset($skillset['id']);
+            $skillset->save();
+        }
+        
+        if ($budget) return DB::commit();
+    }             
+
 }
