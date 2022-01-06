@@ -15,6 +15,9 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
 
   Route::get('projects/quote_budget/{quote}', 'ProjectsController@quote_budget')->name('projects.quote_budget');
   Route::post('projects/quote_budget', 'ProjectsController@store_quote_budget')->name('projects.store_quote_budget');
+  Route::post('projects/quote_budget/{budget}', 'ProjectsController@update_quote_budget')->name('projects.update_quote_budget');
+  Route::delete('projects/quote_budget/delete_budget_item/{id}', 'ProjectsController@delete_budget_item')->name('projects.delete_budget_item');
+  Route::delete('projects/quote_budget/delete_skillset/{id}', 'ProjectsController@delete_skillset')->name('projects.delete_skillset');
 });
 
 Route::group(['namespace' => 'project'], function () {
