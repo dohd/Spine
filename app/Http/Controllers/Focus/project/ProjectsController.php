@@ -36,6 +36,9 @@ use App\Repositories\Focus\project\ProjectRepository;
 use App\Http\Requests\Focus\project\ManageProjectRequest;
 use App\Http\Requests\Focus\project\CreateProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
+use App\Models\project\Budget;
+use App\Models\project\BudgetItem;
+use App\Models\project\BudgetSkillset;
 use App\Models\project\Project;
 use App\Models\quote\Quote;
 use Yajra\DataTables\Facades\DataTables;
@@ -182,7 +185,16 @@ class ProjectsController extends Controller
     {
         $products = $quote->products()->orderBy('row_index')->get();
 
-        return view('focus.projects.quote_budget')->with(compact('quote', 'products'));
+        $budget = Budget::where('quote_id', $quote->id)->orderBy('version', 'desc')->first();
+        $skillset = array();
+        $budget_items = array();
+        if (isset($budget)) {
+            $budget_items = BudgetItem::where('budget_id', $budget->id)->get();
+            $skillset = BudgetSkillset::where('budget_id', $budget->id)->get();
+            $products = array();
+        }
+
+        return view('focus.projects.quote_budget')->with(compact('quote', 'products', 'skillset', 'budget', 'budget_items'));
     }
 
     /**
@@ -192,11 +204,42 @@ class ProjectsController extends Controller
     public function store_quote_budget(Request $request)
     {
         // extract request input
-        $budget = $request->only('budget_total', 'quote_total', 'tools');
-        $budget_items = $request->only('product_name', 'unit', 'new_qty', 'price', );
+        $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
+        $budget_items = $request->only('product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
+        $budget_skillset = $request->only('skill', 'charge', 'hours', 'no_technician');
 
-        $this->repository->store_budget(1);
+        $this->repository->store_budget(compact('budget', 'budget_items', 'budget_skillset'));
+
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Budget created successfully']);
+    }
+
+    /**
+     * Update existing Project Quote Budget
+     * @param Request request
+     */
+    public function update_quote_budget(Request $request, Budget $budget)
+    {
+        $data = $budget;
+        // extract request input
+        $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
+        $budget_items = $request->only('item_id', 'product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
+        $budget_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
+
+        $this->repository->update_budget($data, compact('budget', 'budget_items', 'budget_skillset'));
+
+        return redirect()->back();
+    }
+    
+    // delete existing Project Quote Budget item
+    public function delete_budget_item($id) {
+        BudgetItem::find($id)->delete();
+        return response()->noContent();
+    }
+
+    // delete existing Project Quote Budget item
+    public function delete_skillset($id) {
+        BudgetSkillset::find($id)->delete();        
+        return response()->noContent();
     }
 
     public function store_meta(ManageProjectRequest $request)
