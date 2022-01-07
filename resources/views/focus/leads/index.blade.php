@@ -69,7 +69,7 @@
 
 <script>
     $(function() {
-        setTimeout(function() { draw_data() }, "{{ config('master.delay')}}");
+        setTimeout(function() { draw_data() }, "{{ config('master.delay') }}");
     });
 
     function draw_data() {
@@ -89,7 +89,6 @@
             ajax: {
                 url: '{{ route("biller.leads.get") }}',
                 type: 'post',
-                data: { c_type: 0 }
             },
             columns: [
                 {
