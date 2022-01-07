@@ -23,7 +23,8 @@
     <div class="content-body">
         <div class="card">
             <div class="card-body">
-                {{ Form::model($quote, ['route' => ['biller.projects.quote_budget', $quote], 'method' => 'PATCH' ]) }}
+                {{ Form::model($quote, ['route' => ['biller.stockissuance.store', $quote], 'method' => 'POST' ]) }}
+                <input type="hidden" name="quote_id" value="{{ $quote->id }}">
                 <div class="form-group row">
                     <div class="col-12">
                         @php
@@ -78,34 +79,32 @@
 
                 <div>
                     <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
+                        {{-- Hide budget items 
                         <li class="nav-item">
                             <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">
                                 Budget Items
                             </a>
                         </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">
                                 Issue Items
                             </a>
-                        </li>
-                        {{-- Hide expense tab 
-                        <li class="nav-item">
-                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">
-                                Expense
-                            </a>
-                        </li>
-                        --}}
+                        </li>    
+                        --}}                    
                     </ul>
+                    
 
                     <div class="tab-content px-1 pt-1">
+                        {{-- Hide budget table
                         <div class="tab-pane active in" id="active1" aria-labelledby="tab1" role="tabpanel">
-                            <table id="quotation" class="table-responsive tfr my_stripe_single mb-1">
+                            <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
                                         <th width="39%" class="text-center">{{trans('general.item_name')}}</th>
                                         <th width="7%" class="text-center">UOM</th>
                                         <th width="8%" class="text-center">{{trans('general.quantity')}}</th> 
-                                        <th width="8%" class="text-center">Request Quantity</th>     
+                                        <th width="8%" class="text-center">New Quantity</th>     
                                         <th width="16%" class="text-center">Price (VAT Exc)</th>
                                         <th width="16%" class="text-center">Amount</th>                             
                                     </tr>
@@ -113,57 +112,39 @@
                                 <tbody></tbody>
                             </table>                                                       
                         </div>
+                        --}}
 
-                        <div class="tab-pane" id="active2" aria-labelledby="tab2" role="tabpanel">
-                            <table id="quotation" class="table-responsive tfr my_stripe_single mb-1">
+                        <div class="tab-pane active in" id="active2" aria-labelledby="tab2" role="tabpanel">
+                            <table id="issue-item" class="table-responsive tfr my_stripe_single mb-1">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="39%" class="text-center">{{trans('general.item_name')}}</th>
-                                        <th width="7%" class="text-center">UOM</th>
+                                        <th width="40%" class="text-center">{{trans('general.item_name')}}</th>
+                                        <th width="8%" class="text-center">UOM</th>
                                         <th width="8%" class="text-center">{{trans('general.quantity')}}</th> 
                                         <th width="8%" class="text-center">Issue Quantity</th>     
                                         <th width="16%" class="text-center">Price (VAT Exc)</th>
-                                        <th width="16%" class="text-center">Amount</th>                             
+                                        <th width="16%" class="text-center">Action</th>                            
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
                             <div class="row mb-1">
-                                <div class="col-12 payment-method last-item-row sub_c">
+                                <div class="col-10 payment-method last-item-row sub_c">
                                     <button type="button" class="btn btn-success" id="add-product">
                                         <i class="fa fa-plus-square"></i> Add Item
                                     </button>
+                                </div>
+                                <div class="col-2 mt-2">                                    
+                                    @if (count($issued_items))
+                                        {{ Form::submit('Issue Stock', ['class' => 'btn btn-success btn-lg', 'disabled']) }}   
+                                    @else                                        
+                                        {{ Form::submit('Issue Stock', ['class' => 'btn btn-success btn-lg']) }}
+                                    @endif                                    
                                 </div>                            
-                            </div>   
-                        </div>
-                        
-                        {{-- Hide expense tab content 
-                        <div class="tab-pane" id="active3" aria-labelledby="tab3" role="tabpanel">
-                            <table id="quotation" class="table-responsive tfr my_stripe_single mb-1">
-                                <thead>
-                                    <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="30%" class="text-center">Supplier</th>
-                                        <th width="20%" class="text-center">Item Description</th>
-                                        <th width="8%" class="text-center">Amount</th> 
-                                        <th width="10%" class="text-center">Transaction ID</th>     
-                                        <th width="16%" class="text-center">Document Type</th>
-                                        <th width="16%" class="text-center">Reference No</th>                             
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                            <div class="row mb-1">
-                                <div class="col-12 payment-method last-item-row sub_c">
-                                    <button type="button" class="btn btn-success" id="add-product">
-                                        <i class="fa fa-plus-square"></i> Add Item
-                                    </button>
-                                </div>                            
-                            </div>  
-                        </div>
-                        --}}
+                            </div>
+                        </div>                       
                     </div>
                 </div>
-
                 {{ Form::close() }}   
             </div>
         </div>
@@ -173,6 +154,104 @@
 
 @section('after-scripts')
 <script>
+    // ajax setup
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
 
+    // initialize Quote Date datepicker
+    $('.datepicker')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+    
+    // product row
+    function productRow(n) {
+        return `
+            <tr>
+                <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>          
+                <td><input type="number" class="form-control update" name="new_qty[]" id="newqty-${n}" readonly></td>
+                <td><input type="number" class="form-control" name="issue_qty[]" id="issueqty-${n}" required></td>
+                <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
+                <td class="text-center"><button type="button" class="btn btn-primary removeItem">Remove</button></td>
+                <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
+            </tr>
+        `;
+    }
+
+    function assignVal(i, v) {
+        $('#issue-item tbody').append(productRow(i));
+        // set default values
+        $('#itemid-'+i).val(v.id);
+        $('#productid-'+i).val(v.product_id);
+        $('#itemname-'+i).val(v.product_name);
+        $('#unit-'+i).val(v.unit);                
+        $('#newqty-'+i).val(v.new_qty);
+        $('#price-'+i).val(parseFloat(v.price).toLocaleString());
+        if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);
+    }
+
+    // set default product rows
+    const budgetItems = @json($budget->budget_items);
+    const issuedItems = @json($issued_items);
+    let productIndx = 0;
+    if (issuedItems.length) {
+        issuedItems.forEach(v => {
+            assignVal(productIndx, v);                  
+            productIndx++;
+        });
+        $('.removeItem').attr('disabled', true);
+        $('#add-product').attr('disabled', true);
+    } else {
+        budgetItems.forEach(v => {
+            assignVal(productIndx, v);        
+            productIndx++;
+        });
+    }
+
+    // add product row
+    $('#add-product').click(function() {
+        const i = productIndx;
+        $('#issue-item tbody').append(productRow(i));
+        $('#itemname-'+i).autocomplete(autocompleteProp(i));
+        productIndx++;
+    });
+
+    $('#issue-item').on('click', '.removeItem', function() {
+        const itemId = $(this).parent().next('input[type=hidden]').val();
+        $(this).closest('tr').remove();
+    });
+
+    // autocompleteProp returns autocomplete object properties
+    function autocompleteProp(i) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url: baseurl + 'products/quotesearch/'+i,
+                    dataType: "json",
+                    method: 'post',
+                    success: function(data) {
+                        response(data.map(v => ({
+                            label: v.name,
+                            value: v.name,
+                            data: v
+                        })));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                $('#productid-'+i).val(data.id);
+                $('#itemname-'+i).val(data.name);
+                $('#unit-'+i).val(data.unit);                
+
+                const price = parseFloat(data.purchase_price.replace(/,/g, ''));
+                $('#price-'+i).val(price.toLocaleString());
+            }
+        };
+    }    
 </script>
 @endsection
