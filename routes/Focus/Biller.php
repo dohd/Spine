@@ -224,6 +224,12 @@ Route::group(['namespace' => 'stockissuance'], function () {
     Route::post('stockissuance/get', 'StockIssuanceTableController')->name('stockissuance.get');
 });
 
+Route::group(['namespace' => 'lpo'], function () {
+    Route::resource('lpo', 'LpoController');
+    // for dataTable
+    Route::post('lpo/get', 'LpoTableController')->name('lpo.get');
+});
+
 Route::group(['namespace' => 'productvariable'], function () {
     Route::resource('productvariables', 'ProductvariablesController');
     //For Datatable
