@@ -234,7 +234,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Leads
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Leads
+                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Lead
                                 </a>
                             </li>
                         </ul>
@@ -367,7 +367,7 @@
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="ft-layers"></i><span>{{trans('features.stock')}}</span></a>
                 <ul class="dropdown-menu">
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Stock Issuance</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i>Stock Issuance</a>
                         <ul class="dropdown-menu">
                             <li>
                                 <a class="dropdown-item" href="{{ route('biller.stockissuance.index') }}" data-toggle="dropdown"> <i class="ft-file-text"></i>Stock Issuance Management</a>
@@ -538,6 +538,17 @@
             @if(access()->allow('transaction-manage') || access()->allow('account-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-calculator"></i><span>{{trans('general.finance')}}</span></a>
                 <ul class="dropdown-menu">
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>LPO Management</a>
+
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage LPO</a></li>
+                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create LPO</a></li>
+                        </ul>
+
+                    </li>
+
+
                     @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Management</a>
                         <ul class="dropdown-menu">
