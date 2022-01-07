@@ -538,21 +538,20 @@
             @if(access()->allow('transaction-manage') || access()->allow('account-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-calculator"></i><span>{{trans('general.finance')}}</span></a>
                 <ul class="dropdown-menu">
+                    @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>LPO Management</a>
-
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage LPO</a></li>
-                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create LPO</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.lpo.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage LPO</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.lpo.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create LPO</a></li>
                         </ul>
-
                     </li>
-
-
+                    @endauth
+                    
                     @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage All Invoices
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage All Invoices
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.project_invoice') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Project Invoice
