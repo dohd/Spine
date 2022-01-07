@@ -15,4 +15,10 @@ class Budget extends Model
     protected $guarded = [
         'id'
     ];
+
+    // Relationships
+    public function budget_items()
+    {
+        return $this->hasMany(BudgetItem::class);
+    }
 }
