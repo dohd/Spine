@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Focus\lpo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
+use App\Models\lpo\Lpo;
 use Illuminate\Http\Request;
 
 class LpoController extends Controller
@@ -14,7 +16,7 @@ class LpoController extends Controller
      */
     public function index()
     {
-        return 'LPO index page';
+        return view('focus.lpo.index');
     }
 
     /**
@@ -24,7 +26,7 @@ class LpoController extends Controller
      */
     public function create()
     {
-        return 'LPO create page';
+        // 
     }
 
     /**
@@ -35,7 +37,12 @@ class LpoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // filter input fields
+        $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
+        $input['amount'] = floatval($input['amount']);
+        Lpo::create($input);
+
+        return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO created successfully']);
     }
 
     /**
@@ -81,5 +88,11 @@ class LpoController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    // data for LpoTableController
+    static function getForDataTable()
+    {
+        return Lpo::query()->get();
     }
 }
