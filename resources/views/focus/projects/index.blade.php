@@ -209,12 +209,6 @@
         $("#sales_account").select2();
         $('#color').colorpicker();
 
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
         // fetch customers
         $("#person").select2({
             tags: [],
