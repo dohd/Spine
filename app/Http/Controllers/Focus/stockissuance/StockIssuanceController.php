@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Focus\stockissuance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
+use App\Models\product\ProductVariation;
+use App\Models\project\Budget;
 use App\Models\quote\Quote;
+use App\Models\stock\StockIssuedItem;
 use Illuminate\Http\Request;
 
 class StockIssuanceController extends Controller
@@ -44,9 +48,65 @@ class StockIssuanceController extends Controller
      */
     public function issue_stock(Quote $quote)
     {
-        return view('focus.stockissuance.issue_stock')->with(compact('quote'));
+        $budget = Budget::where(['quote_id' => $quote->id, 'version' => 1])->first();
+        $issued_items = StockIssuedItem::where('quote_id', $quote->id)->get();
+
+        return view('focus.stockissuance.issue_stock')->with(compact('quote', 'budget', 'issued_items'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        // extract input fields
+        $quote_id = $request->quote_id;
+        $issue_items = $request->only('item_id', 'product_id', 'product_name', 'unit', 'new_qty', 'issue_qty', 'price');
+
+        // convert issue_items array 
+        $items = array();
+        for ($i = 0; $i < count($issue_items['product_name']); $i++) {
+            $row = array('quote_id' => $quote_id);
+            foreach (array_keys($issue_items) as $key) {
+                $val = $issue_items[$key][$i];
+                if ($key == 'price') $row[$key] = numberClean($val);
+                else $row[$key] = $val;
+            }
+            $items[] = $row;
+        }
+        // decreament issued items from stock
+        foreach ($items as $item) {
+            ProductVariation::find($item['product_id'])->decrement('qty', $item['issue_qty']);
+        }
+        // store issued items
+        StockIssuedItem::insert($items);
+
+        return new RedirectResponse(route('biller.stockissuance.index'), ['flash_success' => 'Stock issued successfully']);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
 
     /**
      * Show the form for editing the specified resource.
