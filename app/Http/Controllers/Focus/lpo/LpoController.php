@@ -107,6 +107,10 @@ class LpoController extends Controller
     // data for LpoTableController
     static function getForDataTable()
     {
-        return Lpo::query()->get();
+        return Lpo::query()
+            ->join('customers', 'lpos.customer_id', '=', 'customers.id')
+            ->join('branches', 'lpos.branch_id', '=', 'branches.id')
+            ->select('lpos.*', 'customers.name AS customer', 'branches.name AS branch')
+            ->get();
     }
 }
