@@ -356,6 +356,22 @@
         $('.approve-alert').removeClass('d-none');
     });
 
+    // On Add LPO modal
+    const lpos = @json($lpos);
+    $('#pop_model_4').on('shown.bs.modal', function() { 
+        const $modal = $(this);
+        // on selecting lpo option
+        $modal.find("#lpo_id").change(function() {
+            lpos.forEach(v => {
+                if (v.id == $(this).val()) {
+                    $modal.find('input[name=lpo_date]').val(v.date);
+                    $modal.find('input[name=lpo_amount]').val(v.amount);
+                    $modal.find('input[name=lpo_number]').val(v.lpo_no);
+                }                
+            });
+        });
+    });
+
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
