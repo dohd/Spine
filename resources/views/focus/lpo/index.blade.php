@@ -27,12 +27,12 @@
                             <tr>
                                 <th>#</th>
                                 <th>Client & Branch</th>
-                                <th>LPO No</th>
+                                <th>#LPO No</th>
                                 <th>LPO Amount</th>
                                 <th>Invoiced (QT/PI)</th>
                                 <th>Verified & Uninvoiced (QT/PI)</th>
                                 <th>Approved & Unverified (QT/PI)</th>
-                                <th>Balance</th>
+                                <!-- <th>Balance</th> -->
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -50,6 +50,7 @@
     </div>    
 </div>
 @include('focus.lpo.modal.lpo_new')
+@include('focus.lpo.modal.lpo_edit')
 @endsection
 
 @section('after-scripts')
@@ -69,49 +70,65 @@
         }
     });
 
-    // submit lpo-form
-    $('#create-btn').click(function() {
-        $('#lpo-form').submit();
+    // Delete LPO
+    $(document).on('click', 'a.delete-lpo', function(e) {
+        e.preventDefault();
+        if (confirm('Are you sure to delete this item ?')) {
+            $.ajax({
+                url: $(this).attr('href'),
+                method: 'DELETE'
+            }).done(function() { location.reload(); });
+        }        
     });
-
-    // initialize customer select2
-    $("#person").select2({
-        tags: [],
-        ajax: {
-            url: "{{route('biller.customers.select')}}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: function(person) {
-                return { person };
-            },
-            processResults: function(data) {
-                return {
-                    results: $.map(data, function(item) {
-                        return {
-                            text: `${item.name} - ${item.company}`,
-                            id: item.id
-                        }
-                    })
-                };
-            },
-        }
+    
+    // Fetch update data
+    $(document).on('click', 'a.update-lpo', function(e) {
+        e.preventDefault();
+        const id = $(this).attr('href');
+        $.ajax({ 
+            url: baseurl + `lpo/${id}/edit`, 
+            method: 'GET'
+        })
+        .done(function(data) { 
+            const {customer, branch, lpo} = data;
+            const $form = $("#updateLpoForm");
+            $form.find('#lpo_id').val(lpo.id);
+            $form.find("#person").append(new Option(customer.name, customer.id, 'selected', true));
+            $form.find("#branch_id").append(new Option(branch.name, branch.id, 'selected', true));
+            $form.find('#date').val(lpo.date);
+            $form.find('#lpo_no').val(lpo.lpo_no);
+            $form.find('#amount').val(lpo.amount);
+            $form.find('#remark').val(lpo.remark);
+            return;
+        });
+        return;
     });
-
-    // on selecting customer fetch branches
-    $("#person").on('change', function() {
-        var id = $('#person :selected').val();
-        // fetch customer branches
-        $("#branch_id").html('').select2({
+    
+    // On modal open
+    $(document).on('shown.bs.modal', '#updateLpoModal, #AddLpoModal', function() {
+        const $modal = $(this);
+        // submit form
+        $modal.on('click', '#create-btn, #update-btn', function() {
+            if ($(this).is('#create-btn')) $('#createLpoForm').submit();
+            if ($(this).is('#update-btn')) $('#updateLpoForm').submit();
+        });
+        
+        // initialize customer select2
+        $modal.find("#person").select2({
+            tags: [],
             ajax: {
-                url: "{{route('biller.branches.branch_load')}}?id=" + id,
+                url: "{{route('biller.customers.select')}}",
                 dataType: 'json',
+                type: 'POST',
                 quietMillis: 50,
+                data: function(person) {
+                    return { person };
+                },
                 processResults: function(data) {
                     return {
                         results: $.map(data, function(item) {
                             return {
-                                text: item.name,
+                                text: `${item.name} - ${item.company}`,
                                 id: item.id
                             }
                         })
@@ -119,8 +136,31 @@
                 },
             }
         });
-    });  
 
+        // on selecting customer fetch branches
+        $modal.find("#person").on('change', function() {
+            var id = $('#person :selected').val();
+            // fetch customer branches
+            $modal.find("#branch_id").html('').select2({
+                ajax: {
+                    url: "{{route('biller.branches.branch_load')}}?id=" + id,
+                    dataType: 'json',
+                    quietMillis: 50,
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    text: item.name,
+                                    id: item.id
+                                }
+                            })
+                        };
+                    },
+                }
+            });
+        }); 
+    });
+    
     // fetch table data
     function draw_data() {
         const tableLang = { @lang('datatable.strings') };
@@ -151,8 +191,8 @@
                     name: 'amount'
                 },
                 {
-                    data: 'verified',
-                    name: 'verified'
+                    data: 'invoiced',
+                    name: 'invoiced'
                 },
                 {
                     data: 'verified_uninvoiced',
@@ -162,10 +202,10 @@
                     data: 'approved_unverified',
                     name: 'approved_unverified'
                 },
-                {
-                    data: 'balance',
-                    name: 'balance'
-                },
+                // {
+                //     data: 'balance',
+                //     name: 'balance'
+                // },
                 {
                     data: 'actions',
                     name: 'actions',
