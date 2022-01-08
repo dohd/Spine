@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Focus\lpo;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\branch\Branch;
+use App\Models\customer\Customer;
 use App\Models\lpo\Lpo;
 use Illuminate\Http\Request;
 
@@ -37,7 +39,7 @@ class LpoController extends Controller
      */
     public function store(Request $request)
     {
-        // filter input fields
+        // extract input fields
         $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
         $input['amount'] = floatval($input['amount']);
         Lpo::create($input);
@@ -64,7 +66,11 @@ class LpoController extends Controller
      */
     public function edit($id)
     {
-        //
+        $lpo = Lpo::find($id);
+        $customer = Customer::find($lpo->customer_id, ['id', 'name']);
+        $branch = Branch::find($lpo->branch_id, ['id', 'name']);
+
+        return response()->json(compact('lpo', 'customer', 'branch'));
     }
 
     /**
@@ -74,9 +80,16 @@ class LpoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update_lpo(Request $request)
     {
-        //
+        // extract input fields
+        $input = $request->only('lpo_id', 'customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
+
+        $lpo = Lpo::find($input['lpo_id']);
+        unset($input['lpo_id']);
+        $lpo->update($input);
+
+        return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO updated successfully']);
     }
 
     /**
@@ -87,7 +100,8 @@ class LpoController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Lpo::destroy($id);
+        return response()->noContent();
     }
 
     // data for LpoTableController
