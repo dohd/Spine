@@ -35,6 +35,7 @@ use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Models\items\VerifiedItem;
+use App\Models\lpo\Lpo;
 use App\Models\verifiedjcs\VerifiedJc;
 
 /**
@@ -189,13 +190,14 @@ class QuotesController extends Controller
      */
     public function show(Quote $quote)
     {
+        $products = $quote->products()->orderBy('row_index', 'ASC')->get();
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
-        $products = $quote->products()->orderBy('row_index', 'ASC')->get();
+        $lpos = Lpo::get();
 
         $quote['bill_type'] = 4;
 
-        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products'));
+        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products', 'lpos'));
     }
 
     /**
@@ -390,13 +392,18 @@ class QuotesController extends Controller
     // Update LPO
     public function update_lpo(ManageQuoteRequest $request)
     {
-        $input = $request->only(['bill_id', 'lpo_number']);
-        $lpo_amount = numberClean(request('lpo_amount'));
-        $lpo_date = date_for_database(request('lpo_date'));
+        // extract input fields
+        $input = $request->only(['bill_id', 'lpo_number', 'lpo_id', 'lpo_amount', 'lpo_date']);
+
+        // transform data
+        $input = array_replace($input, [
+            'lpo_amount' => numberClean($input['lpo_amount']),
+            'lpo_date' => date_for_database($input['lpo_date'])
+        ]);
 
         $quote = Quote::find($input['bill_id']);
-        $data = array_merge(compact('lpo_date','lpo_amount'), ['lpo_number' => $input['lpo_number']]);
-        $quote->update($data);
+        unset($input['bill_id']);
+        $quote->update($input);
 
         return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully', 'refresh' => 1 ]);
     }
