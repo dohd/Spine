@@ -2,6 +2,7 @@
 
 namespace App\Models\lpo;
 
+use App\Models\quote\Quote;
 use Illuminate\Database\Eloquent\Model;
 
 class Lpo extends Model
@@ -19,4 +20,10 @@ class Lpo extends Model
     protected $guarded = [
         'id'
     ];
+
+    // relations
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
 }
