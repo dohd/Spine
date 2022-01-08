@@ -15,7 +15,6 @@ class CreateLposTable extends Migration
     {
         Schema::create('lpos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('quote_id');
             $table->integer('customer_id');
             $table->integer('branch_id');
             $table->date('date');
