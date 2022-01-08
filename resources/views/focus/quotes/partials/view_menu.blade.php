@@ -63,9 +63,13 @@
             </div>
         </div>
 
-        <a href="#pop_model_4" data-toggle="modal" data-remote="false" class="btn btn-large btn-cyan mb-1" title="Add LPO">
-            <span class="fa fa-retweet"></span> Add LPO
-        </a>
+        @if ($quote->approved_date)
+            <a href="#pop_model_4" data-toggle="modal" data-remote="false" class="btn btn-large btn-cyan mb-1" title="Add LPO">
+                <span class="fa fa-retweet"></span> Add LPO
+            </a>
+        @else
+            <button class="btn btn-large btn-cyan mb-1" disabled><span class="fa fa-retweet"></span> Add LPO</button>
+        @endif
 
         <div  class="d-inline-block ml-5">
             <div class="btn-group">
