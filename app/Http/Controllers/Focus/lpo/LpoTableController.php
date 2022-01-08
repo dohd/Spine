@@ -17,7 +17,7 @@ class LpoTableController extends Controller
         return DataTables::of($core)
             ->addIndexColumn()
             ->addColumn('customer', function ($lpo) {
-                return 'KCB - BIASHARA STREET';
+                return $lpo->customer . ' - ' . $lpo->branch;
             })
             ->addColumn('lpo_no', function ($lpo) {
                 return $lpo->lpo_no;
