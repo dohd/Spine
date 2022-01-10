@@ -328,6 +328,146 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         throw new GeneralException(trans('exceptions.backend.invoices.create_error'));*/
     }
 
+
+    public function create_poroject_invoice(array $input)
+    {
+        DB::beginTransaction();
+
+        $invoice = $input['invoice_data'];
+        $dr_data= $input['dr_data'];
+        $cr_data= $input['cr_data'];
+        $tax_data= $input['tax_data'];
+        
+        //invoice status
+        $invoice['status'] = 'due';
+        
+        // format date values
+        foreach ($invoice as $key => $value) {
+            if ($key == 'invoicedate') {
+                $invoice[$key] = date_for_database($value);
+            }
+        }
+        $duedate = $invoice['invoicedate'] . ' + ' . $invoice['validity'] . ' days';
+        $invoice['invoiceduedate'] = date_for_database($duedate);
+
+        // increament tid
+         $invoice_no = Invoice::orderBy('id', 'desc')->first('tid');
+        $transaction_no= Transaction::orderBy('id', 'desc')->first();
+        $tid=$invoice['invoice_no'];
+       if (isset($invoice_no->tid) && $invoice['invoice_no'] <= $invoice_no->tid) {
+            $tid=$invoice_no->tid + 1;
+        } 
+
+    $tr_id=$dr_data['tid'];
+        if (isset($transaction_no->tid) && $dr_data['tid'] <= $transaction_no->tid) {
+           
+            $tr_id=$transaction_no->tid + 1;
+        }  
+
+
+
+        $customer_name=$dr_data['customer_name'];
+       //transaction category
+        $tr_category = Transactioncategory::where('code', 'sales')->first();
+        //insert invoice
+        unset($invoice['taxid']);
+        unset($invoice['invoice_no']);
+        $invoice['total']=numberClean($invoice['total']);
+        $invoice['subtotal']=numberClean($invoice['subtotal']);
+        $invoice['tax']=numberClean($invoice['tax']);
+        $invoice['tid']=$tid;
+        
+        $result = Invoice::create($invoice);
+        //Dr Receivables
+        $dr_account_id=$dr_data['dr_account_id'];
+        unset($dr_data['customer_name']);
+        unset($dr_data['dr_account_id']);
+       $dr_data['payer_type']='customer';
+       $dr_data['payer']=$customer_name;
+       $dr_data['payer_id']=$invoice['customer_id'];
+       $dr_data['trans_category_id']= $tr_category->id;
+       $dr_data['is_bill']= 2;
+       $dr_data['transaction_type']= 'sales';
+       $dr_data['ins']=$invoice['ins'];
+       $dr_data['user_id']=$invoice['user_id'];
+       $dr_data['tid']= $tr_id;
+       $dr_data['refer_no']=$tid;
+       $dr_data['account_id']=$dr_account_id;
+       $dr_data['transaction_date']=date_for_database($invoice['invoicedate']);
+       $dr_data['due_date']=date_for_database($duedate);
+       $dr_data['debit']=numberClean($invoice['total']);
+       $dr_data['note']=$invoice['notes'];
+       $dr_data['invoice_id'] =$result->id;
+       $debit = Purchase::create($dr_data);          
+      //Cr Income amount exclusive tax
+      $cr_account_id=$cr_data['cr_account_id'];
+      unset($cr_data['cr_account_id']);
+   
+      $cr_data['payer_type']='customer';
+      $cr_data['payer']=$customer_name;
+      $cr_data['payer_id']=$invoice['customer_id'];
+      $cr_data['trans_category_id']= $tr_category->id;
+      $cr_data['is_bill']= 0;
+      $cr_data['transaction_type']= 'sales';
+      $cr_data['ins']=$invoice['ins'];
+      $cr_data['user_id']=$invoice['user_id'];
+      $cr_data['tid']= $tr_id;
+      $cr_data['refer_no']=$tid;
+      $cr_data['account_id']=$cr_account_id;
+      $cr_data['transaction_date']=date_for_database($invoice['invoicedate']);
+      $cr_data['due_date']=date_for_database($duedate);
+      $cr_data['credit']=numberClean($invoice['subtotal']);
+      $cr_data['note']=$invoice['notes'];
+      $cr_data['bill_id'] =$result->id;
+      $credit = Purchase::create($cr_data);  
+      //Cr Tax
+    if(numberClean($tax_data['tax'])>0){
+    $tr_tax_category = Transactioncategory::where('code', 'p_taxes')->first();
+    $account_id = Account::where('system', 'tax')->first();
+    $tax_data['payer_type']='customer';
+    $tax_data['payer']=$customer_name;
+    $tax_data['payer_id']=$invoice['customer_id'];
+    $tax_data['account_id'] = $account_id->id;
+    $tax_data['trans_category_id'] =$tr_tax_category->id;
+    $tax_data['secondary_account_id'] =$account_id->id;
+    $tax_data['tax_type'] ='sales_purchases';
+    $tax_data['transaction_type'] ='sales';
+    $tax_data['ins']=$invoice['ins'];
+    $tax_data['user_id']=$invoice['user_id'];
+    $tax_data['tid']= $tr_id;
+    $tax_data['refer_no']=$tid;
+    $tax_data['refer_no']=$invoice['tid'];
+    $tax_data['tax_amount'] =numberClean($invoice['subtotal']);
+    $tax_data['credit'] =numberClean($tax_data['tax']);
+    $tax_data['taxable_amount'] = numberClean($invoice['tax']);
+    $tax_data['note'] = strip_tags($invoice['notes']);
+    $tax_data['transaction_date'] = date_for_database($invoice['invoicedate']);
+    $tax_data['invoice_id'] =$invoice['tid'];
+    $tax_data['bill_id'] =$result->id;
+
+    Purchase::create($tax_data);
+    }
+
+        // invoice items
+        $items_count = count($input['data_items']['quote_id']);
+        $invoice_items = $this->array_items(
+            $items_count, 
+            $input['data_items'], 
+            ['invoice_id' => $result['id'], 'ins' => $result['ins']]
+        );
+
+    
+        InvoiceItem::insert($invoice_items);
+
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
+        
+        throw new GeneralException('Error Creating Invoice');
+    }
+
+
     private function update_dual(Model $table, array $values, string $index = null, $index2 = null)
     {
         $final = [];
@@ -800,4 +940,20 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         }
         throw new GeneralException(trans('exceptions.backend.invoices.create_error'));
     }
+
+      // convert array to database collection format
+      protected function array_items($count=0, $item=[], $extra=[])
+      {
+          $data_items = array();
+          for ($i = 0; $i < $count; $i++) {
+              $row = $extra;
+              foreach (array_keys($item) as $key) {
+                  if (isset($item[$key][$i])) {
+                      $row[$key] = $item[$key][$i];
+                  }
+              }
+              $data_items[] = $row;
+          }
+          return $data_items;
+      }
 }

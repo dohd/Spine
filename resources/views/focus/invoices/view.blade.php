@@ -121,10 +121,10 @@
                                                     class="fa fa-print"></i> {{trans('general.print')}}
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item"
+                                            <a class="dropdown-item" target="_blank"
                                                href="{{$link}}">{{trans('general.print')}}</a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item"
+                                            <a class="dropdown-item"  target="_blank"
                                                href="{{$link_download}}">{{trans('general.pdf')}}</a>
 
                                         </div>

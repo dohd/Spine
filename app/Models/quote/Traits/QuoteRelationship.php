@@ -30,7 +30,7 @@ trait QuoteRelationship
 
     public function customer_branch()
     {
-        return $this->belongsTo('App\Models\branch\Branch')->withoutGlobalScopes();
+        return $this->hasOne(Branch::class, 'id', 'branch_id')->withoutGlobalScopes();
     }
 
     public function products()

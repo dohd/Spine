@@ -5,6 +5,8 @@ namespace App\Models\invoice\Traits;
 use App\Models\prefix\Prefix;
 use App\Models\project\Project;
 use App\Models\project\ProjectRelations;
+use App\Models\lead\Lead;
+use App\Models\customer\Customer;
 
 /**
  * Class InvoiceRelationship
@@ -43,6 +45,16 @@ trait InvoiceRelationship
             public function project()
     {
          return $this->belongsTo(ProjectRelations::class, 'id',  'rid')->where('related', '=', 7);
+    }
+    
+    public function client()
+    {
+        return $this->hasOneThrough(Customer::class, Lead::class, 'id', 'id', 'lead_id', 'client_id')->withoutGlobalScopes();
+    }
+
+    public function branch()
+    {
+        return $this->hasOneThrough(Branch::class, Lead::class, 'id', 'id', 'lead_id', 'branch_id')->withoutGlobalScopes();
     }
 
 

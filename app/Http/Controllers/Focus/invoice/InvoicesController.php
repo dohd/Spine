@@ -38,6 +38,10 @@ use App\Http\Requests\Focus\invoice\CreateInvoiceRequest;
 use App\Http\Requests\Focus\invoice\EditInvoiceRequest;
 use App\Http\Requests\Focus\invoice\DeleteInvoiceRequest;
 use Illuminate\Support\Facades\Response;
+use App\Models\quote\Quote;
+use App\Models\project\Project;
+use App\Models\transaction\Transaction;
+use App\Models\bank\Bank;
 use mPDF;
 use Bitly;
 
@@ -118,53 +122,72 @@ class InvoicesController extends Controller
 
 
 
+    public function create_project_invoice(ManageInvoiceRequest $request)
+    {
+
+        if(!empty($request->only(['customer']))){
+
+            $customer_id = $request->only(['customer']);
+
+
+            if (!empty($request->input('selected_products'))) {
+            $quotation_id = explode(',', $request->input('selected_products'));
+            //$data['action'] = 1;
+
+            $quotes=Quote::whereIn('id', $quotation_id)->get();
+            $customer=Customer::find($customer_id)->first();
+
+            
+            $last_invoice = Invoice::orderBy('id', 'desc')->first();
+            $last_tr = Transaction::orderBy('id', 'desc')->first();
+            $banks = Bank::all();
+
+         
+
+
+            return view('focus.invoices.create_project_invoice')->with(array('quotes' => $quotes,'customer'=>$customer,'last_invoice'=>$last_invoice,'last_tr'=>$last_tr,'banks' => $banks,))->with(bill_helper(1, 2));
+           
+           // return new ViewResponse('focus.invoices.create_project_invoice', compact('quotes', 'customer','last_invoice'));
+
+
+
+        }else{
+
+            $customers=Customer::where('active','1')->pluck('company','id');
+            $lpos=Quote::whereNotNull('lpo_number')->distinct('lpo_number')->pluck('lpo_number','lpo_number');
+            $projects=Project::pluck('name','id');
+    
+            return new ViewResponse('focus.invoices.project_invoice', compact('customers','lpos','projects'));
+
+            
+        }
+
+       
+     }
+
+
+    
+
+    
+
+
+  
+    
+    }
+
+
 
     public function project_invoice(ManageInvoiceRequest $request)
     {
 
-        $input = $request->only('rel_type', 'rel_id', 'md');
-        $segment = false;
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1 :
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
+        
 
-            }
-        }
+        $customers=Customer::where('active','1')->pluck('company','id');
+        $lpos=Quote::whereNotNull('lpo_number')->distinct('lpo_number')->pluck('lpo_number','lpo_number');
+        $projects=Project::pluck('name','id');
+        
 
-        if (isset($input['md'])) {
-            if ($input['md'] == 'sub') {
-                $input['sub_json'] = "sub: 1";
-                $input['sub_url'] = '?md=sub';
-                $input['title'] = trans('invoices.subscriptions');
-                $input['meta'] = 'sub';
-                $input['pre'] = 6;
-            } elseif ($input['md'] == 'pos') {
-                $input['sub_json'] = "sub: 2";
-                $input['sub_url'] = '?md=pos';
-                $input['title'] = trans('invoices.pos');
-                $input['meta'] = 'pos';
-                $input['pre'] = 10;
-            }
-        } else {
-
-            $input['sub_json'] = "sub: 0";
-            $input['sub_url'] = '';
-            $input['title'] = trans('labels.backend.invoices.management');
-            $input['meta'] = 'sub';
-            $input['pre'] = 1;
-        }
-
-        return new ViewResponse('focus.invoices.project_invoice', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.invoices.project_invoice', compact('customers','lpos','projects'));
     }
 
 
@@ -374,6 +397,36 @@ echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend
         }*/
 
     }
+
+    public function store_project_invoice(CreateInvoiceRequest $request)
+    {
+
+
+        // filter request input fields
+        $invoice_data = $request->only(['customer_id','taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 'notes', 'subtotal', 'tax', 'total','term_id','lpo_ref']);
+        $dr_data = $request->only(['customer_name', 'dr_account_id','tid']);
+        $cr_data = $request->only(['cr_account_id']);
+        $tax_data = $request->only(['tax']);
+        $data_items = $request->only(['description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id']);
+        //check if KRA input is empty
+        if(numberClean($request->input('tax'))>0 && empty($request->input('tax_id'))){
+            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
+            exit;
+           }
+        $invoice_data['user_id'] = auth()->user()->id;
+        $invoice_data['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->create_poroject_invoice(compact('invoice_data', 'dr_data','cr_data','tax_data','data_items'));
+
+        $valid_token = token_validator('','i' . $result['id'].$result['tid'],true);
+       
+
+        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'],1,$valid_token,1]) . '" target="_blank" class="btn btn-success btn-md"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;'));
+        
+
+    }
+
+    
 
     /**
      * Show the form for editing the specified resource.

@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', $input['title'])
+@section ('title','Job Schedule')
 
 @section('page-header')
     <h1>{{ trans('labels.backend.tags.management') }}</h1>
@@ -11,14 +11,14 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{$input['title']}}</h4>
+                    <h4 class="content-header-title mb-0">Job Schedule</h4>
 
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                            @include('focus.miscs.partials.miscs-header-buttons',[$input])
+                            @include('focus.miscs.partials.miscs-header-buttons')
                         </div>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                 ajax: {
                     url: '{{ route("biller.jobschedules.get") }}',
                     type: 'post',
-                    data: {{!! $input['json'] !!}},
+                    data:22,
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},

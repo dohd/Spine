@@ -574,6 +574,7 @@ function bill_helper($term = 1, $module_id = 1)
     $income_accounts = \App\Models\account\Account::where('account_type', 'Income')->get();
     $whts = \App\Models\account\Account::where('system', 'tax')->get();
     $expense_accounts = \App\Models\account\Account::where('account_type', 'Expenses')->get();
+    $receivables = \App\Models\account\Account::where('account_type', 'Assets')->where('system', 'receivables')->get();
     $warehouses = \App\Models\warehouse\Warehouse::all();
     $projects = \App\Models\project\Project::all();
     $customers = \App\Models\customer\Customer::all();
@@ -587,7 +588,7 @@ function bill_helper($term = 1, $module_id = 1)
     $customergroups = \App\Models\customergroup\Customergroup::all();
     $fields = custom_fields(\App\Models\customfield\Customfield::where('module_id', $module_id)->get()->groupBy('field_type'));
     $defaults = \App\Models\Company\ConfigMeta::get()->groupBy('feature_id');
-    return compact('warehouses', 'additionals', 'currencies', 'terms', 'customergroups', 'fields', 'defaults', 'projects', 'customers', 'branches', 'accounts', 'assert_accounts', 'income_accounts', 'expense_accounts', 'whts', 'selling_prices');
+    return compact('warehouses', 'additionals', 'currencies', 'terms', 'customergroups', 'fields', 'defaults', 'projects', 'customers', 'branches', 'accounts', 'assert_accounts', 'income_accounts', 'expense_accounts', 'whts', 'selling_prices', 'receivables');
 }
 
 function product_helper()

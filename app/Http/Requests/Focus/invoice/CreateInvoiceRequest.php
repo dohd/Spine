@@ -27,9 +27,9 @@ class CreateInvoiceRequest extends FormRequest
         if ($this->getMethod() == 'POST') {
             $rules = [
                // 'customer_id' => 'required|integer|min:1',
-                'payer_id' => 'required|integer|min:1',
+                'customer_id' => 'required|integer|min:1',
                 'tid' => 'required|integer|min:1',
-                'totalsaleamount' => 'required',
+                'total' => 'required',
                 //'total' => 'required',
                 //'term_id' => 'required|integer|min:1',
             ];
