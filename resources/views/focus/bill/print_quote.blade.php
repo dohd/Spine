@@ -154,7 +154,7 @@
 				Lean Aircons Building, Opp NextGen Mall<br>
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 787 391 015<br>
+				Cell : +254 732 345 393, +254 713 773 333<br>
 				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
@@ -226,8 +226,6 @@
 				@if ($product->a_type == 1)	
 					@php
 						$product_qty = (int) $product->product_qty;
-						$product_subtotal = (int) $product->product_subtotal;
-						$product_price = (int) $product->product_price;
 					@endphp
 					<tr>
 						<td>{{ $product->numbering }}</td>
@@ -235,18 +233,18 @@
 						<td class="align-c">{{ $product_qty }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
 						@if ($invoice->print_type == 'inclusive')
-							<td class="align-r">{{ number_format($product_subtotal, 2) }}</td>
-							<td class="align-r">{{ number_format($product_qty * $product_subtotal, 2) }}</td>
+							<td class="align-r">{{ number_format($product->product_subtotal, 2) }}</td>
+							<td class="align-r">{{ number_format($product_qty * $product->product_subtotal, 2) }}</td>
 						@else
-							<td class="align-r">{{ number_format($product_price, 2) }}</td>
-							<td class="align-r">{{ number_format($product_qty * $product_price, 2) }}</td>
+							<td class="align-r">{{ number_format($product->product_price, 2) }}</td>
+							<td class="align-r">{{ number_format($product_qty * $product->product_price, 2) }}</td>
 						@endif
 					</tr>
 				@else
 					<tr>
 						<td><b>{{ $product->numbering }}<b></td>
 						<td><b>{{ $product->product_name }}</b></td>
-						@for($i=0; $i < 4; $i++) 
+						@for($i = 0; $i < 4; $i++) 
 							<td></td>
 						@endfor
 					</tr>
@@ -254,8 +252,8 @@
 			@endforeach
 			<!-- empty row with dynamic height-->
 			<tr>
-				<td height="{{ 400-30*count($invoice->products) }}"></td>
-				@for($i=0; $i < 5; $i++) 
+				<td height="{{ 400 - 30 * count($invoice->products) }}"></td>
+				@for($i = 0; $i < 5; $i++) 
                     <td></td>
                 @endfor
 			</tr>
