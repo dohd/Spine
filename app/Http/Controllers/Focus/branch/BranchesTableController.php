@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\branch;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\branch\BranchRepository;
@@ -52,29 +52,28 @@ class BranchesTableController extends Controller
      */
     public function __invoke(ManageBranchRequest $request)
     {
-    
-
         $core = $this->branch->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-                ->addColumn('customer', function ($branch) {
-                  return $branch->customer->company;
-                })
+            ->addColumn('customer', function ($branch) {
+                if (isset($branch->customer)) return $branch->customer->company;
+                return;
+            })
             ->addColumn('name', function ($branch) {
                 return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '">' . $branch->name . '</a>';
             })
-        
+
             // ->addColumn('location', function ($branch) {
-                    //return $branch->location;
-              //  })
-         
+            //return $branch->location;
+            //  })
+
             ->addColumn('created_at', function ($branch) {
                 return dateFormat($branch->created_at);
             })
             ->addColumn('actions', function ($branch) {
                 return $branch->action_buttons;
-               // return '<a class="btn btn-purple round" href="' . route('biller.branches.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '" title="List"><i class="fa fa-list"></i></a>' . $branch->action_buttons;
+                // return '<a class="btn btn-purple round" href="' . route('biller.branches.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '" title="List"><i class="fa fa-list"></i></a>' . $branch->action_buttons;
             })
             ->make(true);
     }
