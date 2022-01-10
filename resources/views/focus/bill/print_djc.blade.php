@@ -97,7 +97,7 @@
 				Lean Aircons Building, Opp NextGen Mall<br>
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 787 391 015<br>
+				Cell : +254 732 345 393, +254 713 773 333<br>
 				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
@@ -198,10 +198,13 @@
 		<p>{!! $invoice->recommendations !!}</p>
 	</div>
 	<h5><span>f.</span> Pictorials</h5>
-	@if(isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four))
+	@php
+		$is_image = isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four)
+	@endphp
+	@if($is_image)
 		<table class="items items-table" cellpadding="8">		
 			<tr class="dottedt">				
-				@for ($i=0; $i < 4; $i++)
+				@for ($i = 0; $i < 4; $i++)
 					<th width="25%"></th>
 				@endfor		
 			</tr>
