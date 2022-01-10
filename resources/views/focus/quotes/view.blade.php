@@ -5,10 +5,6 @@
 {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
 @endsection
 
-@section('page-header')
-<h1>Quote / PI Management </h1>
-@endsection
-
 @section('content')
 <div class="app-content">
     <div class="content-wrapper">
@@ -38,8 +34,8 @@
                     @include('focus.quotes.partials.view_menu')                    
                     @if ($quote->verified == "Yes")
                         <div class="badge text-center white d-block m-1">
-                            <span class="bg-danger round p-1">
-                                &nbsp;&nbsp;This Quote/PI has been verified&nbsp;&nbsp;
+                            <span class="bg-success round p-1">
+                                <b>This {{ $quote->bank_id ? 'PI' : 'Quote' }} is verified</b>
                             </span>
                         </div>
                     @endif
@@ -360,7 +356,7 @@
     const lpos = @json($lpos);
     $('#pop_model_4').on('shown.bs.modal', function() { 
         const $modal = $(this);
-        // on selecting lpo option
+        // on selecting lpo option set default values
         $modal.find("#lpo_id").change(function() {
             lpos.forEach(v => {
                 if (v.id == $(this).val()) {
