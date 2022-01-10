@@ -152,7 +152,7 @@
 				Lean Aircons Building, Opp NextGen Mall<br>
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 787 391 015<br>
+				Cell : +254 732 345 393, +254 713 773 333<br>
 				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
@@ -197,15 +197,15 @@
 		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
         <tr>
             @php
-                $jcard_ref = '';
-                $dnote_ref = '';
+				$jcard_refs = array();
+                $dnote_refs = array();
                 foreach ($invoice->verified_jcs as $jc) {
-                    if ($jc->type == 2) $dnote_ref .= $jc->reference . ', ';
-                    else $jcard_ref .= $jc->reference . ', ';
-                }
+                    if ($jc->type == 2) $dnote_refs[] = $jc->reference;
+                    else $jcard_refs[] = $jc->reference;
+                }                
             @endphp
-            <td>RJC : <b>{{ $jcard_ref }}</b></td>
-            <td>DNOTE : <b>{{ $dnote_ref }}</b></td>
+            <td>RJC : <b>{{ implode(', ', $jcard_refs) }}</b></td>
+            <td>DNOTE : <b>{{ implode(', ', $dnote_refs) }}</b></td>
         </tr>		
 	</table>
 	<br>
@@ -226,8 +226,6 @@
 				@if ($product->a_type == 1)	
 					@php
 						$product_qty = (int) $product->product_qty;
-						$product_subtotal = (int) $product->product_subtotal;
-						$product_price = (int) $product->product_price;
 					@endphp
 					<tr>
 						<td>{{ $product->numbering }}</td>
@@ -236,16 +234,16 @@
 						<td class="align-c">{{ $product->unit }}</td>
                         <td class="align-r">
                             @if ($invoice->print_type == 'inclusive')
-                                {{ number_format($product_subtotal, 2) }}
+                                {{ number_format($product->product_subtotal, 2) }}
                             @else
-                                {{ number_format($product_price, 2) }}
+                                {{ number_format($product->product_price, 2) }}
                             @endif
                         </td>
                         <td class="align-r">
                             @if ($invoice->print_type == 'inclusive')
-                                {{ number_format($product_qty * $product_subtotal, 2) }}
+                                {{ number_format($product_qty * $product->product_subtotal, 2) }}
                             @else
-                                {{ number_format($product_qty * $product_price, 2) }}
+                                {{ number_format($product_qty * $product->product_price, 2) }}
                             @endif
                         </td>						
                         <td>{{ $product->remark }}</td>
@@ -254,7 +252,7 @@
 					<tr>
 						<td><b>{{ $product->numbering }}<b></td>
 						<td><b>{{ $product->product_name }}</b></td>
-						@for($i=0; $i < 5; $i++) 
+						@for($i = 0; $i < 5; $i++) 
                             <td></td>
                         @endfor
 					</tr>
@@ -268,7 +266,7 @@
 					if ($invoice->bank_id) $height = 340 - $items_height;									
 				@endphp
 				<td height="{{ $height }}"></td>				
-                @for($i=0; $i < 6; $i++) 
+                @for($i = 0; $i < 6; $i++) 
                     <td></td>
                 @endfor
 			</tr>
@@ -300,11 +298,10 @@
 				@if ($invoice->print_type == 'inclusive')
 					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
 					<td class="align-r">
-						@if ($invoice->tax_id)
-							INCLUSIVE
-						@else
-							NONE
-						@endif
+						@php
+							$text = $invoice->tax_id ? 'INCLUSIVE' : 'NONE';
+						@endphp
+						{{ $text }}
 					</td>
 				@else
 					<td class="align-r">Tax {{ $invoice->tax_id }}%</td>
