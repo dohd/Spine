@@ -61,19 +61,13 @@ class BranchesTableController extends Controller
                 return;
             })
             ->addColumn('name', function ($branch) {
-                return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '">' . $branch->name . '</a>';
+                return $branch->name;
             })
-
-            // ->addColumn('location', function ($branch) {
-            //return $branch->location;
-            //  })
-
             ->addColumn('created_at', function ($branch) {
                 return dateFormat($branch->created_at);
             })
             ->addColumn('actions', function ($branch) {
                 return $branch->action_buttons;
-                // return '<a class="btn btn-purple round" href="' . route('biller.branches.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '" title="List"><i class="fa fa-list"></i></a>' . $branch->action_buttons;
             })
             ->make(true);
     }
