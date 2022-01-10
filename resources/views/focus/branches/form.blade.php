@@ -1,30 +1,34 @@
-
 <div class="form-group">
-    {{$item->company}}
-            {{ Form::label( 'rel_id', 'Customer',['class' => 'col-lg-2 control-label']) }}
-            <div class='col'>
-                <select class="form-control col-lg-10" name="rel_id" id="rel_id">
-                    @foreach($customers as $item)
-                     
-                            <option value="{{$item->id}}" {{ $item->id === @$branches->rel_id ? " selected" : "" }}>{{$item->company}}</option>
-           
-                    @endforeach
-
-                </select>
-            </div>
+    {{ Form::label( 'rel_id', 'Customer',['class' => 'col-lg-2 control-label']) }}
+    <div class='col'>
+        <select class="form-control col-lg-10" name="rel_id" id="rel_id" required>
+            <option value="0">-- Select Customer --</option>
+            @foreach($customers as $item)
+                <option value="{{ $item->id }}" {{ isset($branches) && $item->id === $branches->rel_id ? 'selected' : '' }}>
+                    {{ $item->company }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+<div class="row">
+    <div class='form-group col-4'>
+        {{ Form::label('code', 'Branch Code', ['class' => 'control-label ml-2']) }}
+        <div>
+            {{ Form::text('branch_code', null, ['class' => 'form-control box-size ml-2', 'placeholder' => 'Branch Code']) }}
         </div>
-
-
-<div class='form-group'>
-    {{ Form::label( 'name', 'Branch Name',['class' => 'col-lg-2 control-label']) }}
-    <div class='col-lg-10'>
-        {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Branch Name*','required'=>'required']) }}
+    </div>
+    <div class='form-group col-6'>
+        {{ Form::label( 'name', 'Branch Name',['class' => 'control-label']) }}
+        <div>
+            {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Branch Name*', 'required']) }}
+        </div>
     </div>
 </div>
 <div class='form-group'>
     {{ Form::label( 'location', 'Physical Location',['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
-        {{ Form::text('location', null, ['class' => 'form-control box-size', 'placeholder' => 'Physical Address*','required'=>'required']) }}
+        {{ Form::text('location', null, ['class' => 'form-control box-size', 'placeholder' => 'Physical Address*', 'required']) }}
     </div>
 </div>
 
@@ -35,7 +39,7 @@
     </div>
 </div>
 <div class='form-group'>
-    {{ Form::label( 'contact_phone', 'Contact Person Contact',['class' => 'col-lg-2 control-label']) }}
+    {{ Form::label( 'contact_phone', 'Contact Person Cell',['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
         {{ Form::text('contact_phone', null, ['class' => 'form-control box-size', 'placeholder' => 'Contact Person']) }}
     </div>
