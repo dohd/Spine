@@ -97,7 +97,7 @@
 				Lean Aircons Building, Opp NextGen Mall<br>
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 787 391 015<br>
+				Cell : +254 732 345 393, +254 713 773 333<br>
 				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
@@ -198,9 +198,9 @@
 					</td>
 					<td>
 						@foreach ($invoice->quote->verified_jcs as $rjc)
-							@if ($rjc->type == 2)
+							@if ($rjc->type == 2 && $rjc->date)
 								DN-{{ $rjc->reference }} ; {{ dateFormat($rjc->date, 'd-m-Y') }} ; {{ $rjc->technician }}
-							@else
+							@elseif ($rjc->date)
 								JC-{{ $rjc->reference }} ; {{ dateFormat($rjc->date, 'd-m-Y') }} ; {{ $rjc->technician }}
 							@endif							
 							<br>
@@ -223,7 +223,10 @@
 		<p>{!! $invoice->recommendations !!}</p>
 	</div>
 	<h5><span>f.</span> Pictorials</h5>
-	@if(isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four))
+	@php
+		$is_image = isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four);
+	@endphp
+	@if($is_image)
 		<table class="items items-table" cellpadding="8">		
 			<tr class="dottedt">
 				<th width="25%"></th>
