@@ -14,6 +14,11 @@ use App\Models\project\Project;
  */
 trait CustomerRelationship
 {
+    public function branches()
+    {
+        return $this->hasMany(Branch::class);
+    }
+
     public function group()
     {
         return $this->hasMany('App\Models\customergroup\CustomerGroupEntry');
@@ -39,18 +44,8 @@ trait CustomerRelationship
         return $this->belongsTo(Project::class);
     }
 
-    public function branch()
-    {
-        return $this->hasMany(Branch::class);
-    }
-
     public function transactions()
     {
         return $this->hasMany('App\Models\transaction\Transaction', 'payer_id')->where('relation_id', '=', 0)->orWhere('relation_id', '=', 21)->withoutGlobalScopes();
-    }
-
-    public function branches()
-    {
-        return $this->belongsToMany(Branch::class, 'customer_branches', 'customer_id', 'branch_id');
     }
 }
