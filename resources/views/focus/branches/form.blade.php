@@ -1,7 +1,7 @@
 <div class="form-group">
     {{ Form::label( 'rel_id', 'Customer',['class' => 'col-lg-2 control-label']) }}
     <div class='col'>
-        <select class="form-control col-lg-10" name="rel_id" id="rel_id" required>
+        <select class="form-control col-lg-10" name="customer_id" id="customer_id" required>
             <option value="0">-- Select Customer --</option>
             @foreach($customers as $item)
                 <option value="{{ $item->id }}" {{ isset($branches) && $item->id === $branches->rel_id ? 'selected' : '' }}>
