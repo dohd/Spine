@@ -40,7 +40,6 @@ class BranchesTableController extends Controller
      */
     public function __construct(BranchRepository $branch)
     {
-
         $this->branch = $branch;
     }
 
