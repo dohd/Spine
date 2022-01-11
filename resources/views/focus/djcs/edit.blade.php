@@ -2,12 +2,6 @@
 
 @section ('title', ' Diagnosis Job Card | Edit Diagnosis Job Card')
 
-@section('page-header')
-<h1>
-    Diagnosis Job Card<small>Edit Diagnosis Job Card</small>
-</h1>
-@endsection
-
 @section('content')
 <div class="">
     <div class="content-wrapper">
@@ -37,12 +31,12 @@
                                             <h3 class="title pl-1"> Djc Details</h3>
                                         </div>
                                     </div>
-
                                     <div class="form-group row">
-                                        <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
+                                        <div class="col-sm-12"><label for="ref_type" class="caption">Lead </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required="required">
+                                                <select class="form-control  round" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required>
+                                                    <option value="0">-- Select Lead --</option>
                                                     @foreach ($leads as $lead)
                                                         @php
                                                             $name = $lead->client_name;
@@ -51,7 +45,7 @@
                                                                 $name = $lead->customer->company.' - '. $lead->branch->name;
                                                             }
                                                         @endphp
-                                                        <option value="{{ $lead->id }}">
+                                                        <option value="{{ $lead->id }}" {{ $lead->id === $djc->lead_id ? 'selected' : '' }}>
                                                             {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                         </option>
                                                     @endforeach
@@ -322,19 +316,18 @@
     function autocompleteProp(i = 0) {
         return {
             source: function(request, response) {
-                const billtype = counter;
                 $.ajax({
-                    url: baseurl + 'equipments/search/' + billtype,
+                    url: baseurl + 'equipments/search/' + $("#client_id").val(),
                     dataType: "json",
                     method: 'post',
                     data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
                     success: function(data) {
-                        response($.map(data, function(itm) {
-                            const label = `${itm.customer} ${itm.name} ${itm.make_type} ${itm.capacity} ${itm.location}`
-                            const value = itm.name;
-                            const data = itm;
-                            return { label, value, data};
+                        const equips = data.map(v => ({
+                            label: `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`,
+                            value: v.name,
+                            data: v
                         }));
+                        response(equips);
                     }
                 });
             },
@@ -356,20 +349,20 @@
 
     // on clicking addproduct (equipment) button
     $('#addqproduct').on('click', function() {
-        const cvalue = counter++;
+        const i = counter++;
         // product (equipment) row
-        const row = equipmentRow(cvalue);
+        const row = equipmentRow(i);
         // add poduct row to equipment table
         $('#equipment tr:last').after(row);
         // add jobcard value   
-        $('#joc_card-'+cvalue).val($("#jobcard").val());
+        $('#joc_card-'+i).val($("#jobcard").val());
         // initialize date picker with php parsed date
         $('[data-toggle="datepicker"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
 
         // autocomplete on added product row
-        $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
+        $('#tag_number-' + i).autocomplete(autocompleteProp(i));
 
         assignIndex();
     });
