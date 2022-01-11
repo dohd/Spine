@@ -35,7 +35,6 @@ use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
 use App\Http\Requests\Focus\customer\DeleteCustomerRequest;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * CustomersController
@@ -121,7 +120,6 @@ class CustomersController extends Controller
             return new RedirectResponse(route('biller.customers.show', [$result->id]), ['flash_success' => trans('alerts.backend.customers.created') . $pass_u . ' <a href="' . route('biller.customers.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
 
         }
-
     }
 
     /**
