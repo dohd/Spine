@@ -91,7 +91,7 @@
                                 <th width="7%" class="text-center">UOM</th>
                                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th> 
                                 <th width="8%" class="text-center">New Quantity</th>     
-                                <th width="16%" class="text-center">Price (VAT Exc)</th>
+                                <th width="16%" class="text-center">Buy Price (VAT Exc)</th>
                                 <th width="16%" class="text-center">Amount</th>
                                 <th width="7%" class="text-center">Action</th>                             
                             </tr>
