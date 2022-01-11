@@ -102,24 +102,26 @@ class CustomersController extends Controller
         //Input received from the request
         $data = $request->except(['_token', 'ins', 'balance', 'custom_field']);
         $data2 = $request->only(['custom_field']);
-        if (!$data['password'] or strlen($data['password']) < 6) $data['password'] = rand(111111, 999999);
-
+        if (!$data['password'] || strlen($data['password']) < 6) $data['password'] = rand(111111, 999999);
 
         //dd($input);
         $data['ins'] = auth()->user()->ins;
         $data2['ins'] = auth()->user()->ins;
         //Create the model using repository create method
         $result = $this->repository->create(compact('data', 'data2'));
+        if (!$result) return redirect()->back();
+
         //return with successfull message
         if ($request->ajax()) {
             $result['random_password'] = $data['password'];
-            echo json_encode($result);
-        } else {
-            $pass_u = ' ' . trans('customers.auto_password') . ' ' . $data['password'];
-            if (isset($data['rel_id']) and $result->id) return new RedirectResponse(route('biller.customers.show', [$data['rel_id']]), ['flash_success' => trans('customers.created_contact') . $pass_u . ' <a href="' . route('biller.customers.show', [$data['rel_id']]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
-            return new RedirectResponse(route('biller.customers.show', [$result->id]), ['flash_success' => trans('alerts.backend.customers.created') . $pass_u . ' <a href="' . route('biller.customers.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
-
+            return response()->json($result);
         }
+
+        return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.created')]);
+
+        // if (isset($data['rel_id']) && $result->id) 
+        //     return new RedirectResponse(route('biller.customers.show', [$data['rel_id']]), ['flash_success' => trans('customers.created_contact') . $pass_u . ' <a href="' . route('biller.customers.show', [$data['rel_id']]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
+        // return new RedirectResponse(route('biller.customers.show', [$result->id]), ['flash_success' => trans('alerts.backend.customers.created') . $pass_u . ' <a href="' . route('biller.customers.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
     }
 
     /**
