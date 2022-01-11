@@ -25,7 +25,9 @@ class BranchRepository extends BaseRepository
     public function getForDataTable()
     {
         
-       $q=$this->query();
+       $q = $this->query();
+       $q->whereNotIn('name', ['Head Office', 'All Branches']);
+       
       // $q->when(!request('rel_type'), function ($q) {
            // return $q->where('c_type', '=',request('rel_type',0));
         //});
