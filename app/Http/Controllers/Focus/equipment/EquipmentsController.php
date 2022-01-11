@@ -181,10 +181,17 @@ class EquipmentsController extends Controller
         return new ViewResponse('focus.odus.view', compact('odu'));
     }
 
-    public function equipment_search(Request $request)
+    /**
+     * Fetch customer equipments
+     */
+    public function equipment_search(Request $request, $id)
     {
-        $q = $request->post('keyword');
-        $equipments = Equipment::where('unique_id', 'LIKE', '%' . $q . '%')->limit(6)->with(['customer'])->get();
+        $key_word = $request->post('keyword');
+        $equipments = Equipment::where('unique_id', 'LIKE', '%' . $key_word. '%')
+            ->where('customer_id', $id)
+            ->limit(6)
+            ->with(['customer'])
+            ->get();
 
         // transform equipemts
         $output = array();
@@ -201,6 +208,7 @@ class EquipmentsController extends Controller
                 'last_maint_date' => $row->last_maint_date,
             );
         }
-        if (count($output) > 0) return view('focus.djcs.partials.search')->withDetails($output);
+        
+        return view('focus.djcs.partials.search')->withDetails($output);
     }
 }
