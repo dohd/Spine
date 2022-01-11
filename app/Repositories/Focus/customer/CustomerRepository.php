@@ -12,6 +12,8 @@ use App\Repositories\BaseRepository;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Responses\RedirectResponse;
+use App\Models\branch\Branch;
+
 /**
  * Class CustomerRepository.
  */
@@ -79,46 +81,54 @@ class CustomerRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-        if (!empty($input['data']['picture'])) {
-            $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-        }
-        $groups = @$input['data']['groups'];
-        unset($input['data']['groups']);
-        DB::beginTransaction();
-        $input['data'] = array_map( 'strip_tags', $input['data']);
         try {
+            if (!empty($input['data']['picture'])) {
+                $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
+            }
+    
+            $groups = @$input['data']['groups'];
+            unset($input['data']['groups']);
+    
+            DB::beginTransaction();
+            $input['data'] = array_map('strip_tags', $input['data']);    
             $result = Customer::create($input['data']);
+
+            // default customer branches            
+            $branches = array(['name' => 'All Branches'], ['name' => 'Head Office']);
+            foreach ($branches as $key => $branch) {
+                $branch[$key]['customer_id'] = $result->id;
+                $branch[$key]['ins'] = $input['data']['ins'];
+                Branch::create($branch);
+            }
+
+            if ($result->id) {
+                $fields = array();
+                if (isset($groups)) {
+                    $insert_groups = array();
+                    foreach ($groups as $key => $value) {
+                        $insert_groups[] = array('customer_id' => $result->id, 'customer_group_id' => strip_tags($value));
+                    }
+                    CustomerGroupEntry::insert($insert_groups);
+                }    
+                if (isset($input['data2']['custom_field'])) {
+                    foreach ($input['data2']['custom_field'] as $key => $value) {
+                        $fields[] = array('custom_field_id' => $key, 'rid' => $result->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $input['data']['ins']);
+                    }
+                    CustomEntry::insert($fields);
+                }
+                
+                DB::commit();
+                return $result;
+            }
+    
         } catch (QueryException $e){
             $errorCode = $e->errorInfo[1];
-            if($errorCode == '1062'){
-                session()->flash('flash_error', 'Duplicate Email');
-            }
+            if($errorCode == '1062') session()->flash('flash_error', 'Duplicate Email');
+            
             new RedirectResponse(route('biller.customers.create'), ['flash_success' =>trans('exceptions.backend.customers.create_error')]);
+            return;
            // throw new GeneralException(trans('exceptions.backend.customers.create_error'));
         }
-
-
-        if (@$result->id) {
-            $fields = array();
-            if (isset($groups)) {
-                $insert_groups = array();
-                foreach ($groups as $key => $value) {
-                    $insert_groups[] = array('customer_id' => $result->id, 'customer_group_id' => strip_tags($value));
-                }
-                CustomerGroupEntry::insert($insert_groups);
-            }
-
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $result->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $input['data']['ins']);
-                }
-                CustomEntry::insert($fields);
-            }
-            DB::commit();
-            return $result;
-        }
-        throw new GeneralException(trans('exceptions.backend.customers.create_error'));
     }
 
     /**
