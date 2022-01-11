@@ -111,15 +111,14 @@ class BranchesController extends Controller
         return new EditResponse($branch);
     }
 
-    // Load customer branches
+    /**
+     *  Load customer branches     *  
+     */
     public function branch_load(Request $request)
     {
-        $id = $request->get('id');
-        $result = Customer::find($id)->branches;
-
-        return json_encode($result);
+        $branches = Customer::find(request('id'))->branches;
+        return response()->json($branches);
     }
-
 
     public function update(StoreBranchRequest $request, Branch $branch)
     {
