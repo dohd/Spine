@@ -98,7 +98,7 @@ Route::group(['namespace' => 'deptor'], function () {
 Route::group(['namespace' => 'equipment'], function () {
     Route::resource('equipments', 'EquipmentsController');
     Route::post('equipments/equipment_load', 'EquipmentsController@equipment_load')->name('equipments.equipment_load');
-    Route::post('equipments/search/{bill_type}', 'EquipmentsController@equipment_search')->name('equipments.equipment_search');
+    Route::post('equipments/search/{id}', 'EquipmentsController@equipment_search')->name('equipments.equipment_search');
 
     //For Datatable
     Route::post('equipments/get', 'EquipmentsTableController')->name('equipments.get');
