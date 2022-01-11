@@ -33,13 +33,13 @@
                             <div class="col-sm-6">
                                 <div>
                                     <div class="form-group row">
-                                        <div class="fcol-sm-12">
-                                            <h3 class="title pl-1"> Djc Details</h3>
+                                        <div class="col-12">
+                                            <h3>Djc Details</h3>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
-                                        <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
+                                        <div class="col-sm-12"><label for="ref_type" class="caption">Lead </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>
@@ -57,8 +57,8 @@
                                                             </option>
                                                         @endforeach
                                                     </select>                                                
-                                                <input type="hidden" name="client_id" id="client_id">
-                                                <input type="hidden" name="branch_id" id="branch_id">                                                
+                                                <input type="hidden" name="client_id" value="0" id="client_id">
+                                                <input type="hidden" name="branch_id" value="0" id="branch_id">                                                
                                             </div>
                                         </div>
                                     </div>
@@ -277,9 +277,8 @@
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
     });
 
-    // on selecting lead
+    // on selecting lead fetch lead details from the server
     $('#lead_id').change(function() {
-        // fetch lead details from the server
         $.ajax({
             type: "POST",
             url: baseurl + 'leads/lead_search',
@@ -299,30 +298,30 @@
     });
     
     // product row
-    function productRow(cvalue=0) {            
+    function productRow(n) {            
         return `
             <tr>
-                <td><input type="text" class="form-control"  required name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}"></td>
-                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
+                <td><input type="text" class="form-control"  required name="tag_number[]" placeholder="Search Equipment" id="tag_number-${n}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${n}"></td>
+                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${n}" autocomplete="off"></td>
+                <td><input type="text" class="form-control r" name="make[]" id="make-${n}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${n}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req" name="location[]" id="location-${n}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${n}" autocomplete="off" data-toggle-${n}="datepicker"></td>
+                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${n}" autocomplete="off" data-toggle-${n}="datepicker"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Action
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item removeProd" href="javascript:void(0);" data-rowid="${cvalue}" >Remove</a>
+                            <a class="dropdown-item removeProd" href="javascript:void(0);" data-rowid="${n}" >Remove</a>
                             <a class="dropdown-item up" href="javascript:void(0);">Up</a>
                             <a class="dropdown-item down" href="javascript:void(0);">Down</a>
                         </div>
                     </div>
                 </td>
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${cvalue}">
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${n}">
             </tr>
         `;
     }
@@ -335,32 +334,33 @@
         });
     }
 
+    // equipment row counter;
+    let eqmntIndx = 0;
     // add default product row
-    $('#equipment tr:last').after(productRow());
+    $('#equipment tr:last').after(productRow(0));
     // initialize date picker
     $('[data-toggle-0="datepicker"]')
         .datepicker({format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date());
     // autocomplete on default product row
-    $('#tag_number-0').autocomplete(autocompleteProp());
+    $('#tag_number-0').autocomplete(autocompleteProp(0));
     assignIndex();
     
-    // equipment row counter;
-    var counter = 1;
     // on clicking addproduct (equipment) button
     $('#addqproduct').on('click', function() {
-        const cvalue = counter++;
+        eqmntIndx++;
+        const i = eqmntIndx;
         // add poduct row to equipment table
-        const row = productRow(cvalue);
+        const row = productRow(i);
         $('#equipment tr:last').after(row);
         // add jobcard value   
         $('input[name="joc_card[]"]').val($("#jobcard").val());     
         // initialize datepicker
-        $(`[data-toggle-${cvalue}="datepicker"]`)
+        $(`[data-toggle-${i}="datepicker"]`)
             .datepicker({format: "{{config('core.user_date_format')}}"})
             .datepicker('setDate', new Date());
         // autocomplete on added product row
-        $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
+        $('#tag_number-' + i).autocomplete(autocompleteProp(i));
         assignIndex();
     });
 
@@ -378,22 +378,22 @@
     });
 
     // autocompleteProp returns autocomplete object properties
-    function autocompleteProp(i = 0) {
+    function autocompleteProp(i) {
+        console.log('auto called')
         return {
             source: function(request, response) {
-                const billtype = counter;
                 $.ajax({
-                    url: baseurl + 'equipments/search/' + billtype,
+                    url: baseurl + 'equipments/search/' + $("#client_id").val(),
                     dataType: "json",
                     method: 'post',
                     data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
                     success: function(data) {
-                        response($.map(data, function(item) {
-                            const label = `${item.customer} ${item.name} ${item.make_type} ${item.capacity} ${item.location}`;
-                            const value = item.name;
-                            const data = item;
-                            return {label, value, data};
+                        const equips = data.map(v => ({
+                            label: `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`,
+                            value: v.name,
+                            data: v
                         }));
+                        response(equips);
                     }
                 });
             },
