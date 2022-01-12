@@ -3,52 +3,53 @@
 @section ('title', 'LPO Management')
 
 @section('content')
-<div>    
-    <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">LPO Management</h4>
-            </div>
-            <div class="content-header-right col">
-                <div class="media width-250 float-right">
-                    <div class="media-body media-right text-right">
-                        @include('focus.lpo.partials.lpo-header-buttons')
-                    </div>
+<div class="content-wrapper">
+    <div class="alert alert-warning alert-dismissible d-none lpo-alert">
+        <strong>Forbidden!</strong> Cannot delete LPO attached to quote
+    </div> 
+    <div class="content-header row">        
+        <div class="content-header-left col-md-6 col-12 mb-2">
+            <h4 class="content-header-title">LPO Management</h4>
+        </div>
+        <div class="content-header-right col">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.lpo.partials.lpo-header-buttons')
                 </div>
             </div>
         </div>
-        <div class="content-body">
-            <div class="card todo-details rounded-0">
-                <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
-                <div class="search"></div>
-                <div class="card-body">
-                    <table id="lpo-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Client & Branch</th>
-                                <th>#LPO No</th>
-                                <th>LPO Amount</th>
-                                <th>Invoiced (QT/PI)</th>
-                                <th>Verified & Uninvoiced (QT/PI)</th>
-                                <th>Approved & Unverified (QT/PI)</th>
-                                <!-- <th>Balance</th> -->
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="100%" class="text-center text-success font-large-1">
-                                    <i class="fa fa-spinner spinner"></i>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+    </div>
+    <div class="content-body">
+        <div class="card todo-details rounded-0">
+            <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
+            <div class="search"></div>
+            <div class="card-body">
+                <table id="lpo-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Client & Branch</th>
+                            <th>#LPO No</th>
+                            <th>LPO Amount</th>
+                            <th>Invoiced (QT/PI)</th>
+                            <th>Verified & Uninvoiced (QT/PI)</th>
+                            <th>Approved & Unverified (QT/PI)</th>
+                            <th>Balance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="100%" class="text-center text-success font-large-1">
+                                <i class="fa fa-spinner spinner"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>    
-</div>
+    </div>
+</div>    
 @include('focus.lpo.modal.lpo_new')
 @include('focus.lpo.modal.lpo_edit')
 @endsection
@@ -77,8 +78,13 @@
             $.ajax({
                 url: $(this).attr('href'),
                 method: 'DELETE'
-            }).done(function() { location.reload(); });
-        }        
+            })
+            .done(function() { location.reload(); })
+            .fail(function(err) {
+                $('.lpo-alert').removeClass('d-none');
+                setTimeout(() => $('.lpo-alert').addClass('d-none'), 3000);
+            })
+        }
     });
     
     // Fetch update data
@@ -202,10 +208,10 @@
                     data: 'approved_unverified',
                     name: 'approved_unverified'
                 },
-                // {
-                //     data: 'balance',
-                //     name: 'balance'
-                // },
+                {
+                    data: 'balance',
+                    name: 'balance'
+                },
                 {
                     data: 'actions',
                     name: 'actions',
