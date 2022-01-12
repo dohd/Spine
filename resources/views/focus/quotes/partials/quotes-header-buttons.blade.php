@@ -18,15 +18,19 @@
                 </a>&nbsp;&nbsp;
                 <a href="{{ route('biller.quotes.index') }}" class="btn btn-success">
                     <i class="fa fa-list-alt"></i> Quote
-                </a>
+                </a>&nbsp;&nbsp;
             @else
                 <a href="{{ route('biller.quotes.create') }}" class="btn btn-pink  btn-lighten-3">
                     <i class="fa fa-plus-circle"></i> Quote
                 </a>&nbsp;&nbsp;
                 <a href="{{ route('biller.quotes.index', 'page=pi') }}" class="btn btn-success">
                     <i class="fa fa-list-alt"></i> PI
-                </a>
+                </a>&nbsp;&nbsp;
             @endif
         @endauth
+
+        <a href="{{ route('biller.projects.index') }}" class="btn btn-cyan">
+            <i class="fa fa-list-alt"></i> Project
+        </a>
     </div>
 </div>
