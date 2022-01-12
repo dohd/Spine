@@ -1,5 +1,5 @@
 <div id="pop_model_4" class="modal fade">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Add LPO</h4>
