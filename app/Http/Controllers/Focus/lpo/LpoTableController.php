@@ -7,13 +7,16 @@ use Yajra\DataTables\Facades\DataTables;
 
 class LpoTableController extends Controller
 {
+    // lpo balance
+    private $balance;
+    
     /**
      * This method return the data of the model
      * @return mixed
      */
     public function __invoke()
     {
-        $core = LpoController::getForDataTable();
+        $core = LpoController::getForDataTable();        
         return DataTables::of($core)
             ->addIndexColumn()
             ->addColumn('customer', function ($lpo) {
@@ -23,6 +26,7 @@ class LpoTableController extends Controller
                 return $lpo->lpo_no;
             })
             ->addColumn('amount', function ($lpo) {
+                $this->balance = $lpo->amount;
                 return '<span><b>'.number_format($lpo->amount, 2).'</b></span>';
             })
             ->addColumn('invoiced', function ($lpo) {
@@ -36,9 +40,9 @@ class LpoTableController extends Controller
                         $subtotal += $quote->subtotal;
                     }                    
                 }
-
-                if ($subtotal) return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
-                return;
+                $this->balance -= $subtotal;
+                if ($subtotal) 
+                    return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('verified_uninvoiced', function ($lpo) {
                 $tids = array(); 
@@ -51,9 +55,9 @@ class LpoTableController extends Controller
                         $subtotal += $quote->subtotal;
                     }                    
                 }
-
-                if ($subtotal) return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
-                return;
+                $this->balance -= $subtotal;
+                if ($subtotal)
+                    return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('approved_unverified', function ($lpo) {
                 $tids = array();
@@ -66,18 +70,18 @@ class LpoTableController extends Controller
                         $subtotal += $quote->subtotal;
                     }                    
                 }
-
-                if ($subtotal) return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
-                return;
+                $this->balance -= $subtotal;
+                if ($subtotal) 
+                    return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('balance', function ($lpo) {
-                return;
+                return '<span><b>'.number_format($this->balance, 2).'</b></span>';
             })
             ->addColumn('actions', function ($lpo) {
                 return '<a href="'.$lpo->id.'" class="update-lpo" data-toggle="modal" data-target="#updateLpoModal"><i class="ft-edit fa-lg"></i></a>'
                     .'&nbsp;&nbsp;<a href="'.route('biller.lpo.destroy', $lpo->id).'" class="danger delete-lpo"><i class="fa fa-trash fa-lg"></i></a>';
             })
-            ->rawColumns(['amount', 'invoiced', 'verified_uninvoiced', 'approved_unverified', 'actions'])
+            ->rawColumns(['amount', 'invoiced', 'verified_uninvoiced', 'approved_unverified', 'balance', 'actions'])
             ->make(true);
     }
 }
