@@ -56,10 +56,6 @@
                 <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="dropdown-item quote-approve" title="Change Status">
                     Approve
                 </a>
-                <a href="javascript:void(0);" class="dropdown-item text-danger quote-cancel">
-                    <i class="fa fa-ban" aria-hidden="true"></i> Cancel
-                    {{ Form::open(['route' => ['biller.quotes.cancel', $quote], 'method' => 'patch']) }} {{ Form::close() }}  
-                </a>
             </div>
         </div>
 
