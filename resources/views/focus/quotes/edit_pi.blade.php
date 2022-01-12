@@ -153,7 +153,7 @@
                                         <label for="invocieno" class="caption">Djc Reference</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference']) }}
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
@@ -346,8 +346,8 @@
         .datepicker('setDate', new Date());
 
     // on selecting lead
+    const leads = @json($leads);
     $('#lead_id').change(function() {
-        const leads = @json($leads);
         leads.forEach(v => {
             if (v.id == $(this).val()) {
                 $('#subject').val(v.title);
@@ -355,7 +355,15 @@
             }
         });
     });
-
+    // on selecting Djc reference
+    $('#reference').change(function() {
+        leads.forEach(v => {
+            if (v.id == $('#lead_id').val()) {
+                $('#subject').val(v.title);
+                if ($(this).val()) $('#subject').val(v.title + ' ; Djc-' + $(this).val());
+            }
+        });
+    });
     // Check if radio button is checked
     $('input[type="radio"]').change(function() {
         const $span = $('#tax-label').find('span').eq(1);

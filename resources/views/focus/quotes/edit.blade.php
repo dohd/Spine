@@ -140,7 +140,7 @@
                                         <label for="invocieno" class="caption">Djc Reference</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference')]) }}
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference'), 'id' => 'reference']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
@@ -353,18 +353,27 @@
     $('[data-toggle="datepicker-qd"]')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
-
+    
     // on selecting lead
+    const leads = @json($leads);
     $('#lead_id').change(function() {
-        const leads = @json($leads);
         leads.forEach(v => {
             if (v.id == $(this).val()) {
                 $('#subject').val(v.title);
                 $('#client_ref').val(v.client_ref);
             }
         });
-    });    
-
+    });   
+    // on selecting Djc reference
+    $('#reference').change(function() {
+        leads.forEach(v => {
+            if (v.id == $('#lead_id').val()) {
+                $('#subject').val(v.title);
+                if ($(this).val()) $('#subject').val(v.title + ' ; Djc-' + $(this).val());
+            }
+        });
+    });
+    
     // row dropdown menu
     function dropDown(val) {
         return `
