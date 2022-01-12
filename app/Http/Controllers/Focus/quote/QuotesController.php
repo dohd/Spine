@@ -193,11 +193,12 @@ class QuotesController extends Controller
         $products = $quote->products()->orderBy('row_index', 'ASC')->get();
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
-        $lpos = Lpo::get();
+        $lpos = Lpo::where('customer_id', $quote->customer_id)->get();
 
         $quote['bill_type'] = 4;
 
-        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'products', 'lpos'));
+        $params = array('quote', 'accounts', 'features', 'products', 'lpos');
+        return new ViewResponse('focus.quotes.view', compact(...$params));
     }
 
     /**
