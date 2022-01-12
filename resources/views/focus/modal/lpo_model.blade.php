@@ -13,7 +13,10 @@
                             <select id="lpo_id" name="lpo_id" class="form-control" required>
                                 <option value="0">-- Select LPO --</option>
                                 @foreach ($lpos as $lpo)
-                                    <option value="{{ $lpo->id }}">{{ $lpo->lpo_no }}</option>
+                                    <option value="{{ $lpo->id }}">
+                                        {{ $lpo->lpo_no }} || {{ $lpo->customer->company }} - {{ $lpo->branch->name }} ||
+                                        {{ number_format($lpo->amount, 2) }} || {{ $lpo->remark }} || {{ dateFormat($lpo->date) }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
