@@ -368,6 +368,17 @@
         });
     });
 
+    // On Change Status modal
+    $('#pop_model_1').on('shown.bs.modal', function() { 
+        $form = $(this).find('#form_model_1');
+        $form.find('select[name=status]').click(function() {
+            $form.find('label[for=approved-by]').text('Approved By');
+            if ($(this).val() === 'cancelled') {
+                $form.find('label[for=approved-by]').text('Cancelled By');
+            }
+        });
+    });
+
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
