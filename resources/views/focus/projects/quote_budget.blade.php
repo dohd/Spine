@@ -148,7 +148,7 @@
                                 <div>
                                     <label for="budget-total">Total Budget</label>&nbsp;
                                     <span class="text-primary font-weight-bold">
-                                        (Profit: <span class="text-dark profit">0</span>)
+                                        (Profit: &nbsp;<span class="text-dark profit">0</span>)
                                     </span>
                                 </div>
                                 <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
@@ -223,7 +223,7 @@
         const charge = $('#charge-'+rowIndx).val();
 
         const amount = charge * hr * notech;
-        const amountStr = parseFloat(amount).toLocaleString();
+        const amountStr = amount.toLocaleString();
         $(this).parentsUntil('tbody').eq(1).children().eq(4).children().text(amountStr);
 
         calcBudget();
@@ -281,9 +281,9 @@
         const qty = $('#newqty-'+rowIndx).val();
 
         const amount = qty * parseFloat(price);
-        const amountStr = parseFloat(amount).toLocaleString();
+        const amountStr = amount.toLocaleString();
         if (id.includes('price')) {
-            const n = $(this).val();
+            const n = $(this).val().replace(/,/g, '');
             $(this).val(parseFloat(n).toLocaleString());
             $(this).parent().next().children().text(amountStr);
         } else if (price) {
