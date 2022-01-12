@@ -269,8 +269,6 @@ Route::group(['namespace' => 'quote'], function () {
     Route::delete('quotes/verified_jcs/{id}', 'QuotesController@delete_verified_jcs')->name('quotes.delete_verified_jcs');
     Route::delete('quotes/reset_verified/{id}', 'QuotesController@reset_verified')->name('quotes.reset_verified');
 
-    Route::patch('quotes/cancel/{quote}', 'QuotesController@cancel_quote')->name('quotes.cancel');
-
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
     //For Datatable
