@@ -138,12 +138,20 @@
                                 </textarea>   
                             </div>                                                     
                             <div class="form-group">
-                                <div><label for="quote-total">Total Quote <span class="text-danger">(VAT Exclusive)</span></label></div>
-                                <div><input type="text" class="form-control" id="quote-total" name="quote_total" readonly></div>
+                                <div>
+                                    <label for="quote-total">Total Quote</label>
+                                    <span class="text-danger">(VAT Exc)</span>
+                                </div>
+                                <input type="text" class="form-control" id="quote-total" name="quote_total" readonly>
                             </div>
                             <div class="form-group">
-                                <div><label for="budget-total">Total Budget</label></div>
-                                <div><input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly></div>
+                                <div>
+                                    <label for="budget-total">Total Budget</label>&nbsp;
+                                    <span class="text-primary font-weight-bold">
+                                        (Profit: <span class="text-dark profit">0</span>)
+                                    </span>
+                                </div>
+                                <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
                             </div>                            
                             {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                         </div>                              
@@ -410,6 +418,9 @@
         });
         $('#budget-total').val(parseFloat(total).toLocaleString());
         $('#labour-total').val(parseFloat(labourTotal).toLocaleString());
+        // profit
+        const profit = parseFloat(subtotal) - total;
+        $('.profit').text(profit.toLocaleString());
 
         // budget limit
         $('.budget-alert').addClass('d-none');
