@@ -240,11 +240,10 @@
     } else {
         $('#skill-item tbody').append(skillRow(0));
     }
-
+    // append row
     $('#add-skill').click(function() {
-        // append row
-        $('#skill-item tbody').append(skillRow(skillIndx));
         skillIndx++;
+        $('#skill-item tbody').append(skillRow(skillIndx));
     });
     // Remove skill row
     $('#skill-item').on('click', '.removeItem', function() {
