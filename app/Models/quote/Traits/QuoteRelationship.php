@@ -25,12 +25,12 @@ trait QuoteRelationship
 
     public function customer()
     {
-        return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
+        return $this->belongsTo(Customer::class);
     }
 
     public function customer_branch()
     {
-        return $this->hasOne(Branch::class, 'id', 'branch_id')->withoutGlobalScopes();
+        return $this->belongsTo(Branch::class);
     }
 
     public function products()
