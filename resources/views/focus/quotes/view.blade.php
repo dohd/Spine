@@ -80,10 +80,7 @@
                                 <li><i>{{ $branchname }},</i></li>
                                 <li><i>{{ $adrress }},</i></li>
                                 <li><i>{{ $email }},</i></li>
-                                <li><i>{{ $cell }},</i></li>
-                                @if ($quote->customer)
-                                    {!! custom_fields_view(1, $quote->customer->id, false) !!}
-                                @endif
+                                <li><i>{{ $cell }}</i></li>                                
                             </ul>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
@@ -94,12 +91,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col">
-                            <hr><p>{!! $quote['proposal'] !!}</p>
-                        </div>
-                    </div>                    
-                    
+
                     <div id="invoice-items-details" class="pt-2">
                         <div class="row">
                             <div class="table-responsive col-sm-12">
@@ -129,8 +121,8 @@
                                                         $price = (float) $product->product_price;
                                                         $subtotal = (float) $product->product_subtotal;
                                                     @endphp
-                                                    <td class="text-right">
-                                                        {{ amountFormat($subtotal - $price) }} <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
+                                                    <td class="text-right">{{ amountFormat($subtotal - $price) }}
+                                                        <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                     </td>
                                                     <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
                                                 </tr>
@@ -138,9 +130,8 @@
                                                 <tr>
                                                     <td scope="row">{{ $product['numbering'] }}</td>
                                                     <td><p>{{$product['product_name']}}</p></td>
-                                                    @for ($i = 0; $i < 4; $i++) {
-                                                        <td class="text-right"></td>
-                                                    }
+                                                    @for ($i = 0; $i < 4; $i++)
+                                                        <td class="text-right"></td>                                                    
                                                     @endfor                                                    
                                                 </tr>
                                             @endif
@@ -151,7 +142,6 @@
                         </div>
 
                         <div class="row">
-
                             <div class="col-md-7">
                                 <div class="row">
                                     <div class="col-md-6">
