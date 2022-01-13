@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Focus\quote;
 
-
 use App\Models\items\QuoteItem;
 use App\Models\items\VerifiedItem;
 
@@ -13,7 +12,6 @@ use App\Repositories\BaseRepository;
 use App\Models\lead\Lead;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
-use App\Models\customer\Customer;
 
 /**
  * Class QuoteRepository.
@@ -34,7 +32,6 @@ class QuoteRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-
         // distinguish pi from quote
         if (request('pi_page') == 1) $q->where('bank_id', '>', 0);
         else $q->where('bank_id', 0);
@@ -42,13 +39,15 @@ class QuoteRepository extends BaseRepository
         $q->when(request('i_rel_type') == 1, function ($q) {
             return $q->where('customer_id', request('i_rel_id', 0));
         });
-
-        if (request('start_date')) {
+        if (request('start_date') && request('end_date')) {
             $q->whereBetween('invoicedate', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
+
+        // order by latest updated record
+        $q->orderBy('updated_at', 'desc');
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
@@ -59,18 +58,15 @@ class QuoteRepository extends BaseRepository
     public function getForVerifyDataTable()
     {
         $q = $this->query();
-
         $q->when(request('i_rel_type') == 1, function ($q) {
             return $q->where('customer_id', request('i_rel_id', 0));
         });
-
-        if (request('start_date')) {
+        if (request('start_date') && request('end_date')) {
             $q->whereBetween('invoicedate', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
-
         // project quotes
         $q->whereNotNull('project_quote_id');
 
@@ -142,7 +138,7 @@ class QuoteRepository extends BaseRepository
             ['quote_id' => $result['id'], 'ins' => $result['ins']]
         );
 
-        // assign unit field if non-existant
+        // assign unit field
         foreach ($quote_items as $key => $val) {
             if (isset($val['unit'])) continue;
             $quote_items[$key]['unit'] = null;
@@ -204,8 +200,8 @@ class QuoteRepository extends BaseRepository
                 $quote_item[$key] = $value;
             }
             // remove stale attributes and save
-            if ($quote_item['id'] == 0) unset($quote_item['id']);
             unset($quote_item['item_id']);
+            if ($quote_item['id'] == 0) unset($quote_item['id']);
             $quote_item->save();
         }
 
@@ -356,32 +352,17 @@ class QuoteRepository extends BaseRepository
     public function getForVerifyNotInvoicedDataTable()
     {
         $q = $this->query();
-
-     
-
-
         if (request('customer_id')) {
             $q->where('customer_id', request('customer_id'));
         }
-
-
         if (request('lpo_number')) {
             $q->where('lpo_number', request('lpo_number'));
         }
-
         if (request('project_id')) {
             $q->where('project_quote_id', request('project_id'));
         }
-
-        
-
-
-      
-     // Verified and Not invoiced 
-       $q->where(['invoiced'=>'No','verified'=>'Yes']);
-
-   
-   
+        // Verified and Not invoiced 
+        $q->where(['invoiced' => 'No', 'verified' => 'Yes']);
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
