@@ -31,45 +31,19 @@
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-body">                    
-                    @include('focus.quotes.partials.view_menu')                    
+                    @include('focus.quotes.partials.view_menu') 
+
                     @if ($quote->verified == "Yes")
                         <div class="badge text-center white d-block m-1">
                             <span class="bg-success round p-1">
-                                <b>This {{ $quote->bank_id ? 'PI' : 'Quote' }} is verified</b>
+                                <b>
+                                    This {{ $quote->bank_id ? 'PI' : 'Quote' }} is verified 
+                                </b>
                             </span>
                         </div>
-                    @endif
-                    <!-- Invoice Company Details -->
-                    <div id="invoice-company-details" class="row">
-                        <div class="col-md-6 col-sm-12 text-center text-md-left">{{trans('general.our_info')}}
-                            <div class="">
-                                <img src="{{ Storage::disk('public')->url('app/public/img/company/' . config('core.logo')) }}" alt="company logo" class="avatar-100 img-responsive" />
-                                <div class="media-body"><br>
-                                    <ul class="px-0 list-unstyled">
-                                        <li class="text-bold-800">{{(config('core.cname'))}}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-sm-12 text-center text-md-right">
-                            @php
-                                $tid = sprintf('%04d', $quote->tid);
-                                $ref = ($quote->bank_id) ? '#PI-'.$tid : '#QT-'.$tid;
-                                $label = ($quote->bank_id) ? 'Proforma Invoice' : trans('quotes.quote');
-                            @endphp
-                            <h2>{{ $label }}</h2>
-                            <p class="pb-3">{{ $ref }}</p>                            
-                            <ul class="px-0 list-unstyled">
-                                <li>{{trans('general.total')}}</li>
-                                <li class="lead text-bold-800">{{amountFormat($quote['total'])}}</li>
-                            </ul>
-                        </div>
-                    </div>
+                    @endif                    
 
-                    <div id="invoice-customer-details" class="row pt-2">
-                        <div class="col-sm-12 text-center text-md-left">
-                            <p class="text-muted">{{trans('invoices.bill_to')}}</p>
-                        </div>
+                    <div id="invoice-customer-details" class="row pt-2">                        
                         <div class="col-md-6 col-sm-12 text-center text-md-left">
                             @php                        
                                 $customername = $quote->client_name;
@@ -77,13 +51,13 @@
                                 $cell = $quote->client_contact;
                                 $branchname = "";
                                 $adrress = "";
-
                                 if ($quote->customer_id) {
-                                    $customername = $quote->customer->name;
-                                    //$branchname = $quote->customer_branch->name ;
+                                    $customername = $quote->customer->name;                                    
                                     $adrress = $quote->customer->address;
                                     $email = $quote->customer->email;
                                     $cell = $quote->customer->phone;
+                                    if ($quote->customer_branch) 
+                                        $branchname = $quote->customer_branch->name;
                                 } 
                                 if ($quote->lead_id) {                                    
                                     $customername = $quote->lead->client_name;
@@ -91,7 +65,6 @@
                                     $adrress = "";
                                     $email = $quote->lead->client_email;
                                     $cell = $quote->lead->client_contact; 
-
                                     if($quote->lead->client_status == 'customer') {
                                         $customername = $quote->client->name ;
                                         $branchname = $quote->branch->name ;
@@ -101,39 +74,32 @@
                                     }
                                 }
                             @endphp
+                            <span class="text-muted"><b>{{ trans('invoices.bill_to') }}</b></span>
                             <ul class="px-0 list-unstyled">
-                                <li>{{ $customername }},</li>
-                                <li>{{ $branchname }},</li>
-                                <li>{{ $adrress }},</li>
-                                <li>{{ $email }},</li>
-                                <li>{{ $cell }},</li>
+                                <li><i>{{ $customername }},</i></li>
+                                <li><i>{{ $branchname }},</i></li>
+                                <li><i>{{ $adrress }},</i></li>
+                                <li><i>{{ $email }},</i></li>
+                                <li><i>{{ $cell }},</i></li>
                                 @if ($quote->customer)
                                     {!! custom_fields_view(1, $quote->customer->id, false) !!}
                                 @endif
                             </ul>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
-                            <p>
-                                <span class="text-muted">{{trans('quotes.invoicedate')}} :</span> {{dateFormat($quote['invoicedate'])}}
-                            </p>
-                            <p>
-                                <span class="text-muted">{{trans('quotes.invoiceduedate')}} :</span> {{dateFormat($quote['invoiceduedate'])}}
-                            </p>
+                            <p><span class="text-muted">{{trans('quotes.invoicedate')}} :</span> {{dateFormat($quote['invoicedate'])}}</p>
+                            <p><span class="text-muted">{{trans('quotes.invoiceduedate')}} :</span> {{dateFormat($quote['invoiceduedate'])}}</p>
                             <div class="row">
-                                <div class="col">
-                                    <hr>
-                                    <p class=" text-danger">{{$quote['notes']}}</p>
-                                </div>
+                                <div class="col"><br><hr><p class="text-danger">{{ $quote->notes }}</p></div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
-                            <hr>
-                            <p>{!! $quote['proposal'] !!}</p>
+                            <hr><p>{!! $quote['proposal'] !!}</p>
                         </div>
-                    </div>
-                    <!-- Invoice Items Details -->
+                    </div>                    
+                    
                     <div id="invoice-items-details" class="pt-2">
                         <div class="row">
                             <div class="table-responsive col-sm-12">
@@ -152,7 +118,7 @@
                                         @foreach ($products as $product)
                                             @if ($product['a_type'] == 1)                                               
                                                 <tr>
-                                                    <th scope="row">{{ $product['numbering'] }}</th>
+                                                    <td scope="row">{{ $product['numbering'] }}</td>
                                                     <td>
                                                         <p>{{$product['product_name']}}</p>
                                                         <p class="text-muted"> {!!$product['product_des'] !!} </p>
@@ -170,24 +136,22 @@
                                                 </tr>
                                             @else
                                                 <tr>
-                                                    <th scope="row">{{ $product['numbering'] }}</th>
-                                                    <td>
-                                                        <p>{{$product['product_name']}}</p>
-                                                    </td>
-                                                    <td class="text-right"></td>
-                                                    <td class="text-right"></td>
-                                                    <td class="text-right"> </td>
-                                                    <td class="text-right"></td>
+                                                    <td scope="row">{{ $product['numbering'] }}</td>
+                                                    <td><p>{{$product['product_name']}}</p></td>
+                                                    @for ($i = 0; $i < 4; $i++) {
+                                                        <td class="text-right"></td>
+                                                    }
+                                                    @endfor                                                    
                                                 </tr>
                                             @endif
                                         @endforeach
-                                        <tr><td colspan="7"></td></tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
                         <div class="row">
+
                             <div class="col-md-7">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -202,6 +166,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-md-5 col-sm-12">
                                 <p class="lead">{{trans('general.summary')}}</p>
                                 <div class="table-responsive">
