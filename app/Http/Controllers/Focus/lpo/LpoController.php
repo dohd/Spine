@@ -41,7 +41,7 @@ class LpoController extends Controller
     {
         // extract input fields
         $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
-        $input['amount'] = floatval($input['amount']);
+        $input['amount'] = (float) $input['amount'];
         Lpo::create($input);
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO created successfully']);
@@ -109,16 +109,14 @@ class LpoController extends Controller
             return response()->json($payload, 403);
         }
         $lpo->delete();
+        
         return response()->noContent();
     }
 
     // data for LpoTableController
     static function getForDataTable()
     {
-        return Lpo::query()
-            ->join('customers', 'lpos.customer_id', '=', 'customers.id')
-            ->join('branches', 'lpos.branch_id', '=', 'branches.id')
-            ->select('lpos.*', 'customers.name AS customer', 'branches.name AS branch')
-            ->get();
+        $q = Lpo::query();
+        return $q->get();
     }
 }
