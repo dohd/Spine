@@ -7,8 +7,11 @@ use Yajra\DataTables\Facades\DataTables;
 
 class LpoTableController extends Controller
 {
-    // lpo balance
-    private $balance;
+    /**
+     * Tracks lpo balance from quotes
+     * @var float 
+     */
+    protected $balance;
     
     /**
      * This method return the data of the model
@@ -20,7 +23,7 @@ class LpoTableController extends Controller
         return DataTables::of($core)
             ->addIndexColumn()
             ->addColumn('customer', function ($lpo) {
-                return $lpo->customer . ' - ' . $lpo->branch;
+                return $lpo->customer->company . ' - ' . $lpo->branch->name;
             })
             ->addColumn('lpo_no', function ($lpo) {
                 return $lpo->lpo_no;
@@ -40,6 +43,7 @@ class LpoTableController extends Controller
                         $subtotal += $quote->subtotal;
                     }                    
                 }
+
                 $this->balance -= $subtotal;
                 if ($subtotal) 
                     return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
@@ -55,6 +59,7 @@ class LpoTableController extends Controller
                         $subtotal += $quote->subtotal;
                     }                    
                 }
+
                 $this->balance -= $subtotal;
                 if ($subtotal)
                     return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
@@ -70,6 +75,7 @@ class LpoTableController extends Controller
                         $subtotal += $quote->subtotal;
                     }                    
                 }
+
                 $this->balance -= $subtotal;
                 if ($subtotal) 
                     return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
