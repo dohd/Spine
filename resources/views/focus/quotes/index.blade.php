@@ -27,7 +27,6 @@
                 </div>
             </div>
         </div>
-
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
@@ -128,13 +127,14 @@
         const tableLang = { @lang('datatable.strings') };
 
         const table = $('#quotes-table').dataTable({
+            ordering: false,
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
             language: tableLang,
             ajax: {
-                url: '{{ route("biller.quotes.get") }}',
+                url: "{{ route('biller.quotes.get') }}",
                 type: 'post',
                 data: {
                     i_rel_id: segment['id'],
@@ -187,7 +187,6 @@
                     sortable: false
                 }
             ],
-            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {
