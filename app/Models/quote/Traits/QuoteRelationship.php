@@ -28,11 +28,6 @@ trait QuoteRelationship
         return $this->belongsTo(Customer::class);
     }
 
-    public function customer_branch()
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
     public function products()
     {
         return $this->hasMany('App\Models\items\QuoteItem')->withoutGlobalScopes();
