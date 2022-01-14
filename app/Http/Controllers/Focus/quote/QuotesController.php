@@ -368,22 +368,23 @@ class QuotesController extends Controller
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
     }
 
-    // Approve quotation
-    public function update_status(ManageQuoteRequest $request)
+    /**
+     * Update Quote Approval Status
+     */
+    public function approve_quote(ManageQuoteRequest $request, Quote $quote)
     {
-        // filter request input fields
-        $data = $request->only(['bill_id', 'status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
+        // extract request input fields
+        $data = $request->only(['status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
         $data['approved_date'] = date_for_database($data['approved_date']);
 
-        $quote = Quote::find($data['bill_id']);
-        // filter bill_id from data then update quote
-        unset($data['bill_id']);
         $quote->update($data);
 
-        return json_encode(['status' => 'Success', 'message' => trans('general.bill_status_update'), 'refresh' => 1]);
+        return new RedirectResponse(route('biller.quotes.show', [$quote]), ['flash_success' => 'Approval status updated successfully']);
     }
 
-    // Update LPO
+    /**
+     * Add LPO to quote
+     */
     public function update_lpo(ManageQuoteRequest $request)
     {
         // extract input fields
