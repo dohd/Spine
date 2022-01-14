@@ -172,7 +172,7 @@
                         </div>
 
                         <div>
-                            <table id="equipment" class="table-responsive tfr my_stripe_single" style="padding-bottom: 100px;">
+                            <table id="equipment" class="table-responsive tfr my_stripe_single">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
                                         <th width="20%" class="text-center">Tag/Unique Number</th>
@@ -189,19 +189,14 @@
                                 <tbody></tbody>
                             </table>
 
-                            <div class="row">
-                                <div class="col-md-8 col-xs-7 payment-method last-item-row sub_c">
-                                    <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-10 mg-lg-t-0-force"></div>
+                            <div class="row mt-1">
+                                <div class="col-6">
                                     <button type="button" class="btn btn-success" aria-label="Left Align" id="addqproduct">
                                         <i class="fa fa-plus-square"></i> Add Equipment
                                     </button>
                                 </div>
-                                <div class="col-md-4 col-xs-5 invoice-block pull-right">
-                                    <div class="edit-form-btn mt-2">
-                                        {{ link_to_route('biller.rjcs.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
-                                        <div class="clearfix"></div>
-                                    </div>
+                                <div class="col-5">
+                                    {{ Form::submit(trans('buttons.general.crud.update') . ' Report', ['class' => 'btn btn-primary btn-lg mt-3 float-right']) }}
                                 </div>
                             </div>
                         </div>
