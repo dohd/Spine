@@ -5,6 +5,7 @@ namespace App\Models\quote\Traits;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\lead\Lead;
+use App\Models\lpo\Lpo;
 use App\Models\project\ProjectQuote;
 use App\Models\verifiedjcs\VerifiedJc;
 
@@ -13,6 +14,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function lpo()
+    {
+        return $this->belongsTo(Lpo::class);
+    }
+
     public function project_quote()
     {
         return $this->hasOne(ProjectQuote::class);
