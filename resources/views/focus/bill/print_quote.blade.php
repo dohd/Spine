@@ -179,11 +179,25 @@
 		<tr>
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name :</b> {{ $invoice->client->company }}<br>
-				<b>Branch :</b> {{ $invoice->branch->name }}<br>
-				<b>Address :</b> {{ $invoice->client->address }}<br>
-				<b>Email :</b> {{ $invoice->client->email }}<br>
-				<b>Cell :</b> {{ $invoice->client->phone }}<br>
+				@php
+					$clientname = $invoice->lead->client_name;
+					$branch = 'Head Office';
+					$address = $invoice->lead->client_address;
+					$email = $invoice->lead->client_email;
+					$cell = $invoice->lead->client_contact;
+					if ($invoice->client) {
+						$clientname = $invoice->client->company;						
+						$branch = $invoice->branch->name;
+						$address = $invoice->client->address;
+						$email = $invoice->client->email;
+						$cell = $invoice->client->phone;
+					}					
+				@endphp
+				<b>Client Name :</b> {{ $clientname }}<br>
+				<b>Branch :</b> {{ $branch }}<br>
+				<b>Address :</b> {{ $address }}<br>
+				<b>Email :</b> {{ $email }}<br>
+				<b>Cell :</b> {{ $cell }}<br>
 				<b>Attention :</b> {{ $invoice->attention }}<br>
 			</td>
 			<td width="5%">&nbsp;</td>
