@@ -235,8 +235,8 @@
             processResults: function(data) {
                 return {
                     results: data.map(v => ({ 
-                        id: item.id, 
-                        text: `${item.name} - ${item.company}`,
+                        id: v.id, 
+                        text: `${v.name} - ${v.company}`,
                     }))
                 };
             },
