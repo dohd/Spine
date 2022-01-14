@@ -36,10 +36,10 @@
                                 <div class="row">
                                     <div class="col-md-2">{{ trans('general.search_date')}} </div>
                                     <div class="col-md-2">
-                                        <input type="text" name="start_date" id="start_date" data-toggle="datepicker" class="date30 form-control form-control-sm" autocomplete="off" />
+                                        <input type="text" name="start_date" id="start_date" class="date30 form-control form-control-sm datepicker" />
                                     </div>
                                     <div class="col-md-2">
-                                        <input type="text" name="end_date" id="end_date" class="form-control form-control-sm" data-toggle="datepicker" autocomplete="off" />
+                                        <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker" />
                                     </div>
                                     <div class="col-md-2">
                                         <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
@@ -87,35 +87,36 @@
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $(function() {
-        const delay = @json(config('master.delay'));
-        setTimeout(() => draw_data(), delay);
-        // access td after dataTable has been drawn
-        setTimeout(() => {
-            const queryString = location.search;
-            $('#quotes-table tbody tr').each(function() {
-                const $a = $(this).find('td').eq(9).find('a').eq(2);
-                const href = $a.attr('href');
-                if (queryString.includes('page=pi')) {
-                    $a.attr('href', href + queryString);
-                }
-            });
-        }, delay+300);
+    const time = @json(config('master.delay'));
+    setTimeout(() => draw_data(), time);
 
-        $('#search').click(function() {
-            var start_date = $('#start_date').val();
-            var end_date = $('#end_date').val();
-            if (start_date && end_date) {
-                $('#quotes-table').DataTable().destroy();
-                return draw_data(start_date, end_date);
-            } 
-            alert("Date range is Required");            
+    // Update view button link td after dataTable has been drawn
+    setTimeout(() => {
+        const queryString = location.search;
+        $('#quotes-table tbody tr').each(function() {
+            const $a = $(this).find('td').eq(9).find('a').eq(2);
+            const href = $a.attr('href');
+            if (queryString.includes('page=pi')) {
+                $a.attr('href', href + queryString);
+            }
         });
+    }, time+300);
 
-        $('[data-toggle="datepicker"]')
-            .datepicker({ format: "{{ config('core.user_date_format') }}" })
-            .datepicker('setDate', new Date());
+    // on clicking search by date
+    $('#search').click(function() {
+        var start_date = $('#start_date').val();
+        var end_date = $('#end_date').val();
+        if (start_date && end_date) {
+            $('#quotes-table').DataTable().destroy();
+            return draw_data(start_date, end_date);
+        } 
+        alert("Date range is Required");            
     });
+
+    // Initialize datepicker
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('#start_date').datepicker('setDate', new Date());
+    $('#end_date').datepicker('setDate', new Date());
 
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
