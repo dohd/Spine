@@ -68,9 +68,7 @@ class CustomersController extends Controller
 
         $segment = array();
         if (isset($input['rel_id'])) {
-
             $segment = CustomerGroupEntry::where('customer_group_id', '=', $input['rel_id'])->first();
-
         }
 
         return new ViewResponse('focus.customers.index', compact('input', 'segment'));
@@ -284,12 +282,20 @@ class CustomersController extends Controller
         if (count($user) > 0) return view('focus.customers.partials.search')->with(compact('user'));
     }
 
+    /**
+     * Fetch cutomers for dropdown select options
+     */
     public function select(Request $request)
     {
-        if (!access()->allow('crm')) return false;
-        $q = $request->post('person');
-        $user = \App\Models\customer\Customer::with('primary_group')->where('name', 'LIKE', '%' . @$q['term'] . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . @$q['term'] . '')->orWhere('company', 'LIKE', '%' . @$q['term'] . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email','company'));
-        if (count($user) > 0) return json_encode($user);
+        if (!access()->allow('crm')) 
+            return response()->json(['message' => 'Insufficient privileges'], 403);
+
+        $val = $request->post('person');
+        $customers = Customer::with('primary_group')
+            ->where('active', 1)
+            ->get(['id', 'name', 'phone', 'address', 'city', 'email','company']);
+
+        return response()->json($customers);
     }
 
     public function active(ManageCustomerRequest $request)
