@@ -256,7 +256,8 @@ Route::group(['namespace' => 'projectequipment'], function () {
 });
 Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/convert', 'QuotesController@convert')->name('quotes.convert');
-    Route::post('quotes/quotes_status', 'QuotesController@update_status')->name('quotes.bill_status');
+    Route::post('quotes/approve_quote/{quote}', 'QuotesController@approve_quote')->name('quotes.approve_quote');
+   
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
     Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');
     Route::get('quotes/verify/{quote}', 'QuotesController@verify')->name('quotes.verify');
