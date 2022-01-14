@@ -65,12 +65,14 @@ class CustomersController extends Controller
     public function index(ManageCustomerRequest $request)
     {
         $input = $request->only('rel_type', 'rel_id', 'due_filter');
-        $segment = false;
+
+        $segment = array();
         if (isset($input['rel_id'])) {
 
             $segment = CustomerGroupEntry::where('customer_group_id', '=', $input['rel_id'])->first();
 
         }
+
         return new ViewResponse('focus.customers.index', compact('input', 'segment'));
     }
 
