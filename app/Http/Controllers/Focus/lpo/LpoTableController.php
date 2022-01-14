@@ -68,7 +68,7 @@ class LpoTableController extends Controller
                 $tids = array();
                 $subtotal = 0;                
                 foreach ($lpo->quotes as $quote) {
-                    if ($quote->approved_date && $quote->verified == 'No') {
+                    if ($quote->status === 'approved' && $quote->verified === 'No') {
                         $tid = sprintf('%04d', $quote->tid);
                         $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
                         $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
