@@ -146,13 +146,13 @@
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate']) }}
                                         </div>
                                     </div>                                                                      
                                 </div>
@@ -288,8 +288,7 @@
                                     </div>
                                     @isset($copy_from_pi)
                                         <input type="hidden" name="bank_id" value="0">                                 
-                                    @endisset
-                                     
+                                    @endisset                                     
                                     @if (isset($last_quote))
                                         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
                                     @else
@@ -318,41 +317,30 @@
     $('#pricing').val("{{ $quote->pricing }}");
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
-    $('#term_id').val("{{ $quote->term_id }}");
-    if (@json($quote->revision)) $('#revision').val("{{ $quote->revision }}");
-    
+    $('#term_id').val("{{ $quote->term_id }}");    
     $('#tax_id').val("{{ $quote->tax_id }}");
     $('#client_ref').val("{{ $quote->client_ref }}");
     $('#tax_format').val("{{ $quote->tax_format }}");
+    if (@json($quote->revision)) $('#revision').val("{{ $quote->revision }}");
 
+    // set quote print type
     const printType = @json($quote->print_type);
-    if (printType === 'inclusive') {
-        $('#colorCheck6').prop('checked', true);
-    } else if (printType === 'exclusive') {
-        $('#colorCheck7').prop('checked', true);
-    }
+    if (printType === 'inclusive') $('#colorCheck6').prop('checked', true);    
+    if (printType === 'exclusive') $('#colorCheck7').prop('checked', true);    
 
     // Check if radio button is checked
     $('input[type="radio"]').change(function() {
         const $span = $('#tax-label').find('span').eq(1);
         if ($(this).is(':checked')) {
-            if ($(this).val() === 'exclusive') {
-                $span.text('VAT-Exclusive (print type)');
-            } else if ($(this).val() === 'inclusive') {
-                $span.text('VAT-Inclusive (print type)');
-            }
+            if ($(this).val() === 'exclusive') $span.text('VAT-Exclusive (print type)');
+            if ($(this).val() === 'inclusive') $span.text('VAT-Inclusive (print type)');            
         }
     });
 
-    // initialize Reference Date datepicker
-    $('[data-toggle="datepicker-rd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date("{{ $quote->reference_date }}"));
-
-    // initialize Quote Date datepicker
-    $('[data-toggle="datepicker-qd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+    // initialize datepicker
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('#referencedate').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
+    $('#invoicedate').datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
     
     // on selecting lead
     const leads = @json($leads);
@@ -394,8 +382,8 @@
     function productRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
@@ -415,8 +403,8 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading" required></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">

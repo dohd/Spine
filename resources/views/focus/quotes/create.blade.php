@@ -71,7 +71,7 @@
                                             <input type="hidden" id="document_type" value="QUOTE" name="document_type">
                                         </div>
                                     </div>
-                                    <div class="col-sm-3"><label for="pricing" class="caption"> Pricing</label>
+                                    <div class="col-sm-3"><label for="pricing" class="caption">Pricing</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
                                             </div>
@@ -126,13 +126,13 @@
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate']) }}
                                         </div>
                                     </div>                                    
                                 </div>
@@ -140,8 +140,8 @@
                                     <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control round  select-box" name="validity" id="validity" data-placeholder="{{trans('tasks.assign')}}">
-                                                <option value="0" selected>On Reciept</option>
+                                            <select class="form-control round" name="validity" id="validity">
+                                                <option value="0" selected>On Receipt</option>
                                                 <option value="14">Valid For 14 Days</option>
                                                 <option value="30">Valid For 30 Days</option>
                                                 <option value="45">Valid For 45 Days</option>
@@ -153,10 +153,11 @@
                                     <div class="col-sm-4"><label for="ref_type" class="caption">Currency <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  select-box " name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
-                                                <option value="0" selected>Default</option>
+                                            <select class="form-control" name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
                                                 @foreach($currencies as $currency)
-                                                    <option value="{{ $currency->id }}">{{ $currency->symbol }} - {{ $currency->code }}</option>
+                                                    <option value="{{ $currency->id }}" {{ $currency->id === 1? 'selected' : '' }}>
+                                                        {{ $currency->symbol }} - {{ $currency->code }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -172,7 +173,7 @@
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="term_id" name="term_id" class="form-control round  selectpicker" required>
+                                            <select id="term_id" name="term_id" class="form-control round" required>
                                                 <option value="0">-- Select Term --</option>
                                                 @foreach($terms as $term)
                                                     <option value="{{ $term->id }}">{{ $term->title }}</option>
@@ -266,15 +267,10 @@
 
 @section('extra-scripts')
 <script>    
-    // initialize Reference Date datepicker
-    $('[data-toggle="datepicker-rd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
-
-    // initialize Quote Date datepicker
-    $('[data-toggle="datepicker-qd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
+    // initialize datepicker
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('#referencedate').datepicker('setDate', new Date());
+    $('#invoicedate').datepicker('setDate', new Date());
 
     // on selecting lead
     const leads = @json($leads);
@@ -328,7 +324,7 @@
     function productRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
@@ -348,7 +344,7 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td><input type="text" class="form-control" name="title_numbering[]" id="numbering-${val}" required></td>
                 <td colspan="6"><input type="text"  class="form-control" name="product_title[]" placeholder="Enter Title Or Heading " titlename-${val}" required></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}">

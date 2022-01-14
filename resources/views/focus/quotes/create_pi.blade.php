@@ -139,7 +139,7 @@
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
                                         </div>
                                     </div>                                                                     
                                 </div>
@@ -161,9 +161,10 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  select-box " name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
-                                                <option value="0" selected>Default</option>
                                                 @foreach($currencies as $currency)
-                                                    <option value="{{ $currency->id }}">{{ $currency->symbol }} - {{ $currency->code }}</option>
+                                                    <option value="{{ $currency->id }}" {{ $currency->id === 1? 'selected' : '' }}>
+                                                        {{ $currency->symbol }} - {{ $currency->code }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -279,15 +280,10 @@
 
 @section('extra-scripts')
 <script>    
-    // initialize Reference Date datepicker
-    $('[data-toggle="datepicker-rd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
-
-    // initialize Quote Date datepicker
-    $('[data-toggle="datepicker-qd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
+    // initialize datepicker
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('#referencedate').datepicker('setDate', new Date());
+    $('#invoicedate').datepicker('setDate', new Date());
 
     // on selecting lead
     const leads = @json($leads);
@@ -341,7 +337,7 @@
     function productRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
@@ -361,7 +357,7 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
                 <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}" required></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}">

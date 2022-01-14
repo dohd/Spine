@@ -7,10 +7,6 @@
 
 @section ('title', 'PI Management' . $part_title )
 
-@section('page-header')
-    <h1>Edit PI</h1>
-@endsection
-
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
@@ -153,13 +149,13 @@
                                         <label for="invocieno" class="caption">Djc Reference</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
+                                            {{ Form::text('reference', null, ['class' => 'form-control round datepicker', 'id' => 'reference']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'), 'data-toggle'=>'datepicker-rd', 'autocomplete'=>'false']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
                                         </div>
                                     </div>   
                                     <div class="col-sm-4"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
@@ -202,7 +198,7 @@
                                             <select id="term_id" name="term_id" class="form-control round  selectpicker required">
                                                 <option value="0">No Terms</option>
                                                 @foreach($terms as $term)
-                                                    <option value="{{$term->id}}">{{$term->title}}</option>
+                                                    <option value="{{ $term->id }}">{{$term->title}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -221,7 +217,7 @@
                                     <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate']) }}
                                         </div>
                                     </div>
                                     @if (!isset($last_quote))
@@ -330,20 +326,15 @@
     $('#validity').val("{{ $quote->validity }}");
     $('#currency').val("{{ $quote->currency }}");
     $('#term_id').val("{{ $quote->term_id }}");
-    if (@json($quote->revision)) $('#revision').val("{{ $quote->revision }}");
     $('#tax_id').val("{{ $quote->tax_id }}");
     $('#client_ref').val("{{ $quote->client_ref }}");
     $('#tax_format').val("{{ $quote->tax_format }}");
+    if (@json($quote->revision)) $('#revision').val("{{ $quote->revision }}");
 
-    // initialize Reference Date datepicker
-    $('[data-toggle="datepicker-rd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
-
-    // initialize Quote Date datepicker
-    $('[data-toggle="datepicker-qd"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
+    // initialize datepicker
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('#referencedate').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
+    $('#invoicedate').datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
 
     // on selecting lead
     const leads = @json($leads);
@@ -396,8 +387,8 @@
     function productRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id="itemname-${val}"></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id="itemname-${val}" required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
                 <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
@@ -417,8 +408,8 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading" required></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
