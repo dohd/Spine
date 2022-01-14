@@ -170,7 +170,7 @@
                             </div>
                         </div>
                     </div>
-                    {!! custom_fields_view(2,$quote['id']) !!}
+                    
                     <!-- Invoice Footer -->
                     <div id="invoice-footer">
                         <div class="row">
@@ -184,22 +184,21 @@
                                     <span class="text-muted">Approval Method :</span>
                                     <span class=" text-danger">{{$quote['approved_method']}}</span>
                                 </h5>
+                                <hr>
+
+                                @isset($quote->lpo)
                                 <p>
-                                    <span class="text-muted">LPO Date :</span> 
-                                    <span class=" text-danger">{{dateFormat($quote['lpo_date'])}}</span> 
-                                    <span class="text-muted">LPO Number :</span> 
-                                    <span class=" text-danger">{{$quote['lpo_number']}}</span> 
-                                    <span class="text-muted">LPO Amount :</span>
-                                    <span class=" text-danger">{{numberFormat($quote['lpo_amount'])}}</span>
-                                </p>
+                                    LPO Date : <span class="text-danger mr-1">{{ dateFormat($quote->lpo->date) }}</span>
+                                    LPO Number : <span class="text-danger mr-1">{{ $quote->lpo->lpo_no }}</span>                                     
+                                    LPO Amount : <span class="text-danger">{{ number_format($quote->lpo->amount, 2) }}</span>
+                                    <br>
+                                    LPO Remark: <span class="text-danger">{{ $quote->lpo->remark }}</span>                             
+                                </p>                                
+                               @endisset
                             </div>
-                            <div class="col-md-7 col-sm-12">
-                                <h5>{{trans('general.payment_terms')}}</h5><hr>
-                                <h5>{{@$quote->term->title}}</h5>
-                                <p>{!! @$quote->term->terms !!}</p>
-                            </div>
+
                             <div class="col-md-5 col-sm-12 text-center">
-                                @if ($quote['status'] != 'cancelled') 
+                                @if ($quote->status !== 'cancelled') 
                                     <a href="#sendEmail" data-toggle="modal" data-remote="false" data-type="6" data-type1="proposal" class="btn btn-primary btn-lg my-1 send_bill">
                                         <i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
                                     </a>
@@ -316,7 +315,7 @@
             $form.find('label[for=approved-by]').text('Approved By');
             $form.find('label[for=approval-date]').text('Approval Date');
             $('#approvedby').attr('placeholder', 'Approved By');
-            $('#approvedmethod').attr('readonly', false).off('mousedown');
+            $('#approvedmethod').attr('disabled', false).off('mousedown');
             $('#approveddate').attr('readonly', false).off('mousedown');
             $('#btn_approve').text('Approve');
 
@@ -326,7 +325,7 @@
                 $('#approvedby').attr('placeholder', 'Called By');
                 $('#btn_approve').text('Cancel');
 
-                $('#approvedmethod').attr('readonly', true).val('None')
+                $('#approvedmethod').attr('disabled', true)
                     .on('mousedown', function(e) { e.preventDefault(); });          
                 $('#approveddate').attr('readonly', true).datepicker('setDate', new Date())
                     .on('mousedown', function(e) { e.preventDefault(); });   
