@@ -2,31 +2,31 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">{{trans('general.change_status')}}</h4>
+                <h4 class="modal-title">Approval</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="form_model_1">
+                {{ Form::open(['route' => ['biller.quotes.approve_quote', $quote], 'method' => 'POST', 'id' => 'form-approve']) }}
                     <div class="row">
                         <div class="col mb-1">
                             <label for="status">{{trans('general.mark_as')}}</label>
                             <select name="status" class="form-control mb-1" required>
                                 <option value="0">-- Select Status --</option>
-                                <option value="pending">{{trans('payments.pending')}}</option>
-                                <option value="approved">{{trans('payments.approved')}}</option>
-                                <option value="cancelled">{{trans('payments.canceled')}}</option>
+                                <option value="pending">{{ trans('payments.pending') }}</option>
+                                <option value="approved">{{ trans('payments.approved') }}</option>
+                                <option value="cancelled">{{ trans('payments.canceled') }}</option>
                             </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-1"><label for="approval-date">Approval Date</label>
-                            <input type="text" class="form-control mb-1" name="approved_date" data-toggle="datepicker" placeholder="{{trans('general.payment_date')}}" required>
+                            <input type="text" class="form-control mb-1 datepicker" name="approved_date" id="approveddate" required />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-1"><label for="approval-method">Approval Method</label>
-                            <select name="approved_method" class="form-control mb-1" required>
-                                <option value="0">-- Select Method --</option>
+                            <select class="form-control mb-1" name="approved_method" id="approvedmethod" required>
+                                <option value="None">-- Select Method --</option>
                                 <option value="Email">Email</option>
                                 <option value="SMS">SMS</option>
                                 <option value="Whatsapp">Whatsapp</option>
@@ -38,22 +38,19 @@
                     </div>
                     <div class="row">
                         <div class="col mb-1"><label for="approved-by">Approved By</label>
-                            <input type="text" class="form-control" name="approved_by" value="{{ @$words['pay_note']}}" placeholder="Approved By" required>
+                            <input type="text" class="form-control" name="approved_by" id="approvedby" placeholder="Approved By" required />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-1"><label for="note">{{trans('general.note')}}</label>
-                            <input type="text" class="form-control" name="approval_note" placeholder="{{trans('general.note')}}" value="{{ @$words['pay_note']}}">
+                            <input type="text" class="form-control" name="approval_note" placeholder="{{trans('general.note')}}" required />
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="hidden" name="bill_id" value="{{$invoice['id']}}">
-                        <input type="hidden" name="bill_type" value="{{$invoice['bill_type']}}">
-                        <button type="button" class="btn btn-warning" data-dismiss="modal">{{trans('general.close')}}</button>
-                        <input type="hidden" id="action-url_1" value="{{route('biller.quotes.bill_status')}}">
-                        <button type="button" class="btn btn-primary submit_model" id="submit_model_1" data-itemid="1">{{trans('general.change_status')}}</button>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">{{trans('general.close')}}</button>                       
+                        <button type="submit" class="btn btn-primary" id="btn_approve">Approve</button> 
                     </div>
-                </form>
+                {{ Form::close() }}
             </div>
         </div>
     </div>
