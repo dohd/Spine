@@ -45,40 +45,25 @@
 
                     <div id="invoice-customer-details" class="row pt-2">                        
                         <div class="col-md-6 col-sm-12 text-center text-md-left">
-                            @php                        
-                                $customername = $quote->client_name;
-                                $email = $quote->client_email;
-                                $cell = $quote->client_contact;
-                                $branchname = "";
-                                $adrress = "";
-                                if ($quote->customer_id) {
-                                    $customername = $quote->customer->name;                                    
-                                    $adrress = $quote->customer->address;
-                                    $email = $quote->customer->email;
-                                    $cell = $quote->customer->phone;
-                                    if ($quote->customer_branch) 
-                                        $branchname = $quote->customer_branch->name;
-                                } 
-                                if ($quote->lead_id) {                                    
-                                    $customername = $quote->lead->client_name;
-                                    $branchname = "";
-                                    $adrress = "";
-                                    $email = $quote->lead->client_email;
-                                    $cell = $quote->lead->client_contact; 
-                                    if($quote->lead->client_status == 'customer') {
-                                        $customername = $quote->client->name ;
-                                        $branchname = $quote->branch->name ;
-                                        $adrress = $quote->client->address;
-                                        $email = @$quote->client->email ;
-                                        $cell = $quote->client->phone;
-                                    }
-                                }
+                            @php
+                                $clientname = $quote->lead->client_name;
+                                $branch = 'Head Office';
+                                $address = $quote->lead->client_address;
+                                $email = $quote->lead->client_email;
+                                $cell = $quote->lead->client_contact;
+                                if ($quote->client) {
+                                    $clientname = $quote->client->company;						
+                                    $branch = $quote->branch->name;
+                                    $address = $quote->client->address;
+                                    $email = $quote->client->email;
+                                    $cell = $quote->client->phone;
+                                }					
                             @endphp
                             <span class="text-muted"><b>{{ trans('invoices.bill_to') }}</b></span>
                             <ul class="px-0 list-unstyled">
-                                <li><i>{{ $customername }},</i></li>
-                                <li><i>{{ $branchname }},</i></li>
-                                <li><i>{{ $adrress }},</i></li>
+                                <li><i>{{ $clientname }},</i></li>
+                                <li><i>{{ $branch }},</i></li>
+                                <li><i>{{ $address }},</i></li>
                                 <li><i>{{ $email }},</i></li>
                                 <li><i>{{ $cell }}</i></li>                                
                             </ul>
@@ -214,7 +199,7 @@
                                 <p>{!! @$quote->term->terms !!}</p>
                             </div>
                             <div class="col-md-5 col-sm-12 text-center">
-                                @if ($quote['status'] != 'canceled') 
+                                @if ($quote['status'] != 'cancelled') 
                                     <a href="#sendEmail" data-toggle="modal" data-remote="false" data-type="6" data-type1="proposal" class="btn btn-primary btn-lg my-1 send_bill">
                                         <i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
                                     </a>
@@ -282,7 +267,7 @@
     }
     
     // initialize datepicker
-    $('[data-toggle="datepicker"]')
+    $('.datepicker')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date());
 
@@ -322,13 +307,29 @@
         });
     });
 
-    // On Change Status modal
+    // On showing Approval Model
     $('#pop_model_1').on('shown.bs.modal', function() { 
-        $form = $(this).find('#form_model_1');
+        $form = $(this).find('#form-approve');
+
+        // On clicking Mark As select dropdown
         $form.find('select[name=status]').click(function() {
             $form.find('label[for=approved-by]').text('Approved By');
+            $form.find('label[for=approval-date]').text('Approval Date');
+            $('#approvedby').attr('placeholder', 'Approved By');
+            $('#approvedmethod').attr('readonly', false).off('mousedown');
+            $('#approveddate').attr('readonly', false).off('mousedown');
+            $('#btn_approve').text('Approve');
+
             if ($(this).val() === 'cancelled') {
                 $form.find('label[for=approved-by]').text('Cancelled By');
+                $form.find('label[for=approval-date]').text('Cancel Date');
+                $('#approvedby').attr('placeholder', 'Called By');
+                $('#btn_approve').text('Cancel');
+
+                $('#approvedmethod').attr('readonly', true).val('None')
+                    .on('mousedown', function(e) { e.preventDefault(); });          
+                $('#approveddate').attr('readonly', true).datepicker('setDate', new Date())
+                    .on('mousedown', function(e) { e.preventDefault(); });   
             }
         });
     });
