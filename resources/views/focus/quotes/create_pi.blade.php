@@ -75,14 +75,14 @@
                                         <div class='col m-1'>
                                             {{ Form::label('method', 'Print Type', ['class' => 'col-12 control-label']) }}
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" value="inclusive" id="colorCheck6">
+                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" value="inclusive" id="colorCheck6" />
                                                 <label class="custom-control-label" for="colorCheck6">VAT-Inclusive</label>
                                             </div>
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7" checked>
+                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7" checked />
                                                 <label class="custom-control-label" for="colorCheck7">VAT-Exclusive</label>
                                             </div>
-                                            <input type="hidden" id="document_type" value="QUOTE" name="document_type">
+                                            <input type="hidden" id="document_type" value="QUOTE" name="document_type" />
                                         </div>
                                     </div>
                                     <div class="col-sm-3"><label for="pricing" class="caption">Pricing</label>
@@ -101,7 +101,7 @@
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                                             {{ Form::text('tid', 'PI-' . sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
-                                            <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}">
+                                            <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}" />
                                         </div>
                                     </div>
                                 </div>
@@ -110,12 +110,12 @@
                                         <label for="attention" class="caption">Attention</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('attention', null, ['class' => 'form-control round required', 'placeholder' => 'Attention','autocomplete'=>'false','id'=>'attention']) }}
+                                            {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention', 'required']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="prepared_by" class="caption">Prepared By</label>
-                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round required', 'placeholder' => 'Prepared By','autocomplete'=>'false', 'id'=>'prepared_by']) }}
+                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepared By', 'id'=>'prepared_by', 'required']) }}
                                     </div>
                                 </div>
                             </div>
@@ -133,13 +133,13 @@
                                         <label for="invocieno" class="caption">Djc Reference</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
+                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference', 'required']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
+                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate', 'required']) }}
                                         </div>
                                     </div>                                                                     
                                 </div>
@@ -196,7 +196,7 @@
                                     <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker-qd','autocomplete'=>'false']) }}
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate', 'required']) }}
                                         </div>
                                     </div> 
                                     <div class="col-sm-4"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
@@ -212,7 +212,7 @@
                     <div class="form-group row">
                         <div class="col-sm-12">
                             <label for="subject" class="caption">Subject / Title</label>
-                            {{ Form::text('notes', null, ['class' => 'form-control round required', 'placeholder' => 'Subject Or Title','autocomplete'=>'false','id'=>'subject']) }}
+                            {{ Form::text('notes', null, ['class' => 'form-control round', 'placeholder' => 'Subject Or Title', 'id'=>'subject', 'required']) }}
                         </div>
                     </div>
                     <div>                            
@@ -337,17 +337,17 @@
     function productRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required /></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required /></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" /></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" /></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" readonly /></td>
                 <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="product_id[]" id="productid-${val}" value="0">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${val}">
+                <input type="hidden" name="product_id[]" id="productid-${val}" value="0" />
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}" />
+                <input type="hidden" name="a_type[]" value="1" id="atype-${val}" />
             </tr>
         `;
     }
@@ -357,16 +357,16 @@
     function productTitleRow(val) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}" required></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required /></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}" required /></td>
                 <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}">
-                <input type="hidden" name="unit[]" value="">
-                <input type="hidden" name="product_qty[]" value="0">
-                <input type="hidden" name="product_price[]" value="0">
-                <input type="hidden" name="product_subtotal[]" value="0">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="a_type[]" value="2" id="atype-${val}">
+                <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}" />
+                <input type="hidden" name="unit[]" />
+                <input type="hidden" name="product_qty[]" value="0" />
+                <input type="hidden" name="product_price[]" value="0" />
+                <input type="hidden" name="product_subtotal[]" value="0" />
+                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}" />
+                <input type="hidden" name="a_type[]" value="2" id="atype-${val}" />
             </tr>
         `;
     }
