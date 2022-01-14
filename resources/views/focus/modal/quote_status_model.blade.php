@@ -11,7 +11,7 @@
                         <div class="col mb-1">
                             <label for="status">{{trans('general.mark_as')}}</label>
                             <select name="status" class="form-control mb-1" required>
-                                <option value="0">-- Select Status --</option>
+                                <option value="">-- Select Status --</option>
                                 <option value="pending">{{ trans('payments.pending') }}</option>
                                 <option value="approved">{{ trans('payments.approved') }}</option>
                                 <option value="cancelled">{{ trans('payments.canceled') }}</option>
@@ -26,7 +26,7 @@
                     <div class="row">
                         <div class="col mb-1"><label for="approval-method">Approval Method</label>
                             <select class="form-control mb-1" name="approved_method" id="approvedmethod" required>
-                                <option value="None">-- Select Method --</option>
+                                <option value="">-- Select Method --</option>
                                 <option value="Email">Email</option>
                                 <option value="SMS">SMS</option>
                                 <option value="Whatsapp">Whatsapp</option>
