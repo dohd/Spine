@@ -68,7 +68,11 @@
                     <tr>
                         <th>Client Email</th>
                         <td>{{ $lead->customer? $lead->customer->email : $lead->client_email }}</td>
-                    </tr>  
+                    </tr> 
+                    <tr>
+                        <th>Client Address</th>
+                        <td>{{ $lead->customer? $lead->customer->address : $lead->client_address }}</td>
+                    </tr>   
                     <tr><th></th></tr>                                     
                     <tr>
                         <th>Date of Request</th>
