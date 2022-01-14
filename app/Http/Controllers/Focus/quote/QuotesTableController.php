@@ -62,10 +62,12 @@ class QuotesTableController extends Controller
                 return '<a class="font-weight-bold" href="' . $link . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
-                if (isset($quote->customer) && isset($quote->lead->branch)) {
-                    return $quote->customer->name.' - '.$quote->lead->branch->name.' '
-                        .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
+                $client_name = $quote->customer ? $quote->customer->name : '';
+                $branch_name = $quote->branch ? $quote->branch->name : '';
+                if ($client_name && $branch_name) {
+                    return $client_name.' - '.$branch_name.' '.'<a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
                 }
+
                 return $quote->lead->client_name;
             })
             ->addColumn('created_at', function ($quote) {
