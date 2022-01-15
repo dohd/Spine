@@ -2,89 +2,56 @@
 
 @section ('title', 'Create Project Invoice')
 
-@section('page-header')
-    <h1>Create Project Invoice</h1>
-@endsection
-
 @section('content')
     <div class="">
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">Create Project Invoice</h4>
-                 
+                    <h4 class="content-header-title mb-0">Create Project Invoice</h4>                 
                 </div>
                 <div class="content-header-right col-md-6 col-12">
-
                     <div class="media width-250 float-right">
-
                         <div class="media-body media-right text-right">
-                            @include('focus.customers.partials.customers-header-buttons')
+                           {{-- @include('focus.invoices.partials.invoices-header-buttons') --}}
                         </div>
                     </div>
                 </div>
-            </div>
-
-          
+            </div>          
 
             <div class="content-body">
-
                 <div class="row">
                     <div class="col-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="row">
-
                                 <div class="col-sm-3">
-
                                     <div class="form-group">
-
                                         {{ Form::open(['route' => 'biller.invoices.create_project_invoice', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'mass_add_form']) }}
                                         {!! Form::hidden('selected_products', null, ['id' => 'selected_products']); !!}
-                                        {!! Form::hidden('customer', null, ['id' => 'customer']); !!}
-                          
-                                       
-                                       {!! Form::submit('Add Selected', array('class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected')) !!}    
-                                          {{ Form::close() }}
-                                      
-                                  
-
-
-                                  
+                                        {!! Form::hidden('customer', null, ['id' => 'customer']); !!}                                       
+                                        {!! Form::submit('Add Selected', array('class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected')) !!}    
+                                        {{ Form::close() }}
                                     </div>
                                 </div>
-
                             <div class="col-sm-3">
                             <div class="form-group">
-                                
                                 <label><strong>Customer :</strong></label>
                                 {!! Form::select('customer_id', $customers,  null, ['placeholder' => 'All Customers', 'id'=>'customer_id','class' => 'form-control']); !!}
-
-
-                              
                             </div>
                         </div>
 
                         <div class="col-sm-3">
-                            
                             <div class="form-group">
                                 <label><strong>LPO :</strong></label>
-
                                 {!! Form::select('lpo_number', $lpos,  null, ['placeholder' => 'All LPOS', 'id'=>'lpo_number','class' => 'form-control']); !!}
-                           
                             </div>
-
                         </div>
-
-                      
 
                         <div class="col-sm-3">
                             
                             <div class="form-group">
                                 <label><strong>Project :</strong></label>
-
                                 {!! Form::select('project_id', $projects,  null, ['placeholder' => 'All Projects', 'id'=>'project_id','class' => 'form-control']); !!}
-                            
                             </div>
                         </div>
                             </div>
@@ -96,9 +63,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-
                             <div class="card-content">
-
                                 <div class="card-body">
                                     <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
@@ -107,16 +72,11 @@
                                                 <th>{{ trans('customers.customer') }}</th>
                                                 <th>Quote / PI Date</th>
                                                 <th>LPO No</th>
-                                               
-                                                
                                                 <th># {{ trans('quotes.quote') }} / PI</th>
                                                 <th>Title</th>                                            
                                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
                                                 <th>Verified (Ksh.)</th>
                                                 <th>Project No</th>
-                                              
-                                               
-                                              
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -126,8 +86,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -135,12 +93,7 @@
             </div>
         </div>
     </div>
-
-  
-
-
 @endsection
-
 
 @section('after-scripts')
     {{-- For DataTables --}}
