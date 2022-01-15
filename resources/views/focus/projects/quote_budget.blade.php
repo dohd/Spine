@@ -32,10 +32,7 @@
                 <div class="form-group row">
                     <div class="col-12">
                         <h3 class="title">
-                            @php
-                                $title = $quote->bank_id ? 'Project Proforma Invoice' : 'Project Quote';
-                            @endphp
-                            {{ $title }}
+                            {{ $quote->bank_id ? 'Project Proforma Invoice' : 'Project Quote' }}
                         </h3>                                        
                     </div>
                 </div>
@@ -309,6 +306,7 @@
         `;
     }
 
+    // Assign Product row values 
     function assignVal(i, v) {
         $('#quote-item tbody').append(productRow(i));
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
@@ -318,6 +316,7 @@
         $('#itemname-'+i).val(v.product_name);
         $('#unit-'+i).val(v.unit);                
         $('#amount-'+i).val(parseFloat(v.product_qty));
+        $('#newqty-'+i).val(parseFloat(v.product_qty));
 
         if (v.new_qty && v.price) {
             $('#newqty-'+i).val(v.new_qty);
