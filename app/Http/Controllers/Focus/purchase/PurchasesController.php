@@ -89,7 +89,6 @@ class PurchasesController extends Controller
             }
         }
 
-
         return new ViewResponse('focus.purchases.index', compact('input', 'segment', 'words'));
     }
 
