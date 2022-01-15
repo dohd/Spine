@@ -369,37 +369,31 @@ class QuotesController extends Controller
     }
 
     /**
-     * Update Quote Approval Status
+     * Update Quote Approval Status 
      */
     public function approve_quote(ManageQuoteRequest $request, Quote $quote)
     {
         // extract request input fields
-        $data = $request->only(['status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
-        $data['approved_date'] = date_for_database($data['approved_date']);
+        $input = $request->only(['status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
 
-        $quote->update($data);
+        // update
+        $input['approved_date'] = date_for_database($input['approved_date']);
+        $quote->update($input);
 
         return new RedirectResponse(route('biller.quotes.show', [$quote]), ['flash_success' => 'Approval status updated successfully']);
     }
 
     /**
-     * Add LPO to quote
+     * Update Quote LPO Details
      */
     public function update_lpo(ManageQuoteRequest $request)
     {
         // extract input fields
-        $input = $request->only(['bill_id', 'lpo_number', 'lpo_id', 'lpo_amount', 'lpo_date']);
+        $input = $request->only(['bill_id', 'lpo_id']);
 
-        // transform data
-        $input = array_replace($input, [
-            'lpo_amount' => numberClean($input['lpo_amount']),
-            'lpo_date' => date_for_database($input['lpo_date'])
-        ]);
+        // update 
+        Quote::find($input['bill_id'])->update($input['lpo_id']);
 
-        $quote = Quote::find($input['bill_id']);
-        unset($input['bill_id']);
-        $quote->update($input);
-
-        return json_encode(['status' => 'Success', 'message' => 'Record Updated Successfully', 'refresh' => 1 ]);
+        return response()->json(['status' => 'Success', 'message' => 'Record Updated Successfully', 'refresh' => 1 ]);
     }
 }
