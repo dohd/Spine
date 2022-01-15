@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\purchase;
 
+use App\Models\project\Budget;
 use App\Models\purchase\Purchase;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -16,11 +17,21 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-          //$equipment=Equipment::all();
-          $last_id=Purchase::orderBy('id', 'desc')->first();
-            return view('focus.purchases.create')->with(array('last_id'=>$last_id))->with(bill_helper(3,9));
+        $bill_types = bill_helper(3, 9);
 
+        // extract projects having all quotes budgeted
+        $projects = array();
+        $budgeted_quote_ids = Budget::get()->pluck('quote_id')->toArray();
+        foreach($bill_types['projects'] as $project) {
+            $quote_ids = $project->quotes->pluck('id')->toArray();
+            $unbudgeted_ids = array_diff($quote_ids, $budgeted_quote_ids);
+            if (!$unbudgeted_ids) $projects[] = $project;
+        }
+        $bill_types['projects'] = $projects;  
 
-        //return view('focus.purchases.create',compact('last_id'));
+        // assign last_it to resource being created    
+        $bill_types['last_id'] = Purchase::orderBy('id', 'desc')->first();
+
+        return view('focus.purchases.create', $bill_types);
     }
 }
