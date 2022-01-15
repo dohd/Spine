@@ -30,9 +30,8 @@ class StockIssuanceTableController extends Controller
      * @return mixed
      */
     public function __invoke()
-    {
+    {        
         $core = StockIssuanceController::getForDataTable();
-
         return Datatables::of($core)
             ->addIndexColumn()
             ->addColumn('notes', function($quote) {
@@ -46,8 +45,8 @@ class StockIssuanceTableController extends Controller
                 return $tid;               
             })
             ->addColumn('customer', function ($quote) {
-                if (isset($quote->customer) && isset($quote->lead->branch)) {
-                    return $quote->customer->name.' - '.$quote->lead->branch->name;
+                if (isset($quote->customer) && isset($quote->branch)) {
+                    return $quote->customer->name.' - '.$quote->branch->name;
                 }
                 
                 return $quote->lead->client_name;
@@ -69,7 +68,7 @@ class StockIssuanceTableController extends Controller
             ->addColumn('actions', function ($quote) {
                 return '<a href="'. route('biller.stockissuance.issue_stock', $quote) .'" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Issue"><i class="ft-list "></i></a>';
             })
-            ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
+            ->rawColumns(['actions'])
             ->make(true);
     }
 }

@@ -65,8 +65,8 @@ class QuoteInvoiceTableController extends Controller
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
-                if (isset($quote->customer) && isset($quote->lead->branch)) {
-                    return $quote->customer->company.' - '.$quote->lead->branch->name.' '
+                if (isset($quote->customer) && isset($quote->branch)) {
+                    return $quote->customer->company.' - '.$quote->branch->name.' '
                         .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
                 }
                 return $quote->lead->client_name;
@@ -91,9 +91,8 @@ class QuoteInvoiceTableController extends Controller
                 return $quote->verified;
             })
             ->addColumn('lpo_number', function($quote) {
-                return $quote->lpo_number;
-            })
-         
+                return $quote->lpo ? $quote->lpo->lpo_no : '';
+            })         
             ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total','mass_select'])
             ->make(true);
     }
