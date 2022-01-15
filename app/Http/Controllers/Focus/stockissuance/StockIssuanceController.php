@@ -140,19 +140,20 @@ class StockIssuanceController extends Controller
             return $q->where('customer_id', request('i_rel_id', 0));
         });
 
-        if (request('start_date')) {
+        if (request('start_date') && request('end_date')) {
             $q->whereBetween('invoicedate', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
 
-        // approved and unveriief quotes
-        $q->where(['status' => 'approved', 'verified' => 'No']);
+        // Budgeted quotes
+        $quote_ids = Budget::get()->pluck('quote_id');
+        $q->whereIn('id', $quote_ids);
 
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'status', 'bank_id', 'verified', 'revision', 'lpo_number', 'client_ref'
+            'id', 'notes', 'tid', 'customer_id', 'branch_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
+            'total', 'status', 'bank_id'
         ]);
     }
 }
