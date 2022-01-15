@@ -1,5 +1,9 @@
 @extends('core.layouts.app')
-@section('title', 'Quote / PI Approval')
+@php
+    $quote_type = $quote->bank_id ? 'PI' : 'Quote';
+@endphp
+
+@section('title', $quote_type . ' Approval')
 
 @section('after-styles')
 {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
@@ -17,7 +21,7 @@
 
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Quote / PI Approval</h4>
+                <h4 class="content-header-title">{{ $quote_type }} Approval</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
@@ -31,14 +35,18 @@
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-body">                    
-                    @include('focus.quotes.partials.view_menu') 
-
-                    @if ($quote->verified == "Yes")
+                    @include('focus.quotes.partials.view_menu')
+                    @php
+                        $approved_verified = ($quote->verified === "Yes" && $quote->status === 'approved');
+                        $text = ($quote->verified === "Yes") ? 'This ' . $quote_type . ' is verified' : '';
+                        if ($approved_verified) {
+                            $text = 'This ' . $quote_type . ' is approved and verified';
+                        }
+                    @endphp
+                    @if ($quote->verified === "Yes")
                         <div class="badge text-center white d-block m-1">
-                            <span class="bg-success round p-1">
-                                <b>
-                                    This {{ $quote->bank_id ? 'PI' : 'Quote' }} is verified 
-                                </b>
+                            <span class="{{ $approved_verified ? 'bg-primary' : 'bg-success' }} round p-1">
+                                <b>{{ $text }}</b>
                             </span>
                         </div>
                     @endif                    
@@ -127,19 +135,14 @@
                         </div>
 
                         <div class="row">
+                            <!-- Approvals -->
                             <div class="col-md-7">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <table class="table table-borderless table-md text-bold-600">
-                                            <tbody>
-                                                <tr>
-                                                    <td>{{trans('quotes.status')}}:</td>
-                                                    <td id="status" class="badge badge-info">{{trans('payments.'.$quote['status'])}}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                                <p class="lead">Approval Details</p><hr>
+                                <p>
+                                    Approved By :<span class="text-danger mr-1">{{$quote['approved_by']}}</span> 
+                                    Approved On :<span class=" text-danger mr-1">{{dateFormat($quote['approved_date'])}}</span> 
+                                    Approval Method :<span class=" text-danger">{{$quote['approved_method']}}</span>
+                                </p>
                             </div>
 
                             <div class="col-md-5 col-sm-12">
@@ -174,26 +177,15 @@
                     <!-- Invoice Footer -->
                     <div id="invoice-footer">
                         <div class="row">
+                            <!-- LPO Details -->
                             <div class="col-md-7 col-sm-12">
-                                <h5>Approvals</h5><hr>
-                                <h5>
-                                    <span class="text-muted">Approved By :</span> 
-                                    <span class="text-danger">{{$quote['approved_by']}}</span> 
-                                    <span class="text-muted">Approval Date :</span> 
-                                    <span class=" text-danger">{{dateFormat($quote['approved_date'])}}</span> 
-                                    <span class="text-muted">Approval Method :</span>
-                                    <span class=" text-danger">{{$quote['approved_method']}}</span>
-                                </h5>
-                                <hr>
-
                                 @isset($quote->lpo)
-                                <p>
-                                    LPO Date : <span class="text-danger mr-1">{{ dateFormat($quote->lpo->date) }}</span>
-                                    LPO Number : <span class="text-danger mr-1">{{ $quote->lpo->lpo_no }}</span>                                     
-                                    LPO Amount : <span class="text-danger">{{ number_format($quote->lpo->amount, 2) }}</span>
-                                    <br>
-                                    LPO Remark: <span class="text-danger">{{ $quote->lpo->remark }}</span>                             
-                                </p>                                
+                                    <p>
+                                        LPO Date : <span class="text-danger mr-1">{{ dateFormat($quote->lpo->date) }}</span>
+                                        LPO Number : <span class="text-danger mr-1">{{ $quote->lpo->lpo_no }}</span>                                     
+                                        LPO Amount : <span class="text-danger">{{ number_format($quote->lpo->amount, 2) }}</span><br>
+                                        LPO Remark: <span class="text-danger">{{ $quote->lpo->remark }}</span>                             
+                                    </p>                                
                                @endisset
                             </div>
 
