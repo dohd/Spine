@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Support\Facades\Auth;
 use Closure;
 
 class InstallMiddleware
@@ -16,12 +15,9 @@ class InstallMiddleware
      */
     public function handle($request, Closure $next, $guard = "crm")
     {
-        if (file_exists(storage_path('installed'))) {
-            return $next($request);
-        } else {
+        if (!file_exists(storage_path('installed'))) 
             return redirect(route('install'));
-        }
 
-
+        return $next($request);
     }
 }
