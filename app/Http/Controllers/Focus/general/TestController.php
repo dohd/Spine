@@ -15,28 +15,27 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\general;
 
-
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
 
 class TestController extends Controller
 {
-    
+    /**
+     * Test whether the login form displays
+     */
     public function showLoginForm()
     {
-    	dd(2222);
-        if (!file_exists(storage_path('installed'))) return redirect()->to('install');
-        if (auth()->user()) {
-            // Authentication passed...
-            return redirect()->route('biller.dashboard');
-        }
+        return 'TestController showLoginForm method, status 200';
+
+        // if no present file in install directory, redirect to installation page
+        if (!file_exists(storage_path('installed'))) 
+            return redirect()->to('install');
+
+        // if authenticated user redirect to dashboard
+        if (auth()->user()) return redirect()->route('biller.dashboard');
+        
         return view('core.index');
     }
-
-    
-
-   
 }
