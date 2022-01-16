@@ -22,18 +22,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Auth\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use App\Http\Utilities\PushNotification;
 
 class CoreController extends Controller
 {
     use AuthenticatesUsers;
-
-    protected $notification;
-
-    public function __construct(PushNotification $notification)
-    {
-
-    }
 
     public function redirectPath()
     {
@@ -42,30 +34,33 @@ class CoreController extends Controller
 
     public function showLoginForm()
     {
-        if (!file_exists(storage_path('installed'))) return redirect()->to('install');
-        if (auth()->user()) {
-            // Authentication passed...
+        if (!file_exists(storage_path('installed'))) 
+            return redirect()->to('install');
+
+        if (auth()->user()) 
             return redirect()->route('biller.dashboard');
-        }
+        
         return view('core.index');
     }
 
+    /*
+    * Check to see if the users account is confirmed and active
+    */
     protected function authenticated(Request $request, $user)
     {
-        /*
-         * Check to see if the users account is confirmed and active
-         */
         if (!$user->isConfirmed()) {
             access()->logout();
-
-            throw new GeneralException(trans('exceptions.frontend.auth.confirmation.resend', ['user_id' => $user->id]), true);
-        } elseif (!$user->isActive()) {
+            throw new GeneralException(
+                trans('exceptions.frontend.auth.confirmation.resend', 
+                ['user_id' => $user->id]), 
+                true
+            );
+        } 
+        if (!$user->isActive()) {
             access()->logout();
-
             throw new GeneralException(trans('exceptions.frontend.auth.deactivated'));
         }
     }
-
 
     protected function validateLogin(Request $request)
     {
@@ -89,6 +84,7 @@ class CoreController extends Controller
         $this->guard()->logout();
         $request->session()->flush();
         $request->session()->regenerate();
+
         return redirect(route('biller.index'));
     }
 }
