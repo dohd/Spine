@@ -130,8 +130,8 @@ class InvoicesController extends Controller
 
         // check for customer and selected products
         if (!empty($input['customer']) && !empty($input['selected_products'])) {
-            $quotation_id = explode(',', $input['selected_products']);
-            $quotes = Quote::whereIn('id', $quotation_id)->get();
+            $quote_ids = explode(',', $input['selected_products']);
+            $quotes = Quote::whereIn('id', $quote_ids)->get();
 
             $customer = Customer::find($input['customer'])->first();
             $last_invoice = Invoice::orderBy('id', 'desc')->first();
