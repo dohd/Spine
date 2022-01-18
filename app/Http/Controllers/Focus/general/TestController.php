@@ -19,6 +19,7 @@
 namespace App\Http\Controllers\Focus\general;
 
 use App\Http\Controllers\Controller;
+use App\Models\Access\User\User;
 
 class TestController extends Controller
 {
@@ -27,7 +28,8 @@ class TestController extends Controller
      */
     public function showLoginForm()
     {
-        return 'TestController showLoginForm method, status 200';
+        $user = User::first(['first_name', 'last_name']);
+        return 'Test user: '. $user->first_name .' '. $user->last_name;
 
         // if no present file in install directory, redirect to installation page
         if (!file_exists(storage_path('installed'))) 
