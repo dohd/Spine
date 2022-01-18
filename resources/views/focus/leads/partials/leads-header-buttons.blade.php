@@ -6,7 +6,7 @@
         </a>
         @permission('customer-create' ) 
             <a href="{{ route('biller.leads.create') }}" class="btn btn-pink  btn-lighten-3">
-                <i class="fa fa-plus-circle"></i> Lead
+                <i class="fa fa-plus-circle"></i> Ticket
             </a>
             &nbsp;&nbsp;
             <a href="{{ route('biller.djcs.create') }}" class="btn btn-success  btn-lighten-3">

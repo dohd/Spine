@@ -1,20 +1,13 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Lead Management |  Lead Edit')
-
-@section('page-header')
-    <h1>
-         Lead Management
-        <small>Edit Lead</small>
-    </h1>
-@endsection
+@section ('title', 'Tickets Management | Edit')
 
 @section('content')
     <div class="">
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title">Leads Management</h4>
+                    <h4 class="content-header-title">Tickets Management</h4>
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right mr-3">
@@ -32,13 +25,8 @@
                             <div class="card-content">
                                 <div class="card-body">
                                     {{ Form::model($lead, ['route' => ['biller.leads.update', $lead], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-lead']) }}
-                                        <div class="form-group">
-                                            {{-- Including Form blade file --}}
                                             @include("focus.leads.form")
-                                            <div class="edit-form-btn">
-                                                {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg pull-right']) }}
-                                                <div class="clearfix"></div>
-                                            </div>
+                                            {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg pull-right mb-2']) }}
                                         </div>
                                     {{ Form::close() }}
                                 </div>

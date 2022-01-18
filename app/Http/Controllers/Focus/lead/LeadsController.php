@@ -95,7 +95,7 @@ class LeadsController extends Controller
         //Create the model using repository create method
         $this->repository->create($data);
 
-        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Lead  Successfully Created']);
+        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Created']);
     }
 
     /**
@@ -136,7 +136,7 @@ class LeadsController extends Controller
         //Update the model using repository update method
         $this->repository->update($lead, $data);
 
-        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Lead Successfully Updated']);
+        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Updated']);
     }
 
     /**
@@ -152,7 +152,7 @@ class LeadsController extends Controller
         //Calling the delete method on repository
         $this->repository->delete($lead);
         //returning with successfull message
-        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Lead Successfully Deleted']);
+        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Deleted']);
     }
 
     /**

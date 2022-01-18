@@ -229,14 +229,10 @@
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-basket"></i><span>{{trans('features.sales')}}</span></a>
                 <ul class="dropdown-menu">
                     @permission('project-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Leads</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Tickets</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Leads
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Lead
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Tickets</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
                         </ul>
                     </li>
                     @endauth
@@ -837,12 +833,8 @@
                     @permission('project-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> IRD Jobcard</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> IRD Report
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create IRD Report
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> IRD Report</a></li>
+                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create IRD Report</a></li>
                         </ul>
                     </li>
                     @endauth

@@ -1,17 +1,13 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Leads Management')
-
-@section('page-header')
-<h1>Leads Management</h1>
-@endsection
+@section ('title', 'Tickets Management')
 
 @section('content')
 <div>
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Leads Management</h4>
+                <h4 class="content-header-title">Tickets Management</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right mr-3">
@@ -32,7 +28,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Lead No</th>
+                                            <th>Ticket No</th>
                                             <th>Title</th>
                                             <th>New/Existing</th>
                                             <th>Client & Branch</th>

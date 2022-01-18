@@ -73,11 +73,11 @@
         <div class="inner-cmp-pnl">
             <div class="form-group row">
                 <div class="col-sm-12">
-                    <h3 class="title">Lead Info</h3>
+                    <h3 class="title">Ticket Info</h3>
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-sm-6"><label for="reference" class="caption">Lead No</span></label>
+                <div class="col-sm-6"><label for="reference" class="caption">Ticket No</span></label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                         @if (isset($tid))
