@@ -71,23 +71,19 @@ class BillsController extends Controller
     public function print_pdf(Request $request)
     {
         $data = $this->bill_details($request);
-        if ($request->pdf) {
 
-            $html = view('focus.bill.print_v1', $data)->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            if ($request->pdf == 2) {
-                return $pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'D');
-            } else {
-                $headers = array(
-                    "Content-type" => "application/pdf",
-                    "Pragma" => "no-cache",
-                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                    "Expires" => "0"
-                );
-                return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
-            }
-        }
+        $html = view('focus.bill.print_invoice', $data)->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+         
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+        
+        return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
     }
 
     public function print_djc_pdf(Request $request)
