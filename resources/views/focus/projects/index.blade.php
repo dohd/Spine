@@ -2,10 +2,6 @@
 
 @section ('title', trans('labels.backend.projects.management'))
 
-@section('page-header')
-<h1>{{ trans('labels.backend.projects.management') }}</h1>
-@endsection
-
 @section('content')
 <div>    
     <div class="content-wrapper">
@@ -33,6 +29,7 @@
                                 <th>{{ trans('projects.project') }}</th>
                                 <th>Project No</th>
                                 <th>#Quote / PI No</th>
+                                <th>Ticket No</th>
                                 <th>Started</th>  
                                 {{-- 
                                     <th>{{ trans('projects.priority') }}</th>
@@ -125,6 +122,10 @@
                 {
                     data: 'quote_tid',
                     name: 'quote_tid'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
                 },
                 {
                     data: 'start_status',

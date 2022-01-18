@@ -72,6 +72,14 @@ class ProjectsTableController extends Controller
 
                 return implode(', ', $tids);
             })
+            ->addColumn('lead_tid', function($project) {
+                $tids = array();                
+                foreach ($project->quotes as $quote) {
+                    $tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                }
+
+                return implode(', ', $tids);
+            })
             // ->addColumn('priority', function ($project) {
             //     return '<span class="">' . $project->priority . '</span> ';
             // })
