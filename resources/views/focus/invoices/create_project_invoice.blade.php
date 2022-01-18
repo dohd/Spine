@@ -8,20 +8,20 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    <form method="post" id="data_form">
                     {{ Form::open(['route' => 'biller.invoices.store_project_invoice', 'method' => 'POST']) }}
                         <div class="row mb-1">
                             <div class="col-3"><label for="payer" class="caption">Customer Name*</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round required', 'placeholder' => 'Customer Name', 'id' => 'payer-name', 'readonly' => 'readonly']) }}
+                                    {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customer_name', 'readonly']) }}
+                                    <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
                                 </div>
                             </div>
                             <div class="col-3">
                                 <label for="taxid" class="caption">KRA PIN</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('taxid', $customer->taxid, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id' => 'taxid']) }}
+                                    {{ Form::text('taxid', $customer->taxid, ['class' => 'form-control round', 'required']) }}
                                 </div>
                             </div>
                             <div class="col-3"> 
@@ -38,10 +38,10 @@
                             <div class="col-3">
                                 <label for="tid" class="caption">Select {{ trans('general.tax') }}*</label>
                                 <div class="input-group">
-                                    <select class="form-control round required" name='tax_id' id="tax_id">
+                                    <select class="form-control round" name='tax_id' id="tax_id">
                                         <option value="16" selected>16% VAT</option>
                                         <option value="8">8% VAT</option>
-                                        <option value="100">Off</option>
+                                        <option value="0">Off</option>
                                     </select>
                                 </div>
                             </div>                            
@@ -164,17 +164,20 @@
                                         $reference = implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);
                                         $description = $title . '; ' . implode(', ', $jcs);
                                         $price = number_format($val->subtotal, 2);
+                                        $project_id = $val->project_quote->project_id;
                                     @endphp
-
                                     <tr>
-                                        <td><span>{{ $k+1 }}</span></td>                
+                                        <td>{{ $k+1 }}</td>                
                                         <td><textarea class="form-control" name="reference[]" id="reference-{{ $k }}" readonly>{{ $reference }}</textarea></td>
                                         <td><textarea type="text" class="form-control" name="description[]" id="description-{{ $k }}">{{ $description }}</textarea></td>
                                         <td><input type="text" class="form-control " name="unit[]" id="unit-{{ $k }}" value="Lot" readonly></td>
                                         <td><input type="text" class="form-control" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
                                         <td><input type="text" class="form-control" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
                                         <td><strong><span class='ttlText' id="result-{{ $k }}">{{ $price }}</span></strong></td>
-                                        <input type="hidden" name="total" value="{{ $price }}" id="total-{{ $k }}" disabled>
+                                        <input type="hidden" value="{{ $price }}" id="initprice-{{ $k }}" disabled>
+                                        <input type="hidden" name="quote_id[]" value="{{ $val->id }}" id="quoteid-{{ $k }}">
+                                        <input type="hidden" name="branch_id[]" value="{{ $val->branch_id }}" id="branchid-{{ $k }}">
+                                        <input type="hidden" name="project_id[]" value="{{ $project_id }}" id="projectid-{{ $k }}">
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -190,19 +193,19 @@
                             <div class="col-3">
                                 <div>
                                     <label for="subtotal" class="caption font-weight-bold">Subtotal</label>
-                                    <input type="text" class="form-control mb-1" name="subtotal" id="subtotal">
+                                    <input type="text" class="form-control mb-1" name="subtotal" id="subtotal" readonly>
                                 </div>                                                         
                                 <div>
                                     <label for="totaltax" class="caption font-weight-bold">Total Tax</label>
-                                    <input type="text" class="form-control mb-1" name="tax" id="tax">
+                                    <input type="text" class="form-control mb-1" name="tax" id="tax" readonly>
                                 </div>
                                 <div>
                                     <label for="grandtotal" class="caption font-weight-bold">Grand Total</label>
-                                    <input type="text" class="form-control mb-1" name="total" id="total">
-                                </div>                           
+                                    <input type="text" class="form-control mb-1" name="total" id="total" readonly>
+                                </div> 
+                                {{ Form::submit('Create Invoice', ['class' => 'btn btn-primary btn-lg']) }}                          
                             </div>
                         </div>
-                        <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
                     {{ Form::close() }}
                 </div>
             </div>
@@ -215,7 +218,7 @@
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 
 <script type="text/javascript">
-    // Initialize html editor
+    // Initialize datepicker
     $('.datepicker')
         .datepicker({ format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date());
@@ -230,34 +233,27 @@
         }
     });
 
-    // calcTotal();
     // On selecting Tax
     $('#tax_id').change(function() {
-        // calcTotal();
-    });
-
-    function calcTotal() {
         let total = 0;
         let subtotal = 0; 
-        const tax = $('#tax_id').val() / 100;
-        $('#quotation tbody tr').each(function() {
+        const taxRate = $('#tax_id').val() / 100;
+        $('#quotation tbody tr').each(function(i) {
+            const subtStr = $('#initprice-'+i).val().replace(/,/g, '');
+            const rateExc = parseFloat(subtStr);
+            const rateInc = rateExc + (taxRate * rateExc);
+            subtotal += rateExc;
+            total += rateInc;
+            // update table values
             const $rateInput = $(this).find('td').eq(5).children();
             const $amountSpan = $(this).find('td').eq(6).children();
-            const $subtInput = $(this).children('input');
-            // sanitize values
-            const rateStr = $rateInput.val().replace(/,/g, '');
-            const subtStr = $subtInput.val().replace(/,/g, '');
-
-            const calcRate = tax * parseFloat(rateStr);
-            subtotal += parseFloat(subtStr);
-            total += calcRate;
-            // update input
-            $rateInput.val(calcRate.toLocaleString());
-            $amountSpan.text(calcRate.toLocaleString());
+            $rateInput.val(rateInc.toLocaleString());
+            $amountSpan.text(rateInc.toLocaleString());
         });
-        // $('#subtotal').val(subtotal.toLocaleString());
-        // $('#total').val(total.toLocaleString());
-        // $('#tax').val((total - subtotal).toLocaleString());
-    }
+        $('#subtotal').val(subtotal.toLocaleString());
+        $('#total').val(total.toLocaleString());
+        $('#tax').val((total - subtotal).toLocaleString());
+    });
+    $('#tax_id').trigger('change');
 </script>
 @endsection
