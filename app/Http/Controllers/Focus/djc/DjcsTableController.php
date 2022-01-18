@@ -21,7 +21,6 @@ namespace App\Http\Controllers\Focus\djc;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\djc\DjcRepository;
-use App\Http\Requests\Focus\djc\ManageDjcRequest;
 
 /**
  * Class AccountsTableController.
@@ -49,7 +48,7 @@ class DjcsTableController extends Controller
     public function __invoke()
     {
         $core = $this->djc->getForDataTable();
-                
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -57,17 +56,22 @@ class DjcsTableController extends Controller
                 return 'DjR-' . sprintf('%04d', $djc->tid);
             })
             ->addColumn('customer', function ($djc) {
-                if (isset($djc->client) && isset($djc->branch)) {
-                    return $djc->client->company . ' - ' . $djc->branch->name 
+                $company = isset($djc->client) ? $djc->client->company : '';
+                $branch = isset($djc->branch) ? $djc->branch->name : '';
+                if ($company && $branch)
+                    return $company . ' - ' . $branch 
                         .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
-                }
             })
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
             })
+            ->addColumn('lead_tid', function($djc) {
+                return 'Tkt-' . sprintf('%04d', $djc->lead->reference);
+            })
             ->addColumn('actions', function ($djc) {
                 $valid_token = token_validator('', 'd' . $djc->id, true);
                 $link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
+
                 return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
                     . $djc->action_buttons;
             })

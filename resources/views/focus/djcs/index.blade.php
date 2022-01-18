@@ -2,10 +2,6 @@
 
 @section ('title', 'Djc Report Management')
 
-@section('page-header')
-<h1>Djc Report Management</h1>
-@endsection
-
 @section('content')
 <div class="">
     <div class="content-wrapper">
@@ -38,6 +34,7 @@
                                             <th>Subject</th>
                                             <th>Client & Branch</th>
                                             <th>Job Card</th>
+                                            <th>Ticket No</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -112,6 +109,10 @@
                 {
                     data: 'job_card',
                     name: 'job_card'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
                 },
                 {
                     data: 'created_at',
