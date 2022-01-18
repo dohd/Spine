@@ -21,8 +21,7 @@
                             </div>
                             <div class="card-content">
                                 <div class="card-body">
-                                    <form method="post" class="form-horizontal form-simple" action="{{route('biller.login')}}" validate>
-                                        {!! csrf_field() !!}
+                                    {{ Form::open(['route' => 'biller.login', 'method' => 'POST', 'class' => 'form-horizontal form-simple']) }}
                                         <fieldset class="form-group position-relative has-icon-left mb-0">
                                             <input type="text" class="form-control form-control-lg" id="user-name" name="email" placeholder="Your Email" required>
                                             <div class="form-control-position">
@@ -74,12 +73,12 @@
                                             <div class="col-sm-6 col-12 text-center text-sm-right"><a href="{{route('frontend.auth.password.reset')}}" class="card-link">{{trans('labels.frontend.passwords.forgot_password')}}</a>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="ft-unlock"></i> {{trans('navs.frontend.login')}}</button>
-                                    </form>
+                                        {{ Form::submit('Login', ['class' => 'btn btn-primary btn-lg btn-block']) }}
+                                    {{ Form::close() }}                                    
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <div class="">
+                                <div>
                                     <a href="{{route('crm.login')}}" class="card-link">{{trans('meta.customer_login')}}</a>
                                 </div>
                             </div>
