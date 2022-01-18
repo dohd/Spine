@@ -73,7 +73,9 @@
                                             <div class="col-sm-6 col-12 text-center text-sm-right"><a href="{{route('frontend.auth.password.reset')}}" class="card-link">{{trans('labels.frontend.passwords.forgot_password')}}</a>
                                             </div>
                                         </div>
-                                        {{ Form::submit('Login', ['class' => 'btn btn-primary btn-lg btn-block']) }}
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                            <i class="ft-unlock"></i> {{trans('navs.frontend.login')}}
+                                        </button>
                                     {{ Form::close() }}                                    
                                 </div>
                             </div>
