@@ -8,10 +8,6 @@
 
 @section ('title', $quote_label)
 
-@section('page-header')
-<h1>{{ $quote_label }}</h1>
-@endsection
-
 @section('content')
 <div>
     <div class="content-wrapper">
@@ -64,6 +60,7 @@
                                             <th>{{ trans('general.status') }}</th>
                                             <th>Verified</th>
                                             <th>Client Ref</th>
+                                            <th>Ticket No</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -180,6 +177,10 @@
                 {
                     data: 'client_ref',
                     name: 'client_ref'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
                 },
                 {
                     data: 'actions',

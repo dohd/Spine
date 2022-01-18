@@ -49,24 +49,28 @@ class QuotesTableController extends Controller
     {
         $core = $this->quote->getForDataTable();
         return Datatables::of($core)
+            ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
             })
+            ->addColumn('lead_tid', function($quote) {
+                return 'Tkt-' . sprintf('%04d', $quote->tid);
+            })
             ->addColumn('tid', function ($quote) {
                 $tid = sprintf('%04d', $quote->tid);
                 $tid = ($quote->bank_id) ? 'PI-'.$tid : 'QT-'.$tid;
-                if ($quote->revision) $tid .= $quote->revision;
-                $link = ($quote->bank_id) ? route('biller.quotes.show', [$quote->id, 'page=pi']) : route('biller.quotes.show', [$quote->id]);
+                if ($quote->revision) $tid .= $quote->revision;                
+                $link = route('biller.quotes.show', [$quote->id]);
+                if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
 
                 return '<a class="font-weight-bold" href="' . $link . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
                 $client_name = $quote->customer ? $quote->customer->name : '';
                 $branch_name = $quote->branch ? $quote->branch->name : '';
-                if ($client_name && $branch_name) {
-                    return $client_name.' - '.$branch_name.' '.'<a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
-                }
+                if ($client_name && $branch_name) 
+                    return $client_name . ' - ' . $branch_name . ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
 
                 return $quote->lead->client_name;
             })
@@ -105,7 +109,6 @@ class QuotesTableController extends Controller
                     .'<a href="'.route('biller.quotes.edit', [$quote, 'page=copy']).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="'. $copy_text .'"><i class="fa fa-clone" aria-hidden="true"></i></a> '
                     .$quote->action_buttons;
             })
-            ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total'])
             ->make(true);
     }
 }
