@@ -1,33 +1,40 @@
 <html>
+
 <head>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
 			font-size: 10pt;
 		}
+
 		table {
 			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			font-size: 10pt;
 		}
+
 		table thead td {
 			background-color: #BAD2FA;
 			text-align: center;
 			border: 0.1mm solid black;
 			font-variant: small-caps;
 		}
+
 		td {
 			vertical-align: top;
 		}
+
 		.bullets {
 			width: 8px;
 		}
+
 		.items {
 			border-bottom: 0.1mm solid black;
-			font-size: 10pt; 
+			font-size: 10pt;
 			border-collapse: collapse;
 			width: 100%;
 			font-family: sans-serif;
 		}
+
 		.items td {
 			border-left: 0.1mm solid black;
 			border-right: 0.1mm solid black;
@@ -36,54 +43,67 @@
 		.align-r {
 			text-align: right;
 		}
+
 		.align-c {
 			text-align: center;
 		}
+
 		.bd {
 			border: 1px solid black;
 		}
+
 		.bd-t {
 			border-top: 1px solid
 		}
+
 		.ref {
 			width: 100%;
 			font-family: serif;
 			font-size: 10pt;
 			border-collapse: collapse;
 		}
+
 		.ref tr td {
-			border: 0.1mm solid #888888; 
+			border: 0.1mm solid #888888;
 		}
+
 		.ref tr:nth-child(2) td {
 			width: 50%;
 		}
+
 		.customer-dt {
 			width: 100%;
 			font-family: serif;
 			font-size: 10pt;
 		}
+
 		.customer-dt tr td:nth-child(1) {
 			border: 0.1mm solid #888888;
 		}
+
 		.customer-dt tr td:nth-child(3) {
 			border: 0.1mm solid #888888;
 		}
+
 		.customer-dt-title {
-			font-size: 7pt; 
-			color: #555555; 
+			font-size: 7pt;
+			color: #555555;
 			font-family: sans;
 		}
+
 		.doc-title-td {
 			text-align: center;
 			width: 100%;
 		}
+
 		.doc-title {
 			font-size: 15pt;
 			color: #0f4d9b;
 		}
+
 		.doc-table {
 			font-size: 10pt;
-			margin-top:5px;
+			margin-top: 5px;
 			width: 100%;
 		}
 
@@ -91,37 +111,44 @@
 			width: 100%;
 			border-bottom: 0.8mm solid #0f4d9b;
 		}
+
 		.header-table tr td:first-child {
 			color: #0f4d9b;
 			font-size: 9pt;
 			width: 60%;
 			text-align: left;
 		}
+
 		.address {
 			color: #0f4d9b;
 			font-size: 10pt;
 			width: 40%;
 			text-align: right;
 		}
+
 		.header-table-text {
-			color:#0f4d9b; 
-			font-size:9pt; 
+			color: #0f4d9b;
+			font-size: 9pt;
 			margin: 0;
 		}
+
 		.header-table-child {
-			color:#0f4d9b; 
-			font-size:8pt;
+			color: #0f4d9b;
+			font-size: 8pt;
 		}
+
 		.header-table-child tr:nth-child(2) td {
-			font-size:9pt; 
-			padding-left:50px;
+			font-size: 9pt;
+			padding-left: 50px;
 		}
+
 		.footer {
 			font-size: 9pt;
 			text-align: center;
 		}
 	</style>
 </head>
+
 <body>
 	<htmlpagefooter name="myfooter">
 		<div class="footer">
@@ -147,14 +174,16 @@
 							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Raised Floors / Access Panels</div>
 						</td>
 					</tr>
-					<tr><td>... and General Suppliers</td></tr>
-				</table>								
+					<tr>
+						<td>... and General Suppliers</td>
+					</tr>
+				</table>
 			</td>
 			<td class="address"><br><br>
 				Lean Aircons Building, Opp NextGen Mall<br>
 				Mombasa Road, Nairobi - Kenya<br>
 				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 787 391 015<br>
+				Cell : +254 732 345 393, +254 713 773 333<br>
 				info@leanventures.co.ke<br>
 				leannventures@gmail.com
 			</td>
@@ -164,11 +193,8 @@
 		<tr>
 			<td class="doc-title-td">
 				<span class='doc-title'>
-					<b>
-                        INVOICE
-					
-					</b>
-				</span>				
+					<b>INVOICE</b>
+				</span>
 			</td>
 		</tr>
 	</table><br>
@@ -177,37 +203,32 @@
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
 				<b>Client Name :</b> {{ $invoice->customer->company }}<br>
-				<b>Branch :</b> Head Office<br>
-				<b>Address :</b> {{  $invoice->customer->address }}<br>
-				<b>Email :</b> {{  $invoice->customer->email }}<br>
+				<b>Client Tax Pin : </b>{{ $invoice->customer->taxid }}<br>
+				<b>Address :</b> {{ $invoice->customer->address }}<br>
+				<b>Email :</b> {{ $invoice->customer->email }}<br>
 				<b>Cell :</b> {{ $invoice->customer->phone }}<br>
-			
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
-				<span class="customer-dt-title">REFERENCE DETAILS:</span><br>
-                @php
-                $tid = sprintf('%04d', $invoice->tid);
-            
-            @endphp
-            	<b>Invoice No :</b> {{  $tid }}<br>	<br>	
+				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
+				<b>Invoice No :</b> {{ sprintf('%04d', $invoice->tid) }}<br><br>
 				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
-                <b>KRA PIN : </b>P051516705D<br>
-                <b>LPO REF : </b>{{ $invoice->lpo_ref }}<br>
-			    <b>Overdue after :</b> {{ $invoice->validity }} days <br>
-			
-			
+				<b>Overdue after :</b> {{ $invoice->validity ? $invoice->validity . ' days' : '' }}<br>
+				<b>KRA Pin : </b>P051516705D<br>
 			</td>
 		</tr>
 	</table><br>
-	
-	
+
+	<table  class="ref" cellpadding="10">
+		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
+	</table><br>
+
 	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
 				<td width="6%">No.</td>
+				<td width="24%"> REFERENCE</td>
 				<td width="24%"> DESCRIPTION</td>
-                <td width="24%"> REFERENCE</td>
 				<td width="8%">QTY</td>
 				<td width="8%">UoM</td>
 				<td width="14%">RATE</td>
@@ -215,35 +236,23 @@
 			</tr>
 		</thead>
 		<tbody>
-            @php
-                $i=0;
-            @endphp
-			@foreach($invoice->products as $product)
-			
-					@php
-                      $i++;
-						$product_qty = (int) $product->product_qty;
-						$product_subtotal = (int) $product->product_subtotal;
-						$product_price = (int) $product->product_price;
-					@endphp
-					<tr>
-						<td>{{ $i }}</td>
-						<td>{{ $product->description }}</td>
-						<td >{{ $product->reference }}</td>
-                        <td class="align-c">{{ $product_qty }}</td>
-						<td class="align-c">{{ $product->unit }}</td>
-					    <td class="align-r">{{ number_format($product_price, 2) }}</td>
-						<td class="align-r">{{ number_format($product_qty * $product_price, 2) }}</td>
-						
-					</tr>
-					
+			@foreach($invoice->products as $k => $val)
+				<tr>
+					<td>{{ $k+1 }}</td>					
+					<td>{{ $val->reference }}</td>
+					<td>{{ $val->description }}</td>
+					<td class="align-c">{{ (int) $val->product_qty }}</td>
+					<td class="align-c">{{ $val->unit }}</td>
+					<td class="align-r">{{ number_format($val->product_price, 2) }}</td>
+					<td class="align-r">{{ number_format($val->product_qty * $val->product_price, 2) }}</td>
+				</tr>
 			@endforeach
 			<!-- empty row with dynamic height-->
 			<tr>
 				<td height="{{ 400-30*count($invoice->products) }}"></td>
-				@for($i=0; $i < 6; $i++) 
-                    <td></td>
-                @endfor
+				@for($i = 0; $i < 6; $i++) 
+					<td></td>
+				@endfor
 			</tr>
 			<tr>
 				<td colspan="5" class="bd-t" rowspan="2">
@@ -258,16 +267,19 @@
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($invoice->print_type == 'inclusive')
-					<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>			
+					<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
 				@else
 					<td class="bd align-r">{{ number_format($invoice->subtotal, 2) }}</td>
 				@endif
 			</tr>
 			<tr>
-			
-					<td class="align-r">Tax {{ $invoice->tax_id }}%</td>
+				@if ($invoice->print_type == 'inclusive')
+					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
+					<td class="align-r">{{ $invoice->tax_id ? 'INCLUSIVE' : 'NONE' }}</td>
+				@else
+					<td class="align-r">Tax {{ $invoice->tax_id ? $invoice->tax_id . '%' : 'Off' }}</td>
 					<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
-				
+				@endif
 			</tr>
 			<tr>
 				<td colspan="5"></td>
