@@ -122,8 +122,8 @@
                         
                         <div class="row mb-1">
                             <div class="col-12">
-                                <div class="input-group"><label for="title" class="caption">Reference</label></div>
-                                {{ Form::text('ref', null, ['class' => 'form-control']) }}
+                                <div class="input-group"><label for="title" class="caption">Note</label></div>
+                                {{ Form::text('notes', null, ['class' => 'form-control']) }}
                             </div>
                         </div>
 
@@ -186,9 +186,9 @@
                         <div class="row">
                             <div class="col-9">
                                 <div class="input-group">
-                                    <label for="notes" class="caption font-weight-bold">{{ trans('general.note') }}</label>
+                                    <label for="notes" class="caption font-weight-bold">Remark</label>
                                 </div>
-                                {{ Form::textarea('notes', null, ['class' => 'form-control text-danger', 'rows' => '4']) }}
+                                {{ Form::textarea('remark', null, ['class' => 'form-control text-danger', 'rows' => '4']) }}
                             </div>
                             <div class="col-3">
                                 <div>
