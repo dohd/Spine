@@ -55,7 +55,7 @@ class QuotesTableController extends Controller
                 return $quote->notes;
             })
             ->addColumn('lead_tid', function($quote) {
-                return 'Tkt-' . sprintf('%04d', $quote->tid);
+                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
             })
             ->addColumn('tid', function ($quote) {
                 $tid = sprintf('%04d', $quote->tid);
