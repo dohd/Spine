@@ -50,6 +50,7 @@ class QuoteVerifyTableController extends Controller
         $core = $this->quote->getForVerifyDataTable();
 
         return Datatables::of($core)
+            ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
@@ -61,11 +62,15 @@ class QuoteVerifyTableController extends Controller
 
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
             })
+            ->addColumn('lead_tid', function($quote) {
+                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+            })
             ->addColumn('customer', function ($quote) {
-                if (isset($quote->customer) && isset($quote->branch)) {
-                    return $quote->customer->name.' - '.$quote->branch->name.' '
-                        .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
-                }
+                $client_name = $quote->customer ? $quote->customer->name : '';
+                $branch_name = $quote->branch ? $quote->branch->name : '';
+                if ($client_name && $branch_name) 
+                    return $client_name . ' - ' . $branch_name . ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
+
                 return $quote->lead->client_name;
             })
             ->addColumn('created_at', function ($quote) {
@@ -78,7 +83,7 @@ class QuoteVerifyTableController extends Controller
                 return $quote->verified;
             })
             ->addColumn('lpo_number', function($quote) {
-                return $quote->lpo? $quote->lpo->lpo_no : '';
+                return $quote->lpo ? $quote->lpo->lpo_no : '';
             })
             ->addColumn('project_number', function($quote) {
                 $tid = '';
@@ -93,7 +98,6 @@ class QuoteVerifyTableController extends Controller
                 return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
                     .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify"><i class="fa fa-check"></i></a>';
             })
-            ->rawColumns(['tid', 'customer', 'actions',])
             ->make(true);
     }
 }

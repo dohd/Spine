@@ -2,10 +2,6 @@
 
 @section ('title', 'Verification Management')
 
-@section('page-header')
-<h1>Verification Management</h1>
-@endsection
-
 @section('content')
 <div>
     <div class="content-wrapper">
@@ -56,6 +52,7 @@
                                             <th>Quote / PI Date</th>
                                             <th>Project No</th>
                                             <th>LPO No</th>
+                                            <th>Ticket No</th>
                                             <th>Client Ref</th>
                                             <th>Verified</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -156,6 +153,10 @@
                 {
                     data: 'lpo_number',
                     name: 'lpo_number'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
                 },
                 {
                     data: 'client_ref',

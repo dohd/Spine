@@ -2,10 +2,6 @@
 
 @section ('title', 'Verify Quote / PI')
 
-@section('page-header')
-    <h1>{{ trans('labels.backend.quotes.management') }}</h1>
-@endsection
-
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
