@@ -90,137 +90,135 @@ class InvoiceRepository extends BaseRepository
     public function create(array $input)
     {
 
-     $purchases_trans_category_id = Transactioncategory::where('code', 'sales')->first();
-       $purchases_trans_category_id=$purchases_trans_category_id->id;
-         //invoices 
+        $purchases_trans_category_id = Transactioncategory::where('code', 'sales')->first();
+        $purchases_trans_category_id = $purchases_trans_category_id->id;
+        //invoices 
         $input['invoice']['tid'] = $input['invoice']['tid'];
         $input['invoice']['tax_id'] = $input['invoice']['tax_id'];
         $input['invoice']['discount_format'] = $input['invoice']['discount_format'];
         $input['invoice']['tax_format'] = $input['invoice']['tax_format'];
         $input['invoice']['discount_rate'] = $input['invoice']['discount_rate'];
         $input['invoice']['notes'] = $input['invoice']['notes'];
-   
-  
+
+
 
         DB::beginTransaction();
 
-        $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
+        $input['invoice'] = array_map('strip_tags', $input['invoice']);
         $result = Invoice::create($input['invoice']);
-     
+
         if ($result) {
 
-                  //credited 
-        $input['receivable']['payer_type'] = $input['receivable']['payer_type'];
-        $input['receivable']['payer'] = $input['receivable']['payer'];
-        $input['receivable']['payer_id'] = $input['receivable']['payer_id'];
-        $input['receivable']['tid'] = $input['receivable']['tid'];
-        $input['receivable']['trans_category_id'] = $purchases_trans_category_id;
-        $input['receivable']['taxformat'] = $input['receivable']['taxformat'];
-        $input['receivable']['discountformat'] = $input['receivable']['discountformat'];
-        $input['receivable']['s_warehouses'] = $input['receivable']['s_warehouses'];
-        $input['receivable']['is_bill'] = 0;
-        $input['receivable']['transaction_type'] ='sales';
-        $input['receivable']['invoice_id'] =$result->id;
+            //credited 
+            $input['receivable']['payer_type'] = $input['receivable']['payer_type'];
+            $input['receivable']['payer'] = $input['receivable']['payer'];
+            $input['receivable']['payer_id'] = $input['receivable']['payer_id'];
+            $input['receivable']['tid'] = $input['receivable']['tid'];
+            $input['receivable']['trans_category_id'] = $purchases_trans_category_id;
+            $input['receivable']['taxformat'] = $input['receivable']['taxformat'];
+            $input['receivable']['discountformat'] = $input['receivable']['discountformat'];
+            $input['receivable']['s_warehouses'] = $input['receivable']['s_warehouses'];
+            $input['receivable']['is_bill'] = 0;
+            $input['receivable']['transaction_type'] = 'sales';
+            $input['receivable']['invoice_id'] = $result->id;
 
-         $input['receivable'] = array_map( 'strip_tags', $input['receivable']);
-        $transaction = Purchase::create($input['receivable']);
+            $input['receivable'] = array_map('strip_tags', $input['receivable']);
+            $transaction = Purchase::create($input['receivable']);
 
 
- if ($transaction) {
- 
+            if ($transaction) {
 
-               //debited 
-        $input['debit']['payer_type'] = $input['debit']['payer_type'];
-        $input['debit']['payer'] = $input['debit']['payer'];
-        $input['debit']['payer_id'] = $input['debit']['payer_id'];
-        $input['debit']['tid'] = $input['debit']['tid'];
-        $input['debit']['taxformat'] = $input['debit']['taxformat'];
-        $input['debit']['trans_category_id'] = $purchases_trans_category_id;
-        $input['debit']['discountformat'] = $input['debit']['discountformat'];
-        $input['debit']['s_warehouses'] = $input['debit']['s_warehouses'];
-        $input['debit']['is_bill'] = 2;
-        $input['debit']['transaction_type'] ='sales';
-        $input['debit']['bill_id'] = $transaction->id;
-        $input['debit']['invoice_id'] =$result->id;
 
-        $input['debit'] = array_map( 'strip_tags', $input['debit']);
-        Purchase::create($input['debit']);
+                //debited 
+                $input['debit']['payer_type'] = $input['debit']['payer_type'];
+                $input['debit']['payer'] = $input['debit']['payer'];
+                $input['debit']['payer_id'] = $input['debit']['payer_id'];
+                $input['debit']['tid'] = $input['debit']['tid'];
+                $input['debit']['taxformat'] = $input['debit']['taxformat'];
+                $input['debit']['trans_category_id'] = $purchases_trans_category_id;
+                $input['debit']['discountformat'] = $input['debit']['discountformat'];
+                $input['debit']['s_warehouses'] = $input['debit']['s_warehouses'];
+                $input['debit']['is_bill'] = 2;
+                $input['debit']['transaction_type'] = 'sales';
+                $input['debit']['bill_id'] = $transaction->id;
+                $input['debit']['invoice_id'] = $result->id;
 
-            $products = array();
-            $subtotal = 0;
-            $total_qty = 0;
-            $total_tax = 0;
-           
+                $input['debit'] = array_map('strip_tags', $input['debit']);
+                Purchase::create($input['debit']);
 
-                   //purchase product
-             if($input['inventory_items']['product_name']>0){
+                $products = array();
+                $subtotal = 0;
+                $total_qty = 0;
+                $total_tax = 0;
 
-              
-            foreach ($input['inventory_items']['product_id'] as $key => $value) {
-            $products[] = array(
-                    'invoice_id' => $result->id,
-                    'product_id' => 0,
-                    'ins' => $input['inventory_items']['ins'],
-                    'product_name' => strip_tags(@$input['inventory_items']['product_name'][$key]),
-                    'product_qty' => strip_tags(@$input['inventory_items']['product_qty'][$key]),
-                    'product_subtotal' => numberClean(@$input['inventory_items']['product_subtotal'][$key]),
-                    'product_price' => numberClean(@$input['inventory_items']['product_price'][$key]),
-                    'taxable_amount' => numberClean(@$input['inventory_items']['taxedvalue'][$key]),
-                    'total_tax' => numberClean(@$input['inventory_items']['total_tax'][$key]),
-                    'product_tax' => numberClean(@$input['inventory_items']['product_tax'][$key]),
-                    'product_discount' => numberClean(@$input['inventory_items']['product_discount'][$key]),
-                    'total_discount' => numberClean(@$input['inventory_items']['total_discount'][$key]),
-                    'product_des' => strip_tags(@$input['inventory_items']['product_description'][$key]),
-                    'project_id' => numberClean(@$input['inventory_items']['inventory_project_id'][$key]),
-                    'branch_id' => numberClean(@$input['inventory_items']['branch_id'][$key])
-                       
-                );
+
+                //purchase product
+                if ($input['inventory_items']['product_name'] > 0) {
+
+
+                    foreach ($input['inventory_items']['product_id'] as $key => $value) {
+                        $products[] = array(
+                            'invoice_id' => $result->id,
+                            'product_id' => 0,
+                            'ins' => $input['inventory_items']['ins'],
+                            'product_name' => strip_tags(@$input['inventory_items']['product_name'][$key]),
+                            'product_qty' => strip_tags(@$input['inventory_items']['product_qty'][$key]),
+                            'product_subtotal' => numberClean(@$input['inventory_items']['product_subtotal'][$key]),
+                            'product_price' => numberClean(@$input['inventory_items']['product_price'][$key]),
+                            'taxable_amount' => numberClean(@$input['inventory_items']['taxedvalue'][$key]),
+                            'total_tax' => numberClean(@$input['inventory_items']['total_tax'][$key]),
+                            'product_tax' => numberClean(@$input['inventory_items']['product_tax'][$key]),
+                            'product_discount' => numberClean(@$input['inventory_items']['product_discount'][$key]),
+                            'total_discount' => numberClean(@$input['inventory_items']['total_discount'][$key]),
+                            'product_des' => strip_tags(@$input['inventory_items']['product_description'][$key]),
+                            'project_id' => numberClean(@$input['inventory_items']['inventory_project_id'][$key]),
+                            'branch_id' => numberClean(@$input['inventory_items']['branch_id'][$key])
+
+                        );
+                    }
+
+
+                    InvoiceItem::insert($products);
+                }
+
+
+
+
+                //end inventory items
+
+
+
+
+                //begit tax
+                if ($input['tax']['tax_amount'] > 0) {
+                    $purchases_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
+                    $purchases_trans_category_id = $purchases_trans_category_id->id;
+                    $account_id = Account::where('system', 'tax')->first();
+                    $account_id = $account_id->id;
+                    $input['tax']['account_id'] = $account_id;
+                    $input['tax']['trans_category_id'] = $purchases_trans_category_id;
+                    $input['tax']['secondary_account_id'] = $account_id;
+                    $input['tax']['tax_type'] = 'sales_purchases';
+                    $input['tax']['transaction_type'] = 'sales';
+                    $input['tax']['invoice_id'] = $result->id;
+
+
+
+                    $input['tax'] = array_map('strip_tags', $input['tax']);
+                    Purchase::create($input['tax']);
+                }
+
+                DB::commit();
+                return $transaction;
             }
 
-
-            InvoiceItem::insert($products);
-
-        }
+            //end tax
 
 
-
-
-//end inventory items
-
-
-
-
-//begit tax
-if($input['tax']['tax_amount']>0){
-     $purchases_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
- $account_id = Account::where('system', 'tax')->first();
- $account_id=$account_id->id;
- $input['tax']['account_id'] = $account_id;
- $input['tax']['trans_category_id'] =$purchases_trans_category_id;
- $input['tax']['secondary_account_id'] =$account_id;
- $input['tax']['tax_type'] ='sales_purchases';
- $input['tax']['transaction_type'] ='sales';
- $input['tax']['invoice_id'] =$result->id;
- 
-
-
-$input['tax'] = array_map( 'strip_tags', $input['tax']);
-          Purchase::create($input['tax']);
-}
-
-  DB::commit();
- return $transaction;
-
-}
-        
-//end tax
-
-          
         }
         throw new GeneralException(trans('exceptions.backend.invoices.create_error'));
 
-     /*
+        /*
         $extra_discount = numberClean($input['invoice']['after_disc']);
         $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
         $input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
@@ -328,142 +326,146 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         throw new GeneralException(trans('exceptions.backend.invoices.create_error'));*/
     }
 
-
+    /**
+     * Create project invoice
+     */
     public function create_poroject_invoice(array $input)
     {
         DB::beginTransaction();
 
         $invoice = $input['invoice_data'];
-        $dr_data= $input['dr_data'];
-        $cr_data= $input['cr_data'];
-        $tax_data= $input['tax_data'];
-        
-        //invoice status
-        $invoice['status'] = 'due';
-        
-        // format date values
+        // sanitize values
         foreach ($invoice as $key => $value) {
+            // format date value
             if ($key == 'invoicedate') {
                 $invoice[$key] = date_for_database($value);
+            }
+            // clean decimal values
+            if (in_array($key, ['total', 'subtotal', 'tax'])) {
+                $invoice[$key] = numberClean($value);
             }
         }
         $duedate = $invoice['invoicedate'] . ' + ' . $invoice['validity'] . ' days';
         $invoice['invoiceduedate'] = date_for_database($duedate);
 
         // increament tid
-         $invoice_no = Invoice::orderBy('id', 'desc')->first('tid');
-        $transaction_no= Transaction::orderBy('id', 'desc')->first();
-        $tid=$invoice['invoice_no'];
-       if (isset($invoice_no->tid) && $invoice['invoice_no'] <= $invoice_no->tid) {
-            $tid=$invoice_no->tid + 1;
-        } 
-
-    $tr_id=$dr_data['tid'];
-        if (isset($transaction_no->tid) && $dr_data['tid'] <= $transaction_no->tid) {
-           
-            $tr_id=$transaction_no->tid + 1;
-        }  
-
-
-
-        $customer_name=$dr_data['customer_name'];
-       //transaction category
-        $tr_category = Transactioncategory::where('code', 'sales')->first();
-        //insert invoice
+        $invoice_no = Invoice::orderBy('id', 'desc')->first('tid');
+        $tid = $invoice['invoice_no'];
+        if (isset($invoice_no->tid) && $invoice['invoice_no'] <= $invoice_no->tid) {
+            $tid = $invoice_no->tid + 1;
+        }
         unset($invoice['taxid']);
         unset($invoice['invoice_no']);
-        $invoice['total']=numberClean($invoice['total']);
-        $invoice['subtotal']=numberClean($invoice['subtotal']);
-        $invoice['tax']=numberClean($invoice['tax']);
-        $invoice['tid']=$tid;
-        
+        $invoice['tid'] = $tid;
+        $invoice['status'] = 'due';
         $result = Invoice::create($invoice);
-        //Dr Receivables
-        $dr_account_id=$dr_data['dr_account_id'];
-        unset($dr_data['customer_name']);
-        unset($dr_data['dr_account_id']);
-       $dr_data['payer_type']='customer';
-       $dr_data['payer']=$customer_name;
-       $dr_data['payer_id']=$invoice['customer_id'];
-       $dr_data['trans_category_id']= $tr_category->id;
-       $dr_data['is_bill']= 2;
-       $dr_data['transaction_type']= 'sales';
-       $dr_data['ins']=$invoice['ins'];
-       $dr_data['user_id']=$invoice['user_id'];
-       $dr_data['tid']= $tr_id;
-       $dr_data['refer_no']=$tid;
-       $dr_data['account_id']=$dr_account_id;
-       $dr_data['transaction_date']=date_for_database($invoice['invoicedate']);
-       $dr_data['due_date']=date_for_database($duedate);
-       $dr_data['debit']=numberClean($invoice['total']);
-       $dr_data['note']=$invoice['notes'];
-       $dr_data['invoice_id'] =$result->id;
-       $debit = Purchase::create($dr_data);          
-      //Cr Income amount exclusive tax
-      $cr_account_id=$cr_data['cr_account_id'];
-      unset($cr_data['cr_account_id']);
-   
-      $cr_data['payer_type']='customer';
-      $cr_data['payer']=$customer_name;
-      $cr_data['payer_id']=$invoice['customer_id'];
-      $cr_data['trans_category_id']= $tr_category->id;
-      $cr_data['is_bill']= 0;
-      $cr_data['transaction_type']= 'sales';
-      $cr_data['ins']=$invoice['ins'];
-      $cr_data['user_id']=$invoice['user_id'];
-      $cr_data['tid']= $tr_id;
-      $cr_data['refer_no']=$tid;
-      $cr_data['account_id']=$cr_account_id;
-      $cr_data['transaction_date']=date_for_database($invoice['invoicedate']);
-      $cr_data['due_date']=date_for_database($duedate);
-      $cr_data['credit']=numberClean($invoice['subtotal']);
-      $cr_data['note']=$invoice['notes'];
-      $cr_data['bill_id'] =$result->id;
-      $credit = Purchase::create($cr_data);  
-      //Cr Tax
-    if(numberClean($tax_data['tax'])>0){
-    $tr_tax_category = Transactioncategory::where('code', 'p_taxes')->first();
-    $account_id = Account::where('system', 'tax')->first();
-    $tax_data['payer_type']='customer';
-    $tax_data['payer']=$customer_name;
-    $tax_data['payer_id']=$invoice['customer_id'];
-    $tax_data['account_id'] = $account_id->id;
-    $tax_data['trans_category_id'] =$tr_tax_category->id;
-    $tax_data['secondary_account_id'] =$account_id->id;
-    $tax_data['tax_type'] ='sales_purchases';
-    $tax_data['transaction_type'] ='sales';
-    $tax_data['ins']=$invoice['ins'];
-    $tax_data['user_id']=$invoice['user_id'];
-    $tax_data['tid']= $tr_id;
-    $tax_data['refer_no']=$tid;
-    $tax_data['refer_no']=$invoice['tid'];
-    $tax_data['tax_amount'] =numberClean($invoice['subtotal']);
-    $tax_data['credit'] =numberClean($tax_data['tax']);
-    $tax_data['taxable_amount'] = numberClean($invoice['tax']);
-    $tax_data['note'] = strip_tags($invoice['notes']);
-    $tax_data['transaction_date'] = date_for_database($invoice['invoicedate']);
-    $tax_data['invoice_id'] =$invoice['tid'];
-    $tax_data['bill_id'] =$result->id;
-
-    Purchase::create($tax_data);
-    }
 
         // invoice items
-        $items_count = count($input['data_items']['quote_id']);
-        $invoice_items = $this->array_items(
-            $items_count, 
-            $input['data_items'], 
-            ['invoice_id' => $result['id'], 'ins' => $result['ins']]
-        );
-
-    
+        $invoice_items = array();
+        $item = $input['data_items'];
+        for ($i = 0; $i < count($item['quote_id']); $i++) {
+            $row = array('invoice_id' => $result['id'], 'ins' => $result['ins']);
+            foreach (array_keys($item) as $key) {
+                $value = $item[$key][$i];
+                if ($key == 'product_price') $row[$key] = numberClean($value);
+                else $row[$key] = $value;               
+            }
+            $invoice_items[] = $row;
+        }
         InvoiceItem::insert($invoice_items);
+
+        // Credits and Debits
+        $dr_data = $input['dr_data'];
+        $cr_data = $input['cr_data'];
+        if ($dr_data && $cr_data) {
+            // increament transaction id
+            $tr_id = $dr_data['tid'];
+            $transxn_no = Transaction::orderBy('id', 'desc')->first();
+            if (isset($transxn_no->tid) && $dr_data['tid'] <= $transxn_no->tid) {
+                $tr_id = $transxn_no->tid + 1;
+            }
+
+            $customer_name = $dr_data['customer_name'];
+            $tr_category = Transactioncategory::where('code', 'sales')->first();
+
+            //Dr Receivables
+            $dr_account_id = $dr_data['dr_account_id'];
+            unset($dr_data['customer_name']);
+            unset($dr_data['dr_account_id']);
+            $dr_data['payer_type'] = 'customer';
+            $dr_data['payer'] = $customer_name;
+            $dr_data['payer_id'] = $invoice['customer_id'];
+            $dr_data['trans_category_id'] = $tr_category->id;
+            $dr_data['is_bill'] = 2;
+            $dr_data['transaction_type'] = 'sales';
+            $dr_data['ins'] = $invoice['ins'];
+            $dr_data['user_id'] = $invoice['user_id'];
+            $dr_data['tid'] = $tr_id;
+            $dr_data['refer_no'] = $tid;
+            $dr_data['account_id'] = $dr_account_id;
+            $dr_data['transaction_date'] = date_for_database($invoice['invoicedate']);
+            $dr_data['due_date'] = date_for_database($duedate);
+            $dr_data['debit'] = numberClean($invoice['total']);
+            $dr_data['note'] = $invoice['notes'];
+            $dr_data['invoice_id'] = $result->id;
+            $debit = Purchase::create($dr_data);
+            //Cr Income amount exclusive tax
+            $cr_account_id = $cr_data['cr_account_id'];
+            unset($cr_data['cr_account_id']);
+
+            $cr_data['payer_type'] = 'customer';
+            $cr_data['payer'] = $customer_name;
+            $cr_data['payer_id'] = $invoice['customer_id'];
+            $cr_data['trans_category_id'] = $tr_category->id;
+            $cr_data['is_bill'] = 0;
+            $cr_data['transaction_type'] = 'sales';
+            $cr_data['ins'] = $invoice['ins'];
+            $cr_data['user_id'] = $invoice['user_id'];
+            $cr_data['tid'] = $tr_id;
+            $cr_data['refer_no'] = $tid;
+            $cr_data['account_id'] = $cr_account_id;
+            $cr_data['transaction_date'] = date_for_database($invoice['invoicedate']);
+            $cr_data['due_date'] = date_for_database($duedate);
+            $cr_data['credit'] = numberClean($invoice['subtotal']);
+            $cr_data['note'] = $invoice['notes'];
+            $cr_data['bill_id'] = $result->id;
+            $credit = Purchase::create($cr_data);
+
+            //Cr Tax
+            $tax_data = $input['tax_data'];
+            if (numberClean($tax_data['tax']) > 0) {
+                $tr_tax_category = Transactioncategory::where('code', 'p_taxes')->first();
+                $account_id = Account::where('system', 'tax')->first();
+                $tax_data['payer_type'] = 'customer';
+                $tax_data['payer'] = $customer_name;
+                $tax_data['payer_id'] = $invoice['customer_id'];
+                $tax_data['account_id'] = $account_id->id;
+                $tax_data['trans_category_id'] = $tr_tax_category->id;
+                $tax_data['secondary_account_id'] = $account_id->id;
+                $tax_data['tax_type'] = 'sales_purchases';
+                $tax_data['transaction_type'] = 'sales';
+                $tax_data['ins'] = $invoice['ins'];
+                $tax_data['user_id'] = $invoice['user_id'];
+                $tax_data['tid'] = $tr_id;
+                $tax_data['refer_no'] = $tid;
+                $tax_data['refer_no'] = $invoice['tid'];
+                $tax_data['tax_amount'] = numberClean($invoice['subtotal']);
+                $tax_data['credit'] = numberClean($tax_data['tax']);
+                $tax_data['taxable_amount'] = numberClean($invoice['tax']);
+                $tax_data['note'] = strip_tags($invoice['notes']);
+                $tax_data['transaction_date'] = date_for_database($invoice['invoicedate']);
+                $tax_data['invoice_id'] = $invoice['tid'];
+                $tax_data['bill_id'] = $result->id;
+
+                Purchase::create($tax_data);
+            }
+        }
 
         if ($result) {
             DB::commit();
             return $result;
         }
-        
+
         throw new GeneralException('Error Creating Invoice');
     }
 
@@ -482,7 +484,7 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
             $q = '';
             $i = 0;
             foreach (array_keys($val) as $field) {
-                if ($field != $index AND $field != $index2) {
+                if ($field != $index and $field != $index2) {
 
                     if ($i < 2) $q .= $field . '=' . $val[$field] . ',';
                     if ($i == 2) $q .= $field . '=' . $val[$field] . ' ';
@@ -495,7 +497,6 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         }
 
         return DB::statement($whr);
-
     }
 
 
@@ -509,7 +510,7 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
      */
     public function update(Invoice $invoice, array $input)
     {
-           $p = @$input['invoice']['p'];
+        $p = @$input['invoice']['p'];
 
         $id = $input['invoice']['id'];
         $extra_discount = numberClean($input['invoice']['after_disc']);
@@ -534,14 +535,14 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         DB::beginTransaction();
         $result = Invoice::find($id);
         if ($result->status == 'canceled') return false;
-                if ($result->i_class>1) {
+        if ($result->i_class > 1) {
             $input['invoice']['r_time'] = $input['invoice']['recur_after'];
             $input['invoice']['invoiceduedate'] = date("Y-m-d", strtotime($input['invoice']['invoicedate'] . " +" . $input['invoice']['r_time'] . 's'));
             unset($input['invoice']['recur_after']);
         } else {
             $input['invoice']['invoiceduedate'] = date_for_database($input['invoice']['invoiceduedate']);
         }
-        $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
+        $input['invoice'] = array_map('strip_tags', $input['invoice']);
         $result->update($input['invoice']);
 
         if ($result) {
@@ -568,7 +569,8 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                 $total_qty += $qty;
                 $total_tax += numberClean(@$input['invoice_items']['product_tax'][$key]);
                 $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array('invoice_id' => $id,
+                $products[] = array(
+                    'invoice_id' => $id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
                     'code' => @$input['invoice_items']['code'][$key],
@@ -579,17 +581,17 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                     'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
                     'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
                     'total_discount' => numberClean(@$input['invoice_items']['total_discount'][$key]),
-                    'product_des' =>  strip_tags(@$input['invoice_items']['product_description'][$key],config('general.allowed')),
+                    'product_des' =>  strip_tags(@$input['invoice_items']['product_description'][$key], config('general.allowed')),
                     'unit_value' => $unit_val,
                     'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']);
+                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']
+                );
 
                 if ($old_qty > 0) {
                     $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty - $old_qty);
                 } else {
                     $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty);
                 }
-
             }
             InvoiceItem::insert($products);
             $invoice_d = Invoice::find($id);
@@ -679,7 +681,8 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                 $total_qty += (@$row['product_qty']);
                 $total_tax += (@$row['total_tax']);
                 $total_discount += (@$row['total_discount']);
-                $products[] = array('invoice_id' => $result->id,
+                $products[] = array(
+                    'invoice_id' => $result->id,
                     'product_id' => @$row['product_id'],
                     'product_name' => @$row['product_name'],
                     'code' => @$row['code'],
@@ -692,7 +695,8 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                     'total_discount' => (@$row['total_discount']),
                     'product_des' => @$row['product_des'],
                     'i_class' => 0,
-                    'unit' => $row['unit'], 'ins' => $result->ins);
+                    'unit' => $row['unit'], 'ins' => $result->ins
+                );
             }
 
             $stock_update[] = array('id' => $row['product_id'], 'qty' => $row['product_qty']);
@@ -733,15 +737,15 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         $default_category = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 8)->first('feature_value');
         $words['prefix'] = prefix(1);
         $total_amount = 0;
-        $register_update=array();
+        $register_update = array();
         foreach ($payment['p_amount'] as $key => $amount) {
             $pay_method = $payment['p_method'][$key];
-             $amount = numberClean($amount);
+            $amount = numberClean($amount);
 
-            if(!isset($register_update[$pay_method])){
-                $register_update[$pay_method]=$amount;
+            if (!isset($register_update[$pay_method])) {
+                $register_update[$pay_method] = $amount;
             } else {
-                 $register_update[$pay_method]=$register_update[$pay_method]+$amount;
+                $register_update[$pay_method] = $register_update[$pay_method] + $amount;
             }
 
             if ($pay_method == 'Wallet') {
@@ -754,7 +758,7 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                     $amount = 0;
                 }
             }
- $transaction = array();
+            $transaction = array();
             if ($amount > 0) {
 
                 $transaction['ins'] = auth()->user()->ins;
@@ -774,11 +778,10 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                 $payments[] = $transaction;
                 $total_amount += $amount;
             }
-
         }
 
         try {
-            if(count($transaction)>0) {
+            if (count($transaction) > 0) {
 
                 $result = Transaction::insert($payments);
                 $note = trans('payments.paid_amount') . ' ' . amountFormat($total_amount);
@@ -790,13 +793,12 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
 
                 foreach ($items as $key => $reg) {
 
-                    if (isset($register_update[$key])) $new_data[$key] = $register_update[$key] + $reg; else $new_data[$key] = $reg;
-
+                    if (isset($register_update[$key])) $new_data[$key] = $register_update[$key] + $reg;
+                    else $new_data[$key] = $reg;
                 }
                 $register->data = json_encode($new_data);
                 $register->save();
             }
-
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();
             echo json_encode(array('status' => 'Error', 'message' => trans('exceptions.valid_entry_account') . $e->getCode()));
@@ -824,37 +826,37 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                 $account->balance = $account->balance - $total_amount;
                 $account->save();
             }
-            $due = $invoice->total - ($total_amount+$invoice->pamnt);
+            $due = $invoice->total - ($total_amount + $invoice->pamnt);
             $invoice->pmethod = $transaction['method'];
 
             if ($due <= 0) {
 
                 $invoice->pamnt = $invoice->total;
                 $invoice->status = 'paid';
-
-            } elseif ($total_amount < $invoice->total AND $total_amount > 0) {
+            } elseif ($total_amount < $invoice->total and $total_amount > 0) {
 
                 $invoice->pamnt = $invoice->pamnt + $total_amount;
 
                 $invoice->status = 'partial';
             }
             $invoice->save();
-        } elseif($invoice->pamnt>=$invoice->total) {
-             $invoice->status = 'paid';
-              $invoice->pamnt = $invoice->total;
+        } elseif ($invoice->pamnt >= $invoice->total) {
+            $invoice->status = 'paid';
+            $invoice->pamnt = $invoice->total;
 
-              $invoice->save();
-        } elseif($invoice->pamnt>0) {
-             $invoice->status = 'partial';
+            $invoice->save();
+        } elseif ($invoice->pamnt > 0) {
+            $invoice->status = 'partial';
 
-              $invoice->save();
+            $invoice->save();
         }
-           if(isset(auth()->valid)) DB::commit(); else  DB::rollBack();
+        if (isset(auth()->valid)) DB::commit();
+        else  DB::rollBack();
 
         return true;
     }
 
-        public function create_draft(array $input)
+    public function create_draft(array $input)
     {
         $extra_discount = numberClean($input['invoice']['after_disc']);
         $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
@@ -907,7 +909,8 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                     $unit_val = 1;
                     $qty = numberClean($input['invoice_items']['product_qty'][$key]);
                 }
-                $products[] = array('invoice_id' => $result->id,
+                $products[] = array(
+                    'invoice_id' => $result->id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => @$input['invoice_items']['product_name'][$key],
                     'code' => @$input['invoice_items']['code'][$key],
@@ -922,7 +925,8 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
                     'unit_value' => $unit_val,
                     'serial' => @$input['invoice_items']['serial'][$key],
                     'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins);
+                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins
+                );
                 $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty);
             }
 
@@ -940,20 +944,4 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         }
         throw new GeneralException(trans('exceptions.backend.invoices.create_error'));
     }
-
-      // convert array to database collection format
-      protected function array_items($count=0, $item=[], $extra=[])
-      {
-          $data_items = array();
-          for ($i = 0; $i < $count; $i++) {
-              $row = $extra;
-              foreach (array_keys($item) as $key) {
-                  if (isset($item[$key][$i])) {
-                      $row[$key] = $item[$key][$i];
-                  }
-              }
-              $data_items[] = $row;
-          }
-          return $data_items;
-      }
 }
