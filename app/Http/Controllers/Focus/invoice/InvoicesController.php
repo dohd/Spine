@@ -38,6 +38,7 @@ use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
 use App\Http\Requests\Focus\invoice\CreateInvoiceRequest;
 use App\Http\Requests\Focus\invoice\EditInvoiceRequest;
 use App\Http\Requests\Focus\invoice\DeleteInvoiceRequest;
+use App\Http\Responses\RedirectResponse;
 use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
@@ -176,30 +177,30 @@ class InvoicesController extends Controller
     /**
      * Store newly created project invoice
      */
-    public function store_project_invoice(CreateInvoiceRequest $request)
+    public function store_project_invoice(Request $request)
     {
-        // filter request input fields
-        $invoice_data = $request->only(['customer_id', 'taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 'notes', 'subtotal', 'tax', 'total', 'term_id', 'lpo_ref']);
+        // extract request input fields
+        $invoice_data = $request->only([
+            'customer_id', 'taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 
+            'notes', 'subtotal', 'tax', 'total', 'term_id'
+        ]);
         $dr_data = $request->only(['customer_name', 'dr_account_id', 'tid']);
         $cr_data = $request->only(['cr_account_id']);
         $tax_data = $request->only(['tax']);
         $data_items = $request->only(['description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id']);
-        //check if KRA input is empty
-        if (numberClean($request->input('tax')) > 0 && empty($request->input('tax_id'))) {
-            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
-            exit;
-        }
+
         $invoice_data['user_id'] = auth()->user()->id;
         $invoice_data['ins'] = auth()->user()->ins;
 
         $result = $this->repository->create_poroject_invoice(compact('invoice_data', 'dr_data', 'cr_data', 'tax_data', 'data_items'));
 
         $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
+        $msg = trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-md bg-purple ml-2"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  
+            <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> 
+            <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-warning"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;';
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-success btn-md"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;'));
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => $msg]);
     }
-
-
 
     /**
      * Show the form for editing the specified resource.
