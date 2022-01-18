@@ -292,15 +292,9 @@
 			<tr>
 				@if ($invoice->print_type == 'inclusive')
 					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
-					<td class="align-r">
-						@if ($invoice->tax_id)
-							INCLUSIVE
-						@else
-							NONE
-						@endif
-					</td>
+					<td class="align-r">{{ $invoice->tax_id ? 'INCLUSIVE' : 'NONE' }}</td>
 				@else
-					<td class="align-r">Tax {{ $invoice->tax_id }}%</td>
+					<td class="align-r">Tax {{ $invoice->tax_id ? $invoice->tax_id . '%' : 'Off' }}</td>
 					<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
 				@endif
 			</tr>
