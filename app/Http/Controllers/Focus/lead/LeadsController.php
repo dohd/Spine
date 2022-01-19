@@ -148,10 +148,8 @@ class LeadsController extends Controller
      */
     public function destroy(Lead $lead)
     {
-        //dd($lead);
-        //Calling the delete method on repository
         $this->repository->delete($lead);
-        //returning with successfull message
+        
         return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Deleted']);
     }
 
