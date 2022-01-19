@@ -11,9 +11,7 @@ use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
 use App\Models\items\Register;
-use App\Models\product\ProductMeta;
 use App\Models\product\ProductVariation;
-use App\Models\project\ProjectRelations;
 use App\Models\transaction\Transaction;
 use App\Models\transaction\TransactionHistory;
 use App\Repositories\BaseRepository;
@@ -42,31 +40,29 @@ class InvoiceRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
         $q->when(request('i_rel_type') == 1, function ($q) {
             return $q->where('customer_id', '=', request('i_rel_id', 0));
         });
 
         if (request('project_id')) {
-            $q->whereHas('project', function ($s) {
-                return $s->where('project_id', '=', request('project_id', 0));
+            $q->whereHas('project', function ($sq) {
+                return $sq->where('project_id', request('project_id', 0));
             });
         }
 
-        if (request('sub') == 1) {
-            $q->where('i_class', '>', 1);
-        } elseif (request('sub') == 2) {
-            $q->where('i_class', '=', 1);
-        } else {
-            $q->where('i_class', '<', 1);
+        if (request('sub') == 1) $q->where('i_class', '>', 1);
+        if (request('sub') == 2) $q->where('i_class', 1);
+        else $q->where('i_class', '<', 1);
+        
+        if (request('start_date') && request('end_date')) {
+            $q->whereBetween('invoicedate', [
+                date_for_database(request('start_date')), 
+                date_for_database(request('end_date'))
+            ]);
         }
 
-        if (request('start_date')) {
-            $q->whereBetween('invoicedate', [date_for_database(request('start_date')), date_for_database(request('end_date'))]);
-        }
-
-
-        return
-            $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'refer', 'total', 'status']);
+        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
     }
 
     public function getSelfDataTable($self_id = false)
@@ -349,14 +345,11 @@ class InvoiceRepository extends BaseRepository
         $invoice['invoiceduedate'] = date_for_database($duedate);
 
         // increament tid
-        $invoice_no = Invoice::orderBy('id', 'desc')->first('tid');
-        $tid = $invoice['invoice_no'];
-        if (isset($invoice_no->tid) && $invoice['invoice_no'] <= $invoice_no->tid) {
-            $tid = $invoice_no->tid + 1;
+        $db_invoice = Invoice::orderBy('id', 'desc')->first('tid');
+        if (isset($db_invoice->tid) && $invoice['tid'] <= $db_invoice->tid) {
+            $invoice['tid'] = $db_invoice->tid + 1;
         }
         unset($invoice['taxid']);
-        unset($invoice['invoice_no']);
-        $invoice['tid'] = $tid;
         $invoice['status'] = 'due';
         $result = Invoice::create($invoice);
 
