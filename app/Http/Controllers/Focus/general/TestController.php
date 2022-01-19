@@ -19,7 +19,6 @@
 namespace App\Http\Controllers\Focus\general;
 
 use App\Http\Controllers\Controller;
-use App\Models\Access\User\User;
 
 class TestController extends Controller
 {
@@ -28,8 +27,16 @@ class TestController extends Controller
      */
     public function showLoginForm()
     {
-        $user = User::first(['first_name', 'last_name']);
-        return 'Test user: '. $user->first_name .' '. $user->last_name;
+        return '
+            <form action="'.route('biller.test_login').'" method="POST">
+                <input type="hidden" name="_token" value="'.csrf_token().'">
+                <div><label>Email</label></div>
+                <input type="text" name="email"><br>
+                <div><label>Password</label></div>
+                <input type="text" name="password">
+                <button type="submit">Login</button>
+            </form>
+        ';
 
         // if no present file in install directory, redirect to installation page
         if (!file_exists(storage_path('installed'))) 
