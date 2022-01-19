@@ -182,9 +182,6 @@
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
-    // Remove visibility for status checkbox
-    $('.status-group').css('display', 'none');
-
     /**
      * Edit Lead form script
      */
@@ -192,8 +189,8 @@
     const branch = @json(@$lead->branch);
     const customer = @json(@$lead->customer);
     if (lead && lead.hasOwnProperty('branch_id')) {
-        // if branch_id is 0 then its a new customer
-        if (lead['branch_id'] === 0) {
+        // new customer
+        if (lead['client_status'] == 'new') {
             $('#colorCheck1').attr('checked', false);
             $('#colorCheck3').attr('checked', true);
             $('#person').attr('disabled', true);
@@ -202,7 +199,6 @@
             $('#client_email').attr('readonly', false);
             $('#client_contact').attr('readonly', false);
             $('#client_address').attr('readonly', false);
-            $('input[type=radio]').attr('disabled', false);
         } 
         else {
             $('#colorCheck1').attr('checked', true);
@@ -214,7 +210,6 @@
 
             $('#person').append(new Option(customer['name'], customer['id']));
             $('#branch_id').append(new Option(branch['name'], branch['id']));
-            $('input[type=radio]').prop('disabled', true);
         }
 
         $('#reference').val(lead['reference']);
