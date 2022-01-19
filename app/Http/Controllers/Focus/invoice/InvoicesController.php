@@ -77,7 +77,7 @@ class InvoicesController extends Controller
     public function index(ManageInvoiceRequest $request)
     {
         $input = $request->only('rel_type', 'rel_id', 'md');
-        $segment = false;
+        $segment = array();
         $words = array();
         if (isset($input['rel_id']) and isset($input['rel_type'])) {
             switch ($input['rel_type']) {
@@ -181,7 +181,7 @@ class InvoicesController extends Controller
     {
         // extract request input fields
         $invoice_data = $request->only([
-            'customer_id', 'taxid', 'bank_id', 'tax_id', 'invoice_no', 'invoicedate', 'validity', 
+            'customer_id', 'taxid', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 
             'notes', 'subtotal', 'tax', 'total', 'term_id'
         ]);
         $dr_data = $request->only(['customer_name', 'dr_account_id', 'tid']);
