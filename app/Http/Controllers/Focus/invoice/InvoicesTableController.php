@@ -17,7 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\invoice;
 
-use App\Models\invoice\Invoice;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\invoice\InvoiceRepository;
@@ -51,9 +50,10 @@ class InvoicesTableController extends Controller
      */
     public function __invoke(ManageInvoiceRequest $request)
     {
-        //
         $core = $this->invoice->getForDataTable();
+
         return Datatables::of($core)
+            ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
                 return '<a class="font-weight-bold" href="' . route('biller.invoices.show', [$invoice->id]) . '">' . $invoice->tid . '</a>';
@@ -75,7 +75,7 @@ class InvoicesTableController extends Controller
             })
             ->addColumn('actions', function ($invoice) {
                 return $invoice->action_buttons;
-            })->rawColumns(['tid', 'customer', 'actions', 'status', 'total'])
+            })
             ->make(true);
     }
 }
