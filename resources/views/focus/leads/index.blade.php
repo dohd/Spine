@@ -64,9 +64,7 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 
 <script>
-    $(function() {
-        setTimeout(function() { draw_data() }, "{{ config('master.delay') }}");
-    });
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     function draw_data() {
         $.ajaxSetup({
