@@ -72,16 +72,12 @@
                             <div class="col-3">
                                 <label for="tid" class="caption">Transaction ID*</label>
                                 <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span>
-                                    </div>
-                                    {{ Form::number('tid', @$last_tr->tid + 1, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid')]) }}
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <label for="invoice_no" class="caption">Invoice Number*</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('invoice_no', @$last_invoice->tid + 1, ['class' => 'form-control round required', 'placeholder' => trans('general.reference')]) }}
+                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                    @php
+                                        $tid = isset($last_tr->tid) ? $last_tr->tid+1 : 1;
+                                    @endphp
+                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', $tid), ['class' => 'form-control round', 'disabled']) }}
+                                    <input type="hidden" name="tid" value={{ $tid }}>
                                 </div>
                             </div>
                         </div>
