@@ -15,12 +15,10 @@ trait LeadAttribute
      * Action Button Attribute to show in grid
      * @return string
      */
-     public function getActionButtonsAttribute()
+    public function getActionButtonsAttribute()
     {
-        return '
-         '.$this->getViewButtonAttribute("project-manage", "biller.leads.show").'
-                '.$this->getEditButtonAttribute("project-edit", "biller.leads.edit").'
-                '.$this->getDeleteButtonAttribute("project-delete", "biller.leads.destroy").'
-                ';
+        return $this->getViewButtonAttribute("project-manage", "biller.leads.show") . ' ' 
+            . $this->getEditButtonAttribute("project-edit", "biller.leads.edit") . ' ' 
+            . $this->getDeleteButtonAttribute("project-delete", "biller.leads.destroy");
     }
 }
