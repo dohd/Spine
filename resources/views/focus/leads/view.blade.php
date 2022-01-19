@@ -1,16 +1,12 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Leads Management')
-
-@section('page-header')
-<h1>Leads Management</h1>
-@endsection
+@section ('title', 'Tickets Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title">Leads Management</h4>
+            <h4 class="content-header-title">Tickets Management</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right mr-3">
@@ -23,12 +19,14 @@
     
     <div class="card">
         <div class="card-header">
+            {{-- 
             <button type="button" class="btn btn-success font-weight-bold" data-toggle="modal" data-target="#status-modal">
                 <i class="fa fa-pencil"></i> Status
             </button>
-            @include('focus.leads.partials.status_modal')
-        </div>
+            --}}
 
+            <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning"><i class="fa fa-clone" aria-hidden="true"></i> Copy</a>
+        </div>
         <div class="card-body">
             <h5 class="card-title mb-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
             <table id="leads-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -103,6 +101,7 @@
         </div>
     </div>
 </div>
+@include('focus.leads.partials.status_modal')
 @endsection
 
 @section('after-scripts')

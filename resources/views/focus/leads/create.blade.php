@@ -23,7 +23,7 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                {{ Form::open(['route' => 'biller.leads.store', 'method' => 'post' ]) }}
+                                {{ Form::open(['route' => 'biller.leads.store', 'method' => 'POST' ]) }}
                                     @include("focus.leads.form")
                                     {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-lg pull-right mb-2']) }}
                                 {{ Form::close() }}

@@ -257,9 +257,7 @@
                 params: { 'cat_id': id },
                 data: function(product) { return { product };},
                 processResults: function(data) {
-                    return { 
-                        results: data.map(v => ({ text: v.name, id: v.id }))                      
-                    };
+                    return { results: data.map(v => ({ text: v.name, id: v.id })) };
                 },
             }
         });
