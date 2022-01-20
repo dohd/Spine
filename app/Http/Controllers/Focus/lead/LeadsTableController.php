@@ -69,10 +69,6 @@ class LeadsTableController extends Controller
             ->addColumn('created_at', function ($lead) {
                 return dateFormat($lead->created_at);
             })
-            ->addColumn('status', function($lead) {
-                if ($lead->status == 0) return '<span class="badge badge-success">Open</span>';
-                return '<span class="badge badge-secondary">Closed</span>';
-            })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
             })
