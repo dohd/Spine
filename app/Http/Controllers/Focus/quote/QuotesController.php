@@ -398,9 +398,8 @@ class QuotesController extends Controller
         // extract input fields
         $input = $request->only(['bill_id', 'lpo_id']);
 
-        // update 
-        Quote::find($input['bill_id'])->update($input['lpo_id']);
+        Quote::find($input['bill_id'])->update(['lpo_id' => $input['lpo_id']]);
 
-        return response()->json(['status' => 'Success', 'message' => 'Record Updated Successfully', 'refresh' => 1 ]);
+        return response()->json(['status' => 'Success', 'message' => 'LPO added successfully', 'refresh' => 1 ]);
     }
 }
