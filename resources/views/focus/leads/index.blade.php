@@ -34,7 +34,6 @@
                                             <th>Client & Branch</th>
                                             <th>Source</th>
                                             <th>{{ trans('general.createdat') }}</th>
-                                            <th>Status</th>
                                             <th>Client Ref</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -48,8 +47,6 @@
                                     </tbody>
                                 </table>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -111,11 +108,7 @@
                 },
                 {
                     data: 'created_at',
-                    name: "{{config('module.leads.table')}}.created_at"
-                },
-                {
-                    data: 'status',
-                    name: 'status'
+                    name: "{{ config('module.leads.table') }}.created_at"
                 },
                 {
                     data: 'client_ref',
