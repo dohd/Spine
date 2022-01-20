@@ -48,7 +48,7 @@ class QuoteInvoiceTableController extends Controller
     public function __invoke()
     {
         $core = $this->quote->getForVerifyNotInvoicedDataTable();
-
+        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -81,14 +81,15 @@ class QuoteInvoiceTableController extends Controller
             ->addColumn('total', function ($quote) {
                 return number_format($quote->total, 2);
             })
-            ->addColumn('verified_amount', function ($quote) {
-                return number_format($quote->verified_amount, 2);
+            ->addColumn('verified_total', function ($quote) {
+                return number_format($quote->verified_total, 2);
             })
             ->addColumn('project_number', function($quote) {
                 if ($quote->project_quote_id) 
                     return 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
             })
             ->addColumn('lpo_number', function($quote) {
+                print_log('+++ lpo_id ++ ' . $quote->lpo_id, '+++ quote_id ++' . $quote->id);
                 if ($quote->lpo_id) 
                     return $quote->lpo->lpo_no;
             })
