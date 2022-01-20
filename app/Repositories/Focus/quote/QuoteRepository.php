@@ -376,7 +376,7 @@ class QuoteRepository extends BaseRepository
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'bank_id', 'verified'
+            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id'
         ]);
     }
 }
