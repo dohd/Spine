@@ -127,14 +127,13 @@ class InvoicesController extends Controller
     public function create_project_invoice(ManageInvoiceRequest $request)
     {
         // extract input fields
-        $input = $request->only(['customer', 'selected_products']);
+        $inv_customer = request('customer');
+        $inv_quote_ids = request('selected_products');
 
-        // check for customer and selected products
-        if (!empty($input['customer']) && !empty($input['selected_products'])) {
-            $quote_ids = explode(',', $input['selected_products']);
+        if ($inv_customer && $inv_quote_ids) {
+            $quote_ids = explode(',', $inv_quote_ids);
             $quotes = Quote::whereIn('id', $quote_ids)->get();
-
-            $customer = Customer::find($input['customer'])->first();
+            $customer = Customer::find($inv_customer);
             $last_invoice = Invoice::orderBy('id', 'desc')->first();
             $last_tr = Transaction::orderBy('id', 'desc')->first();
             $banks = Bank::all();
