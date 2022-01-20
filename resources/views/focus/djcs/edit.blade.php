@@ -1,6 +1,11 @@
 @extends ('core.layouts.app')
 
-@section ('title', ' Diagnosis Job Card | Edit Diagnosis Job Card')
+@php
+    $query_str = request()->getQueryString();
+    $part_title = preg_match('/page=copy/', $query_str) ? 'Copy' : 'Edit';
+@endphp
+
+@section ('title', ' Diagnosis Job Card | ' . $part_title)
 
 @section('content')
 <div class="">
@@ -22,7 +27,11 @@
             <div class="card">
                 <div class="card-content">
                     <div class="card-body">
-                        {{ Form::model($djc, ['route' => ['biller.djcs.update', $djc], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-djc']) }}
+                        @if ($query_str == 'page=copy')
+                            {{ Form::model($djc, ['route' => ['biller.djcs.store', $djc], 'method' => 'POST']) }}
+                        @else
+                            {{ Form::model($djc, ['route' => ['biller.djcs.update', $djc], 'method' => 'PATCH']) }}
+                        @endif
                         <div class="row">
                             <div class="col-sm-6 cmp-pnl">
                                 <div id="customerpanel" class="inner-cmp-pnl">
@@ -204,8 +213,11 @@
                                         <i class="fa fa-plus-square"></i> Add Equipment
                                     </button>
                                 </div>
-                                <div class="col-5">
-                                    {{ Form::submit(trans('buttons.general.crud.update') . ' Report', ['class' => 'btn btn-primary btn-lg mt-3 float-right']) }}
+                                <div class="col-5 mt-3">
+                                @php
+                                    $text = $query_str == 'page=copy' ? 'Copy Report' : 'Update Report';
+                                @endphp                                
+                                {{ Form::submit($text, ['class' => 'btn btn-success btn-lg float-right']) }}
                                 </div>
                             </div>
                         </div>

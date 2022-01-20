@@ -2,10 +2,6 @@
 
 @section ('title', 'Djc Report Management')
 
-@section('page-header')
-<h1>Djc Report</h1>
-@endsection
-
 @section('content')
 <div class="p-2">
     <div class="content-header row">
@@ -22,7 +18,11 @@
     </div>
     
     <div class="card">
-        <h5 class="card-header">Diagnosis Job-card</h5>
+        <h5 class="card-header">
+            <a href="{{ route('biller.djcs.edit', [$djc, 'page=copy']) }}" class="btn btn-warning">
+                <i class="fa fa-clone" aria-hidden="true"></i> Copy
+            </a>
+        </h5>
         <div class="card-body">            
             <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
                 <li class="nav-item">
