@@ -13,7 +13,7 @@
                             <div class="col-3"><label for="payer" class="caption">Customer Name*</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customer_name', 'readonly']) }}
+                                    {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
                                     <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
                                 </div>
                             </div>
