@@ -19,7 +19,8 @@ class LpoTableController extends Controller
      */
     public function __invoke()
     {
-        $core = LpoController::getForDataTable();        
+        $core = LpoController::getForDataTable();   
+             
         return DataTables::of($core)
             ->addIndexColumn()
             ->addColumn('customer', function ($lpo) {
@@ -34,51 +35,51 @@ class LpoTableController extends Controller
             })
             ->addColumn('invoiced', function ($lpo) {
                 $tids = array(); 
-                $subtotal = 0;               
+                $total = 0;               
                 foreach ($lpo->quotes as $quote) {
                     if ($quote->invoiced == 'Yes') {
                         $tid = sprintf('%04d', $quote->tid);
                         $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
                         $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
-                        $subtotal += $quote->subtotal;
+                        $total += $quote->total;
                     }                    
                 }
 
-                $this->balance -= $subtotal;
-                if ($subtotal) 
-                    return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
+                $this->balance -= $total;
+                if ($total) 
+                    return '<span><b>'.number_format($total, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('verified_uninvoiced', function ($lpo) {
                 $tids = array(); 
-                $subtotal = 0;                 
+                $total = 0;                 
                 foreach ($lpo->quotes as $quote) {
                     if ($quote->verified == 'Yes' && $quote->invoiced == 'No') {
                         $tid = sprintf('%04d', $quote->tid);
                         $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
                         $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
-                        $subtotal += $quote->subtotal;
+                        $total += $quote->total;
                     }                    
                 }
 
-                $this->balance -= $subtotal;
-                if ($subtotal)
-                    return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
+                $this->balance -= $total;
+                if ($total)
+                    return '<span><b>'.number_format($total, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('approved_unverified', function ($lpo) {
                 $tids = array();
-                $subtotal = 0;                
+                $total = 0;                
                 foreach ($lpo->quotes as $quote) {
                     if ($quote->status === 'approved' && $quote->verified === 'No') {
                         $tid = sprintf('%04d', $quote->tid);
                         $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
                         $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
-                        $subtotal += $quote->subtotal;
+                        $total += $quote->total;
                     }                    
                 }
 
-                $this->balance -= $subtotal;
-                if ($subtotal) 
-                    return '<span><b>'.number_format($subtotal, 2).'</b><span><br>' . implode(', ', $tids);
+                $this->balance -= $total;
+                if ($total) 
+                    return '<span><b>'.number_format($total, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('balance', function ($lpo) {
                 return '<span><b>'.number_format($this->balance, 2).'</b></span>';
