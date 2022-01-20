@@ -101,13 +101,14 @@ class LpoController extends Controller
     public function destroy($id)
     {
         $lpo = Lpo::find($id);
-        if (isset($lpo->quotes)) {
+        if (!empty($lpo->quotes->toArray())) {
             $payload = array(
                 'message' => 'Cannot delete lpo attached to quote',
                 'code' => 403,
             );
             return response()->json($payload, 403);
         }
+        
         $lpo->delete();
         
         return response()->noContent();
