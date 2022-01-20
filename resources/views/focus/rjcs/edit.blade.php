@@ -38,7 +38,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <div class="col-sm-12"><label for="ref_type" class="caption">Search Lead </label>
+                                        <div class="col-sm-12"><label for="ref_type" class="caption">Search Ticket </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control  round  select-box" name="project_id" id="project" required="required">

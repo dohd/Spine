@@ -32,11 +32,11 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <div class="col-sm-12"><label for="ref_type" class="caption">Lead </label>
+                                        <div class="col-sm-12"><label for="ref_type" class="caption">Ticket </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control  round" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required>
-                                                    <option value="0">-- Select Lead --</option>
+                                                    <option value="0">-- Select Ticket --</option>
                                                     @foreach ($leads as $lead)
                                                         @php
                                                             $name = $lead->client_name;
