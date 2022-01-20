@@ -235,7 +235,7 @@ class QuoteRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Quote $quote)
+    public function delete($quote)
     {
         if ($quote->delete()) return true;
 
