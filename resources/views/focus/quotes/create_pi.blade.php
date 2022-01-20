@@ -2,10 +2,6 @@
 
 @section ('title', "PI Management | Create PI" )
 
-@section('page-header')
-    <h1>Create PI</h1>
-@endsection
-
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
@@ -35,11 +31,11 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="ref_type" class="caption">Leads</label>
+                                        <label for="ref_type" class="caption">Tickets</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
-                                                <option value="0">-- Select Lead --</option>
+                                                <option value="0">-- Select Ticket --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
@@ -174,8 +170,8 @@
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="term_id" name="term_id" class="form-control round  selectpicker" required>
-                                                <option value="0">-- Select Term --</option>
+                                            <select id="term_id" name="term_id" class="form-control round" required>
+                                                <option value="">-- Select Term --</option>
                                                 @foreach($terms as $term)
                                                     <option value="{{ $term->id }}">{{ $term->title }}</option>
                                                 @endforeach
@@ -309,10 +305,9 @@
     $('input[type="radio"]').change(function() {
         const $span = $('#tax-label').find('span').eq(1);
         if ($(this).is(':checked')) {
+            $span.text('VAT-Inclusive (print type)');
             if ($(this).val() === 'exclusive') {
                 $span.text('VAT-Exclusive (print type)');
-            } else if ($(this).val() === 'inclusive') {
-                $span.text('VAT-Inclusive (print type)');
             }
         }
     });
@@ -334,65 +329,59 @@
     }
 
     // product row
-    function productRow(val) {
+    function productRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required /></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required /></td>
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}"></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" /></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" /></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" readonly /></td>
-                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required /></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${n}' required /></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}"></td>                
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${n}" onchange="qtyChange(event)" /></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${n}" onchange="priceChange(event)" /></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${n}" readonly /></td>
+                <td><strong><span class='ttlText' id="result-${n}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="product_id[]" id="productid-${val}" value="0" />
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}" />
-                <input type="hidden" name="a_type[]" value="1" id="atype-${val}" />
+                <input type="hidden" name="product_id[]" id="productid-${n}" value="0" />
+                <input type="hidden" name="row_index[]" value="{n}" id="rowindex-${n}" />
+                <input type="hidden" name="a_type[]" value="1" id="atype-${n}" />
             </tr>
         `;
     }
 
     // product title row
     // with extra hidden input fields to imitate product row state
-    function productTitleRow(val) {
+    function productTitleRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required /></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${val}" required /></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required /></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${n}" required /></td>
                 <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="product_id[]" value="${val}" id="customfieldid-${val}" />
+                <input type="hidden" name="product_id[]" value="${n}" id="customfieldid-${n}" />
                 <input type="hidden" name="unit[]" />
                 <input type="hidden" name="product_qty[]" value="0" />
                 <input type="hidden" name="product_price[]" value="0" />
                 <input type="hidden" name="product_subtotal[]" value="0" />
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}" />
-                <input type="hidden" name="a_type[]" value="2" id="atype-${val}" />
+                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}" />
+                <input type="hidden" name="a_type[]" value="2" id="atype-${n}" />
             </tr>
         `;
     }
 
     // product row counter
-    let cvalue = 1;
-    // default row
-    const row = productRow(0);
-    $('#quotation tr:last').after(row);
+    let rowIndx = 0;
+    $('#quotation tr:last').after(productRow(0));
     $('#itemname-0').autocomplete(autocompleteProp(0));
 
     // on clicking Add Product button
     $('#add-product').click(function() {
-        // append row
-        const row = productRow(cvalue);
-        $('#quotation tr:last').after(row);
-        // autocomplete on added product row
-        $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
-        cvalue++;
+        rowIndx++;
+        const i = rowIndx;
+        $('#quotation tr:last').after(productRow(i));
+        $('#itemname-'+i).autocomplete(autocompleteProp(i));
     });
     // on clicking Add Title button
     $('#add-title').click(function() {
-        // append row
-        const row = productTitleRow(cvalue);
-        $('#quotation tr:last').after(row);
-        cvalue++;
+        rowIndx++;
+        $('#quotation tr:last').after(productTitleRow(rowIndx));
     });
 
     // on clicking Product row drop down menu
