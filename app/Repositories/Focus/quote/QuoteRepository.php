@@ -108,7 +108,7 @@ class QuoteRepository extends BaseRepository
         $quote = $input['data'];
         // format date values
         foreach ($quote as $key => $value) {
-            if ($key == 'invoicedate' || $key == 'reference_date') {
+            if (in_array($key, ['invoicedate', 'reference_date'])) {
                 $quote[$key] = date_for_database($value);
             }
         }
@@ -120,36 +120,32 @@ class QuoteRepository extends BaseRepository
         if (isset($quote['bank_id'])) {
             $ref = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
         }
-        if (isset($ref->tid) && $quote['tid'] <= $ref->tid) {
+        if (isset($ref) && $quote['tid'] <= $ref->tid) {
             $quote['tid'] = $ref->tid + 1;
         }  
 
-        // default fields
-        $quote['quote_type'] = 'lead';
-        $quote['client_type'] = 'lead';
-
         $lead = Lead::find($quote['lead_id']);
-        if (isset($lead->client_id) && isset($lead->branch_id)) {
+        if (isset($lead)) {
             $quote['customer_id'] = $lead->client_id;
             $quote['branch_id'] = $lead->branch_id;    
         }
-        // update Lead status to closed(1) reason won
+        // Close Lead (status = 1)
         $lead->update(['status' => 1, 'reason' => 'won']);
 
         $result = Quote::create($quote);
 
         // quote items
-        $items_count = count($input['data_items']['product_name']);
-        $quote_items = $this->array_items(
-            $items_count, 
-            $input['data_items'], 
-            ['quote_id' => $result['id'], 'ins' => $result['ins']]
-        );
-
-        // assign unit field
-        foreach ($quote_items as $key => $val) {
-            if (isset($val['unit'])) continue;
-            $quote_items[$key]['unit'] = null;
+        $quote_items = array();
+        $item = $input['data_items'];
+        for ($i = 0; $i < count($item['product_name']); $i++) {
+            $row = array('quote_id' => $result['id'], 'ins' => $result['ins']);
+            foreach (array_keys($item) as $key) {
+                if (isset($item[$key][$i])) {
+                    $row[$key] = $item[$key][$i];
+                } 
+                else $row[$key] = NULL;
+            }
+            $quote_items[] = $row;
         }
         QuoteItem::insert($quote_items);
 
@@ -183,19 +179,30 @@ class QuoteRepository extends BaseRepository
         $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
         $quote['invoiceduedate'] = date_for_database($duedate);
 
-        $lead = Lead::find($quote['lead_id']);
-        $quote['customer_id'] = $lead->client_id;
-        $quote['branch_id'] = $lead->branch_id;
-
-        $result = Quote::where('id', $quote['id'])->update($quote);
+        $result = Quote::where('id', $quote['id']);
+        // If lead is updated, open previous lead
+        if ($result->lead_id != $quote['lead_id']) {
+            $lead = Lead::find($quote['lead_id']);
+            $quote['customer_id'] = $lead->client_id;
+            $quote['branch_id'] = $lead->branch_id;
+            // open previous lead (status = 0)
+            $lead->update(['status' => 0, 'reason' => 'new']);
+        }
+        $result->update($quote);
 
         // quote items
-        $items_count = count($input['data_items']['product_name']);
-        $quote_items = $this->array_items(
-            $items_count, 
-            $input['data_items'], 
-            ['quote_id' => $quote['id'], 'ins' => $quote['ins']]
-        );
+        $quote_items = array();
+        $item = $input['data_items'];
+        for ($i = 0; $i < count($item['product_name']); $i++) {
+            $row = array('quote_id' => $quote['id'], 'ins' => $quote['ins']);
+            foreach (array_keys($item) as $key) {
+                if (isset($item[$key][$i])) {
+                    $row[$key] = $item[$key][$i];
+                } 
+                else $row[$key] = NULL;
+            }
+            $quote_items[] = $row;
+        }
 
         // update or create new quote item
         foreach($quote_items as $item) {
@@ -254,12 +261,18 @@ class QuoteRepository extends BaseRepository
         $ins = auth()->user()->ins;
 
         // quote items
-        $items_count = count($input['quote_items']['product_name']);
-        $quote_items = $this->array_items(
-            $items_count, 
-            $input['quote_items'],
-            compact('quote_id', 'ins')
-        );
+        $quote_items = array();
+        $item = $input['quote_items'];
+        for ($i = 0; $i < count($item['product_name']); $i++) {
+            $row = compact('quote_id', 'ins');
+            foreach (array_keys($item) as $key) {
+                if (isset($item[$key][$i])) {
+                    $row[$key] = $item[$key][$i];
+                } 
+                else $row[$key] = NULL;
+            }
+            $quote_items[] = $row;
+        }
         
         // job cards
         $job_cards = array();
@@ -287,8 +300,8 @@ class QuoteRepository extends BaseRepository
                 $quote_item[$key] = $value;
             }
             // remove stale attributes and save
-            if ($quote_item['id'] == 0) unset($quote_item['id']);
             unset($quote_item['item_id']);
+            if ($quote_item['id'] == 0) unset($quote_item['id']);
             $quote_item->save();
         }
         // update or create new job_card
@@ -302,8 +315,8 @@ class QuoteRepository extends BaseRepository
                 $job_card[$key] = $value;
             }
             // remove stale attributes and save
-            if ($job_card['id'] == 0) unset($job_card['id']);
             unset($job_card['jcitem_id']);                
+            if ($job_card['id'] == 0) unset($job_card['id']);
             $job_card->save();
         }
         
@@ -341,22 +354,6 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException(trans('Error deleting verified job card'));
     }
     
-    // convert array to database collection format
-    protected function array_items($count=0, $item=[], $extra=[])
-    {
-        $data_items = array();
-        for ($i = 0; $i < $count; $i++) {
-            $row = $extra;
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                }
-            }
-            $data_items[] = $row;
-        }
-        return $data_items;
-    }
-
     public function getForVerifyNotInvoicedDataTable()
     {
         $q = $this->query();
