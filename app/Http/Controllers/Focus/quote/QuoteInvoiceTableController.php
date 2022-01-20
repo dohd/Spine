@@ -50,11 +50,12 @@ class QuoteInvoiceTableController extends Controller
         $core = $this->quote->getForVerifyNotInvoicedDataTable();
 
         return Datatables::of($core)
+            ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('mass_select', function ($quote) {
-                return  '<input type="checkbox"  class="row-select" value="' . $quote->id .'">' ;
+                return  '<input type="checkbox"  class="row-select" value="'.$quote->id.'">';
             })
-            ->addColumn('notes', function($quote) {
+            ->addColumn('title', function($quote) {
                 return $quote->notes;
             })
             ->addColumn('tid', function ($quote) {
@@ -62,13 +63,16 @@ class QuoteInvoiceTableController extends Controller
                 if ($quote->bank_id) $tid = 'PI-'.$tid;
                 else $tid = 'QT-'.$tid;
 
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="'.route('biller.quotes.show', [$quote->id]).'">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($quote) {
-                if (isset($quote->customer) && isset($quote->branch)) {
-                    return $quote->customer->company.' - '.$quote->branch->name.' '
-                        .'<a class="font-weight-bold" href="' . route('biller.customers.show', [$quote->customer->id]) . '"><i class="ft-eye"></i></a>';
-                }
+                $customer = isset($quote->customer) ? $quote->customer->company : '';
+                $branch  = isset($quote->branch) ? $quote->branch->name : '';
+
+                if ($customer && $branch) 
+                    return $customer.' - '.$branch
+                        .'&nbsp;<a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
+                
                 return $quote->lead->client_name;
             })
             ->addColumn('created_at', function ($quote) {
@@ -77,23 +81,20 @@ class QuoteInvoiceTableController extends Controller
             ->addColumn('total', function ($quote) {
                 return number_format($quote->total, 2);
             })
-            ->addColumn('verified_total', function ($quote) {
-                return number_format($quote->verified_total, 2);
+            ->addColumn('verified_amount', function ($quote) {
+                return number_format($quote->verified_amount, 2);
             })
             ->addColumn('project_number', function($quote) {
-                $tid = '';
-                if (isset($quote->project_quote->project)) {
-                    $tid = 'P-'.sprintf('%04d', $quote->project_quote->project->project_number);
-                }
-                return $tid;
-            })
-            ->addColumn('verified', function ($quote) {
-                return $quote->verified;
+                if ($quote->project_quote_id) 
+                    return 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
             })
             ->addColumn('lpo_number', function($quote) {
-                return $quote->lpo ? $quote->lpo->lpo_no : '';
-            })         
-            ->rawColumns(['notes', 'tid', 'customer', 'actions', 'status', 'total','mass_select'])
+                if ($quote->lpo_id) 
+                    return $quote->lpo->lpo_no;
+            })
+            ->addColumn('lead_tid', function($quote) {
+                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+            })          
             ->make(true);
     }
 }
