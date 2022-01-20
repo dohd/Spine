@@ -33,6 +33,7 @@ class EditResponse implements Responsable
         $quote = $this->quote;
 
         $products = $quote->products()->orderBy('row_index')->get();
+        // open leads (status = 0)
         $leads = Lead::where('status', 0)->get();
 
         // default parameters
@@ -76,7 +77,7 @@ class EditResponse implements Responsable
                 ->with(bill_helper(2, 4));        
         }
 
-        $leads = Lead::all();
+        // $leads = Lead::all();
         // edit proforma invoice
         if (isset($banks)) {            
             return view('focus.quotes.edit_pi')
