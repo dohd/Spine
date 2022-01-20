@@ -11,7 +11,7 @@
                         <div class="col mb-1 form-group">
                             <label for="customer">Select LPO</label>
                             <select id="lpo_id" name="lpo_id" class="form-control" required>
-                                <option value="0">-- Select LPO --</option>
+                                <option value="">-- Select LPO --</option>
                                 @foreach ($lpos as $lpo)
                                     <option value="{{ $lpo->id }}">
                                         {{ $lpo->lpo_no }} || {{ $lpo->customer->company }} - {{ $lpo->branch->name }} ||

@@ -41,7 +41,7 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Search Project </label>
                                             <div class="input-group">
                                                 <select class="form-control  round  select-box" name="project_id" id="project" required>
-                                                    <option value="0">-- Select Project --</option>
+                                                    <option value="">-- Select Project --</option>
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}">
                                                             {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}

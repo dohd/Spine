@@ -186,7 +186,7 @@
             <tr>
                 <td>
                     <select class="form-control update" name="skill[]" id="skill-${v}" required>
-                        <option value="0" class="text-center">-- Select Skill Type --</option>                        
+                        <option value="" class="text-center">-- Select Skill Type --</option>                        
                         <option value="casual">Casual</option>
                         <option value="contract">Contract</option>
                         <option value="outsourced">Outsourced</option>

@@ -112,7 +112,7 @@
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                         <select id="ref_type" name="source" class="form-control round" required>
-                            <option value="0">-- Select Source --</option>
+                            <option value="">-- Select Source --</option>
                             <option value="Emergency Call">Emergency Call</option>
                             <option value="RFQ">RFQ</option>
                             <option value="Site Survey">Site Survey</option>

@@ -48,7 +48,7 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
-                                                <option value="0">-- Select Ticket --</option>
+                                                <option value="">-- Select Ticket --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
@@ -225,7 +225,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control round  select-box" name="revision" id="revision">
-                                                    <option value="0">-- Select Revision --</option>
+                                                    <option value="">-- Select Revision --</option>
                                                     <option value="_r1">R1</option>
                                                     <option value="_r2">R2</option>
                                                     <option value="_r3">R3</option>
