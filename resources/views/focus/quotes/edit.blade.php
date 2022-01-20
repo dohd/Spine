@@ -48,11 +48,11 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="ref_type" class="caption">Search Lead</label>
+                                        <label for="ref_type" class="caption">Search Ticket</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
-                                                <option value="0">-- Select Lead --</option>
+                                                <option value="0">-- Select Ticket --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
                                                         $name = $lead->client_name;
@@ -192,8 +192,8 @@
                                     <div class="col-sm-4"><label for="source" class="caption">Quotation Terms *</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="term_id" name="term_id" class="form-control round  selectpicker required">
-                                                <option value="0">No Terms</option>
+                                            <select id="term_id" name="term_id" class="form-control round" required>
+                                                <option value="">-- Select Term --</option>
                                                 @foreach($terms as $term)
                                                     <option value="{{$term->id}}">{{$term->title}}</option>
                                                 @endforeach
@@ -379,51 +379,51 @@
     }
 
     // product row
-    function productRow(val) {
+    function productRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}' required></td>
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
+                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${n}' required></td>
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" value=""></td>                
+                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${n}" onchange="qtyChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${n}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${n}" autocomplete="off" readonly></td>
+                <td><strong><span class='ttlText' id="result-${n}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
-                <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${val}">
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
+                <input type="hidden" name="product_id[]" value=0 id="productid-${n}">
+                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
+                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
             </tr>
         `;
     }
 
     // product title row
     // with extra hidden input fields to imitate product row state
-    function productTitleRow(val) {
+    function productTitleRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" required></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading" required></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
+                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" id="itemname-${n}" placeholder="Enter Title Or Heading" required></td>
                 <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
-                <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
+                <input type="hidden" name="product_id[]" value="${n}" id="productid-${n}">
                 <input type="hidden" name="unit[]" value="">
                 <input type="hidden" name="product_qty[]" value="0">
                 <input type="hidden" name="product_price[]" value="0">
                 <input type="hidden" name="product_subtotal[]" value="0">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
-                <input type="hidden" name="a_type[]" value="2" id="atype-${val}">
+                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
+                <input type="hidden" name="a_type[]" value="2" id="atype-${n}">
             </tr>
         `;
     }
 
     // product row counter
-    let cvalue = 0;
+    let rowIndx = 0;
     // set default product rows
     const quoteItems = @json($products);
     quoteItems.forEach(v => {
-        const i = cvalue;
+        const i = rowIndx;
         const item = {...v};
         // format float values to integer
         const keys = ['product_price','product_qty','product_subtotal'];
@@ -432,9 +432,9 @@
         });
         // check if item has product row parameters
         if (item.product_name && item.product_price) {
-            const row = productRow(cvalue);
+            const row = productRow(i);
             $('#quotation tr:last').after(row);
-            $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
+            $('#itemname-'+i).autocomplete(autocompleteProp(i));
 
             // set default values
             $('#itemid-'+i).val(item.id);
@@ -447,7 +447,7 @@
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
             $('#result-'+i).text(item.product_subtotal.toFixed(2));
         } else {
-            const row = productTitleRow(cvalue);
+            const row = productTitleRow(i);
             $('#quotation tr:last').after(row);
             // set default values
             $('#itemid-'+i).val(item.id);
@@ -455,24 +455,19 @@
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
         }
-        cvalue++;
+        rowIndx++;
         totals();
     });    
 
     $('#add-product').click(function() {
-        // append row
-        const row = productRow(cvalue);
-        $('#quotation tr:last').after(row);
-        // autocomplete on added product row
-        $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
-        cvalue++;
+        $('#quotation tr:last').after(productRow(rowIndx));
+        $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
+        rowIndx++;
     });
     // on clicking Add Title button
     $('#add-title').click(function() {
-        // append row
-        const row = productTitleRow(cvalue);
-        $('#quotation tr:last').after(row);
-        cvalue++;
+        $('#quotation tr:last').after(productTitleRow(rowIndx));
+        rowIndx++;
     });
 
     // on clicking Product row drop down menu
