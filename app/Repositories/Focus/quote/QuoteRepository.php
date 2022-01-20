@@ -179,7 +179,7 @@ class QuoteRepository extends BaseRepository
         $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
         $quote['invoiceduedate'] = date_for_database($duedate);
 
-        $result = Quote::where('id', $quote['id']);
+        $result = Quote::find($quote['id']);
         // If lead is updated, open previous lead
         if ($result->lead_id != $quote['lead_id']) {
             $lead = Lead::find($quote['lead_id']);
@@ -372,7 +372,7 @@ class QuoteRepository extends BaseRepository
         }
         
         // Verified and Not invoiced 
-        $q->where(['invoiced' => 'No', 'verified' => 'Yes']);
+        $q->where(['invoiced' => 'No', 'verified' => 'Yes'])->orderBy('id', 'desc');
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
