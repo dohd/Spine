@@ -158,8 +158,8 @@
                     name: 'total'
                 },
                 {
-                    data: 'verified_amount',
-                    name: 'verified_amount'
+                    data: 'verified_total',
+                    name: 'verified_total'
                 },
                 {
                     data: 'created_at',
