@@ -89,7 +89,6 @@ class QuoteInvoiceTableController extends Controller
                     return 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
             })
             ->addColumn('lpo_number', function($quote) {
-                print_log('+++ lpo_id ++ ' . $quote->lpo_id, '+++ quote_id ++' . $quote->id);
                 if ($quote->lpo_id) 
                     return $quote->lpo->lpo_no;
             })
