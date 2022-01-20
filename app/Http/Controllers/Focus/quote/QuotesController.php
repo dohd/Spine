@@ -107,9 +107,16 @@ class QuotesController extends Controller
      */
     public function store(CreateQuoteRequest $request)
     {
-        // filter request input fields
-        $data = $request->only(['client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
-        $data_items = $request->only(['row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'product_exclusive', 'total_tax', 'unit']);
+        // extract request input fields
+        $data = $request->only([
+            'client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 
+            'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 
+            'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type'
+        ]);
+        $data_items = $request->only([
+            'row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 
+            'product_subtotal', 'product_exclusive', 'total_tax', 'unit'
+        ]);
 
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
@@ -120,7 +127,7 @@ class QuotesController extends Controller
         $msg = trans('alerts.backend.quotes.created');
         if ($result['bank_id']) {
             $route = route('biller.quotes.index', 'page=pi');
-            $msg = 'PI created successfully';
+            $msg = 'Proforma Invoice successfully created';
         }
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
