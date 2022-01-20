@@ -155,8 +155,15 @@ class QuotesController extends Controller
     public function update(EditQuoteRequest $request, Quote $quote)
     {
         //filter request input fields
-        $data = $request->only(['client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type']);
-        $data_items = $request->only(['row_index', 'item_id', 'numbering', 'a_type', 'product_id', 'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit']);
+        $data = $request->only([
+            'client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 
+            'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 
+            'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type'
+        ]);
+        $data_items = $request->only([
+            'row_index', 'item_id', 'numbering', 'a_type', 'product_id', 'product_name', 
+            'product_qty', 'product_price', 'product_subtotal', 'unit'
+        ]);
 
         $data['id'] = $quote->id;
         $data['ins'] = auth()->user()->ins;
