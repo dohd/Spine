@@ -48,10 +48,9 @@ class StockIssuanceController extends Controller
      */
     public function issue_stock(Quote $quote)
     {
-        $budget = Budget::where(['quote_id' => $quote->id, 'version' => 1])->first();
-        $issued_items = StockIssuedItem::where('quote_id', $quote->id)->get();
+        $budget = Budget::where('quote_id', $quote->id)->first();
 
-        return view('focus.stockissuance.issue_stock')->with(compact('quote', 'budget', 'issued_items'));
+        return view('focus.stockissuance.issue_stock', compact('quote', 'budget'));
     }
 
     /**
