@@ -3,30 +3,29 @@
 namespace App\Models\items;
 
 use App\Models\items\Traits\InvoiceItemRelationship;
+use App\Models\items\Traits\QuoteItemAttribute;
 use Illuminate\Database\Eloquent\Model;
 
 class QuoteItem extends Model
 {
-     use InvoiceItemRelationship {
-            // CustomfieldAttribute::getEditButtonAttribute insteadof ModelTrait;
+    use InvoiceItemRelationship,
+        QuoteItemAttribute {
+            // 
         }
+
     protected $table = 'quote_items';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -53,11 +52,12 @@ class QuoteItem extends Model
     {
         parent::__construct($attributes);
     }
+
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
