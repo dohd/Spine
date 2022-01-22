@@ -13,4 +13,10 @@ class BudgetItem extends Model
     protected $guarded = [
         'id'
     ];
+
+    // scope
+    public function scopeOrderByRow($query)
+    {
+        return $query->orderBy('row_index', 'asc');
+    }
 }
