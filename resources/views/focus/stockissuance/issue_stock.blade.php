@@ -1,18 +1,22 @@
-@extends ('core.layouts.app')
+@extends('core.layouts.app')
 
-@section ('title', 'Stock Issuance Management')
+@section('title', 'Stock Issuance')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
+        <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
+            <strong>Budget Limit Exceeded!</strong> You should check on your list items.
+        </div>
+    </div>
+    <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title">Stock Issuance Management</h4>
-        </div>   
-
+            <h4 class="content-header-title">Stock Issuance</h4>
+        </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    <a href="{{ route('biller.stockissuance.index') }}" class="btn btn-primary">
+                    <a href="{{ '#' }}" class="btn btn-primary">
                         <i class="ft-list"></i> List
                     </a>
                 </div>
@@ -22,15 +26,14 @@
 
     <div class="content-body">
         <div class="card">
-            <div class="card-body">
+            <div class="card-body">                
                 {{ Form::model($quote, ['route' => ['biller.stockissuance.store', $quote], 'method' => 'POST' ]) }}
                 <input type="hidden" name="quote_id" value="{{ $quote->id }}">
                 <div class="form-group row">
                     <div class="col-12">
-                        @php
-                            $title = $quote->bank_id ? 'Proforma Invoice' : 'Quote';
-                        @endphp
-                        <h3 class="title">{{ $title }}</h3>                                        
+                        <h3 class="title">
+                            {{ $quote->bank_id ? 'Budgeted Proforma Invoice' : 'Budgeted Quote' }}
+                        </h3>                                        
                     </div>
                 </div>
                 <div class="form-group row">
@@ -44,12 +47,8 @@
                         <div id="customerpanel" class="inner-cmp-pnl">                        
                             <div class="form-group row">                                  
                                 <div class="col-4">
-                                    <label for="invoiceno" class="caption">
-                                        @if ($quote->bank_id)
-                                            #PI {{ trans('general.serial_no') }}
-                                        @else
-                                            #QT {{ trans('general.serial_no') }}
-                                        @endif
+                                    <label for="invoiceno" class="caption">                                        
+                                        {{ $quote->bank_id ? '#PI Serial No' : '#QT Serial No' }}
                                     </label>
                                     <div class="input-group">
                                         <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
@@ -63,7 +62,7 @@
                                 <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                     <div class="input-group">
                                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('invoicedate', null, ['class' => 'form-control round', 'data-toggle' => 'datepicker-qd', 'disabled']) }}
+                                        {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'disabled']) }}
                                     </div>
                                 </div>                                                                
                                 <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
@@ -75,152 +74,288 @@
                             </div> 
                         </div>
                     </div>
-                </div> 
+                </div>                    
 
-                <div>
-                    <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
-                        {{-- Hide budget items 
-                        <li class="nav-item">
-                            <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">
-                                Budget Items
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">
-                                Issue Items
-                            </a>
-                        </li>    
-                        --}}                    
-                    </ul>
-                    
-
-                    <div class="tab-content px-1 pt-1">
-                        {{-- Hide budget table
-                        <div class="tab-pane active in" id="active1" aria-labelledby="tab1" role="tabpanel">
-                            <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
+                <div>                            
+                    <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
+                        <thead>
+                            <tr class="item_header bg-gradient-directional-blue white">
+                                <th class="text-center">#</th>
+                                <th width="38%" class="text-center">Name</th>
+                                <th width="8%" class="text-center">Quoted Qty</th>                                
+                                <th width="7%" class="text-center">UOM</th>
+                                <th width="8%" class="text-center">Approve Qty</th>     
+                                <th width="16%" class="text-center">Buy Price (VAT Exc)</th>
+                                <th width="16%" class="text-center">Amount</th>
+                                <th width="8%" class="text-center">Issue Qty</th>  
+                                <th width="7%" class="text-center">Action</th>                             
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="row mb-1">
+                        <div class="col-12 payment-method last-item-row sub_c">
+                            <button type="button" class="btn btn-success" id="add-product">
+                                <i class="fa fa-plus-square"></i> Add Item
+                            </button>
+                        </div>                            
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-8">
+                            <table id="skill-item" class="table-responsive tfr my_stripe_single">
                                 <thead>
                                     <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="39%" class="text-center">{{trans('general.item_name')}}</th>
-                                        <th width="7%" class="text-center">UOM</th>
-                                        <th width="8%" class="text-center">{{trans('general.quantity')}}</th> 
-                                        <th width="8%" class="text-center">New Quantity</th>     
-                                        <th width="16%" class="text-center">Price (VAT Exc)</th>
-                                        <th width="16%" class="text-center">Amount</th>                             
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>                                                       
-                        </div>
-                        --}}
-
-                        <div class="tab-pane active in" id="active2" aria-labelledby="tab2" role="tabpanel">
-                            <table id="issue-item" class="table-responsive tfr my_stripe_single mb-1">
-                                <thead>
-                                    <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="40%" class="text-center">{{trans('general.item_name')}}</th>
-                                        <th width="8%" class="text-center">UOM</th>
-                                        <th width="8%" class="text-center">{{trans('general.quantity')}}</th> 
-                                        <th width="8%" class="text-center">Issue Quantity</th>     
-                                        <th width="16%" class="text-center">Price (VAT Exc)</th>
-                                        <th width="16%" class="text-center">Action</th>                            
+                                        <th class="text-center">#</th>
+                                        <th width="20%" class="text-center">Skill Type</th>
+                                        <th width="15%" class="text-center">Charge</th>
+                                        <th width="15%" class="text-center">Working Hrs</th>
+                                        <th width="15%" class="text-center">No. Technicians</th> 
+                                        <th width="15%" class="text-center">Amount</th>
+                                        <th width="10%" class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
-                            <div class="row mb-1">
-                                <div class="col-10 payment-method last-item-row sub_c">
-                                    <button type="button" class="btn btn-success" id="add-product">
-                                        <i class="fa fa-plus-square"></i> Add Item
-                                    </button>
-                                </div>
-                                <div class="col-2 mt-2">                                    
-                                    @if (count($issued_items))
-                                        {{ Form::submit('Issue Stock', ['class' => 'btn btn-success btn-lg', 'disabled']) }}   
-                                    @else                                        
-                                        {{ Form::submit('Issue Stock', ['class' => 'btn btn-success btn-lg']) }}
-                                    @endif                                    
-                                </div>                            
+                            <button type="button" class="btn btn-success mt-1" id="add-skill" disabled>
+                                <i class="fa fa-plus-square"></i> Add Skill
+                            </button>
+                            <div class="form-group float-right mt-1">
+                                <div><label for="budget-total">Total Amount</label></div>
+                                <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
                             </div>
-                        </div>                       
+                        </div>  
+                        <div class="col-4">
+                            <div class="form-group">
+                                <div><label for="tool">Tools Required & Notes</label></div>
+                                <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">                                    
+                                    {{ $budget->tool }}                                    
+                                </textarea>   
+                            </div>                                                     
+                            <div class="form-group">
+                                <div>
+                                    <label for="quote-total">Total Quote</label>
+                                    <span class="text-danger">(VAT Exc)</span>
+                                </div>
+                                <input type="text" class="form-control" id="quote-total" name="quote_total" readonly>
+                            </div>
+                            <div class="form-group">
+                                <div>
+                                    <label for="budget-total">Total Budget</label>&nbsp;
+                                    <span class="text-primary font-weight-bold">
+                                        (Profit: &nbsp;<span class="text-dark profit">0</span>)
+                                    </span>
+                                </div>
+                                <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
+                            </div>                            
+                            {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg', 'id' => 'submit']) }}
+                        </div>                              
                     </div>
                 </div>
-                {{ Form::close() }}   
-            </div>
+                {{ Form::close() }}
+            </div>             
         </div>
     </div>
 </div>
 @endsection
 
-@section('after-scripts')
+@section('extra-scripts')
 <script>
-    // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    // initialize html editor
+    editor();
 
+    // ajax setup
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+
+    // set default values
+    const subtotal = @json($quote->subtotal);
+    $('#quote-total').val(parseFloat(subtotal).toLocaleString());
+    $('#submit').css('visibility', 'hidden');
+    
     // initialize Quote Date datepicker
     $('.datepicker')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
         .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
-    
-    // product row
-    function productRow(n) {
+
+    // skill row html
+    function skillRow(n) {
         return `
             <tr>
-                <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>          
-                <td><input type="number" class="form-control update" name="new_qty[]" id="newqty-${n}" readonly></td>
-                <td><input type="number" class="form-control" name="issue_qty[]" id="issueqty-${n}" required></td>
-                <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
-                <td class="text-center"><button type="button" class="btn btn-primary removeItem">Remove</button></td>
-                <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
-                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
+                <td>${n+1}</td>
+                <td>
+                    <select class="form-control update" name="skill[]" id="skill-${n}" readonly>
+                        <option value="" class="text-center">-- Select Skill Type --</option>                        
+                        <option value="casual">Casual</option>
+                        <option value="contract">Contract</option>
+                        <option value="outsourced">Outsourced</option>
+                    </select>
+                </td>
+                <td><input type="number" class="form-control update" name="charge[]" id="charge-${n}" required readonly></td>
+                <td><input type="number" class="form-control update" name="hours[]" id="hours-${n}" required readonly></td>               
+                <td><input type="number" class="form-control update" name="no_technician[]" id="notech-${n}" required readonly></td>
+                <td class="text-center"><span>0</span></td>
+                <td><button type="button" class="btn btn-primary removeItem" disabled>Remove</button></td>
+                <input type="hidden" name="skillitem_id[]" value="0" id="skillitemid-${n}">
             </tr>
         `;
     }
 
-    function assignVal(i, v) {
-        $('#issue-item tbody').append(productRow(i));
-        // set default values
-        $('#itemid-'+i).val(v.id);
-        $('#productid-'+i).val(v.product_id);
-        $('#itemname-'+i).val(v.product_name);
-        $('#unit-'+i).val(v.unit);                
-        $('#newqty-'+i).val(v.new_qty);
-        $('#price-'+i).val(parseFloat(v.price).toLocaleString());
-        if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);
+    // row dropdown menu
+    function dropDown(val) {
+        return `
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Action
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item up" href="javascript:void(0);">Issue</a>
+                    <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Remove</a>
+                </div>
+            </div>            
+        `;
     }
 
-    // set default product rows
-    const budgetItems = @json($budget->budget_items);
-    const issuedItems = @json($issued_items);
-    let productIndx = 0;
-    if (issuedItems.length) {
-        issuedItems.forEach(v => {
-            assignVal(productIndx, v);                  
-            productIndx++;
-        });
-        $('.removeItem').attr('disabled', true);
-        $('#add-product').attr('disabled', true);
-    } else {
-        budgetItems.forEach(v => {
-            assignVal(productIndx, v);        
-            productIndx++;
-        });
+    // product row html
+    function productRow(n) {
+        return `
+            <tr>
+                <td><span id="number-${n}"></span></td>
+                <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
+                <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>                
+                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
+                <td><input type="number" class="form-control update newqty" name="new_qty[]" value="0" id="newqty-${n}" readonly></td>
+                <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
+                <td class="text-center"><span>0</span></td>
+                <td><input type="number" class="form-control issue" name="issue_qty[]" value="0" id="issueqty-${n}"></td>
+                <td>${dropDown()}</td>
+                <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
+                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
+                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
+            </tr>
+        `;
     }
+
+    // title row html
+    function titleRow(n) {
+        return `
+            <tr>
+                <td><span id="number-${n}"></span></td>
+                <td colspan="9"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
+                <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
+                <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
+                <input type="hidden" class="form-control" name="product_qty[]" value="0" id="amount-${n}">               
+                <input type="hidden" class="form-control" name="unit[]" id="unit-${n}">               
+                <input type="hidden" class="form-control update" name="new_qty[]" value="0" id="newqty-${n}">
+                <input type="hidden" class="form-control update" name="price[]" value="0" id="price-${n}">
+                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
+                <input type="hidden" name="a_type[]" value="2" id="atype-${n}">
+            </tr>
+        `;
+    }
+
+    // On skill-item update
+    $('#skill-item').on('change', '.update', function() {
+        if (!$(this).val()) $(this).val(0);
+
+        const id = $(this).attr('id');
+        const rowIndx = id.split('-')[1]; 
+
+        const $input = $('#charge-'+rowIndx).attr('readonly', true);
+        switch ($('#skill-'+rowIndx).val()) {
+            case 'casual': $input.val(200); break;
+            case 'contract': $input.val(350); break;
+            case 'outsourced': $input.attr('readonly', false); break;
+        }
+        const hr = $('#hours-'+rowIndx).val();
+        const notech = $('#notech-'+rowIndx).val();
+        const charge = $('#charge-'+rowIndx).val();
+
+        const amount = charge * hr * notech;
+        const amountStr = amount.toLocaleString();
+        $(this).parentsUntil('tbody').eq(1).children().eq(5).children().text(amountStr);
+
+        calcBudget();
+    });
+
+    // default skill row
+    let skillIndx = 0;
+    const skillsets = @json($budget->skillsets);
+    skillsets.forEach(v => {
+        const i = skillIndx;
+        $('#skill-item tbody').append(skillRow(i));
+        $('#skill-'+i).val(v.skill);
+        $('#charge-'+i).val(v.charge);
+        $('#hours-'+i).val(v.hours);
+        $('#notech-'+i).val(v.no_technician).change();
+        skillIndx++;
+    });
+
+    // Issuance condition
+    $('#budget-item').on('change', '.issue', function() {        
+        const approveQty = $(this).parentsUntil('tbody').eq(1).find('.newqty').val()
+        if ($(this).val() > approveQty) $(this).val(approveQty);
+    });
+
+    // On budget-item update
+    $('#budget-item').on('change', '.update', function() {
+        if (!$(this).val()) $(this).val(0);
+
+        const id = $(this).attr('id');
+        const rowIndx = id.split('-')[1];        
+        const price = $('#price-'+rowIndx).val().replace(/,/g, '');
+        const qty = $('#newqty-'+rowIndx).val();
+
+        const amount = qty * parseFloat(price);
+        const amountStr = amount.toLocaleString();
+        if (id.includes('price')) {
+            const n = $(this).val().replace(/,/g, '');
+            $(this).val(parseFloat(n).toLocaleString());
+            $(this).parent().next().children().text(amountStr);
+        } else if (price) {
+            $(this).parent().next().next().children().text(amountStr);
+        }
+
+        calcBudget();
+    });
+
+    // set default product rows
+    let productIndx = 0;
+    const budgetItems = @json($budget->products()->orderByRow()->get());    
+    budgetItems.forEach(v => {
+        const i = productIndx;
+        // check type if item type is product else assign title
+        if (v.a_type === 1) {
+            $('#budget-item tbody').append(productRow(i));
+            $('#itemname-'+i).autocomplete(autocompleteProp(i));
+            // set default values
+            $('#number-'+i).text(v.numbering);
+            $('#itemid-'+i).val(v.id);
+            $('#productid-'+i).val(v.product_id);
+            $('#itemname-'+i).val(v.product_name);
+            $('#unit-'+i).val(v.unit);                
+            $('#amount-'+i).val(parseFloat(v.product_qty));
+            $('#newqty-'+i).val(parseFloat(v.product_qty));
+            $('#price-'+i).val(v.price).change();
+        } else {
+            $('#budget-item tbody').append(titleRow(i));
+            $('#number-'+i).text(v.numbering);
+            $('#itemname-'+i).val(v.product_name);
+        }
+        productIndx++;
+    });
 
     // add product row
     $('#add-product').click(function() {
         const i = productIndx;
-        $('#issue-item tbody').append(productRow(i));
+        $('#budget-item tbody').append(productRow(i));
+        // autocomplete on added product row
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
         productIndx++;
     });
-
-    $('#issue-item').on('click', '.removeItem', function() {
-        const itemId = $(this).parent().next('input[type=hidden]').val();
+    // remove product row
+    $('#budget-item').on('click', '.removeItem', function() {
         $(this).closest('tr').remove();
+        calcBudget();
     });
 
     // autocompleteProp returns autocomplete object properties
@@ -252,6 +387,37 @@
                 $('#price-'+i).val(price.toLocaleString());
             }
         };
-    }    
+    }
+
+    // total budget
+    function calcBudget() {
+        let total = 0;
+        let labourTotal = 0;
+        $('#budget-item tbody tr').each(function() {
+            const spanText = $(this).find('td').eq(6).children().text();
+            const amount = parseFloat(spanText.replace(/,/g, ''));
+            if (amount) total += amount;
+        });
+        $('#skill-item tbody tr').each(function() {
+            const spanText = $(this).find('td').eq(5).children().text();
+            const amount = parseFloat(spanText.replace(/,/g, ''));
+            total += amount;
+            labourTotal += amount;
+        });
+        $('#budget-total').val(parseFloat(total).toLocaleString());
+        $('#labour-total').val(parseFloat(labourTotal).toLocaleString());
+        // profit
+        const profit = parseFloat(subtotal) - total;
+        $('.profit').text(profit.toLocaleString());
+
+        // budget limit
+        $('.budget-alert').addClass('d-none');
+        const quoteTotal = parseFloat($('#quote-total').val().replace(/,/g, ''));
+        const limit = quoteTotal * 0.8;
+        if (total > limit) {
+            $('.budget-alert').removeClass('d-none');
+            scroll(0, 0);
+        }
+    }
 </script>
 @endsection
