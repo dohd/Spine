@@ -2,11 +2,15 @@
 
 namespace App\Models\quote\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
+use App\Models\items\MetaEntry;
+use App\Models\items\QuoteItem;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
 use App\Models\project\ProjectQuote;
+use App\Models\term\Term;
 use App\Models\verifiedjcs\VerifiedJc;
 
 /**
@@ -36,22 +40,22 @@ trait QuoteRelationship
 
     public function products()
     {
-        return $this->hasMany('App\Models\items\QuoteItem')->withoutGlobalScopes();
+        return $this->hasMany(QuoteItem::class);
     }
 
     public function user()
     {
-        return $this->belongsTo('App\Models\Access\User\User')->withoutGlobalScopes();
+        return $this->belongsTo(User::class)->withoutGlobalScopes();
     }
 
     public function term()
     {
-        return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
+        return $this->belongsTo(Term::class)->withoutGlobalScopes();
     }
 
     public function attachment()
     {
-        return $this->hasMany('App\Models\items\MetaEntry', 'rel_id')->where('rel_type', '=', 4)->withoutGlobalScopes();
+        return $this->hasMany(MetaEntry::class, 'rel_id')->where('rel_type', '=', 4)->withoutGlobalScopes();
     }
 
     public function client()
