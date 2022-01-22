@@ -32,20 +32,7 @@ class ProjectRepository extends BaseRepository
     public function getForDataTable($c = true)
     {
         $q = $this->query()->withoutGlobalScopes();
-        // if ($c) {
-        //     $q->WhereHas('creator', function ($s) {
-        //         return $s->where('rid', '=', auth()->user()->id);
-        //     });
-        //     $q->orWhereHas('users', function ($s) {
-        //         return $s->where('rid', '=', auth()->user()->id);
-        //     });
-        // } else {
-        //     $q->where('project_share', 4);
-        //     $q->orWhere('project_share', 6);
-        //     $q->whereHas('customer', function ($s) {
-        //         return $s->where('rid', auth('crm')->user()->id);
-        //     });
-        // }
+
         return $q->get();
     }
 
@@ -172,32 +159,34 @@ class ProjectRepository extends BaseRepository
                 $input['budget'][$key] = numberClean($val);
             }
         }
-        // set budget version
-        $latest_budget = Budget::where('quote_id', $input['budget']['quote_id'])
-            ->orderBy('version', 'desc')
-            ->first('version');
-        if (isset($latest_budget)) $input['budget']['version'] = $latest_budget->version + 1; 
-        else $input['budget']['version'] = 1; 
-               
+                       
         $budget = Budget::create($input['budget']);
 
+        // budget items
         $budget_items = array();
-        for ($i = 0; $i < count($input['budget_items']['product_name']); $i++) {
+        $item = $input['budget_items'];
+        for ($i = 0; $i < count($item['product_name']); $i++) {
             $row = array('budget_id' => $budget->id);
-            foreach (array_keys($input['budget_items']) as $key) {
-                $val = $input['budget_items'][$key][$i];
-                if ($key == 'price') $row[$key] = numberClean($val);
-                else $row[$key] = $val;
+            foreach (array_keys($item) as $key) {
+                if (isset($item[$key][$i])) {
+                    $val = $item[$key][$i];
+                    $row[$key] = ($key == 'price') ? numberClean($val) : $val;
+                }
+                else $row[$key] = NULL;
             }
             $budget_items[] = $row;
         }
         BudgetItem::insert($budget_items);
 
+        // budget skillset
         $budget_skillset = array();
-        for ($i = 0; $i < count($input['budget_skillset']['skill']); $i++) {
+        $item = $input['budget_skillset'];
+        for ($i = 0; $i < count($item['skill']); $i++) {
             $row = array('budget_id' => $budget->id);
-            foreach (array_keys($input['budget_skillset']) as $key) {
-                $row[$key] = $input['budget_skillset'][$key][$i];
+            foreach (array_keys($item) as $key) {
+                if (isset($item[$key][$i])) {
+                    $row[$key] = $item[$key][$i];
+                }
             }
             $budget_skillset[] = $row;
         }
@@ -222,13 +211,17 @@ class ProjectRepository extends BaseRepository
         }
         $budget->update($input['budget']);
 
+        // budget items
         $budget_items = array();
-        for ($i = 0; $i < count($input['budget_items']['product_name']); $i++) {
+        $item = $input['budget_items'];
+        for ($i = 0; $i < count($item['product_name']); $i++) {
             $row = array('budget_id' => $budget->id);
-            foreach (array_keys($input['budget_items']) as $key) {
-                $val = $input['budget_items'][$key][$i];
-                if ($key == 'price') $row[$key] = numberClean($val);
-                else $row[$key] = $val;
+            foreach (array_keys($item) as $key) {
+                if (isset($item[$key][$i])) {
+                    $val = $item[$key][$i];
+                    $row[$key] = ($key == 'price') ? numberClean($val) : $val;
+                }
+                else $row[$key] = NULL;
             }
             $budget_items[] = $row;
         }
@@ -275,5 +268,4 @@ class ProjectRepository extends BaseRepository
         
         if ($budget) return DB::commit();
     }             
-
 }
