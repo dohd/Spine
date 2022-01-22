@@ -16,9 +16,14 @@ class Budget extends Model
         'id'
     ];
 
-    // Relationships
-    public function budget_items()
+    // Relation
+    public function products()
     {
         return $this->hasMany(BudgetItem::class);
+    }
+
+    public function skillsets()
+    {
+        return $this->hasMany(BudgetSkillset::class);
     }
 }
