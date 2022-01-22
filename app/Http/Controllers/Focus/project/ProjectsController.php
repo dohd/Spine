@@ -181,31 +181,20 @@ class ProjectsController extends Controller
      * show form for Project Quote Budget
      * @param App\Models\quote\Quote quote
      */
-    public function quote_budget(Quote $quote)
-    {
-        $products = $quote->products()->orderBy('row_index')->get();
-
-        $budget = Budget::where('quote_id', $quote->id)->orderBy('version', 'desc')->first();
-        $skillset = array();
-        $budget_items = array();
-        if (isset($budget)) {
-            $budget_items = BudgetItem::where('budget_id', $budget->id)->get();
-            $skillset = BudgetSkillset::where('budget_id', $budget->id)->get();
-            $products = array();
-        }
-
-        return view('focus.projects.quote_budget')->with(compact('quote', 'products', 'skillset', 'budget', 'budget_items'));
+    public function create_project_budget(Quote $quote)
+    {        
+        return view('focus.projects.project_budget', compact('quote'));
     }
 
     /**
      * store a newly created Project Quote Budget
      * @param Request request
      */
-    public function store_quote_budget(Request $request)
+    public function store_project_budget(Request $request)
     {
         // extract request input
         $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
-        $budget_items = $request->only('product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
+        $budget_items = $request->only('numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
         $budget_skillset = $request->only('skill', 'charge', 'hours', 'no_technician');
 
         $this->repository->store_budget(compact('budget', 'budget_items', 'budget_skillset'));
@@ -217,12 +206,12 @@ class ProjectsController extends Controller
      * Update existing Project Quote Budget
      * @param Request request
      */
-    public function update_quote_budget(Request $request, Budget $budget)
+    public function update_project_budget(Request $request, Budget $budget)
     {
         $data = $budget;
         // extract request input
         $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
-        $budget_items = $request->only('item_id', 'product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
+        $budget_items = $request->only('row_index', 'a_type', 'item_id', 'product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
         $budget_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
 
         $this->repository->update_budget($data, compact('budget', 'budget_items', 'budget_skillset'));
