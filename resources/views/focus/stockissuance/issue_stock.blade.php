@@ -160,16 +160,17 @@
 
 @section('extra-scripts')
 <script>
-    // initialize html editor
-    editor();
-
     // ajax setup
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+
+    // initialize html editor
+    editor();
 
     // set default values
     const subtotal = @json($quote->subtotal);
     $('#quote-total').val(parseFloat(subtotal).toLocaleString());
     $('#submit').css('visibility', 'hidden');
+    $('#add-skill').css('visibility', 'hidden');
     
     // initialize Quote Date datepicker
     $('.datepicker')
@@ -200,14 +201,16 @@
     }
 
     // row dropdown menu
-    function dropDown(val) {
+    function dropDown(n) {
         return `
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Action
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item up" href="javascript:void(0);">Issue</a>
+                    <a class="dropdown-item issueItem" href="javascript:void(0);">Issue</a>
+                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
+                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
                     <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Remove</a>
                 </div>
             </div>            
@@ -218,19 +221,21 @@
     function productRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}"></span></td>
+                <td><span id="number-${n}">#</span></td>
                 <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
                 <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>                
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
                 <td><input type="number" class="form-control update newqty" name="new_qty[]" value="0" id="newqty-${n}" readonly></td>
                 <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
                 <td class="text-center"><span>0</span></td>
-                <td><input type="number" class="form-control issue" name="issue_qty[]" value="0" id="issueqty-${n}"></td>
+                <td><input type="number" class="form-control issue" name="issue_qty[]" id="issueqty-${n}"></td>
                 <td>${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
                 <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
+                <input type="hidden" name="numbering[]" value="#" id="numbering-${n}">
+                <input type="hidden" name="budget_id[]" value="{{ $budget->id }}" id="budgetid-${n}">
             </tr>
         `;
     }
@@ -290,9 +295,10 @@
         skillIndx++;
     });
 
-    // Issuance condition
+    // Issuance condition on approved quantity
     $('#budget-item').on('change', '.issue', function() {        
         const approveQty = $(this).parentsUntil('tbody').eq(1).find('.newqty').val()
+        if (approveQty == 0) return;
         if ($(this).val() > approveQty) $(this).val(approveQty);
     });
 
@@ -303,7 +309,8 @@
         const id = $(this).attr('id');
         const rowIndx = id.split('-')[1];        
         const price = $('#price-'+rowIndx).val().replace(/,/g, '');
-        const qty = $('#newqty-'+rowIndx).val();
+        let qty = $('#newqty-'+rowIndx).val();
+        if (qty == 0) qty = 1;
 
         const amount = qty * parseFloat(price);
         const amountStr = amount.toLocaleString();
@@ -329,6 +336,7 @@
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
             // set default values
             $('#number-'+i).text(v.numbering);
+            $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
             $('#itemname-'+i).val(v.product_name);
@@ -336,6 +344,7 @@
             $('#amount-'+i).val(parseFloat(v.product_qty));
             $('#newqty-'+i).val(parseFloat(v.product_qty));
             $('#price-'+i).val(v.price).change();
+            if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);  
         } else {
             $('#budget-item tbody').append(titleRow(i));
             $('#number-'+i).text(v.numbering);
@@ -353,9 +362,40 @@
         productIndx++;
     });
     // remove product row
-    $('#budget-item').on('click', '.removeItem', function() {
-        $(this).closest('tr').remove();
+    $('#budget-item').on('click', '.removeItem, .up, .down', function() {
+        const row = $(this).parents("tr:first");
+        if ($(this).is('.up')) row.insertBefore(row.prev());
+        if ($(this).is('.down')) row.insertAfter(row.next());
+        if ($(this).is('.removeItem')) $(this).closest('tr').remove();
+        
         calcBudget();
+    });
+    // issue product
+    $('#budget-item').on('click', '.issueItem', function() {
+        const $tr = $(this).parentsUntil('tbody').eq(3);
+        const i = $tr.index();
+        const data = {
+            numbering: $('#numbering-'+i).val(),
+            product_name: $('#itemname-'+i).val(),
+            unit: $('#unit-'+i).val(),
+            price: $('#price-'+i).val(),
+            new_qty: $('#newqty-'+i).val(),
+            issue_qty: $('#issueqty-'+i).val(),
+            item_id: $('#itemid-'+i).val(),
+            product_id: $('#productid-'+i).val(),
+            row_index: $('#rowindex-'+i).val(),
+            budget_id: $('#budgetid-'+i).val(),
+            a_type: $('#atype-'+i).val(),
+        };
+        $.ajax({
+            url: "{{ route('biller.stockissuance.store') }}",
+            method: 'POST',
+            type: 'json-data',
+            data
+        })
+        .done(function(data) {
+            return (data.issue_qty) && $('#issueqty-'+i).val(data.issue_qty);
+        });      
     });
 
     // autocompleteProp returns autocomplete object properties
@@ -384,7 +424,7 @@
                 $('#unit-'+i).val(data.unit);                
 
                 const price = parseFloat(data.purchase_price.replace(/,/g, ''));
-                $('#price-'+i).val(price.toLocaleString());
+                $('#price-'+i).val(price.toLocaleString()).trigger('change');
             }
         };
     }
@@ -393,10 +433,12 @@
     function calcBudget() {
         let total = 0;
         let labourTotal = 0;
-        $('#budget-item tbody tr').each(function() {
+        $('#budget-item tbody tr').each(function(i) {
             const spanText = $(this).find('td').eq(6).children().text();
             const amount = parseFloat(spanText.replace(/,/g, ''));
             if (amount) total += amount;
+            // update row index
+            $(this).find('#rowindex-'+i).val(i);
         });
         $('#skill-item tbody tr').each(function() {
             const spanText = $(this).find('td').eq(5).children().text();
