@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Focus\stockissuance;
 
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
 use App\Models\product\ProductVariation;
 use App\Models\project\Budget;
+use App\Models\project\BudgetItem;
 use App\Models\quote\Quote;
-use App\Models\stock\StockIssuedItem;
 use Illuminate\Http\Request;
 
 class StockIssuanceController extends Controller
@@ -72,28 +71,29 @@ class StockIssuanceController extends Controller
     public function store(Request $request)
     {
         // extract input fields
-        $quote_id = $request->quote_id;
-        $issue_items = $request->only('item_id', 'product_id', 'product_name', 'unit', 'new_qty', 'issue_qty', 'price');
+        $item = $request->only([
+            'numbering', 'item_id', 'budget_id', 'product_name', 'unit', 'new_qty', 'issue_qty', 'price',
+            'row_index', 'product_id', 'a_type',
+        ]);
 
-        // convert issue_items array 
-        $items = array();
-        for ($i = 0; $i < count($issue_items['product_name']); $i++) {
-            $row = array('quote_id' => $quote_id);
-            foreach (array_keys($issue_items) as $key) {
-                $val = $issue_items[$key][$i];
-                if ($key == 'price') $row[$key] = numberClean($val);
-                else $row[$key] = $val;
-            }
-            $items[] = $row;
-        }
-        // decreament issued items from stock
-        foreach ($items as $item) {
-            ProductVariation::find($item['product_id'])->decrement('qty', $item['issue_qty']);
-        }
-        // store issued items
-        StockIssuedItem::insert($items);
+        // decreament issued item from stock
+        if ($item['product_id'])
+            ProductVariation::find($item['product_id'])->decrement('qty', $item['issue_qty']); 
 
-        return new RedirectResponse(route('biller.stockissuance.index'), ['flash_success' => 'Stock issued successfully']);
+        // update or create new item
+        $budget_item = BudgetItem::firstOrNew([
+            'id' => $item['item_id'],
+            'budget_id' => $item['budget_id'],
+        ]);
+        // assign properties to budget_item
+        foreach($item as $key => $value) {
+            if ($key == 'price') $budget_item[$key] = numberClean($value);
+            else $budget_item[$key] = $value;
+        }
+        unset($budget_item['item_id']);
+        $budget_item->save();
+
+        return response()->json($budget_item);
     }
 
     /**
