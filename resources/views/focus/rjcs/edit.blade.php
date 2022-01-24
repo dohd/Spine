@@ -44,14 +44,10 @@
                                                 <select class="form-control  round  select-box" name="project_id" id="project" required="required">
                                                     <option value="">-- Select Project --</option>
                                                     @foreach ($projects as $project)
-                                                        @php
-                                                            $tid = 'Prj-'.sprintf('%04d', $project->project_number);
-                                                        @endphp
-                                                        @if ($rjc->project->id == $project->id)
-                                                            <option value="{{ $project->id }}" selected>{{ $tid }} - {{ $project->name }}</option>
-                                                        @else
-                                                            <option value="{{ $project->id }}">{{ $tid }} - {{ $project->name }}</option>
-                                                        @endif
+                                                        <option value="{{ $project->id }}" {{ ($rjc->project->id == $project->id) ? 'selected' : '' }}>
+                                                            {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
+                                                            {{ $project->quote_tids }}
+                                                        </option>                                                        
                                                     @endforeach
                                                 </select>
                                             </div>

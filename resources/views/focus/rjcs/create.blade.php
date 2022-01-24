@@ -1,12 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', ' Repair Job Card | Create Repair Job Card')
-
-@section('page-header')
-<h1>
-    Repair Job Card<small>Create Repair Job Card</small>
-</h1>
-@endsection
+@section ('title', 'Repair Job Card | Create')
 
 @section('content')
 <div class="">
@@ -45,7 +39,7 @@
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}">
                                                             {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
-                                                            {{ $project->quote_nos }}
+                                                            {{ $project->quote_tids }}
                                                         </option>
                                                     @endforeach
                                                 </select>                                                
