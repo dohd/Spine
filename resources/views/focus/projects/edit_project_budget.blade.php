@@ -19,8 +19,11 @@
                     <a href="{{ route('biller.projects.index') }}" class="btn btn-primary">
                         <i class="ft-list"></i> Projects
                     </a>
-                    <!-- '.route('biller.print_quote', [$quote->id, 4, $valid_token, 1]).' -->
-                    <a href="{{ '#' }}" class="btn btn-purple" target="_blank">
+                    @php
+                        $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
+                        $print_url = route('biller.print_budget', [$quote->id, 4, $valid_token, 1]);
+                    @endphp
+                    <a href="{{ $print_url }}" class="btn btn-purple" target="_blank">
                         <i class="fa fa-print"></i> Print
                     </a> 
                 </div>
