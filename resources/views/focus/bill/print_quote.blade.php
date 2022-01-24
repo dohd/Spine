@@ -164,13 +164,7 @@
 		<tr>
 			<td class="doc-title-td">
 				<span class='doc-title'>
-					<b>
-						@if ($invoice->bank_id)
-							PROFORMA INVOICE
-						@else
-							QUOTATION
-						@endif
-					</b>
+					<b>{{ $invoice->bank_id? 'PROFORMA INVOICE' : 'QUOTATION' }}</b>
 				</span>				
 			</td>
 		</tr>
@@ -202,8 +196,7 @@
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
-				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>
-				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
+				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
 				@php
 					$tid = sprintf('%04d', $invoice->tid);
 					$field_name = 'Quotation No';
@@ -213,10 +206,11 @@
 						$field_value = 'PI-' . $tid;
 					}
 				@endphp
-				<b>{{ $field_name }} :</b> {{ $field_value }}<br>				
+				<b>{{ $field_name }} :</b> {{ $field_value }}<br><br>		
+				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>		
 				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
-				<b>Currency :</b> Kenya Shillings <br><br>
-				<b>Client Ref: </b> {{ $invoice->client_ref }}
+				<b>Currency :</b> Kenya Shillings <br>
+				<b>Client Ref :</b> {{ $invoice->client_ref }}
 			</td>
 		</tr>
 	</table><br>
