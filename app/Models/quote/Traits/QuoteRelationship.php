@@ -9,6 +9,7 @@ use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
+use App\Models\project\Budget;
 use App\Models\project\ProjectQuote;
 use App\Models\term\Term;
 use App\Models\verifiedjcs\VerifiedJc;
@@ -18,6 +19,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function budgets()
+    {
+        return $this->hasMany(Budget::class);
+    }
+
     public function lpo()
     {
         return $this->belongsTo(Lpo::class);
