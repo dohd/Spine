@@ -241,12 +241,13 @@ class ProjectRepository extends BaseRepository
             $budget_item->save();
         }
 
-
+        // budget skillset
         $budget_skillset = array();
-        for ($i = 0; $i < count($input['budget_skillset']['skill']); $i++) {
+        $item = $input['budget_skillset'];
+        for ($i = 0; $i < count($item['skill']); $i++) {
             $row = array('budget_id' => $budget->id);
-            foreach (array_keys($input['budget_skillset']) as $key) {
-                $row[$key] = $input['budget_skillset'][$key][$i];
+            foreach (array_keys($item) as $key) {
+                $row[$key] = $item[$key][$i];
             }
             $budget_skillset[] = $row;
         }
