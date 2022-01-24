@@ -67,7 +67,7 @@ class ProjectsTableController extends Controller
                 foreach ($project->quotes as $quote) {
                     $tid = sprintf('%04d', $quote->tid);
                     $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
-                    $tids[] = '<a href="'. route('biller.projects.quote_budget', $quote) .'" data-toggle="tooltip" title="Budget"><b>'. $tid .'</b></a>';
+                    $tids[] = '<a href="'.route('biller.projects.create_project_budget', $quote).'" data-toggle="tooltip" title="Budget"><b>'. $tid .'</b></a>';
                 }
 
                 return implode(', ', $tids);
