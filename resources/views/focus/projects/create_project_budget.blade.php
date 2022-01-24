@@ -27,7 +27,7 @@
     <div class="content-body">
         <div class="card">
             <div class="card-body">                
-                {{ Form::model($quote, ['route' => ['biller.projects.store_quote_budget'], 'method' => 'POST' ]) }}
+                {{ Form::model($quote, ['route' => ['biller.projects.store_project_budget'], 'method' => 'POST' ]) }}
                 <input type="hidden" name="quote_id" value="{{ $quote->id }}">
                 <div class="form-group row">
                     <div class="col-12">
@@ -131,7 +131,7 @@
                                 <div><label for="tool">Tools Required & Notes</label></div>
                                 <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">
                                 </textarea>   
-                            </div>                                                     
+                            </div>                        
                             <div class="form-group">
                                 <div>
                                     <label for="quote-total">Total Quote</label>
@@ -199,6 +199,22 @@
         `;
     }
 
+    // row dropdown menu
+    function dropDown(n) {
+        return `
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Action
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
+                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
+                    <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Remove</a>
+                </div>
+            </div>            
+        `;
+    }
+
     // product row html
     function productRow(n) {
         return `
@@ -210,7 +226,7 @@
                 <td><input type="number" class="form-control update" name="new_qty[]" id="newqty-${n}" required></td>
                 <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
                 <td class="text-center"><span>0</span></td>
-                <td><button type="button" class="btn btn-primary removeItem">Remove</button></td>
+                <td>${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
@@ -333,9 +349,13 @@
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
         productIndx++;
     });
-    // remove product row
-    $('#quote-item').on('click', '.removeItem', function() {
-        $(this).closest('tr').remove();
+    // modify product row
+    $('#quote-item').on('click', '.up, .down, .removeItem', function() {
+        const $row = $(this).parents("tr:first");
+        if ($(this).is('.up')) $row.insertBefore($row.prev());
+        if ($(this).is('.down')) $row.insertAfter($row.next());        
+        if ($(this).is('.removeItem')) $(this).closest('tr').remove();
+
         calcBudget();
     });
 
