@@ -91,7 +91,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Voucher</th>
+                                            <th>Invoice No</th>
                                             <th>{{ trans('customers.customer') }}</th>
                                             <th>{{ trans('invoices.invoice_date') }}</th>
                                             <th>{{ trans('general.amount') }}</th>
