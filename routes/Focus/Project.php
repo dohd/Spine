@@ -13,11 +13,14 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/notes', 'ProjectsController@notes')->name('projects.notes');
   Route::post('projects/invoices', 'ProjectsController@invoices')->name('projects.invoices');
 
-  Route::get('projects/quote_budget/{quote}', 'ProjectsController@create_project_budget')->name('projects.quote_budget');
-  Route::post('projects/quote_budget', 'ProjectsController@store_project_budget')->name('projects.store_quote_budget');
-  Route::post('projects/quote_budget/{budget}', 'ProjectsController@update_project_budget')->name('projects.update_quote_budget');
-  Route::delete('projects/quote_budget/delete_budget_item/{id}', 'ProjectsController@delete_budget_item')->name('projects.delete_budget_item');
-  Route::delete('projects/quote_budget/delete_skillset/{id}', 'ProjectsController@delete_skillset')->name('projects.delete_skillset');
+  // Project budget
+  Route::get('projects/budget/{quote}', 'ProjectsController@create_project_budget')->name('projects.create_project_budget');
+  Route::get('projects/budget/{qoute_id}/{budget_id}', 'ProjectsController@edit_project_budget')->name('projects.edit_project_budget');
+  Route::post('projects/budget_store', 'ProjectsController@store_project_budget')->name('projects.store_project_budget');
+  Route::post('projects/budget_update/{budget}', 'ProjectsController@update_project_budget')->name('projects.update_project_budget');
+
+  Route::delete('projects/budget_delete_item/{id}', 'ProjectsController@delete_budget_item')->name('projects.delete_budget_item');
+  Route::delete('projects/budget_delete_skillset/{id}', 'ProjectsController@delete_budget_skillset')->name('projects.delete_budget_skillset');
 });
 
 Route::group(['namespace' => 'project'], function () {
