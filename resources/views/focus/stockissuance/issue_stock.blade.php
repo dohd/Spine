@@ -16,7 +16,7 @@
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    <a href="{{ '#' }}" class="btn btn-primary">
+                    <a href="{{ route('biller.stockissuance.index') }}" class="btn btn-primary">
                         <i class="ft-list"></i> List
                     </a>
                 </div>
