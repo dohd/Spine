@@ -91,6 +91,7 @@ class StockIssuanceController extends Controller
             else $budget_item[$key] = $value;
         }
         unset($budget_item['item_id']);
+        if ($budget_item['id'] == 0) unset($budget_item['id']);
         $budget_item->save();
 
         return response()->json($budget_item);
