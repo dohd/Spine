@@ -46,8 +46,10 @@ class RjcsController extends Controller
         $rjc =  Rjc::orderBy('tid', 'desc')->first('tid');
         $tid = isset($rjc) ? $rjc->tid+1 : 1;
 
-        $projects =  Project::orderBy('id', 'desc')->get(['id', 'name', 'project_number', 'main_quote_id']);
-        // append quote numbers
+        $projects =  Project::where('main_quote_id', '>', 0)
+            ->orderBy('id', 'desc')
+            ->get(['id', 'name', 'project_number', 'main_quote_id']);
+        // append quote tid
         foreach($projects as $project) {
             $tids = '';                
             foreach ($project->quotes as $quote) {
@@ -55,7 +57,7 @@ class RjcsController extends Controller
                 if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
                 else $tids .= 'QT-'. $tid . ', ';
             }
-            $project['quote_nos'] = '[ ' . $tids . ']';            
+            $project['quote_tids'] = '[ ' . $tids . ']';            
         }
         
         return view('focus.rjcs.create')->with(compact('projects', 'tid'));
@@ -110,7 +112,20 @@ class RjcsController extends Controller
      */
     public function edit(Rjc $rjc)
     {
-        $projects =  Project::all(['id', 'name', 'project_number']);
+        $projects =  Project::where('main_quote_id', '>', 0)
+            ->orderBy('id', 'desc')
+            ->get(['id', 'name', 'project_number', 'main_quote_id']);
+        // append quote tid
+        foreach($projects as $project) {
+            $tids = '';                
+            foreach ($project->quotes as $quote) {
+                $tid = sprintf('%04d', $quote->tid);
+                if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
+                else $tids .= 'QT-'. $tid . ', ';
+            }
+            $project['quote_tids'] = '[ ' . $tids . ']';            
+        }
+        // rjc items
         $items = $rjc->rjc_items()->orderBy('row_index', 'ASC')->get();
 
         return new EditResponse('focus.rjcs.edit', compact('rjc', 'projects', 'items'));
