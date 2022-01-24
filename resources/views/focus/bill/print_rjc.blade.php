@@ -166,7 +166,7 @@
 		<h5><span>b.</span> Call Out Details</h5>
 		<p>
 			{{ $invoice->quote->lead->title }} <b>on</b> <i>{{ dateFormat($invoice->quote->lead->date_of_request, 'd-M-Y') }}</i> <b>as
-			per reference</b> <i>{{ $invoice->quote->lead->client_ref }}</i>
+			per call reference</b> <i>{{ $invoice->quote->lead->client_ref }}</i>
 		</p><br>
 		<table class="items items-table" cellpadding=8>
 			<thead>
