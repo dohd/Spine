@@ -2,10 +2,6 @@
 
 @section ('title', 'Rjc Report Management')
 
-@section('page-header')
-<h1>Rjc Report Management</h1>
-@endsection
-
 @section('content')
 <div class="">
     <div class="content-wrapper">
@@ -32,9 +28,11 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Report No</th>
+                                            <th>Customer</th>
                                             <th>Client Ref</th>
                                             <th>Subject</th>
                                             <th>Project No</th>
+                                            <th>Ticket No</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -93,6 +91,10 @@
                     name: 'tid'
                 },
                 {
+                    data: 'customer',
+                    name: 'customer'
+                },
+                {
                     data: 'client_ref',
                     name: 'client_ref'
                 },
@@ -103,6 +105,10 @@
                 {
                     data: 'project_no',
                     name: 'project_no'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
                 },
                 {
                     data: 'created_at',

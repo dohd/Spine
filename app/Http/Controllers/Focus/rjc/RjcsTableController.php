@@ -57,14 +57,30 @@ class RjcsTableController extends Controller
             })
             ->addColumn('project_no', function ($rjc) {
                 $no = $rjc->project->project_number;
+
                 return 'Prj-'.sprintf('%04d', $no);
             })
             ->addColumn('created_at', function ($rjc) {
                 return dateFormat($rjc->created_at);
             })
+            ->addColumn('customer', function ($rjc) {
+                $client_name = $rjc->project->customer_project ? $rjc->project->customer_project->name : '';
+                $branch_name = $rjc->project->branch ? $rjc->project->branch->name : '';
+                if ($client_name && $branch_name) 
+                    return $client_name . ' - ' . $branch_name;
+            })
+            ->addColumn('lead_tid', function($rjc) {
+                $tids = array();                
+                foreach ($rjc->project->quotes as $quote) {
+                    $tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                }
+
+                return implode(', ', $tids);
+            })
             ->addColumn('actions', function ($rjc) {
                 $valid_token = token_validator('', 'd' . $rjc->id, true);
                 $link = route('biller.print_rjc', [$rjc->id, 11, $valid_token, 1]);
+
                 return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
                     . $rjc->action_buttons;
             })
