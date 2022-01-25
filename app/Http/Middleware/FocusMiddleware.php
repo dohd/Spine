@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Models\Company\Company;
 use App\Models\Company\ConfigMeta;
 use Closure;
-use Illuminate\Support\Facades\App;
 
 class FocusMiddleware
 {
@@ -18,24 +17,19 @@ class FocusMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if (App::environment('production')) {
-            error_reporting(0);
-        }
-        //current user fetch
-        $user_d = auth();
-        if (isset($user_d->valid)) {
-            $company = Company::where('id', '=', $user_d->user()->ins)->where('valid', '=', 1)->first();
-            config([
-                'core' => $company
-            ]);
-            config([
-                'currency' => ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 2)->where('ins', '=', $company->id)->first()->currency
-            ]);
-
+        if (isset(auth()->valid)) {
+            $company = Company::find(auth()->user()->ins);
+            if ($company) {
+                config(['core' => $company]);
+                $meta = ConfigMeta::withoutGlobalScopes()
+                    ->where(['feature_id' => 2, 'ins' => $company->id])
+                    ->first();
+                if ($meta) config(['currency' => $meta->currency]);
+            }
             config(['app.timezone' => $company->zone]);
             date_default_timezone_set($company->zone);
-
-            return $next($request);
         }
+
+        return $next($request);
     }
 }
