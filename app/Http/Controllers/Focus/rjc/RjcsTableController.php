@@ -60,9 +60,6 @@ class RjcsTableController extends Controller
 
                 return 'Prj-'.sprintf('%04d', $no);
             })
-            ->addColumn('created_at', function ($rjc) {
-                return dateFormat($rjc->created_at);
-            })
             ->addColumn('customer', function ($rjc) {
                 $client_name = $rjc->project->customer_project ? $rjc->project->customer_project->name : '';
                 $branch_name = $rjc->project->branch ? $rjc->project->branch->name : '';
@@ -76,6 +73,19 @@ class RjcsTableController extends Controller
                 }
 
                 return implode(', ', $tids);
+            })
+            ->addColumn('quote_tid', function($rjc) {
+                $tids = array();                
+                foreach ($rjc->project->quotes as $quote) {
+                    $tid = sprintf('%04d', $quote->tid);
+                    $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
+                    $tids[] = $tid;
+                }
+
+                return implode(', ', $tids);
+            })
+            ->addColumn('created_at', function ($rjc) {
+                return dateFormat($rjc->created_at);
             })
             ->addColumn('actions', function ($rjc) {
                 $valid_token = token_validator('', 'd' . $rjc->id, true);

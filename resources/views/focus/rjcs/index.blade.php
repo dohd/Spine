@@ -33,6 +33,7 @@
                                             <th>Subject</th>
                                             <th>Project No</th>
                                             <th>Ticket No</th>
+                                            <th>Quote No</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -111,8 +112,12 @@
                     name: 'lead_tid'
                 },
                 {
+                    data: 'quote_tid',
+                    name: 'quote_tid'
+                },
+                {
                     data: 'created_at',
-                    name: "{{config('module.rjcs.table')}}.created_at"
+                    name: 'created_at'
                 },
                 {
                     data: 'actions',
