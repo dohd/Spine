@@ -58,12 +58,10 @@ class LeadsTableController extends Controller
                 return 'Tkt-'.sprintf('%04d', $lead->reference);
             })
             ->addColumn('client_name', function ($lead) {
-                switch ($lead->client_status) {
-                    case 'customer':
-                        return  $lead->customer->company. ' - ' . $lead->branch->name;
-                    case 'new':
-                        return  $lead->client_name;
-                }
+                $customer = isset($lead->customer) ?  $lead->customer->company : '';
+                $branch = isset($lead->branch) ? $lead->branch->name : '';
+                if ($customer && $branch) return $customer . ' - ' .$branch;
+               
                 return $lead->client_name;
             })
             ->addColumn('created_at', function ($lead) {
