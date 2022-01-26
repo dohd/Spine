@@ -31,11 +31,6 @@
                                 <th>#Quote / PI No</th>
                                 <th>Ticket No</th>
                                 <th>Started</th>  
-                                {{-- 
-                                    <th>{{ trans('projects.priority') }}</th>
-                                    <th>{{ trans('projects.end_date') }}</th> 
-                                --}}
-                                <th>{{ trans('projects.status') }}</th>
                                 <th>{{ trans('general.createdat') }}</th>
                                 <th>{{ trans('general.action') }}</th>
                             </tr>
@@ -130,18 +125,6 @@
                 {
                     data: 'start_status',
                     name: 'start_status'
-                },
-                // {
-                //     data: 'priority',
-                //     name: 'priority'
-                // },
-                // {
-                //     data: 'deadline',
-                //     name: 'deadline'
-                // },
-                {
-                    data: 'progress',
-                    name: 'progress'
                 },
                 {
                     data: 'created_at',

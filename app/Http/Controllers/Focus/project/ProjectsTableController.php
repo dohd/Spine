@@ -80,13 +80,15 @@ class ProjectsTableController extends Controller
 
                 return implode(', ', $tids);
             })
-            // ->addColumn('priority', function ($project) {
-            //     return '<span class="">' . $project->priority . '</span> ';
-            // })
             ->addColumn('start_status', function ($project) {
                 $badge = 'badge-secondary';
-                if ($project->start_status == 'running') $badge = 'badge-success';
-                            
+                foreach($project->quotes as $quote) {
+                    if (count($quote->budgets)) {
+                        $project->start_status = 'budgeted';
+                        $badge = 'badge-success';
+                    }
+                }
+
                 return '<span class="badge '. $badge .'">' . $project->start_status . '</span>';
             })
             ->addColumn('progress', function ($project) {
@@ -94,9 +96,6 @@ class ProjectsTableController extends Controller
                 return '<a href="#" class="view_project" data-toggle="modal" data-target="#ViewProjectModal" data-item="' 
                     . $project->id . '"><span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span></a> ' . numberFormat($project->progress) . ' %';
             })
-            // ->addColumn('deadline', function ($project) {
-            //     return dateTimeFormat($project->end_date);
-            // })
             ->addColumn('created_at', function ($project) {
                 return dateFormat($project->created_at);
             })
