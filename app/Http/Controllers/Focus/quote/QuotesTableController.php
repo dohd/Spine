@@ -81,6 +81,7 @@ class QuotesTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('status', function ($quote) {
+                $bg = '';
                 switch($quote->status) {
                     case 'approved':
                         $bg = 'bg-primary';
