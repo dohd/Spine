@@ -17,19 +17,24 @@ class FocusMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if (isset(auth()->valid)) {
-            $company = Company::find(auth()->user()->ins);
-            if ($company) {
-                config(['core' => $company]);
-                $meta = ConfigMeta::withoutGlobalScopes()
-                    ->where(['feature_id' => 2, 'ins' => $company->id])
-                    ->first();
-                if ($meta) config(['currency' => $meta->currency]);
-            }
-            config(['app.timezone' => $company->zone]);
-            date_default_timezone_set($company->zone);
-        }
+        /**
+         * Set core configuraion key value to company instance 
+         */
+        $company = Company::find(auth()->user()->ins);
+        config(['core' => $company]);
 
+        $company_zone = $company ? $company->zone : '';
+        config(['app.timezone' => $company_zone]);
+        date_default_timezone_set($company_zone);
+
+        if ($company) {
+            $meta = ConfigMeta::withoutGlobalScopes()
+                ->where(['feature_id' => 2, 'ins' => $company->id])
+                ->first();
+
+            config(['currency' => $meta ? $meta->currency : '']);
+        } 
+               
         return $next($request);
     }
 }
