@@ -10,7 +10,8 @@ Route::post('test_login', function() {
     return '<h1> Logged in as '. request('email') .'</h1>';
 })->name('biller.test_login');
 
-Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('install')->name('login');
+// Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('install')->name('login');
+Route::get('login', 'Focus\general\CoreController@showLoginForm')->name('login');
 Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
     //publicUserLoggedOut
     Route::get('', 'general\CoreController@showLoginForm')->name('index');

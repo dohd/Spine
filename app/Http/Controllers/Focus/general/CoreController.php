@@ -34,8 +34,8 @@ class CoreController extends Controller
 
     public function showLoginForm()
     {
-        if (!file_exists(storage_path('installed'))) 
-            return redirect()->to('install');
+        // if (!file_exists(storage_path('installed'))) 
+        //     return redirect()->to('install');
 
         if (auth()->user()) 
             return redirect()->route('biller.dashboard');
@@ -80,11 +80,11 @@ class CoreController extends Controller
         /*
          * Fire event, Log out user, Redirect
          */
-        event(new UserLoggedOut($this->guard()->user()));
+        // event(new UserLoggedOut($this->guard()->user()));
         $this->guard()->logout();
         $request->session()->flush();
         $request->session()->regenerate();
 
-        return redirect(route('biller.index'));
+        return redirect()->route('biller.index');
     }
 }
