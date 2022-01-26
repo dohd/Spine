@@ -342,7 +342,7 @@
             $('#itemname-'+i).val(v.product_name);
             $('#unit-'+i).val(v.unit);                
             $('#amount-'+i).val(parseFloat(v.product_qty));
-            $('#newqty-'+i).val(parseFloat(v.product_qty));
+            $('#newqty-'+i).val(parseFloat(v.new_qty));
             $('#price-'+i).val(v.price).change();
             if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);  
         } else {
