@@ -25,11 +25,24 @@ class CreateResponse implements Responsable
         foreach($bill_types['projects'] as $project) {
             $quote_ids = $project->quotes->pluck('id')->toArray();
             $unbudgeted_ids = array_diff($quote_ids, $budgeted_quote_ids);
-            if (!$unbudgeted_ids) $projects[] = $project;
+            if (empty($quote_ids) || $unbudgeted_ids) continue;
+            // append tids
+            $lead_tids = array();
+            $quote_tids = array();                
+            foreach ($project->quotes as $quote) {
+                $lead_tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                // quote
+                $quote_tid = sprintf('%04d', $quote->tid);
+                if ($quote->bank_id) $quote_tids[] = 'PI-'. $quote_tid;
+                else $quote_tids[] = 'QT-'. $quote_tid;
+            }
+            $project['quote_tids'] = implode(', ', $quote_tids);
+            $project['lead_tids'] =  implode(', ', $lead_tids);
+            $projects[] = $project;
         }
         $bill_types['projects'] = $projects;  
 
-        // assign last_it to resource being created    
+        // assign last_id to resource being created    
         $bill_types['last_id'] = Purchase::orderBy('id', 'desc')->first();
 
         return view('focus.purchases.create', $bill_types);
