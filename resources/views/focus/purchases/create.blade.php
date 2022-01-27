@@ -2,13 +2,6 @@
 
 @section ('title', 'Purchases | Create')
 
-@section('page-header')
-<h1>
-    Purchases
-    <small>Create</small>
-</h1>
-@endsection
-
 @section('content')
 <div class="">
     <div class="content-wrapper">
@@ -22,7 +15,8 @@
                                     <div id="customerpanel" class="inner-cmp-pnl">
                                         <div class="form-group row">
                                             <div class="fcol-sm-12">
-                                                <h3 class="title">{{trans('purchaseorders.bill_from')}} <a href='#' class="btn btn-primary btn-sm round" data-toggle="modal" data-target="#addCustomer">
+                                                <h3 class="title">{{trans('purchaseorders.bill_from')}} 
+                                                    <a href='#' class="btn btn-primary btn-sm round" data-toggle="modal" data-target="#addCustomer">
                                                         {{trans('purchaseorders.add_supplier')}}
                                                     </a>
                                                 </h3>
@@ -80,9 +74,9 @@
                                                 <div class="form-group">
                                                     <label for="project" class="caption">Ledger Account(Credited)*</label>
                                                     <select name="credit_account_id" class="form-control round required" id="credit_account_id">
-                                                        <option value="">Select Ledger Account</option>
+                                                        <option value="">-- Select Ledger Account --</option>
                                                         @foreach($accounts as $account)
-                                                        <option value="{{$account->id}}"> {{$account->holder}}</option>
+                                                            <option value="{{$account->id}}"> {{$account->holder}}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -202,20 +196,20 @@
                                                 <label for="taxFormat" class="caption">{{trans('general.tax')}}*</label>
                                                 <select class="form-control round" name="taxformat" onchange="changeTaxFormat()" id="taxFormat">
                                                     @php
-                                                    $tax_format='exclusive';
-                                                    $tax_format_id=0;
-                                                    $tax_format_type='exclusive';
+                                                        $tax_format='exclusive';
+                                                        $tax_format_id=0;
+                                                        $tax_format_type='exclusive';
                                                     @endphp
                                                     @foreach($additionals as $additional_tax)
-                                                    @php
-                                                    if($additional_tax->id == @$defaults[4][0]['feature_value'] && $additional_tax->class == 1){
-                                                    echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
-                                                    $tax_format=$additional_tax->type2;
-                                                    $tax_format_id=$additional_tax->id;
-                                                    $tax_format_type=$additional_tax->type3;
-                                                    }
-                                                    @endphp
-                                                    {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
+                                                        @php
+                                                            if ($additional_tax->id == @$defaults[4][0]['feature_value'] && $additional_tax->class == 1) {
+                                                                echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
+                                                                $tax_format=$additional_tax->type2;
+                                                                $tax_format_id=$additional_tax->id;
+                                                                $tax_format_type=$additional_tax->type3;
+                                                            }
+                                                        @endphp
+                                                        {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
                                                     @endforeach
                                                     <option value="0" data-type1="%" data-type2="off" data-type3="off">{{trans('general.off')}}</option>
                                                 </select>
@@ -225,14 +219,14 @@
                                                     <label for="discountFormat" class="caption">{{trans('general.discount')}}</label>
                                                     <select class="form-control round" name="discountFormat" onchange="changeDiscountFormat()" id="discountFormat">
                                                         @php
-                                                        $discount_format='%';
+                                                            $discount_format='%';
                                                         @endphp
                                                         @foreach($additionals as $additional_discount)
                                                         @php
-                                                        if(@$defaults[3][0]['feature_value'] == $additional_discount->id && $additional_discount->class == 2){
-                                                        echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
-                                                        $discount_format=$additional_discount->type1;
-                                                        }
+                                                            if (@$defaults[3][0]['feature_value'] == $additional_discount->id && $additional_discount->class == 2) {
+                                                                echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
+                                                                $discount_format=$additional_discount->type1;
+                                                            }
                                                         @endphp
                                                         {!! $additional_discount->class == 2 ? "<option value='$additional_discount->value' data-type1='$additional_discount->type1' data-type2='$additional_discount->type2' data-type3='$additional_discount->type3'>$additional_discount->name</option>" : "" !!}
                                                         @endforeach
@@ -247,7 +241,7 @@
                                                     <select id="s_warehouses" name="s_warehouses" class="form-control round ">
                                                         <option value="0">{{trans('general.all')}}</option>
                                                         @foreach($warehouses as $warehouse)
-                                                        <option value="{{$warehouse->id}}" {{$warehouse->id==@$defaults[1][0]['feature_value'] ? 'selected' : ''}}>{{$warehouse->title}}</option>
+                                                            <option value="{{$warehouse->id}}" {{$warehouse->id==@$defaults[1][0]['feature_value'] ? 'selected' : ''}}>{{$warehouse->title}}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -255,10 +249,14 @@
                                             <div class="col-sm-8">
                                                 <div class="form-group">
                                                     <label for="project" class="caption">Projects</label>
-                                                    <select name="all_project_id" class="form-control round" onchange="changeProject()" id="project_id">
-                                                        <option value="">Select Project</option>
+                                                    <select name="all_project_id" class="form-control round" id="project_id" required>
+                                                        <option value="">-- Select Project --</option>
                                                         @foreach($projects as $project)
-                                                        <option value="{{$project->id}}" data-type1="{{$project->customer_project->id}}" data-type2="{{$project->branch->id}}" data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}"> {{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}</option>
+                                                            <option value="{{$project->id}}" data-type1="{{$project->customer_project->id}}" data-type2="{{$project->branch->id}}" data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}">
+                                                                {{ $project->customer_project->company }} - {{ $project->branch->name }}
+                                                                [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ]
+                                                                {{ $project->name }} - {{ 'Prj-' . sprintf('%04d', $project->project_number) }}
+                                                            </option>
                                                         @endforeach
                                                     </select>
                                                 </div>
