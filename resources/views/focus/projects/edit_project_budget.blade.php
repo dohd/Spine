@@ -372,6 +372,7 @@
             $('#budget-item tbody').append(titleRow(i));
             $('#number-'+i).text(v.numbering);
             $('#itemname-'+i).val(v.product_name);
+            $('#itemid-'+i).val(v.id);
         }
         productIndx++;
     });
