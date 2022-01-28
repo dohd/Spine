@@ -2,12 +2,6 @@
 
 @section ('title', ' Diagnosis Job Card | Create Diagnosis Job Card')
 
-@section('page-header')
-<h1>
-    Diagnosis Job Card<small>Create Diagnosis Job Card</small>
-</h1>
-@endsection
-
 @section('content')
 <div class="">
     <div class="content-wrapper">
@@ -46,17 +40,16 @@
                                                     <option value="">-- Select Ticket --</option>
                                                         @foreach ($leads as $lead)
                                                             @php
-                                                                $name = $lead->client_name;
                                                                 $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
-                                                                if ($lead->client_status == "customer") {
-                                                                    $name = $lead->customer->company.' - '. $lead->branch->name;
-                                                                }
+                                                                $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
+                                                                $branch = isset($lead->branch) ? $lead->branch->name : '';
+                                                                if ($name && $branch) $name .= ' - ' . $branch;                                                                
                                                             @endphp
                                                             <option value="{{ $lead->id }}">
                                                                 {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                             </option>
                                                         @endforeach
-                                                    </select>                                                
+                                                    </select>                                     
                                                 <input type="hidden" name="client_id" value="0" id="client_id">
                                                 <input type="hidden" name="branch_id" value="0" id="branch_id">                                                
                                             </div>
