@@ -196,17 +196,17 @@
                                                 <label for="taxFormat" class="caption">{{trans('general.tax')}}*</label>
                                                 <select class="form-control round" name="taxformat" onchange="changeTaxFormat()" id="taxFormat">
                                                     @php
-                                                        $tax_format='exclusive';
-                                                        $tax_format_id=0;
-                                                        $tax_format_type='exclusive';
+                                                        $tax_format = 'exclusive';
+                                                        $tax_format_id = 0;
+                                                        $tax_format_type = 'exclusive';
                                                     @endphp
                                                     @foreach($additionals as $additional_tax)
                                                         @php
                                                             if ($additional_tax->id == @$defaults[4][0]['feature_value'] && $additional_tax->class == 1) {
                                                                 echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
-                                                                $tax_format=$additional_tax->type2;
-                                                                $tax_format_id=$additional_tax->id;
-                                                                $tax_format_type=$additional_tax->type3;
+                                                                $tax_format = $additional_tax->type2;
+                                                                $tax_format_id = $additional_tax->id->id;
+                                                                $tax_format_type = $additional_tax->type3;
                                                             }
                                                         @endphp
                                                         {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
@@ -241,7 +241,9 @@
                                                     <select id="s_warehouses" name="s_warehouses" class="form-control round ">
                                                         <option value="0">{{trans('general.all')}}</option>
                                                         @foreach($warehouses as $warehouse)
-                                                            <option value="{{$warehouse->id}}" {{$warehouse->id==@$defaults[1][0]['feature_value'] ? 'selected' : ''}}>{{$warehouse->title}}</option>
+                                                            <option value="{{$warehouse->id}}" {{$warehouse->id==@$defaults[1][0]['feature_value'] ? 'selected' : ''}}>
+                                                                {{$warehouse->title}}
+                                                            </option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -252,8 +254,12 @@
                                                     <select name="all_project_id" class="form-control round" id="project_id" required>
                                                         <option value="">-- Select Project --</option>
                                                         @foreach($projects as $project)
-                                                            <option value="{{$project->id}}" data-type1="{{$project->customer_project->id}}" data-type2="{{$project->branch->id}}" data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}">
-                                                                {{ $project->customer_project->company }} - {{ $project->branch->name }}
+                                                            @php
+                                                                $branch = $project->branch ? $project->branch->name : '';
+                                                                $name = $project->customer_project->company;
+                                                            @endphp
+                                                            <option value="{{ $project->id }}">
+                                                                {{ $name }} - {{ $branch }}
                                                                 [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ]
                                                                 {{ $project->name }} - {{ 'Prj-' . sprintf('%04d', $project->project_number) }}
                                                             </option>
