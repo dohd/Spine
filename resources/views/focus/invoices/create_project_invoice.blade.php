@@ -56,7 +56,7 @@
                                 </div>
                             </div>
                             <div class="col-3">
-                                <label for="validity" class="caption">Validity Period*</label>
+                                <label for="validity" class="caption">Credit Period*</label>
                                 <div class="input-group">
                                     <select class="form-control round  select-box" name="validity" id="validity">
                                         <option value="0" selected>On Reciept</option>
