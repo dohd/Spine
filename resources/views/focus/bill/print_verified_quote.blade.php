@@ -224,13 +224,11 @@
 		<tbody>
 			@foreach($invoice->verified_items as $product)
 				@if ($product->a_type == 1)	
-					@php
-						$product_qty = (int) $product->product_qty;
-					@endphp
+					
 					<tr>
 						<td>{{ $product->numbering }}</td>
 						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ $product_qty }}</td>
+						<td class="align-c">{{ (int) $product->product_qty }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
                         <td class="align-r">
                             @if ($invoice->print_type == 'inclusive')
@@ -240,6 +238,9 @@
                             @endif
                         </td>
                         <td class="align-r">
+							@php
+								$product_qty = (int) $product->product_qty;
+							@endphp
                             @if ($invoice->print_type == 'inclusive')
                                 {{ number_format($product_qty * $product->product_subtotal, 2) }}
                             @else
@@ -293,7 +294,9 @@
 			</tr>
 			<tr>
 				<td colspan="4">
-					<b>General Remark</b> : <i>{{ $invoice->gen_remark }}<i>
+					@isset($invoice->gen_remark)
+						<b>General Remark</b> : <i>{{ $invoice->gen_remark }}<i>
+					@endisset
 				</td>
 				@if ($invoice->print_type == 'inclusive')
 					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
