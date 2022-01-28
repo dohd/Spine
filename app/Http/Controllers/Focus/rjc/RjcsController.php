@@ -51,13 +51,13 @@ class RjcsController extends Controller
             ->get(['id', 'name', 'project_number', 'main_quote_id']);
         // append quote tid
         foreach($projects as $project) {
-            $tids = '';                
+            $quote_tids = array();                
             foreach ($project->quotes as $quote) {
                 $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
-                else $tids .= 'QT-'. $tid . ', ';
+                if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
+                else $quote_tids[] = 'QT-'. $tid;
             }
-            $project['quote_tids'] = '[ ' . $tids . ']';            
+            $project['quote_tids'] = implode(', ', $quote_tids);            
         }
         
         return view('focus.rjcs.create')->with(compact('projects', 'tid'));
@@ -117,13 +117,13 @@ class RjcsController extends Controller
             ->get(['id', 'name', 'project_number', 'main_quote_id']);
         // append quote tid
         foreach($projects as $project) {
-            $tids = '';                
+            $quote_tids = array();                
             foreach ($project->quotes as $quote) {
                 $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $tids .= 'PI-'. $tid . ', ';
-                else $tids .= 'QT-'. $tid . ', ';
+                if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
+                else $quote_tids[] = 'QT-'. $tid;
             }
-            $project['quote_tids'] = '[ ' . $tids . ']';            
+            $project['quote_tids'] = implode(', ', $quote_tids);            
         }
         // rjc items
         $items = $rjc->rjc_items()->orderBy('row_index', 'ASC')->get();
