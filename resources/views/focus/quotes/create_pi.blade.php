@@ -38,11 +38,10 @@
                                                 <option value="">-- Select Ticket --</option>
                                                 @foreach ($leads as $lead)
                                                     @php
-                                                        $name = $lead->client_name;
                                                         $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
-                                                        if ($lead->client_status == "customer") {
-                                                            $name = $lead->customer->company.' - '. $lead->branch->name;                                                                
-                                                        }
+                                                        $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
+                                                        $branch = isset($lead->branch) ? $lead->branch->name : '';
+                                                        if ($name && $branch) $name .= ' - ' . $branch;  
                                                     @endphp
                                                     <option value="{{ $lead->id }}">
                                                         {{ $tid }} - {{ $name }} - {{ $lead->title }}
