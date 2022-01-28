@@ -75,11 +75,7 @@
                     <tr>
                         <th>Date of Request</th>
                         <td>{{ dateFormat($lead->date_of_request) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Cost</th>
-                        <td>{{ $lead->cost }}</td>
-                    </tr>
+                    </tr>                    
                     <tr>
                         <th>Assigned to</th>
                         <td>{{ $lead->assign_to }}</td>
