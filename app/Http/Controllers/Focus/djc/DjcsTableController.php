@@ -61,6 +61,8 @@ class DjcsTableController extends Controller
                 if ($company && $branch)
                     return $company . ' - ' . $branch 
                         .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
+
+                return $djc->lead->client_name;
             })
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
