@@ -388,6 +388,7 @@
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off" ></td>
                 <td colspan="7"><input type="text"  class="form-control" name="product_name[]" id="itemname-${val}" placeholder="Enter Title Or Heading"></td>
                 <td class="text-center">${dropDown()}</td>
+                <input type="hidden" name="remark[]" id="remark-${val}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value="${val}" id="productid-${val}">
                 <input type="hidden" name="unit[]" value="">
