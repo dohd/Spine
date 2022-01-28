@@ -39,9 +39,7 @@
                     @php
                         $approved_verified = ($quote->verified === "Yes" && $quote->status === 'approved');
                         $text = ($quote->verified === "Yes") ? 'This ' . $quote_type . ' is verified' : '';
-                        if ($approved_verified) {
-                            $text = 'This ' . $quote_type . ' is approved and verified';
-                        }
+                        if ($approved_verified) $text = 'This ' . $quote_type . ' is approved and verified';
                     @endphp
                     @if ($quote->verified === "Yes")
                         <div class="badge text-center white d-block m-1">
@@ -75,12 +73,24 @@
                                 <li><i>{{ $email }},</i></li>
                                 <li><i>{{ $cell }}</i></li>                                
                             </ul>
+                            Client Ref: {{ $quote->client_ref }}
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
-                            <p><span class="text-muted">{{trans('quotes.invoicedate')}} :</span> {{dateFormat($quote['invoicedate'])}}</p>
-                            <p><span class="text-muted">{{trans('quotes.invoiceduedate')}} :</span> {{dateFormat($quote['invoiceduedate'])}}</p>
+                            @php
+                                $tid = sprintf('%04d', $quote->tid);
+                                $tid = $quote->bank_id ? '#PI-'.$tid : '#QT-'.$tid;
+                            @endphp
+                            <h2>{{ $tid }}</h2>
+                            <h3>{{ '#Tkt-' . sprintf('%04d', $quote->lead->reference) }}</h3>
+                            <p>                                
+                                {{trans('quotes.invoicedate')}} : {{dateFormat($quote['invoicedate'])}}<br>
+                                {{trans('quotes.invoiceduedate')}} : {{dateFormat($quote['invoiceduedate'])}}
+                            </p>
                             <div class="row">
-                                <div class="col"><br><hr><p class="text-danger">{{ $quote->notes }}</p></div>
+                                <div class="col">
+                                    <br><hr>
+                                    <p class="text-danger">{{ $quote->notes }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -117,7 +127,7 @@
                                                     <td class="text-right">{{ amountFormat($subtotal - $price) }}
                                                         <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                     </td>
-                                                    <td class="text-right">{{amountFormat($product['product_subtotal'])}}</td>
+                                                    <td class="text-right">{{ amountFormat(intval($product->product_qty) * $subtotal) }}</td>
                                                 </tr>
                                             @else
                                                 <tr>
