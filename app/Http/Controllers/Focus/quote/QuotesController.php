@@ -220,22 +220,23 @@ class QuotesController extends Controller
      */
     public function project_quotes(ManageQuoteRequest $request)
     {
+        // extract request input
         $input = $request->only('rel_type', 'rel_id');
-        
+        $relshp_type = request('rel_type');
+        $relshp_id = request('rel_id');
+
         $segment = array();
         $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
+        if ($relshp_type && $relshp_id) {
+            if ($relshp_type == 1) {
+                $segment = Customer::find($relshp_id);
+                $words['name'] = trans('customers.title');
+                $words['name_data'] = $segment->name;
+            }
+            else {
+                $segment = Hrm::find($relshp_id);
+                $words['name'] = trans('hrms.employee');
+                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
             }
         }
 
