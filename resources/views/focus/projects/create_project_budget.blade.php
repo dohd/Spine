@@ -336,6 +336,7 @@
         } else {
             $('#quote-item tbody').append(titleRow(i));
             $('#number-'+i).text(v.numbering);
+            $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
         }
         productIndx++;
