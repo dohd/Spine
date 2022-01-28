@@ -285,17 +285,15 @@
         `;
     }
     //job card row counter
-    let jobCardNo = 1;
+    let jcIndex = 1;
     // addjob card row
     $('#add-jobcard').click(function() {
-        // append row
-        const row = jobCardRow(jobCardNo);
-        $('#jobcard tr:last').after(row);
+        $('#jobcard tbody').append(jobCardRow(jcIndex));
         // initalize datepicker
-        $('#date-'+jobCardNo)
+        $('#date-'+jcIndex)
             .datepicker({ format: "{{ config('core.user_date_format') }}"  })
             .datepicker('setDate', new Date());
-        jobCardNo++;
+        jcIndex++;
     });
     // remove job card row
     $('#jobcard').on('click', '.removeJc', function() {
@@ -315,7 +313,7 @@
     });
 
     // On next verifications other than the first
-    if (Number("{{ $verify_no }}") > 1) {
+    if ("{{ $verify_no }}" > 1) {
         // fetch job cards
         $.ajax({
             url: baseurl + 'quotes/verified_jcs/' + "{{ $quote->id }}",
@@ -326,9 +324,8 @@
                 data.forEach((v, i) => {
                     // append additional rows
                     if (i) {
-                        const row = jobCardRow(i);
-                        $('#jobcard tr:last').after(row);
-                        jobCardNo++;
+                        $('#jobcard tbody').append(jobCardRow(i));
+                        jcIndex++;
                     }
                     // set values
                     $('#jcitemid-'+i).val(v.id);
@@ -366,8 +363,8 @@
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req amount" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req price" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
                 <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td><textarea class="form-control" name="remark[]" id="remark-${val}"></textarea></td>
@@ -381,7 +378,6 @@
     }
 
     // product title row
-    // with extra hidden input fields to imitate product row state
     function productTitleRow(val) {
         return `
             <tr>
@@ -401,12 +397,17 @@
         `;
     }
 
-    // product row counter
-    let cvalue = 0;
+    // On product amount or price change condition
+    $('#quotation').on('change', '.amount, .price', function() {
+        const i = $(this).attr('id').split('-')[1];
+        $('#remark-'+i).attr('required', true);
+    });
+
     // set default product rows
+    let rowIndx = 0;
     const quoteItems = @json($products);
     quoteItems.forEach(v => {
-        const i = cvalue;
+        const i = rowIndx;
         const item = {...v};
         // format float values to integer
         const keys = ['product_price', 'product_qty', 'product_subtotal'];
@@ -415,9 +416,8 @@
         });
         // check if item has product row parameters
         if (item.product_name && item.product_price) {
-            const row = productRow(cvalue);
-            $('#quotation tr:last').after(row);
-            $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
+            $('#quotation tbody').append(productRow(rowIndx));
+            $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
 
             // set default values
             $('#itemid-'+i).val(item.id);
@@ -431,33 +431,27 @@
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
             $('#result-'+i).text(item.product_subtotal.toFixed(2));
         } else {
-            const row = productTitleRow(cvalue);
-            $('#quotation tr:last').after(row);
+            $('#quotation tbody').append(productTitleRow(rowIndx));
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
         }
-        cvalue++;
+        rowIndx++;
         totals();
     });    
 
     // On click Add Product
     $('#add-product').click(function() {
-        // append row
-        const row = productRow(cvalue);
-        $('#quotation tr:last').after(row);
-        // autocomplete on added product row
-        $('#itemname-'+cvalue).autocomplete(autocompleteProp(cvalue));
-        cvalue++;
+        $('#quotation tbody').append(productRow(rowIndx));
+        $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
+        rowIndx++;
     });
     // on click Add Title button
     $('#add-title').click(function() {
-        // append row
-        const row = productTitleRow(cvalue);
-        $('#quotation tr:last').after(row);
-        cvalue++;
+        $('#quotation tbody').append(productTitleRow(rowIndx));
+        rowIndx++;
     });
 
     // on clicking Product row drop down menu
@@ -471,11 +465,11 @@
         if ($(this).is('.removeProd')) {
             const row = $(this).closest('tr');
             row.remove();
-            if (Number("{{ $verify_no }}") > 1) {
+            if ("{{ $verify_no }}" > 1) {
                 if (confirm('Are you sure to delete this item?')) {
                     // delete verified product ajax call 
                     const itemId = row.find('input[name="item_id[]"]').val();
-                    if (Number(itemId)) {
+                    if (itemId > 0) {
                         $.ajax({
                             url: baseurl + 'quotes/delete_product/' + itemId,
                             dataType: "json",
