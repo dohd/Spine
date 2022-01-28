@@ -57,6 +57,9 @@ class QuoteRepository extends BaseRepository
         ]);
     }
 
+    /**
+     * Verify Quotes
+     */
     public function getForVerifyDataTable()
     {
         $q = $this->query();
@@ -80,7 +83,7 @@ class QuoteRepository extends BaseRepository
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'bank_id', 'verified', 'client_ref'
+            'total', 'bank_id', 'verified', 'client_ref', 'lpo_id'
         ]);
     }
 
