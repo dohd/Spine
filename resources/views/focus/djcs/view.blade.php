@@ -123,7 +123,7 @@
                     <table id="others-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
                             <th>Call Description</th>
-                            <td>{{ @$djc->lead->note }}</td>
+                            <td>{{ $djc->lead->note }}</td>
                         </tr>
                         <tr>
                             <th>Findings and Root Cause</th>
