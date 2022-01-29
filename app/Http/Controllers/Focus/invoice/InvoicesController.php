@@ -127,13 +127,13 @@ class InvoicesController extends Controller
     public function create_project_invoice(ManageInvoiceRequest $request)
     {
         // extract input fields
-        $inv_customer = request('customer');
-        $inv_quote_ids = request('selected_products');
+        $inp_customer = request('customer');
+        $inp_quote_ids = request('selected_products');
 
-        if ($inv_customer && $inv_quote_ids) {
-            $quote_ids = explode(',', $inv_quote_ids);
+        if ($inp_customer && $inp_quote_ids) {
+            $quote_ids = explode(',', $inp_quote_ids);
             $quotes = Quote::whereIn('id', $quote_ids)->get();
-            $customer = Customer::find($inv_customer);
+            $customer = Customer::find($inp_customer);
             $last_invoice = Invoice::orderBy('id', 'desc')->first();
             $last_tr = Transaction::orderBy('id', 'desc')->first();
             $banks = Bank::all();
@@ -144,7 +144,7 @@ class InvoicesController extends Controller
         }
 
         $customers = Customer::where('active', '1')->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no');
+        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
         $projects = Project::pluck('name', 'id');
 
         return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
@@ -156,7 +156,7 @@ class InvoicesController extends Controller
     public function project_invoice(ManageInvoiceRequest $request)
     {
         $customers = Customer::where('active', '1')->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no');
+        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
         $projects = Project::pluck('name', 'id');
 
         return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
