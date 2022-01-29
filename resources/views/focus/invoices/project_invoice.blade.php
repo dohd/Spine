@@ -220,7 +220,7 @@
     });
 
     //add selected
-    $(document).on('click', '#add-selected', function() {
+    $(document).on('click', '#add-selected', function(e) {
         e.preventDefault();
         var customer_id = $('#customer_id').val();
         if (!customer_id) return swal('Filter Customer');
