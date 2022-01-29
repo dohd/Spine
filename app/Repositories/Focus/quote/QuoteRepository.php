@@ -12,6 +12,7 @@ use App\Repositories\BaseRepository;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
 use App\Models\project\Budget;
+use App\Models\project\ProjectQuote;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 
@@ -58,7 +59,7 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     * Verify Quotes
+     * Quotes approved and budgeted
      */
     public function getForVerifyDataTable()
     {
@@ -95,6 +96,33 @@ class QuoteRepository extends BaseRepository
 
             return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
         }
+    }
+
+    /**
+     * Quotes Verified but not invoiced
+     */
+    public function getForVerifyNotInvoicedDataTable()
+    {
+        $q = $this->query();
+        $q->where(['invoiced' => 'No', 'verified' => 'Yes'])->orderBy('id', 'desc');
+
+        // extract input filter fields
+        $customer_id = request('customer_id');
+        $lpo_id = request('lpo_number');
+        $project_id = request('project_id');
+
+        // apply filtering
+        if ($customer_id) $q->where(compact('customer_id'));
+        if ($lpo_id) $q->where(compact('lpo_id'));
+        if ($project_id) {
+            $quote_ids =  ProjectQuote::where(compact('project_id'))->pluck('quote_id');
+            $q->whereIn('id', $quote_ids);
+        }
+        
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
+            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id'
+        ]);
     }
 
     /**
@@ -355,31 +383,5 @@ class QuoteRepository extends BaseRepository
         if (VerifiedJc::destroy($id)) return true;
 
         throw new GeneralException(trans('Error deleting verified job card'));
-    }
-    
-    public function getForVerifyNotInvoicedDataTable()
-    {
-        $q = $this->query();
-
-        if (request('customer_id')) {
-            $q->where('customer_id', request('customer_id'));
-        }
-
-        if (request('lpo_number')) {
-            $lpo = Lpo::where('lpo_no', request('lpo_number'))->first(['lpo_no']);
-            if (isset($lpo)) $q->where('lpo_number', $lpo->lpo_no);
-        }
-
-        if (request('project_id')) {
-            $q->where('project_quote_id', request('project_id'));
-        }
-        
-        // Verified and Not invoiced 
-        $q->where(['invoiced' => 'No', 'verified' => 'Yes'])->orderBy('id', 'desc');
-
-        return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id'
-        ]);
     }
 }
