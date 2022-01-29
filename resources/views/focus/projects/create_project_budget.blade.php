@@ -19,6 +19,13 @@
                     <a href="{{ route('biller.projects.index') }}" class="btn btn-primary">
                         <i class="ft-list"></i> Projects
                     </a>
+                    @php
+                        $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
+                        $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
+                    @endphp
+                    <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
+                        <i class="fa fa-print"></i> Quote
+                    </a> 
                 </div>
             </div>
         </div>
