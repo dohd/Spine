@@ -144,8 +144,9 @@
                                         $lpo_no = $val->lpo ? $val->lpo->lpo_no : '';
                                         $client_ref = $val->client_ref;
                                         $branch_name = $val->branch->name;
-                                        if (isset($val->branch->code)) {
-                                            $branch_name = $branch_name . '(' . $val->branch->code . ')';
+                                        $branch_code = $val->branch->code;
+                                        if ($branch_name && $branch_code) {
+                                            $branch_name .=  '(' . $branch_code . ')';
                                         }                                       
 
                                         // Description details
@@ -160,7 +161,7 @@
                                         $reference = implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);
                                         $description = $title . '; ' . implode(', ', $jcs);
                                         $price = number_format($val->subtotal, 2);
-                                        $project_id = $val->project_quote->project_id;
+                                        $project_id = $val->project_quote ? $val->project_quote->project_id : '';
                                     @endphp
                                     <tr>
                                         <td>{{ $k+1 }}</td>                
