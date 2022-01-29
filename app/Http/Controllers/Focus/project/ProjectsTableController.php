@@ -52,6 +52,10 @@ class ProjectsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('customer', function($project) {
+                if ($project->customer_project)
+                    return $project->customer_project->company;
+            })
             ->addColumn('name', function ($project) {
                 $tg = '';
                 foreach ($project->tags as $row) {

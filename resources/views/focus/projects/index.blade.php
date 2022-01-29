@@ -26,6 +26,7 @@
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Customer</th>
                                 <th>{{ trans('projects.project') }}</th>
                                 <th>Project No</th>
                                 <th>#Quote / PI No</th>
@@ -105,6 +106,10 @@
             columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
+                },
+                {
+                    data: 'customer',
+                    name: 'customer'
                 },
                 {
                     data: 'name',
