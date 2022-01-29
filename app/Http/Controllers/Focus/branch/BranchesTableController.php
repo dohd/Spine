@@ -56,8 +56,8 @@ class BranchesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($branch) {
-                if (isset($branch->customer)) return $branch->customer->company;
-                return;
+                if (isset($branch->customer)) 
+                    return $branch->customer->company;
             })
             ->addColumn('name', function ($branch) {
                 return $branch->name;
