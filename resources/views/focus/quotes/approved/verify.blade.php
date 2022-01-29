@@ -1,6 +1,10 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Verify Quote / PI')
+@php
+    $title = $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote';
+@endphp
+
+@section ('title', $title)
 
 @section('content')
 <div class="content-wrapper">
@@ -34,7 +38,7 @@
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
-                                    <div class="fcol-sm-12"><h3 class="title pl-1">Verify Quote / Proforma Invoice</h3></div>
+                                    <div class="fcol-sm-12"><h3 class="title pl-1">{{ $title }}</h3></div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
