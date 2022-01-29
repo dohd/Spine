@@ -144,11 +144,8 @@
                                         $lpo_no = $val->lpo ? $val->lpo->lpo_no : '';
                                         $client_ref = $val->client_ref;
                                         $branch_name = $val->branch->name;
-                                        $branch_code = $val->branch->code;
-                                        if ($branch_name && $branch_code) {
-                                            $branch_name .=  '(' . $branch_code . ')';
-                                        }                                       
-
+                                        if ($val->branch->branch_code) $branch_name .=  '(' . $val->branch->branch_code . ')';
+                                        
                                         // Description details
                                         $title = $val->notes;
                                         $jcs = array();
