@@ -93,14 +93,14 @@
                     <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
                         <thead>
                             <tr class="item_header bg-gradient-directional-blue white">
-                                <th class="text-center">#</th>
+                                <th width="6%" class="text-center">#</th>
                                 <th width="38%" class="text-center">Name</th>
                                 <th width="8%" class="text-center">Quoted Qty</th>                                
                                 <th width="7%" class="text-center">UOM</th>
                                 <th width="8%" class="text-center">Approve Qty</th>     
-                                <th width="16%" class="text-center">Buy Price (VAT Exc)</th>
-                                <th width="16%" class="text-center">Amount</th>
-                                <th width="8%" class="text-center">Issue Qty</th>  
+                                <th width="12%" class="text-center">Buy Price (VAT Exc)</th>
+                                <th width="10%" class="text-center">Amount</th>
+                                <th width="8%" class="text-center">Issued Qty</th>  
                                 <th width="7%" class="text-center">Action</th>                             
                             </tr>
                         </thead>
@@ -221,7 +221,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <a class="dropdown-item up" href="javascript:void(0);">Up</a>
                     <a class="dropdown-item down" href="javascript:void(0);">Down</a>
-                    <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Remove</a>
+                    <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Delete</a>
                 </div>
             </div>            
         `;
@@ -231,7 +231,7 @@
     function productRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}">#</span></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
                 <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>                
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
@@ -244,7 +244,7 @@
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
                 <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
-                <input type="hidden" name="numbering[]" value="#" id="numbering-${n}">
+                
                 <input type="hidden" name="budget_id[]" value="{{ $budget->id }}" id="budgetid-${n}">
             </tr>
         `;
@@ -364,7 +364,6 @@
             $('#budget-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
             // set default values
-            $('#number-'+i).text(v.numbering);
             $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
@@ -376,7 +375,7 @@
             if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);  
         } else {
             $('#budget-item tbody').append(titleRow(i));
-            $('#number-'+i).text(v.numbering);
+            $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
             $('#itemid-'+i).val(v.id);
         }
@@ -391,20 +390,27 @@
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
         productIndx++;
     });
-    // modify product row
+
+    // On clicking action
+    $('#budget-item').on('click', '#dropdownMenuButton', function() {
+        const $row = $(this).parents("tr:first");
+        const $btn = $(this).next().find('.removeItem');
+        $btn.removeClass('d-none');
+        
+        const issueQty = $('#issueqty-'+$row.index()).val();
+        if (issueQty > 0) $btn.addClass('d-none');        
+    });
+
+    // Modify product row
     $('#budget-item').on('click', '.removeItem, .up, .down', function() {
-        const row = $(this).parents("tr:first");
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        if ($(this).is('.down')) row.insertAfter(row.next());        
+        const $row = $(this).parents("tr:first");
+        if ($(this).is('.up')) $row.insertBefore($row.prev());
+        if ($(this).is('.down')) $row.insertAfter($row.next());        
         if ($(this).is('.removeItem')) {
-            const issueQty = $(this).parentsUntil('tbody').eq(3).find('input[name="issue_qty[]"]').val();
-            if (issueQty > 0) return;
-            // Remove only unissued products 
-            const $row = $(this).closest('tr');
-            const itemId = $row.children('input[name="item_id[]"]').val();
+            const itemId = $('#itemid-'+$row.index());
             if (itemId > 0) {
                 $.ajax({
-                    url: baseurl + `/projects/budget_delete_item/${itemId}`,
+                    url: baseurl + `projects/budget_delete_item/${itemId}`,
                     method: 'DELETE'
                 });
             }
