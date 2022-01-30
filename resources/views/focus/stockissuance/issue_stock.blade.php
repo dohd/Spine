@@ -27,7 +27,7 @@
     <div class="content-body">
         <div class="card">
             <div class="card-body">                
-                {{ Form::model($quote, ['route' => ['biller.stockissuance.store', $quote], 'method' => 'POST' ]) }}
+                {{ Form::model($quote) }}
                 <input type="hidden" name="quote_id" value="{{ $quote->id }}">
                 <div class="form-group row">
                     <div class="col-12">
@@ -80,14 +80,15 @@
                     <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
                         <thead>
                             <tr class="item_header bg-gradient-directional-blue white">
-                                <th class="text-center">#</th>
+                                <th width="6%" class="text-center">#</th>
                                 <th width="38%" class="text-center">Name</th>
-                                <th width="8%" class="text-center">Quoted Qty</th>                                
-                                <th width="7%" class="text-center">UOM</th>
-                                <th width="8%" class="text-center">Approve Qty</th>     
-                                <th width="16%" class="text-center">Buy Price (VAT Exc)</th>
-                                <th width="16%" class="text-center">Amount</th>
-                                <th width="8%" class="text-center">Issue Qty</th>  
+                                <th width="6%" class="text-center">Quoted Qty</th>                                
+                                <th width="8%" class="text-center">UOM</th>
+                                <th width="6%" class="text-center">Approve Qty</th>     
+                                <th width="14%" class="text-center">Buy Price (VAT Exc)</th>
+                                <th width="8%" class="text-center">Amount</th>
+                                <th width="6%" class="text-center">Issued Qty</th> 
+                                <th width="10%" class="text-center">Qty</th>  
                                 <th width="7%" class="text-center">Action</th>                             
                             </tr>
                         </thead>
@@ -128,7 +129,7 @@
                             <div class="form-group">
                                 <div><label for="tool">Tools Required & Notes</label></div>
                                 <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">                                    
-                                    {{ $budget->tool }}                                    
+                                    {{ $budget->tool }}
                                 </textarea>   
                             </div>                                                     
                             <div class="form-group">
@@ -156,6 +157,7 @@
         </div>
     </div>
 </div>
+@include('focus.stockissuance.issuance_log');
 @endsection
 
 @section('extra-scripts')
@@ -209,9 +211,13 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <a class="dropdown-item issueItem" href="javascript:void(0);">Issue</a>
-                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
-                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
-                    <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Remove</a>
+                    <a class="dropdown-item saveItem" href="javascript:void(0);">Save</a>
+                    <a class="dropdown-item up" href="javascript:void(0);">Move Up</a>
+                    <a class="dropdown-item down" href="javascript:void(0);">Move Down</a>
+                    <a class="dropdown-item removeItem text-danger" href="javascript:void(0);">Delete</a>
+                    <a class="dropdown-item logItem" href="javascript:void(0);" data-toggle="modal" data-target="#issuanceLog">
+                        View Log
+                    </a>
                 </div>
             </div>            
         `;
@@ -221,20 +227,20 @@
     function productRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}">#</span></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
                 <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>                
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
                 <td><input type="number" class="form-control update newqty" name="new_qty[]" value="0" id="newqty-${n}" readonly></td>
                 <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
                 <td class="text-center"><span>0</span></td>
+                <td><input type="number" class="form-control issued" name="issued_qty" id="issuedqty-${n}" disabled></td>
                 <td><input type="number" class="form-control issue" name="issue_qty[]" id="issueqty-${n}"></td>
                 <td>${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
-                <input type="hidden" name="numbering[]" value="#" id="numbering-${n}">
+                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">                
                 <input type="hidden" name="budget_id[]" value="{{ $budget->id }}" id="budgetid-${n}">
             </tr>
         `;
@@ -295,11 +301,37 @@
         skillIndx++;
     });
 
-    // Issuance condition on approved quantity
+    // Dropdown menu condition
+    $('#budget-item').on('click', '#dropdownMenuButton', function() {
+        const $dropDown = $(this).next();
+        $dropDown.find('.issueItem').addClass('d-none');
+        $dropDown.find('.saveItem').addClass('d-none');
+        $dropDown.find('.logItem').addClass('d-none');
+
+        const i = $(this).parentsUntil('tbody').eq(2).index();
+        const productId = $('#productid-'+i).val();
+        const itemId = $('#itemid-'+i).val();
+        // if new item, enable save
+        if (itemId == 0) 
+            return $dropDown.find('.saveItem').removeClass('d-none');
+        // if not stock item, disable save and issue
+        if (productId == 0) return;
+        // default enable issue
+        $dropDown.find('.issueItem').removeClass('d-none');
+        $dropDown.find('.logItem').removeClass('d-none');
+        $dropDown.find('.removeItem').addClass('d-none');
+    });
+
+    // Issuance condition
     $('#budget-item').on('change', '.issue', function() {        
-        const approveQty = $(this).parentsUntil('tbody').eq(1).find('.newqty').val()
-        if (approveQty == 0) return;
-        if ($(this).val() > approveQty) $(this).val(approveQty);
+        let aprvQty = $(this).parentsUntil('tbody').eq(1).find('.newqty').val();
+        aprvQty = Number(aprvQty);
+        if (!aprvQty) return;
+
+        const issuedQty = $(this).parentsUntil('tbody').eq(1).find('.issued').val();
+        if (issuedQty == aprvQty) $(this).attr('disabled', true);
+
+        if (Number($(this).val()) > aprvQty) $(this).val(aprvQty);
     });
 
     // On budget-item update
@@ -335,7 +367,6 @@
             $('#budget-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
             // set default values
-            $('#number-'+i).text(v.numbering);
             $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
@@ -344,11 +375,11 @@
             $('#amount-'+i).val(parseFloat(v.product_qty));
             $('#newqty-'+i).val(parseFloat(v.new_qty));
             $('#price-'+i).val(v.price).change();
-            if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);  
+            if (v.issue_qty) $('#issuedqty-'+i).val(v.issue_qty);  
         } else {
             $('#budget-item tbody').append(titleRow(i));
-            $('#number-'+i).text(v.numbering);
             $('#itemname-'+i).val(v.product_name);
+            $('#numbering-'+i).val(v.numbering);
         }
         productIndx++;
     });
@@ -363,15 +394,24 @@
     });
     // remove product row
     $('#budget-item').on('click', '.removeItem, .up, .down', function() {
-        const row = $(this).parents("tr:first");
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        if ($(this).is('.removeItem')) $(this).closest('tr').remove();
+        const $row = $(this).parents("tr:first");
+        if ($(this).is('.up')) $row.insertBefore($row.prev());
+        if ($(this).is('.down')) $row.insertAfter($row.next());
+        if ($(this).is('.removeItem')) {
+            const itemId = $('#itemid-'+$row.index()).val();
+            if (itemId > 0) {
+                $.ajax({
+                    url: baseurl + `projects/budget_delete_item/${itemId}`,
+                    method: 'DELETE'
+                });
+            }
+            $(this).closest('tr').remove();
+        }
         
         calcBudget();
     });
-    // issue product
-    $('#budget-item').on('click', '.issueItem', function() {
+    // On Issue or Save product
+    $('#budget-item').on('click', '.issueItem, .saveItem', function() {
         const $tr = $(this).parentsUntil('tbody').eq(3);
         const i = $tr.index();
         const data = {
@@ -387,15 +427,21 @@
             budget_id: $('#budgetid-'+i).val(),
             a_type: $('#atype-'+i).val(),
         };
-        $.ajax({
-            url: "{{ route('biller.stockissuance.store') }}",
-            method: 'POST',
-            type: 'json-data',
-            data
-        })
-        .done(function(data) {
-            return (data.issue_qty) && $('#issueqty-'+i).val(data.issue_qty);
-        });      
+        // ajax api calls
+        const ajaxConfig = {method: 'POST', type: 'json-data', data};
+        if ($(this).is('.issueItem')) {
+            ajaxConfig['url'] = "{{ route('biller.stockissuance.issue_stock') }}";
+            $.ajax(ajaxConfig)
+            .done(function(data) {
+                $('#issueqty-'+i).val('');
+                if (data) $('#issuedqty-'+i).val(data.issue_qty);
+            });      
+        }
+        if ($(this).is('.saveItem')) {
+            ajaxConfig['url'] = "{{ route('biller.stockissuance.store') }}";
+            $.ajax(ajaxConfig)
+            .done(function(data) { location.reload(); });      
+        }
     });
 
     // autocompleteProp returns autocomplete object properties
@@ -461,5 +507,31 @@
             scroll(0, 0);
         }
     }
+
+    // On View Log
+    function logRow(v, i) {
+        return `
+            <tr>
+                <td class="text-center">${i+1}</td>
+                <td class="text-center">${v.issue_qty}</td>
+                <td>${v.issuer}</td>
+                <td>${new Date(v.created_at).toDateString()}</td>
+            <tr>
+        `;
+    }
+    $(document).on('click', ".logItem", function() {
+        const $row = $(this).parents('tr:first');
+        const itemId = $('#itemid-'+$row.index()).val();
+        $.ajax({
+            url: baseurl + `issued_stock_log/${itemId}`,
+            dataType: 'json',
+            success: function(data) {
+                $('#issueItemLog tbody').html('');
+                data.forEach((v, i) => {
+                    $('#issueItemLog tbody').append(logRow(v, i));
+                });                
+            }
+        });
+    });
 </script>
 @endsection
