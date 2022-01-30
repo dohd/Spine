@@ -311,14 +311,12 @@
         const i = $(this).parents('tr:first').index();
         const productId = $('#productid-'+i).val();
         const itemId = $('#itemid-'+i).val();
-        const issuedQty = $('#issuedqty-'+i).val();
-        const aprvQty = $('#newqty-'+i).val();
         // if new item, enable save
         if (itemId == 0) 
             return $dropDown.find('.saveItem').removeClass('d-none');
         // if not stock item or issued qty is equal to approved qty 
         // disable save and issue
-        if (productId == 0 || issuedQty == aprvQty) return;
+        if (productId == 0) return;
         // default enable issue
         $dropDown.find('.issueItem').removeClass('d-none');
         $dropDown.find('.logItem').removeClass('d-none');
