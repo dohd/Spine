@@ -63,6 +63,10 @@ class StockIssuanceController extends Controller
         if ($store_product->qty < $input_qty) $input_qty = $store_product->qty;
 
         $budget_item = BudgetItem::find($item_id);
+        $diff = $budget_item->new_qty - $budget_item->issue_qty;        
+        if ($diff > 0 && $input_qty > $diff) {
+            $input_qty = $diff;
+        }
         // reduce stock by input qty
         $store_product->decrement('qty', $input_qty);
         // increament value of issued by input qty
