@@ -308,14 +308,17 @@
         $dropDown.find('.saveItem').addClass('d-none');
         $dropDown.find('.logItem').addClass('d-none');
 
-        const i = $(this).parentsUntil('tbody').eq(2).index();
+        const i = $(this).parents('tr:first').index();
         const productId = $('#productid-'+i).val();
         const itemId = $('#itemid-'+i).val();
+        const issuedQty = $('#issuedqty-'+i).val();
+        const aprvQty = $('#newqty-'+i).val();
         // if new item, enable save
         if (itemId == 0) 
             return $dropDown.find('.saveItem').removeClass('d-none');
-        // if not stock item, disable save and issue
-        if (productId == 0) return;
+        // if not stock item or issued qty is equal to approved qty 
+        // disable save and issue
+        if (productId == 0 || issuedQty == aprvQty) return;
         // default enable issue
         $dropDown.find('.issueItem').removeClass('d-none');
         $dropDown.find('.logItem').removeClass('d-none');
@@ -405,15 +408,14 @@
                     method: 'DELETE'
                 });
             }
-            $(this).closest('tr').remove();
+            $row.remove();
         }
         
         calcBudget();
     });
     // On Issue or Save product
     $('#budget-item').on('click', '.issueItem, .saveItem', function() {
-        const $tr = $(this).parentsUntil('tbody').eq(3);
-        const i = $tr.index();
+        const i = $(this).parents('tr:first').index();
         const data = {
             numbering: $('#numbering-'+i).val(),
             product_name: $('#itemname-'+i).val(),
@@ -431,16 +433,21 @@
         const ajaxConfig = {method: 'POST', type: 'json-data', data};
         if ($(this).is('.issueItem')) {
             ajaxConfig['url'] = "{{ route('biller.stockissuance.issue_stock') }}";
-            $.ajax(ajaxConfig)
-            .done(function(data) {
-                $('#issueqty-'+i).val('');
-                if (data) $('#issuedqty-'+i).val(data.issue_qty);
-            });      
+            if (data.issue_qty) {
+                $.ajax(ajaxConfig).done(function(data) {
+                    $('#issueqty-'+i).val('');
+                    if (data) {
+                        $('#issuedqty-'+i).val(data.issue_qty);
+                        if ($('#issuedqty-'+i).val() == $('#newqty-'+i).val()) {
+                            $('#issueqty-'+i).attr('disabled', true);
+                        }
+                    }
+                }); 
+            }                 
         }
         if ($(this).is('.saveItem')) {
             ajaxConfig['url'] = "{{ route('biller.stockissuance.store') }}";
-            $.ajax(ajaxConfig)
-            .done(function(data) { location.reload(); });      
+            $.ajax(ajaxConfig).done(function(data) { location.reload(); });      
         }
     });
 
