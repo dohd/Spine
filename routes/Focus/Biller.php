@@ -218,7 +218,9 @@ Route::group(['namespace' => 'projectstocktransfer'], function () {
 });
 
 Route::group(['namespace' => 'stockissuance'], function () {
-    Route::get('issue_stock/{quote}', 'StockIssuanceController@issue_stock')->name('stockissuance.issue_stock');
+    Route::post('issue_stock', 'StockIssuanceController@issue_stock')->name('stockissuance.issue_stock');
+    Route::get('issued_stock_log/{id}', 'StockIssuanceController@get_issued_log')->name('stockissuance.get_issued_log');
+
     Route::resource('stockissuance', 'StockIssuanceController');
     // for dataTable
     Route::post('stockissuance/get', 'StockIssuanceTableController')->name('stockissuance.get');
