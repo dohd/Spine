@@ -66,7 +66,7 @@ class StockIssuanceTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('actions', function ($quote) {
-                return '<a href="'. route('biller.stockissuance.issue_stock', $quote) .'" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Issue"><i class="ft-list "></i></a>';
+                return '<a href="'. route('biller.stockissuance.create', $quote->id) .'" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Issue"><i class="ft-list "></i></a>';
             })
             ->rawColumns(['actions'])
             ->make(true);
