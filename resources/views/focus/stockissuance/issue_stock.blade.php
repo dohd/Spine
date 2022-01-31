@@ -325,11 +325,11 @@
 
     // Issuance condition
     $('#budget-item').on('change', '.issue', function() {        
-        let aprvQty = $(this).parentsUntil('tbody').eq(1).find('.newqty').val();
+        let aprvQty = $(this).parents('tr:first').find('.newqty').val();
         aprvQty = Number(aprvQty);
         if (!aprvQty) return;
 
-        const issuedQty = $(this).parentsUntil('tbody').eq(1).find('.issued').val();
+        const issuedQty = $(this).parents('tr:first').find('.issued').val();
         if (issuedQty == aprvQty) $(this).attr('disabled', true);
 
         if (Number($(this).val()) > aprvQty) $(this).val(aprvQty);
@@ -444,6 +444,7 @@
             }                 
         }
         if ($(this).is('.saveItem')) {
+            if (!data.numbering) return alert('Please input numbering on line item!');
             ajaxConfig['url'] = "{{ route('biller.stockissuance.store') }}";
             $.ajax(ajaxConfig).done(function(data) { location.reload(); });      
         }
