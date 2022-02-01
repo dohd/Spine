@@ -149,9 +149,12 @@
                             <div class="col-md-7">
                                 <p class="lead">Approval Details</p><hr>
                                 <p>
-                                    Approved By :<span class="text-danger mr-1">{{$quote['approved_by']}}</span> 
-                                    Approved On :<span class=" text-danger mr-1">{{dateFormat($quote['approved_date'])}}</span> 
-                                    Approval Method :<span class=" text-danger">{{$quote['approved_method']}}</span>
+                                    Approved By : <span class="text-danger mr-1">{{ $quote->approved_by }}</span> 
+                                    Approved On : <span class=" text-danger mr-1">{{ dateFormat($quote->approved_date) }}</span> 
+                                    Approval Method : <span class=" text-danger">{{ $quote->approved_method }}</span>
+                                </p>
+                                <p>
+                                    Approval Note: <span class="text-danger mr-1">{{ $quote->approval_note }}</span> 
                                 </p>
                             </div>
 
@@ -190,12 +193,15 @@
                             <!-- LPO Details -->
                             <div class="col-md-7 col-sm-12">
                                 @isset($quote->lpo)
+                                    <h3>LPO Details</h3>
                                     <p>
                                         LPO Date : <span class="text-danger mr-1">{{ dateFormat($quote->lpo->date) }}</span>
                                         LPO Number : <span class="text-danger mr-1">{{ $quote->lpo->lpo_no }}</span>                                     
-                                        LPO Amount : <span class="text-danger">{{ number_format($quote->lpo->amount, 2) }}</span><br>
-                                        LPO Remark: <span class="text-danger">{{ $quote->lpo->remark }}</span>                             
-                                    </p>                                
+                                        LPO Amount : <span class="text-danger">{{ number_format($quote->lpo->amount, 2) }}</span>                                                                    
+                                    </p> 
+                                    <p>
+                                        LPO Remark : <span class="text-danger">{{ $quote->lpo->remark }}</span> 
+                                    </p>                               
                                @endisset
                             </div>
 
