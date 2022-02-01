@@ -90,13 +90,13 @@
                     <table id="quote-item" class="table-responsive tfr my_stripe_single mb-1">
                         <thead>
                             <tr class="item_header bg-gradient-directional-blue white">
-                                <th class="text-center">#</th>
+                                <th width="6%" class="text-center">#</th>
                                 <th width="38%" class="text-center">Name</th>
                                 <th width="8%" class="text-center">Quoted Qty</th>                                
                                 <th width="7%" class="text-center">UOM</th>
                                 <th width="8%" class="text-center">Approve Qty</th>     
-                                <th width="16%" class="text-center">Buy Price (VAT Exc)</th>
-                                <th width="16%" class="text-center">Amount</th>
+                                <th width="12%" class="text-center">Buy Price (VAT Exc)</th>
+                                <th width="12%" class="text-center">Amount</th>
                                 <th width="7%" class="text-center">Action</th>                             
                             </tr>
                         </thead>
@@ -187,7 +187,7 @@
     function skillRow(n) {
         return `
             <tr>
-                <td>${n+1}</td>
+                <td class="text-center">${n+1}</td>
                 <td>
                     <select class="form-control update" name="skill[]" id="skill-${n}" required>
                         <option value="" class="text-center">-- Select Skill Type --</option>                        
@@ -226,7 +226,7 @@
     function productRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}"></span></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
                 <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>                
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
@@ -237,8 +237,7 @@
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
-                <input type="hidden" name="numbering[]" value="1" id="numbering-${n}">
+                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">                
             </tr>
         `;
     }
@@ -247,7 +246,7 @@
     function titleRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}"></span></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td colspan="9"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
@@ -256,8 +255,7 @@
                 <input type="hidden" class="form-control update" name="new_qty[]" value="0" id="newqty-${n}">
                 <input type="hidden" class="form-control update" name="price[]" value="0" id="price-${n}">
                 <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="2" id="atype-${n}">
-                <input type="hidden" name="numbering[]" value="1" id="numbering-${n}">
+                <input type="hidden" name="a_type[]" value="2" id="atype-${n}">                
             </tr>
         `;
     }
@@ -281,7 +279,7 @@
 
         const amount = charge * hr * notech;
         const amountStr = amount.toLocaleString();
-        $(this).parentsUntil('tbody').eq(1).children().eq(5).children().text(amountStr);
+        $(this).parents('tr:first').find('span').text(amountStr);
 
         calcBudget();
     });
@@ -289,7 +287,6 @@
     // default skill row
     let skillIndx = 0;
     $('#skill-item tbody').append(skillRow(0));
-    // On add skill append row
     $('#add-skill').click(function() {
         skillIndx++;
         $('#skill-item tbody').append(skillRow(skillIndx));
@@ -332,7 +329,6 @@
             $('#quote-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
             // set default values
-            $('#number-'+i).text(v.numbering);
             $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
@@ -342,7 +338,6 @@
             $('#newqty-'+i).val(parseFloat(v.product_qty));
         } else {
             $('#quote-item tbody').append(titleRow(i));
-            $('#number-'+i).text(v.numbering);
             $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
         }
@@ -353,7 +348,6 @@
     $('#add-product').click(function() {
         const i = productIndx;
         $('#quote-item tbody').append(productRow(i));
-        // autocomplete on added product row
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
         productIndx++;
     });
@@ -393,7 +387,7 @@
                 $('#unit-'+i).val(data.unit);                
 
                 const price = parseFloat(data.purchase_price.replace(/,/g, ''));
-                $('#price-'+i).val(price.toLocaleString());
+                $('#price-'+i).val(price.toLocaleString()).change();
             }
         };
     }
