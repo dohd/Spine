@@ -77,7 +77,7 @@ class EditResponse implements Responsable
                 ->with(bill_helper(2, 4));        
         }
 
-        // $leads = Lead::all();
+        $leads[] = Lead::find($quote->lead_id);
         // edit proforma invoice
         if (isset($banks)) {            
             return view('focus.quotes.edit_pi')
