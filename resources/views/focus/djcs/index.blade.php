@@ -21,19 +21,17 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-
                         <div class="card-content">
-
                             <div class="card-body">
                                 <table id="djc-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
                                             <th>Report No</th>
-                                            <th>Client Ref</th>
-                                            <th>Subject</th>
-                                            <th>Client & Branch</th>
+                                            <th>Client & Branch</th>                                            
+                                            <th>Subject</th>                                            
                                             <th>Job Card</th>
+                                            <th>Client Ref</th>
                                             <th>Ticket No</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -60,19 +58,11 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 
 <script>
-    $(function() {
-        setTimeout(function() {
-            draw_data();
-        }, "{{config('master.delay')}}");
-    });
+    setTimeout(() => draw_data(), "{{config('master.delay')}}");
+
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     function draw_data() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
         const tableLang = {@lang('datatable.strings')};
         var dataTable = $('#djc-table').dataTable({
             processing: true,
@@ -95,20 +85,20 @@
                     name: 'tid'
                 },
                 {
-                    data: 'client_ref',
-                    name: 'client_ref'
+                    data: 'customer',
+                    name: 'customer'
                 },
                 {
                     data: 'subject',
                     name: 'subject'
                 },
                 {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
                     data: 'job_card',
                     name: 'job_card'
+                },
+                {
+                    data: 'client_ref',
+                    name: 'client_ref'
                 },
                 {
                     data: 'lead_tid',
