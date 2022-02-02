@@ -122,9 +122,32 @@ class InvoicesController extends Controller
     }
 
     /**
+     * Show the form for creating a new resource.
+     *
+     * @param CreateInvoiceRequestNamespace $request
+     * @return \App\Http\Responses\Focus\invoice\CreateResponse
+     */
+    public function create(CreateInvoiceRequest $request)
+    {
+        return new CreateResponse('focus.invoices.create');
+    }
+
+    /**
+     * Project Invoice index page
+     */
+    public function project_invoice(ManageInvoiceRequest $request)
+    {
+        $customers = Customer::where('active', '1')->pluck('company', 'id');
+        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
+        $projects = Project::pluck('name', 'id');
+
+        return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
+    }
+
+    /**
      * Show the form for creating project invoice
      */
-    public function create_project_invoice(ManageInvoiceRequest $request)
+    public function create_project_invoice()
     {
         // extract input fields
         $inp_customer = request('customer');
@@ -148,29 +171,6 @@ class InvoicesController extends Controller
         $projects = Project::pluck('name', 'id');
 
         return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
-    }
-
-    /**
-     * Project Invoice index page
-     */
-    public function project_invoice(ManageInvoiceRequest $request)
-    {
-        $customers = Customer::where('active', '1')->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
-        $projects = Project::pluck('name', 'id');
-
-        return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @param CreateInvoiceRequestNamespace $request
-     * @return \App\Http\Responses\Focus\invoice\CreateResponse
-     */
-    public function create(CreateInvoiceRequest $request)
-    {
-        return new CreateResponse('focus.invoices.create');
     }
 
     /**
