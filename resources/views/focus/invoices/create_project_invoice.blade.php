@@ -210,7 +210,6 @@
 
 @section('extra-scripts')
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
-
 <script type="text/javascript">
     // Initialize datepicker
     $('.datepicker')
