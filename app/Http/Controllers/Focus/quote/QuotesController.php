@@ -191,7 +191,14 @@ class QuotesController extends Controller
     {
         $this->repository->delete($quote);
 
-        return new RedirectResponse(route('biller.quotes.index'), ['flash_success' => trans('alerts.backend.quotes.deleted')]);
+        $url = route('biller.quotes.index');
+        $msg = trans('alerts.backend.quotes.deleted');
+        if ($quote->bank_id) {
+            $url = route('biller.quotes.index', 'page=pi');
+            $msg = 'The Proforma Invoice was successfully deleted';
+        }
+
+        return new RedirectResponse($url, ['flash_success' => $msg]);
     }
 
 
