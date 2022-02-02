@@ -130,14 +130,6 @@
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-sm-12"><label for="refer_no" class="caption">Note</label>
-                    <div class="input-group">
-                        <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('note', null, ['class' => 'form-control round', 'placeholder' => trans('general.note')]) }}
-                    </div>
-                </div>
-            </div>
-            <div class="form-group row">
                 <div class="col-sm-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
@@ -145,6 +137,14 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group row">
+                <div class="col-sm-12"><label for="refer_no" class="caption">Note</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                        {{ Form::textarea('note', null, ['class' => 'form-control round', 'rows' => 5]) }}
+                    </div>
+                </div>
+            </div>            
         </div>
     </div>
 </div>
