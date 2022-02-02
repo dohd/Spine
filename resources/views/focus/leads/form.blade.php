@@ -118,6 +118,7 @@
                             <option value="Site Survey">Site Survey</option>
                             <option value="Existing SLA">Existing SLA</option>
                             <option value="Tender">Tender</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                 </div>
@@ -132,7 +133,7 @@
                 <div class="col-sm-12"><label for="refer_no" class="caption">Note</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('note', null, ['class' => 'form-control round', 'placeholder' => trans('general.note'),'autocomplete'=>'off']) }}
+                        {{ Form::text('note', null, ['class' => 'form-control round', 'placeholder' => trans('general.note')]) }}
                     </div>
                 </div>
             </div>
