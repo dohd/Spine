@@ -68,7 +68,6 @@ class QuoteInvoiceTableController extends Controller
             ->addColumn('customer', function ($quote) {
                 $customer = isset($quote->customer) ? $quote->customer->company : '';
                 $branch  = isset($quote->branch) ? $quote->branch->name : '';
-
                 if ($customer && $branch) 
                     return $customer.' - '.$branch
                         .'&nbsp;<a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
