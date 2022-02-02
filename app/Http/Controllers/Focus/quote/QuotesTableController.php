@@ -81,23 +81,13 @@ class QuotesTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('status', function ($quote) {
-                $bg = '';
-                switch($quote->status) {
-                    case 'approved':
-                        $bg = 'bg-primary';
-                        break;
-                    case 'client_approved':
-                        $bg = 'bg-success';
-                        break;
-                    case 'cancelled':
-                        $bg = 'bg-danger';
-                        break;
-                    case 'pending':
-                        $bg = 'bg-secondary';
-                        break;               
-                }
+                $statuses = array('approved', 'client_approved', 'cancelled', 'pending');
+                $backgrd = array('bg-primary', 'bg-success', 'bg-danger', 'bg-secondary');
+                $i = array_search($quote->status, $statuses);
 
-                return '<span class="badge ' . $bg . '">' . $quote->status . '</span>';
+                $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : '';
+
+                return '<span class="badge ' . $backgrd[$i] . '">' . $quote->status . '</span><br>'. $lpo;
             })
             ->addColumn('verified', function ($quote) {
                 return $quote->verified;
