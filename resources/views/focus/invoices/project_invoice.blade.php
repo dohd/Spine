@@ -3,18 +3,10 @@
 @section ('title', 'Create Project Invoice')
 
 @section('content')
-
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
             <h4 class="content-header-title mb-0">Create Project Invoice</h4>
-        </div>
-        <div class="content-header-right col-md-6 col-12">
-            <div class="media width-250 float-right">
-                <div class="media-body media-right text-right">
-                    {{-- @include('focus.invoices.partials.invoices-header-buttons') --}}
-                </div>
-            </div>
         </div>
     </div>
     <div class="content-body">
