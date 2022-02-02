@@ -46,21 +46,15 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Title</th>
-                                            @if ($query_str == 'page=pi')
-                                                <th>#PI</th>
-                                                <th>{{ trans('customers.customer') }}</th>
-                                                <th>PI Date</th>
-                                            @else
-                                                <th>#{{ trans('quotes.quote') }}</th>
-                                                <th>{{ trans('customers.customer') }}</th>
-                                                <th>{{ trans('quotes.invoicedate') }}</th>
-                                            @endif                                            
+                                            <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
+                                            <th>Customer & Branch</th>   
+                                            <th>Title</th> 
+                                            <th>Created At</th>                                      
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                            <th>{{ trans('general.status') }}</th>
-                                            <th>Verified</th>
                                             <th>Client Ref</th>
                                             <th>Ticket No</th>
+                                            <th>{{ trans('general.status') }}</th>
+                                            <th>Verified</th>                                          
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -147,10 +141,6 @@
                     name: 'id'
                 },
                 {
-                    data: 'notes',
-                    name: 'notes'
-                },
-                {
                     data: 'tid',
                     name: 'tid'
                 },
@@ -158,6 +148,10 @@
                     data: 'customer',
                     name: 'customer'
                 },
+                {
+                    data: 'notes',
+                    name: 'notes'
+                },                
                 {
                     data: 'created_at',
                     name: 'created_at'
@@ -167,20 +161,20 @@
                     name: 'total'
                 },
                 {
-                    data: 'status',
-                    name: 'status'
-                },
-                {
-                    data: 'verified',
-                    name: 'verified'
-                },
-                {
                     data: 'client_ref',
                     name: 'client_ref'
                 },
                 {
                     data: 'lead_tid',
                     name: 'lead_tid'
+                },
+                {
+                    data: 'status',
+                    name: 'status'
+                },
+                {
+                    data: 'verified',
+                    name: 'verified'
                 },
                 {
                     data: 'actions',
