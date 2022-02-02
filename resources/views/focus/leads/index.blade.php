@@ -29,9 +29,9 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Ticket No</th>
+                                            <th>Client & Branch</th>
                                             <th>Title</th>
                                             <th>New/Existing</th>
-                                            <th>Client & Branch</th>
                                             <th>Source</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>Client Ref</th>
@@ -63,15 +63,10 @@
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
+
     function draw_data() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
         const datatableLang = { @lang("datatable.strings") };
-
         var dataTable = $('#leads-table').dataTable({
             processing: true,
             serverSide: true,
@@ -91,16 +86,16 @@
                     name: 'reference'
                 },
                 {
+                    data: 'client_name',
+                    name: 'client_name'
+                },
+                {
                     data: 'title',
                     name: 'title'
                 },
                 {
                     data: 'client_status',
                     name: 'client_status'
-                },
-                {
-                    data: 'client_name',
-                    name: 'client_name'
                 },
                 {
                     data: 'source',
