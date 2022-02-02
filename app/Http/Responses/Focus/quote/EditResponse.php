@@ -31,16 +31,17 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-
         $products = $quote->products()->orderBy('row_index')->get();
+
         // open leads (status = 0)
-        $leads = Lead::where('status', 0)->get();
+        $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
+        $leads[] = Lead::find($quote->lead_id);
 
         // default parameters
         $params = array('quote', 'products', 'leads');
         if ($quote->bank_id ) $banks = Bank::all();
         
-        // if copy page 
+        // copy page 
         if (request('page') == 'copy') {
             // copy proforma invoice
             if (isset($banks)) {
@@ -51,6 +52,7 @@ class EditResponse implements Responsable
                     ->with(bill_helper(2, 4));
             }
 
+            // copy quote
             $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
             return view('focus.quotes.edit')
                 ->with(compact('last_quote', ...$params))
@@ -77,7 +79,6 @@ class EditResponse implements Responsable
                 ->with(bill_helper(2, 4));        
         }
 
-        $leads[] = Lead::find($quote->lead_id);
         // edit proforma invoice
         if (isset($banks)) {            
             return view('focus.quotes.edit_pi')
