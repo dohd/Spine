@@ -1,6 +1,6 @@
 <html>
-
 <head>
+	<title>Invoice</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -148,7 +148,6 @@
 		}
 	</style>
 </head>
-
 <body>
 	<htmlpagefooter name="myfooter">
 		<div class="footer">
