@@ -85,9 +85,7 @@
 
                         <div class="row mb-1">
                             <div class="col-4">                                
-                                <div class="input-group">
-                                    <label for="ledger-off">Enable Ledger Account</label>
-                                </div>
+                                <div class="input-group"><label for="ledger-off">Enable Ledger Account</label></div>
                                 <select class="form-control" name="ledger_toggle" id="ledgertoggle">
                                     <option value="0" selected>No</option>
                                     <option value="1">Yes</option>                                    
@@ -156,15 +154,16 @@
                                         }
 
                                         // Table values
-                                        $reference = implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);
+                                        $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);
+                                        
                                         $description = $title . '; ' . implode(', ', $jcs);
                                         $price = number_format($val->subtotal, 2);
                                         $project_id = $val->project_quote ? $val->project_quote->project_id : '';
                                     @endphp
                                     <tr>
-                                        <td>{{ $k+1 }}</td>                
+                                        <td>{{ $k+1 }}</td>                                            
                                         <td><textarea class="form-control" name="reference[]" id="reference-{{ $k }}" readonly>{{ $reference }}</textarea></td>
-                                        <td><textarea type="text" class="form-control" name="description[]" id="description-{{ $k }}">{{ $description }}</textarea></td>
+                                        <td><textarea class="form-control" name="description[]" id="description-{{ $k }}">{{ $description }}</textarea></td>
                                         <td><input type="text" class="form-control " name="unit[]" id="unit-{{ $k }}" value="Lot" readonly></td>
                                         <td><input type="text" class="form-control" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
                                         <td><input type="text" class="form-control" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
@@ -212,23 +211,6 @@
 @section('extra-scripts')
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 <script type="text/javascript">
-    // $('#storeInvoice').submit(function(e) {
-    //     e.preventDefault();
-    //     console.log('form submitted');
-
-    //     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
-    //     $.ajax({
-    //         url: "{{ route('biller.invoices.store_project_invoice') }}",
-    //         method: 'POST',
-    //         dataType: 'json',
-    //         data: $(this).serializeArray()
-    //     })
-    //     .done(function(data) {
-    //         console.log(data);
-    //     })
-    // });
-
-
     // Initialize datepicker
     $('.datepicker')
         .datepicker({ format: "{{config('core.user_date_format')}}"})
