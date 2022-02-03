@@ -13,7 +13,7 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::get('draft_view/{id}', 'InvoicesController@draft_view')->name('invoices.draft_view');
     Route::post('pos_update', 'InvoicesController@pos_update')->name('invoices.pos_update');
     // project invoice
-    Route::post('create_project_invoice', 'InvoicesController@create_project_invoice')->name('invoices.create_project_invoice');
+    Route::post('filter_invoice_quotes', 'InvoicesController@filter_invoice_quotes')->name('invoices.filter_invoice_quotes');
     Route::post('store_project_invoice', 'InvoicesController@store_project_invoice')->name('invoices.store_project_invoice');
     Route::get('project_invoice', 'InvoicesController@project_invoice')->name('invoices.project_invoice');
     Route::resource('invoices', 'InvoicesController');

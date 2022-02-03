@@ -17,7 +17,7 @@
                         <div class="row">
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    {{ Form::open(['route' => 'biller.invoices.create_project_invoice', 'method' => 'POST', 'id' => 'mass_add_form']) }}
+                                    {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'POST', 'id' => 'mass_add_form']) }}
                                     {!! Form::hidden('selected_products', null, ['id' => 'selected_products']); !!}
                                     {!! Form::hidden('customer', null, ['id' => 'customer']); !!}
                                     {!! Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) !!}
@@ -88,6 +88,8 @@
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
+
     $('#search').click(function() {
         var start_date = $('#start_date').val();
         var end_date = $('#end_date').val();
@@ -97,8 +99,6 @@
         }
         alert("Date range is Required");
     });
-
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     function draw_data(customer_id = '', lpo_number = '', project_id = '') {
         const tableLang = { @lang('datatable.strings') };
