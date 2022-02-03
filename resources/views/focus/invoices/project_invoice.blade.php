@@ -14,35 +14,35 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-3">
+                        {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'GET', 'id' => 'mass_add_form']) }}
+                        <div class="row">                            
+                            <div class="col-3">
                                 <div class="form-group">
-                                    {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'POST', 'id' => 'mass_add_form']) }}
-                                    {!! Form::hidden('selected_products', null, ['id' => 'selected_products']); !!}
-                                    {!! Form::hidden('customer', null, ['id' => 'customer']); !!}
-                                    {!! Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) !!}
-                                    {{ Form::close() }}
+                                    {{ Form::hidden('selected_products', null, ['id' => 'selected_products']) }}
+                                    {{ Form::hidden('customer', null, ['id' => 'customer']) }}
+                                    {{ Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) }}
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-3">
                                 <div class="form-group">
                                     <label><strong>Customer :</strong></label>
                                     {{ Form::select('customer_id', $customers, null, ['placeholder' => '-- Customers --', 'id'=>'customer_id','class' => 'form-control']) }}
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-3">
                                 <div class="form-group">
                                     <label><strong>LPO :</strong></label>
                                     {{ Form::select('lpo_number', $lpos, null, ['placeholder' => '-- LPOS --', 'id'=>'lpo_number','class' => 'form-control']) }}
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-3">
                                 <div class="form-group">
                                     <label><strong>Project :</strong></label>
                                     {{ Form::select('project_id', $projects, null, ['placeholder' => '-- Projects --', 'id'=>'project_id','class' => 'form-control']) }}
                                 </div>
                             </div>
                         </div>
+                        {{ Form::close() }}
                     </div>
                 </div>
             </div>
