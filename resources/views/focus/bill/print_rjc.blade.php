@@ -223,11 +223,11 @@
 		<h5><span>e.</span> Recommendation</h5>
 		<p>{!! $invoice->recommendations !!}</p>
 	</div>
-	<h5><span>f.</span> Pictorials</h5>
 	@php
 		$is_image = isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four);
 	@endphp
 	@if($is_image)
+		<h5><span>f.</span> Pictorials</h5>
 		<table class="items items-table" cellpadding="8">		
 			<tr class="dottedt">
 				<th width="25%"></th>
@@ -238,22 +238,22 @@
 			<tr class="dotted">
 				<td>
 					@isset($invoice->image_one)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_one) }}" alt="" border=3 height=200 width=300></img>
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_one) }}" alt="image_one" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 				<td>
 					@isset($invoice->image_two)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_two) }}" alt="" border=3 height=200 width=300></img>
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_two) }}" alt="image_two" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 				<td>
 					@isset($invoice->image_three)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_three) }}" alt="" border=3 height=200 width=300></img>
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_three) }}" alt="image_three" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 				<td>
 					@isset($invoice->image_four)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_four) }}" alt="" border=3 height=200 width=300></img>
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_four) }}" alt="image_four" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 			</tr>
