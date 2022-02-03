@@ -252,7 +252,7 @@
 			@endforeach
 			<!-- empty row with dynamic height-->
 			<tr>
-				<td height="{{ 400 - 30 * count($invoice->products) }}"></td>
+				<td height="{{ 340 - 30 * count($invoice->products) }}"></td>
 				@for($i = 0; $i < 3; $i++) 
                     <td></td>
                 @endfor
@@ -272,18 +272,25 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>1</td>
-						<td>Casual</td>
-						<td>3</td>
-						<td>4</td>
-					</tr>
+					@php
+						$budget = $invoice->budgets()->first();
+					@endphp
+					@isset($budget)
+						@foreach ($budget->skillsets as $k => $val)
+							<tr>
+								<td>{{ $k+1 }}</td>
+								<td>{{ $val->skill }}</td>
+								<td>{{ $val->hours }}</td>
+								<td>{{ $val->no_technician }}</td>
+							</tr>
+						@endforeach
+					@endisset
 				</tbody>
 			</table>
 		</div>
 		<div style="float: left; margin-left: 5%">
 			<b>Tools Required & Notes :</b><br>
-			Drill, ....
+			{{ $budget->tool }}
 		</div>		
 	</div>	
 </body>
