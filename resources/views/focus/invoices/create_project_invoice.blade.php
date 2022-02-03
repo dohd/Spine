@@ -8,7 +8,8 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.invoices.store_project_invoice', 'method' => 'POST']) }}
+                    {{ Form::open(['route' => 'biller.invoices.store_project_invoice', 'method' => 'POST', 'id' => 'storeInvoice']) }}
+                        <input type="hidden" name="_method" value="POST">
                         <div class="row mb-1">
                             <div class="col-3"><label for="payer" class="caption">Customer Name*</label>
                                 <div class="input-group">
@@ -211,6 +212,23 @@
 @section('extra-scripts')
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 <script type="text/javascript">
+    // $('#storeInvoice').submit(function(e) {
+    //     e.preventDefault();
+    //     console.log('form submitted');
+
+    //     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
+    //     $.ajax({
+    //         url: "{{ route('biller.invoices.store_project_invoice') }}",
+    //         method: 'POST',
+    //         dataType: 'json',
+    //         data: $(this).serializeArray()
+    //     })
+    //     .done(function(data) {
+    //         console.log(data);
+    //     })
+    // });
+
+
     // Initialize datepicker
     $('.datepicker')
         .datepicker({ format: "{{config('core.user_date_format')}}"})
