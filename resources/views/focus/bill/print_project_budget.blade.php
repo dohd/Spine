@@ -1,5 +1,6 @@
 <html>
 <head>
+	<title>Picking List / Budget</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -164,13 +165,7 @@
 		<tr>
 			<td class="doc-title-td">
 				<span class='doc-title'>
-					<b>
-						@if ($invoice->bank_id)
-							PROFORMA INVOICE
-						@else
-							QUOTATION
-						@endif
-					</b>
+					<b>Picking List / Budget</b>
 				</span>				
 			</td>
 		</tr>
@@ -264,5 +259,32 @@
 			</tr>			
 		</tbody>
 	</table>
+	<br>
+	<div style="width: 100%;">
+		<div style="float: left; width: 50%">
+			<table class="items" cellpadding="8">
+				<thead>
+					<tr>
+						<td width="8%">No.</td>
+						<td width="42%">Skill Type</td>
+						<td width="10%">Working Hours</td>
+						<td width="10%">No. Technicians</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>1</td>
+						<td>Casual</td>
+						<td>3</td>
+						<td>4</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div style="float: left; margin-left: 5%">
+			<b>Tools Required & Notes :</b><br>
+			Drill, ....
+		</div>		
+	</div>	
 </body>
 </html>
