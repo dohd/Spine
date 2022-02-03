@@ -327,8 +327,8 @@
 
     // ApprovedQty condition on issued items
     $('#budget-item').on('change', '.newqty', function() {        
-        const issuedQty = $(this).parentsUntil('tbody').eq(1).find('.issue').val();
-        if ($(this).val() < issuedQty) $(this).val(issuedQty);
+        const issuedQty = $(this).parents('tr:first').find('.issue').val();
+        if ($(this).val() < Number(issuedQty)) $(this).val(issuedQty);
     });
 
     // On budget-item update

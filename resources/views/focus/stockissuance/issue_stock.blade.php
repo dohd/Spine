@@ -436,7 +436,8 @@
                     $('#issueqty-'+i).val('');
                     if (data) {
                         $('#issuedqty-'+i).val(data.issue_qty);
-                        if ($('#issuedqty-'+i).val() == $('#newqty-'+i).val()) {
+                        const aprvQty = $('#newqty-'+i).val();
+                        if ($('#issuedqty-'+i).val() == aprvQty) {
                             $('#issueqty-'+i).attr('disabled', true);
                         }
                     }

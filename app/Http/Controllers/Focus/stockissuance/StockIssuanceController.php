@@ -59,10 +59,13 @@ class StockIssuanceController extends Controller
         DB::beginTransaction();
 
         $store_product = ProductVariation::find($product_id);
-        if (!$store_product || !$item_id) return response()->noContent();
+        // check if its a saved product, store product, product in stock
+        if (!$item_id || !$store_product || !intval($store_product->qty) || !$input_qty) 
+            return response()->noContent();
         if ($store_product->qty < $input_qty) $input_qty = $store_product->qty;
 
         $budget_item = BudgetItem::find($item_id);
+        // difference between approved qty and issued qty
         $diff = $budget_item->new_qty - $budget_item->issue_qty;        
         if ($diff > 0 && $input_qty > $diff) {
             $input_qty = $diff;
