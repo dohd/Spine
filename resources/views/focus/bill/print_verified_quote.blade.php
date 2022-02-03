@@ -1,5 +1,12 @@
 <html>
 <head>
+	@php
+		$tid = sprintf('%04d', $invoice->tid);
+		$v_no =  ' (v' . $invoice->verified_jcs[0]->verify_no . ')';
+		$field_value = 'QT-' . $tid;
+		if ($invoice->bank_id) $field_value = 'PI-' . $tid;
+	@endphp
+	<title>{{ $field_value . $v_no }}</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;

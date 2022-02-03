@@ -1,5 +1,6 @@
 <html>
 <head>
+	<title>DjR-{{ sprintf('%04d', $invoice->tid) }}</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;

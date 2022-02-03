@@ -1,5 +1,12 @@
 <html>
 <head>
+	<title>
+		{{ 
+			$invoice->bank_id ? 
+			'PI-'.sprintf('%04d', $invoice->tid) : 
+			'QT-'.sprintf('%04d', $invoice->tid) 
+		}}
+	</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
