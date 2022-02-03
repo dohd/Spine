@@ -10,6 +10,7 @@ use App\Models\order\Order;
 use App\Models\purchaseorder\Purchaseorder;
 use App\Models\quote\Quote;
 use App\Models\djc\Djc;
+use App\Models\invoice\Invoice;
 use App\Models\items\VerifiedItem;
 use App\Models\rjc\Rjc;
 
