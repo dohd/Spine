@@ -9,7 +9,7 @@ return [
 	'margin_top'           => 10,
 	'margin_bottom'        => 10,
 	'margin_header'        => 0,
-	'margin_footer'        => 0,
+	'margin_footer'        => 5,
 	'orientation'          => 'P',
 	'title'                => 'PDF',
 	'author'               => '',
