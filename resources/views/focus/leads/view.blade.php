@@ -107,5 +107,13 @@
     // default status modal select value
     $('#status').val("{{ $lead->status }}");
     $('#reason').val("{{ $lead->reason }}");
+
+    const temp_div = document.createElement('div');
+    $('#leads-table td').each(function() {
+        if (!$(this).index()) return;
+        $(temp_div).html($(this).text());
+        const td_text = $(temp_div).text().replace(/[A-Z]/g, function(el) { return ' ' + el; });
+        $(this).text(td_text);
+    });
 </script>
 @endsection
