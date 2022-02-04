@@ -138,10 +138,11 @@
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-sm-12"><label for="refer_no" class="caption">Note</label>
+                <div class="col-12"><label for="refer_no" class="caption">Note</label>
                     <div class="input-group">
-                        <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::textarea('note', null, ['class' => 'form-control round', 'rows' => 5]) }}
+                        <div class="w-100">
+                            {{ Form::textarea('note', null, ['class' => 'form-control html_editor', 'rows' => 6]) }}
+                        </div>
                     </div>
                 </div>
             </div>            
@@ -154,6 +155,11 @@
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 
 <script type="text/javascript">
+    // instatiate html-editor
+    $(function() {
+        editor();
+    });
+
     // On selecting client type radio
     $('.clientstatus').change(function() {
         if ($(this).val() === 'new') {
