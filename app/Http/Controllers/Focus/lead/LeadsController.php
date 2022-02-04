@@ -87,7 +87,7 @@ class LeadsController extends Controller
 
         ]);
         // filter request input fields
-        $data = $request->except(['_token', 'ins']);
+        $data = $request->except(['_token', 'ins', 'files']);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
