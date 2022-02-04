@@ -62,7 +62,7 @@ class BillsController extends Controller
     }
 
 
-    public function print_pdf(Request $request)
+    public function print_invoice(Request $request)
     {
         $data = $this->bill_details($request);
 
