@@ -77,8 +77,12 @@
                                     @php
                                         $tid = isset($last_tr->tid) ? $last_tr->tid+1 : 1;
                                     @endphp
+                                    {{ Form::number('tid', $tid, ['class' => 'form-control round']) }}
+
+                                    {{-- 
                                     {{ Form::text('tid', 'Inv-'.sprintf('%04d', $tid), ['class' => 'form-control round', 'disabled']) }}
                                     <input type="hidden" name="tid" value={{ $tid }}>
+                                    --}}
                                 </div>
                             </div>
                         </div>

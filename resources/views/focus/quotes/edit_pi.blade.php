@@ -109,12 +109,19 @@
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                                             @if (isset($last_quote))
+                                                {{ Form::number('tid', $last_quote->tid+1, ['class' => 'form-control round', 'id' => 'tid']) }}
+                                            @else
+                                                {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'id' => 'tid']) }}
+                                            @endif
+                                            {{-- 
+                                            @if (isset($last_quote))
                                                 {{ Form::text('tid', 'PI-' . sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}">
                                             @else
                                                 {{ Form::text('tid', 'PI-' . sprintf('%04d', $quote->tid) . $quote->revision, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $quote->tid }}">
                                             @endif
+                                            --}}
                                         </div>
                                     </div>
                                 </div>
