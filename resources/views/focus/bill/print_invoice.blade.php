@@ -213,7 +213,7 @@
 				<b>Invoice No :</b> {{ sprintf('%04d', $invoice->tid) }}<br><br>
 				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
 				<b>Overdue after :</b> {{ $invoice->validity ? $invoice->validity . ' days' : '' }}<br>
-				<b>KRA Pin : </b>P051516705D<br>
+				<b>KRA Pin :</b> P051516705D<br>
 			</td>
 		</tr>
 	</table><br>
@@ -255,14 +255,28 @@
 			</tr>
 			<tr>
 				<td colspan="5" class="bd-t" rowspan="2">
-					@if ($invoice->bank_id)
+					@isset($invoice->bank)
 						<span class="customer-dt-title">BANK DETAILS:</span><br>
-						<b>Account Name :</b> Lean Ventures Limited<br>
-						<b>Account Number :</b> 1267496231<br>
-						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br>
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br>
-						(KCB Mpesa Paybill: 522 522)
-					@endif
+						<b>Account Name :</b> {{ $invoice->bank->name }}<br>
+						<b>Account Number :</b> {{ $invoice->bank->number }}<br>
+						<b>Bank :</b> {{ $invoice->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $invoice->bank->branch }} <br>
+						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $invoice->bank->code }} <br>
+						@php
+							$paybill = '';
+							switch ($invoice->bank->code) {
+								case 'KCBLKENX': 
+									$paybill = '(KCB Mpesa Paybill: 522 522)';
+									break;
+								case 'EQBLKENA':
+									$paybill = '(Equity Mpesa Paybill: 247 247)';
+									break;
+								case 'CBAFKENX':
+									$paybill = '(NCBA Mpesa Paybill: 880 100)';
+									break;
+							}
+						@endphp
+						{{ $paybill }}
+					@endisset
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($invoice->print_type == 'inclusive')
