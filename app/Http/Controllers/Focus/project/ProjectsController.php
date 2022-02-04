@@ -75,7 +75,7 @@ class ProjectsController extends Controller
         $employees = Hrm::all();
         $accounts = Account::where('account_type', 'Income')->get();
         $ref = Project::orderBy('project_number', 'desc')->first('project_number');
-        $tid = isset($ref) ? $ref->project_number+1 : 1;
+        $tid = isset($ref) ? $ref->project_number + 1 : 1;
 
         return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts', 'tid'));
     }
@@ -91,7 +91,7 @@ class ProjectsController extends Controller
     {
         // extract input fields from request
         $project = $request->only([
-            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc', 
+            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc',
             'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
         ]);
         $project_quotes = $request->only(['main_quote', 'other_quote']);
@@ -112,7 +112,7 @@ class ProjectsController extends Controller
     public function edit(Project $project)
     {
         // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-        if (true) return new EditResponse($project);        
+        if (true) return new EditResponse($project);
     }
 
     /**
@@ -126,16 +126,16 @@ class ProjectsController extends Controller
     {
         // extract input fields from request
         $data = $request->only([
-            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc', 
+            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc',
             'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
         ]);
         $quotes = $request->only(['main_quote', 'other_quote']);
 
         $data['id'] = $project->id;
-        
+
         // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
         if (true) $this->repository->update($project, compact('data', 'quotes'));
-        
+
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
     }
 
@@ -183,9 +183,9 @@ class ProjectsController extends Controller
      * @param App\Models\quote\Quote quote
      */
     public function create_project_budget(Quote $quote)
-    {        
+    {
         $budget = Budget::where('quote_id', $quote->id)->first();
-        if (isset($budget)) 
+        if (isset($budget))
             return redirect(route('biller.projects.edit_project_budget', [$quote, $budget]));
 
         return view('focus.projects.create_project_budget', compact('quote'));
@@ -213,7 +213,7 @@ class ProjectsController extends Controller
     {
         // extract request input
         $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
-        $budget_items = $request->only('numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
+        $budget_items = $request->only('numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 'new_qty', 'price');
         $budget_skillset = $request->only('skill', 'charge', 'hours', 'no_technician');
 
         $this->repository->store_budget(compact('budget', 'budget_items', 'budget_skillset'));
@@ -231,20 +231,21 @@ class ProjectsController extends Controller
         $db_budget = $budget;
         // extract request input
         $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
-        $budget_items = $request->only('item_id', 'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty','unit', 'new_qty', 'price');
+        $budget_items = $request->only('item_id', 'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 'new_qty', 'price');
         $budget_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
 
         $this->repository->update_budget($db_budget, compact('budget', 'budget_items', 'budget_skillset'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project Budget updated successfully']);
     }
-    
+
     /**
      * Delete Project Quote Budget item in storage
      * 
      * @param int $id
      */
-    public function delete_budget_item($id) {
+    public function delete_budget_item($id)
+    {
         BudgetItem::find($id)->delete();
 
         return response()->noContent();
@@ -255,8 +256,9 @@ class ProjectsController extends Controller
      * 
      * @param int $id
      */
-    public function delete_budget_skillset($id) {
-        BudgetSkillset::find($id)->delete();  
+    public function delete_budget_skillset($id)
+    {
+        BudgetSkillset::find($id)->delete();
 
         return response()->noContent();
     }
@@ -395,16 +397,14 @@ class ProjectsController extends Controller
     }
 
     public function project_search(Request $request, $bill_type)
-    {
-
+    {        
         if (!access()->allow('product_search')) return false;
-
+        // extract input fields
         $q = $request->post('keyword');
         $w = $request->post('wid');
         $s = $request->post('serial_mode');
         if ($bill_type == 'label') $q = @$q['term'];
         $wq = compact('q', 'w');
-
 
         $project = Project::where('name', 'LIKE', '%' . $q . '%')
             ->orWhereHas('customer', function ($query) use ($wq) {
@@ -414,18 +414,35 @@ class ProjectsController extends Controller
                 $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
                 return $query;
             })->limit(6)->get();
+
+        // response format
         $output = array();
-
-        foreach ($project as $row) {
-
-            if ($row->id > 0) {
-                $output[] = array('name' => $row->customer_project->company . ' ' . $row->branch->name . '  - ' . $row->name . ' - ' . $row->project_number, 'id' => $row['id'], 'client_id' => $row->customer_project->id, 'branch_id' => $row->branch->id);
+        foreach ($project as $project) {
+            // append tids
+            $quote_tids = array();     
+            $lead_tids = array();           
+            foreach ($project->quotes as $quote) {
+                $lead_tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                // quote
+                $tid = sprintf('%04d', $quote->tid);
+                if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
+                else $quote_tids[] = 'QT-'. $tid;
             }
+            $project['lead_tids'] =  implode(', ', $lead_tids);
+            $project['quote_tids'] = implode(', ', $quote_tids);
+            
+            $customer = $project->customer_project->company;
+            $branch = $project->branch->name . ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
+            $tid = 'Prj-'.sprintf('%04d', $project->project_number);
+            $output[] = array(
+                'name' => implode(' - ', array($customer, $branch, $tid, $project->name)),
+                'id' => $project['id'], 
+                'client_id' => $project->customer_project->id, 
+                'branch_id' => $project->branch->id
+            );
         }
 
-        if (count($output) > 0)
-
-            return view('focus.products.partials.search')->withDetails($output);
+        return view('focus.products.partials.search')->withDetails($output);
     }
 
     public function search(Request $request)
@@ -447,7 +464,7 @@ class ProjectsController extends Controller
 
     public function update_status(ManageProjectRequest $request)
     {
-        print_log('+++ Update status called +++',$request->all());
+        print_log('+++ Update status called +++', $request->all());
         //Update the model using repository update method
         switch ($request->r_type) {
             case 1:
@@ -478,7 +495,7 @@ class ProjectsController extends Controller
         if ($q == 1) {
             $result = Equipment::all()->where('rel_id', '=', $q);
             return json_encode($result);
-        } 
+        }
 
         $result = "";
         return json_encode($result);
@@ -488,7 +505,7 @@ class ProjectsController extends Controller
     {
         $q = $request->get('id');
         $result = Project::all()->where('customer_id', '=', $q)->where('status', '=', 1);
-        
+
         return json_encode($result);
     }
 }
