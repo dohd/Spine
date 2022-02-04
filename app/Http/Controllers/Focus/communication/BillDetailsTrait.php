@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Focus\communication;
 
+use App\Models\bank\Bank;
 use App\Models\bill\Bill;
 use App\Models\Company\Company;
 use App\Models\Company\ConfigMeta;
@@ -35,6 +36,8 @@ trait BillDetailsTrait
                 foreach($attributes as $key => $val) {
                     $invoice[$key] = $val;
                 }
+                // assign bank
+                $invoice['bank'] = Bank::find($invoice->bank_id);
 
                 $prefix = 1;
                 $title = trans('invoices.invoice_title');
@@ -83,6 +86,9 @@ trait BillDetailsTrait
                 foreach($attributes as $key => $val) {
                     $invoice[$key] = $val;
                 }
+                // assign bank
+                $invoice['bank'] = Bank::find($invoice->bank_id);
+
 
                 $invoice['products'] = $invoice->products()->orderBy('row_index')->get();
                 if ($invoice->verified == 'Yes') {
