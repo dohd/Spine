@@ -99,7 +99,7 @@ class ProjectsController extends Controller
 
         $result = $this->repository->create(compact('project', 'project_quotes'));
 
-        return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.projects.created'), 'refresh' => 1]);
+        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
     }
 
     /**
@@ -112,7 +112,7 @@ class ProjectsController extends Controller
     public function edit(Project $project)
     {
         // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-        if (true) return new EditResponse($project);
+        return new EditResponse($project);
     }
 
     /**
@@ -134,7 +134,7 @@ class ProjectsController extends Controller
         $data['id'] = $project->id;
 
         // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-        if (true) $this->repository->update($project, compact('data', 'quotes'));
+        $this->repository->update($project, compact('data', 'quotes'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
     }
@@ -347,6 +347,9 @@ class ProjectsController extends Controller
             ->make(true);
     }
 
+    /**
+     * Invoices Datatable
+     */
     public function invoices(InvoiceRepository $invoice)
     {
         $core = $invoice->getForDataTable();
@@ -396,6 +399,9 @@ class ProjectsController extends Controller
         return response()->json($project);
     }
 
+    /**
+     * Project autocomplete search
+     */
     public function project_search(Request $request, $bill_type)
     {        
         if (!access()->allow('product_search')) return false;
@@ -464,8 +470,6 @@ class ProjectsController extends Controller
 
     public function update_status(ManageProjectRequest $request)
     {
-        print_log('+++ Update status called +++', $request->all());
-        //Update the model using repository update method
         switch ($request->r_type) {
             case 1:
                 $project = Project::find($request->project_id);
