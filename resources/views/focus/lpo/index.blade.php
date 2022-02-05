@@ -50,8 +50,8 @@
         </div>
     </div>
 </div>    
-@include('focus.lpo.modal.lpo_new')
 @include('focus.lpo.modal.lpo_edit')
+@include('focus.lpo.modal.lpo_new')
 @endsection
 
 @section('after-scripts')
@@ -61,15 +61,9 @@
 {{ Html::script('focus/js/select2.min.js') }}
 
 <script>
-    // draw dataTable data
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
-    // ajax header set up
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     // Delete LPO
     $(document).on('click', 'a.delete-lpo', function(e) {
@@ -105,19 +99,12 @@
             $form.find('#lpo_no').val(lpo.lpo_no);
             $form.find('#amount').val(lpo.amount);
             $form.find('#remark').val(lpo.remark);
-            return;
         });
-        return;
     });
     
     // On modal open
     $(document).on('shown.bs.modal', '#updateLpoModal, #AddLpoModal', function() {
         const $modal = $(this);
-        // submit form
-        $modal.on('click', '#create-btn, #update-btn', function() {
-            if ($(this).is('#create-btn')) $('#createLpoForm').submit();
-            if ($(this).is('#update-btn')) $('#updateLpoForm').submit();
-        });
         
         // initialize customer select2
         $modal.find("#person").select2({
@@ -145,11 +132,10 @@
 
         // on selecting customer fetch branches
         $modal.find("#person").on('change', function() {
-            var id = $('#person :selected').val();
             // fetch customer branches
             $modal.find("#branch_id").html('').select2({
                 ajax: {
-                    url: "{{route('biller.branches.branch_load')}}?id=" + id,
+                    url: "{{ route('biller.branches.branch_load') }}?id=" + $(this).val(),
                     dataType: 'json',
                     quietMillis: 50,
                     processResults: function(data) {
