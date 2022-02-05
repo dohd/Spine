@@ -130,10 +130,10 @@
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-sm-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
+                <div class="col-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref', 'required']) }}
+                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref', 'maxlength' => 30, 'required']) }}
                     </div>
                 </div>
             </div>
