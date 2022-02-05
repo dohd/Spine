@@ -43,7 +43,7 @@
                     </div>
                     <div class="row">
                         <div class="col mb-1"><label for="note">{{trans('general.note')}}</label>
-                            <input type="text" class="form-control" name="approval_note" placeholder="{{trans('general.note')}}" required />
+                            <textarea class="form-control" name="approval_note" placeholder="{{trans('general.note')}}" rows="5" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
