@@ -130,7 +130,7 @@ class LeadsController extends Controller
         $request->validate($fields);
 
         // update input fields from request
-        $data = $request->except(['_token', 'ins']);
+        $data = $request->except(['_token', 'ins', 'files']);
         $data['date_of_request'] = date_for_database($data['date_of_request']);
 
         //Update the model using repository update method
