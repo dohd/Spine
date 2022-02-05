@@ -244,8 +244,8 @@
             // update table values
             const $rateInput = $(this).find('td').eq(5).children();
             const $amountSpan = $(this).find('td').eq(6).children();
-            $rateInput.val(rateInc.toLocaleString());
-            $amountSpan.text(rateInc.toLocaleString());
+            $rateInput.val(rateExc.toLocaleString());
+            $amountSpan.text(rateExc.toLocaleString());
         });
         $('#subtotal').val(subtotal.toLocaleString());
         $('#total').val(total.toLocaleString());
