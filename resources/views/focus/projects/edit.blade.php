@@ -2,13 +2,6 @@
 
 @section ('title', trans('labels.backend.projects.management') . ' | ' . trans('labels.backend.projects.edit'))
 
-@section('page-header')
-    <h1>
-        {{ trans('labels.backend.projects.management') }}
-        <small>{{ trans('labels.backend.projects.edit') }}</small>
-    </h1>
-@endsection
-
 @section('content')
     <div class="">
         <div class="content-wrapper">
@@ -62,15 +55,14 @@
 {{ Html::script('focus/js/bootstrap-colorpicker.min.js') }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    // form default values
+    // initialize datepicker
     $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}" });
     $('.from_date').datepicker('setDate', "{{ dateFormat($project->start_date) }}");
     $('.from_date').datepicker({ format: "{{ config('core.user_date_format') }}" });
     $('.to_date').datepicker('setDate', "{{ dateFormat($project->end_date) }}");
     $('.to_date').datepicker({ format: "{{ config('core.user_date_format') }}"});
-
-    $('#color').colorpicker();
-
+    // $('#color').colorpicker();
+    // initialize select2
     $("#tags").select2();
     $("#employee").select2();
     $("#main_quote").select2();
