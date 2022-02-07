@@ -54,7 +54,7 @@ class ProjectRepository extends BaseRepository
         $main_quote = $data['project_quotes']['main_quote'];
         $project['main_quote_id'] = $main_quote;
         $ref = Project::orderBy('project_number', 'desc')->first('project_number');
-        if (isset($ref) && $project['project_number'] <= $ref->project_number) {
+        if ($ref && $project['project_number'] <= $ref->project_number) {
             $project['project_number'] = $ref->project_number + 1;
         }
         $result = Project::create($project);
