@@ -153,9 +153,8 @@
                                     Approved On : <span class=" text-danger mr-1">{{ dateFormat($quote->approved_date) }}</span> 
                                     Approval Method : <span class=" text-danger">{{ $quote->approved_method }}</span>
                                 </p>
-                                <p>
-                                    Approval Note: <span class="text-danger mr-1">{{ $quote->approval_note }}</span> 
-                                </p>
+                                Approval Note:
+                                <div class="text-danger">{!! $quote->approval_note !!}</div>                                
                             </div>
 
                             <div class="col-md-5 col-sm-12">
@@ -265,6 +264,9 @@
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
 <script type="text/javascript">
+    // initialize editor
+    editor();
+
     // check if previous page was pi page and add 'page=pi' querystring to current page
     if (document.referrer.includes('page=pi')) {
         const queryString = location.search;
