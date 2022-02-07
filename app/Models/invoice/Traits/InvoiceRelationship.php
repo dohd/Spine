@@ -2,8 +2,6 @@
 
 namespace App\Models\invoice\Traits;
 
-use App\Models\prefix\Prefix;
-use App\Models\project\Project;
 use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
@@ -13,13 +11,12 @@ use App\Models\customer\Customer;
  */
 trait InvoiceRelationship
 {
-
-      public function customer()
+    public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
     }
 
-     public function products()
+    public function products()
     {
         return $this->hasMany('App\Models\items\InvoiceItem')->withoutGlobalScopes();
     }
@@ -32,21 +29,21 @@ trait InvoiceRelationship
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
-     public function transactions()
+    public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','bill_id')->where('relation_id','=',0)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 0)->withoutGlobalScopes();
     }
 
     public function attachment()
     {
-        return $this->hasMany('App\Models\items\MetaEntry','rel_id')->where('rel_type','=',1)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\items\MetaEntry', 'rel_id')->where('rel_type', '=', 1)->withoutGlobalScopes();
     }
 
-            public function project()
+    public function project()
     {
-         return $this->belongsTo(ProjectRelations::class, 'id',  'rid')->where('related', '=', 7);
+        return $this->belongsTo(ProjectRelations::class, 'id',  'rid')->where('related', '=', 7);
     }
-    
+
     public function client()
     {
         return $this->hasOneThrough(Customer::class, Lead::class, 'id', 'id', 'lead_id', 'client_id')->withoutGlobalScopes();
@@ -56,7 +53,4 @@ trait InvoiceRelationship
     {
         return $this->hasOneThrough(Branch::class, Lead::class, 'id', 'id', 'lead_id', 'branch_id')->withoutGlobalScopes();
     }
-
-
-
 }
