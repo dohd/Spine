@@ -61,8 +61,7 @@
                     </fieldset>
                 </div>
 
-                <div><label for="Description">Description</label></div>
-                
+                <div><label for="Description">Description</label></div>                
                 <fieldset class="form-group">
                     <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}" rows="6" name="note"></textarea>
                 </fieldset>
