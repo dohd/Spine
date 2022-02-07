@@ -584,7 +584,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.purchases.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Purchases
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.purchases.create') }}" data-toggle="dropdown"> <i class="ft-list"></i> Create Purchases
+                            <li><a class="dropdown-item" href="{{ route('biller.purchases.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Purchase
                                 </a>
                             </li>
                         </ul>
@@ -673,6 +673,20 @@
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.creditors.index') }}" data-toggle="dropdown"> <i class="fa fa-credit-card"></i>Creditor Ledger</a>
                             </li>
+                        </ul>
+                    </li>
+                    @endauth
+                    @permission('creditnote-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.credit_notes') }}</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=creditnote" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
+                                </a>
+                            </li>
+                            @permission('data-creditnote')
+                            <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=creditnote" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
+                                </a>
+                            </li>
+                            @endauth
                         </ul>
                     </li>
                     @endauth
@@ -852,20 +866,7 @@
                     </li>
                     @endauth
                     
-                    @permission('creditnote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.credit_notes') }}</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=creditnote" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
-                                </a>
-                            </li>
-                            @permission('data-creditnote')
-                            <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=creditnote" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
+                    
                 </ul>
             </li>
             @endif
