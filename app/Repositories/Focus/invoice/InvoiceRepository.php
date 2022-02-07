@@ -62,7 +62,7 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
-        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
+        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes']);
     }
 
     public function getSelfDataTable($self_id = false)
