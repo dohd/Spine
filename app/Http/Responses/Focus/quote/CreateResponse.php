@@ -19,7 +19,7 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $last_quote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
-        $leads = Lead::where('status', 0)->get();
+        $leads = Lead::where('status', 0)->orderBy('id', 'desc') ->get();
         
         // create proforma invoice
         if (request('page') == 'pi') {
