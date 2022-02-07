@@ -73,6 +73,22 @@ class InvoicesTableController extends Controller
             ->addColumn('invoiceduedate', function ($invoice) {
                 return dateFormat($invoice->invoiceduedate);
             })
+            ->addColumn('quote_tid', function ($invoice) {
+                $tids = array();
+                foreach ($invoice->products as $item) {
+                    if ($item->quote) 
+                        $tids[] = 'QT-'.sprintf('%04d', $item->quote->tid);
+                }
+                return implode(', ', $tids);
+            })
+            ->addColumn('lead_tid', function ($invoice) {
+                $tids = array();
+                foreach ($invoice->products as $item) {
+                    if ($item->quote) 
+                        $tids[] = 'Tkt-'.sprintf('%04d',$item->quote->lead->reference);
+                }
+                return implode(', ', $tids); 
+            })
             ->addColumn('actions', function ($invoice) {
                 return $invoice->action_buttons;
             })
