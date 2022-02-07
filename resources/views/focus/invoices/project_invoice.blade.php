@@ -103,7 +103,6 @@
     function draw_data(customer_id = '', lpo_number = '', project_id = '') {
         const tableLang = { @lang('datatable.strings') };
         const table = $('#quotes-table').dataTable({
-            ordering: false,
             processing: true,
             serverSide: true,
             responsive: true,
@@ -157,6 +156,7 @@
                     name: 'lead_tid'
                 }
             ],
+            order:[[0, 'desc']],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {

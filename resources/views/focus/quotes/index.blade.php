@@ -119,7 +119,6 @@
         const tableLang = { @lang('datatable.strings') };
 
         const table = $('#quotes-table').dataTable({
-            ordering: false,
             processing: true,
             serverSide: true,
             responsive: true,
@@ -183,6 +182,7 @@
                     sortable: false
                 }
             ],
+            order:[[0, 'desc']],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {
