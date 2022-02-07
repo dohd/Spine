@@ -7,10 +7,10 @@ use App\Models\items\VerifiedItem;
 
 use App\Models\quote\Quote;
 use App\Exceptions\GeneralException;
+use App\Models\items\InvoiceItem;
 use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
-use App\Models\lpo\Lpo;
 use App\Models\project\Budget;
 use App\Models\project\ProjectQuote;
 use App\Models\verifiedjcs\VerifiedJc;
@@ -59,12 +59,14 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     * Quotes approved and budgeted
+     *  Budgeted Project Quotes
      */
     public function getForVerifyDataTable()
     {
         $q = $this->query();
-
+        $quote_ids = Budget::pluck('quote_id');
+        $q->whereIn('id', $quote_ids);
+        
         $q->when(request('i_rel_type') == 1, function ($q) {
             return $q->where('customer_id', request('i_rel_id', 0));
         });
@@ -75,12 +77,6 @@ class QuoteRepository extends BaseRepository
                 date_for_database(request('end_date'))
             ]);
         }
-
-        // Quotes included in a project
-        $q->whereNotNull('project_quote_id');
-        // Budgeted quotes
-        $quote_ids = Budget::get()->pluck('quote_id');
-        $q->whereIn('id', $quote_ids);
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
@@ -99,12 +95,14 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     * Quotes Verified but not invoiced
+     * Project Quotes Verified but not invoiced
      */
     public function getForVerifyNotInvoicedDataTable()
     {
         $q = $this->query();
-        $q->where(['invoiced' => 'No', 'verified' => 'Yes'])->orderBy('id', 'desc');
+        $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        $inv_quote_ids = InvoiceItem::pluck('quote_id');
+        $q->whereNotIn('id', $inv_quote_ids);
 
         // extract input filter fields
         $customer_id = request('customer_id');
