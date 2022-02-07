@@ -91,12 +91,15 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Invoice No</th>
+                                            <th>#Invoice No</th>
                                             <th>{{ trans('customers.customer') }}</th>
+                                            <th>Subject</th>
                                             <th>{{ trans('invoices.invoice_date') }}</th>
                                             <th>{{ trans('general.amount') }}</th>
                                             <th>{{ trans('general.status') }}</th>
-                                            <th>{{ trans('invoices.invoice_due_date') }}</th>
+                                            <th>Due Date</th>
+                                            <th>#Quote No</th>
+                                            <th>#Ticket No</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -131,9 +134,9 @@
         var end_date = $('#end_date').val();
         if (start_date && end_date) {
             $('#invoices-table_'+ meta).DataTable().destroy();
-            draw_data(start_date, end_date);
+            return draw_data(start_date, end_date);
         } 
-        else alert("Date range is Required");
+        alert("Date range is Required");
     });
 
     // Initialize datepicker
@@ -141,11 +144,9 @@
         .datepicker({ format: "{{ config('core.user_date_format') }}"})
         .datepicker('setDate', new Date());
 
-    function draw_data(start_date = '', end_date = '') {
-        $.ajaxSetup({
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
-        });
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
+    function draw_data(start_date = '', end_date = '') {
         const segmentId = @json($segment);
         const relType = @json($input);
         const subJson = @json($input)['sub_json'];
@@ -182,6 +183,10 @@
                     name: 'customer'
                 },
                 {
+                    data: 'notes',
+                    name: 'notes'
+                },
+                {
                     data: 'invoicedate',
                     name: 'invoicedate'
                 },
@@ -196,6 +201,14 @@
                 {
                     data: 'invoiceduedate',
                     name: 'invoiceduedate'
+                },
+                {
+                    data: 'quote_tid',
+                    name: 'quote_tid'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
                 },
                 {
                     data: 'actions',
