@@ -59,7 +59,7 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     *  Budgeted Project Quotes
+     *  Project Quotes budgeted but not verified
      */
     public function getForVerifyDataTable()
     {
@@ -116,6 +116,9 @@ class QuoteRepository extends BaseRepository
             $quote_ids =  ProjectQuote::where(compact('project_id'))->pluck('quote_id');
             $q->whereIn('id', $quote_ids);
         }
+
+        // order by id
+        $q->orderBy('id', 'desc');
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
