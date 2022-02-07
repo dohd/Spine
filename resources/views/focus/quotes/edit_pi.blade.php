@@ -72,7 +72,7 @@
                                             <select class="form-control  round  select-box" name="bank_id" id="bank_id" required>
                                                 <option value="0">-- Select Bank --</option>
                                                 @foreach ($banks as $bank) 
-                                                    <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                                    <option value="{{ $bank->id }}">{{ $bank->bank }}</option>
                                                 @endforeach
                                             </select>
                                         </div>

@@ -31,7 +31,7 @@
                                     <select class="form-control round select-box required" name="bank_id" id="bank_id" required>
                                         <option value="">-- Select Bank --</option>
                                         @foreach ($banks as $bank)
-                                            <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                            <option value="{{ $bank->id }}">{{ $bank->bank }}</option>
                                         @endforeach
                                     </select>
                                 </div>                                
@@ -60,7 +60,7 @@
                                 <label for="validity" class="caption">Credit Period*</label>
                                 <div class="input-group">
                                     <select class="form-control round  select-box" name="validity" id="validity">
-                                        <option value="0" selected>On Reciept</option>
+                                        <option value="0" selected>On Receipt</option>
                                         <option value="14">Valid For 14 Days</option>
                                         <option value="30">Valid For 30 Days</option>
                                         <option value="45">Valid For 45 Days</option>
