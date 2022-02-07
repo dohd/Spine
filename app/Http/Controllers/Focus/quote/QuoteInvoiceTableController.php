@@ -71,8 +71,6 @@ class QuoteInvoiceTableController extends Controller
                 if ($customer && $branch) 
                     return $customer.' - '.$branch
                         .'&nbsp;<a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
-                
-                return $quote->lead->client_name;
             })
             ->addColumn('created_at', function ($quote) {
                 return dateFormat($quote->invoicedate);
