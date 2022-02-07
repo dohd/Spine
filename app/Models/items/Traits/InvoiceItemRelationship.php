@@ -2,23 +2,25 @@
 
 namespace App\Models\items\Traits;
 
+use App\Models\quote\Quote;
 
 /**
  * Class CustomerRelationship
  */
 trait InvoiceItemRelationship
 {
-
-       public function product()
+    public function quote()
     {
-        return $this->belongsTo('App\Models\product\ProductVariation','product_id','product_id')->withoutGlobalScopes();
+        return $this->belongsTo(Quote::class);
     }
 
-           public function variation()
+    public function product()
     {
-        return $this->belongsTo('App\Models\product\ProductVariation','product_id','id')->withoutGlobalScopes();
+        return $this->belongsTo('App\Models\product\ProductVariation', 'product_id', 'product_id')->withoutGlobalScopes();
     }
 
-
-
+    public function variation()
+    {
+        return $this->belongsTo('App\Models\product\ProductVariation', 'product_id', 'id')->withoutGlobalScopes();
+    }
 }
