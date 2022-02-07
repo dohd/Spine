@@ -47,10 +47,6 @@
         </div>
     </div>    
 </div>
-<!-- END: Content-->
-<div class="sidenav-overlay"></div>
-<div class="drag-target"></div>
-<input type="hidden" id="loader_url" value="{{route('biller.projects.load')}}">
 @include('focus.projects.modal.project_new')
 @include('focus.projects.modal.project_view')
 @endsection
@@ -72,26 +68,11 @@
 {{ Html::script('focus/js/select2.min.js') }}
 
 <script>
-    // draw dataTable data
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
-    // ajax header set up
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     function draw_data() {
-        $("#submit-data_project").on("click", function(e) {
-            e.preventDefault();
-            var form_data = [];
-            form_data['form'] = $("#data_form_project").serialize();
-            form_data['url'] = $('#action-url').val();
-            $('#AddProjectModal').modal('toggle');
-            addObject(form_data, true);
-        });
-
         const tableLang = { @lang('datatable.strings') };
         var dataTable = $('#projects-table').dataTable({
             processing: true,
@@ -174,20 +155,8 @@
         });
     }
 
+    // On Click Create Modal
     $('#AddProjectModal').on('shown.bs.modal', function() {
-        $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}" });
-
-        $('.from_date')
-            .datepicker('setDate', 'today')
-            .datepicker({ format: "{{date(config('core.user_date_format'))}}" });
-
-        // Add thirty days to the current date
-        const d = new Date();
-        const days_in_ms = (30 * 24 * 60 * 60 * 1000);
-        d.setTime(d.getTime() + days_in_ms);
-        $('.to_date')
-            .datepicker({ format: "{{ config('core.user_date_format') }}" })
-            .datepicker('setDate', d);
 
         // initiate select2 select menu
         $("#main_quote").select2();
@@ -281,20 +250,13 @@
         });
     });
 
-    function trigger(data) {
-        $(data.row).prependTo("table > tbody");
-        $("#data_form_project").trigger('reset');
-    }
-
     $(document).on('click', ".view_project", function(e) {
-        var did = $(this).attr('data-item');
+        const project_id = $(this).attr('data-item');
         $.ajax({
-            url: $('#loader_url').val(),
+            url: "{{ route('biller.projects.load') }}",
             type: 'POST',
             dataType: 'json',
-            data: {
-                'project_id': did
-            },
+            data: { project_id },
             success: function(data) {
                 $('#p_id').val(data.id);
                 $('#p_name').text(data.name);
