@@ -16,9 +16,22 @@
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    <a href="{{ route('biller.stockissuance.index') }}" class="btn btn-primary">
-                        <i class="ft-list"></i> List
-                    </a>
+                    <div class="btn-group">
+                        <a href="{{ route('biller.stockissuance.index') }}" class="btn btn-primary">
+                            <i class="ft-list"></i> List
+                        </a>&nbsp;&nbsp;
+                        @php
+                            $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
+                            $budget_url = route('biller.print_budget', [$quote->id, 4, $valid_token, 1]);
+                            $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
+                        @endphp
+                        <a href="{{ $budget_url }}" class="btn btn-purple" target="_blank">
+                            <i class="fa fa-print"></i> Budget
+                        </a>&nbsp;
+                        <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
+                            <i class="fa fa-print"></i> Quote
+                        </a> 
+                    </div>
                 </div>
             </div>
         </div>
