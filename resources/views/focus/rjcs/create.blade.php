@@ -38,8 +38,9 @@
                                                     <option value="">-- Select Project --</option>
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}">
-                                                            {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
-                                                            [ {{ $project->quote_tids }} ]
+                                                            {{ 'Prj-'.sprintf('%04d', $project->project_number) }} 
+                                                            [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ] 
+                                                            {{ $project->name }}
                                                         </option>
                                                     @endforeach
                                                 </select>                                                

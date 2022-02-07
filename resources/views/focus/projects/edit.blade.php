@@ -80,12 +80,14 @@
     const qt_id = @json($project->main_quote_id);
 
     const mainqt = quotes.filter(v => v.id === qt_id)[0];
-    const text = `${mainqt.bank_id? '#PI' : '#QT'} ${mainqt.tid} - ${mainqt.notes}`;
+    const tid = String(mainqt.tid).length < 4 ? ('000'+mainqt.tid).slice(-4) : mainqt.tid;
+    const text = `${mainqt.bank_id? '#PI-' : '#QT-'}${tid} - ${mainqt.notes}`;
     $("#main_quote").append(new Option(text, mainqt.id, 'selected', true));
 
     const otherqt = quotes.filter(v => v.id !== qt_id);
     otherqt.forEach(v => {
-        const text = `${v.bank_id? '#PI' : '#QT'} ${v.tid} - ${v.notes}`;
+        const tid = String(v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
+        const text = `${v.bank_id? '#PI-' : '#QT-'}${tid} - ${v.notes}`;
         $("#other_quote").append(new Option(text, v.id, 'selected', true));
     });
 
@@ -142,8 +144,9 @@
                 quietMillis: 50,
                 processResults: function(data) {
                     const results = $.map(data, function(item) {
+                        const tid = String(item.tid).length < 4 ? ('000'+item.tid).slice(-4) : item.tid;
                         return {
-                            text: `${item.bank_id ? '#PI' : '#QT'} ${item.tid} - ${item.notes}`,
+                            text: `${item.bank_id ? '#PI-' : '#QT-'}${tid} - ${item.notes}`,
                             id: item.id
                         };
                     });

@@ -2,12 +2,6 @@
 
 @section ('title', ' Diagnosis Job Card | Edit Diagnosis Job Card')
 
-@section('page-header')
-<h1>
-    Diagnosis Job Card<small>Edit Diagnosis Job Card</small>
-</h1>
-@endsection
-
 @section('content')
 <div class="">
     <div class="content-wrapper">
@@ -45,8 +39,9 @@
                                                     <option value="">-- Select Project --</option>
                                                     @foreach ($projects as $project)
                                                         <option value="{{ $project->id }}" {{ ($rjc->project->id == $project->id) ? 'selected' : '' }}>
-                                                            {{ 'Prj-'.sprintf('%04d', $project->project_number) }} - {{ $project->name }}
-                                                            [ {{ $project->quote_tids }} ]
+                                                            {{ 'Prj-'.sprintf('%04d', $project->project_number) }} 
+                                                            [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ] 
+                                                            {{ $project->name }}
                                                         </option>                                                        
                                                     @endforeach
                                                 </select>

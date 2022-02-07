@@ -255,7 +255,7 @@
                         const results = $.map(data, function(item) {
                             const tid = String(item.tid).length < 4 ? ('000'+item.tid).slice(-4) : item.tid;
                             return {
-                                text: `${item.bank_id ? '#PI-' : '#QT-'} ${tid} - ${item.notes}`,
+                                text: `${item.bank_id ? '#PI-' : '#QT-'}${tid} - ${item.notes}`,
                                 id: item.id
                             };
                         });
