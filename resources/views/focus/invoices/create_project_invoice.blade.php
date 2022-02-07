@@ -147,7 +147,7 @@
                                         $lpo_no = $val->lpo ? $val->lpo->lpo_no : '';
                                         $client_ref = $val->client_ref;
                                         $branch_name = $val->branch->name;
-                                        if ($val->branch->branch_code) $branch_name .=  '(' . $val->branch->branch_code . ')';
+                                        if ($val->branch->branch_code) $branch_name .=  ' (' . $val->branch->branch_code . ') ';
                                         
                                         // Description details
                                         $title = $val->notes;
@@ -158,8 +158,7 @@
                                         }
 
                                         // Table values
-                                        $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);
-                                        
+                                        $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);                                        
                                         $description = $title . '; ' . implode(', ', $jcs);
                                         $price = number_format($val->subtotal, 2);
                                         $project_id = $val->project_quote ? $val->project_quote->project_id : '';
