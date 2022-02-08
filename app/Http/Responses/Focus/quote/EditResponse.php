@@ -35,7 +35,6 @@ class EditResponse implements Responsable
 
         // open leads (status = 0)
         $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
-        $leads[] = Lead::find($quote->lead_id);
 
         // default parameters
         $params = array('quote', 'products', 'leads');
@@ -78,6 +77,9 @@ class EditResponse implements Responsable
                 ->with(compact('last_quote', 'copy_from_pi', ...$params))
                 ->with(bill_helper(2, 4));        
         }
+
+        // append previous lead when editing
+        $leads[] = Lead::find($quote->lead_id);
 
         // edit proforma invoice
         if (isset($banks)) {            
