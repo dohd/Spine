@@ -144,7 +144,8 @@
                                         // Reference details
                                         $tid = sprintf('%04d', $val->tid);
                                         $tid = $val->bank_id ? 'PI-'.$tid : 'QT-'.$tid;
-                                        $lpo_no = $val->lpo ? $val->lpo->lpo_no : '';
+                                        if ($val->revision) $tid .= $val->revision;
+                                        $lpo_no = $val->lpo ? 'PO-'.$val->lpo->lpo_no : '';
                                         $client_ref = $val->client_ref;
                                         $branch_name = $val->branch->name;
                                         if ($val->branch->branch_code) $branch_name .=  ' (' . $val->branch->branch_code . ') ';
