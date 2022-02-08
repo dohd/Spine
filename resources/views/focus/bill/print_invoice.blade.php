@@ -248,7 +248,7 @@
 			@endforeach
 			<!-- empty row with dynamic height-->
 			<tr>
-				<td height="{{ 400-30*count($invoice->products) }}"></td>
+				<td height="{{ 400 - 60 * count($invoice->products) }}"></td>
 				@for($i = 0; $i < 6; $i++) 
 					<td></td>
 				@endfor
