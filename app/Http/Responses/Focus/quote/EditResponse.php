@@ -31,7 +31,7 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-        $products = $quote->products()->orderBy('row_index')->get();
+        $products = $quote->products()->orderBy('row_index', 'asc')->get();
 
         // open leads (status = 0)
         $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
