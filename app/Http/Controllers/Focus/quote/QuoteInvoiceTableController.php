@@ -63,7 +63,7 @@ class QuoteInvoiceTableController extends Controller
                 if ($quote->bank_id) $tid = 'PI-'.$tid;
                 else $tid = 'QT-'.$tid;
 
-                return '<a class="font-weight-bold" href="'.route('biller.quotes.show', [$quote->id]).'">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="'.route('biller.quotes.show', [$quote->id]).'">' . $tid . $quote->revision .'</a>';
             })
             ->addColumn('customer', function ($quote) {
                 $customer = isset($quote->customer) ? $quote->customer->company : '';
