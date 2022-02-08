@@ -95,21 +95,21 @@
                                         <label for="invocieno" class="caption">#{{prefix(5)}} {{trans('general.serial_no')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            {{-- 
                                             @if (isset($last_quote))
                                                 {{ Form::number('tid', $last_quote->tid+1, ['class' => 'form-control round']) }}
                                             @else
                                                 {{ Form::number('tid', $quote->tid, ['class' => 'form-control round']) }}
                                             @endif
-
-                                            {{-- 
+                                            --}}
+                                            
                                             @if (isset($last_quote))
                                                 {{ Form::text('tid', 'QT-'.sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'disabled']) }}
                                                 <input type="hidden" name="tid", value="{{ $last_quote->tid+1 }}">
                                             @else
                                                 {{ Form::text('tid', 'QT-' . sprintf('%04d', $quote->tid) . $quote->revision, ['class' => 'form-control round', 'disabled']) }}
                                                 <input type="hidden" name="tid", value="{{ $quote->tid }}">
-                                            @endif
-                                            --}}
+                                            @endif                                            
                                         </div>
                                     </div>
                                 </div>
@@ -370,10 +370,10 @@
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Action
                 </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item removeProd" href="javascript:void(0);">Remove</a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">                    
                     <a class="dropdown-item up" href="javascript:void(0);">Up</a>
                     <a class="dropdown-item down" href="javascript:void(0);">Down</a>
+                    <a class="dropdown-item removeProd text-danger" href="javascript:void(0);">Remove</a>
                 </div>
             </div>            
         `;
@@ -428,15 +428,16 @@
         const item = {...v};
         // format float values to integer
         const keys = ['product_price','product_qty','product_subtotal'];
-        keys.forEach(key => {
-            item[key] = parseFloat(item[key].replace(',',''));
-        });
+        for (let prop in item) {
+            if (keys.includes(prop) && item[prop]) {
+                item[prop] = parseFloat(item[prop].replace(/,/g, ''));
+            }
+        }
         // check if item has product row parameters
         if (item.product_name && item.product_price) {
             const row = productRow(i);
             $('#quotation tr:last').after(row);
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
-
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
@@ -472,26 +473,19 @@
     });
 
     // on clicking Product row drop down menu
-    $("#quotation").on("click", ".up,.down,.removeProd", function() {
-        var row = $(this).parents("tr:first");
-        // move row up 
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
+    $("#quotation").on("click", ".up, .down, .removeProd", function() {
+        const $row = $(this).parents("tr:first");
+        if ($(this).is('.up')) $row.insertBefore($row.prev());
+        if ($(this).is('.down')) $row.insertAfter($row.next());
         if ($(this).is('.removeProd')) {
-            if (confirm('Are you sure to delete this product ?')) {
-                const row = $(this).closest('tr');
-                row.remove();
-                const itemId = row.find('input[name="item_id[]"]').val();
-                // delete product api call 
-                if (Number(itemId)) {
-                    $.ajax({
-                        url: baseurl + 'quotes/delete_product/' + itemId,
-                        dataType: "json",
-                        method: 'DELETE',
-                    });
-                }
+            const itemId = $row.find('input[name="item_id[]"]').val();
+            if (itemId == 0) return $row.remove();
+            if (confirm('Are you sure to delete this product ?')) {                
+                $.ajax({
+                    url: baseurl + 'quotes/delete_product/' + itemId,
+                    method: 'DELETE',
+                });
+                $row.remove();
             }
         }
 

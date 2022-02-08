@@ -108,21 +108,21 @@
                                         <label for="invocieno" class="caption">#PI {{trans('general.serial_no')}} </label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            {{-- Hidden fields
                                             @if (isset($last_quote))
                                                 {{ Form::number('tid', $last_quote->tid+1, ['class' => 'form-control round', 'id' => 'tid']) }}
                                             @else
                                                 {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'id' => 'tid']) }}
                                             @endif
+                                            --}}
 
-                                            {{-- Hidden fields
                                             @if (isset($last_quote))
                                                 {{ Form::text('tid', 'PI-' . sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}">
                                             @else
                                                 {{ Form::text('tid', 'PI-' . sprintf('%04d', $quote->tid) . $quote->revision, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $quote->tid }}">
-                                            @endif
-                                            --}}
+                                            @endif                                           
                                         </div>
                                     </div>
                                 </div>
@@ -381,7 +381,7 @@
                     <a class="dropdown-item down" href="javascript:void(0);">Down</a>
                     <a class="dropdown-item removeProd text-danger" href="javascript:void(0);">Remove</a>
                 </div>
-            </div>            
+            </div>
         `;
     }
 
@@ -434,9 +434,12 @@
         const item = {...v};
         // format float values to integer
         const keys = ['product_price','product_qty','product_subtotal'];
-        keys.forEach(key => {
-            item[key] = parseFloat(item[key].replace(/,/g, ''));
-        });
+        for (let prop in item) {
+            if (keys.includes(prop) && item[prop]) {
+                item[prop] = parseFloat(item[prop].replace(/,/g, ''));
+            }
+        }
+
         // check if item type is of product row
         if (item.a_type == 1) {
             $('#quotation tbody').append(productRow(i));
@@ -452,7 +455,7 @@
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
             $('#result-'+i).text(item.product_subtotal.toFixed(2));
         } else {
-            $('#quotation tbody').append(productRow(i));
+            $('#quotation tbody').append(productTitleRow(i));
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
@@ -477,7 +480,7 @@
     });
 
     // on clicking Product row drop down menu
-    $("#quotation").on("click", ".up, .down, .removeProd", function() {
+    $("#quotation").on("click", ".up, .down, .removeProd", function(e) {
         const $row = $(this).parents("tr:first");
         if ($(this).is('.up')) $row.insertBefore($row.prev());
         if ($(this).is('.down')) $row.insertAfter($row.next());
@@ -487,7 +490,7 @@
             if (confirm('Are you sure to delete this product ?')) {
                 $.ajax({
                     url: baseurl + 'quotes/delete_product/' + itemId,
-                    method: 'DELETE',
+                    method: 'DELETE'
                 });
                 $row.remove();
             }

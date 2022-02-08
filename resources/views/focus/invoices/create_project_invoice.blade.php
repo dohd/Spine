@@ -74,15 +74,8 @@
                                 <label for="tid" class="caption">Transaction ID*</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    @php
-                                        $tid = isset($last_tr->tid) ? $last_tr->tid+1 : 1;
-                                    @endphp
-                                    {{ Form::number('tid', $tid, ['class' => 'form-control round']) }}
-
-                                    {{-- 
-                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', $tid), ['class' => 'form-control round', 'disabled']) }}
-                                    <input type="hidden" name="tid" value={{ $tid }}>
-                                    --}}
+                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', @$last_tr->tid+1), ['class' => 'form-control round', 'disabled']) }}
+                                    <input type="hidden" name="tid" value={{ @$last_tr->tid+1 }}>
                                 </div>
                             </div>
                         </div>
