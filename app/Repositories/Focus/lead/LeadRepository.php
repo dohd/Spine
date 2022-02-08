@@ -75,9 +75,7 @@ class LeadRepository extends BaseRepository
      */
     public function delete(Lead $lead)
     {
-        if ($lead->delete()) {
-            return true;
-        }
+        if (!count($lead->quotes)) return $lead->delete();
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
