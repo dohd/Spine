@@ -127,7 +127,7 @@ class BranchesController extends Controller
             'location' => 'required'
         ]);
         //Input received from the request
-        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
+        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone', 'branch_code']);
         //Update the model using repository update method
         $this->repository->update($branch, $input);
         //return with successfull message
