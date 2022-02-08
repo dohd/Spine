@@ -26,9 +26,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (isset($last_quote))
-                        {{ Form::model($quote, ['route' => 'biller.quotes.store', 'class' => 'form-horizontal', 'method' => 'POST']) }}
+                        {{ Form::model($quote, ['route' => 'biller.quotes.store', 'method' => 'POST']) }}
                     @else
-                        {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'class' => 'form-horizontal', 'method' => 'PATCH']) }}
+                        {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'method' => 'PATCH']) }}
                     @endif                    
                     <div class="row">
                         <div class="col-sm-6 cmp-pnl">
@@ -113,7 +113,8 @@
                                             @else
                                                 {{ Form::number('tid', $quote->tid, ['class' => 'form-control round', 'id' => 'tid']) }}
                                             @endif
-                                            {{-- 
+
+                                            {{-- Hidden fields
                                             @if (isset($last_quote))
                                                 {{ Form::text('tid', 'PI-' . sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}">
@@ -320,9 +321,7 @@
 @section('extra-scripts')
 <script>
     // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
     // set default field values
     $('#bank_id').val("{{ $quote->bank_id }}");
@@ -377,10 +376,10 @@
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Action
                 </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item removeProd" href="javascript:void(0);">Remove</a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">                    
                     <a class="dropdown-item up" href="javascript:void(0);">Up</a>
                     <a class="dropdown-item down" href="javascript:void(0);">Down</a>
+                    <a class="dropdown-item removeProd text-danger" href="javascript:void(0);">Remove</a>
                 </div>
             </div>            
         `;
@@ -436,13 +435,12 @@
         // format float values to integer
         const keys = ['product_price','product_qty','product_subtotal'];
         keys.forEach(key => {
-            item[key] = parseFloat(item[key].replace(',',''));
+            item[key] = parseFloat(item[key].replace(/,/g, ''));
         });
-        // check if item has product row parameters
-        if (item.product_name && item.product_price) {
-            $('#quotation tr:last').after(productRow(i));
+        // check if item type is of product row
+        if (item.a_type == 1) {
+            $('#quotation tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
-
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
@@ -454,7 +452,7 @@
             $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
             $('#result-'+i).text(item.product_subtotal.toFixed(2));
         } else {
-            $('#quotation tr:last').after(productTitleRow(i));
+            $('#quotation tbody').append(productRow(i));
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
@@ -468,37 +466,30 @@
     // on clicking Add Product button
     $('#add-product').click(function() {
         const i = rowIndx;
-        $('#quotation tr:last').after(productRow(i));
+        $('#quotation tbody').append(productRow(i));
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
         rowIndx++;
     });
     // on clicking Add Title button
     $('#add-title').click(function() {
-        $('#quotation tr:last').after(productTitleRow(rowIndx));
+        $('#quotation tbody').append(productRow(i));
         rowIndx++;
     });
 
     // on clicking Product row drop down menu
-    $("#quotation").on("click", ".up,.down,.removeProd", function() {
-        var row = $(this).parents("tr:first");
-        // move row up 
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
+    $("#quotation").on("click", ".up, .down, .removeProd", function() {
+        const $row = $(this).parents("tr:first");
+        if ($(this).is('.up')) $row.insertBefore($row.prev());
+        if ($(this).is('.down')) $row.insertAfter($row.next());
         if ($(this).is('.removeProd')) {
+            const itemId = $('#itemid-'+$row.index()).val();
+            if (itemId == 0) return $row.remove();
             if (confirm('Are you sure to delete this product ?')) {
-                const row = $(this).closest('tr');
-                row.remove();
-                const itemId = row.find('input[name="item_id[]"]').val();
-                // delete product api call 
-                if (Number(itemId)) {
-                    $.ajax({
-                        url: baseurl + 'quotes/delete_product/' + itemId,
-                        dataType: "json",
-                        method: 'DELETE',
-                    });
-                }
+                $.ajax({
+                    url: baseurl + 'quotes/delete_product/' + itemId,
+                    method: 'DELETE',
+                });
+                $row.remove();
             }
         }
 
