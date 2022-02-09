@@ -415,15 +415,18 @@ class ProjectsController extends Controller
         $project = Project::where('name', 'LIKE', '%' . $q . '%')
             ->orWhereHas('customer', function ($query) use ($wq) {
                 $query->where('company', 'LIKE', '%' . $wq['q'] . '%');
-                return $query;
+                // return $query;
             })->orWhereHas('branch', function ($query) use ($wq) {
                 $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
-                return $query;
+                // return $query;
+            })->orWhereHas('quotes', function($q) use ($wq) {
+                $q->where('tid', 'LIKE', '%' . $wq['q'] . '%');
             })->limit(6)->get();
 
         // response format
         $output = array();
         foreach ($project as $project) {
+            if (!count($project->quotes)) continue;
             // append tids
             $quote_tids = array();     
             $lead_tids = array();           
@@ -434,12 +437,12 @@ class ProjectsController extends Controller
                 if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
                 else $quote_tids[] = 'QT-'. $tid;
             }
+            
             $project['lead_tids'] =  implode(', ', $lead_tids);
             $project['quote_tids'] = implode(', ', $quote_tids);
             
             $customer = $project->customer_project->company;
-            $branch = $project->branch->name;
-            if ($quote_tids) $branch .= ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
+            $branch = $project->branch->name . ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
             $tid = 'Prj-'.sprintf('%04d', $project->project_number);
             $output[] = array(
                 'name' => implode(' - ', array($customer, $branch, $tid, $project->name)),
