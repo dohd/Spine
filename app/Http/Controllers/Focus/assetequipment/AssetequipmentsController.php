@@ -27,7 +27,7 @@ use App\Http\Responses\Focus\assetequipment\EditResponse;
 use App\Repositories\Focus\assetequipment\AssetequipmentRepository;
 use App\Http\Requests\Focus\assetequipment\ManageAssetequipmentRequest;
 use App\Http\Requests\Focus\assetequipment\StoreAssetequipmentRequest;
-
+use App\Models\account\Account;
 
 /**
  * ProductcategoriesController
@@ -70,9 +70,8 @@ class AssetequipmentsController extends Controller
      * @param CreateProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\CreateResponse
      */
-    public function create(StoreAssetequipmentRequest $request)
+    public function create()
     {
-
         return new CreateResponse('focus.assetequipments.create');
     }
 
@@ -94,9 +93,9 @@ class AssetequipmentsController extends Controller
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
          
-        $id = $this->repository->create($input);
+        $this->repository->create($input);
         //return with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Branch  Successfully Created' . ' <a href="' . route('biller.assetequipments.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset & Equipment Successfully Created']);
     }
 
     /**
@@ -170,12 +169,14 @@ class AssetequipmentsController extends Controller
         return new ViewResponse('focus.assetequipments.view', compact('assetequipment'));
     }
 
+    /**
+     * Load Ledger Account Type
+     */
     public function ledger_load(Request $request)
     {
-        $q = $request->get('id');
-        $result = \App\Models\account\Account::all()->where('account_type', '=', $q);
-
-        return json_encode($result);
+        $accounts = Account::where('account_type', $request->account_type)->get();
+        
+        return response()->json($accounts);
     }
 
     public function product_search(Request $request, $bill_type)

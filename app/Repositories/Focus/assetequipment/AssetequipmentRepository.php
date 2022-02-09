@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\assetequipment;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\assetequipment\Assetequipment;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProductcategoryRepository.
@@ -48,14 +45,18 @@ class AssetequipmentRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // format values
+        foreach ($input as $key => $value) {
+            if (array_search($key, ['purchase_date', 'warranty_expiry_date'])) {
+                $input[$key] = date_for_database($value);
+            } elseif (array_search($key, ['cost', 'qty'])) {
+                $input[$key] = (float) $value;
+            }
+        }
 
-        $input['purchase_date'] = date_for_database($input['purchase_date']);
-        $input['warranty_expiry_date'] = date_for_database($input['warranty_expiry_date']);
-        $input['cost'] = numberClean($input['cost']);
-        $input['qty'] = numberClean($input['qty']);
-        $input = array_map( 'strip_tags', $input);
-       $c=Assetequipment::create($input);
-       if ($c->id) return $c->id;
+        $eqmnt = Assetequipment::create($input);        
+        if ($eqmnt->id) return $eqmnt->id;
+
         throw new GeneralException('Error Creating Assetequipment');
     }
 
