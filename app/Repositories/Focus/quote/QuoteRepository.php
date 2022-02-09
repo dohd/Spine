@@ -282,6 +282,9 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException(trans('Error deleting product'));
     }
 
+    /**
+     * Verify Budgeted Project Quote
+     */
     public function verify(array $input)
     {
         DB::beginTransaction();
@@ -336,8 +339,13 @@ class QuoteRepository extends BaseRepository
             if ($quote_item['id'] == 0) unset($quote_item['id']);
             $quote_item->save();
         }
-        // update or create new job_card
+        
         foreach($job_cards as $item) {
+            // discard non-unique reference job_card
+            $job_card = VerifiedJc::where(['reference' => $item['reference']])->first();
+            if ($job_card) continue;
+
+            // update or create new job_card
             $job_card = VerifiedJc::firstOrNew([
                 'id' => $item['jcitem_id'],
                 'quote_id' => $item['quote_id'],
