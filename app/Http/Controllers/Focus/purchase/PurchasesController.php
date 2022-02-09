@@ -21,21 +21,14 @@ use App\Models\purchase\Purchase;
 use App\Models\supplier\Supplier;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\purchase\CreateResponse;
 use App\Http\Responses\Focus\purchase\EditResponse;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
 
-//Ported
-use App\Models\account\Account;
-use App\Models\Company\ConfigMeta;
-use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
-use mPDF;
 
-use App\Http\Requests\Focus\purchase\CreatePurchaseRequest;
 use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
 //use App\Http\Requests\Focus\purchase\EditPurchaseorderRequest;
 //use App\Http\Requests\Focus\purchase\UpdatePurchaseorderRequest;
