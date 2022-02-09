@@ -351,13 +351,16 @@ class QuotesController extends Controller
         return response()->noContent();
     } 
 
-    // Load Approved Customer Quotes not in any project
+    /**
+     * Approved Customer Quotes not in any project
+     */
     public function customer_quotes()
     {
-        $quotes = Quote::whereNotIn('id', function($q) { $q->select('quote_id')->from('project_quotes'); })
+        $quotes = Quote::with('branch')
             ->where(['customer_id' => request('id'), 'status' => 'approved'])
+            ->whereNull('project_quote_id')
             ->orderBy('id', 'desc')
-            ->get(['id', 'tid', 'notes', 'customer_id', 'bank_id']);
+            ->get();
 
         return response()->json($quotes);
     }
