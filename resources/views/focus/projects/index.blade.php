@@ -221,13 +221,13 @@
                     dataType: 'json',
                     quietMillis: 50,
                     processResults: function(data) {
-                        const results = $.map(data, function(item) {
-                            const tid = String(item.tid).length < 4 ? ('000'+item.tid).slice(-4) : item.tid;
-                            return {
-                                text: `${item.bank_id ? '#PI-' : '#QT-'}${tid} - ${item.notes}`,
-                                id: item.id
-                            };
+                        const results = data.map(v => {
+                            const tid = (''+v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
+                            const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch.name} - ${v.notes}`;
+
+                            return {id: v.id, text}; 
                         });
+                        
                         // replace array data
                         quoteData.length = 0;
                         quoteData.push.apply(quoteData, results);
