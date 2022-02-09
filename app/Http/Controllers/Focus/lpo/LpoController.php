@@ -41,6 +41,7 @@ class LpoController extends Controller
     {
         // extract input fields
         $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
+
         $input['amount'] = (float) $input['amount'];
         Lpo::create($input);
 
@@ -83,11 +84,11 @@ class LpoController extends Controller
     public function update_lpo(Request $request)
     {
         // extract input fields
-        $input = $request->only('lpo_id', 'customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
+        $lpo_id = request('lpo_id');
+        $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
 
-        $lpo = Lpo::find($input['lpo_id']);
-        unset($input['lpo_id']);
-        $lpo->update($input);
+        $input['amount'] = (float) $input['amount'];
+        Lpo::find($lpo_id)->update($input);
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO updated successfully']);
     }
