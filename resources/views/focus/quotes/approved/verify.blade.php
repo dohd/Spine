@@ -1,10 +1,6 @@
 @extends ('core.layouts.app')
 
-@php
-    $title = $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote';
-@endphp
-
-@section ('title', $title)
+@section ('title', $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote')
 
 @section('content')
 <div class="content-wrapper">
@@ -38,7 +34,9 @@
                         <div class="col-sm-6 cmp-pnl">
                             <div id="customerpanel" class="inner-cmp-pnl">
                                 <div class="form-group row">
-                                    <div class="fcol-sm-12"><h3 class="title pl-1">{{ $title }}</h3></div>
+                                    <div class="fcol-sm-12">
+                                        <h3 class="title pl-1">{{ $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote' }}</h3>
+                                    </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12">
@@ -69,18 +67,14 @@
                                             {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id'=>'invoicedate', 'disabled']) }}
                                         </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        @php
-                                            $prefix = '#Qt';
-                                            $tid = 'QT-'.sprintf('%04d', $quote->tid);
-                                            if ($quote->bank_id) {
-                                                $prefix = '#PI';
-                                                $tid = 'PI-'.sprintf('%04d', $quote->tid);
-                                            }
-                                        @endphp
-                                        <label for="serial_no" class="caption">{{ $prefix }} {{trans('general.serial_no')}}</label>
+                                    <div class="col-sm-6">                                        
+                                        <label for="serial_no" class="caption">{{ $quote->bank_id ? '#PI' : '#Qt' }} {{trans('general.serial_no')}}</label>
                                         <div class="input-group">
                                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
+                                            @php
+                                                $tid = 'QT-'.sprintf('%04d', $quote->tid);
+                                                if ($quote->bank_id) $tid = 'PI-'.sprintf('%04d', $quote->tid);
+                                            @endphp
                                             {{ Form::text('tid', $tid, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                         </div>
                                     </div>                                    
@@ -177,10 +171,10 @@
                                     <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
                                     <th width="7%" class="text-center">UOM</th>
                                     <th width="5%" class="text-center">{{trans('general.quantity')}}</th>
-                                    <th width="12%" class="text-center">{{trans('general.rate')}} Exclusive</th>
-                                    <th width="12%" class="text-center">{{trans('general.rate')}} Inclusive</th>
+                                    <th width="10%" class="text-center">{{trans('general.rate')}} Exclusive</th>
+                                    <th width="10%" class="text-center">{{trans('general.rate')}} Inclusive</th>
                                     <th width="10%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
-                                    <th width="7%" class="text-center">Remark</th>
+                                    <th width="12%" class="text-center">Remark</th>
                                     <th width="5%" class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -242,10 +236,7 @@
 
 @section('extra-scripts')
 <script>    
-    // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
     // Intialize datepicker
     $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" });
@@ -281,7 +272,7 @@
                     </select>
                 </td>
                 <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
-                <td><input type="text" class="form-control" name="date[]" id="date-${n}" required></td>
+                <td><input type="text" class="form-control datepicker" name="date[]" id="date-${n}" required></td>
                 <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
                 <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
                 <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-${n}">
@@ -299,25 +290,28 @@
             .datepicker('setDate', new Date());
         jcIndex++;
     });
+
+    const v_no = "{{ $verify_no }}";
     // remove job card row
     $('#jobcard').on('click', '.removeJc', function() {
         if ($(this).is('.removeJc')) {
-            const row = $(this).closest('tr');
-            row.remove();
-            if (Number("{{ $verify_no }}") > 1) {
+            const $row = $(this).parents('tr:first');
+            const itemId = $row.find('input[name="jcitem_id[]"]').val();
+            if (itemId == 0) return $row.remove();
+            if (v_no > 1) {
                 if (confirm('Are you sure to delete this job card ?')) {
-                    const itemId = row.find('input[name="jcitem_id[]"]').val();
                     $.ajax({
                         url: baseurl + 'quotes/verified_jcs/' + itemId,
                         method: 'DELETE'
                     });
+                    $row.remove();
                 }
-            }
+            } 
         }
     });
 
     // On next verifications other than the first
-    if ("{{ $verify_no }}" > 1) {
+    if (v_no > 1) {
         // fetch job cards
         $.ajax({
             url: baseurl + 'quotes/verified_jcs/' + "{{ $quote->id }}",
@@ -326,7 +320,6 @@
             success: function(data) {
                 // set default job card rows
                 data.forEach((v, i) => {
-                    // append additional rows
                     if (i) {
                         $('#jobcard tbody').append(jobCardRow(i));
                         jcIndex++;
