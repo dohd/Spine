@@ -101,8 +101,9 @@ class QuoteRepository extends BaseRepository
     {
         $q = $this->query();
         $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
-        $inv_quote_ids = InvoiceItem::pluck('quote_id');
-        $q->whereNotIn('id', $inv_quote_ids);
+        $q->whereNotIn('id', function($q) { 
+            $q->select('quote_id')->from('invoice_items'); 
+        });
 
         // extract input filter fields
         $customer_id = request('customer_id');
@@ -113,8 +114,9 @@ class QuoteRepository extends BaseRepository
         if ($customer_id) $q->where(compact('customer_id'));
         if ($lpo_id) $q->where(compact('lpo_id'));
         if ($project_id) {
-            $quote_ids =  ProjectQuote::where(compact('project_id'))->pluck('quote_id');
-            $q->whereIn('id', $quote_ids);
+            $q->whereIn('id', function($q) use($project_id) {
+                $q->select('quote_id')->from('project_quotes')->where(compact('project_id'));
+            });
         }
 
         // order by id
