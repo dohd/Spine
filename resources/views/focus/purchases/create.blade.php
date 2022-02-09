@@ -76,9 +76,7 @@
                                                     <select name="credit_account_id" class="form-control round required" id="credit_account_id" required>
                                                         <option value="">-- Select Ledger Account --</option>
                                                         @foreach($accounts as $account)
-                                                            @if ($account->holder == 'Prefferential Creditors')
-                                                                <option value="{{$account->id}}"> {{$account->holder}}</option>
-                                                            @endif
+                                                            <option value="{{$account->id}}"> {{$account->holder}}</option>                                                            
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -599,15 +597,15 @@
 @section('extra-scripts')
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 <script type="text/javascript">
-    // initialize select2 menu
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
     $("#project_id").select2();
-    // initialize html editor
     editor();
-    // Initialize datepicker
+
     $('.datepicker')
         .datepicker({ format: "{{ config('core.user_date_format')}}" })
         .datepicker('setDate', new Date());
     
+    // On clicking payer_type
     $("input[name=payer_type]").on('change', function() {
         var p_t = $('input[name=payer_type]:checked').val();
         if (p_t != 'walkin') {
@@ -628,16 +626,43 @@
             $('#payer_id').val('');
         }
     });
-    
-    $(".user-box-new").keyup(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+
+    // On selecting Project
+    const projects = @json($projects);
+    $('#project_id').change(function() {
+        const text = $(this).find('option:selected').text().replace(/\s+/g, ' ');
+        const len = $('#saman-row-exp').find('input[name="exp_project[]"]').length;
+        // set default expense inputs
+        projects.forEach(v => {
+            if (v.id == $(this).val()) {
+                for (let i = 0; i < len; i++) {
+                    $('#exp_project-'+i).val(text);
+                    $('#exp_project_id-'+i).val(v.id);
+                    $('#exp_client_id-'+i).val(v.customer_id);
+                    $('#exp_project_id-'+i).val(v.branch_id);
+                }    
             }
         });
+    });
+    // On clicking Expenses Add Row
+    $('#expaddproduct').click(function() {
+        const text = $('#project_id option:selected').text().replace(/\s+/g, ' ');
+        const len = $('#saman-row-exp').find('input[name="exp_project[]"]').length;
+        const i = len - 1;
+        // set default expense inputs
+        projects.forEach(v => {
+            if (v.id == $('#project_id').val()) {
+                $('#exp_project-'+i).val(text);
+                $('#exp_project_id-'+i).val(v.id);
+                $('#exp_client_id-'+i).val(v.customer_id);
+                $('#exp_project_id-'+i).val(v.branch_id);
+            }
+        });
+    });
+    
+    $(".user-box-new").keyup(function() {        
         var box_id = $(this).attr('data-section');
         var p_t = $('input[name=payer_type]:checked').val();
-
         $.ajax({
             type: "POST",
             url: baseurl + 'transactions/payer_search',
@@ -657,9 +682,7 @@
         $('#payer_id').val(data.id);
         $('#relation_id').val(data.relation_id);
         $('#payer-name').val(data.name);
-        //console.log(data);
         $('#taxid').val(data.taxid);
-
         $("#suppliers-box-result").hide();
     }
 </script>
