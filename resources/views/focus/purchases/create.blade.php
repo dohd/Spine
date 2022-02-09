@@ -73,10 +73,12 @@
                                             <div class="col-sm-12">
                                                 <div class="form-group">
                                                     <label for="project" class="caption">Ledger Account(Credited)*</label>
-                                                    <select name="credit_account_id" class="form-control round required" id="credit_account_id">
+                                                    <select name="credit_account_id" class="form-control round required" id="credit_account_id" required>
                                                         <option value="">-- Select Ledger Account --</option>
                                                         @foreach($accounts as $account)
-                                                            <option value="{{$account->id}}"> {{$account->holder}}</option>
+                                                            @if ($account->holder == 'Prefferential Creditors')
+                                                                <option value="{{$account->id}}"> {{$account->holder}}</option>
+                                                            @endif
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -158,8 +160,8 @@
                                                 <div class="input-group">
                                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span>
                                                     </div>
-                                                    <select id="ref_type" name="ref_type" class="form-control round required  ">
-                                                        <option value="">Select Doc Type*</option>
+                                                    <select id="ref_type" name="ref_type" class="form-control round" required>
+                                                        <option value="">-- Select Reference Document --</option>
                                                         <option value="Invoice">Invoice</option>
                                                         <option value="Receipt">Receipt</option>
                                                         <option value="DNote">DNote</option>
@@ -331,7 +333,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td colspan="2"><textarea id="dpid-0" class="form-control html_editor" name="product_description[]" placeholder="{{trans('general.enter_description')}} (Optional)" autocomplete="off"></textarea><br></td>
-                                                    <td colspan="4"><input type="text" class="form-control" name="project[]" placeholder="Search  Project By Project Name , Clent, Branch" id='project-0'>
+                                                    <td colspan="4"><input type="text" class="form-control" name="project[]" placeholder="Search  Project By Project Name , Clent, Branch" id='project-0' disabled>
                                                         <input type="hidden" name="inventory_project_id[]" id="project_id-0">
                                                         <input type="hidden" name="client_id[]" id="client_id-0">
                                                         <input type="hidden" name="branch_id[]" id="branch_id-0">
@@ -517,7 +519,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3"><textarea id="item_dpid-0" class="form-control html_editor" name="item_product_description[]" placeholder="{{trans('general.enter_description')}} (Optional)" autocomplete="off"></textarea><br></td>
-                                                    <td colspan="5"><input type="text" class="form-control" name="item_project[]" placeholder="Search  Project By Project Name , Clent, Branch" id='item_project-0'>
+                                                    <td colspan="5"><input type="text" class="form-control" name="item_project[]" placeholder="Search  Project By Project Name , Clent, Branch" id='item_project-0' disabled>
                                                         <input type="hidden" name="item_project_id[]" id="item_project_id-0">
                                                         <input type="hidden" name="item_client_id[]" id="item_client_id-0">
                                                         <input type="hidden" name="item_branch_id[]" id="item_branch_id-0">
