@@ -32,7 +32,7 @@
           </div>
           <div class="form-group col-4">
             <div><label for="lpo_amount">Amount</label></div>
-            <input type="number" name="amount" class="form-control" required>
+            <input type="number" step=".01"  name="amount" class="form-control" required>
           </div>
         </div>
         <div class="row">
