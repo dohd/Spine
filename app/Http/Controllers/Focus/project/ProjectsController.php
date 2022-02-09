@@ -438,7 +438,8 @@ class ProjectsController extends Controller
             $project['quote_tids'] = implode(', ', $quote_tids);
             
             $customer = $project->customer_project->company;
-            $branch = $project->branch->name . ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
+            $branch = $project->branch->name;
+            if ($quote_tids) $branch .= ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
             $tid = 'Prj-'.sprintf('%04d', $project->project_number);
             $output[] = array(
                 'name' => implode(' - ', array($customer, $branch, $tid, $project->name)),
