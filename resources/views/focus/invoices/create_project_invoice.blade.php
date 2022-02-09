@@ -159,8 +159,8 @@
                                     @endphp
                                     <tr>
                                         <td>{{ $k+1 }}</td>                                            
-                                        <td><textarea class="form-control" name="reference[]" id="reference-{{ $k }}" readonly>{{ $reference }}</textarea></td>
-                                        <td><textarea class="form-control" name="description[]" id="description-{{ $k }}">{{ $description }}</textarea></td>
+                                        <td><textarea class="form-control" name="reference[]" id="reference-{{ $k }}" rows="5" readonly>{{ $reference }}</textarea></td>
+                                        <td><textarea class="form-control" name="description[]" id="description-{{ $k }}" rows="5">{{ $description }}</textarea></td>
                                         <td><input type="text" class="form-control " name="unit[]" id="unit-{{ $k }}" value="Lot" readonly></td>
                                         <td><input type="text" class="form-control" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
                                         <td><input type="text" class="form-control" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
