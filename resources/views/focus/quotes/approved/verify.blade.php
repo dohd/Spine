@@ -253,7 +253,7 @@
         if (confirm(msg)) {
             $.ajax({
                 url: baseurl + 'quotes/reset_verified/' + "{{ $quote->id }}",
-                method: 'DELETE',
+                // method: 'DELETE',
                 success: function() {
                     return location.reload();
                 }
@@ -302,7 +302,7 @@
                 if (confirm('Are you sure to delete this job card ?')) {
                     $.ajax({
                         url: baseurl + 'quotes/verified_jcs/' + itemId,
-                        method: 'DELETE'
+                        // method: 'DELETE'
                     });
                     $row.remove();
                 }
@@ -315,7 +315,7 @@
         // fetch job cards
         $.ajax({
             url: baseurl + 'quotes/verified_jcs/' + "{{ $quote->id }}",
-            method: 'GET',
+            method: 'POST',
             dataType: 'json',
             success: function(data) {
                 // set default job card rows
@@ -469,8 +469,7 @@
                     if (itemId > 0) {
                         $.ajax({
                             url: baseurl + 'quotes/delete_product/' + itemId,
-                            dataType: "json",
-                            method: 'DELETE',
+                            // method: 'DELETE',
                         });
                     }
                 }

@@ -433,8 +433,8 @@
                 item[prop] = parseFloat(item[prop].replace(/,/g, ''));
             }
         }
-        // check if item has product row parameters
-        if (item.product_name && item.product_price) {
+        // check if item is of type product
+        if (item.a_type == 1) {
             const row = productRow(i);
             $('#quotation tr:last').after(row);
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
@@ -483,7 +483,7 @@
             if (confirm('Are you sure to delete this product ?')) {                
                 $.ajax({
                     url: baseurl + 'quotes/delete_product/' + itemId,
-                    method: 'DELETE',
+                    // method: 'DELETE',
                 });
                 $row.remove();
             }

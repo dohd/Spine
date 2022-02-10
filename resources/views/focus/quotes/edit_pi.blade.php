@@ -490,7 +490,7 @@
             if (confirm('Are you sure to delete this product ?')) {
                 $.ajax({
                     url: baseurl + 'quotes/delete_product/' + itemId,
-                    method: 'DELETE'
+                    // method: 'DELETE'
                 });
                 $row.remove();
             }
