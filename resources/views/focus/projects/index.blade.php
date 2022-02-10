@@ -171,7 +171,7 @@
         $("#person").select2({
             tags: [],
             ajax: {
-                url: "{{route('biller.customers.select')}}",
+                url: "{{ route('biller.customers.select') }}",
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
@@ -239,14 +239,14 @@
         });
 
         // On selecting Main Quote
-        $("#main_quote").change(function(e) {
-            const id = Number(e.target.value);
+        $("#main_quote").change(function() {
             // set Other Quote select options 
-            const data = quoteData.filter(function(item) { return id !== item.id; });
-            $("#other_quote").html('').select2({ data });
-            // set project title
-            const name = $(this).find(':selected').text().split(' - ')[1];
-            $('#project-name').val(name);
+            $("#other_quote").html('').select2({ 
+                data: quoteData.filter(v => v.id != $(this).val())
+            });
+
+            const quoteTitle = $(this).find(':selected').text().split(' - ')[2];
+            $('#project-name').val(quoteTitle);
         });
     });
 
