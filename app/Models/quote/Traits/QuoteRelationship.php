@@ -5,6 +5,7 @@ namespace App\Models\quote\Traits;
 use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
+use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\lead\Lead;
@@ -19,6 +20,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function invoice_items()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     public function budgets()
     {
         return $this->hasMany(Budget::class);
