@@ -56,7 +56,8 @@ class InvoicesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
-                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', [$invoice->id]) . '">' . $invoice->tid . '</a>';
+                $tid = 'Inv-'.sprintf('%04d', $invoice->tid);
+                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($invoice) {
                 return $invoice->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '"><i class="ft-eye"></i></a>';
@@ -76,17 +77,18 @@ class InvoicesTableController extends Controller
             ->addColumn('quote_tid', function ($invoice) {
                 $tids = array();
                 foreach ($invoice->products as $item) {
-                    if ($item->quote) 
-                        $tids[] = 'QT-'.sprintf('%04d', $item->quote->tid);
+                    $tid = sprintf('%04d', $item->quote->tid);
+                    $tids[] = $item->quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;
                 }
+
                 return implode(', ', $tids);
             })
             ->addColumn('lead_tid', function ($invoice) {
                 $tids = array();
                 foreach ($invoice->products as $item) {
-                    if ($item->quote) 
-                        $tids[] = 'Tkt-'.sprintf('%04d',$item->quote->lead->reference);
+                    $tids[] = 'Tkt-'.sprintf('%04d',$item->quote->lead->reference);                        
                 }
+
                 return implode(', ', $tids); 
             })
             ->addColumn('actions', function ($invoice) {
