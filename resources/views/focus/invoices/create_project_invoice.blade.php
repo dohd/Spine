@@ -74,8 +74,8 @@
                                 <label for="tid" class="caption">Transaction ID*</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', @$last_tr->tid+1), ['class' => 'form-control round', 'disabled']) }}
-                                    <input type="hidden" name="tid" value={{ @$last_tr->tid+1 }}>
+                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', @$last_inv->tid+1), ['class' => 'form-control round', 'disabled']) }}
+                                    <input type="hidden" name="tid" value={{ @$last_inv->tid+1 }}>
                                 </div>
                             </div>
                         </div>

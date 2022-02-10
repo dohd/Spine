@@ -325,7 +325,7 @@ class InvoiceRepository extends BaseRepository
     /**
      * Create project invoice
      */
-    public function create_poroject_invoice(array $input)
+    public function create_project_invoice(array $input)
     {
         DB::beginTransaction();
 
@@ -345,9 +345,9 @@ class InvoiceRepository extends BaseRepository
         $invoice['invoiceduedate'] = date_for_database($duedate);
 
         // increament tid
-        $db_invoice = Invoice::orderBy('id', 'desc')->first('tid');
-        if (isset($db_invoice->tid) && $invoice['tid'] <= $db_invoice->tid) {
-            $invoice['tid'] = $db_invoice->tid + 1;
+        $last_inv = Invoice::orderBy('id', 'desc')->first('tid');
+        if ($last_inv && $invoice['tid'] <= $last_inv->tid) {
+            $invoice['tid'] = $last_inv->tid + 1;
         }
         unset($invoice['taxid']);
         $invoice['status'] = 'due';

@@ -242,15 +242,13 @@ class InvoicesController extends Controller
         $inp_quote_ids = request('selected_products');
 
         if ($inp_customer && $inp_quote_ids) {
-            $quote_ids = explode(',', $inp_quote_ids);
-            $quotes = Quote::whereIn('id', $quote_ids)->get();
+            $quotes = Quote::whereIn('id', explode(',', $inp_quote_ids))->get();
             $customer = Customer::find($inp_customer);
-            $last_invoice = Invoice::orderBy('id', 'desc')->first();
-            $last_tr = Transaction::orderBy('id', 'desc')->first();
             $banks = Bank::all();
+            $last_inv = Invoice::orderBy('tid', 'desc')->first('tid');
     
             return view('focus.invoices.create_project_invoice')
-                ->with(compact('quotes', 'customer', 'last_invoice', 'last_tr', 'banks'))
+                ->with(compact('quotes', 'customer', 'last_inv', 'banks'))
                 ->with(bill_helper(1, 2));
         }
 
@@ -282,7 +280,7 @@ class InvoicesController extends Controller
         $invoice_data['user_id'] = auth()->user()->id;
         $invoice_data['ins'] = auth()->user()->ins;
 
-        $result = $this->repository->create_poroject_invoice(compact('invoice_data', 'dr_data', 'cr_data', 'tax_data', 'data_items'));
+        $result = $this->repository->create_project_invoice(compact('invoice_data', 'dr_data', 'cr_data', 'tax_data', 'data_items'));
 
         $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
         $msg = trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-md bg-purple ml-2"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  
