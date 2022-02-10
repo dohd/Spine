@@ -2,6 +2,7 @@
 
 namespace App\Models\items\Traits;
 
+use App\Models\invoice\Invoice;
 use App\Models\quote\Quote;
 
 /**
@@ -9,6 +10,11 @@ use App\Models\quote\Quote;
  */
 trait InvoiceItemRelationship
 {
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
     public function quote()
     {
         return $this->belongsTo(Quote::class);
