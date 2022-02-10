@@ -51,16 +51,14 @@ class QuotesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('notes', function($quote) {
-                return $quote->notes;
-            })
             ->addColumn('lead_tid', function($quote) {
                 return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
             })
             ->addColumn('tid', function ($quote) {
                 $tid = sprintf('%04d', $quote->tid);
                 $tid = ($quote->bank_id) ? 'PI-'.$tid : 'QT-'.$tid;
-                if ($quote->revision) $tid .= $quote->revision;                
+                if ($quote->revision) $tid .= $quote->revision; 
+                              
                 $link = route('biller.quotes.show', [$quote->id]);
                 if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
 
@@ -82,15 +80,18 @@ class QuotesTableController extends Controller
             })
             ->addColumn('status', function ($quote) {
                 $statuses = array('approved', 'client_approved', 'cancelled', 'pending');
-                $backgrd = array('bg-primary', 'bg-success', 'bg-danger', 'bg-secondary');
-                $i = array_search($quote->status, $statuses);
+                $backgrds = array('bg-primary', 'bg-success', 'bg-danger', 'bg-secondary');
+                $backgrd = $backgrds[array_search($quote->status, $statuses)];
 
                 $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : '';
 
-                return '<span class="badge ' . $backgrd[$i] . '">' . $quote->status . '</span><br>'. $lpo;
+                return '<span class="badge ' . $backgrd . '">' . $quote->status . '</span><br>'. $lpo;
             })
             ->addColumn('verified', function ($quote) {
-                return $quote->verified;
+                $inv_item = $quote->invoice_items()->first();                
+                $tid = $inv_item ? 'Inv-'.sprintf('%04d', $inv_item->invoice->tid) : 'NIL';
+
+                return $quote->verified . '<br>' . $tid;
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
