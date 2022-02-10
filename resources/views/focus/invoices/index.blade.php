@@ -98,7 +98,7 @@
                                             <th>{{ trans('general.amount') }}</th>
                                             <th>{{ trans('general.status') }}</th>
                                             <th>Due Date</th>
-                                            <th>#Quote No</th>
+                                            <th>#Quote / PI No</th>
                                             <th>#Ticket No</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
