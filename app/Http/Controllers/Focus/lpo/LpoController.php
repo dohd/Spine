@@ -102,16 +102,10 @@ class LpoController extends Controller
     public function destroy($id)
     {
         $lpo = Lpo::find($id);
-        if (!empty($lpo->quotes->toArray())) {
-            $payload = array(
-                'message' => 'Cannot delete lpo attached to quote',
-                'code' => 403,
-            );
-            return response()->json($payload, 403);
-        }
+        if (count($lpo->quotes))
+            return response()->json(['message' => ' Detach LPO from Quote / Proforma Invoice'], 403);
         
-        $lpo->delete();
-        
+        $lpo->delete();        
         return response()->noContent();
     }
 
