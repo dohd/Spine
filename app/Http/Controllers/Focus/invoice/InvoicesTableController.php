@@ -77,6 +77,7 @@ class InvoicesTableController extends Controller
             ->addColumn('quote_tid', function ($invoice) {
                 $tids = array();
                 foreach ($invoice->products as $item) {
+                    if (!$item->quote) continue;
                     $tid = sprintf('%04d', $item->quote->tid);
                     $tids[] = $item->quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;
                 }
@@ -86,6 +87,7 @@ class InvoicesTableController extends Controller
             ->addColumn('lead_tid', function ($invoice) {
                 $tids = array();
                 foreach ($invoice->products as $item) {
+                    if (!$item->quote) continue;
                     $tids[] = 'Tkt-'.sprintf('%04d',$item->quote->lead->reference);                        
                 }
 
