@@ -5,7 +5,7 @@
 @section('content')
 <div class="content-wrapper">
     <div class="alert alert-warning alert-dismissible d-none lpo-alert">
-        <strong>Forbidden!</strong> Cannot delete LPO attached to quote
+        <strong>Forbidden!</strong><span class="lpoMsg"></span>
     </div> 
     <div class="content-header row">        
         <div class="content-header-left col-md-6 col-12 mb-2">
@@ -75,8 +75,11 @@
             })
             .done(function() { location.reload(); })
             .fail(function(err) {
-                $('.lpo-alert').removeClass('d-none');
-                setTimeout(() => $('.lpo-alert').addClass('d-none'), 3000);
+                if (err.status === 403) {
+                    $('.lpo-alert').removeClass('d-none');
+                    $('.lpoMsg').text(err.responseJSON.message);
+                    setTimeout(() => $('.lpo-alert').addClass('d-none'), 5000);
+                }
             })
         }
     });
@@ -85,10 +88,8 @@
     $(document).on('click', 'a.update-lpo', function(e) {
         e.preventDefault();
         const id = $(this).attr('href');
-        $.ajax({ 
-            url: baseurl + `lpo/${id}/edit`, 
-            method: 'GET'
-        })
+
+        $.ajax({ url: baseurl + `lpo/${id}/edit`, })
         .done(function(data) { 
             const {customer, branch, lpo} = data;
             const $form = $("#updateLpoForm");
@@ -110,7 +111,7 @@
         $modal.find("#person").select2({
             tags: [],
             ajax: {
-                url: "{{route('biller.customers.select')}}",
+                url: "{{ route('biller.customers.select') }}",
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
