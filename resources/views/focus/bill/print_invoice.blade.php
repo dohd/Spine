@@ -246,13 +246,20 @@
 					<td class="align-r">{{ number_format($val->product_qty * $val->product_price, 2) }}</td>
 				</tr>
 			@endforeach
-			<!-- empty row with dynamic height-->
-			<tr>
-				<td height="{{ 400 - 60 * count($invoice->products) }}"></td>
-				@for($i = 0; $i < 6; $i++) 
-					<td></td>
+			<!-- 20 dynamic empty rows -->
+			@php
+				$len = count($invoice->products);
+			@endphp
+			@if ($len < 20)
+				@for ($i = 0; $i < (20 - $len); $i++)
+					<tr>
+						@for($j = 0; $j < 7; $j++) 
+							<td></td>
+						@endfor
+					</tr>
 				@endfor
-			</tr>
+			@endif
+			<!--  -->
 			<tr>
 				<td colspan="5" class="bd-t" rowspan="2">
 					@isset($invoice->bank)

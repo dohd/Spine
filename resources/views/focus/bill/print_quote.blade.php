@@ -265,13 +265,20 @@
 					</tr>
 				@endif				
 			@endforeach
-			<!-- empty row with dynamic height-->
-			<tr>
-				<td height="{{ 400 - 30 * count($invoice->products) }}"></td>
-				@for($i = 0; $i < 5; $i++) 
-                    <td></td>
-                @endfor
-			</tr>
+			<!-- 20 dynamic empty rows -->
+			@php
+				$len = count($invoice->products);
+			@endphp
+			@if ($len < 20)
+				@for ($i = 0; $i < (20 - $len); $i++)
+					<tr>
+						@for($j = 0; $j < 6; $j++) 
+							<td></td>
+						@endfor
+					</tr>
+				@endfor
+			@endif
+			<!--  -->
 			<tr>
 				<td colspan="4" class="bd-t" rowspan="2">
 					@isset($invoice->bank)
