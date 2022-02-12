@@ -217,7 +217,7 @@
                                             <div class="col-sm-6">
                                                 <div class="form-group">
                                                     <label for="discountFormat" class="caption">{{trans('general.discount')}}</label>
-                                                    <select class="form-control round" name="discountFormat" onchange="changeDiscountFormat()" id="discountFormat">
+                                                    <select class="form-control round" name="discountformat" onchange="changeDiscountFormat()" id="discountFormat">
                                                         @php
                                                             $discount_format='%';
                                                         @endphp
