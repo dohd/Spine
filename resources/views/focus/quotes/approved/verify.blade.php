@@ -238,6 +238,8 @@
 <script>    
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
+    const verify_no = "{{ $verify_no }}";
+
     // Intialize datepicker
     $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" });
     $('#reference-date').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
@@ -266,7 +268,7 @@
         return `
             <tr>
                 <td>
-                    <select name="type[]" id="type-${n}" class="form-control" required>
+                    <select name="type[]" id="type-${n}" class="form-control">
                         <option value="1" selected>JobCard</option>
                         <option value="2">DNote</option> 
                     </select>
@@ -291,14 +293,13 @@
         jcIndex++;
     });
 
-    const v_no = "{{ $verify_no }}";
     // remove job card row
     $('#jobcard').on('click', '.removeJc', function() {
         if ($(this).is('.removeJc')) {
             const $row = $(this).parents('tr:first');
             const itemId = $row.find('input[name="jcitem_id[]"]').val();
             if (itemId == 0) return $row.remove();
-            if (v_no > 1) {
+            if (verify_no > 1) {
                 if (confirm('Are you sure to delete this job card ?')) {
                     $.ajax({
                         url: baseurl + 'quotes/verified_jcs/' + itemId,
@@ -311,7 +312,7 @@
     });
 
     // On next verifications other than the first
-    if (v_no > 1) {
+    if (verify_no > 1) {
         // fetch job cards
         $.ajax({
             url: baseurl + 'quotes/verified_jcs/' + "{{ $quote->id }}",
@@ -320,7 +321,7 @@
             success: function(data) {
                 // set default job card rows
                 data.forEach((v, i) => {
-                    if (i) {
+                    if (i > 0) {
                         $('#jobcard tbody').append(jobCardRow(i));
                         jcIndex++;
                     }
@@ -345,9 +346,9 @@
                     Action
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item removeProd" href="javascript:void(0);">Remove</a>
                     <a class="dropdown-item up" href="javascript:void(0);">Up</a>
                     <a class="dropdown-item down" href="javascript:void(0);">Down</a>
+                    <a class="dropdown-item removeProd text-danger" href="javascript:void(0);">Remove</a>
                 </div>
             </div>            
         `;
@@ -408,11 +409,13 @@
         const item = {...v};
         // format float values to integer
         const keys = ['product_price', 'product_qty', 'product_subtotal'];
-        keys.forEach(key => {
-            item[key] = parseFloat(item[key].replace(',',''));
-        });
-        // check if item has product row parameters
-        if (item.product_name && item.product_price) {
+        for (let prop in item) {
+            if (keys.includes(prop) && item[prop]) {
+                item[prop] = parseFloat(item[prop].replace(/,/g, ''));
+            }
+        }
+        // check if item type is product
+        if (item.a_type == 1) {
             $('#quotation tbody').append(productRow(rowIndx));
             $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
 
@@ -452,26 +455,20 @@
     });
 
     // on clicking Product row drop down menu
-    $("#quotation").on("click", ".up,.down,.removeProd", function() {
-        var row = $(this).parents("tr:first");
-        // move row up 
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
+    $("#quotation").on("click", ".up, .down, .removeProd", function() {
+        const $row = $(this).parents("tr:first");
+        if ($(this).is('.up')) $row.insertBefore($row.prev());
+        if ($(this).is('.down')) $row.insertAfter($row.next());
         if ($(this).is('.removeProd')) {
-            const row = $(this).closest('tr');
-            row.remove();
-            if ("{{ $verify_no }}" > 1) {
+            const itemId = $row.find('input[name="item_id[]"]').val();
+            if (itemId == 0) return $row.remove();            
+            if (verify_no > 1) {
                 if (confirm('Are you sure to delete this item?')) {
-                    // delete verified product ajax call 
-                    const itemId = row.find('input[name="item_id[]"]').val();
-                    if (itemId > 0) {
-                        $.ajax({
-                            url: baseurl + 'quotes/delete_product/' + itemId,
-                            // method: 'DELETE',
-                        });
-                    }
+                    $.ajax({
+                        url: baseurl + 'quotes/verified_item/' + itemId,
+                        // method: 'DELETE',
+                    });
+                    $row.remove();                
                 }
             }            
         }
@@ -481,7 +478,7 @@
 
     // default tax
     const tax = "{{ $quote->tax_id }}";
-    const taxInt = parseFloat(tax.replace(',', ''));
+    const taxInt = parseFloat(tax.replace(/,/g, ''));
     let taxRate = (taxInt+100)/100;
 
     // autocompleteProp returns autocomplete object properties
@@ -536,7 +533,7 @@
         const productQty = $('#'+id).val();
 
         let productPrice = $('#price-'+indx).val();
-        productPrice = parseFloat(productPrice.replace(',', ''));
+        productPrice = parseFloat(productPrice.replace(/,/g, ''));
 
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
@@ -557,7 +554,7 @@
         const productQty = $('#amount-'+indx).val();
 
         let productPrice = $('#'+id).val();
-        productPrice = parseFloat(productPrice.replace(',', ''));
+        productPrice = parseFloat(productPrice.replace(/,/g, ''));
 
         const rateInclusive = taxRate * productPrice;
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
