@@ -86,8 +86,10 @@ class QuoteInvoiceTableController extends Controller
                     return 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
             })
             ->addColumn('lpo_number', function($quote) {
-                if (!$quote->lpo_id) return;
-                return $quote->lpo->lpo_no . '<br> Kes: ' . number_format($quote->lpo->amount, 2);
+                if ($quote->lpo)
+                    return $quote->lpo->lpo_no . '<br> Kes: ' . number_format($quote->lpo->amount, 2);
+
+                return 'Null:';
             })
             ->addColumn('lead_tid', function($quote) {
                 return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
