@@ -42,6 +42,10 @@ class LpoController extends Controller
         // extract input fields
         $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
 
+        // check for duplicate lpo number per client
+        $lpo = Lpo::where(['customer_id' => $input['customer_id'], 'lpo_no' => $input['lpo_no']])->first();
+        if ($lpo) return response()->noContent();
+
         $input['amount'] = (float) $input['amount'];
         Lpo::create($input);
 
