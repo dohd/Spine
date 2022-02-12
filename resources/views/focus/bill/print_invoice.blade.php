@@ -250,8 +250,8 @@
 			@php
 				$len = count($invoice->products);
 			@endphp
-			@if ($len < 20)
-				@for ($i = 0; $i < (20 - $len); $i++)
+			@if ($len < 5)
+				@for ($i = 0; $i < (5 - $len); $i++)
 					<tr>
 						@for($j = 0; $j < 7; $j++) 
 							<td></td>
