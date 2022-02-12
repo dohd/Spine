@@ -83,15 +83,15 @@ class QuotesTableController extends Controller
                 $backgrds = array('bg-primary', 'bg-success', 'bg-danger', 'bg-secondary');
                 $backgrd = $backgrds[array_search($quote->status, $statuses)];
 
-                $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : '';
+                $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : 'Null:';
 
                 return '<span class="badge ' . $backgrd . '">' . $quote->status . '</span><br>'. $lpo;
             })
             ->addColumn('verified', function ($quote) {
                 $inv_item = $quote->invoice_items()->first();                
-                $tid = $inv_item ? 'Inv-'.sprintf('%04d', $inv_item->invoice->tid) : 'NIL';
+                $tid = $inv_item ? 'Inv-'.sprintf('%04d', $inv_item->invoice->tid) : 'NIL:';
 
-                return $quote->verified . '<br>' . $tid;
+                return $quote->verified . ': <br>' . $tid;
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
