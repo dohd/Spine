@@ -94,14 +94,16 @@
                         <thead>
                             <tr class="item_header bg-gradient-directional-blue white">
                                 <th width="6%" class="text-center">#</th>
-                                <th width="38%" class="text-center">Name</th>
+                                <th width="36%" class="text-center">Name</th>
                                 <th width="6%" class="text-center">Quoted Qty</th>                                
                                 <th width="8%" class="text-center">UOM</th>
                                 <th width="6%" class="text-center">Approve Qty</th>     
-                                <th width="14%" class="text-center">Buy Price (VAT Exc)</th>
+                                <th width="10%" class="text-center">Buy Price (VAT Exc)</th>
                                 <th width="8%" class="text-center">Amount</th>
                                 <th width="6%" class="text-center">Issued Qty</th> 
-                                <th width="10%" class="text-center">Qty</th>  
+                                <th width="8%" class="text-center">Qty</th>
+                                <th width="10%" class="text-center">Reqn</th>  
+                                <th width="10%" class="text-center">Warehouse</th>  
                                 <th width="7%" class="text-center">Action</th>                             
                             </tr>
                         </thead>
@@ -139,6 +141,10 @@
                             </div>
                         </div>  
                         <div class="col-4">
+                            <div class="form-group">
+                                <div><label for="budget-total">Tools Requisition</label></div>
+                                <input type="text" class="form-control" id="tools-reqxn" name="tools_reqxn">
+                            </div> 
                             <div class="form-group">
                                 <div><label for="tool">Tools Required & Notes</label></div>
                                 <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">                                    
@@ -249,6 +255,18 @@
                 <td class="text-center"><span>0</span></td>
                 <td><input type="number" class="form-control issued" name="issued_qty" id="issuedqty-${n}" disabled></td>
                 <td><input type="number" class="form-control issue" name="issue_qty[]" id="issueqty-${n}"></td>
+                <td><input type="number" class="form-control" name="reqxn[]" id="reqxn-${n}"></td>
+                <td>
+                    <select class="form-control" name="warehouse[]" id="warehouse-${n}" required>
+                        <option value="">W/H</option>
+                        <option value="6">HQ Lean Aircons Store</option>
+                        <option value="5">Container - Metal Equipment</option>
+                        <option value="4">Mombasa Office</option>
+                        <option value="3">Kisumu Office</option>
+                        <option value="2">Pride Centre KQ</option>
+                        <option value="1">Paragon Eastern Bypass</option>
+                    </select>
+                </td>
                 <td>${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
@@ -264,7 +282,7 @@
         return `
             <tr>
                 <td><span id="number-${n}"></span></td>
-                <td colspan="9"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
+                <td colspan="11"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" class="form-control" name="product_qty[]" value="0" id="amount-${n}">               
