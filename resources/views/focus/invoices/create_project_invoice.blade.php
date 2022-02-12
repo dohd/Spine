@@ -82,10 +82,10 @@
 
                         <div class="row mb-1">
                             <div class="col-4">                                
-                                <div class="input-group"><label for="ledger-off">Enable Ledger Account</label></div>
+                                <div class="input-group"><label for="ledger-off">Invoice Type</label></div>
                                 <select class="form-control" name="ledger_toggle" id="ledgertoggle">
-                                    <option value="0" selected>No</option>
-                                    <option value="1">Yes</option>                                    
+                                    <option value="0" selected>Dummy</option>
+                                    <option value="1">Actual</option>                                    
                                 </select>
                             </div>
                             <div class="col-4">                                
