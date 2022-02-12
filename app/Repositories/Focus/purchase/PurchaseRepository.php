@@ -3,17 +3,12 @@
 namespace App\Repositories\Focus\purchase;
 
 
-use App\Models\items\PurchaseItem;
 use App\Models\purchase\Purchase;
 use App\Models\account\Account;
-use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
-use App\Models\items\CustomEntry;
-use App\Models\items\InvoiceItem;
 use App\Models\product\ProductVariation;
 use Illuminate\Support\Facades\DB;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
@@ -37,34 +32,34 @@ class PurchaseRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q=$this->query();
-       
-        $q->when(request('rel_type')==2, function ($q) {
-            return $q->where('payer_id', '=',request('rel_id',0));
+        $q = $this->query();
+
+        $q->when(request('rel_type') == 2, function ($q) {
+            return $q->where('payer_id', '=', request('rel_id', 0));
         });
-        $q->when(request('rel_type')==3, function ($q) {
-            return $q->where('payer_id', '=',request('rel_id',0));
+        $q->when(request('rel_type') == 3, function ($q) {
+            return $q->where('payer_id', '=', request('rel_id', 0));
         });
 
-         $q->when(request('rel_type')==2, function ($q) {
-            return $q->where('payer_type', '=','supplier');
+        $q->when(request('rel_type') == 2, function ($q) {
+            return $q->where('payer_type', '=', 'supplier');
         });
-         $q->when(request('rel_type')==3, function ($q) {
-            return $q->where('payer_type', '=','customer');
+        $q->when(request('rel_type') == 3, function ($q) {
+            return $q->where('payer_type', '=', 'customer');
         });
 
-  
 
-         $q->when(request('rel_type')==1, function ($q) {
+
+        $q->when(request('rel_type') == 1, function ($q) {
             return  $q->where('is_bill', 1);
         });
-          $q->when(request('rel_type')==1, function ($q) {
+        $q->when(request('rel_type') == 1, function ($q) {
             return  $q->where('transaction_type', 'purchases');;
         });
-        
-       $q->when(request('i_rel_type')==1, function ($q) {
 
-            return $q->where('supplier_id', '=',request('i_rel_id',0));
+        $q->when(request('i_rel_type') == 1, function ($q) {
+
+            return $q->where('supplier_id', '=', request('i_rel_id', 0));
         });
 
         return
@@ -82,9 +77,9 @@ class PurchaseRepository extends BaseRepository
     {
 
 
-       $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
-       $purchases_trans_category_id=$purchases_trans_category_id->id;
-       
+        $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
+        $purchases_trans_category_id = $purchases_trans_category_id->id;
+
         $input['invoice']['payer_type'] = $input['invoice']['payer_type'];
         $input['invoice']['payer'] = $input['invoice']['payer'];
         $input['invoice']['payer_id'] = $input['invoice']['payer_id'];
@@ -94,18 +89,18 @@ class PurchaseRepository extends BaseRepository
         $input['invoice']['discountformat'] = $input['invoice']['discountformat'];
         $input['invoice']['s_warehouses'] = $input['invoice']['s_warehouses'];
         $input['invoice']['is_bill'] = 1;
-        $input['invoice']['transaction_type'] ='purchases';
+        $input['invoice']['transaction_type'] = 'purchases';
 
-      
-       
+
+
 
         DB::beginTransaction();
-         $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
-      
+        $input['invoice'] = array_map('strip_tags', $input['invoice']);
+
         $result = Purchase::create($input['invoice']);
 
         if ($result) {
-                 // dd($result->id);
+            // dd($result->id);
             $products = array();
             $stockables = array();
             $subtotal = 0;
@@ -113,240 +108,218 @@ class PurchaseRepository extends BaseRepository
             $total_tax = 0;
             $stock_update = array();
             $purchases_trans_sec_id = Account::where('system', 'inv')->first();
-            $purchases_trans_sec_id=$purchases_trans_sec_id->id;
-            
-            
-             $grn=Purchase::orderBy('grn', 'desc')->where('grn','>',0)->first();
-             $grn= @$grn+1;
-
-//purchase product
-             if($input['inventory_items']['totalsaleamount']>0){
-
-         $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
-            foreach ($input['inventory_items']['product_id'] as $key => $value) {
-    
-  
-                  //if project take to work in progress account
-                 if(!empty( $input['inventory_items']['inventory_project_id'][$key]) || ($input['inventory_items']['inventory_project_id'][$key])>0){
-                     $account_id = Account::where('system', 'cogs')->first();
-                      $account_id=$account_id->id;
-                      $grn="0";
-                    
-                     
-
-                 }else{
-                     $account_id = Account::where('system', 'inv')->first();
-                      $account_id=$account_id->id;
-
-                      $stock_update[] = array('id' => $input['inventory_items']['product_id'][$key], 'qty' => numberClean($input['inventory_items']['product_qty'][$key]));
-                      $grn= $grn;
+            $purchases_trans_sec_id = $purchases_trans_sec_id->id;
 
 
-                 }
+            $grn = Purchase::orderBy('grn', 'desc')->where('grn', '>', 0)->first();
+            $grn = @$grn + 1;
 
-                
-            $products[] = array(
-                    'bill_id' => $result->id,
-                    'tid' => $input['inventory_items']['tid'],
-                    'ins' => $input['inventory_items']['ins'],
-                    'user_id' => $input['inventory_items']['user_id'],
-                    'account_id' => $account_id,
-                    'secondary_account_id' => $purchases_trans_sec_id,
-                    'trans_category_id' => $purchases_trans_category_id,
-                    'grn' => $grn,
-                    'transaction_tab' => 1,
-                    'transaction_type' =>'purchases',
-                    'for_who' =>$input['inventory_items']['for_who'],
-                    'transaction_date' => $input['inventory_items']['transaction_date'],
-                    's_warehouses' => $input['inventory_items']['s_warehouses'],
-                    'item_id' => strip_tags(@$input['inventory_items']['product_id'][$key]),
-                    'item_name' => strip_tags(@$input['inventory_items']['product_name'][$key]),
-                    'qty' => strip_tags(@$input['inventory_items']['product_qty'][$key]),
-                    'unit' => strip_tags(@$input['inventory_items']['u_m'][$key]),
-                    'debit' => numberClean(@$input['inventory_items']['salevalue'][$key]),
-                    'total_amount' => numberClean(@$input['inventory_items']['product_subtotal'][$key]),
-                    'rate' => numberClean(@$input['inventory_items']['product_price'][$key]),
-                    'taxable_amount' => numberClean(@$input['inventory_items']['taxedvalue'][$key]),
-                    'tax_amount' => numberClean(@$input['inventory_items']['total_tax'][$key]),
-                    'tax' => numberClean(@$input['inventory_items']['product_tax'][$key]),
-                    'discount_rate' => numberClean(@$input['inventory_items']['product_discount'][$key]),
-                    'discount' => numberClean(@$input['inventory_items']['total_discount'][$key]),
-                    'note' => strip_tags(@$input['inventory_items']['product_description'][$key]),
-                    //'payer_id' => numberClean(@$input['inventory_items']['client_id'][$key]),
-                    'project_id' => numberClean(@$input['inventory_items']['inventory_project_id'][$key]),
-                     'branch_id' => numberClean(@$input['inventory_items']['branch_id'][$key])
-                       
-                );
+            //purchase product
+            if ($input['inventory_items']['totalsaleamount'] > 0) {
+
+                $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
+                $purchases_trans_category_id = $purchases_trans_category_id->id;
+                foreach ($input['inventory_items']['product_id'] as $key => $value) {
+
+
+                    //if project take to work in progress account
+                    if (!empty($input['inventory_items']['inventory_project_id'][$key]) || ($input['inventory_items']['inventory_project_id'][$key]) > 0) {
+                        $account_id = Account::where('system', 'cogs')->first();
+                        $account_id = $account_id->id;
+                        $grn = "0";
+                    } else {
+                        $account_id = Account::where('system', 'inv')->first();
+                        $account_id = $account_id->id;
+
+                        $stock_update[] = array('id' => $input['inventory_items']['product_id'][$key], 'qty' => numberClean($input['inventory_items']['product_qty'][$key]));
+                        $grn = $grn;
+                    }
+
+
+                    $products[] = array(
+                        'bill_id' => $result->id,
+                        'tid' => $input['inventory_items']['tid'],
+                        'ins' => $input['inventory_items']['ins'],
+                        'user_id' => $input['inventory_items']['user_id'],
+                        'account_id' => $account_id,
+                        'secondary_account_id' => $purchases_trans_sec_id,
+                        'trans_category_id' => $purchases_trans_category_id,
+                        'grn' => $grn,
+                        'transaction_tab' => 1,
+                        'transaction_type' => 'purchases',
+                        'for_who' => $input['inventory_items']['for_who'],
+                        'transaction_date' => $input['inventory_items']['transaction_date'],
+                        's_warehouses' => $input['inventory_items']['s_warehouses'],
+                        'item_id' => strip_tags(@$input['inventory_items']['product_id'][$key]),
+                        'item_name' => strip_tags(@$input['inventory_items']['product_name'][$key]),
+                        'qty' => strip_tags(@$input['inventory_items']['product_qty'][$key]),
+                        'unit' => strip_tags(@$input['inventory_items']['u_m'][$key]),
+                        'debit' => numberClean(@$input['inventory_items']['salevalue'][$key]),
+                        'total_amount' => numberClean(@$input['inventory_items']['product_subtotal'][$key]),
+                        'rate' => numberClean(@$input['inventory_items']['product_price'][$key]),
+                        'taxable_amount' => numberClean(@$input['inventory_items']['taxedvalue'][$key]),
+                        'tax_amount' => numberClean(@$input['inventory_items']['total_tax'][$key]),
+                        'tax' => numberClean(@$input['inventory_items']['product_tax'][$key]),
+                        'discount_rate' => numberClean(@$input['inventory_items']['product_discount'][$key]),
+                        'discount' => numberClean(@$input['inventory_items']['total_discount'][$key]),
+                        'note' => strip_tags(@$input['inventory_items']['product_description'][$key]),
+                        //'payer_id' => numberClean(@$input['inventory_items']['client_id'][$key]),
+                        'project_id' => numberClean(@$input['inventory_items']['inventory_project_id'][$key]),
+                        'branch_id' => numberClean(@$input['inventory_items']['branch_id'][$key])
+
+                    );
+                }
+
+
+                Purchase::insert($products);
+                $update_variation = new ProductVariation;
+                $index = 'id';
+                Batch::update($update_variation, $stock_update, $index, true, '+');
             }
 
-
-            Purchase::insert($products);
-            $update_variation = new ProductVariation;
-            $index = 'id';
-            Batch::update($update_variation, $stock_update, $index, true,'+');
-
-        }
-
-//end inventory items
+            //end inventory items
 
 
 
 
 
-//start expense tab
-             if($input['expense_items']['exp_totalsaleamount']>0){
+            //start expense tab
+            if ($input['expense_items']['exp_totalsaleamount'] > 0) {
 
-            $purchases_trans_category_id = Transactioncategory::where('code', 'exp')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
-            foreach ($input['expense_items']['ledger_id'] as $key => $value) {
+                $purchases_trans_category_id = Transactioncategory::where('code', 'exp')->first();
+                $purchases_trans_category_id = $purchases_trans_category_id->id;
+                foreach ($input['expense_items']['ledger_id'] as $key => $value) {
 
 
-    
-  
-                  //if project post to work in progress ledger
-                 if(!empty( $input['expense_items']['exp_project_id'][$key]) || ($input['expense_items']['exp_project_id'][$key])>0){
-                     $account_id = Account::where('system', 'cogs')->first();
-                      $account_id=$account_id->id;
-            
-                    
-                     
 
-                 }else{
-                     $account_id = $input['expense_items']['ledger_id'][$key];
-                   
-                 }
 
-                
-               $expenses[] = array(
-                    'bill_id' => $result->id,
-                    'tid' => $input['expense_items']['tid'],
-                    'ins' => $input['expense_items']['ins'],
-                    'user_id' => $input['expense_items']['user_id'],
-                    'account_id' => $account_id,
-                    'secondary_account_id' => $input['expense_items']['ledger_id'][$key],
-                    'trans_category_id' => $purchases_trans_category_id,
-                    'transaction_tab' => 2,
-                    'transaction_type' =>'purchases',
-                    'for_who' =>$input['expense_items']['for_who'],
-                    'transaction_date' => $input['expense_items']['transaction_date'],
-                    'qty' => strip_tags(@$input['expense_items']['exp_product_qty'][$key]),
-                    'debit' => numberClean(@$input['expense_items']['exp_salevalue'][$key]),
-                    'total_amount' => numberClean(@$input['expense_items']['exp_product_subtotal'][$key]),
-                    'rate' => numberClean(@$input['expense_items']['exp_product_price'][$key]),
-                    'taxable_amount' => numberClean(@$input['expense_items']['exp_taxedvalue'][$key]),
-                    'tax_amount' => numberClean(@$input['expense_items']['exp_total_tax'][$key]),
-                    'tax' => numberClean(@$input['expense_items']['exp_product_tax'][$key]),
-                    'discount_rate' => numberClean(@$input['expense_items']['exp_product_discount'][$key]),
-                    'discount' => numberClean(@$input['expense_items']['exp_total_discount'][$key]),
-                    'note' => strip_tags(@$input['expense_items']['exp_product_description'][$key]),
-                   // 'payer_id' => numberClean(@$input['expense_items']['exp_client_id'][$key]),
-                    'project_id' => numberClean(@$input['expense_items']['exp_project_id'][$key]),
-                    'branch_id' => numberClean(@$input['expense_items']['exp_branch_id'][$key])
-                       
-                );
+                    //if project post to work in progress ledger
+                    if (!empty($input['expense_items']['exp_project_id'][$key]) || ($input['expense_items']['exp_project_id'][$key]) > 0) {
+                        $account_id = Account::where('system', 'cogs')->first();
+                        $account_id = $account_id->id;
+                    } else {
+                        $account_id = $input['expense_items']['ledger_id'][$key];
+                    }
+
+
+                    $expenses[] = array(
+                        'bill_id' => $result->id,
+                        'tid' => $input['expense_items']['tid'],
+                        'ins' => $input['expense_items']['ins'],
+                        'user_id' => $input['expense_items']['user_id'],
+                        'account_id' => $account_id,
+                        'secondary_account_id' => $input['expense_items']['ledger_id'][$key],
+                        'trans_category_id' => $purchases_trans_category_id,
+                        'transaction_tab' => 2,
+                        'transaction_type' => 'purchases',
+                        'for_who' => $input['expense_items']['for_who'],
+                        'transaction_date' => $input['expense_items']['transaction_date'],
+                        'qty' => strip_tags(@$input['expense_items']['exp_product_qty'][$key]),
+                        'debit' => numberClean(@$input['expense_items']['exp_salevalue'][$key]),
+                        'total_amount' => numberClean(@$input['expense_items']['exp_product_subtotal'][$key]),
+                        'rate' => numberClean(@$input['expense_items']['exp_product_price'][$key]),
+                        'taxable_amount' => numberClean(@$input['expense_items']['exp_taxedvalue'][$key]),
+                        'tax_amount' => numberClean(@$input['expense_items']['exp_total_tax'][$key]),
+                        'tax' => numberClean(@$input['expense_items']['exp_product_tax'][$key]),
+                        'discount_rate' => numberClean(@$input['expense_items']['exp_product_discount'][$key]),
+                        'discount' => numberClean(@$input['expense_items']['exp_total_discount'][$key]),
+                        'note' => strip_tags(@$input['expense_items']['exp_product_description'][$key]),
+                        // 'payer_id' => numberClean(@$input['expense_items']['exp_client_id'][$key]),
+                        'project_id' => numberClean(@$input['expense_items']['exp_project_id'][$key]),
+                        'branch_id' => numberClean(@$input['expense_items']['exp_branch_id'][$key])
+
+                    );
+                }
+
+
+                Purchase::insert($expenses);
             }
 
-
-            Purchase::insert($expenses);
-           
-
-        }
-
-//end expense tab
+            //end expense tab
 
 
-        //stockable tab
-             if($input['stockable_items']['item_totalsaleamount']>0){
+            //stockable tab
+            if ($input['stockable_items']['item_totalsaleamount'] > 0) {
 
 
-            foreach ($input['stockable_items']['item_id'] as $key => $value) {
-    
-  
-                  //if asset
-                 if( $input['stockable_items']['account_type'][$key]=='Assets'){
-
-         $purchases_trans_category_id = Transactioncategory::where('code', 'p_asset')->first();
-         $purchases_trans_category_id=$purchases_trans_category_id->id;
-         $transaction_type='purchase_asset';
-                     
-
-                 }else{
-         $purchases_trans_category_id = Transactioncategory::where('code', 'exp')->first();
-         $purchases_trans_category_id=$purchases_trans_category_id->id;
-         $transaction_type='expenses';
-                    
+                foreach ($input['stockable_items']['item_id'] as $key => $value) {
 
 
-                 }
+                    //if asset
+                    if ($input['stockable_items']['account_type'][$key] == 'Assets') {
 
-                
-            $stockables[] = array(
-                    'bill_id' => $result->id,
-                    'tid' => $input['stockable_items']['tid'],
-                    'ins' => $input['stockable_items']['ins'],
-                    'user_id' => $input['stockable_items']['user_id'],
-                    'trans_category_id' => $purchases_trans_category_id,
-                    'transaction_tab' => 3,
-                    'for_who' =>$input['stockable_items']['for_who'],
-                    'transaction_type' =>$transaction_type,
-                    'transaction_date' => $input['stockable_items']['transaction_date'],
-                    's_warehouses' => $input['stockable_items']['s_warehouses'],
-                    'account_id' => numberClean(@$input['stockable_items']['account_id'][$key]),
-                    //'item_id' => strip_tags(@$input['stockable_items']['item_product_id'][$key]),
-                    //'item_name' => strip_tags(@$input['stockable_items']['item_product_name'][$key]),
-                    'qty' => strip_tags(@$input['stockable_items']['item_product_qty'][$key]),
-                    'debit' => numberClean(@$input['stockable_items']['item_salevalue'][$key]),
-                    'total_amount' => numberClean(@$input['stockable_items']['item_product_subtotal'][$key]),
-                    'rate' => numberClean(@$input['stockable_items']['item_product_price'][$key]),
-                    'taxable_amount' => numberClean(@$input['stockable_items']['item_taxedvalue'][$key]),
-                    'tax_amount' => numberClean(@$input['stockable_items']['item_total_tax'][$key]),
-                    'tax' => numberClean(@$input['stockable_items']['item_product_tax'][$key]),
-                    'discount_rate' => numberClean(@$input['stockable_items']['item_product_discount'][$key]),
-                    'discount' => numberClean(@$input['stockable_items']['item_total_discount'][$key]),
-                    'note' => strip_tags(@$input['stockable_items']['item_product_description'][$key]),
-                    'project_id' => numberClean(@$input['stockable_items']['item_project_id'][$key]),
-                    'branch_id' => numberClean(@$input['stockable_items']['item_branch_id'][$key])
-                       
-                );
+                        $purchases_trans_category_id = Transactioncategory::where('code', 'p_asset')->first();
+                        $purchases_trans_category_id = $purchases_trans_category_id->id;
+                        $transaction_type = 'purchase_asset';
+                    } else {
+                        $purchases_trans_category_id = Transactioncategory::where('code', 'exp')->first();
+                        $purchases_trans_category_id = $purchases_trans_category_id->id;
+                        $transaction_type = 'expenses';
+                    }
+
+
+                    $stockables[] = array(
+                        'bill_id' => $result->id,
+                        'tid' => $input['stockable_items']['tid'],
+                        'ins' => $input['stockable_items']['ins'],
+                        'user_id' => $input['stockable_items']['user_id'],
+                        'trans_category_id' => $purchases_trans_category_id,
+                        'transaction_tab' => 3,
+                        'for_who' => $input['stockable_items']['for_who'],
+                        'transaction_type' => $transaction_type,
+                        'transaction_date' => $input['stockable_items']['transaction_date'],
+                        's_warehouses' => $input['stockable_items']['s_warehouses'],
+                        'account_id' => numberClean(@$input['stockable_items']['account_id'][$key]),
+                        //'item_id' => strip_tags(@$input['stockable_items']['item_product_id'][$key]),
+                        //'item_name' => strip_tags(@$input['stockable_items']['item_product_name'][$key]),
+                        'qty' => strip_tags(@$input['stockable_items']['item_product_qty'][$key]),
+                        'debit' => numberClean(@$input['stockable_items']['item_salevalue'][$key]),
+                        'total_amount' => numberClean(@$input['stockable_items']['item_product_subtotal'][$key]),
+                        'rate' => numberClean(@$input['stockable_items']['item_product_price'][$key]),
+                        'taxable_amount' => numberClean(@$input['stockable_items']['item_taxedvalue'][$key]),
+                        'tax_amount' => numberClean(@$input['stockable_items']['item_total_tax'][$key]),
+                        'tax' => numberClean(@$input['stockable_items']['item_product_tax'][$key]),
+                        'discount_rate' => numberClean(@$input['stockable_items']['item_product_discount'][$key]),
+                        'discount' => numberClean(@$input['stockable_items']['item_total_discount'][$key]),
+                        'note' => strip_tags(@$input['stockable_items']['item_product_description'][$key]),
+                        'project_id' => numberClean(@$input['stockable_items']['item_project_id'][$key]),
+                        'branch_id' => numberClean(@$input['stockable_items']['item_branch_id'][$key])
+
+                    );
+                }
+
+                //dd($stockables);
+                Purchase::insert($stockables);
             }
 
-//dd($stockables);
-            Purchase::insert($stockables);
-            
+            //end stockable items
 
-        }
+            //dd($input['tax']['tax_amount']);
 
-//end stockable items
-
-  //dd($input['tax']['tax_amount']);
-
-//begit tax
-if($input['tax']['tax_amount']>0){
-     $purchases_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
-    $account_id = Account::where('system', 'tax')->first();
- $account_id=$account_id->id;
- $input['tax']['bill_id'] =  $result->id;
- $input['tax']['account_id'] = $account_id;
- $input['tax']['trans_category_id'] =$purchases_trans_category_id;
- $input['tax']['secondary_account_id'] =$account_id;
- $input['tax']['tax_type'] ='sales_purchases';
- $input['tax']['transaction_type'] ='purchases';
+            //begit tax
+            if ($input['tax']['tax_amount'] > 0) {
+                $purchases_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
+                $purchases_trans_category_id = $purchases_trans_category_id->id;
+                $account_id = Account::where('system', 'tax')->first();
+                $account_id = $account_id->id;
+                $input['tax']['bill_id'] =  $result->id;
+                $input['tax']['account_id'] = $account_id;
+                $input['tax']['trans_category_id'] = $purchases_trans_category_id;
+                $input['tax']['secondary_account_id'] = $account_id;
+                $input['tax']['tax_type'] = 'sales_purchases';
+                $input['tax']['transaction_type'] = 'purchases';
 
 
-$input['tax'] = array_map( 'strip_tags', $input['tax']);
-          Purchase::create($input['tax']);
-}
-        
-//end tax
+                $input['tax'] = array_map('strip_tags', $input['tax']);
+                Purchase::create($input['tax']);
+            }
+
+            //end tax
 
             DB::commit();
             return $result;
         }
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
-
-
     }
 
     /**
@@ -359,12 +332,12 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
      */
     public function update(Purchase $purchase, array $input)
     {
-    	
 
 
 
-      $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
-       $purchases_trans_category_id=$purchases_trans_category_id->id;
+
+        $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
+        $purchases_trans_category_id = $purchases_trans_category_id->id;
 
         $id = $input['invoice']['id'];
         $tid = $input['invoice']['tid'];
@@ -377,19 +350,19 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         $input['invoice']['discountformat'] = $input['invoice']['discountformat'];
         $input['invoice']['s_warehouses'] = $input['invoice']['s_warehouses'];
         $input['invoice']['is_bill'] = 1;
-        $input['invoice']['transaction_type'] ='purchases';
+        $input['invoice']['transaction_type'] = 'purchases';
         unset($input['invoice']['id']);
         unset($input['invoice']['tid']);
-      
-       
+
+
 
         DB::beginTransaction();
-         $result = Purchase::find($id);
-         $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
-       // $result = Purchase::create($input['invoice']);
+        $result = Purchase::find($id);
+        $input['invoice'] = array_map('strip_tags', $input['invoice']);
+        // $result = Purchase::create($input['invoice']);
         $result->update($input['invoice']);
         if ($result) {
-                 // dd($result->id);
+            // dd($result->id);
             Purchase::where('bill_id', $id)->delete();
             $products = array();
             $subtotal = 0;
@@ -397,143 +370,132 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
             $total_tax = 0;
             $stock_update = array();
             $purchases_trans_sec_id = Account::where('system', 'inv')->first();
-            $purchases_trans_sec_id=$purchases_trans_sec_id->id;
-            
-            
-             $grn=Purchase::orderBy('grn', 'desc')->where('grn','>',0)->first();
-             $grn= @$grn+1;
-
-//purchase product
-             if($input['inventory_items']['totalsaleamount']>0){
-
-         $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
-            foreach ($input['inventory_items']['product_id'] as $key => $value) {
-    
-  
-                  //if project take to work in progress account
-                 if(!empty( $input['inventory_items']['inventory_project_id'][$key]) || ($input['inventory_items']['inventory_project_id'][$key])>0){
-                     $account_id = Account::where('system', 'cogs')->first();
-                      $account_id=$account_id->id;
-                      $grn="0";
-                    
-                     
-
-                 }else{
-                     $account_id = Account::where('system', 'inv')->first();
-                      $account_id=$account_id->id;
-
-                      $stock_update[] = array('id' => $input['inventory_items']['product_id'][$key], 'qty' => numberClean($input['inventory_items']['product_qty'][$key]));
-                      $grn= $grn;
+            $purchases_trans_sec_id = $purchases_trans_sec_id->id;
 
 
-                 }
+            $grn = Purchase::orderBy('grn', 'desc')->where('grn', '>', 0)->first();
+            $grn = @$grn + 1;
 
-                
-            $products[] = array(
-                    'bill_id' => $result->id,
-                    'tid' => $input['inventory_items']['tid'],
-                    'ins' => $input['inventory_items']['ins'],
-                    'user_id' => $input['inventory_items']['user_id'],
-                    'account_id' => $account_id,
-                    'secondary_account_id' => $purchases_trans_sec_id,
-                    'trans_category_id' => $purchases_trans_category_id,
-                    'grn' => $grn,
-                    'transaction_tab' => 1,
-                    'transaction_type' =>'inventory',
-                    'transaction_date' => $input['inventory_items']['transaction_date'],
-                    's_warehouses' => $input['inventory_items']['s_warehouses'],
-                    'item_id' => strip_tags(@$input['inventory_items']['product_id'][$key]),
-                    'item_name' => strip_tags(@$input['inventory_items']['product_name'][$key]),
-                    'qty' => strip_tags(@$input['inventory_items']['product_qty'][$key]),
-                    'unit' => strip_tags(@$input['inventory_items']['u_m'][$key]),
-                    'debit' => numberClean(@$input['inventory_items']['salevalue'][$key]),
-                    'total_amount' => numberClean(@$input['inventory_items']['product_subtotal'][$key]),
-                    'rate' => numberClean(@$input['inventory_items']['product_price'][$key]),
-                    'taxable_amount' => numberClean(@$input['inventory_items']['taxedvalue'][$key]),
-                    'tax_amount' => numberClean(@$input['inventory_items']['total_tax'][$key]),
-                    'tax' => numberClean(@$input['inventory_items']['product_tax'][$key]),
-                    'discount_rate' => numberClean(@$input['inventory_items']['product_discount'][$key]),
-                    'discount' => numberClean(@$input['inventory_items']['total_discount'][$key]),
-                    'note' => strip_tags(@$input['inventory_items']['product_description'][$key]),
-                    //'payer_id' => numberClean(@$input['inventory_items']['client_id'][$key]),
-                    'project_id' => numberClean(@$input['inventory_items']['inventory_project_id'][$key]),
-                    'branch_id' => numberClean(@$input['inventory_items']['branch_id'][$key])
-                       
-                );
+            //purchase product
+            if ($input['inventory_items']['totalsaleamount'] > 0) {
+
+                $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
+                $purchases_trans_category_id = $purchases_trans_category_id->id;
+                foreach ($input['inventory_items']['product_id'] as $key => $value) {
+
+
+                    //if project take to work in progress account
+                    if (!empty($input['inventory_items']['inventory_project_id'][$key]) || ($input['inventory_items']['inventory_project_id'][$key]) > 0) {
+                        $account_id = Account::where('system', 'cogs')->first();
+                        $account_id = $account_id->id;
+                        $grn = "0";
+                    } else {
+                        $account_id = Account::where('system', 'inv')->first();
+                        $account_id = $account_id->id;
+
+                        $stock_update[] = array('id' => $input['inventory_items']['product_id'][$key], 'qty' => numberClean($input['inventory_items']['product_qty'][$key]));
+                        $grn = $grn;
+                    }
+
+
+                    $products[] = array(
+                        'bill_id' => $result->id,
+                        'tid' => $input['inventory_items']['tid'],
+                        'ins' => $input['inventory_items']['ins'],
+                        'user_id' => $input['inventory_items']['user_id'],
+                        'account_id' => $account_id,
+                        'secondary_account_id' => $purchases_trans_sec_id,
+                        'trans_category_id' => $purchases_trans_category_id,
+                        'grn' => $grn,
+                        'transaction_tab' => 1,
+                        'transaction_type' => 'inventory',
+                        'transaction_date' => $input['inventory_items']['transaction_date'],
+                        's_warehouses' => $input['inventory_items']['s_warehouses'],
+                        'item_id' => strip_tags(@$input['inventory_items']['product_id'][$key]),
+                        'item_name' => strip_tags(@$input['inventory_items']['product_name'][$key]),
+                        'qty' => strip_tags(@$input['inventory_items']['product_qty'][$key]),
+                        'unit' => strip_tags(@$input['inventory_items']['u_m'][$key]),
+                        'debit' => numberClean(@$input['inventory_items']['salevalue'][$key]),
+                        'total_amount' => numberClean(@$input['inventory_items']['product_subtotal'][$key]),
+                        'rate' => numberClean(@$input['inventory_items']['product_price'][$key]),
+                        'taxable_amount' => numberClean(@$input['inventory_items']['taxedvalue'][$key]),
+                        'tax_amount' => numberClean(@$input['inventory_items']['total_tax'][$key]),
+                        'tax' => numberClean(@$input['inventory_items']['product_tax'][$key]),
+                        'discount_rate' => numberClean(@$input['inventory_items']['product_discount'][$key]),
+                        'discount' => numberClean(@$input['inventory_items']['total_discount'][$key]),
+                        'note' => strip_tags(@$input['inventory_items']['product_description'][$key]),
+                        //'payer_id' => numberClean(@$input['inventory_items']['client_id'][$key]),
+                        'project_id' => numberClean(@$input['inventory_items']['inventory_project_id'][$key]),
+                        'branch_id' => numberClean(@$input['inventory_items']['branch_id'][$key])
+
+                    );
+                }
+
+
+                Purchase::insert($products);
+                $update_variation = new ProductVariation;
+                $index = 'id';
+                Batch::update($update_variation, $stock_update, $index, true, '+');
             }
 
-
-            Purchase::insert($products);
-            $update_variation = new ProductVariation;
-            $index = 'id';
-            Batch::update($update_variation, $stock_update, $index, true,'+');
-
-        }
-
-//end inventory items
+            //end inventory items
 
 
 
 
 
-//start expense tab
-             if($input['expense_items']['exp_totalsaleamount']>0){
+            //start expense tab
+            if ($input['expense_items']['exp_totalsaleamount'] > 0) {
 
-            $purchases_trans_category_id = Transactioncategory::where('code', 'exp')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
-            foreach ($input['expense_items']['ledger_id'] as $key => $value) {
+                $purchases_trans_category_id = Transactioncategory::where('code', 'exp')->first();
+                $purchases_trans_category_id = $purchases_trans_category_id->id;
+                foreach ($input['expense_items']['ledger_id'] as $key => $value) {
 
 
-    
-  
-                  //if project post to work in progress ledger
-                 if(!empty( $input['expense_items']['exp_project_id'][$key]) || ($input['expense_items']['exp_project_id'][$key])>0){
-                     $account_id = Account::where('system', 'cogs')->first();
-                      $account_id=$account_id->id;
-             
 
-                 }else{
-                     $account_id = $input['expense_items']['ledger_id'][$key];
-                   
-                 }
 
-                
-               $expenses[] = array(
-                    'bill_id' => $result->id,
-                    'tid' => $input['expense_items']['tid'],
-                    'ins' => $input['expense_items']['ins'],
-                    'user_id' => $input['expense_items']['user_id'],
-                    'account_id' => $account_id,
-                    'secondary_account_id' => $input['expense_items']['ledger_id'][$key],
-                    'trans_category_id' => $purchases_trans_category_id,
-                    'transaction_tab' => 2,
-                    'transaction_type' =>'expenses',
-                    'transaction_date' => $input['expense_items']['transaction_date'],
-                    'qty' => strip_tags(@$input['expense_items']['exp_product_qty'][$key]),
-                    'debit' => numberClean(@$input['expense_items']['exp_salevalue'][$key]),
-                    'total_amount' => numberClean(@$input['expense_items']['exp_product_subtotal'][$key]),
-                    'rate' => numberClean(@$input['expense_items']['exp_product_price'][$key]),
-                    'taxable_amount' => numberClean(@$input['expense_items']['exp_taxedvalue'][$key]),
-                    'tax_amount' => numberClean(@$input['expense_items']['exp_total_tax'][$key]),
-                    'tax' => numberClean(@$input['expense_items']['exp_product_tax'][$key]),
-                    'discount_rate' => numberClean(@$input['expense_items']['exp_product_discount'][$key]),
-                    'discount' => numberClean(@$input['expense_items']['exp_total_discount'][$key]),
-                    'note' => strip_tags(@$input['expense_items']['exp_product_description'][$key]),
-                   // 'payer_id' => numberClean(@$input['expense_items']['exp_client_id'][$key]),
-                    'project_id' => numberClean(@$input['expense_items']['exp_project_id'][$key]),
-                    'branch_id' => numberClean(@$input['expense_items']['exp_branch_id'][$key])
-                       
-                );
+                    //if project post to work in progress ledger
+                    if (!empty($input['expense_items']['exp_project_id'][$key]) || ($input['expense_items']['exp_project_id'][$key]) > 0) {
+                        $account_id = Account::where('system', 'cogs')->first();
+                        $account_id = $account_id->id;
+                    } else {
+                        $account_id = $input['expense_items']['ledger_id'][$key];
+                    }
+
+
+                    $expenses[] = array(
+                        'bill_id' => $result->id,
+                        'tid' => $input['expense_items']['tid'],
+                        'ins' => $input['expense_items']['ins'],
+                        'user_id' => $input['expense_items']['user_id'],
+                        'account_id' => $account_id,
+                        'secondary_account_id' => $input['expense_items']['ledger_id'][$key],
+                        'trans_category_id' => $purchases_trans_category_id,
+                        'transaction_tab' => 2,
+                        'transaction_type' => 'expenses',
+                        'transaction_date' => $input['expense_items']['transaction_date'],
+                        'qty' => strip_tags(@$input['expense_items']['exp_product_qty'][$key]),
+                        'debit' => numberClean(@$input['expense_items']['exp_salevalue'][$key]),
+                        'total_amount' => numberClean(@$input['expense_items']['exp_product_subtotal'][$key]),
+                        'rate' => numberClean(@$input['expense_items']['exp_product_price'][$key]),
+                        'taxable_amount' => numberClean(@$input['expense_items']['exp_taxedvalue'][$key]),
+                        'tax_amount' => numberClean(@$input['expense_items']['exp_total_tax'][$key]),
+                        'tax' => numberClean(@$input['expense_items']['exp_product_tax'][$key]),
+                        'discount_rate' => numberClean(@$input['expense_items']['exp_product_discount'][$key]),
+                        'discount' => numberClean(@$input['expense_items']['exp_total_discount'][$key]),
+                        'note' => strip_tags(@$input['expense_items']['exp_product_description'][$key]),
+                        // 'payer_id' => numberClean(@$input['expense_items']['exp_client_id'][$key]),
+                        'project_id' => numberClean(@$input['expense_items']['exp_project_id'][$key]),
+                        'branch_id' => numberClean(@$input['expense_items']['exp_branch_id'][$key])
+
+                    );
+                }
+
+
+                Purchase::insert($expenses);
             }
 
-
-            Purchase::insert($expenses);
-           
-
-        }
-
-//end expense tab
+            //end expense tab
 
 
 
@@ -541,25 +503,25 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
 
 
 
-//begit tax
-if($input['tax']['tax_amount']>0){
-     $purchases_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
-            $purchases_trans_category_id=$purchases_trans_category_id->id;
-    $account_id = Account::where('system', 'tax')->first();
- $account_id=$account_id->id;
- $input['tax']['bill_id'] =  $result->id;
- $input['tax']['account_id'] = $account_id;
- $input['tax']['trans_category_id'] =$purchases_trans_category_id;
- $input['tax']['secondary_account_id'] =$account_id;
- $input['tax']['tax_type'] ='sales_purchases';
- $input['tax']['transaction_type'] ='vat';
+            //begit tax
+            if ($input['tax']['tax_amount'] > 0) {
+                $purchases_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
+                $purchases_trans_category_id = $purchases_trans_category_id->id;
+                $account_id = Account::where('system', 'tax')->first();
+                $account_id = $account_id->id;
+                $input['tax']['bill_id'] =  $result->id;
+                $input['tax']['account_id'] = $account_id;
+                $input['tax']['trans_category_id'] = $purchases_trans_category_id;
+                $input['tax']['secondary_account_id'] = $account_id;
+                $input['tax']['tax_type'] = 'sales_purchases';
+                $input['tax']['transaction_type'] = 'vat';
 
 
-$input['tax'] = array_map( 'strip_tags', $input['tax']);
-   Purchase::create($input['tax']);
-}
-        
-//end tax
+                $input['tax'] = array_map('strip_tags', $input['tax']);
+                Purchase::create($input['tax']);
+            }
+
+            //end tax
 
             DB::commit();
             return $result;
@@ -567,7 +529,7 @@ $input['tax'] = array_map( 'strip_tags', $input['tax']);
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
 
 
-/*
+        /*
 
 
         $extra_discount = numberClean($input['invoice']['after_disc']);
