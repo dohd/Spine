@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\purchase;
 
 use App\Models\purchase\Purchase;
@@ -68,17 +69,16 @@ class PurchasesController extends Controller
 
         if (isset($input['rel_id']) and isset($input['rel_type'])) {
             switch ($input['rel_type']) {
-                case 1 :
+                case 1:
                     $segment = Supplier::find($input['rel_id']);
                     $words['name'] = trans('customers.title');
                     $words['name_data'] = $segment->name;
                     break;
-                case 2 :
+                case 2:
                     $segment = Hrm::find($input['rel_id']);
                     $words['name'] = trans('hrms.employee');
                     $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
                     break;
-
             }
         }
 
@@ -109,35 +109,33 @@ class PurchasesController extends Controller
 
     public function store(StorePurchaseRequest $request)
     {
-       
-     $invoice = $request->only(['payer_type', 'payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
-     
-       $tax = $request->only(['payer_type', 'payer', 'payer_id','taxid','tid', 'ref_type','taxformat']);
+        $invoice = $request->only(['payer_type', 'payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
+
+        $tax = $request->only(['payer_type', 'payer', 'payer_id', 'taxid', 'tid', 'ref_type', 'taxformat']);
 
 
-      $inventory_items = $request->only(['product_id', 'product_name', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'u_m','taxedvalue','salevalue', 'client_id', 'branch_id', 'inventory_project_id']);
+        $inventory_items = $request->only(['product_id', 'product_name', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'u_m', 'taxedvalue', 'salevalue', 'client_id', 'branch_id', 'inventory_project_id']);
 
-      $expense_items = $request->only(['ledger_id', 'exp_product_qty', 'exp_product_price', 'exp_product_tax', 'exp_product_discount', 'exp_product_subtotal', 'total_tax', 'exp_total_discount', 'exp_product_description','exp_taxedvalue','exp_salevalue', 'exp_client_id', 'exp_branch_id', 'exp_project_id']);
+        $expense_items = $request->only(['ledger_id', 'exp_product_qty', 'exp_product_price', 'exp_product_tax', 'exp_product_discount', 'exp_product_subtotal', 'total_tax', 'exp_total_discount', 'exp_product_description', 'exp_taxedvalue', 'exp_salevalue', 'exp_client_id', 'exp_branch_id', 'exp_project_id']);
 
-    $stockable_items = $request->only(['item_id', 'account_id', 'account_type', 'itemname', 'item_product_qty', 'item_product_price', 'item_product_tax', 'item_product_discount', 'item_total_tax', 'item_product_subtotal', 'item_total_tax', 'item_total_discount', 'item_product_description','item_taxedvalue','item_salevalue','item_taxedvalue','item_client_id', 'item_branch_id', 'item_project_id']);
+        $stockable_items = $request->only(['item_id', 'account_id', 'account_type', 'itemname', 'item_product_qty', 'item_product_price', 'item_product_tax', 'item_product_discount', 'item_total_tax', 'item_product_subtotal', 'item_total_tax', 'item_total_discount', 'item_product_description', 'item_taxedvalue', 'item_salevalue', 'item_taxedvalue', 'item_client_id', 'item_branch_id', 'item_project_id']);
 
 
-if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid'))){
- echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
- exit;
-}
+        if (numberClean($request->input('grandtaxs')) > 0 && empty($request->input('taxid'))) {
+            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
+            exit;
+        }
 
-     //invoices
-    if ($request->input('ref_type')=="Invoice") {
-        $refer_no="INV-".$request->input('refer_no');
-    }else if($request->input('ref_type')=="Receipt"){
-        $refer_no="RCPT-".$request->input('refer_no'); 
-    }else if($request->input('ref_type')=="DNote"){
-        $refer_no="DN-".$request->input('refer_no'); 
-    }
-    else if($request->input('ref_type')=="Voucher"){
-        $refer_no="VOU-".$request->input('refer_no'); 
-    }
+        //invoices
+        if ($request->input('ref_type') == "Invoice") {
+            $refer_no = "INV-" . $request->input('refer_no');
+        } else if ($request->input('ref_type') == "Receipt") {
+            $refer_no = "RCPT-" . $request->input('refer_no');
+        } else if ($request->input('ref_type') == "DNote") {
+            $refer_no = "DN-" . $request->input('refer_no');
+        } else if ($request->input('ref_type') == "Voucher") {
+            $refer_no = "VOU-" . $request->input('refer_no');
+        }
 
         $invoice['ins'] = auth()->user()->ins;
         $invoice['user_id'] = auth()->user()->id;
@@ -145,7 +143,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $invoice['account_id'] = $request->input('credit_account_id');
         $invoice['project_id'] = $request->input('all_project_id');
         $invoice['for_who'] = $request->input('payer_id');
-        
+
         $invoice['transaction_date'] = date_for_database($request->input('transaction_date'));
         $invoice['due_date'] = date_for_database($request->input('due_date'));
         $invoice['credit'] = numberClean($request->input('finaltotals'));
@@ -154,8 +152,8 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $invoice['taxable_amount'] = numberClean($request->input('grandtaxable'));
         $invoice['total_amount'] = numberClean($request->input('finaltotals'));
         $invoice['note'] = strip_tags($request->input('note'));
-       
-        
+
+
 
         //tax
         $tax['ins'] = auth()->user()->ins;
@@ -167,7 +165,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $tax['taxable_amount'] = numberClean($request->input('grandtaxable'));
         $tax['note'] = strip_tags($request->input('note'));
         $tax['transaction_date'] = date_for_database($request->input('transaction_date'));
-        
+
 
         //inventory tab
         $inventory_items['user_id'] = auth()->user()->id;
@@ -179,7 +177,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $inventory_items['totalsaleamount'] = numberClean($request->input('totalsaleamount'));
 
 
-         //stockable Inventory
+        //stockable Inventory
         $stockable_items['user_id'] = auth()->user()->id;
         $stockable_items['ins'] = auth()->user()->ins;
         $stockable_items['tid'] = $request->input('tid');
@@ -190,7 +188,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
 
 
 
-    //expense tab
+        //expense tab
         $expense_items['user_id'] = auth()->user()->id;
         $expense_items['ins'] = auth()->user()->ins;
         $expense_items['tid'] = $request->input('tid');
@@ -201,17 +199,16 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
 
 
 
-        
-    //$invoice_items['ins'] = auth()->user()->ins;
 
-            $data2['ins'] = auth()->user()->ins;
- 
-        $result = $this->repository->create(compact('invoice', 'inventory_items','tax','expense_items', 'stockable_items', 'data2'));
-     
+        //$invoice_items['ins'] = auth()->user()->ins;
+
+        $data2['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->create(compact('invoice', 'inventory_items', 'tax', 'expense_items', 'stockable_items', 'data2'));
+
 
 
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchases.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Make Payment  </a>&nbsp; &nbsp;'));
-
     }
 
     /**
@@ -221,12 +218,8 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
      * @param EditPurchaseorderRequestNamespace $request
      * @return \App\Http\Responses\Focus\purchaseorder\EditResponse
      */
-
-
-
     public function edit(Purchase $purchase, StorePurchaseRequest $request)
     {
-        
         return new EditResponse($purchase);
     }
 
@@ -237,41 +230,37 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-
-
-
     public function update(StorePurchaseRequest $request, Purchase $purchase)
     {
 
 
-         $invoice = $request->only(['id','payer_type','payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
-     
-     $tax = $request->only(['payer_type', 'payer', 'payer_id','taxid','tid', 'ref_type','taxformat']);
+        $invoice = $request->only(['id', 'payer_type', 'payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
+
+        $tax = $request->only(['payer_type', 'payer', 'payer_id', 'taxid', 'tid', 'ref_type', 'taxformat']);
 
 
-    $inventory_items = $request->only(['product_id', 'product_name', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'u_m','taxedvalue','salevalue', 'client_id', 'branch_id', 'inventory_project_id']);
+        $inventory_items = $request->only(['product_id', 'product_name', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'u_m', 'taxedvalue', 'salevalue', 'client_id', 'branch_id', 'inventory_project_id']);
 
-    $expense_items = $request->only(['ledger_id', 'exp_product_qty', 'exp_product_price', 'exp_product_tax', 'exp_product_discount', 'exp_product_subtotal', 'total_tax', 'exp_total_discount', 'exp_product_description','exp_taxedvalue','exp_salevalue', 'exp_client_id', 'exp_branch_id', 'exp_project_id']);
+        $expense_items = $request->only(['ledger_id', 'exp_product_qty', 'exp_product_price', 'exp_product_tax', 'exp_product_discount', 'exp_product_subtotal', 'total_tax', 'exp_total_discount', 'exp_product_description', 'exp_taxedvalue', 'exp_salevalue', 'exp_client_id', 'exp_branch_id', 'exp_project_id']);
 
-    $stockable_items = $request->only(['account_id', 'itemname', 'item_product_qty', 'item_product_price', 'item_product_tax', 'item_product_discount', 'item_total_tax', 'item_product_subtotal', 'item_total_tax', 'item_total_discount', 'item_product_description','item_taxedvalue','item_salevalue','item_taxedvalue','item_client_id', 'item_branch_id', 'item_project_id']);
+        $stockable_items = $request->only(['account_id', 'itemname', 'item_product_qty', 'item_product_price', 'item_product_tax', 'item_product_discount', 'item_total_tax', 'item_product_subtotal', 'item_total_tax', 'item_total_discount', 'item_product_description', 'item_taxedvalue', 'item_salevalue', 'item_taxedvalue', 'item_client_id', 'item_branch_id', 'item_project_id']);
 
 
-if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid'))){
- echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
- exit;
-}
+        if (numberClean($request->input('grandtaxs')) > 0 && empty($request->input('taxid'))) {
+            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
+            exit;
+        }
 
-     //invoices
-    if ($request->input('ref_type')=="Invoice") {
-        $refer_no="INV-".$request->input('refer_no');
-    }else if($request->input('ref_type')=="Receipt"){
-        $refer_no="RCPT-".$request->input('refer_no'); 
-    }else if($request->input('ref_type')=="DNote"){
-        $refer_no="DN-".$request->input('refer_no'); 
-    }
-    else if($request->input('ref_type')=="Voucher"){
-        $refer_no="VOU-".$request->input('refer_no'); 
-    }
+        //invoices
+        if ($request->input('ref_type') == "Invoice") {
+            $refer_no = "INV-" . $request->input('refer_no');
+        } else if ($request->input('ref_type') == "Receipt") {
+            $refer_no = "RCPT-" . $request->input('refer_no');
+        } else if ($request->input('ref_type') == "DNote") {
+            $refer_no = "DN-" . $request->input('refer_no');
+        } else if ($request->input('ref_type') == "Voucher") {
+            $refer_no = "VOU-" . $request->input('refer_no');
+        }
 
         $invoice['ins'] = auth()->user()->ins;
         $invoice['user_id'] = auth()->user()->id;
@@ -286,8 +275,8 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $invoice['taxable_amount'] = numberClean($request->input('grandtaxable'));
         $invoice['total_amount'] = numberClean($request->input('finaltotals'));
         $invoice['note'] = strip_tags($request->input('note'));
-       
-        
+
+
 
         //tax
         $tax['ins'] = auth()->user()->ins;
@@ -298,7 +287,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $tax['taxable_amount'] = numberClean($request->input('grandtaxable'));
         $tax['note'] = strip_tags($request->input('note'));
         $tax['transaction_date'] = date_for_database($request->input('transaction_date'));
-        
+
 
         //inventory tab
         $inventory_items['user_id'] = auth()->user()->id;
@@ -308,7 +297,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $inventory_items['s_warehouses'] = numberClean($request->input('s_warehouses'));
         $inventory_items['totalsaleamount'] = numberClean($request->input('totalsaleamount'));
 
-    //expense tab
+        //expense tab
         $expense_items['user_id'] = auth()->user()->id;
         $expense_items['ins'] = auth()->user()->ins;
         $expense_items['tid'] = $request->input('tid');
@@ -316,13 +305,13 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         $expense_items['exp_totalsaleamount'] = numberClean($request->input('exp_totalsaleamount'));
 
 
-        
-    //$invoice_items['ins'] = auth()->user()->ins;
 
-            $data2['ins'] = auth()->user()->ins;
- 
-        $result = $this->repository->update($purchase,compact('invoice', 'inventory_items','tax','expense_items', 'stockable_items', 'data2'));
-     
+        //$invoice_items['ins'] = auth()->user()->ins;
+
+        $data2['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->update($purchase, compact('invoice', 'inventory_items', 'tax', 'expense_items', 'stockable_items', 'data2'));
+
 
 
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchases.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Make Payment  </a>&nbsp; &nbsp;'));
@@ -330,7 +319,7 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
 
 
 
-      /* 
+        /* 
         $invoice = $request->only(['supplier_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock']);
         $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
     
@@ -356,17 +345,12 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-
-
     public function destroy(Purchase $purchase, StorePurchaseRequest $request)
     {
-        
-       /* $this->repository->delete($purchaseorder);
+        /* $this->repository->delete($purchaseorder);
         
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')));*/
-
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -375,11 +359,9 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-
-
     public function show(Purchase $purchase, ManagePurchaseRequest $request)
     {
-/*
+        /*
         $accounts = Account::all();
        
         $purchaseorder['bill_type'] = 1;
@@ -389,22 +371,14 @@ if(numberClean($request->input('grandtaxs'))>0 && empty($request->input('taxid')
         return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'accounts', 'features', 'words'));*/
     }
 
-  
-
-     public function customer_load(Request $request)
+    public function customer_load(Request $request)
     {
-        
         $q = $request->get('id');
-        if($q=='supplier'){
-           $result =  \App\Models\supplier\Supplier::select('id','suppliers.company AS name')->get();
-       
-             //$result = Branch::all()->where('rel_id', '=', $q);
-
+        if ($q == 'supplier') {
+            $result =  \App\Models\supplier\Supplier::select('id', 'suppliers.company AS name')->get();
+            //$result = Branch::all()->where('rel_id', '=', $q);
         }
-       
+
         return json_encode($result);
     }
-
-
-
 }
