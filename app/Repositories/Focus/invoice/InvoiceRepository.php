@@ -332,13 +332,9 @@ class InvoiceRepository extends BaseRepository
         $invoice = $input['invoice_data'];
         // sanitize values
         foreach ($invoice as $key => $value) {
-            // format date value
-            if ($key == 'invoicedate') {
-                $invoice[$key] = date_for_database($value);
-            }
-            // clean decimal values
-            if (in_array($key, ['total', 'subtotal', 'tax'])) {
-                $invoice[$key] = numberClean($value);
+            if (in_array($key, ['total', 'subtotal', 'tax', 'invoicedate'])) {
+                if ($key == 'invoicedate') $invoice[$key] = date_for_database($value);                
+                else $invoice[$key] = numberClean($value);
             }
         }
         $duedate = $invoice['invoicedate'] . ' + ' . $invoice['validity'] . ' days';
@@ -357,7 +353,7 @@ class InvoiceRepository extends BaseRepository
         $invoice_items = array();
         $item = $input['data_items'];
         for ($i = 0; $i < count($item['quote_id']); $i++) {
-            $row = array('invoice_id' => $result['id'], 'ins' => $result['ins']);
+            $row = array('invoice_id' => $result->id, 'ins' => $result->ins);
             foreach (array_keys($item) as $key) {
                 $value = $item[$key][$i];
                 if ($key == 'product_price') $row[$key] = numberClean($value);
@@ -374,82 +370,67 @@ class InvoiceRepository extends BaseRepository
             // increament transaction id
             $tr_id = $dr_data['tid'];
             $transxn_no = Transaction::orderBy('id', 'desc')->first();
-            if (isset($transxn_no->tid) && $dr_data['tid'] <= $transxn_no->tid) {
+            if ($transxn_no && $dr_data['tid'] <= $transxn_no->tid) {
                 $tr_id = $transxn_no->tid + 1;
             }
 
-            $customer_name = $dr_data['customer_name'];
             $tr_category = Transactioncategory::where('code', 'sales')->first();
-
-            //Dr Receivables
+            $customer_name = $dr_data['customer_name'];
             $dr_account_id = $dr_data['dr_account_id'];
+            
+            $dr_data = array_replace($dr_data, [
+                'payer_type' => 'customer',
+                'payer' => $customer_name,
+                'payer_id' => $invoice['customer_id'],
+                'trans_category_id' => $tr_category->id,
+                'is_bill' => 2,
+                'transaction_type' => 'sales',
+                'ins' => $invoice['ins'],
+                'user_id' => $invoice['user_id'],
+                'tid' => $tr_id,
+                'refer_no' => $result->tid,
+                'account_id' => $dr_account_id,
+                'transaction_date' => $invoice['invoicedate'],
+                'due_date' => $invoice['invoiceduedate'],
+                'debit' => $invoice['total'],
+                'note' => $invoice['notes'],
+                'invoice_id' => $result->id
+            ]);
+            // debit
             unset($dr_data['customer_name']);
             unset($dr_data['dr_account_id']);
-            $dr_data['payer_type'] = 'customer';
-            $dr_data['payer'] = $customer_name;
-            $dr_data['payer_id'] = $invoice['customer_id'];
-            $dr_data['trans_category_id'] = $tr_category->id;
-            $dr_data['is_bill'] = 2;
-            $dr_data['transaction_type'] = 'sales';
-            $dr_data['ins'] = $invoice['ins'];
-            $dr_data['user_id'] = $invoice['user_id'];
-            $dr_data['tid'] = $tr_id;
-            $dr_data['refer_no'] = $tid;
-            $dr_data['account_id'] = $dr_account_id;
-            $dr_data['transaction_date'] = date_for_database($invoice['invoicedate']);
-            $dr_data['due_date'] = date_for_database($duedate);
-            $dr_data['debit'] = numberClean($invoice['total']);
-            $dr_data['note'] = $invoice['notes'];
-            $dr_data['invoice_id'] = $result->id;
-            $debit = Purchase::create($dr_data);
+            Purchase::create($dr_data);
+
             //Cr Income amount exclusive tax
             $cr_account_id = $cr_data['cr_account_id'];
-            unset($cr_data['cr_account_id']);
-
-            $cr_data['payer_type'] = 'customer';
-            $cr_data['payer'] = $customer_name;
-            $cr_data['payer_id'] = $invoice['customer_id'];
-            $cr_data['trans_category_id'] = $tr_category->id;
-            $cr_data['is_bill'] = 0;
-            $cr_data['transaction_type'] = 'sales';
-            $cr_data['ins'] = $invoice['ins'];
-            $cr_data['user_id'] = $invoice['user_id'];
-            $cr_data['tid'] = $tr_id;
-            $cr_data['refer_no'] = $tid;
-            $cr_data['account_id'] = $cr_account_id;
-            $cr_data['transaction_date'] = date_for_database($invoice['invoicedate']);
-            $cr_data['due_date'] = date_for_database($duedate);
-            $cr_data['credit'] = numberClean($invoice['subtotal']);
-            $cr_data['note'] = $invoice['notes'];
-            $cr_data['bill_id'] = $result->id;
-            $credit = Purchase::create($cr_data);
+            $cr_data = array_replace($dr_data, [
+                'is_bill' => 0,
+                'account_id' => $cr_account_id,
+                'credit' => $invoice['subtotal']
+            ]);
+            // credit
+            unset($cr_data['debit']);
+            Purchase::create($cr_data);
 
             //Cr Tax
-            $tax_data = $input['tax_data'];
-            if (numberClean($tax_data['tax']) > 0) {
+            $inp_tax = $input['tax_data']['tax'];
+            if (numberClean($inp_tax) > 0) {
                 $tr_tax_category = Transactioncategory::where('code', 'p_taxes')->first();
                 $account_id = Account::where('system', 'tax')->first();
-                $tax_data['payer_type'] = 'customer';
-                $tax_data['payer'] = $customer_name;
-                $tax_data['payer_id'] = $invoice['customer_id'];
-                $tax_data['account_id'] = $account_id->id;
-                $tax_data['trans_category_id'] = $tr_tax_category->id;
-                $tax_data['secondary_account_id'] = $account_id->id;
-                $tax_data['tax_type'] = 'sales_purchases';
-                $tax_data['transaction_type'] = 'sales';
-                $tax_data['ins'] = $invoice['ins'];
-                $tax_data['user_id'] = $invoice['user_id'];
-                $tax_data['tid'] = $tr_id;
-                $tax_data['refer_no'] = $tid;
-                $tax_data['refer_no'] = $invoice['tid'];
-                $tax_data['tax_amount'] = numberClean($invoice['subtotal']);
-                $tax_data['credit'] = numberClean($tax_data['tax']);
-                $tax_data['taxable_amount'] = numberClean($invoice['tax']);
-                $tax_data['note'] = strip_tags($invoice['notes']);
-                $tax_data['transaction_date'] = date_for_database($invoice['invoicedate']);
-                $tax_data['invoice_id'] = $invoice['tid'];
-                $tax_data['bill_id'] = $result->id;
 
+                $tax_data = array_replace($cr_data, [
+                    'trans_category_id' => $tr_tax_category->id,
+                    'secondary_account_id' => $account_id->id,
+                    'tax_type' => 'sales_purchases',
+                    'tax_amount' => $invoice['subtotal'],
+                    'credit' => $inp_tax,
+                    'taxable_amount' => $invoice['tax'],
+                    'bill_id' => $result->id
+                ]);
+                // credit tax
+                unset($tax_data['is_bill']);
+                unset($tax_data['account_id']);
+                unset($tax_data['due_date']);
                 Purchase::create($tax_data);
             }
         }
@@ -637,9 +618,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function delete(Invoice $invoice)
     {
-        if ($invoice->delete()) {
-            return true;
-        }
+        if ($invoice->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
     }
