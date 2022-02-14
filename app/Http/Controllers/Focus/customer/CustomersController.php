@@ -290,10 +290,10 @@ class CustomersController extends Controller
         if (!access()->allow('crm')) 
             return response()->json(['message' => 'Insufficient privileges'], 403);
 
-        $val = $request->post('person');
-        $customers = Customer::with('primary_group')
-            ->where('active', 1)
-            ->get(['id', 'name', 'phone', 'address', 'city', 'email','company']);
+        $q = $request->search;
+        $customers = Customer::where('name', 'LIKE', '%'.$q.'%')
+            ->orWhere('company', 'LIKE', '%'.$q.'%')
+            ->limit(6)->get();
 
         return response()->json($customers);
     }
