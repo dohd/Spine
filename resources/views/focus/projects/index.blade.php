@@ -169,7 +169,6 @@
 
         // fetch customers
         $("#person").select2({
-            tags: [],
             ajax: {
                 url: "{{ route('biller.customers.select') }}",
                 dataType: 'json',
@@ -194,22 +193,18 @@
         // on selecting customer fetch branches
         const quoteData = [];
         $("#person").on('change', function() {
-            var id = $('#person :selected').val();
-            // fetch customer branches
             $("#branch_id").html('').select2({
                 ajax: {
-                    url: "{{route('biller.branches.branch_load')}}?id=" + id,
-                    dataType: 'json',
+                    url: "{{ route('biller.branches.branch_load') }}",
                     quietMillis: 50,
-                    processResults: function(data) {
+                    data: function(params) { 
                         return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    text: item.name,
-                                    id: item.id
-                                }
-                            })
-                        };
+                            search: params.term, 
+                            customer_id: $("#person").val()
+                        }
+                    },
+                    processResults: function(data) {
+                        return { results: data.map(v => ({ text: v.name, id: v.id })) };
                     },
                 }
             });
@@ -217,7 +212,7 @@
             // fetch customer quotes
             $("#main_quote").html('').select2({
                 ajax: {
-                    url: "{{ route('biller.quotes.customer_quotes') }}?id=" + id,
+                    url: "{{ route('biller.quotes.customer_quotes') }}?id=" + $(this).val(),
                     dataType: 'json',
                     quietMillis: 50,
                     processResults: function(data) {

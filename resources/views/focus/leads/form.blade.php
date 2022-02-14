@@ -227,13 +227,14 @@
 
     // fetch customers
     $("#person").select2({
-        tags: [],
         ajax: {
-            url: "{{route('biller.customers.select')}}",
+            url: "{{ route('biller.customers.select') }}",
             dataType: 'json',
             type: 'POST',
             quietMillis: 50,
-            data: function(person) { return { person }; },
+            data: function(params) { 
+                return { search: params.term }
+            },
             processResults: function(data) {
                 return {
                     results: data.map(v => ({ 
@@ -246,18 +247,18 @@
     });
 
     // on selecting a customer
+    $("#branch_id").select2();
     $("#person").change(function() {
-        $("#branch_id").val('').trigger('change');
-        const id = $('#person :selected').val();
-        // fetch branches with params id from selected customer
-        $("#branch_id").select2({
+        $("#branch_id").html('').select2({
             ajax: {
-                url: "{{route('biller.branches.branch_load')}}?id=" + id,
-                dataType: 'json',
-                type: 'GET',
+                url: "{{ route('biller.branches.branch_load') }}",
                 quietMillis: 50,
-                params: { 'cat_id': id },
-                data: function(product) { return { product };},
+                data: function(params) { 
+                    return {
+                        search: params.term, 
+                        customer_id: $("#person").val()
+                    }
+                },
                 processResults: function(data) {
                     return { results: data.map(v => ({ text: v.name, id: v.id })) };
                 },
