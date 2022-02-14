@@ -139,7 +139,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
+                                                <!-- <tr>
                                                     <td>
                                                         <select name="type[]" id="type-0" class="form-control" required>
                                                             <option value="1" selected>JobCard</option>
@@ -151,7 +151,7 @@
                                                     <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
                                                     <th class="text-center">#</th>
                                                     <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-0">
-                                                </tr>
+                                                </tr> -->
                                             </tbody>
                                         </table>
                                         <button type="button" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
@@ -276,20 +276,21 @@
                 <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
                 <td><input type="text" class="form-control datepicker" name="date[]" id="date-${n}" required></td>
                 <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
-                <th><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></th>
+                <td><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></td>
                 <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-${n}">
             </tr>
         `;
     }
-    //job card row counter
-    let jcIndex = 1;
+
     // addjob card row
+    let jcIndex = 0;
     $('#add-jobcard').click(function() {
-        $('#jobcard tbody').append(jobCardRow(jcIndex));
-        // initalize datepicker
-        $('#date-'+jcIndex)
+        const i = jcIndex;
+        $('#jobcard tbody').append(jobCardRow(i));
+        $('#date-'+i)
             .datepicker({ format: "{{ config('core.user_date_format') }}"  })
             .datepicker('setDate', new Date());
+
         jcIndex++;
     });
 
@@ -311,20 +312,18 @@
         }
     });
 
-    // On next verifications other than the first
+    // On next verifications fetch jobcards
     if (verify_no > 1) {
-        // fetch job cards
+        const quoteId = "{{ $quote->id }}";
         $.ajax({
-            url: baseurl + 'quotes/verified_jcs/' + "{{ $quote->id }}",
+            url: baseurl + 'quotes/verified_jcs/' + quoteId,
             method: 'POST',
             dataType: 'json',
             success: function(data) {
                 // set default job card rows
                 data.forEach((v, i) => {
-                    if (i > 0) {
-                        $('#jobcard tbody').append(jobCardRow(i));
-                        jcIndex++;
-                    }
+                    jcIndex++;
+                    $('#jobcard tbody').append(jobCardRow(i));                    
                     // set values
                     $('#jcitemid-'+i).val(v.id);
                     $('#reference-'+i).val(v.reference);
@@ -339,7 +338,7 @@
     }
 
     // row dropdown menu
-    function dropDown(val) {
+    function dropDown() {
         return `
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
