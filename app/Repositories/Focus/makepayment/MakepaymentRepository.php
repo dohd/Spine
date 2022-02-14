@@ -5,15 +5,11 @@ namespace App\Repositories\Focus\makepayment;
 
 use App\Models\items\PurchaseItem;
 use App\Models\purchase\Purchase;
-use App\Models\account\Account;
-use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 use App\Models\items\CustomEntry;
-use App\Models\items\InvoiceItem;
 use App\Models\product\ProductVariation;
 use Illuminate\Support\Facades\DB;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
@@ -37,10 +33,10 @@ class MakepaymentRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q=$this->query();
-       $q->when(request('i_rel_type')==1, function ($q) {
+        $q = $this->query();
+        $q->when(request('i_rel_type') == 1, function ($q) {
 
-            return $q->where('supplier_id', '=',request('i_rel_id',0));
+            return $q->where('supplier_id', '=', request('i_rel_id', 0));
         });
 
         return
@@ -56,73 +52,44 @@ class MakepaymentRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-
-       $purchases_trans_category_id = Transactioncategory::where('code', 'bc_transactions')->first();
-       $purchases_trans_category_id=$purchases_trans_category_id->id;
-        $input['invoice']['bill_id'] = $input['invoice']['id'];
-        $input['invoice']['payer_id'] = $input['invoice']['payer_id'];
-        $input['invoice']['tid'] = $input['invoice']['tid'];
-        $input['invoice']['refer_no'] = $input['invoice']['refer_no'];
-        $input['invoice']['method'] = $input['invoice']['method'];
-        $input['invoice']['note'] = strip_tags(@$input['invoice']['note']);
-        $input['invoice']['trans_category_id'] = $purchases_trans_category_id;
-        $input['invoice']['account_id'] = $input['invoice']['account_id'];
-        $input['invoice']['transaction_type'] ='purchases';
-       
-
-      
-       
+        $tranxn_category = Transactioncategory::where('code', 'bc_transactions')->first();
+        $inp_invoice = $input['invoice'];
+        $inp_invoice = array_replace($inp_invoice, [
+            'bill_id' => $inp_invoice['id'],
+            'trans_category_id' => $tranxn_category->id,
+            'transaction_type' => 'purchases'
+        ]);
 
         DB::beginTransaction();
-        $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
-        $result = Purchase::create($input['invoice']);
 
+        $inp_invoice = array_map('strip_tags', $inp_invoice);
+        $result = Purchase::create($inp_invoice);
 
         if ($result) {
-                
+            // 
+            Purchase::find($inp_invoice['id'])->update(['total_paid_amount' => $inp_invoice['credit']]);
 
-        
-$update_value = [
-     [
-         'id' => $input['invoice']['id'],
-         'total_paid_amount' => $input['invoice']['credit'],
-         
-     ] ,
-     
-];
-$purchase = new Purchase;
-$index = 'id';
-
-Batch::update($purchase, $update_value, $index, true,'+');
-
-
-
-                
-         //begin debit entry for payment
-
-        $invoice_d = Purchase::where('id',$input['debit_entry']['id'])->first();
-        $input['debit_entry']['account_id'] =$invoice_d->account_id;
-        $input['debit_entry']['trans_category_id'] =$invoice_d->trans_category_id;
-        $input['debit_entry']['bill_id'] = $input['debit_entry']['id'];
-        $input['debit_entry']['tid'] = $input['debit_entry']['tid'];
-        $input['debit_entry']['refer_no'] = $input['debit_entry']['refer_no'];
-        $input['debit_entry']['method'] = $input['debit_entry']['method'];
-        $input['debit_entry']['note'] = strip_tags(@$input['debit_entry']['note']);
-        $input['debit_entry']['second_trans'] = 1;
-        $input['debit_entry']['transaction_type'] ='purchases';
-        
-         Purchase::create($input['debit_entry']);
-
-
-
+            // begin debit entry for payment
+            $dr_data = $input['debit_entry'];
+            $invoice_dr = Purchase::find($dr_data['id']);
+            $dr_data = array_replace($dr_data, [
+                'account_id' => $invoice_dr->account_id,
+                'trans_category_id' => $invoice_dr->trans_category_id,
+                'bill_id' => $dr_data['id'],
+                'tid' => $dr_data['tid'],
+                'refer_no' => $dr_data['refer_no'],
+                'method' => $dr_data['method'],
+                'second_trans' => 1,
+                'transaction_type' => 'purchases'   
+            ]);
+            $dr_data = array_map('strip_tags', $dr_data);
+            Purchase::create($dr_data);
 
             DB::commit();
             return $result;
         }
+
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
-
-
     }
 
     /**
@@ -135,7 +102,7 @@ Batch::update($purchase, $update_value, $index, true,'+');
      */
     public function update(Purchaseorder $purchaseorder, array $input)
     {
-    	$id = $input['invoice']['id'];
+        $id = $input['invoice']['id'];
         $extra_discount = numberClean($input['invoice']['after_disc']);
         $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
         $input['invoice']['invoiceduedate'] = date_for_database($input['invoice']['invoiceduedate']);
@@ -155,7 +122,7 @@ Batch::update($purchase, $update_value, $index, true,'+');
         unset($input['invoice']['restock']);
         $result = Purchaseorder::find($id);
         if ($result->status == 'canceled') return false;
-         $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
+        $input['invoice'] = array_map('strip_tags', $input['invoice']);
         $result->update($input['invoice']);
         if ($result) {
             PurchaseItem::where('bill_id', $id)->delete();
@@ -165,12 +132,13 @@ Batch::update($purchase, $update_value, $index, true,'+');
             $total_tax = 0;
             foreach ($input['invoice_items']['product_id'] as $key => $value) {
                 $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $qty=numberClean($input['invoice_items']['product_qty'][$key]);
-                $old_qty=numberClean(@$input['invoice_items']['old_product_qty'][$key]);
+                $qty = numberClean($input['invoice_items']['product_qty'][$key]);
+                $old_qty = numberClean(@$input['invoice_items']['old_product_qty'][$key]);
                 $total_qty += $qty;
                 $total_tax += numberClean(@$input['invoice_items']['product_tax'][$key]);
                 $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array('bill_id' => $id,
+                $products[] = array(
+                    'bill_id' => $id,
                     'product_id' => $input['invoice_items']['product_id'][$key],
                     'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
                     'code' => @$input['invoice_items']['code'][$key],
@@ -181,15 +149,15 @@ Batch::update($purchase, $update_value, $index, true,'+');
                     'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
                     'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
                     'total_discount' => numberClean(@$input['invoice_items']['total_discount'][$key]),
-                    'product_des' => strip_tags(@$input['invoice_items']['product_description'][$key],config('general.allowed')),
+                    'product_des' => strip_tags(@$input['invoice_items']['product_description'][$key], config('general.allowed')),
                     'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']);
+                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $input['invoice']['ins']
+                );
 
-                if($old_qty>0){
-                     $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty-$old_qty);
-                }
-                else {
-                      $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty);
+                if ($old_qty > 0) {
+                    $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty - $old_qty);
+                } else {
+                    $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => $qty);
                 }
             }
             PurchaseItem::insert($products);
@@ -210,14 +178,14 @@ Batch::update($purchase, $update_value, $index, true,'+');
             $index = 'id';
             Batch::update($update_variation, $stock_update, $index, true);
             if (is_array($re_stock)) {
-                $stock_update_one=array();
+                $stock_update_one = array();
                 foreach ($re_stock as $key => $value) {
                     $myArray = explode('-', $value);
                     $s_id = $myArray[0];
                     $s_qty = numberClean($myArray[1]);
                     if ($s_id) $stock_update_one[] = array('id' => $s_id, 'qty' => $s_qty);
                 }
-            Batch::update($update_variation, $stock_update_one, $index, true, '+');
+                Batch::update($update_variation, $stock_update_one, $index, true, '+');
             }
             DB::commit();
             return $result;
