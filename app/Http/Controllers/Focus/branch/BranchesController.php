@@ -112,11 +112,17 @@ class BranchesController extends Controller
     }
 
     /**
-     *  Load customer branches     *  
+     *  Load customer branches for select options *  
      */
     public function branch_load(Request $request)
     {
-        $branches = Customer::find(request('id'))->branches;
+        $q = $request->search;
+        $customer_id = $request->customer_id;
+
+        $branches = Branch::where('customer_id', $customer_id)
+            ->where('name', 'LIKE', '%'.$q.'%')
+            ->limit(6)->get();
+            
         return response()->json($branches);
     }
 
