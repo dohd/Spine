@@ -228,6 +228,8 @@ Route::group(['namespace' => 'stockissuance'], function () {
 
 Route::group(['namespace' => 'lpo'], function () {
     Route::post('lpo/update_lpo', 'LpoController@update_lpo')->name('lpo.update_lpo');
+    Route::get('lpo/delete_lpo/{id}', 'LpoController@delete_lpo')->name('lpo.delete_lpo');
+
     Route::resource('lpo', 'LpoController');
     // for dataTable
     Route::post('lpo/get', 'LpoTableController')->name('lpo.get');
