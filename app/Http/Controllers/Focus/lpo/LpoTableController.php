@@ -23,6 +23,7 @@ class LpoTableController extends Controller
              
         return DataTables::of($core)
             ->addIndexColumn()
+            ->escapeColumns(['id'])
             ->addColumn('customer', function ($lpo) {
                 $customer = isset($lpo->customer) ?  $lpo->customer->company : '';
                 $branch = isset($lpo->branch) ? $lpo->branch->name : '';
@@ -88,10 +89,10 @@ class LpoTableController extends Controller
                 return '<span><b>'.number_format($this->balance, 2).'</b></span>';
             })
             ->addColumn('actions', function ($lpo) {
-                return '<a href="'.$lpo->id.'" class="update-lpo" data-toggle="modal" data-target="#updateLpoModal"><i class="ft-edit fa-lg"></i></a>'
-                    .'&nbsp;&nbsp;<a href="'.route('biller.lpo.destroy', $lpo->id).'" class="danger delete-lpo"><i class="fa fa-trash fa-lg"></i></a>';
+                return '<a href="'.$lpo->id.'" class="update-lpo" data-toggle="modal" data-target="#updateLpoModal"><i class="ft-edit fa-lg"></i></a>  '
+                    .'<a href="'.route('biller.lpo.delete_lpo', $lpo->id).'" class="danger delete-lpo">'
+                    .'<i class="fa fa-trash fa-lg"></i></a>';
             })
-            ->rawColumns(['amount', 'invoiced', 'verified_uninvoiced', 'approved_unverified', 'balance', 'actions'])
             ->make(true);
     }
 }
