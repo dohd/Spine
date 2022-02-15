@@ -80,7 +80,7 @@ class QuoteVerifyTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('verified', function ($quote) {
-                return $quote->verified;
+                return $quote->verified . ':';
             })
             ->addColumn('lpo_number', function($quote) {
                 return $quote->lpo ? $quote->lpo->lpo_no : '';

@@ -88,8 +88,10 @@ class QuotesTableController extends Controller
                 return '<span class="badge ' . $backgrd . '">' . $quote->status . ':</span><br>'. $lpo;
             })
             ->addColumn('verified', function ($quote) {
+                $tid = 'NIL:';
                 $inv_item = $quote->invoice_items()->first();                
-                $tid = $inv_item ? 'Inv-'.sprintf('%04d', $inv_item->invoice->tid) : 'NIL:';
+                if ($inv_item  && $inv_item->invoice) 
+                    $tid = 'Inv-'.sprintf('%04d', $inv_item->invoice->tid);
 
                 return $quote->verified . ':; <br>' . $tid;
             })
