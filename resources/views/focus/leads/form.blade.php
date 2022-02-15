@@ -156,9 +156,7 @@
 
 <script type="text/javascript">
     // instatiate html-editor
-    $(function() {
-        editor();
-    });
+    editor();
 
     // On selecting client type radio
     $('.clientstatus').change(function() {
@@ -185,9 +183,7 @@
     $('#date_of_request').datepicker('setDate', new Date());
 
     // set ajax headers
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
     /**
      * Edit Lead form script
