@@ -68,20 +68,27 @@
     // Delete LPO
     $(document).on('click', 'a.delete-lpo', function(e) {
         e.preventDefault();
-        if (confirm('Are you sure to delete this item ?')) {
-            $.ajax({
-                url: $(this).attr('href'),
-                method: 'DELETE'
-            })
-            .done(function() { location.reload(); })
-            .fail(function(err) {
-                if (err.status === 403) {
-                    $('.lpo-alert').removeClass('d-none');
-                    $('.lpoMsg').text(err.responseJSON.message);
-                    setTimeout(() => $('.lpo-alert').addClass('d-none'), 5000);
-                }
-            })
-        }
+        const url = $(this).attr('href');
+        swal(
+            {
+                title: 'Are you sure to delete this ?',
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#DD6B55'
+            }, 
+            function() {
+                $.ajax({ url })
+                .done(function() { location.reload(); })
+                .fail(function(err) {
+                    if (err.status === 403) {
+                        $('.lpo-alert').removeClass('d-none');
+                        $('.lpoMsg').text(err.responseJSON.message);
+                        setTimeout(() => $('.lpo-alert').addClass('d-none'), 5000);
+                    }
+                })            
+            }
+        );     
     });
     
     // Fetch update data
@@ -92,31 +99,32 @@
         $.ajax({ url: baseurl + `lpo/${id}/edit`, })
         .done(function(data) { 
             const {customer, branch, lpo} = data;
-            const $form = $("#updateLpoForm");
-            $form.find('#lpo_id').val(lpo.id);
-            $form.find("#person").append(new Option(customer.name, customer.id, 'selected', true));
-            $form.find("#branch_id").append(new Option(branch.name, branch.id, 'selected', true));
-            $form.find('#date').val(lpo.date);
-            $form.find('#lpo_no').val(lpo.lpo_no);
-            $form.find('#amount').val(lpo.amount);
-            $form.find('#remark').val(lpo.remark);
+            const formId = '#updateLpoForm ';
+            $(formId+'#lpo_id').val(lpo.id);
+            $(formId+'#person').append(new Option(customer.name, customer.id, 'selected', true));
+            $(formId+'#branch_id').append(new Option(branch.name, branch.id, 'selected', true));
+            $(formId+'#date').val(lpo.date);
+            $(formId+'#lpo_no').val(lpo.lpo_no);
+            $(formId+'#amount').val(lpo.amount);
+            $(formId+'#remark').val(lpo.remark);
         });
     });
     
     // On modal open
     $(document).on('shown.bs.modal', '#updateLpoModal, #AddLpoModal', function() {
-        const $modal = $(this);
-        
+        $person = $(this).find("#person");
+        $branch =  $(this).find("#branch_id");
+
         // initialize customer select2
-        $modal.find("#person").select2({
-            tags: [],
+        $person.select2({
+            dropdownParent: $(this),
             ajax: {
                 url: "{{ route('biller.customers.select') }}",
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
-                data: function(person) {
-                    return { person };
+                data: function(params) { 
+                    return { search: params.term }
                 },
                 processResults: function(data) {
                     return {
@@ -132,13 +140,19 @@
         });
 
         // on selecting customer fetch branches
-        $modal.find("#person").on('change', function() {
-            // fetch customer branches
-            $modal.find("#branch_id").html('').select2({
+        $modal = $(this);
+        $person.on('change', function() {
+            $branch.html('').select2({
+                dropdownParent: $modal,
                 ajax: {
-                    url: "{{ route('biller.branches.branch_load') }}?id=" + $(this).val(),
-                    dataType: 'json',
+                    url: "{{ route('biller.branches.branch_load') }}",
                     quietMillis: 50,
+                    data: function(params) {
+                        return {
+                            search: params.term,
+                            customer_id: $person.val()
+                        };
+                    },
                     processResults: function(data) {
                         return {
                             results: $.map(data, function(item) {
