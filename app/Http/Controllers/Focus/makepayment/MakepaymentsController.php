@@ -136,15 +136,15 @@ class MakepaymentsController extends Controller
             $debit_entry['payer_id'] = 0;
         }
         // add extra params
+        $amount_paid = numberClean($request->input('amount_paid'));
         $extras = array(
             'ins' => auth()->user()->ins,
             'user_id' => auth()->user()->id,
-            'credit' => numberClean($request->input('amount_paid')),
             'for_who' => $invoice['payer_id'],
             'transaction_date' => date_for_database($request->input('transaction_date'))
         );
-        $invoice = array_replace($invoice, $extras);
-        $debit_entry = array_replace($debit_entry, $extras);
+        $invoice = array_replace($invoice, $extras, ['credit' => $amount_paid]);
+        $debit_entry = array_replace($debit_entry, $extras, ['debit' => $amount_paid]);
         
         $result = $this->repository->create(compact('invoice', 'debit_entry'));
 
