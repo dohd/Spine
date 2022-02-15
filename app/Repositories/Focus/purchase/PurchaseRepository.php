@@ -103,16 +103,13 @@ class PurchaseRepository extends BaseRepository
             // dd($result->id);
             $products = array();
             $stockables = array();
-            $subtotal = 0;
-            $total_qty = 0;
-            $total_tax = 0;
             $stock_update = array();
             $purchases_trans_sec_id = Account::where('system', 'inv')->first();
             $purchases_trans_sec_id = $purchases_trans_sec_id->id;
 
 
-            $grn = Purchase::orderBy('grn', 'desc')->where('grn', '>', 0)->first();
-            $grn = @$grn + 1;
+            $row = Purchase::orderBy('grn', 'desc')->where('grn', '>', 0)->first();
+            $grn = $row ? $row->grn + 1 : 0;
 
             //purchase product
             if ($input['inventory_items']['totalsaleamount'] > 0) {
