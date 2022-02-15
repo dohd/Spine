@@ -413,8 +413,8 @@ class InvoiceRepository extends BaseRepository
             Purchase::create($cr_data);
 
             //Cr Tax
-            $inp_tax = $input['tax_data']['tax'];
-            if (numberClean($inp_tax) > 0) {
+            $inp_tax = numberClean($input['tax_data']['tax']);
+            if ($inp_tax > 0) {
                 $tr_tax_category = Transactioncategory::where('code', 'p_taxes')->first();
                 $account_id = Account::where('system', 'tax')->first();
 
