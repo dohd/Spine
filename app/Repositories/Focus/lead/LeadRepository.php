@@ -39,13 +39,12 @@ class LeadRepository extends BaseRepository
         $data['date_of_request'] = date_for_database($data['date_of_request']);
         // increament reference
         $lead = Lead::orderBy('reference', 'desc')->first('reference');
-        if (isset($lead) && $data['reference'] <= $lead->reference) {
+        if ($lead && $data['reference'] <= $lead->reference) {
             $data['reference'] = $lead->reference + 1;
         }
 
         $result = Lead::create($data);
-
-        if ($result) return $result;
+        return $result;
 
         throw new GeneralException('Error Creating Lead');
     }
@@ -75,8 +74,9 @@ class LeadRepository extends BaseRepository
      */
     public function delete(Lead $lead)
     {
-        if (!count($lead->quotes)) return $lead->delete();
-
+        if (count($lead->quotes)) return;          
+        else return $lead->delete();
+        
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }
