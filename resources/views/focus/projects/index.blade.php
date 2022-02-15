@@ -157,15 +157,10 @@
 
     // On Click Create Modal
     $('#AddProjectModal').on('shown.bs.modal', function() {
-
         // initiate select2 select menu
         $("#main_quote").select2();
         $("#other_quote").select2();
         $("#branch_id").select2();
-        $("#tags").select2();
-        $("#employee").select2();
-        $("#sales_account").select2();
-        $('#color').colorpicker();
 
         // fetch customers
         $("#person").select2({
@@ -174,8 +169,8 @@
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
-                data: function(person) {
-                    return { person };
+                data: function(params) {
+                    return { search: params.term };
                 },
                 processResults: function(data) {
                     return {
