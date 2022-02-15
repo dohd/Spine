@@ -105,9 +105,20 @@ class LpoController extends Controller
      */
     public function destroy($id)
     {
+        // 
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete_lpo($id)
+    {
         $lpo = Lpo::find($id);
         if (count($lpo->quotes))
-            return response()->json(['message' => ' Detach LPO from Quote / Proforma Invoice'], 403);
+            return response()->json(['status' => 'Error', 'message' => ' LPO attached to Quote / Proforma Invoice'], 403);
         
         $lpo->delete();        
         return response()->noContent();
