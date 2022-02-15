@@ -148,9 +148,12 @@ class LeadsController extends Controller
      */
     public function destroy(Lead $lead)
     {
-        $this->repository->delete($lead);
+        $resp = $this->repository->delete($lead);
+
+        $params = array('flash_success' => 'Ticket Successfully Deleted');
+        if (!$resp) $params = array('flash_error' => 'Tkt-'.sprintf('%04d', $lead->reference).' is attached to a Quote / Proforma Invoice.');
         
-        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Deleted']);
+        return new RedirectResponse(route('biller.leads.index'), $params);
     }
 
     /**
