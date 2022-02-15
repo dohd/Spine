@@ -419,6 +419,7 @@ class InvoiceRepository extends BaseRepository
                 $account_id = Account::where('system', 'tax')->first();
 
                 $tax_data = array_replace($cr_data, [
+                    'account_id' => $account_id->id,
                     'trans_category_id' => $tr_tax_category->id,
                     'secondary_account_id' => $account_id->id,
                     'tax_type' => 'sales_purchases',
@@ -429,7 +430,6 @@ class InvoiceRepository extends BaseRepository
                 ]);
                 // credit tax
                 unset($tax_data['is_bill']);
-                unset($tax_data['account_id']);
                 unset($tax_data['due_date']);
                 Purchase::create($tax_data);
             }
