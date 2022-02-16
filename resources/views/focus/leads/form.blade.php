@@ -89,7 +89,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-sm-6"><label for="date_of_request" class="caption">Callout Date</label>
+                <div class="col-sm-6"><label for="date_of_request" class="caption">Callout / Client Report Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                         {{ Form::text('date_of_request', null, ['class' => 'form-control round datepicker', 'id' => 'date_of_request']) }}
@@ -122,10 +122,10 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-sm-6"><label for="employee_id" class="caption">Assign To <span class="text-danger">*</span></label>
+                <div class="col-sm-6"><label for="employee_id" class="caption">Requested By (Client Rep)<span class="text-danger">*</span></label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        {{ Form::text('assign_to', null, ['class' => 'form-control round', 'placeholder' => 'Assign To', 'required']) }}
+                        {{ Form::text('assign_to', null, ['class' => 'form-control round', 'placeholder' => 'Requested By', 'required']) }}
                     </div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                 <div class="col-12"><label for="refer_no" class="caption">Note</label>
                     <div class="input-group">
                         <div class="w-100">
-                            {{ Form::textarea('note', null, ['class' => 'form-control html_editor', 'rows' => 6]) }}
+                            {{ Form::textarea('note', null, ['class' => 'form-control', 'rows' => 6]) }}
                         </div>
                     </div>
                 </div>
