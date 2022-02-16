@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Models\product\Traits;
+
 use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
-use App\Models\warehouse\Warehouse;
 
 /**
  * Class ProductRelationship
@@ -21,29 +21,27 @@ trait ProductRelationship
         return $this->hasMany(ProductVariation::class)->where('parent_id', 1);
     }
 
-        public function variations_b()
+    public function variations_b()
     {
         return $this->belongsTo(ProductVariation::class)->where('parent_id', 1);
     }
 
-     public function category()
+    public function category()
     {
-        return $this->hasOne(Productcategory::class,'id','productcategory_id');
+        return $this->hasOne(Productcategory::class, 'id', 'productcategory_id')->withoutGlobalScopes();
     }
 
-         public function subcategory()
+    public function subcategory()
     {
-        return $this->hasOne(Productcategory::class,'id','sub_cat_id');
+        return $this->hasOne(Productcategory::class, 'id', 'sub_cat_id');
     }
 
-     public function record()
+    public function record()
     {
         return $this->hasMany(ProductVariation::class);
     }
-         public function record_one()
+    public function record_one()
     {
         return $this->hasOne(ProductVariation::class);
     }
-
-
 }
