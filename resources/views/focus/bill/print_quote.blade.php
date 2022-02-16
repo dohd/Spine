@@ -213,7 +213,7 @@
 						$field_value = 'PI-' . $tid;
 					}
 				@endphp
-				<b>{{ $field_name }} :</b> {{ $field_value }}<br><br>		
+				<b>{{ $field_name }} :</b> {{ $field_value . $invoice->revision }}<br><br>		
 				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>		
 				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
 				<b>Currency :</b> Kenya Shillings <br>
@@ -266,18 +266,13 @@
 				@endif				
 			@endforeach
 			<!-- 20 dynamic empty rows -->
-			@php
-				$len = count($invoice->products);
-			@endphp
-			@if ($len < 20)
-				@for ($i = 0; $i < (20 - $len); $i++)
-					<tr>
-						@for($j = 0; $j < 6; $j++) 
-							<td></td>
-						@endfor
-					</tr>
-				@endfor
-			@endif
+			@for ($i = count($invoice->products); $i < 15; $i++)
+				<tr>
+					@for($j = 0; $j < 6; $j++) 
+						<td></td>
+					@endfor
+				</tr>
+			@endfor
 			<!--  -->
 			<tr>
 				<td colspan="4" class="bd-t" rowspan="2">

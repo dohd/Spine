@@ -247,18 +247,13 @@
 				</tr>
 			@endforeach
 			<!-- 20 dynamic empty rows -->
-			@php
-				$len = count($invoice->products);
-			@endphp
-			@if ($len < 5)
-				@for ($i = 0; $i < (5 - $len); $i++)
-					<tr>
-						@for($j = 0; $j < 7; $j++) 
-							<td></td>
-						@endfor
-					</tr>
-				@endfor
-			@endif
+			@for ($i = count($invoice->products); $i < 5; $i++)
+				<tr>
+					@for($j = 0; $j < 7; $j++) 
+						<td></td>
+					@endfor
+				</tr>
+			@endfor
 			<!--  -->
 			<tr>
 				<td colspan="5" class="bd-t" rowspan="2">

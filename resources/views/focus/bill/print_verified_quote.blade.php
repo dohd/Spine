@@ -266,18 +266,15 @@
 					</tr>
 				@endif				
 			@endforeach
-			<!-- empty row with dynamic height-->
-			<tr>
-				@php
-					$items_height = 30 * count($invoice->verified_items);
-					$height = 370 - $items_height;
-					if ($invoice->bank_id) $height = 340 - $items_height;									
-				@endphp
-				<td height="{{ $height }}"></td>				
-                @for($i = 0; $i < 6; $i++) 
-                    <td></td>
-                @endfor
-			</tr>
+			<!-- 20 dynamic empty rows -->
+			@for ($i = count($invoice->verified_items); $i < 15; $i++)
+				<tr>
+					@for($j = 0; $j < 7; $j++) 
+						<td></td>
+					@endfor
+				</tr>
+			@endfor
+			<!--  -->
 			<tr>
 				<td colspan="4" class="bd-t">
 					@if ($invoice->bank_id)
