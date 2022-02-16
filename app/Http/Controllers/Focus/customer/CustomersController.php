@@ -168,13 +168,12 @@ class CustomersController extends Controller
      * @param App\Models\customer\Customer $customer
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Customer $customer, DeleteCustomerRequest $request)
+    public function destroy(Customer $customer)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($customer);
-        //returning with successfull message
-        //return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.customers.deleted')));
+        $res = $this->repository->delete($customer);
+        if (!$res) return response()->json(['status' => 'Error', 'message' => 'Customer is attached to a Ticket']);
+
+        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.customers.deleted')]);
     }
 
     /**
