@@ -15,11 +15,10 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\product;
 
-use App\Models\product\Product;
 use App\Http\Controllers\Controller;
-use App\Models\product\ProductVariation;
 use App\Repositories\Focus\product\ProductVariationRepository;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\product\ProductRepository;
@@ -54,83 +53,56 @@ class ProductsTableController extends Controller
      *
      * @return mixed
      */
-    public function __invoke(ManageProductRequest $request)
+    public function __invoke()
     {
-
-        if (request('p_rel_id') and (request('p_rel_type') == 2)) {
+        // warehouse products
+        if (request('p_rel_id') && request('p_rel_type') == 2) {
+            print_log('+++ W/H product +++');
             $core = $this->product_variation->getForDataTable();
+        } 
+        else $core = $this->product->getForDataTable();
+        
+        return Datatables::of($core)
+            ->escapeColumns(['id'])
+            ->addIndexColumn()
+            ->addColumn('name', function ($item) {
+                return '<a class="font-weight-bold" href="' . route('biller.products.show', [$item->id]) . '">' . $item->name . '</a>';
+            })
+            ->addColumn('code', function ($item) {
+                return  $item->standard ? $item->standard->code : $item->code;
+            })
+            ->addColumn('warehouse', function ($item) {
+                $title = '';
+                if (isset($item->standard->warehouse)) $title = $item->standard->warehouse->title;
+                if ($item->warehouse) $title = $item->warehouse->title;
+                $image = $item->standard ? $item->standard->image : $item->image;
 
-            return Datatables::of($core)
-                ->addIndexColumn()
-                ->addColumn('name', function ($item) {
-                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$item->product->id]) . '">' . $item->product->name . '</a> <small> ' . $item->name . '</small>';
-                })
-                ->addColumn('warehouse', function ($item) {
+                if ($title && $image)
+                    return $title . '<img class="media-object img-lg border" src="'.Storage::disk('public')->url('app/public/img/products/' . $image).'" alt="Product Image">';
+            })
+            ->addColumn('category', function ($item) {
+                $title = '';
+                if (isset($item->category)) $title = $item->category->title;
+                if (isset($item->product->category)) $title = $item->product->category->title;
 
-                    return $item->warehouse['title'] . '<img class="media-object img-lg border"
-                                                                      src="' . Storage::disk('public')->url('app/public/img/products/' . @$item['image']) . '"
-                                                                      alt="Product Image">';
-                })
-                ->addColumn('code', function ($item) {
+                return $title;
+            })
+            ->addColumn('qty', function ($item) {
+                return $item->standard ? intval($item->standard->qty) : intval($item->qty);
+            })
+            ->addColumn('created_at', function ($item) {
+                return dateFormat($item->created_at);
+            })
+            ->addColumn('price', function ($item) {
+                return $item->standard ? amountFormat($item->standard->price) : amountFormat($item->price);
+            })
+            ->addColumn('actions', function ($item) {
+                $buttons = '';
+                if ($item->action_buttons) $buttons = $item->action_buttons;
+                if (isset($item->product->action_buttons)) $buttons = $item->product->action_buttons;
 
-                    return  $item->standard->code;
-                })
-                ->addColumn('category', function ($item) {
-                    return $item->product->category->title;
-                })
-                ->addColumn('qty', function ($item) {
-                    return numberFormat($item['qty']) . ' ' . $item->unit;
-                })
-                ->addColumn('created_at', function ($item) {
-                    return dateFormat($item->created_at);
-                })
-                ->addColumn('price', function ($item) {
-                    return amountFormat($item['price']);
-                })
-                ->addColumn('actions', function ($item) {
-                    return $item->product->action_buttons;
-                })->rawColumns(['name', 'warehouse', 'category', 'qty', 'created_at', 'price', 'actions'])
-                ->make(true);
-
-
-        } else {
-
-
-            $core = $this->product->getForDataTable();
-
-
-            return Datatables::of($core)
-                ->addIndexColumn()
-                ->addColumn('name', function ($item) {
-                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$item->id]) . '">' . $item->name . '</a>';
-                })
-                ->addColumn('code', function ($item) {
-
-                    return  $item->standard->code;
-                })
-                ->addColumn('warehouse', function ($item) {
-
-                    return $item->standard['warehouse']['title'] . '<img class="media-object img-lg border"
-                                                                      src="' . Storage::disk('public')->url('app/public/img/products/' . @$item->standard['image']) . '"
-                                                                      alt="Product Image">';
-                })
-                ->addColumn('category', function ($item) {
-                    return $item->category->title;
-                })
-                ->addColumn('qty', function ($item) {
-                    return numberFormat($item->standard['qty']) . ' ' . $item->unit;
-                })
-                ->addColumn('created_at', function ($item) {
-                    return dateFormat($item->created_at);
-                })
-                ->addColumn('price', function ($item) {
-                    return amountFormat($item->standard['price']);
-                })
-                ->addColumn('actions', function ($item) {
-                    return $item->action_buttons;
-                })->rawColumns(['name', 'warehouse', 'category', 'qty', 'created_at', 'price', 'actions'])
-                ->make(true);
-
-        }
+                return $buttons;
+            })
+            ->make(true);
     }
 }
