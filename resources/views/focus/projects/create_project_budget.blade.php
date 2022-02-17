@@ -24,7 +24,7 @@
                         $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
                     @endphp
                     <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
-                        <i class="fa fa-print"></i> Quote
+                        <i class="fa fa-print"></i> Technician
                     </a> 
                 </div>
             </div>
@@ -338,6 +338,7 @@
             $('#newqty-'+i).val(parseFloat(v.product_qty));
         } else {
             $('#quote-item tbody').append(titleRow(i));
+            // set default values
             $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
         }

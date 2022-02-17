@@ -26,10 +26,10 @@
                             $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
                         @endphp
                         <a href="{{ $budget_url }}" class="btn btn-purple" target="_blank">
-                            <i class="fa fa-print"></i> Budget
+                            <i class="fa fa-print"></i> Store
                         </a>&nbsp;
                         <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
-                            <i class="fa fa-print"></i> Quote
+                            <i class="fa fa-print"></i> Technician
                         </a> 
                     </div>                    
                 </div>
@@ -254,7 +254,7 @@
     function titleRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}"></span></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td colspan="9"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
@@ -375,6 +375,7 @@
             if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);  
         } else {
             $('#budget-item tbody').append(titleRow(i));
+            // set default values
             $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
             $('#itemid-'+i).val(v.id);
