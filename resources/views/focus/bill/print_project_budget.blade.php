@@ -219,6 +219,9 @@
 		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
 	</table>
 	<br>
+	@php
+		$budget = $invoice->budgets()->first();                
+	@endphp
 	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
@@ -228,10 +231,7 @@
 				<td width="10%">UoM</td>				
 			</tr>
 		</thead>
-		<tbody>
-            @php
-                $budget = $invoice->budgets()->first();                
-            @endphp
+		<tbody>            
 			@foreach($budget->products as $product)
 				@if ($product->a_type == 1)					
 					<tr>
@@ -262,22 +262,19 @@
 		</tbody>
 	</table>
 	<br>
-	<div style="width: 100%;">
-		<div style="float: left; width: 50%">
-			<table class="items" cellpadding="8">
-				<thead>
-					<tr>
-						<td width="8%">No.</td>
-						<td width="42%">Skill Type</td>
-						<td width="10%">Working Hours</td>
-						<td width="10%">No. Technicians</td>
-					</tr>
-				</thead>
-				<tbody>
-					@php
-						$budget = $invoice->budgets()->first();
-					@endphp
-					@isset($budget)
+	@isset($budget)
+		<div style="width: 100%;">
+			<div style="float: left; width: 50%">
+				<table class="items" cellpadding="8">
+					<thead>
+						<tr>
+							<td width="8%">No.</td>
+							<td width="42%">Skill Type</td>
+							<td width="10%">Working Hours</td>
+							<td width="10%">No. Technicians</td>
+						</tr>
+					</thead>
+					<tbody>
 						@foreach ($budget->skillsets as $k => $val)
 							<tr>
 								<td>{{ $k+1 }}</td>
@@ -285,15 +282,15 @@
 								<td>{{ $val->hours }}</td>
 								<td>{{ $val->no_technician }}</td>
 							</tr>
-						@endforeach
-					@endisset
-				</tbody>
-			</table>
-		</div>
-		<div style="float: left; margin-left: 5%">
-			<b>Tools Required & Notes :</b><br>
-			{!! $budget->tool !!}
-		</div>		
-	</div>	
+						@endforeach						
+					</tbody>
+				</table>
+			</div>
+			<div style="float: left; margin-left: 5%">
+				<b>Tools Required & Notes :</b><br>
+				{!! $budget->tool !!}
+			</div>		
+		</div>	
+	@endisset
 </body>
 </html>
