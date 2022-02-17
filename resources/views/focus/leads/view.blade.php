@@ -73,11 +73,11 @@
                     </tr>   
                     <tr><th></th></tr>                                     
                     <tr>
-                        <th>Date of Request</th>
+                        <th>Callout Date</th>
                         <td>{{ dateFormat($lead->date_of_request) }}</td>
                     </tr>                    
                     <tr>
-                        <th>Assigned to</th>
+                        <th>Requested By</th>
                         <td>{{ $lead->assign_to }}</td>
                     </tr>
                     <tr>
@@ -86,7 +86,7 @@
                     </tr>
                     <tr>
                         <th>Note</th>
-                        <td>{{ $lead->note }}</td>
+                        <td>{!! $lead->note !!}</td>
                     </tr>
                     <tr>
                         <th>Created at</th>
@@ -97,23 +97,4 @@
         </div>
     </div>
 </div>
-@include('focus.leads.partials.status_modal')
-@endsection
-
-@section('after-scripts')
-{{-- For DataTables --}}
-{{ Html::script(mix('js/dataTable.js')) }}
-<script>
-    // default status modal select value
-    $('#status').val("{{ $lead->status }}");
-    $('#reason').val("{{ $lead->reason }}");
-
-    const temp_div = document.createElement('div');
-    $('#leads-table td').each(function() {
-        if (!$(this).index()) return;
-        $(temp_div).html($(this).text());
-        const td_text = $(temp_div).text().replace(/[A-Z]/g, function(el) { return ' ' + el; });
-        $(this).text(td_text);
-    });
-</script>
 @endsection
