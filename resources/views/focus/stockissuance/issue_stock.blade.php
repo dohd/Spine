@@ -26,10 +26,10 @@
                             $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
                         @endphp
                         <a href="{{ $budget_url }}" class="btn btn-purple" target="_blank">
-                            <i class="fa fa-print"></i> Budget
+                            <i class="fa fa-print"></i> Store
                         </a>&nbsp;
                         <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
-                            <i class="fa fa-print"></i> Quote
+                            <i class="fa fa-print"></i> Technician
                         </a> 
                     </div>
                 </div>
