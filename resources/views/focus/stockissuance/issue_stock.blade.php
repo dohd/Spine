@@ -281,7 +281,7 @@
     function titleRow(n) {
         return `
             <tr>
-                <td><span id="number-${n}"></span></td>
+                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" disabled></td>
                 <td colspan="11"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
@@ -410,8 +410,9 @@
             if (v.issue_qty) $('#issuedqty-'+i).val(v.issue_qty);  
         } else {
             $('#budget-item tbody').append(titleRow(i));
-            $('#itemname-'+i).val(v.product_name);
+            // set default values
             $('#numbering-'+i).val(v.numbering);
+            $('#itemname-'+i).val(v.product_name);
         }
         productIndx++;
     });
@@ -489,10 +490,11 @@
                 $.ajax({
                     url: baseurl + 'products/quotesearch/'+i,
                     dataType: "json",
-                    method: 'post',
+                    method: 'POST',
+                    data: 'keyword=' + request.term,
                     success: function(data) {
                         response(data.map(v => ({
-                            label: v.name,
+                            label: v.code + ' - ' + v.name,
                             value: v.name,
                             data: v
                         })));
