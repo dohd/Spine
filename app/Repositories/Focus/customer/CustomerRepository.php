@@ -244,10 +244,8 @@ class CustomerRepository extends BaseRepository
      */
     public function delete($customer)
     {
-        $lead = $customer->leads()->first();
-        if ($lead) return;
-
-        // return $customer->delete();
+        if ($customer->leads()->first()) return;
+        return $customer->delete();
 
         throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
     }
