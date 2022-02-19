@@ -49,12 +49,12 @@ class StockIssuanceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function issue_stock()
+    public function issue_stock(Request $request)
     {
         // extract input fields
-        $product_id = request('product_id');
-        $item_id = request('item_id');
-        $input_qty = request('issue_qty');
+        $product_id = $request->product_id;
+        $item_id = $request->item_id;
+        $input_qty = $request->issue_qty;
 
         DB::beginTransaction();
 
@@ -80,7 +80,8 @@ class StockIssuanceController extends Controller
             'item_id' => $item_id,
             'issue_qty' => $input_qty,
             'issued_by' => $user->id,
-            'issuer' => $user->first_name . ' ' . $user->last_name
+            'issuer' => $user->first_name . ' ' . $user->last_name,
+            'reqxn' => $request->reqxn
         ]);
 
         DB::commit();
