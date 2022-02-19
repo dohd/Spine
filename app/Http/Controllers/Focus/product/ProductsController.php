@@ -390,11 +390,14 @@ class ProductsController extends Controller
         ->when($input['warehouse_id'] > 0, function ($q) use ($input) {
             $q->where('warehouse_id', $input['warehouse_id']);
         })
+        ->with(['warehouse' => function($q) {
+            $q->select(['id', 'title']);
+        }])
         ->limit(6)->get();
 
         $output = array();
         foreach ($product_variations as $row) {
-            if ( !$row->product->stock_type || ($row->product->stock_type > 0 && $row->qty > 0)) {
+            if (!$row->product->stock_type || ($row->product->stock_type > 0 && $row->qty > 0)) {
                 $output[] = array(
                     'name' => $row->product->name . ' ' . $row->name, 
                     'disrate' => numberFormat($row->disrate), 
@@ -406,8 +409,8 @@ class ProductsController extends Controller
                     'unit' => $row->product['unit'], 
                     'code' => $row->code, 
                     'alert' => $row->qty, 
-                    'image' => $row->image, 
-                    'serial' => ''
+                    'image' => $row->image,
+                    'warehouse' => $row->warehouse
                 );
             }
         }
@@ -416,16 +419,19 @@ class ProductsController extends Controller
             $product_variations = ProductVariation::whereHas('product', function ($q) use ($input) {
                 $q->where('name', 'LIKE', '%'.$input['keyword'].'%');
             })
-            ->whereHas('v_prices', function ($query) use ($input) {
-                $query->where('pricegroup_id', $input['pricing']);
+            ->whereHas('v_prices', function ($q) use ($input) {
+                $q->where('pricegroup_id', $input['pricing']);
             })
             ->when($input['warehouse_id'] > 0, function ($q) use ($input) {
                 $q->where('warehouse_id', $input['warehouse_id']);
             })
+            ->with(['warehouse' => function($q) {
+                $q->select(['id', 'title']);
+            }])    
             ->limit(6)->get();
     
             foreach ($product_variations as $row) {
-                if ( !$row->product->stock_type || ($row->product->stock_type > 0 && $row->qty > 0)) {
+                if (!$row->product->stock_type || ($row->product->stock_type > 0 && $row->qty > 0)) {
                     $output = array_replace($output, [
                         'price' => numberFormat($row->v_prices->selling_price)
                     ]);  
