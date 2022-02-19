@@ -12,9 +12,10 @@
                     <thead>
                         <tr class="item_header bg-gradient-directional-blue white">
                             <th width="10%" class="text-center">#</th>  
-                            <th width="30%" class="text-center">Issued Qty</th>
-                            <th width="30%" class="text-center">Issued By</th>
-                            <th width="30%" class="text-center">Date</th>                                                      
+                            <th width="20%" class="text-center">Issued Qty</th>
+                            <th width="20%" class="text-center">Requisition No.</th>
+                            <th width="20%" class="text-center">Issued By</th>
+                            <th width="20%" class="text-center">Date</th>                                                      
                         </tr>
                     </thead>
                     <tbody></tbody>                    
