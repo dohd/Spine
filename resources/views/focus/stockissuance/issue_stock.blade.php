@@ -41,53 +41,54 @@
         <div class="card">
             <div class="card-body">                
                 {{ Form::model($quote) }}
-                <input type="hidden" name="quote_id" value="{{ $quote->id }}">
-                <div class="form-group row">
-                    <div class="col-12">
-                        <h3 class="title">
-                            {{ $quote->bank_id ? 'Budgeted Proforma Invoice' : 'Budgeted Quote' }}
-                        </h3>                                        
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-12">
-                        <label for="subject" class="caption">Subject / Title</label>
-                        {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 cmp-pnl">
-                        <div id="customerpanel" class="inner-cmp-pnl">                        
-                            <div class="form-group row">                                  
-                                <div class="col-4">
-                                    <label for="invoiceno" class="caption">                                        
-                                        {{ $quote->bank_id ? '#PI Serial No' : '#QT Serial No' }}
-                                    </label>
-                                    <div class="input-group">
-                                        <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                        @php
-                                            $tid = sprintf('%04d', $quote->tid);
-                                            $tid = $quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;                                             
-                                        @endphp
-                                        {{ Form::text('tid', $tid, ['class' => 'form-control round', 'disabled']) }}
-                                    </div>
-                                </div>
-                                <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'disabled']) }}
-                                    </div>
-                                </div>                                                                
-                                <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
-                                    </div>
-                                </div> 
-                            </div> 
+                    <input type="hidden" name="quote_id" value="{{ $quote->id }}">
+                    <div class="form-group row">
+                        <div class="col-12">
+                            <h3 class="title">
+                                {{ $quote->bank_id ? 'Budgeted Proforma Invoice' : 'Budgeted Quote' }}
+                            </h3>                                        
                         </div>
                     </div>
-                </div>                    
+                    <div class="form-group row">
+                        <div class="col-12">
+                            <label for="subject" class="caption">Subject / Title</label>
+                            {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 cmp-pnl">
+                            <div id="customerpanel" class="inner-cmp-pnl">                        
+                                <div class="form-group row">                                  
+                                    <div class="col-4">
+                                        <label for="invoiceno" class="caption">                                        
+                                            {{ $quote->bank_id ? '#PI Serial No' : '#QT Serial No' }}
+                                        </label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            @php
+                                                $tid = sprintf('%04d', $quote->tid);
+                                                $tid = $quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;                                             
+                                            @endphp
+                                            {{ Form::text('tid', $tid, ['class' => 'form-control round', 'disabled']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'disabled']) }}
+                                        </div>
+                                    </div>                                                                
+                                    <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
+                                        </div>
+                                    </div> 
+                                </div> 
+                            </div>
+                        </div>
+                    </div> 
+                {{ Form::close() }}                   
 
                 <div>                            
                     <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
@@ -102,8 +103,7 @@
                                 <th width="8%" class="text-center">Amount</th>
                                 <th width="6%" class="text-center">Issued Qty</th> 
                                 <th width="8%" class="text-center">Qty</th>
-                                <th width="10%" class="text-center">Reqn</th>  
-                                <th width="10%" class="text-center">Warehouse</th>  
+                                <th width="10%" class="text-center">Reqxn</th>  
                                 <th width="7%" class="text-center">Action</th>                             
                             </tr>
                         </thead>
@@ -140,17 +140,7 @@
                                 <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
                             </div>
                         </div>  
-                        <div class="col-4">
-                            <div class="form-group">
-                                <div><label for="budget-total">Tools Requisition</label></div>
-                                <input type="text" class="form-control" id="tools-reqxn" name="tools_reqxn">
-                            </div> 
-                            <div class="form-group">
-                                <div><label for="tool">Tools Required & Notes</label></div>
-                                <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">                                    
-                                    {{ $budget->tool }}
-                                </textarea>   
-                            </div>                                                     
+                        <div class="col-4">                                                                               
                             <div class="form-group">
                                 <div>
                                     <label for="quote-total">Total Quote</label>
@@ -166,12 +156,24 @@
                                     </span>
                                 </div>
                                 <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
-                            </div>                            
-                            {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg', 'id' => 'submit']) }}
+                            </div> 
+                            {{ Form::open(['route' => ['biller.projects.update_budget_tool', $budget], 'method' => 'POST']) }}
+                                <div class="form-group">
+                                    <div><label for="tool-requisiion">Tools Requisition</label></div>
+                                    <input type="text" class="form-control" id="tool-reqxn" name="tool_reqxn" value="{{ $budget->tool_reqxn }}">
+                                </div> 
+                                <div class="form-group">
+                                    <div><label for="tool">Tools Required & Notes</label></div>
+                                    <textarea name="tool" id="tool" cols="45" rows="10" class="form-control">                                    
+                                        {!! $budget->tool !!}
+                                    </textarea>   
+                                </div>
+                                {{ Form::submit('Save Tools & Requisition', ['class' => 'btn btn-primary'])}}
+                            {{ Form::close() }}                             
                         </div>                              
                     </div>
                 </div>
-                {{ Form::close() }}
+                
             </div>             
         </div>
     </div>
@@ -184,15 +186,16 @@
     // ajax setup
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
-    // initialize html editor
-    editor();
-
     // set default values
     const subtotal = @json($quote->subtotal);
     $('#quote-total').val(parseFloat(subtotal).toLocaleString());
-    $('#submit').css('visibility', 'hidden');
     $('#add-skill').css('visibility', 'hidden');
-    
+    // sanitize budget tool value
+    const div = document.createElement('div');
+    $(div).html($('#tool').val());
+    const toolVal = $(div).text().replace(/\s+/g, '\n');
+    $('#tool').val(toolVal);
+
     // initialize Quote Date datepicker
     $('.datepicker')
         .datepicker({ format: "{{ config('core.user_date_format') }}" })
@@ -256,17 +259,6 @@
                 <td><input type="number" class="form-control issued" name="issued_qty" id="issuedqty-${n}" disabled></td>
                 <td><input type="number" class="form-control issue" name="issue_qty[]" id="issueqty-${n}"></td>
                 <td><input type="number" class="form-control" name="reqxn[]" id="reqxn-${n}"></td>
-                <td>
-                    <select class="form-control" name="warehouse[]" id="warehouse-${n}" required>
-                        <option value="">W/H</option>
-                        <option value="6">HQ Lean Aircons Store</option>
-                        <option value="5">Container - Metal Equipment</option>
-                        <option value="4">Mombasa Office</option>
-                        <option value="3">Kisumu Office</option>
-                        <option value="2">Pride Centre KQ</option>
-                        <option value="1">Paragon Eastern Bypass</option>
-                    </select>
-                </td>
                 <td>${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
@@ -421,7 +413,6 @@
     $('#add-product').click(function() {
         const i = productIndx;
         $('#budget-item tbody').append(productRow(i));
-        // autocomplete on added product row
         $('#itemname-'+i).autocomplete(autocompleteProp(i));
         productIndx++;
     });
@@ -435,7 +426,7 @@
             if (itemId > 0) {
                 $.ajax({
                     url: baseurl + `projects/budget_delete_item/${itemId}`,
-                    method: 'DELETE'
+                    // method: 'DELETE'
                 });
             }
             $row.remove();
@@ -458,26 +449,30 @@
             row_index: $('#rowindex-'+i).val(),
             budget_id: $('#budgetid-'+i).val(),
             a_type: $('#atype-'+i).val(),
+            reqxn: $('#reqxn-'+i).val(),
         };
         // ajax api calls
         const ajaxConfig = {method: 'POST', type: 'json-data', data};
+
         if ($(this).is('.issueItem')) {
             ajaxConfig['url'] = "{{ route('biller.stockissuance.issue_stock') }}";
-            if (data.issue_qty) {
-                $.ajax(ajaxConfig).done(function(data) {
-                    $('#issueqty-'+i).val('');
-                    if (data) {
-                        $('#issuedqty-'+i).val(data.issue_qty);
-                        const aprvQty = $('#newqty-'+i).val();
-                        if ($('#issuedqty-'+i).val() == aprvQty) {
-                            $('#issueqty-'+i).attr('disabled', true);
-                        }
+            if (!data.issue_qty || !data.reqxn) return alert('Qty & Reqxn required!');
+            
+            $.ajax(ajaxConfig).done(function(data) {
+                if (data) {
+                    $('#issuedqty-'+i).val(data.issue_qty);
+                    const aprvQty = $('#newqty-'+i).val();
+                    if ($('#issuedqty-'+i).val() == aprvQty) {
+                        $('#issueqty-'+i).attr('disabled', true);
                     }
-                }); 
-            }                 
+                }
+                $('#issueqty-'+i).val('');
+                $('#reqxn-'+i).val('');
+            });
         }
+
         if ($(this).is('.saveItem')) {
-            if (!data.numbering) return alert('Please input numbering on line item!');
+            if (!data.numbering) return alert('Numbering required on line item!');
             ajaxConfig['url'] = "{{ route('biller.stockissuance.store') }}";
             $.ajax(ajaxConfig).done(function(data) { location.reload(); });      
         }
@@ -494,7 +489,7 @@
                     data: 'keyword=' + request.term,
                     success: function(data) {
                         response(data.map(v => ({
-                            label: v.code + ' - ' + v.name,
+                            label: `${v.code} - ${v.name} - ${v.warehouse.title}`,
                             value: v.name,
                             data: v
                         })));
@@ -541,7 +536,7 @@
         // budget limit
         $('.budget-alert').addClass('d-none');
         const quoteTotal = parseFloat($('#quote-total').val().replace(/,/g, ''));
-        const limit = quoteTotal * 0.8;
+        const limit = quoteTotal * 0.7;
         if (total > limit) {
             $('.budget-alert').removeClass('d-none');
             scroll(0, 0);
@@ -554,6 +549,7 @@
             <tr>
                 <td class="text-center">${i+1}</td>
                 <td class="text-center">${v.issue_qty}</td>
+                <td class="text-center">${v.reqxn}</td>
                 <td>${v.issuer}</td>
                 <td>${new Date(v.created_at).toDateString()}</td>
             <tr>
