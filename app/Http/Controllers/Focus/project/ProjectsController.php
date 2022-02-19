@@ -222,7 +222,7 @@ class ProjectsController extends Controller
     }
 
     /**
-     * Update resource in storage
+     * Update Project Budget resource in storage
      * 
      * @param Request request
      */
@@ -237,6 +237,16 @@ class ProjectsController extends Controller
         $this->repository->update_budget($db_budget, compact('budget', 'budget_items', 'budget_skillset'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project Budget updated successfully']);
+    }
+
+    /**
+     * Update issuance tools and requisition
+     */
+    public function update_budget_tool(Request $request, Budget $budget)
+    {
+        $budget->update(['tool' => $request->tool, 'tool_reqxn' => $request->tool_reqxn]);
+
+        return redirect()->back();
     }
 
     /**
