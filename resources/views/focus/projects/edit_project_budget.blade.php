@@ -478,7 +478,7 @@
         // budget limit
         $('.budget-alert').addClass('d-none');
         const quoteTotal = parseFloat($('#quote-total').val().replace(/,/g, ''));
-        const limit = quoteTotal * 0.8;
+        const limit = quoteTotal * 0.7;
         if (total > limit) {
             $('.budget-alert').removeClass('d-none');
             scroll(0, 0);
