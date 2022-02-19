@@ -123,19 +123,19 @@
                     <table id="others-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
                             <th>Call Description</th>
-                            <td>{{ $djc->lead->note }}</td>
+                            <td>{!! $djc->lead->note !!}</td>
                         </tr>
                         <tr>
                             <th>Findings and Root Cause</th>
-                            <td>{{ $djc->root_cause }}</td>
+                            <td>{!! $djc->root_cause !!}</td>
                         </tr>
                         <tr>
                             <th>Action Taken</th>
-                            <td>{{ $djc->action_taken }}</td>
+                            <td>{!! $djc->action_taken !!}</td>
                         </tr>
                         <tr>
                             <th>Recommendation</th>
-                            <td>{{ $djc->recommendations }}</td>
+                            <td>{!! $djc->recommendations !!}</td>
                         </tr>
                     </table>
                 </div>
@@ -143,16 +143,4 @@
         </div>
     </div>
 </div>
-@endsection
-
-@section('extra-scripts')
-<script type="text/javascript">
-    const temp_div = document.createElement('div');
-    $('#others-table td').each(function() {
-        if (!$(this).index()) return;
-        $(temp_div).html($(this).text());
-        const td_text = $(temp_div).text().replace(/[A-Z]/g, function(el) { return ' ' + el; });
-        $(this).text(td_text);
-    });
-</script>
 @endsection
