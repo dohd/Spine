@@ -13,4 +13,9 @@ trait TransactioncategoryRelationship
         {
              return $this->hasMany(Transaction::class,'trans_category_id');
         }
+
+        public function parent()
+    {
+        return $this->belongsTo('App\Models\transactioncategory\Transactioncategory', 'sub_category_id');
+    }
 }

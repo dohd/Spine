@@ -20,5 +20,8 @@
     },
     "config": {
         "process-timeout": 0
+    },
+    "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.12"
     }
 }

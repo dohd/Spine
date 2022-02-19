@@ -60,6 +60,17 @@ class TransactioncategoriesTableController extends Controller
             ->addColumn('created_at', function ($transactioncategory) {
                 return Carbon::parse($transactioncategory->created_at)->toDateString();
             })
+            ->addColumn('parent', function ($transactioncategory) {
+
+                $parent='';
+
+                if($transactioncategory->sub_category==1){
+                    $parent=$transactioncategory->parent->name;
+
+                }
+                
+                return $parent;
+            })
             ->addColumn('actions', function ($transactioncategory) {
                 return $transactioncategory->action_buttons;
             })
