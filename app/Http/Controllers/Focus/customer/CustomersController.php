@@ -171,7 +171,7 @@ class CustomersController extends Controller
     public function destroy(Customer $customer)
     {
         $res = $this->repository->delete($customer);
-        if (!$res) return response()->json(['status' => 'Error', 'message' => 'Customer is attached to a Ticket']);
+        if (!$res) return response()->json(['status' => 'Error', 'message' => 'Customer attached to Ticket']);
 
         return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.customers.deleted')]);
     }

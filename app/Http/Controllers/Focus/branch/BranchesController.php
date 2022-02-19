@@ -147,14 +147,14 @@ class BranchesController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Branch $branch, StoreBranchRequest $request)
+    public function destroy(Branch $branch)
     {
+        $res = $this->repository->delete($branch);
 
-        //dd($branch);
-        //Calling the delete method on repository
-        $this->repository->delete($branch);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch Successfully Deleted']);
+        $params = ['flash_success' => 'Branch successfully deleted'];
+        if (!$res) $params = ['flash_error' => 'Branch attached to Ticket'];
+
+        return new RedirectResponse(route('biller.branches.index'), $params);
     }
 
     /**
