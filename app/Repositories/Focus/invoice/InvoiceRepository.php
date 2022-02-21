@@ -375,6 +375,11 @@ class InvoiceRepository extends BaseRepository
 
         // actual invoice
         if ($is_actual) {
+            // update invoiced Quote or PI
+            Quote::whereIn('id', function($q) use ($result) {
+                $q->select('quote_id')->from('invoice_items')->where(['invoice_id' => $result->id]);
+            })->update(['invoiced' => 'Yes']);
+
             // increament transaction id
             $tr_id = $dr_data['tid'];
             $transxn_no = Transaction::orderBy('id', 'desc')->first();
