@@ -229,7 +229,7 @@
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-basket"></i><span>{{trans('features.sales')}}</span></a>
                 <ul class="dropdown-menu">
                     @permission('project-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Tickets</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> Tickets</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Tickets</a></li>
                             <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
@@ -251,9 +251,9 @@
                     @endauth
 
                     @permission('quote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Quotes Management</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i>Quotes Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('quotes.management') }}
+                            <li><a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> {{ trans('quotes.management') }}
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.quotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}
@@ -261,9 +261,9 @@
                             </li>                            
                         </ul>
                     </li>
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>PI Management</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i>PI Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.quotes.index', 'page=pi') }}" data-toggle="dropdown"><i class="ft-file-text"></i>PI Management
+                            <li><a class="dropdown-item" href="{{ route('biller.quotes.index', 'page=pi') }}" data-toggle="dropdown"><i class="ft-list"></i> PI Management
                                 </a>
                             </li>                            
                             <li><a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI
@@ -277,8 +277,8 @@
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> {{ trans('labels.backend.projects.management') }}</a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('projects.projects')}}
-                                    <span class="badge badge-sm badge-primary">Beta</span>
+                                <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown">
+                                    <i class="ft-list"></i>{{ trans('projects.projects')}} <span class="badge badge-sm badge-primary">Beta</span>
                                 </a>                                
                             </li>
                         </ul>
@@ -286,10 +286,10 @@
                     @endauth
 
                     @permission('quote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i>Verification</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Verification</a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('biller.quotes.project_quotes') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Verification</a>
+                                <a class="dropdown-item" href="{{ route('biller.quotes.project_quotes') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a>
                             </li>                            
                         </ul>                        
                     </li>
@@ -363,10 +363,10 @@
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="ft-layers"></i><span>{{trans('features.stock')}}</span></a>
                 <ul class="dropdown-menu">
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i>Stock Issuance</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i>Stock Issuance</a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('biller.stockissuance.index') }}" data-toggle="dropdown"> <i class="ft-file-text"></i>Stock Issuance Management</a>
+                                <a class="dropdown-item" href="{{ route('biller.stockissuance.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Stock Issuance Management</a>
                             </li>                            
                         </ul>
                     </li>
@@ -536,9 +536,9 @@
                 <ul class="dropdown-menu">
                     @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>LPO Management</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-clipboard"></i> Client PO</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.lpo.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage LPO</a></li>                           
+                            <li><a class="dropdown-item" href="{{ route('biller.lpo.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Client PO</a></li>                           
                         </ul>
                     </li>
                     @endauth
