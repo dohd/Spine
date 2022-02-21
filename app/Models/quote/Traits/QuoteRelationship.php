@@ -20,6 +20,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function invoice_item()
+    {
+        return $this->hasOne(InvoiceItem::class);
+    }
+
     public function invoice_items()
     {
         return $this->hasMany(InvoiceItem::class);
