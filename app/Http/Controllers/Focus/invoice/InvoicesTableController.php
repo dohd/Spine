@@ -57,7 +57,8 @@ class InvoicesTableController extends Controller
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
                 $tid = 'Inv-'.sprintf('%04d', $invoice->tid);
-                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' . $tid . '</a>';
+                
+                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' . $tid . '</a><br>'. $invoice->type . ':';
             })
             ->addColumn('customer', function ($invoice) {
                 return $invoice->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '"><i class="ft-eye"></i></a>';
