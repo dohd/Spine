@@ -62,7 +62,7 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
-        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes']);
+        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes', 'type']);
     }
 
     public function getSelfDataTable($self_id = false)
@@ -328,6 +328,10 @@ class InvoiceRepository extends BaseRepository
     public function create_project_invoice(array $input)
     {
         DB::beginTransaction();
+        // credit and debit data
+        $dr_data = $input['dr_data'];
+        $cr_data = $input['cr_data'];
+        $is_actual = boolval($dr_data && $cr_data);
 
         $invoice = $input['invoice_data'];
         // sanitize values
@@ -345,6 +349,7 @@ class InvoiceRepository extends BaseRepository
         if ($last_inv && $invoice['tid'] <= $last_inv->tid) {
             $invoice['tid'] = $last_inv->tid + 1;
         }
+        if ($is_actual) $invoice['type'] = 'actual';
         unset($invoice['taxid']);
         $invoice['status'] = 'due';
         $result = Invoice::create($invoice);
@@ -363,10 +368,8 @@ class InvoiceRepository extends BaseRepository
         }
         InvoiceItem::insert($invoice_items);
 
-        // Credits and Debits
-        $dr_data = $input['dr_data'];
-        $cr_data = $input['cr_data'];
-        if ($dr_data && $cr_data) {
+        // actual invoice
+        if ($is_actual) {
             // increament transaction id
             $tr_id = $dr_data['tid'];
             $transxn_no = Transaction::orderBy('id', 'desc')->first();
