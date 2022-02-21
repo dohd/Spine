@@ -34,7 +34,6 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
-use App\Http\Requests\Focus\customer\DeleteCustomerRequest;
 
 /**
  * CustomersController

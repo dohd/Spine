@@ -5,13 +5,11 @@ namespace App\Repositories\Focus\customer;
 use App\Models\customergroup\CustomerGroupEntry;
 use App\Models\items\CustomEntry;
 use DB;
-use Carbon\Carbon;
 use App\Models\customer\Customer;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Responses\RedirectResponse;
 use App\Models\branch\Branch;
 
 /**
