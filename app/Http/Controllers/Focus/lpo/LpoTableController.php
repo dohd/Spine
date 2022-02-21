@@ -41,7 +41,7 @@ class LpoTableController extends Controller
                 $tids = array(); 
                 $total = 0;               
                 foreach ($lpo->quotes as $quote) {
-                    if ($quote->invoice_item) {
+                    if ($quote->invoiced == 'Yes') {
                         $tid = sprintf('%04d', $quote->tid);
                         $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
                         $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
@@ -50,7 +50,7 @@ class LpoTableController extends Controller
                 }
 
                 $this->balance -= $total;
-                if ($total) 
+                if ($total)
                     return '<span><b>'.number_format($total, 2).'</b><span><br>' . implode(', ', $tids);
             })
             ->addColumn('verified_uninvoiced', function ($lpo) {
