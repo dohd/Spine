@@ -1,4 +1,5 @@
 @extends('core.layouts.app')
+
 @php
     $quote_type = $quote->bank_id ? 'PI' : 'Quote';
 @endphp
@@ -80,7 +81,7 @@
                                 $tid = sprintf('%04d', $quote->tid);
                                 $tid = $quote->bank_id ? '#PI-'.$tid : '#QT-'.$tid;
                             @endphp
-                            <h2>{{ $tid }}</h2>
+                            <h2>{{ $tid . $quote->revision }}</h2>
                             <h3>{{ '#Tkt-' . sprintf('%04d', $quote->lead->reference) }}</h3>
                             <p>                                
                                 {{trans('quotes.invoicedate')}} : {{dateFormat($quote['invoicedate'])}}<br>
@@ -120,14 +121,10 @@
                                                     </td>
                                                     <td class="text-right">{{amountFormat($product['product_price'])}}</td>
                                                     <td class="text-right">{{ (int) $product['product_qty'] }} {{$product['unit']}}</td>
-                                                    @php
-                                                        $price = (float) $product->product_price;
-                                                        $subtotal = (float) $product->product_subtotal;
-                                                    @endphp
-                                                    <td class="text-right">{{ amountFormat($subtotal - $price) }}
+                                                    <td class="text-right">{{ amountFormat($product->product_subtotal - $product->product_price) }}
                                                         <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                     </td>
-                                                    <td class="text-right">{{ amountFormat(intval($product->product_qty) * $subtotal) }}</td>
+                                                    <td class="text-right">{{ amountFormat(intval($product->product_qty) * $product->product_subtotal) }}</td>
                                                 </tr>
                                             @else
                                                 <tr>
@@ -148,13 +145,23 @@
                             <!-- Approvals -->
                             <div class="col-md-7">
                                 <p class="lead">Approval Details</p><hr>
-                                <p>
-                                    Approved By : <span class="text-danger mr-1">{{ $quote->approved_by }}</span> 
-                                    Approved On : <span class=" text-danger mr-1">{{ dateFormat($quote->approved_date) }}</span> 
-                                    Approval Method : <span class=" text-danger">{{ $quote->approved_method }}</span>
-                                </p>
-                                Approval Note:
-                                <div class="text-danger">{!! $quote->approval_note !!}</div>                                
+                                @if ($quote->status != 'pending')
+                                    @if ($quote->status == 'cancelled')
+                                        <p>
+                                            Cancelled By : <span class="text-danger mr-1">{{ $quote->approved_by }}</span>
+                                            Cancelled On : <span class=" text-danger mr-1">{{ dateFormat($quote->approved_date) }}</span> 
+                                        </p>
+                                        Cancel Note:
+                                    @else
+                                        <p>
+                                            Approved By : <span class="text-danger mr-1">{{ $quote->approved_by }}</span> 
+                                            Approved On : <span class=" text-danger mr-1">{{ dateFormat($quote->approved_date) }}</span> 
+                                            Approval Method : <span class=" text-danger">{{ $quote->approved_method }}</span>
+                                        </p>
+                                        Approval Note:                                    
+                                    @endif
+                                    <div class="text-danger">{!! $quote->approval_note !!}</div> 
+                                @endif                             
                             </div>
 
                             <div class="col-md-5 col-sm-12">
