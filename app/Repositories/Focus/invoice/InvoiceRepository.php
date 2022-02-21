@@ -18,6 +18,7 @@ use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Models\purchase\Purchase;
+use App\Models\quote\Quote;
 use App\Models\transactioncategory\Transactioncategory;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
@@ -367,6 +368,10 @@ class InvoiceRepository extends BaseRepository
             $invoice_items[] = $row;
         }
         InvoiceItem::insert($invoice_items);
+        // update invoiced Quote or PI
+        Quote::whereIn('id', function($q) use ($result) {
+            $q->select('quote_id')->from('invoice_items')->where(['invoice_id' => $result->id]);
+        })->update(['invoiced' => 'Yes']);
 
         // actual invoice
         if ($is_actual) {
