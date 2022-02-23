@@ -23,14 +23,17 @@
     </div>
 </div>
 <div class='form-group'>
-    {{ Form::label( 'account_type', trans('accounts.account_type'),['class' => 'col-lg-2 control-label']) }}
+    {{ Form::label( 'account_type', trans('accounts.account_type'), ['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
-        <select name="account_type" class='form-control'>
-            @foreach($account_types as $row)
-                <option value="{{$row}}" @if($row==@$accounts->account_type) selected @endif>{{$row}}</option>
+        <select name="account_type" class="form-control" id="accType" required>
+            <option value="">-- Select Account Type --</option>
+            @foreach($account_types as $k => $row)
+                <option value="{{ $row->category }}" key="{{ $row->id }}">
+                    {{ $k+1 }}. {{ $row->name }}
+                </option>
             @endforeach
         </select>
-
+        <input type="hidden" name="account_type_id" id="accTypeId">
     </div>
 </div>
 <div class='form-group'>
@@ -41,12 +44,11 @@
 </div>
 
 @section("after-scripts")
-    <script type="text/javascript">
-        //Put your javascript needs in here.
-        //Don't forget to put `@`parent exactly after `@`section("after-scripts"),
-        //if your create or edit blade contains javascript of its own
-        $(document).ready(function () {
-            //Everything in here would execute after the DOM is ready to manipulated.
-        });
-    </script>
+<script>
+    // update account_type_id value
+    $('#accType').change(function() {
+        const key = $(this).find('option:selected').attr('key');
+        $('#accTypeId').val(key);
+    });
+</script>
 @endsection
