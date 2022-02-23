@@ -462,13 +462,15 @@
     });    
 
     $('#add-product').click(function() {
-        $('#quotation tr:last').after(productRow(rowIndx));
-        $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
+        const i = rowIndx;
+        $('#quotation tr:last').after(productRow(i));
+        $('#itemname-'+i).autocomplete(autocompleteProp(i));
         rowIndx++;
     });
     // on clicking Add Title button
     $('#add-title').click(function() {
-        $('#quotation tr:last').after(productTitleRow(rowIndx));
+        const i = rowIndx;
+        $('#quotation tr:last').after(productTitleRow(i));
         rowIndx++;
     });
 

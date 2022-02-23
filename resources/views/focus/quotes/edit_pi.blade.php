@@ -475,6 +475,7 @@
     });
     // on clicking Add Title button
     $('#add-title').click(function() {
+        const i = rowIndx;
         $('#quotation tbody').append(productRow(i));
         rowIndx++;
     });
