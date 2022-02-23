@@ -86,12 +86,12 @@ class AccountsController extends Controller
             'number' => 'required',
             'holder' => 'required'
         ]);
-        //Input received from the request
+        // extract request input
         $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
+        $input['ins'] = auth()->user()->ins; 
+
         $this->repository->create($input);
-        //return with successfull message
+        
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.created')]);
     }
 
