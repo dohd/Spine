@@ -1,7 +1,11 @@
 <div class='form-group'>
     {{ Form::label( 'number', trans('accounts.number'),['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
-        {{ Form::text('number', null, ['class' => 'form-control box-size', 'placeholder' => trans('accounts.number').'*','required'=>'required']) }}
+        @if (isset($account))
+            {{ Form::text('number', null, ['class' => 'form-control box-size', 'required', 'readonly']) }}
+        @else
+            {{ Form::text('number', 1, ['class' => 'form-control box-size', 'required', 'readonly']) }}
+        @endif
     </div>
 </div>
 <div class='form-group'>
@@ -28,7 +32,11 @@
         <select name="account_type" class="form-control" id="accType" required>
             <option value="">-- Select Account Type --</option>
             @foreach($account_types as $k => $row)
-                <option value="{{ $row->category }}" key="{{ $row->id }}">
+                <option 
+                    value="{{ $row->category }}" 
+                    key="{{ $row->id }}" 
+                    {{ $row->id == @$account->account_type_id ? 'selected' : '' }}
+                >
                     {{ $k+1 }}. {{ $row->name }}
                 </option>
             @endforeach
@@ -45,10 +53,15 @@
 
 @section("after-scripts")
 <script>
-    // update account_type_id value
+    // on selecting account type
     $('#accType').change(function() {
         const key = $(this).find('option:selected').attr('key');
         $('#accTypeId').val(key);
     });
+    // on update page
+    if (@json(@$account)) {
+        const key = $('#accType option:selected').attr('key');
+        $('#accTypeId').val(key);
+    }
 </script>
 @endsection
