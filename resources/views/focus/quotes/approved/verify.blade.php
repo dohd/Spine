@@ -217,7 +217,7 @@
                                         </div>
                                     </div>
                                     {{ Form::submit('Verify & Save', ['class' => 'btn btn-success btn-lg']) }}
-                                    @if ($verify_no > 1)
+                                    @if ($verify_no)
                                         <button type="button" class="btn btn-danger btn-lg" aria-label="Left Align" id="reset-items">
                                             <i class="fa fa-refresh"></i> Undo
                                         </button>
@@ -247,7 +247,7 @@
     $('#date-0').datepicker('setDate', new Date());
 
     // set general remark
-    $('#gen_remark').val("{{ $quote->gen_remark }}");
+    $('#gen_remark').val(@json($quote->gen_remark));
 
     // reset Quote Verification 
     $('#reset-items').click(function() {
@@ -300,7 +300,7 @@
             const $row = $(this).parents('tr:first');
             const itemId = $row.find('input[name="jcitem_id[]"]').val();
             if (itemId == 0) return $row.remove();
-            if (verify_no > 1) {
+            if (verify_no) {
                 if (confirm('Are you sure to delete this job card ?')) {
                     $.ajax({
                         url: baseurl + 'quotes/verified_jcs/' + itemId,
@@ -313,7 +313,7 @@
     });
 
     // On next verifications fetch jobcards
-    if (verify_no > 1) {
+    if (verify_no) {
         const quoteId = "{{ $quote->id }}";
         $.ajax({
             url: baseurl + 'quotes/verified_jcs/' + quoteId,
@@ -461,7 +461,7 @@
         if ($(this).is('.removeProd')) {
             const itemId = $row.find('input[name="item_id[]"]').val();
             if (itemId == 0) return $row.remove();            
-            if (verify_no > 1) {
+            if (verify_no) {
                 if (confirm('Are you sure to delete this item?')) {
                     $.ajax({
                         url: baseurl + 'quotes/verified_item/' + itemId,
