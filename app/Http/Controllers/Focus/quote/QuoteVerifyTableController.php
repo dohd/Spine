@@ -52,15 +52,12 @@ class QuoteVerifyTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('notes', function($quote) {
-                return $quote->notes;
-            })
             ->addColumn('tid', function ($quote) {
                 $tid = sprintf('%04d', $quote->tid);
                 if ($quote->bank_id) $tid = 'PI-'.$tid;
                 else $tid = 'QT-'.$tid;
 
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . $quote->revision . '</a>';
             })
             ->addColumn('lead_tid', function($quote) {
                 return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
