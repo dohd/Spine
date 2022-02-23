@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\account;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\account\Account;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class AccountRepository.
@@ -40,9 +37,17 @@ class AccountRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        if (Account::create($input)) {
-            return true;
+        // increament account number
+        $account_type_id = $input['account_type_id'];
+        $account = Account::where(compact('account_type_id'))
+            ->where('number', '>', 1)
+            ->orderBy('number', 'DESC')->first();
+        if ($account && $input['number'] <= $account->number) {
+            $input['number'] = $account->number + 1;
         }
+
+        if (Account::create($input)) return true;
+        
         throw new GeneralException(trans('exceptions.backend.accounts.create_error'));
     }
 
@@ -56,8 +61,7 @@ class AccountRepository extends BaseRepository
      */
     public function update(Account $account, array $input)
     {
-    	if ($account->update($input))
-            return true;
+    	if ($account->update($input)) return true;
 
         throw new GeneralException(trans('exceptions.backend.accounts.update_error'));
     }
@@ -71,9 +75,7 @@ class AccountRepository extends BaseRepository
      */
     public function delete(Account $account)
     {
-        if ($account->delete()) {
-            return true;
-        }
+        if ($account->delete())  return true;
 
         throw new GeneralException(trans('exceptions.backend.accounts.delete_error'));
     }
