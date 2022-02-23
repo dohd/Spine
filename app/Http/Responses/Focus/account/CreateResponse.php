@@ -2,8 +2,8 @@
 
 namespace App\Http\Responses\Focus\account;
 
-use App\Models\Company\ConfigMeta;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Support\Facades\DB;
 
 class CreateResponse implements Responsable
 {
@@ -16,8 +16,8 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-         $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
-         $account_types=json_decode($account_types->value1,true);
-        return view('focus.accounts.create',compact('account_types'));
+        $account_types = DB::table('account_types')->get(['id', 'name', 'category']);
+        
+        return view('focus.accounts.create', compact('account_types'));
     }
 }
