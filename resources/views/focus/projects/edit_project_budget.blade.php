@@ -473,7 +473,8 @@
         $('#labour-total').val(parseFloat(labourTotal).toLocaleString());
         // profit
         const profit = parseFloat(subtotal) - total;
-        $('.profit').text(profit.toLocaleString());
+        const pcent = Math.round(profit/subtotal * 100);
+        $('.profit').text(profit.toLocaleString() + ' : ' + pcent + '%');
 
         // budget limit
         $('.budget-alert').addClass('d-none');
