@@ -23,9 +23,8 @@
                         <div class="card">
                             <div class="card-content">
                                 <div class="card-body">
-                                    {{ Form::model($accounts, ['route' => ['biller.accounts.update', $accounts], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-account']) }}
+                                    {{ Form::model($account, ['route' => ['biller.accounts.update', $account], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-account']) }}
                                     <div class="form-group">
-                                        {{-- Including Form blade file --}}
                                         @include("focus.accounts.form")
                                         <div class="edit-form-btn">
                                             {{ link_to_route('biller.accounts.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
