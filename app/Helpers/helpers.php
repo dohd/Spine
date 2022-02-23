@@ -3,6 +3,7 @@
 use App\Helpers\uuid;
 use App\Models\hrm\Hrm;
 use App\Models\Settings\Setting;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Henerate UUID.
@@ -569,9 +570,16 @@ function bill_helper($term = 1, $module_id = 1)
     $accounts = \App\Models\account\Account::where('account_type', 'Liabilities')->get();
     $assert_accounts = \App\Models\account\Account::where('account_type', 'Assets')->get();
     $income_accounts = \App\Models\account\Account::where('account_type', 'Income')->get();
-    $whts = \App\Models\account\Account::where('system', 'tax')->get();
     $expense_accounts = \App\Models\account\Account::where('account_type', 'Expenses')->get();
-    $receivables = \App\Models\account\Account::where('account_type', 'Assets')->where('system', 'receivables')->get();
+
+    // $whts = \App\Models\account\Account::where('system', 'tax')->get();
+    $whts = DB::table('account_types')->where('system', 'tax')->get();
+    // $receivables = \App\Models\account\Account::where('account_type', 'Assets')->where('system', 'receivables')->get();
+    $receivables = DB::table('accounts')->where('account_type', 'Assets')
+        ->join('account_types', 'account_types.id', '=', 'accounts.account_type_id')
+        ->where(['account_types.system' => 'receivables', 'accounts.ins' => 1])
+        ->get();
+
     $warehouses = \App\Models\warehouse\Warehouse::all();
     $projects = \App\Models\project\Project::all();
     $customers = \App\Models\customer\Customer::all();
