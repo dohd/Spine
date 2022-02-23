@@ -75,7 +75,7 @@
                                                 $tid = 'QT-'.sprintf('%04d', $quote->tid);
                                                 if ($quote->bank_id) $tid = 'PI-'.sprintf('%04d', $quote->tid);
                                             @endphp
-                                            {{ Form::text('tid', $tid, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                                            {{ Form::text('tid', $tid . $quote->revision, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                                         </div>
                                     </div>                                    
                                 </div>
@@ -138,21 +138,7 @@
                                                     <th class="text-center" width="5%">Action</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
-                                                <!-- <tr>
-                                                    <td>
-                                                        <select name="type[]" id="type-0" class="form-control" required>
-                                                            <option value="1" selected>JobCard</option>
-                                                            <option value="2">DNote</option> 
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="text" class="form-control" name="reference[]" id="reference-0" required></td>
-                                                    <td><input type="text" class="form-control datepicker" name="date[]" id="date-0" required></td>
-                                                    <td><input type="text" class="form-control" name="technician[]" id="technician-0" required></td>
-                                                    <th class="text-center">#</th>
-                                                    <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-0">
-                                                </tr> -->
-                                            </tbody>
+                                            <tbody></tbody>
                                         </table>
                                         <button type="button" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
                                             <i class="fa fa-plus-square"></i> Add Jobcard / DNote
