@@ -9,14 +9,13 @@ use App\Models\transaction\Transaction;
  */
 trait AccountRelationship
 {
-     public function transactions()
+    public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','account_id')->withoutGlobalScopes();
+        return $this->hasMany(Transaction::class, 'account_id')->withoutGlobalScopes();
     }
 
-          public function amount()
-          {
-              return $this->hasMany(Transaction::class, 'account_id');
-          }
-
+    public function amount()
+    {
+        return $this->hasMany(Transaction::class, 'account_id');
+    }
 }
