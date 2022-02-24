@@ -5,12 +5,18 @@ namespace App\Models\invoice\Traits;
 use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
+use App\Models\items\InvoiceItem;
 
 /**
  * Class InvoiceRelationship
  */
 trait InvoiceRelationship
 {
+    public function invoice_items()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
