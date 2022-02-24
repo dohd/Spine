@@ -627,7 +627,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function delete(Invoice $invoice)
     {
-        if ($invoice->delete()) return true;
+        if ($invoice->invoice_items()->delete() && $invoice->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
     }
