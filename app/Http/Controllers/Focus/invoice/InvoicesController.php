@@ -290,6 +290,24 @@ class InvoicesController extends Controller
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => $msg]);
     }
 
+    /**
+     * Create invoice resource payment
+     */
+    public function create_payment(Request $request)
+    {
+        
+        return view('focus.invoices.create_payment');
+    }
+
+    /**
+     * Store invoice resource payment
+     */
+    public function store_payment(Request $request)
+    {
+        return;
+    }
+
+
     public function print_document(Invoice $invoice, ManageInvoiceRequest $request)
     {
         $invoice = $this->repository->find($request->id);
