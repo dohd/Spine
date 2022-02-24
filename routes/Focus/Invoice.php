@@ -12,11 +12,15 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::post('drafts_load', 'InvoicesController@drafts_load')->name('invoices.drafts_load');
     Route::get('draft_view/{id}', 'InvoicesController@draft_view')->name('invoices.draft_view');
     Route::post('pos_update', 'InvoicesController@pos_update')->name('invoices.pos_update');
+    Route::get('invoices/create_payment', 'InvoicesController@create_payment')->name('invoices.create_payment');
+    Route::post('invoices/store_payment', 'InvoicesController@store_payment')->name('invoices.store_payment');
+
     // project invoice
     Route::get('filter_invoice_quotes', 'InvoicesController@filter_invoice_quotes')->name('invoices.filter_invoice_quotes');
     Route::post('store_project_invoice', 'InvoicesController@store_project_invoice')->name('invoices.store_project_invoice');
     Route::get('project_invoice', 'InvoicesController@project_invoice')->name('invoices.project_invoice');
     Route::resource('invoices', 'InvoicesController');
+
     //For Datatable
     Route::post('invoices/get', 'InvoicesTableController')->name('invoices.get');
     Route::get('invoices/print_document/{id}/{type}', 'InvoicesController@print_document')->name('invoices.print_document');
