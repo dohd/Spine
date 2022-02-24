@@ -576,7 +576,7 @@ function bill_helper($term = 1, $module_id = 1)
     $whts = DB::table('account_types')->where('system', 'tax')->get();
     // $receivables = \App\Models\account\Account::where('account_type', 'Assets')->where('system', 'receivables')->get();
     $receivables = DB::table('accounts')
-        ->where(['ins' => auth()->user()->ins, 'account_type' => 'Assets'])
+        ->where(['accounts.ins' => auth()->user()->ins, 'account_type' => 'Assets'])
         ->join('account_types', 'account_types.id', '=', 'accounts.account_type_id')
         ->where(['account_types.system' => 'receivables'])
         ->get();
