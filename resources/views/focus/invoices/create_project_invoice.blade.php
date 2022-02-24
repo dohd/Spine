@@ -9,7 +9,6 @@
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.invoices.store_project_invoice', 'method' => 'POST', 'id' => 'storeInvoice']) }}
-                        <input type="hidden" name="_method" value="POST">
                         <div class="row mb-1">
                             <div class="col-3"><label for="payer" class="caption">Customer Name*</label>
                                 <div class="input-group">
