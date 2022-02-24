@@ -555,9 +555,10 @@
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Standard Invoice
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{route('biller.invoices.index') }}?md=pos" data-toggle="dropdown"><i class="ft-zap"></i> {{ trans('labels.backend.invoices.pos_management') }}
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}?md=pos" data-toggle="dropdown"><i class="ft-zap"></i> {{ trans('labels.backend.invoices.pos_management') }}
                                 </a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create_payment') }}"><i class="fa fa-money"></i> Invoice Payment</a></li>
                         </ul>
                     </li>
                     @endauth
