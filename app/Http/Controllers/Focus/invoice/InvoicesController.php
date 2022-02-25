@@ -291,20 +291,52 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Create invoice resource payment
+     * Create invoice payment
      */
     public function create_payment(Request $request)
     {
-        
-        return view('focus.invoices.create_payment');
+        $accounts = Account::where('account_type', 'Assets')->get(['id', 'holder']);
+
+        return view('focus.invoices.create_payment', compact('accounts'));
     }
 
     /**
-     * Store invoice resource payment
+     * Store invoice payment
      */
     public function store_payment(Request $request)
     {
-        return;
+        // extract request input
+        $payment_info = $request->only(['date', 'tid', 'account_id', 'customer_id', 'total_depo', 'total']);
+        $depos = $request->only(['invoice_id', 'depo']); 
+
+        // filter paid invoices
+        $paid_inv = array();
+        for ($i = 0; $i < count($depos['invoice_id']); $i++) {
+            $row = array();
+            foreach (array_keys($depos) as $key) {
+                $row[$key] = $depos[$key][$i];
+            }
+            if ($row['depo']) $paid_inv[] = $row;
+        }
+
+        $input = compact('payment_info', 'paid_inv');
+        // 
+
+
+        return redirect()->back()->with(['flash_success' => 'Invoice payments successful']);
+    }
+
+    /**
+     * Fetch client invoices
+     */
+    public function client_invoices(Request $request)
+    {
+        $id = $request->client_id;
+        $invoices = Invoice::where(['customer_id' => $id, 'type' => 'actual'])
+            ->whereNotIn('status', ['paid'])
+            ->get(['id', 'tid', 'total', 'notes']);
+
+        return response()->json($invoices);
     }
 
 
