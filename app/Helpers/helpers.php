@@ -930,3 +930,25 @@ function modify_array($input=[])
     }
     return $output;
 }
+// accounts numbering
+function accounts_numbering($account)
+{
+    switch ($account) {
+
+        case 'Asset' :
+           return 100;
+        case 'Liability' :
+            return 200; 
+        case 'Income' :
+             return 400;   
+        case 'Expense' :
+             return 500;
+        case 'Equity' :
+             return 300;       
+            
+     
+
+    }
+}
+
+
