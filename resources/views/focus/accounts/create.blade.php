@@ -24,7 +24,7 @@
                             <div class="card-content">
                                 <div class="card-body">
                                     {{ Form::open(['route' => 'biller.accounts.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-account']) }}
-                                        <div class="form-group">
+                                    <form class="row g-3">
                                             @include("focus.accounts.form")
                                             <div class="edit-form-btn">
                                                 {{ link_to_route('biller.accounts.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
