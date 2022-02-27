@@ -115,7 +115,7 @@ class QuotesController extends Controller
         ]);
         $data_items = $request->only([
             'row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 
-            'product_subtotal', 'product_exclusive', 'total_tax', 'unit'
+            'product_subtotal', 'unit'
         ]);
 
         $data['user_id'] = auth()->user()->id;
