@@ -7,12 +7,10 @@ use App\Models\items\VerifiedItem;
 
 use App\Models\quote\Quote;
 use App\Exceptions\GeneralException;
-use App\Models\items\InvoiceItem;
 use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
 use App\Models\project\Budget;
-use App\Models\project\ProjectQuote;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 
@@ -140,10 +138,12 @@ class QuoteRepository extends BaseRepository
         DB::beginTransaction();
 
         $quote = $input['data'];
-        // format date values
-        foreach ($quote as $key => $value) {
-            if (in_array($key, ['invoicedate', 'reference_date'])) {
-                $quote[$key] = date_for_database($value);
+        // sanitize values
+        foreach ($quote as $key => $val) {
+            if (in_array($key, ['invoicedate', 'reference_date'], 1)) {
+                $quote[$key] = date_for_database($val);
+            } else if (in_array($key, ['total', 'subtotal', 'tax'], 1)) {
+                $quote[$key] = numberClean($val);
             }
         }
         $duedate = $quote['invoicedate'] . ' + ' . $quote['validity'] . ' days';
@@ -154,39 +154,33 @@ class QuoteRepository extends BaseRepository
         if (isset($quote['bank_id'])) {
             $ref = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
         }
-        if (isset($ref) && $quote['tid'] <= $ref->tid) {
+        if ($ref && $quote['tid'] <= $ref->tid) {
             $quote['tid'] = $ref->tid + 1;
         }  
-
+        // update lead info
         $lead = Lead::find($quote['lead_id']);
-        if (isset($lead)) {
+        if ($lead) {
             $quote['customer_id'] = $lead->client_id;
-            $quote['branch_id'] = $lead->branch_id;    
+            $quote['branch_id'] = $lead->branch_id;
+            // close Lead (status = 1)
+            $lead->update(['status' => 1, 'reason' => 'won']);
         }
-        // Close Lead (status = 1)
-        $lead->update(['status' => 1, 'reason' => 'won']);
-
         $result = Quote::create($quote);
 
         // quote items
-        $quote_items = array();
-        $item = $input['data_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = array('quote_id' => $result['id'], 'ins' => $result['ins']);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                } 
-                else $row[$key] = NULL;
+        $quote_items = modify_array($input['data_items']);
+        $quote_items = array_map(function($item) use ($result) {
+            foreach ($item as $key => $val) {
+                if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
+                    $item[$key] = numberClean($val);
+                }
             }
-            $quote_items[] = $row;
-        }
+            return $item + ['quote_id' => $result['id'], 'ins' => $result['ins']];            
+        }, $quote_items);
         QuoteItem::insert($quote_items);
 
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
+        DB::commit();
+        if ($result) return $result;
         
         throw new GeneralException('Error Creating Quote');
     }
@@ -204,10 +198,12 @@ class QuoteRepository extends BaseRepository
         DB::beginTransaction();
 
         $quote = $input['data'];
-        // change date values to database format
-        foreach ($quote as $key => $value) {
-            if ($key == 'invoicedate' || $key == 'reference_date') {
-                $quote[$key] = date_for_database($value);
+        // sanitize values
+        foreach ($quote as $key => $val) {
+            if (in_array($key, ['invoicedate', 'reference_date'], 1)) {
+                $quote[$key] = date_for_database($val);
+            } else if (in_array($key, ['total', 'subtotal', 'tax'], 1)) {
+                $quote[$key] = numberClean($val);
             }
         }
         $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
@@ -224,41 +220,30 @@ class QuoteRepository extends BaseRepository
         }
         $result->update($quote);
 
-        // quote items
-        $quote_items = array();
-        $item = $input['data_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = array('quote_id' => $quote['id'], 'ins' => $quote['ins']);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                } 
-                else $row[$key] = NULL;
-            }
-            $quote_items[] = $row;
-        }
-
         // update or create new quote item
+        $quote_items = modify_array($input['data_items']);
         foreach($quote_items as $item) {
+            $new_item = $item + ['quote_id' => $quote['id'], 'ins' => $quote['ins']];
             $quote_item = QuoteItem::firstOrNew([
-                'id' => $item['item_id'],
-                'quote_id' => $item['quote_id'],
+                'id' => $new_item['item_id'],
+                'quote_id' => $quote['id'],
             ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $quote_item[$key] = $value;
+            
+            foreach ($new_item as $key => $val) {
+                if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
+                    $quote_item[$key] = numberClean($val);
+                } else $quote_item[$key] = $val;
             }
-            // remove stale attributes and save
+
             unset($quote_item['item_id']);
             if ($quote_item['id'] == 0) unset($quote_item['id']);
+            print_log(json_encode($quote_item, JSON_PRETTY_PRINT));
             $quote_item->save();
         }
 
-        if ($result) {
-            DB::commit();
-            return $quote;    
-        }
-
+        DB::commit();
+        if ($result) return $quote;      
+               
         throw new GeneralException('Error Updating Quote');
     }
 
@@ -297,73 +282,51 @@ class QuoteRepository extends BaseRepository
         $verify_no = $quote_data['verify_no'];
         $ins = auth()->user()->ins;
 
-        // quote items
-        $quote_items = array();
-        $item = $input['quote_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = compact('quote_id', 'ins');
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                } 
-                else $row[$key] = NULL;
-            }
-            $quote_items[] = $row;
-        }
-        
-        // job cards
-        $job_cards = array();
-        $jc_count = count($input['job_cards']['reference']);
-        $item = $input['job_cards'];
-        for ($i = 0; $i < $jc_count; $i++) {
-            $row = compact('quote_id', 'verify_no');
-            foreach (array_keys($item) as $key) {
-                if ($key == 'date') {
-                    $item[$key][$i] = date_for_database($item[$key][$i]);
-                }
-                $row[$key] = $item[$key][$i];             
-            }
-            $job_cards[] = $row;
-        }
-
         // update or create new quote_item
+        $quote_items = modify_array($input['quote_items']);
         foreach($quote_items as $item) {
+            $new_item = $item + compact('quote_id', 'ins');
             $quote_item = VerifiedItem::firstOrNew([
-                'id' => $item['item_id'],
-                'quote_id' => $item['quote_id'],
+                'id' => $new_item['item_id'],
+                'quote_id' => $quote_id,
             ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $quote_item[$key] = $value;
+
+            foreach($new_item as $key => $val) {
+                if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
+                    $quote_item[$key] = numberClean($val);
+                } else $quote_item[$key] = $val;            
             }
-            // remove stale attributes and save
+
             unset($quote_item['item_id']);
             if ($quote_item['id'] == 0) unset($quote_item['id']);
             $quote_item->save();
         }
         
+        // update or create new job_card
+        $job_cards = modify_array($input['job_cards']);
         foreach($job_cards as $item) {
-            // discard non-unique reference job_card
+            // skip non-unique job_card reference 
             $job_card = VerifiedJc::where(['reference' => $item['reference']])->first();
             if ($job_card) continue;
 
-            // update or create new job_card
+            $new_item = $item + compact('quote_id', 'verify_no');
             $job_card = VerifiedJc::firstOrNew([
-                'id' => $item['jcitem_id'],
-                'quote_id' => $item['quote_id'],
+                'id' => $new_item['jcitem_id'],
+                'quote_id' => $quote_id,
             ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $job_card[$key] = $value;
+
+            foreach($new_item as $key => $value) {
+                if ($key == 'date') $job_card[$key] = date_for_database($value);
+                else $job_card[$key] = $value;
             }
-            // remove stale attributes and save
+
             unset($job_card['jcitem_id']);                
             if ($job_card['id'] == 0) unset($job_card['id']);
             $job_card->save();
         }
         
-        $qt = Quote::find($quote_id);
-        $result = $qt->update([
+        $quote = Quote::find($quote_id);
+        $result = $quote->update([
             'verified' => 'Yes', 
             'verification_date' => date('Y-m-d'),
             'verified_by' => auth()->user()->id,
@@ -372,10 +335,9 @@ class QuoteRepository extends BaseRepository
             'verified_total' => $quote_data['total'],
             'verified_tax' => $quote_data['tax']
         ]);
-        if ($result) {
-            DB::commit();
-            return $qt;
-        }
+
+        DB::commit();
+        if ($result) return $quote;      
         
         throw new GeneralException('Error Verifying Quote');
     }
