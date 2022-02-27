@@ -56,7 +56,12 @@
                                                         $branch = isset($lead->branch) ? $lead->branch->name : '';
                                                         if ($name && $branch) $name .= ' - ' . $branch; 
                                                     @endphp
-                                                    <option value="{{ $lead->id }}" {{ ($lead->id == $quote->lead_id) ? 'selected' : '' }}>
+                                                    <option 
+                                                        value="{{ $lead->id }}" 
+                                                        {{ $lead->id == $quote->lead_id ? 'selected' : '' }}
+                                                        title="{{ $lead->title }}"
+                                                        client_ref="{{ $lead->client_ref }}"
+                                                    >
                                                         {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                     </option>
                                                 @endforeach                                                                                             
@@ -69,11 +74,11 @@
                                         <div class='col m-1'>
                                             {{ Form::label('method', 'Print Type', ['class' => 'col-12 control-label']) }}
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" id="colorCheck6" value="inclusive">
+                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" value="inclusive" id="colorCheck6" {{ @$quote->print_type == 'inclusive' ? 'checked' : '' }}>
                                                 <label class="custom-control-label" for="colorCheck6">VATInclusive</label>
                                             </div>
                                             <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7">
+                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7" {{ @$quote->print_type == 'exclusive' ? 'checked' : '' }}>
                                                 <label class="custom-control-label" for="colorCheck7">VATExclusive</label>
                                             </div>
                                             <input type="hidden" id="document_type" value="QUOTE" name="document_type">
@@ -83,10 +88,12 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
                                             </div>
-                                            <select id="pricing" name="pricing" class="form-control round required  ">
-                                                <option value="0">Default </option>
+                                            <select id="pricing" name="pricing" class="form-control round">
+                                                <option value="0">Default</option>
                                                 @foreach($selling_prices as $selling_price)
-                                                    <option value="{{$selling_price->id}}">{{$selling_price->name}}</option>
+                                                    <option value="{{ $selling_price->id }}" {{ $quote->pricing == $selling_price->id ? 'selected' : '' }}>
+                                                        {{$selling_price->name}}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -94,15 +101,7 @@
                                     <div class="col-sm-3">
                                         <label for="invocieno" class="caption">#{{prefix(5)}} {{trans('general.serial_no')}}</label>
                                         <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{-- 
-                                            @if (isset($last_quote))
-                                                {{ Form::number('tid', $last_quote->tid+1, ['class' => 'form-control round']) }}
-                                            @else
-                                                {{ Form::number('tid', $quote->tid, ['class' => 'form-control round']) }}
-                                            @endif
-                                            --}}
-                                            
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                            
                                             @if (isset($last_quote))
                                                 {{ Form::text('tid', 'QT-'.sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'disabled']) }}
                                                 <input type="hidden" name="tid", value="{{ $last_quote->tid+1 }}">
@@ -162,22 +161,23 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                             <select class="form-control round  select-box" name="validity" id="validity" data-placeholder="{{trans('tasks.assign')}}">
-                                                <option value="0">On Reciept</option>
-                                                <option value="14">Valid For 14 Days</option>
-                                                <option value="30">Valid For 30 Days</option>
-                                                <option value="45">Valid For 45 Days</option>
-                                                <option value="60">Valid For 60 Days</option>
-                                                <option value="90">Valid For 90 Days</option>
+                                                @foreach (array(0, 14, 30, 45, 60, 90) as $n)
+                                                    <option value="{{ $n }}" {{ $n == $quote->validity ? 'selected' : '' }}>
+                                                        {{ !$n ? 'On Receipt' : 'Valid for '. $n .' days' }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="ref_type" class="caption">Currency *</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  select-box " name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
+                                            <select class="form-control  select-box" name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}">
                                                 <option value="0">Default</option>
                                                 @foreach($currencies as $currency)
-                                                    <option value="{{$currency->id}}">{{$currency->symbol}} - {{$currency->code}}</option>
+                                                    <option value="{{ $currency->id }}" {{ $quote->currency == $currency->id ? 'selected' : '' }}>
+                                                        {{$currency->symbol}} - {{$currency->code}}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -185,7 +185,7 @@
                                     <div class="col-sm-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'required']) }}
+                                            {{ Form::text('client_ref', @$quote->client_ref, ['class' => 'form-control round', 'id' => 'client_ref', 'required']) }}
                                         </div>
                                     </div> 
                                 </div>
@@ -196,7 +196,9 @@
                                             <select id="term_id" name="term_id" class="form-control round" required>
                                                 <option value="">-- Select Term --</option>
                                                 @foreach($terms as $term)
-                                                    <option value="{{$term->id}}">{{$term->title}}</option>
+                                                    <option value="{{ $term->id }}" {{ $quote->term_id == $term->id ? 'selected' : '' }}>
+                                                        {{ $term->title }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -204,11 +206,13 @@
                                     <div class="col-sm-4">
                                         <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
                                         <select class="form-control round" name='tax_id' id="tax_id">
-                                            <option value="16">16% VAT</option>
-                                            <option value="8">8% VAT</option>
-                                            <option value="0">Off</option>
+                                            @foreach (array(16, 8, 0) as $n)
+                                                <option value="{{ $n }}" {{ $n == $quote->tax_id ? 'selected' : ''}}>
+                                                    {{ !$n ? 'Off' : $n . '% VAT' }}
+                                                </option>
+                                            @endforeach                                            
                                         </select>
-                                        <input type="hidden" name="tax_format" id="tax_format">
+                                        <input type="hidden" name="tax_format" id="tax_format" value="{{ @$quote->tax_format }}">
                                     </div>
                                     @if (!isset($last_quote))
                                         <div class="col-sm-4"><label for="revision" class="caption">Revision</label>
@@ -216,11 +220,11 @@
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                                 <select class="form-control round  select-box" name="revision" id="revision">
                                                     <option value="">-- Select Revision --</option>
-                                                    <option value="_r1">R1</option>
-                                                    <option value="_r2">R2</option>
-                                                    <option value="_r3">R3</option>
-                                                    <option value="_r4">R4</option>
-                                                    <option value="_r5">R5</option>
+                                                    @foreach (array(1, 2, 3, 4, 5) as $n)
+                                                        <option value="_r{{ $n }}" {{ @$quote->revision == '_r'.$n ? 'selected' : '' }}>
+                                                            R{{ $n }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -310,61 +314,39 @@
 @section('extra-scripts')
 <script>
     // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
-
-    // set default options
-    $('#pricing').val("{{ $quote->pricing }}");
-    $('#validity').val("{{ $quote->validity }}");
-    $('#currency').val("{{ $quote->currency }}");
-    $('#term_id').val("{{ $quote->term_id }}");    
-    $('#tax_id').val("{{ $quote->tax_id }}");
-    $('#client_ref').val("{{ $quote->client_ref }}");
-    $('#tax_format').val("{{ $quote->tax_format }}");
-    if (@json($quote->revision)) $('#revision').val("{{ $quote->revision }}");
-
-    // set quote print type
-    const printType = @json($quote->print_type);
-    if (printType === 'inclusive') $('#colorCheck6').prop('checked', true);    
-    if (printType === 'exclusive') $('#colorCheck7').prop('checked', true);    
-
-    // Check if radio button is checked
-    $('input[type="radio"]').change(function() {
-        const $span = $('#tax-label').find('span').eq(1);
-        if ($(this).is(':checked')) {
-            if ($(this).val() === 'exclusive') $span.text('VAT-Exclusive (print type)');
-            if ($(this).val() === 'inclusive') $span.text('VAT-Inclusive (print type)');            
-        }
-    });
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
     // initialize datepicker
     $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
     $('#referencedate').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
     $('#invoicedate').datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
-    
-    // on selecting lead
-    const leads = @json($leads);
+
+    // Check if radio button is checked
+    $('input[type="radio"]').change(function() {
+        const $span = $('#tax-label').find('span').eq(1);
+        if ($(this).is(':checked')) {
+            if ($(this).val() === 'exclusive') 
+                $span.text('VAT-Exclusive (print type)');
+            else $span.text('VAT-Inclusive (print type)');            
+        }
+    });
+
+    // on selecting lead update subjec and client_ref
     $('#lead_id').change(function() {
-        leads.forEach(v => {
-            if (v.id == $(this).val()) {
-                $('#subject').val(v.title);
-                $('#client_ref').val(v.client_ref);
-            }
-        });
-    });   
-    // on selecting Djc reference
+        $option = $('#lead_id option:selected');
+        $('#subject').val($option.attr('title'));
+        $('#client_ref').val($option.attr('client_ref'));
+    });
+
+    // on selecting Djc reference update subject
     $('#reference').change(function() {
-        leads.forEach(v => {
-            if (v.id == $('#lead_id').val()) {
-                $('#subject').val(v.title);
-                if ($(this).val()) $('#subject').val(v.title + ' ; Djc-' + $(this).val());
-            }
-        });
+        const title = $('#lead_id option:selected').attr('title')
+        $('#subject').val(title);
+        if ($(this).val()) $('#subject').val(title + ' ; Djc-' + $(this).val());
     });
     
     // row dropdown menu
-    function dropDown(val) {
+    function dropDown() {
         return `
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -386,9 +368,9 @@
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${n}' required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" value=""></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${n}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${n}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${n}" autocomplete="off" readonly></td>
+                <td><input type="text" class="form-control req qty" name="product_qty[]" id="amount-${n}"></td>
+                <td><input type="text" class="form-control req price" name="product_price[]" id="price-${n}"></td>
+                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${n}" readonly></td>
                 <td><strong><span class='ttlText' id="result-${n}">0</span></strong></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
@@ -419,9 +401,23 @@
         `;
     }
 
+    // On change quantity and rate exclusive
+    $("#quotation").on('change', '.qty, .price', function() {
+        const i = $(this).parents('tr:first').index() - 1;
+        const qty = $('#amount-'+i).val() || 0;
+        const rateExc = $('#price-'+i).val().replace(/,/g, '') || 0;
+        const tax = $('#tax_id').val() * 0.01 + 1;
+        const amount = qty * rateExc * tax;
+        const rateIncl = rateExc * tax;
+
+        $('#price-'+i).val((rateExc*1).toLocaleString());
+        $('#rateinclusive-'+i).val(rateIncl.toLocaleString());
+        $('#result-'+i).text(amount.toLocaleString());
+        calcTotal();
+    });
+
     // product row counter
     let rowIndx = 0;
-    // set default product rows
     const quoteItems = @json($products);
     quoteItems.forEach(v => {
         const i = rowIndx;
@@ -444,10 +440,10 @@
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
             $('#unit-'+i).val(item.unit);                
-            $('#amount-'+i).val(parseFloat(item.product_qty));
-            $('#price-'+i).val(item.product_price.toFixed(2));
-            $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
-            $('#result-'+i).text(item.product_subtotal.toFixed(2));
+            $('#amount-'+i).val(item.product_qty.toLocaleString());
+            $('#rateinclusive-'+i).val(item.product_subtotal.toLocaleString());                
+            $('#result-'+i).text(item.product_subtotal.toLocaleString());
+            $('#price-'+i).val(item.product_price.toLocaleString()).change();
         } else {
             const row = productTitleRow(i);
             $('#quotation tr:last').after(row);
@@ -458,7 +454,7 @@
             $('#itemname-'+i).val(item.product_name);
         }
         rowIndx++;
-        totals();
+        calcTotal();
     });    
 
     $('#add-product').click(function() {
@@ -490,43 +486,54 @@
                 $row.remove();
             }
         }
-
-        totals();
+        calcTotal();
     });
 
-    // default tax
-    const taxInt = Number($('#tax_id').val());
-    let taxRate = (taxInt+100)/100;
-    // on select Tax change
+    // on Tax id change
     $('#tax_id').change(function() {
-        const tax = Number($(this).val()); 
+        const tax = $(this).val();
         const $span = $('#tax-label').find('span').eq(0);
-
-        if (tax) {
-            $('#tax_format').val('inclusive');
-            $span.text(tax+'%');
-        } else {
+        $('#tax_format').val('inclusive');
+        $span.text(tax+'%');
+        if (tax == 0) {
             $('#tax_format').val('exclusive');
             $span.text('OFF');
         }
-       
-        // loop throw product rows while adjusting values
-        taxRate = (tax+100)/100;
+
         $('#quotation tr').each(function() {
-            if (!$(this).index()) return;
-            const productQty = $(this).find('td').eq(3).children().val()
-            if (productQty) {
-                const productPrice = $(this).find('td').eq(4).children().val();
+            const i = $(this).index();
+            if ($('#atype-'+i).val() == 1) {
+                const tax = $('#tax_id').val() * 0.01 + 1;
+                const qty = $('#amount-'+i).val() || 0;
+                const rateExc = $('#price-'+i).val().replace(/,/g, '') || 0;
 
-                const rateInclusive = taxRate * parseFloat(productPrice.replace(',', ''));
-                $(this).find('td').eq(5).children().val(rateInclusive.toFixed(2));
-
-                const rowAmount = productQty * parseFloat(rateInclusive);
-                $(this).find('td').eq(6).find('.ttlText').text(rowAmount.toFixed(2))
+                const amount = qty * rateExc * tax;
+                const rateIncl = rateExc * tax;
+                $('#rateinclusive-'+i).val(rateIncl.toLocaleString());
+                $('#result-'+i).text(amount.toLocaleString());
             }
         });
-        totals();
+
+        calcTotal();
     });    
+
+    function calcTotal() {
+        let subTotal = 0;
+        let grandTotal = 0;
+
+        $('#quotation tr').each(function() {
+            const i = $(this).index();
+            $('#rowindex-'+i).val(i);
+
+            const tax = $('#tax_id').val() * 0.01 + 1;
+            const amount = $('#result-'+i).text().replace(/,/g, '');
+            subTotal += amount/tax;
+            grandTotal += amount*1;
+        });
+        $('#subtotal').val(subTotal.toLocaleString());
+        $('#total').val(grandTotal.toLocaleString());
+        $('#tax').val((grandTotal-subTotal).toLocaleString());        
+    }
 
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i) {
@@ -557,82 +564,16 @@
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
-                const productPrice = parseFloat(data.price.replace(',',''));
-                $('#price-'+i).val(productPrice.toFixed(2));
 
-                // Initial values                
-                const rateInclusive = taxRate * productPrice;
-                $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
-                // displayed Amount
-                $('#result-'+i).text(rateInclusive.toFixed(2));
-                // Compute Totals
-                totals();
+                const price = parseFloat(data.price.replace(/,/, ''));
+                $('#price-'+i).val(price.toLocaleString());
+                const rateIncl = price * $('#tax_id').val() * 0.01 + 1;
+                $('#rateinclusive-'+i).val(rateIncl.toLocaleString());                
+                $('#result-'+i).text(rateIncl.toLocaleString());
+                
+                calcTotal();
             }
         };
-    }
-
-    // on quantity input change
-    function qtyChange(e) {
-        const id = e.target.id;
-        const indx = id.split('-')[1];
-
-        const productQty = $('#'+id).val();
-
-        let productPrice = $('#price-'+indx).val();
-        productPrice = parseFloat(productPrice.replace(',', ''));
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
-
-        totals();
-    }
-    // on price input change
-    function priceChange(e) {
-        // change value to float
-        e.target.value = Number(e.target.value).toFixed(2);
-
-        const id = e.target.id;
-        indx = id.split('-')[1];
-
-        const productQty = $('#amount-'+indx).val();
-
-        let productPrice = $('#'+id).val();
-        productPrice = parseFloat(productPrice.replace(',', ''));
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
-
-        totals();
-    }
-
-    // totals
-    function totals() {
-        let subTotal = 0;
-        let grandTotal = 0;
-        $('#quotation tr').each(function(i) {
-            if (!i) return;
-            const productQty = $(this).find('td').eq(3).children().val()
-            if (productQty) {
-                const productPrice = $(this).find('td').eq(4).children().val();
-                const rateInclusive = $(this).find('td').eq(5).children().val();
-                // increament
-                subTotal += Number(productQty) * parseFloat(productPrice);
-                grandTotal += Number(productQty) * parseFloat(rateInclusive);
-            }
-            // update row_index
-            $(this).find('input[name="row_index[]"]').val($(this).index());
-        });
-
-        const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
-        $('#tax').val(taxTotal.toFixed(2));        
-        $('#subtotal').val(subTotal.toFixed(2));
-        $('#total').val(grandTotal.toFixed(2));
     }
 </script>
 @endsection
