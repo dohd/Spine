@@ -17,7 +17,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $account_types = DB::table('account_types')->get(['id', 'name', 'category']);
+        $account_types = DB::table('account_types')->get(['id', 'name', 'category','is_opening_balance']);
         $account_category= Account::where('is_parent','0')->pluck('holder', 'id');
         
         return view('focus.accounts.create', compact('account_types','account_category'));

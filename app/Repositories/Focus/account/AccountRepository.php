@@ -39,12 +39,28 @@ class AccountRepository extends BaseRepository
     {
         // increament account number
         $account_type_id = $input['account_type_id'];
+
         $account = Account::where(compact('account_type_id'))
             ->where('number', '>', 1)
             ->orderBy('number', 'DESC')->first();
         if ($account && $input['number'] <= $account->number) {
             $input['number'] = $account->number + 1;
         }
+        $opening_balance=numberClean($input['opening_balance']);
+
+        if($opening_balance>0){
+
+         $input['opening_balance'] =  $opening_balance;
+         $input['opening_balance_date'] = date_for_database($input['opening_balance_date']);
+
+        }else{
+            unset($input['opening_balance_date']);
+        }
+    
+         
+
+    
+
 
         if (Account::create($input)) return true;
         

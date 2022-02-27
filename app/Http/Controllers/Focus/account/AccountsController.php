@@ -85,7 +85,10 @@ class AccountsController extends Controller
     {
         $request->validate([
             'number' => 'required',
-            'holder' => 'required'
+            'holder' => 'required',
+            'is_parent'=> 'required',
+            'is_manual_journal'=> 'required',
+            'account_type' => 'required',
         ]);
         // extract request input
         $input = $request->except(['_token', 'ins']);

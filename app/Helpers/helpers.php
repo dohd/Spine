@@ -4,6 +4,7 @@ use App\Helpers\uuid;
 use App\Models\hrm\Hrm;
 use App\Models\Settings\Setting;
 use Illuminate\Support\Facades\DB;
+use App\Models\transaction\Transaction;
 
 /**
  * Henerate UUID.
@@ -949,6 +950,77 @@ function accounts_numbering($account)
      
 
     }
+}
+
+// douible entry function
+function double_entry($pr_count_id,$sec_count_id,$amount,$dr_pri,$pri_tr_id,$sec_tr_id,$pri_account_type,$sec_account_type,$user_type,$user_id,$date,$duedate,$memo)
+{
+
+    $tid=Transaction::max('tid');
+    $tid=$tid+1;
+    if($dr_pri=='dr'){
+        //dr primary and cr secondary
+        // dr primary
+     
+         $transaction_dr[] = array(
+            'tid' => $tid,
+            'account_id' => $pr_count_id,
+            'is_primary' => 1,
+            'trans_category_id' => $pri_tr_id,
+            'transaction_type' => $pri_account_type,
+            'debit' => $amount,
+            'transaction_date' =>$date,
+            'due_date' => $duedate,
+            'user_type' => $user_type,
+            'user_id' => $user_id,
+            'note' => $memo,
+            'user_id' => auth()->user()->id,
+            'ins' => auth()->user()->ins,
+
+        );
+
+        //cr secondary
+        $transaction_cr[] = array(
+            'tid' => $tid,
+            'account_id' => $sec_count_id,
+            'is_primary' => 0,
+            'trans_category_id' => $sec_tr_id,
+            'transaction_type' => $sec_account_type,
+            'credit' => $amount,
+            'transaction_date' =>$date,
+            'due_date' => $duedate,
+            'user_type' => $user_type,
+            'user_id' => $user_id,
+            'note' => $memo,
+            'user_id' => auth()->user()->id,
+            'ins' => auth()->user()->ins,
+
+        );
+        DB::beginTransaction();
+        try {
+
+        Transaction::insert($transaction_dr);
+        Transaction::insert($transaction_cr);
+        return true;
+    } catch (\Illuminate\Database\QueryException $e) {
+        DB::rollback();
+        return false;
+    }
+
+
+    }else{
+        // cr primary and dr primapry
+
+        //cr primary
+        
+
+    }
+
+
+    
+  
+
+
 }
 
 
