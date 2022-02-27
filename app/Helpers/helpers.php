@@ -919,3 +919,14 @@ function print_log(...$logs)
         error_log(print_r($log, 1));
     }
 }
+// modify input array
+function modify_array($input=[])
+{
+    $output = array();
+    foreach ($input as $key => $list) {
+        foreach ($list as $i => $v) {
+            $output[$i][$key] = $v;
+        }
+    }
+    return $output;
+}
