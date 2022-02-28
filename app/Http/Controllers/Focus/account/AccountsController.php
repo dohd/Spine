@@ -90,9 +90,20 @@ class AccountsController extends Controller
             'is_manual_journal'=> 'required',
             'account_type' => 'required',
         ]);
+
+
+        if($request->input('is_multiple')==0){
+            $request->validate([
+                'account_type_id' => 'unique:accounts,account_type_id',
+            ]);
+
+        }
+      
+
+
         // extract request input
         $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
+      
 
         $this->repository->create($input);
 

@@ -4,7 +4,11 @@ namespace App\Repositories\Focus\account;
 
 use App\Models\account\Account;
 use App\Exceptions\GeneralException;
+use App\Models\deposit\Deposit;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class AccountRepository.
@@ -37,8 +41,14 @@ class AccountRepository extends BaseRepository
      */
     public function create(array $input)
     {
+
+
+       
         // increament account number
         $account_type_id = $input['account_type_id'];
+        $ins=auth()->user()->ins;
+        $input['ins'] =  $ins;
+        unset($input['is_multiple']);
 
         $account = Account::where(compact('account_type_id'))
             ->where('number', '>', 1)
@@ -46,25 +56,125 @@ class AccountRepository extends BaseRepository
         if ($account && $input['number'] <= $account->number) {
             $input['number'] = $account->number + 1;
         }
+
+
         $opening_balance=numberClean($input['opening_balance']);
+       if($opening_balance>0){
+       $input['opening_balance'] =  $opening_balance;
+       $input['opening_balance_date'] = date_for_database($input['opening_balance_date']); 
+       }
 
-        if($opening_balance>0){
-
-         $input['opening_balance'] =  $opening_balance;
-         $input['opening_balance_date'] = date_for_database($input['opening_balance_date']);
-
-        }else{
-            unset($input['opening_balance_date']);
-        }
-    
+         DB::beginTransaction();
+       try {
+        
+        $result=Account::create($input);
+        if ($result->id>0) {
          
 
+            if($opening_balance>0){
+                //find asystem
+                $account_types = DB::table('account_types')->find($account_type_id);
+
+            
+              //bank transactions
+              $tid=Transaction::max('tid');
+              $tid=$tid+1;
+            
+             if($account_types->system=='bank'){
+               
+                 //deposit bank and credit Equity Share Capital
+                 $seco_account=Account::where('system','share_capital')->first();
+                 $pri_tr = Transactioncategory::where('code', 'DEP')->first();
+                 $date=date('Y-m-d');
+                 $tr_ref='DEP';
+                 $memo='Account Opening Balance';
+                 //Insert to deposit table
+
+                 $transaction = array(
+                    'account_id' => $result->id,
+                    'from_account_id' =>$seco_account->id,
+                    'is_user' => 0,
+                    'received_from' => 0,
+                    'amount' =>$opening_balance,
+                    'transaction_ref' => $tid,
+                    'date' => $date,
+                    'note' => $memo,
+                    'user_id' => auth()->user()->id,
+                    'ins' => $ins,
+                );
+
+                $savedeposit= Deposit::create($transaction);
+
+                if($savedeposit->id){
+            
+                  $insert_double= double_entry($tid,$result->id,$seco_account->id,$opening_balance,'dr',$pri_tr->id,'0','0',$date,$result->opening_balance_date,$tr_ref,$memo,$ins);
+                 
+                if($insert_double){
+                    DB::commit();
+                    return true;
+                }
+                 
+
+                }
+     
+                
+     
+             }else if($account_types->system=='fixed_asset' || $account_types->system=='other_current_asset' || $account_types->system=='other_asset'){
+
+                //deposit asset and credit Equity Share Capital
+                $seco_account=Account::where('system','share_capital')->first();
+                $pri_tr = Transactioncategory::where('code', 'GENJRNL')->first();
+                $date=date('Y-m-d');
+                $tr_ref='GENJRNL';
+                $memo='Account Opening Balance';
+                //Insert to deposit table
+
+                $transaction = array(
+                   'account_id' => $result->id,
+                   'from_account_id' =>$seco_account->id,
+                   'amount' =>$opening_balance,
+                   'transaction_ref' => $tid,
+                   'date' => $date,
+                   'note' => $memo,
+                   'user_id' => auth()->user()->id,
+                   'ins' => $ins,
+               );
+
+               $savedeposit= ManualJournal::create($transaction);
+
+               if($savedeposit->id){
+           
+                 $insert_double= double_entry($tid,$result->id,$seco_account->id,$opening_balance,'dr',$pri_tr->id,'0','0',$date,$result->opening_balance_date,$tr_ref,$memo,$ins);
+                
+               if($insert_double){
+                   DB::commit();
+                   return true;
+               }
+                
+
+               }
+
+
+             }
+     
+             $input['opening_balance'] =  $opening_balance;
+             $input['opening_balance_date'] = date_for_database($input['opening_balance_date']); 
+     
+             }else{
+                DB::commit();
+                return true;
+
+             }
+
+        }
+       
     
-
-
-        if (Account::create($input)) return true;
-        
+      } catch (\Illuminate\Database\QueryException $e) {
+        DB::rollback();
         throw new GeneralException(trans('exceptions.backend.accounts.create_error'));
+    }
+
+        
     }
 
     /**

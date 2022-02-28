@@ -63,7 +63,7 @@ class AccountsTableController extends Controller
                 return amountFormat($account->amount->sum('credit'));
             })
             ->addColumn('account_type', function ($account) {
-                return trans('accounts.' . $account->account_type);
+                return  $account->account_type;
             })
             ->addColumn('created_at', function ($account) {
                 return dateFormat($account->created_at);
