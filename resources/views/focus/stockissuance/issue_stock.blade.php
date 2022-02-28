@@ -489,7 +489,7 @@
                     data: 'keyword=' + request.term,
                     success: function(data) {
                         response(data.map(v => ({
-                            label: `${v.code} - ${v.name} - ${v.warehouse.title}`,
+                            label: `${v.code} - ${v.name} - ${v.warehouse.title} (${parseInt(v.qty)})`,
                             value: v.name,
                             data: v
                         })));
@@ -531,7 +531,8 @@
         $('#labour-total').val(parseFloat(labourTotal).toLocaleString());
         // profit
         const profit = parseFloat(subtotal) - total;
-        $('.profit').text(profit.toLocaleString());
+        const pcent = Math.round(profit/subtotal * 100);
+        $('.profit').text(profit.toLocaleString() + ' : ' + pcent + '%');
 
         // budget limit
         $('.budget-alert').addClass('d-none');
