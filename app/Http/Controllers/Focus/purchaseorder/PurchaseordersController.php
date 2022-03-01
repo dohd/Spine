@@ -15,15 +15,13 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
 use App\Models\supplier\Supplier;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\Focus\purchaseorder\EditResponse;
 use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
 use App\Http\Requests\Focus\purchaseorder\ManagePurchaseorderRequest;
@@ -31,15 +29,10 @@ use App\Http\Requests\Focus\purchaseorder\ManagePurchaseorderRequest;
 //Ported
 use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
-use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
-use mPDF;
 
-use App\Http\Requests\Focus\purchaseorder\CreatePurchaseorderRequest;
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
-use App\Http\Requests\Focus\purchaseorder\EditPurchaseorderRequest;
-use App\Http\Requests\Focus\purchaseorder\UpdatePurchaseorderRequest;
-use App\Http\Requests\Focus\purchaseorder\DeletePurchaseorderRequest;
+use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 
 /**
  * PurchaseordersController
@@ -74,17 +67,16 @@ class PurchaseordersController extends Controller
         $words = array();
         if (isset($input['rel_id']) and isset($input['rel_type'])) {
             switch ($input['rel_type']) {
-                case 1 :
+                case 1:
                     $segment = Supplier::find($input['rel_id']);
                     $words['name'] = trans('customers.title');
                     $words['name_data'] = $segment->name;
                     break;
-                case 2 :
+                case 2:
                     $segment = Hrm::find($input['rel_id']);
                     $words['name'] = trans('hrms.employee');
                     $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
                     break;
-
             }
         }
 
@@ -125,7 +117,6 @@ class PurchaseordersController extends Controller
         //return with successfull message
 
         echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchaseorders.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
-
     }
 
     /**
@@ -182,7 +173,6 @@ class PurchaseordersController extends Controller
         $this->repository->delete($purchaseorder);
         //returning with successfull message
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')));
-
     }
 
 
@@ -205,7 +195,4 @@ class PurchaseordersController extends Controller
 
         return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'accounts', 'features', 'words'));
     }
-
-
-
 }
