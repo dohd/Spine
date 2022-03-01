@@ -383,7 +383,7 @@
 
     // set default product rows
     let productIndx = 0;
-    const budgetItems = @json($budget->products()->orderByRow()->get());    
+    const budgetItems = @json($budget->products);    
     budgetItems.forEach(v => {
         const i = productIndx;
         // check type if item type is product else assign title
@@ -502,7 +502,7 @@
                 const {data} = ui.item;
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
-                $('#unit-'+i).val(data.unit);                
+                $('#unit-'+i).val(data.unit);
 
                 const price = parseFloat(data.purchase_price.replace(/,/g, ''));
                 $('#price-'+i).val(price.toLocaleString()).trigger('change');
@@ -549,10 +549,17 @@
         return `
             <tr>
                 <td class="text-center">${i+1}</td>
-                <td class="text-center">${v.issue_qty}</td>
-                <td class="text-center">${v.reqxn}</td>
-                <td>${v.issuer}</td>
+                <td>${v.issue_qty}</td>
+                <td>${v.reqxn}</td>
+                <td class="text-center">${v.issuer}</td>
+                <td>${v.warehouse}</td>
                 <td>${new Date(v.created_at).toDateString()}</td>
+                <td>
+                    <button type="button" class="btn btn-link delete-log">
+                        <i class="fa fa-trash fa-lg text-danger"></i>
+                    </button>
+                </td>
+                <input type="hidden" id="logid-${i}" value="${v.id}">
             <tr>
         `;
     }
@@ -569,6 +576,17 @@
                 });                
             }
         });
+    });
+
+    // On delete log
+    $('#issueItemLog').on('click', '.delete-log', function() {
+        const $row = $(this).parents('tr:first');
+        const i = $row.index();
+        const logId = $('#logid-'+i).val();
+
+        $.ajax({url: "{{ route('biller.stockissuance.delete_log') }}?id=" + logId });
+
+        $row.remove();
     });
 </script>
 @endsection
