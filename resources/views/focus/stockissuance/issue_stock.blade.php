@@ -558,7 +558,7 @@
                         <i class="fa fa-trash fa-lg text-danger"></i>
                     </button>
                 </td>
-                <input type="hidden" id="logid-${i}" value="${v.id}">
+                <input type="hidden" name="logid" value="${v.id}" id="logid-${i}">
             <tr>
         `;
     }
@@ -580,8 +580,7 @@
     // On delete log
     $('#issueItemLog').on('click', '.delete-log', function() {
         const $row = $(this).parents('tr:first');
-        const i = $row.index();
-        const logId = $('#logid-'+i).val();
+        const logId = $row.find('input[name="logid"]').val();
 
         $.ajax({url: "{{ route('biller.stockissuance.delete_log') }}?id=" + logId })
         .done(function(data) {
