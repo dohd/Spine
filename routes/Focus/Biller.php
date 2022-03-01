@@ -220,6 +220,7 @@ Route::group(['namespace' => 'projectstocktransfer'], function () {
 
 Route::group(['namespace' => 'stockissuance'], function () {
     Route::post('issue_stock', 'StockIssuanceController@issue_stock')->name('stockissuance.issue_stock');
+    Route::get('issued_stock_log/delete', 'StockIssuanceController@delete_log')->name('stockissuance.delete_log');
     Route::get('issued_stock_log/{id}', 'StockIssuanceController@get_issued_log')->name('stockissuance.get_issued_log');
 
     Route::resource('stockissuance', 'StockIssuanceController');
