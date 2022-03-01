@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Models\bill;
+namespace App\Models\billitem;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\bill\Traits\BillAttribute;
-use App\Models\bill\Traits\BillRelationship;
+use App\Models\billitem\Traits\BillItemAttribute;
+use App\Models\billitem\Traits\BillItemRelationship;
 
-class Bill extends Model
+class BillItem extends Model
 {
     use ModelTrait,
-        BillAttribute,
-        BillRelationship {
+    BillItemAttribute,
+        BillItemRelationship {
         // InvoiceAttribute::getEditButtonAttribute insteadof ModelTrait;
     }
 
@@ -24,7 +24,7 @@ class Bill extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'bills';
+    protected $table = 'bill_items';
 
     /**
      * Mass Assignable fields of model

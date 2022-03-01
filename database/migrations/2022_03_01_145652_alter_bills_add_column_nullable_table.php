@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterDepositsTableAddNote extends Migration
+class AlterBillsAddColumnNullableTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AlterDepositsTableAddNote extends Migration
      */
     public function up()
     {
-        Schema::table('deposits', function (Blueprint $table) {
-            $table->text('note')->nullable();
+        Schema::table('bills', function (Blueprint $table) {
+            $table->dropColumn('document_ref_type');
+            $table->dropColumn('document_ref');
         });
     }
 
@@ -25,8 +26,8 @@ class AlterDepositsTableAddNote extends Migration
      */
     public function down()
     {
-        Schema::table('deposits', function (Blueprint $table) {
-            $table->dropColumn('note');
+        Schema::table('bills', function (Blueprint $table) {
+            //
         });
     }
 }
