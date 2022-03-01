@@ -157,7 +157,7 @@ class StockIssuanceController extends Controller
 
         DB::commit();
 
-        return response()->noContent();
+        return response()->json(['issue_qty' => $budget_item->issue_qty]);
     }
 
     /**
