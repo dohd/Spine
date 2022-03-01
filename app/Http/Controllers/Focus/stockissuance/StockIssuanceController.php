@@ -8,6 +8,7 @@ use App\Models\project\Budget;
 use App\Models\project\BudgetItem;
 use App\Models\quote\Quote;
 use App\Models\stock\IssueItemLog;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -52,42 +53,42 @@ class StockIssuanceController extends Controller
     public function issue_stock(Request $request)
     {
         // extract input fields
-        $product_id = $request->product_id;
-        $item_id = $request->item_id;
-        $input_qty = $request->issue_qty;
+        $input = (object) $request->only(['product_id', 'item_id', 'issue_qty']);
 
         DB::beginTransaction();
 
-        $store_product = ProductVariation::find($product_id);
+        $store_product = ProductVariation::find($input->product_id);
         // check if its a saved product, store product, product in stock
-        if (!$item_id || !$store_product || !intval($store_product->qty) || !$input_qty) 
+        if (!$input->item_id || !$input->issue_qty || !$store_product || ($store_product->qty < 1)) 
             return response()->noContent();
-        if ($store_product->qty < $input_qty) $input_qty = $store_product->qty;
+        if ($store_product->qty < $input->issue_qty) 
+            $input->issue_qty = $store_product->qty;
 
-        $budget_item = BudgetItem::find($item_id);
+        $budget_item = BudgetItem::find($input->item_id);
         // difference between approved qty and issued qty
         $diff = $budget_item->new_qty - $budget_item->issue_qty;        
-        if ($diff > 0 && $input_qty > $diff) {
-            $input_qty = $diff;
+        if ($diff > 0 && $input->issue_qty > $diff) {
+            $input->issue_qty = $diff;
         }
         // reduce stock by input qty
-        $store_product->decrement('qty', $input_qty);
+        $store_product->decrement('qty', $input->issue_qty);
         // increament value of issued by input qty
-        $budget_item->increment('issue_qty', $input_qty);
+        $budget_item->increment('issue_qty', $input->issue_qty);
         // store log
         $user = auth()->user();
         IssueItemLog::create([
-            'item_id' => $item_id,
-            'issue_qty' => $input_qty,
+            'item_id' => $input->item_id,
+            'issue_qty' => $input->issue_qty,
             'issued_by' => $user->id,
             'issuer' => $user->first_name . ' ' . $user->last_name,
-            'reqxn' => $request->reqxn
+            'reqxn' => $request->reqxn,
+            'warehouse' => $store_product->warehouse->title
         ]);
 
         DB::commit();
 
         return response()->json([
-            'issued' => $input_qty, 
+            'issued' => $input->issue_qty, 
             'issue_qty' => $budget_item->issue_qty
         ]);
     }
@@ -104,6 +105,7 @@ class StockIssuanceController extends Controller
 
         $quote = Quote::find($quote_id);
         $budget = Budget::where('quote_id', $quote->id)->first();
+        $budget->products = $budget->products()->orderBy('row_index', 'ASC')->get();
 
         return view('focus.stockissuance.issue_stock', compact('quote', 'budget'));
     }
@@ -136,6 +138,26 @@ class StockIssuanceController extends Controller
         $logs = IssueItemLog::where('item_id', $id)->orderBy('id', 'desc')->get();
 
         return response()->json($logs);
+    }
+
+    /**
+     * Delete log for issued stock item
+     */
+    public function delete_log(Request $request)
+    {
+        DB::beginTransaction();
+
+        $log = IssueItemLog::find($request->id);
+        $budget_item = BudgetItem::find($log->item_id);
+
+        ProductVariation::find($budget_item->product_id)->increment('qty', $log->issue_qty);
+        $budget_item->decrement('issue_qty', $log->issue_qty);
+
+        $log->delete();
+
+        DB::commit();
+
+        return response()->noContent();
     }
 
     /**
