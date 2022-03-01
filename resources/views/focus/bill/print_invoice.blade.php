@@ -212,7 +212,7 @@
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
 				<b>Invoice No :</b> {{ sprintf('%04d', $invoice->tid) }}<br><br>
 				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
-				<b>Overdue after :</b> {{ $invoice->validity ? $invoice->validity . ' days' : '' }}<br>
+				<b>Overdue after :</b> {{ $invoice->validity ? $invoice->validity . ' days' : 'On Receipt' }}<br>
 				<b>KRA Pin :</b> P051516705D<br>
 			</td>
 		</tr>
