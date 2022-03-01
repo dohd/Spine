@@ -877,5 +877,40 @@ function double_entry($tid,$pr_count_id,$sec_count_id,$amount,$dr_pri,$pri_tr_id
     }else{
         // cr primary and dr primapry
         //cr primary
+        $transaction_dr = array(
+            'tid' => $tid,
+            'account_id' => $pr_count_id,
+            'is_primary' => 1,
+            'trans_category_id' => $pri_tr_id,
+            'credit' => $amount,
+            'transaction_date' =>$date,
+            'due_date' => $duedate,
+            'user_type' => $user_type,
+            'tr_user_id' => $user_id,
+            'tr_ref' => $tr_ref,
+            'note' => $memo,
+            'user_id' => auth()->user()->id,
+            'ins' => $ins,
+        );
+        //cr secondary
+        $transaction_cr = array(
+            'tid' => $tid,
+            'account_id' => $sec_count_id,
+            'is_primary' => 0,
+            'trans_category_id' => $pri_tr_id,
+            'debit' => $amount,
+            'transaction_date' =>$date,
+            'due_date' => $duedate,
+            'user_type' => $user_type,
+            'tr_user_id' => $user_id,
+            'tr_ref' => $tr_ref,
+            'note' => $memo,
+            'user_id' => auth()->user()->id,
+            'ins' => $ins,
+        );
+   
+     Transaction::create($transaction_dr);
+     Transaction::create($transaction_cr);
+        return true;
     }
 }
