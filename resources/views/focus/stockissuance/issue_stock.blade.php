@@ -383,7 +383,7 @@
 
     // set default product rows
     let productIndx = 0;
-    const budgetItems = @json($budget->products);    
+    const budgetItems = @json($budget->products);
     budgetItems.forEach(v => {
         const i = productIndx;
         // check type if item type is product else assign title
@@ -391,15 +391,15 @@
             $('#budget-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
             // set default values
-            $('#numbering-'+i).val(v.numbering);
+            $('#numbering-'+i).val(v.numbering).attr('readonly', 'true');
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
-            $('#itemname-'+i).val(v.product_name);
-            $('#unit-'+i).val(v.unit);                
+            $('#itemname-'+i).val(v.product_name).attr('readonly', 'true');;
+            $('#unit-'+i).val(v.unit).attr('readonly', 'true');;                
             $('#amount-'+i).val(parseFloat(v.product_qty));
             $('#newqty-'+i).val(parseFloat(v.new_qty));
-            $('#price-'+i).val(v.price).change();
-            if (v.issue_qty) $('#issuedqty-'+i).val(v.issue_qty);  
+            $('#price-'+i).attr('readonly', 'true').val(v.price).change();
+            $('#issuedqty-'+i).val(v.issue_qty);  
         } else {
             $('#budget-item tbody').append(titleRow(i));
             // set default values
@@ -435,8 +435,10 @@
         calcBudget();
     });
     // On Issue or Save product
+    let prodRowIndex;
     $('#budget-item').on('click', '.issueItem, .saveItem', function() {
         const i = $(this).parents('tr:first').index();
+        prodRowIndex = i;
         const data = {
             numbering: $('#numbering-'+i).val(),
             product_name: $('#itemname-'+i).val(),
@@ -459,15 +461,12 @@
             if (!data.issue_qty || !data.reqxn) return alert('Qty & Reqxn required!');
             
             $.ajax(ajaxConfig).done(function(data) {
-                if (data) {
-                    $('#issuedqty-'+i).val(data.issue_qty);
-                    const aprvQty = $('#newqty-'+i).val();
-                    if ($('#issuedqty-'+i).val() == aprvQty) {
-                        $('#issueqty-'+i).attr('disabled', true);
-                    }
-                }
+                $('#issuedqty-'+i).val(data.issue_qty);
                 $('#issueqty-'+i).val('');
                 $('#reqxn-'+i).val('');
+                if ($('#issuedqty-'+i).val() == $('#newqty-'+i).val()) {
+                    $('#issueqty-'+i).attr('disabled', true);
+                }
             });
         }
 
@@ -584,9 +583,11 @@
         const i = $row.index();
         const logId = $('#logid-'+i).val();
 
-        $.ajax({url: "{{ route('biller.stockissuance.delete_log') }}?id=" + logId });
-
-        $row.remove();
+        $.ajax({url: "{{ route('biller.stockissuance.delete_log') }}?id=" + logId })
+        .done(function(data) {
+            $('#issuedqty-'+prodRowIndex).val(data.issue_qty);
+            $row.remove();
+        });
     });
 </script>
 @endsection
