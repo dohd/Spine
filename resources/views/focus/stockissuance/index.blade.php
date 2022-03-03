@@ -190,6 +190,62 @@
         });
     }
 
+    // assign quote_id to modal
+    $('#quotes-table').on('click', '.issued-stock', function() {
+        const quoteId = $(this).attr('data-id');
+        $('#mergedLog').attr('data-id', quoteId);
+    });
+    // On Opening Modal
+    $('#mergedLog').on('shown.bs.modal', function() {
+        draw_data2();
+    });
+    function draw_data2(start_date = '', end_date = '') {
+        const table = $('#mergedLogTbl').dataTable({
+            destroy: true,
+            ajax: {
+                url: "{{ route('biller.stockissuance.getlog') }}",
+                type: 'POST',
+                data: {start_date, end_date},
+            },
+            columns: [{
+                    data: 'DT_Row_Index',
+                    name: 'id'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'unit',
+                    name: 'unit'
+                },
+                {
+                    data: 'issue_qty',
+                    name: 'issue_qty'
+                },
+                {
+                    data: 'reqxn',
+                    name: 'reqxn'
+                },
+                {
+                    data: 'warehouse',
+                    name: 'warehouse'
+                },
+                {
+                    data: 'date',
+                    name: 'date'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    searchable: false,
+                    sortable: false
+                }
+            ],
+            ...tableConfig()
+        });
+    }
+
     // On posting issued Stock
     $('#post-stock').click(function() {
         const quoteId = $('#mergedLog').attr('data-id');
