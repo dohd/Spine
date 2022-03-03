@@ -49,13 +49,11 @@ class AlterTransactionsTable extends Migration
             $table->dropColumn('invoice_id');
             $table->dropColumn('requested_by');
             $table->dropColumn('approved_by');
-            $table->dropColumn('s_warehouses');
+
             $table->string('tr_ref')->nullable();
             $table->integer('user_type')->default(0);
             $table->integer('tr_user_id')->default(0);
             $table->integer('is_primary')->default(0);
-            
-            
         });
     }
 
