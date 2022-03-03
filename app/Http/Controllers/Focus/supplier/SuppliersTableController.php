@@ -57,9 +57,7 @@ class SuppliersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($supplier) {
-                return '<a class="font-weight-bold" href="' . route('biller.suppliers.show', [$supplier->id]) . '">' . $supplier->name . '</a><br><img class="media-object img-lg border"
-                                                                      src="' . Storage::disk('public')->url('app/public/img/supplier/' . $supplier->picture) . '"
-                                                                      alt="Client Image">';
+                return '<a class="font-weight-bold" href="' . route('biller.suppliers.show', [$supplier->id]) . '">' . $supplier->company . '</a>';
             })
             ->addColumn('created_at', function ($supplier) {
                 $c = '';

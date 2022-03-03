@@ -15,17 +15,15 @@
                                     <div id="customerpanel" class="inner-cmp-pnl">
                                         <div class="form-group row">
                                             <div class="fcol-sm-12">
-                                                <h3 class="title">{{trans('purchaseorders.bill_from')}} 
-                                                    <a href='#' class="btn btn-primary btn-sm round" data-toggle="modal" data-target="#addCustomer">
-                                                        {{trans('purchaseorders.add_supplier')}}
-                                                    </a>
+                                                <h3 class="title">BILL 
+                                                   
                                                 </h3>
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <div class='col-md-12'>
-                                                <div class='col m-1'>
-                                                    {{ Form::label( 'method', trans('transactions.payer_type'),['class' => 'col-12 control-label']) }}
+                                         
+                                                <div class="col-sm-6">
+                                                    {{ Form::label( 'method', 'Select Supplier Type',['class' => 'col-12 control-label']) }}
                                                     <div class="d-inline-block custom-control custom-checkbox mr-1">
                                                         <input type="radio" class="custom-control-input bg-primary" name="payer_type" id="colorCheck1" value="walkin" checked="">
                                                         <label class="custom-control-label" for="colorCheck1">Walkin</label>
@@ -34,30 +32,29 @@
                                                         <input type="radio" class="custom-control-input bg-purple" name="payer_type" value="supplier" id="colorCheck3">
                                                         <label class="custom-control-label" for="colorCheck3">{{trans('suppliers.supplier')}}</label>
                                                     </div>
-                                                    <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                        <input type="radio" class="custom-control-input bg-success" name="payer_type" value="customer" id="colorCheck2">
-                                                        <label class="custom-control-label" for="colorCheck2">{{trans('customers.customer')}}</label>
-                                                    </div>
-                                                    <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                        <input type="radio" class="custom-control-input bg-blue-grey" name="payer_type" value="employee" id="colorCheck4">
-                                                        <label class="custom-control-label" for="colorCheck4">{{trans('hrms.employee')}}</label>
-                                                    </div>
+                                                  
                                                 </div>
-                                            </div>
+                                                <div class="col-sm-6">
+                                                    <div class="frmSearch col-sm-12">
+                                                        {{ Form::label( 'cst', trans('purchaseorders.search_supplier'),['class' => 'caption']) }}
+                                                        {{ Form::text('cst', null, ['class' => 'form-control round user-box-new ', 'placeholder' =>'Enter Supplier Name', 'id'=>'suppliers-box','data-section'=>'suppliers','autocomplete'=>'off','readonly']) }}
+                                                        <div id="suppliers-box-result"></div>
+                                                    </div>
+
+                                                </div>
+
+
+                                           
                                         </div>
                                         <div class="form-group row">
-                                            <div class="frmSearch col-sm-12">
-                                                {{ Form::label( 'cst', trans('purchaseorders.search_supplier'),['class' => 'caption']) }}
-                                                {{ Form::text('cst', null, ['class' => 'form-control round user-box-new', 'placeholder' =>trans('purchaseorders.supplier_search'), 'id'=>'suppliers-box','data-section'=>'suppliers','autocomplete'=>'off','readonly']) }}
-                                                <div id="suppliers-box-result"></div>
-                                            </div>
+                                          
                                         </div>
                                         <div class="form-group row">
                                             <div class="col-sm-8"><label for="payer" class="caption">Supplire Name*</label>
-                                                <div class="input-group">
+                                                <div class="input-group ">
                                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span>
                                                     </div>
-                                                    {{ Form::text('payer', null, ['class' => 'form-control round required', 'placeholder' => 'Supplier Name','id'=>'payer-name']) }}
+                                                    {{ Form::text('payer', null, ['class' => 'form-control round required ', 'placeholder' => 'Supplier Name','id'=>'payer-name']) }}
                                                 </div>
                                             </div>
                                             <div class="col-sm-4"><label for="taxid" class="caption">Tax ID</label>
@@ -69,19 +66,7 @@
                                             </div>
                                             {{ Form::hidden('payer_id', '0',['id'=>'payer_id']) }}
                                         </div>
-                                        <div class="form-group row">
-                                            <div class="col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="project" class="caption">Ledger Account(Credited)*</label>
-                                                    <select name="credit_account_id" class="form-control round required" id="credit_account_id" required>
-                                                        <option value="">-- Select Ledger Account --</option>
-                                                        @foreach($accounts as $account)
-                                                            <option value="{{$account->id}}"> {{$account->holder}}</option>                                                            
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                     
                                         <div class="form-group row">
                                             <table class="table-responsive tfr">
                                                 <thead>
@@ -103,20 +88,13 @@
                                                         <input type="hidden" id="totalLinetotals" name="totalcredit">
                                                     </tr>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="text-center">Discount</td>
-                                                        <td class="text-center" id="disctotal">0.00</td>
-                                                        <td class="text-center" id="exp_disctotal">0.00</td>
-                                                        <td class="text-center" id="item_disctotal">0.00</td>
-                                                        <td class="text-center" id="grandDiscount">0.00</td>
-                                                        <input type="hidden" id="grandDiscounts" name="granddiscounts">
-                                                    </tr>
+                                               
                                                     <tr>
                                                         <td class="text-center">Tax</td>
                                                         <td class="text-center" id="taxtotal">0.00</td>
                                                         <td class="text-center" id="exp_taxtotal">0.00</td>
                                                         <td class="text-center" id="item_taxtotal">0.00</td>
-                                                        <td class="text-center" id="grandTax">0.00y</td>
+                                                        <td class="text-center" id="grandTax">0.00</td>
                                                         <input type="hidden" id="grandTaxs" name="grandtaxs">
                                                     </tr>
                                                     <tr>
@@ -145,45 +123,21 @@
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <div class="col-sm-6"><label for="tid" class="caption">Transaction ID*</label>
+                                            <div class="col-sm-4"><label for="tid" class="caption">Transaction ID*</label>
                                                 <div class="input-group">
                                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span>
                                                     </div>
                                                     {{ Form::number('tid', @$last_id->tid+1, ['class' => 'form-control round', 'placeholder' => trans('purchaseorders.tid')]) }}
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <div class="col-sm-6"><label for="ref_type" class="caption">Reference Document Type*</label>
-                                                <div class="input-group">
-                                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span>
-                                                    </div>
-                                                    <select id="ref_type" name="ref_type" class="form-control round" required>
-                                                        <option value="">-- Select Reference Document --</option>
-                                                        <option value="Invoice">Invoice</option>
-                                                        <option value="Receipt">Receipt</option>
-                                                        <option value="DNote">DNote</option>
-                                                        <option value="Voucher">Voucher</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6"><label for="refer_no" class="caption">{{trans('general.reference')}} Number*</label>
-                                                <div class="input-group">
-                                                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                    </div>
-                                                    {{ Form::text('refer_no', null, ['class' => 'form-control round required', 'placeholder' => trans('general.reference')]) }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <div class="col-sm-6"><label for="transaction_date" class="caption">Purchase Date*</label>
+                                            <div class="col-sm-4"><label for="transaction_date" class="caption">Purchase Date*</label>
                                                 <div class="input-group">
                                                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
                                                     </div>
                                                     {{ Form::text('transaction_date', null, ['class' => 'form-control round datepicker', 'id' => 'transaction_date']) }}
                                                 </div>
                                             </div>
-                                            <div class="col-sm-6"><label for="due_date" class="caption">Due Date*</label>
+                                            <div class="col-sm-4"><label for="due_date" class="caption">Due Date*</label>
                                                 <div class="input-group">
                                                     <div class="input-group-addon"><span class="icon-calendar-o" aria-hidden="true"></span>
                                                     </div>
@@ -192,63 +146,48 @@
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <div class="col-sm-6">
+                                            <div class="col-sm-4"><label for="ref_type" class="caption">Doc Ref Type*</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span>
+                                                    </div>
+                                                    <select id="ref_type" name="ref_type" class="form-control round" required>
+                                                        <option value="">-- Select Doc Ref --</option>
+                                                        <option value="Invoice">Invoice</option>
+                                                        <option value="Receipt">Receipt</option>
+                                                        <option value="DNote">DNote</option>
+                                                        <option value="Voucher">Voucher</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4"><label for="refer_no" class="caption">{{trans('general.reference')}} Number*</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
+                                                    </div>
+                                                    {{ Form::text('refer_no', null, ['class' => 'form-control round required', 'placeholder' => trans('general.reference')]) }}
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
                                                 <label for="taxFormat" class="caption">{{trans('general.tax')}}*</label>
                                                 <select class="form-control round" name="taxformat" onchange="changeTaxFormat()" id="taxFormat">
-                                                    @php
-                                                        $tax_format = 'exclusive';
-                                                        $tax_format_id = 0;
-                                                        $tax_format_type = 'exclusive';
-                                                    @endphp
+                                                   
                                                     @foreach($additionals as $additional_tax)
                                                         @php
-                                                            if ($additional_tax->id == @$defaults[4][0]['feature_value'] && $additional_tax->class == 1) {
-                                                                echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
-                                                                $tax_format = $additional_tax->type2;
-                                                                $tax_format_id = $additional_tax->id->id;
-                                                                $tax_format_type = $additional_tax->type3;
+                                                            if ($additional_tax->default_a ==1) {
+                                                                echo '<option value="'.numberFormat($additional_tax->value).'"  selected>--'.$additional_tax->name.'--</option>';
+                                                                
                                                             }
                                                         @endphp
-                                                        {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
+                                                        {!! $additional_tax->default_a == 0 ? "<option value='".numberFormat($additional_tax->value)."' >$additional_tax->name</option>" : "" !!}
                                                     @endforeach
-                                                    <option value="0" data-type1="%" data-type2="off" data-type3="off">{{trans('general.off')}}</option>
+                                                    <option value="0">{{trans('general.off')}}</option>
                                                 </select>
                                             </div>
-                                            <div class="col-sm-6">
-                                                <div class="form-group">
-                                                    <label for="discountFormat" class="caption">{{trans('general.discount')}}</label>
-                                                    <select class="form-control round" name="discountformat" onchange="changeDiscountFormat()" id="discountFormat">
-                                                        @php
-                                                            $discount_format='%';
-                                                        @endphp
-                                                        @foreach($additionals as $additional_discount)
-                                                        @php
-                                                            if (@$defaults[3][0]['feature_value'] == $additional_discount->id && $additional_discount->class == 2) {
-                                                                echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
-                                                                $discount_format=$additional_discount->type1;
-                                                            }
-                                                        @endphp
-                                                        {!! $additional_discount->class == 2 ? "<option value='$additional_discount->value' data-type1='$additional_discount->type1' data-type2='$additional_discount->type2' data-type3='$additional_discount->type3'>$additional_discount->name</option>" : "" !!}
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
                                         </div>
+                                       
+                                      
                                         <div class="form-group row">
-                                            <div class="col-sm-4">
-                                                <div class="form-group">
-                                                    <label for="discountFormat" class="caption"> {{trans('warehouses.warehouse')}}</label>
-                                                    <select id="s_warehouses" name="s_warehouses" class="form-control round ">
-                                                        <option value="0">{{trans('general.all')}}</option>
-                                                        @foreach($warehouses as $warehouse)
-                                                            <option value="{{$warehouse->id}}" {{$warehouse->id==@$defaults[1][0]['feature_value'] ? 'selected' : ''}}>
-                                                                {{$warehouse->title}}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-8">
+                                           
+                                            <div class="col-sm-12">
                                                 <div class="form-group">
                                                     <label for="project" class="caption">Projects</label>
                                                     <select name="all_project_id" class="form-control round" id="project_id" required>
@@ -294,13 +233,11 @@
                                         <table class="table-responsive tfr my_stripe">
                                             <thead>
                                                 <tr class="item_header bg-gradient-directional-blue white ">
-                                                    <th width="30%" class="text-center">{{trans('general.item_name')}}</th>
-                                                    <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
-                                                    <th width="10%" class="text-center">{{trans('general.rate')}}</th>
-                                                    <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
-                                                    <th width="10%" class="text-center">{{trans('general.tax')}}</th>
-                                                    <th width="7%" class="text-center">{{trans('general.discount')}}</th>
-                                                    <th width="10%" class="text-center">{{trans('general.amount')}}
+                                                    <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
+                                                    <th width="10%" class="text-center">{{trans('general.quantity')}}</th>
+                                                    <th width="15%" class="text-center">{{trans('general.rate')}}</th>
+                                                    <th width="20%" class="text-center">{{trans('general.tax_p')}}</th>
+                                                    <th width="15%" class="text-center">{{trans('general.amount')}}
                                                         ({{config('currency.symbol')}})
                                                     </th>
                                                     <th width="5%" class="text-center">{{trans('general.action')}}</th>
@@ -312,9 +249,17 @@
                                                     </td>
                                                     <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-0" onkeypress="return isNumber(event)" onkeyup="rowTotal('0'), billUpyog()" autocomplete="off" value="1"><input type="hidden" id="alert-0" value="" name="alert[]"></td>
                                                     <td><input type="text" class="form-control req prc" name="product_price[]" id="price-0" onkeypress="return isNumber(event)" onkeyup="rowTotal('0'), billUpyog()" autocomplete="off"></td>
-                                                    <td><input type="text" class="form-control vat " name="product_tax[]" id="vat-0" onkeypress="return isNumber(event)" onkeyup="rowTotal('0'), billUpyog()" autocomplete="off"></td>
-                                                    <td class="text-center" id="texttaxa-0">0</td>
-                                                    <td><input type="text" class="form-control discount" name="product_discount[]" onkeypress="return isNumber(event)" id="discount-0" onkeyup="rowTotal('0'), billUpyog()" autocomplete="off"></td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                          <select class="form-control" name="">
+                                                            <option value="Factura No.">Factura No.</option>
+                                                            <option value="Factura No.">Nota No.</option>
+                                                          </select>
+                                                          <input type="text" class="form-control" name="nuevaFactura" id="nuevaFactura" value="1-928361" readonly>
+                                                        </div>
+                                                      </td>
+                                                  
+                                               
                                                     <td><span class="currenty">{{config('currency.symbol')}}</span>
                                                         <strong><span class='ttlText' id="result-0">0</span></strong>
                                                     </td>
@@ -331,7 +276,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td colspan="2"><textarea id="dpid-0" class="form-control html_editor" name="product_description[]" placeholder="{{trans('general.enter_description')}} (Optional)" autocomplete="off"></textarea><br></td>
-                                                    <td colspan="4"><input type="text" class="form-control" name="project[]" placeholder="Search  Project By Project Name , Clent, Branch" id='project-0' disabled>
+                                                    <td colspan="2"><input type="text" class="form-control" name="project[]" placeholder="Search  Project By Project Name , Clent, Branch" id='project-0' disabled>
                                                         <input type="hidden" name="inventory_project_id[]" id="project_id-0">
                                                         <input type="hidden" name="client_id[]" id="client_id-0">
                                                         <input type="hidden" name="branch_id[]" id="branch_id-0">
@@ -345,10 +290,10 @@
                                                             <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
                                                         </button>
                                                     </td>
-                                                    <td colspan="7"></td>
+                                                    <td colspan="4"></td>
                                                 </tr>
                                                 <tr class="sub_c" style="display: table-row;">
-                                                    <td colspan="6" align="right">{{ Form::hidden('subtotal','0',['id'=>'subttlform']) }}
+                                                    <td colspan="4" align="right">{{ Form::hidden('subtotal','0',['id'=>'subttlform']) }}
                                                         <strong>{{trans('general.total_tax')}}</strong>
                                                     </td>
                                                     <td align="left" colspan="2"><span class="currenty lightMode">{{config('currency.symbol')}}</span>
@@ -359,16 +304,9 @@
                                                     <input type="hidden" name="totaldiscount" id="totaldiscount">
                                                     <input type="hidden" name="totaltax" id="totaltax">
                                                 </tr>
+                                            
                                                 <tr class="sub_c" style="display: table-row;">
-                                                    <td colspan="6" align="right">
-                                                        <strong>{{trans('general.total_discount')}}</strong>
-                                                    </td>
-                                                    <td align="left" colspan="2"><span class="currenty lightMode"></span>
-                                                        <span id="discs" class="lightMode">0</span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="sub_c" style="display: table-row;">
-                                                    <td colspan="6" align="right"><strong>{{trans('general.grand_total')}}
+                                                    <td colspan="4" align="right"><strong>Inventory Total
                                                             (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</strong>
                                                     </td>
                                                     <td align="left" colspan="2"><input type="text" name="total" class="form-control" id="invoiceyoghtml" readonly="">
@@ -572,10 +510,8 @@
                             <input type="hidden" value="0" name="counter" id="ganak">
                             <input type="hidden" value="0" name="counter" id="expganak">
                             <input type="hidden" value="0" name="counter" id="itemganak">
-                            <input type="hidden" value="{{$tax_format}}" name="tax_format_static" id="tax_format">
-                            <input type="hidden" value="{{$tax_format_type}}" name="tax_format" id="tax_format_type">
-                            <input type="hidden" value="{{$tax_format_id}}" name="tax_id" id="tax_format_id">
-                            <input type="hidden" value="{{$discount_format}}" name="discount_format" id="discount_format">
+                            
+                            
                             @if(@$defaults[4][0]->ship_tax['id']>0) 
                                 <input type='hidden' value='{{numberFormat($defaults[4][0]->ship_tax['value'])}}' name='ship_rate' id='ship_rate'><input type='hidden' value='{{$defaults[4][0]->ship_tax['type2']}}' name='ship_tax_type' id='ship_taxtype'>
                             @else
@@ -685,5 +621,92 @@
         $('#taxid').val(data.taxid);
         $("#suppliers-box-result").hide();
     }
+
+    // expense calculations
+
+    $('#productname-0').autocomplete({
+    source: function (request, response) {
+        $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+        $.ajax({
+            url: baseurl + 'products/search/' + billtype,
+            dataType: "json",
+            method: 'post',
+            data: 'keyword=' + request.term + '&type=product_list&row_num=1&wid=' + $("#s_warehouses option:selected").val() + '&serial_mode=' + $("#serial_mode:checked").val(),
+            success: function (data) {
+                response($.map(data, function (item) {
+                    return {
+                        label: item.name,
+                        value: item.name,
+                        data: item
+                    };
+                }));
+            }
+        });
+    },
+    autoFocus: true,
+    minLength: 0,
+    select: function (event, ui) {
+        var t_r = ui.item.data.taxrate;
+        var custom = accounting.unformat($("#taxFormat option:selected").val(), accounting.settings.number.decimal);
+        console.log(custom);
+        if (custom > 0) {
+            t_r = custom;
+        }
+
+        var discount = ui.item.data.disrate;
+        var custom_discount = $('#custom_discount').val();
+        //project details
+
+        var project_id = $('#project_id option:selected').val();
+
+      if(project_id=""){
+
+        var customer_id= "";
+        var branch_id= "";
+        var project_description= "";
+
+        }else{
+
+        var customer_id= $('#project_id option:selected').attr('data-type1');
+        var branch_id= $('#project_id option:selected').attr('data-type2');
+        var project_description= $('#project_id option:selected').attr('data-type3');
+        }
+       var project_id = $('#project_id option:selected').val(); 
+
+ 
+        $('#amount-0').val(1);
+        $('#price-0').val(accounting.formatNumber(ui.item.data.price));
+        $('#pid-0').val(ui.item.data.id);
+        $('#vat-0').val(accounting.formatNumber(t_r));
+        $('#unit-0').val(ui.item.data.unit).attr('attr-org', ui.item.data.unit);
+        $('#hsn-0').val(ui.item.data.code);
+        $('#alert-0').val(ui.item.data.alert);
+        $('#serial-0').val(ui.item.data.serial);
+        $('#project-0').val(project_description);
+        $('#project_id-0').val(project_id);
+        $('#client_id-0').val(customer_id);
+        $('#branch_id-0').val(branch_id);
+
+        $('.unit').show();
+        unit_load();
+        rowTotal(0);
+        billUpyog();
+        $('#dpid-0').summernote('code',ui.item.data.product_des);
+    }
+});
+
+function tax_load() {
+    if ($('.unit').empty()) {
+        $('.unit').append($('<option>').text($('meta[name="d_unit"]').attr('content')).attr('value', -1));
+        $.each(unit_load_data, function (i, item) {
+            $('.unit').append($('<option>').text(item.name).attr('value', item.val).attr('code', item.code));
+        });
+    }
+}
 </script>
 @endsection

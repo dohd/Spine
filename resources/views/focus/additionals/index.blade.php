@@ -44,8 +44,9 @@
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>{{ trans('general.title') }}</th>
-                                            <th>{{ trans('general.type') }}</th>
+                                            <th>Name</th>
+                                            <th>Rate</th>
+                                            <th>Default</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -91,7 +92,8 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
-                    {data: 'class', name: 'class'},
+                    {data: 'value', name: 'value'},
+                    {data: 'default_a', name: 'default_a'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

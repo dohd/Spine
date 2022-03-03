@@ -35,101 +35,169 @@
                                                 <li class="nav-item">
                                                     <a class="nav-link active" id="active-tab1" data-toggle="tab"
                                                        href="#active1" aria-controls="active1" role="tab"
-                                                       aria-selected="true">{{ trans('customers.billing_address') }}</a>
+                                                       aria-selected="true">Supplier Info</a>
                                                 </li>
 
                                                 <li class="nav-item">
                                                     <a class="nav-link " id="active-tab3" data-toggle="tab"
                                                        href="#active3" aria-controls="active3"
-                                                       role="tab">{{ trans('customers.other_data') }}</a>
+                                                       role="tab">Transactions</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link " id="active-tab3" data-toggle="tab"
+                                                       href="#active4" aria-controls="active3"
+                                                       role="tab">Purchase Orders</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link " id="active-tab3" data-toggle="tab"
+                                                       href="#active5" aria-controls="active3"
+                                                       role="tab">Inventory</a>
                                                 </li>
 
 
                                             </ul>
                                             <div class="tab-content px-1 pt-1">
-                                                <div class="tab-pane active in" id="active1"
+                                                <div class="tab-pane active in small" id="active1"
                                                      aria-labelledby="active-tab1" role="tabpanel">
+                                                     <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                            <p>Supplier Number</p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
+                                                            <p>{{$supplier['supplier_no']}}</p>
+                                                        </div>
+                                                    </div>
+
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.name')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['name']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.phone')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['phone']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.email')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['email']}}</p>
                                                         </div>
                                                     </div>
 
 
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.address')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['address']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.city')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['city']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.region')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['region']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.country')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
                                                             <p>{{$supplier['country']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.postbox')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['postbox']}}</p>
                                                         </div>
                                                     </div>
 
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.company')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5   font-weight-bold">
                                                             <p>{{$supplier['company']}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
                                                             <p>{{trans('customers.taxid')}}</p>
                                                         </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
                                                             <p>{{$supplier['taxid']}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                            <p>Bank </p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                            <p>{{$supplier['bank']}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                            <p>Account Number</p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                            <p>{{$supplier['account_no']}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                            <p>Account Name</p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                            <p>{{$supplier['account_name']}}</p>
+                                                        </div>
+                                                    </div>
+                                                 
+                                                    <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                            <p>Bank Code</p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                            <p>{{$supplier['bank_code']}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                            <p>Mpesa  Account</p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                            <p>{{$supplier['mpesa_payment']}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-3 border-blue-grey border-lighten-5 ">
+                                                            <p>{{trans('customers.docid')}}</p>
+                                                        </div>
+                                                        <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                            <p>{{$supplier['docid']}}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -137,22 +205,47 @@
                                                 <div class="tab-pane" id="active3" aria-labelledby="link-tab3"
                                                      role="tabpanel">
 
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.docid')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['docid']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.custom1')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['custom1']}}</p>
-                                                        </div>
-                                                    </div>
+                                                     <table id="transacion-table"
+                                                     class="table table-striped table-bordered zero-configuration small" cellspacing="0"
+                                                     width="100%">
+                                                  <thead>
+                                                  <tr>
+                                                      <th>TYPE</th>
+                                                      <th>VOUCHER NO</th>
+                                                      <th>DATE </th>
+                                                      <th>DUE DATE </th>
+                                                      <th>BILLED</th>
+                                                      <th>PAID</th>
+                                                      <th>BALANCE</th>
+                                                     
+                                                  </tr>
+                                                  </thead>
+                         
+                         
+                                                  <tbody>
+                                                      @php
+                                                          $tbalance=0;
+                                                      @endphp
+                                                      @foreach ($transactions as  $transaction)
+                                                      @php
+                                                          $chkbala=$transaction->credit- $transaction->debit;
+                                                          $tbalance+= $chkbala;
+                                                      @endphp
+                                                          
+                                                    
+                                                  <tr>
+                                                      <td>{{  $transaction->tr_ref }}</td>
+                                                      <td>{{  $transaction->tid }}</td>
+                                                      <td>{{  dateFormat($transaction->transaction_date) }}</td>
+                                                      <td>{{  dateFormat($transaction->due_date) }}</td>
+                                                      <td>{{  number_format($transaction->credit) }}</td>
+                                                      <td>{{  number_format($transaction->debit) }}</td>
+                                                      <td>{{  number_format($tbalance) }}</td>
+                                                      
+                                                  </tr>
+                                                  </tbody>
+                                                  @endforeach
+                                              </table>
 
 
                                                 </div>
@@ -187,20 +280,25 @@
                             </div>
 
                             <div class="card-body">
-                                <p class="lead"> {{trans('general.related')}}</p>
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <span class="badge badge-primary badge-pill float-right">{{$supplier->invoices->count('id')}}</span>
-                                        <a href="{{route('biller.purchaseorders.index')}}?rel_type=1&rel_id={{$supplier->id}}">
-                                            {{trans('purchaseorders.purchaseorder')}}</a>
-                                    </li>
-                                    <li class="list-group-item">
-                                        <span class="badge bg-purple badge-pill float-right">{{$supplier->amount->count('id')}}</span>
-                                        <a href="{{route('biller.transactions.index')}}?rel_type=4&rel_id={{$supplier->id}}">
-                                            {{trans('transactions.transactions')}}</a>
-                                    </li>
-
-                                </ul>
+                      
+                                <table id="suppliers-table"
+                                class="table table-striped table-bordered zero-configuration small" cellspacing="0"
+                                width="100%">
+                             <thead>
+                             <tr>
+                                 <th>{{ trans('customers.name') }}</th>
+                                
+                             </tr>
+                             </thead>
+    
+    
+                             <tbody>
+                             <tr>
+                                 <td colspan="100%" class="text-center text-success font-large-1"><i
+                                             class="fa fa-spinner spinner"></i></td>
+                             </tr>
+                             </tbody>
+                         </table>
                             </div>
                             <!--/ Groups-->
 
@@ -247,5 +345,65 @@
 
 
         });
+
+
+        $(function () {
+            setTimeout(function () {
+                draw_data()
+            }, {{config('master.delay')}});
+        });
+
+        function draw_data() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+          /*  $(document).on('click', ".customer_active", function (e) {
+                var cid = $(this).attr('data-cid');
+                var active = $(this).attr('data-active');
+                if (active == 1) {
+                    $(this).removeClass('checked');
+                    $(this).attr('data-active', 0);
+                } else {
+                    $(this).addClass('checked');
+                    $(this).attr('data-active', 1);
+                }
+
+                $.ajax({
+                    url: '{{ route("biller.suppliers.active") }}',
+                    type: 'post',
+                    data: {'cid': cid, 'active': active}
+                });
+            });*/
+
+            var dataTable = $('#suppliers-table').dataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                stateSave: true,
+                language: {
+                    @lang('datatable.strings')
+                },
+                ajax: {
+                    url: '{{ route("biller.suppliers.get") }}',
+                    type: 'post'
+                },
+                columns: [
+                  
+                    {data: 'name', name: 'name'},
+                
+                  
+                   
+                  
+                ],
+                order: [[0, "asc"]],
+                searchDelay: 500,
+                dom: 'frt',
+            
+            });
+            $('#suppliers-table_wrapper').removeClass('form-inline');
+
+        }
     </script>
 @endsection

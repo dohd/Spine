@@ -72,7 +72,7 @@ class SupplierRepository extends BaseRepository
             $input['opening_balance'] =  $opening_balance;
             $input['opening_balance_date'] = date_for_database($input['opening_balance_date']);
         }
-        $supplier_no = Supplier::max('supplier_no')->first();
+        $supplier_no = Supplier::max('supplier_no');
         $input['supplier_no'] = $supplier_no + 1;
         $input = array_map('strip_tags', $input);
         DB::beginTransaction();

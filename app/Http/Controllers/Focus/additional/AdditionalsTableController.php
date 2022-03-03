@@ -57,14 +57,14 @@ class AdditionalsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('class', function ($term) {
+            ->addColumn('default_a', function ($term) {
                 $ty = '';
-                switch ($term->class) {
-                    case 1 :
-                        $ty = trans('general.tax');
+                switch ($term->default_a) {
+                    case 0 :
+                        $ty ='No';
                         break;
-                    case 2 :
-                        $ty = trans('general.discount');
+                    case 1 :
+                        $ty ='Yes';
                         break;
 
                 }

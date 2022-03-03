@@ -22,6 +22,7 @@
         var crsf_hash = '{{ csrf_token() }}';
         window.Laravel = {!! json_encode([ 'csrfToken' => csrf_token() ]) !!};
         var unit_load_data ={!!units() !!};
+        var unit_load_tax ={!!taxes() !!};
         var cur_dy='{{config('currency.symbol')}}';
     </script>
     <!-- BEGIN: Vendor CSS-->

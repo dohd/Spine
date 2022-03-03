@@ -29,7 +29,7 @@ class AdditionalRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','class','created_at']);
+            ->get(['id','name','value','default_a','created_at']);
     }
 
     /**

@@ -637,9 +637,17 @@ function user_data($id)
 }
 function units()
 {
-    $u = \App\Models\productvariable\Productvariable::where('type', '=', 1)->get(['id', 'name', 'code', 'val'])->toJson();
+    $u = \App\Models\productvariable\Productvariable::where('type', '=', 0)->get(['id', 'name', 'code', 'val'])->toJson();
     return $u;
 }
+
+function taxes()
+{
+    $t = \App\Models\additional\Additional::all()->toJson();
+    return $t;
+}
+
+
 function visual()
 {
     if (session()->exists('theme')) {

@@ -140,12 +140,7 @@
                     </div>
                 </div>
 
-                <div class='form-group'>
-                    {{ Form::label( 'account_no', 'ACCOUNT NUMBER',['class' => 'col-lg-2 control-label']) }}
-                    <div class='col-lg-10'>
-                        {{ Form::text('account_no', null, ['class' => 'form-control box-size', 'placeholder' => 'ACCOUNT NUMBER']) }}
-                    </div>
-                </div>
+              
                 <div class='form-group'>
                     {{ Form::label( 'account_name', 'PRINT NAME ON CHEQUE AS',['class' => 'col-lg-3 control-label']) }}
                     <div class='col-lg-10'>

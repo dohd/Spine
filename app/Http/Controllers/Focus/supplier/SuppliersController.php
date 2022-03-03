@@ -30,7 +30,9 @@ use App\Http\Responses\Focus\supplier\CreateResponse;
 use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\account\Account;
 use App\Models\supplier\Supplier;
+use App\Models\transaction\Transaction;
 use App\Repositories\Focus\supplier\SupplierRepository;
 
 /**
@@ -150,9 +152,13 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
+       
+        $pri_account = Account::where('system', 'payable')->first();
+        $transactions=Transaction::where('account_id',$pri_account->id)->where('tr_user_id',$supplier->id)->orderBy('transaction_date', 'desc')->get();
+       
 
         //returning with successfull message
-        return new ViewResponse('focus.suppliers.view', compact('supplier'));
+        return new ViewResponse('focus.suppliers.view', compact('supplier','transactions'));
     }
 
     public function search(CreatePurchaseorderRequest $request)

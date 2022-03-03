@@ -7,65 +7,251 @@
 @endsection
 
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ trans('labels.backend.suppliers.management') }}</h4>
-
-                </div>
-                <div class="content-header-right col-md-6 col-12">
-                    <div class="media width-250 float-right">
-
-                        <div class="media-body media-right text-right">
-                            @include('focus.suppliers.partials.suppliers-header-buttons')
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="">
+    <div class="content-wrapper">
+        <div class="content-header row">
+        </div>
+        <div class="content-detached content-right">
             <div class="content-body">
-                <div class="row">
+                <div class="content-overlay"></div>
+
+
+                <section class="row all-contacts">
                     <div class="col-12">
                         <div class="card">
 
                             <div class="card-content">
-
                                 <div class="card-body">
-                                    <table id="suppliers-table"
-                                           class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                                           width="100%">
-                                        <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>{{ trans('customers.name') }}</th>
-                                            <th>{{ trans('customers.company') }}</th>
-                                            <th>{{ trans('customers.email') }}</th>
-                                            <th>{{ trans('customers.address') }}</th>
+                                    <!-- Task List table -->
+                               
+                                    <div class="card-body">
 
-                                            <th>{{ trans('general.active') }}</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                        </thead>
+                                        <ul class="nav nav-tabs nav-top-border no-hover-bg "
+                                            role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link active" id="active-tab1" data-toggle="tab"
+                                                   href="#active1" aria-controls="active1" role="tab"
+                                                   aria-selected="true">Supplier Info</a>
+                                            </li>
+
+                                            <li class="nav-item">
+                                                <a class="nav-link " id="active-tab3" data-toggle="tab"
+                                                   href="#active3" aria-controls="active3"
+                                                   role="tab">Transactions</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link " id="active-tab3" data-toggle="tab"
+                                                   href="#active4" aria-controls="active3"
+                                                   role="tab">Purchase Orders</a>
+                                            </li>
+                                          
 
 
-                                        <tbody>
-                                        <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1"><i
-                                                        class="fa fa-spinner spinner"></i></td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+                                        </ul>
+                                        <div class="tab-content px-1 pt-1">
+                                            <div class="tab-pane active in" id="active1"
+                                                 aria-labelledby="active-tab1" role="tabpanel">
+                                                 <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5 ">
+                                                        <p>Supplier No</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5 ">
+                                                        <p>Name</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>{{trans('customers.phone')}}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5   font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>{{trans('customers.email')}}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5   font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Address</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>City</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5   font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Region</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Country</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5 ">
+                                                        <p>{{trans('customers.postbox')}}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+
+                                                
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>{{trans('customers.taxid')}}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Bank </p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Account Number</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Account Name</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                             
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Bank Code</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  ">
+                                                        <p>Mpesa  Account</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="tab-pane" id="active3" aria-labelledby="link-tab3"
+                                                 role="tabpanel">
+
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <p>{{trans('customers.docid')}}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <p></p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+
+                                        </div>
+                                    </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
+                </section>
+            </div>
+        </div>
+        <div class="sidebar-detached sidebar-left">
+            <div class="sidebar">
+                <div class="bug-list-sidebar-content">
+                    <!-- Predefined Views -->
+                    <div class="card">
+                       
+
+                        <div class="card-body">
+                          
+                            <table id="suppliers-table"
+                            class="table table-striped table-bordered zero-configuration" cellspacing="0"
+                            width="100%">
+                         <thead>
+                         <tr>
+                             <th>{{ trans('customers.name') }}</th>
+                            
+                         </tr>
+                         </thead>
+
+
+                         <tbody>
+                         <tr>
+                             <td colspan="100%" class="text-center text-success font-large-1"><i
+                                         class="fa fa-spinner spinner"></i></td>
+                         </tr>
+                         </tbody>
+                     </table>
+                        </div>
+                        <!--/ Groups-->
+
+
+                    </div>
+                    <!--/ Predefined Views -->
+
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endsection
+
 
 @section('after-scripts')
     {{-- For DataTables --}}
@@ -114,28 +300,22 @@
                     type: 'post'
                 },
                 columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
+                  
                     {data: 'name', name: 'name'},
-                    {data: 'company', name: 'company'},
-                    {data: 'email', name: 'email'},
-                    {data: 'address', name: 'address'},
-                    {data: 'created_at', name: 'created_at'},
-                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
+                
+                  
+                   
+                  
                 ],
                 order: [[0, "asc"]],
                 searchDelay: 500,
-                dom: 'Blfrtip',
-                buttons: {
-                    buttons: [
-
-                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
-                    ]
-                }
+                dom: 'frt',
+            
             });
             $('#suppliers-table_wrapper').removeClass('form-inline');
 
         }
     </script>
 @endsection
+   
+

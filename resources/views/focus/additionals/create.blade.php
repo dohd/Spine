@@ -4,8 +4,8 @@
 
 @section('page-header')
     <h1>
-        {{ trans('labels.backend.additionals.management') }}
-        <small>{{ trans('labels.backend.additionals.create') }}</small>
+        Tax Management
+        <small>Tax Create</small>
     </h1>
 @endsection
 
@@ -14,7 +14,7 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ trans('labels.backend.additionals.create') }}</h4>
+                    <h4 class="content-header-title mb-0">TAX MANAGEMENT</h4>
 
                 </div>
                 <div class="content-header-right col-md-6 col-12">
