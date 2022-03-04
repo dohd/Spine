@@ -232,18 +232,18 @@
 			</tr>
 		</thead>
 		<tbody>            
-			@foreach($budget->products as $product)
-				@if ($product->a_type == 1)					
+			@foreach($budget->items as $item)
+				@if ($item->a_type == 1)					
 					<tr>
-						<td>{{ $product->numbering }}</td>
-						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ (int) $product->new_qty }}</td>
-						<td class="align-c">{{ $product->unit }}</td>						
+						<td>{{ $item->numbering }}</td>
+						<td>{{ $item->product_name }}</td>
+						<td class="align-c">{{ (int) $item->new_qty }}</td>
+						<td class="align-c">{{ $item->unit }}</td>						
 					</tr>
 				@else
 					<tr>
-						<td><b>{{ $product->numbering }}<b></td>
-						<td><b>{{ $product->product_name }}</b></td>
+						<td><b>{{ $item->numbering }}<b></td>
+						<td><b>{{ $item->product_name }}</b></td>
 						@for($i = 0; $i < 2; $i++) 
 							<td></td>
 						@endfor

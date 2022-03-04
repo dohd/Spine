@@ -356,7 +356,7 @@
 
     // set default product rows
     let productIndx = 0;
-    const budgetItems = @json($budget->products()->orderByRow()->get());    
+    const budgetItems = @json($budget->items()->orderByRow()->get());    
     budgetItems.forEach(v => {
         const i = productIndx;
         // check type if item type is product else assign title

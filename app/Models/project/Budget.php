@@ -17,7 +17,7 @@ class Budget extends Model
     ];
 
     // Relation
-    public function products()
+    public function items()
     {
         return $this->hasMany(BudgetItem::class);
     }
