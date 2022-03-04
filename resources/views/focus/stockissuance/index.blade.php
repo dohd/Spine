@@ -199,6 +199,8 @@
             dataType: 'json',
             data: {id: quoteId}
         });
+        $('#mergedLog').modal('hide');
+
     });
 
     // On delete log
@@ -249,15 +251,6 @@
                 ]
             }
         }
-    }
-
-    const tableConfig = function() {
-
-    }
-
-
-    {
-        ...tableConfig()
     }
 </script>
 @endsection

@@ -104,7 +104,7 @@ class StockIssuanceController extends Controller
 
         $quote = Quote::find($quote_id);
         $budget = Budget::where('quote_id', $quote->id)->first();
-        $budget->products = $budget->products()->orderBy('row_index', 'ASC')->get();
+        $budget->items = $budget->items()->orderBy('row_index', 'ASC')->get();
 
         return view('focus.stockissuance.issue_stock', compact('quote', 'budget'));
     }
@@ -164,16 +164,14 @@ class StockIssuanceController extends Controller
      */
     public function post_issuedstock(Request $request)
     {
-        $items = Quote::find($request->id)->budget;
-
-        print_log(json_encode($items, JSON_PRETTY_PRINT));
+        $items = Quote::find($request->id)->budget->items;
 
         $stock_cost = 0;
-        // foreach ($items as $item) {
-        //     $item_qty = $item->issuance_logs()->sum('issue_qty');
-        //     $item_cost = $item->price * $item_qty;
-        //     $stock_cost += $item_cost;
-        // }
+        foreach ($items as $item) {
+            $ttl_qty = $item->issuance_logs()->sum('issue_qty');
+            $stock_cost += ($item->price * $item->issue_qty);
+            print_log(json_encode($item, JSON_PRETTY_PRINT));
+        }
 
         print_log('+++ Stock cost +++ '.$stock_cost);
 
