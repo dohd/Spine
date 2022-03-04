@@ -2,6 +2,7 @@
 
 namespace App\Models\stock;
 
+use App\Models\project\BudgetItem;
 use Illuminate\Database\Eloquent\Model;
 
 class IssueItemLog extends Model
@@ -15,4 +16,9 @@ class IssueItemLog extends Model
     protected $guarded = [
         'id'
     ];
+
+    public function budget_item()
+    {
+        return $this->belongsTo(BudgetItem::class, 'item_id');
+    }
 }

@@ -20,6 +20,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function budget()
+    {
+        return $this->hasOne(Budget::class);
+    }
+
     public function invoice_item()
     {
         return $this->hasOne(InvoiceItem::class);

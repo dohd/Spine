@@ -32,6 +32,7 @@ class StockIssuanceTableController extends Controller
     public function __invoke()
     {        
         $core = StockIssuanceController::getForDataTable();
+        
         return Datatables::of($core)
             ->addIndexColumn()
             ->addColumn('notes', function($quote) {
@@ -66,7 +67,12 @@ class StockIssuanceTableController extends Controller
                 return number_format($quote->total, 2);
             })
             ->addColumn('actions', function ($quote) {
-                return '<a href="'. route('biller.stockissuance.create', $quote->id) .'" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Issue"><i class="ft-list "></i></a>';
+                return '
+                        <a href="'. route('biller.stockissuance.create', $quote->id) .'" class="btn btn-link" data-toggle="tooltip" data-placement="bottom" title="Issue">
+                            <i class="fa fa-cubes text-primary fa-lg" aria-hidden="true"></i></a>
+                        <a href="javascript:void(0);" data-toggle="modal" data-target="#mergedLog" class="btn btn-link issued-stock" data-toggle="tooltip" data-placement="bottom" title="Issued-stock" data-id="'.$quote->id.'">
+                            <i class="fa fa-list fa-lg text-primary" aria-hidden="true"></i></a>
+                    ';
             })
             ->rawColumns(['actions'])
             ->make(true);

@@ -57,53 +57,42 @@
         </div>
     </div>
 </div>
+@include('focus.stockissuance.modal.merged_log')
 @endsection
 
 @section('after-scripts')
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $(function() {
-        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
-        $('#search').click(function() {
-            var start_date = $('#start_date').val();
-            var end_date = $('#end_date').val();
-            if (start_date && end_date) {
-                $('#quotes-table').DataTable().destroy();
-                return draw_data(start_date, end_date);
-            } 
-            alert("Date range is Required");            
-        });
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
-        $('[data-toggle="datepicker"]')
-            .datepicker({ format: "{{ config('core.user_date_format') }}" })
-            .datepicker('setDate', new Date());
+    $('#search').click(function() {
+        var start_date = $('#start_date').val();
+        var end_date = $('#end_date').val();
+        if (start_date && end_date) {
+            $('#quotes-table').DataTable().destroy();
+            return draw_data(start_date, end_date);
+        } 
+        alert("Date range is Required");            
     });
 
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    $('[data-toggle="datepicker"]')
+        .datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date());
 
     function draw_data(start_date = '', end_date = '') {
         const segment = @json($segment);
         const input = @json($input);
-        const tableLang = { @lang('datatable.strings') };
-
         const table = $('#quotes-table').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            stateSave: true,
-            language: tableLang,
             ajax: {
                 url: "{{ route('biller.stockissuance.get') }}",
                 type: 'post',
                 data: {
+                    start_date, end_date,
                     i_rel_id: segment['id'],
                     i_rel_type: input['rel_type'],
-                    start_date: start_date,
-                    end_date: end_date,
                 },
             },
             columns: [{
@@ -141,6 +130,96 @@
                     sortable: false
                 }
             ],
+            ...tableConfig()
+        });
+    }
+
+    // assign quote_id to modal
+    $('#quotes-table').on('click', '.issued-stock', function() {
+        const quoteId = $(this).attr('data-id');
+        $('#mergedLog').attr('data-id', quoteId);
+    });
+    // On Opening Modal
+    $('#mergedLog').on('shown.bs.modal', function() {
+        draw_data2();
+    });
+    function draw_data2(start_date = '', end_date = '') {
+        const table = $('#mergedLogTbl').dataTable({
+            destroy: true,
+            ajax: {
+                url: "{{ route('biller.stockissuance.getlog') }}",
+                type: 'POST',
+                data: {start_date, end_date},
+            },
+            columns: [{
+                    data: 'DT_Row_Index',
+                    name: 'id'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'unit',
+                    name: 'unit'
+                },
+                {
+                    data: 'issue_qty',
+                    name: 'issue_qty'
+                },
+                {
+                    data: 'reqxn',
+                    name: 'reqxn'
+                },
+                {
+                    data: 'warehouse',
+                    name: 'warehouse'
+                },
+                {
+                    data: 'date',
+                    name: 'date'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    searchable: false,
+                    sortable: false
+                }
+            ],
+            ...tableConfig()
+        });
+    }
+
+    // On posting issued Stock
+    $('#post-stock').click(function() {
+        const quoteId = $('#mergedLog').attr('data-id');
+        $.ajax({
+            url: "{{ route('biller.stockissuance.post_issuedstock') }}",
+            method: 'POST',
+            dataType: 'json',
+            data: {id: quoteId}
+        });
+    });
+
+    // On delete log
+    $('#mergedLogTbl').on('click', '.delete-log', function() {
+        const $row = $(this).parents('tr:first');
+        const logId = $row.find('td:last').children('button').attr('data-id');
+
+        // $.ajax({url: "{{ route('biller.stockissuance.delete_log') }}?id=" + logId })
+        // .done(function(data) {
+        //     $row.remove();
+        // });
+    });
+
+    function tableConfig() {
+        const tableLang = {@lang('datatable.strings')};
+        return {
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            stateSave: true,
+            language: tableLang,
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
@@ -169,7 +248,16 @@
                     }
                 ]
             }
-        });
+        }
+    }
+
+    const tableConfig = function() {
+
+    }
+
+
+    {
+        ...tableConfig()
     }
 </script>
 @endsection

@@ -8,7 +8,6 @@ use App\Models\project\Budget;
 use App\Models\project\BudgetItem;
 use App\Models\quote\Quote;
 use App\Models\stock\IssueItemLog;
-use App\Models\warehouse\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -161,7 +160,28 @@ class StockIssuanceController extends Controller
     }
 
     /**
-     * Budgeted quotes for stock issuance
+     * Post issued stock
+     */
+    public function post_issuedstock(Request $request)
+    {
+        $items = Quote::find($request->id)->budget;
+
+        print_log(json_encode($items, JSON_PRETTY_PRINT));
+
+        $stock_cost = 0;
+        // foreach ($items as $item) {
+        //     $item_qty = $item->issuance_logs()->sum('issue_qty');
+        //     $item_cost = $item->price * $item_qty;
+        //     $stock_cost += $item_cost;
+        // }
+
+        print_log('+++ Stock cost +++ '.$stock_cost);
+
+        return response()->json(['status' => 'Success', 'message' => 'Issued items successfully posted']);
+    }
+
+    /**
+     * Budgeted quotes for stock issuance dataTable
      */
     static function getForDataTable()
     {
@@ -185,5 +205,15 @@ class StockIssuanceController extends Controller
             'id', 'notes', 'tid', 'customer_id', 'branch_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
             'total', 'status', 'bank_id'
         ]);
+    }
+
+    /**
+     *  Budgeted Issued items for mergedLog dataTable
+     */
+    static function stockissuanceLogDataTable()
+    {
+        $q = IssueItemLog::with('budget_item');
+
+        return $q->get();
     }
 }
