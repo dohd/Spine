@@ -109,6 +109,29 @@ class PurchasesController extends Controller
 
     public function store(StorePurchaseRequest $request)
     {
+        // extract input details
+        $bill = $request->only([
+            'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
+            'project_id', 'note'
+        ]);
+
+
+
+
+
+
+        
+
+        dd($bill);
+
+        print_log('+++ Direct Purchase ++++');
+        return response()->json(['status' => 'Success', 'message' => 'Direct purchase successful']);
+
+
+
+
+
+
         $invoice = $request->only(['payer_type', 'payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
 
         $tax = $request->only(['payer_type', 'payer', 'payer_id', 'taxid', 'tid', 'ref_type', 'taxformat']);
@@ -195,10 +218,6 @@ class PurchasesController extends Controller
         $expense_items['for_who'] = $request->input('payer_id');
         $expense_items['transaction_date'] = date_for_database($request->input('transaction_date'));
         $expense_items['exp_totalsaleamount'] = numberClean($request->input('exp_totalsaleamount'));
-
-
-
-
 
         //$invoice_items['ins'] = auth()->user()->ins;
 
