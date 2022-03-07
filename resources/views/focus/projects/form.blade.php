@@ -45,7 +45,7 @@
             <div><label for="projectNumber">Project No</label></div>
             <div class="input-group">
                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                {{ Form::text('project_number', 'Prj-'.sprintf('%04d', $project->project_number), ['class' => 'form-control', 'disabled']) }}
+                {{ Form::text('tid', 'Prj-'.sprintf('%04d', $project->tid), ['class' => 'form-control', 'disabled']) }}
             </div>
         </fieldset>
     </div>

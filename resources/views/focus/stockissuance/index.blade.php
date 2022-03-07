@@ -120,8 +120,8 @@
                     name: 'quote_date'
                 },
                 {
-                    data: 'project_number',
-                    name: 'project_number'
+                    data: 'tid',
+                    name: 'tid'
                 },
                 {
                     data: 'actions',

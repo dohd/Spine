@@ -2,10 +2,9 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class AlterColumnProjectNumberInProjectsTable extends Migration
+class RenameColumnProjectNumberInProjectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -17,8 +16,7 @@ class AlterColumnProjectNumberInProjectsTable extends Migration
         Schema::table('projects', function (Blueprint $table) {
             //
         });
-
-        DB::statement('ALTER TABLE rose_projects MODIFY tid INT DEFAULT 0');
+        DB::statement('ALTER TABLE rose_projects RENAME COLUMN project_number TO tid');
     }
 
     /**
@@ -31,5 +29,6 @@ class AlterColumnProjectNumberInProjectsTable extends Migration
         Schema::table('projects', function (Blueprint $table) {
             //
         });
+        DB::statement('ALTER TABLE rose_projects RENAME COLUMN tid TO project_number');
     }
 }

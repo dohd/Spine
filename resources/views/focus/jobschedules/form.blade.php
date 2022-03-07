@@ -202,7 +202,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 return {
-                                    text: item.name+' - '+item.project_number,
+                                    text: item.name+' - '+item.tid,
                                     id: item.id
                                 }
                             })

@@ -56,7 +56,7 @@ class RjcsTableController extends Controller
                 return 'RjR-'.sprintf('%04d', $rjc->tid);
             })
             ->addColumn('project_no', function ($rjc) {
-                $no = $rjc->project->project_number;
+                $no = $rjc->project->tid;
 
                 return 'Prj-'.sprintf('%04d', $no);
             })

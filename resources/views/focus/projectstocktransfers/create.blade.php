@@ -38,7 +38,7 @@
                                                     <div id="project_name"></div>
                                                 </div>
                                                 <hr>
-                                                 <div id="project_number"></div>
+                                                 <div id="tid"></div>
                                                 
                                                  <hr>
                                                 <div class="clientinfo">

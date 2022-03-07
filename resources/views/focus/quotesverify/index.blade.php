@@ -141,8 +141,8 @@
                     name: 'created_at'
                 },
                 {
-                    data: 'project_number',
-                    name: 'project_number'
+                    data: 'tid',
+                    name: 'tid'
                 },
                 {
                     data: 'lpo_number',

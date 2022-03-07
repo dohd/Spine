@@ -55,10 +55,10 @@ class StockIssuanceTableController extends Controller
             ->addColumn('quote_date', function ($quote) {
                 return dateFormat($quote->invoicedate);
             })
-            ->addColumn('project_number', function($quote) {
+            ->addColumn('tid', function($quote) {
                 $tid = '';
                 if (isset($quote->project_quote->project)) {
-                    $no = $quote->project_quote->project->project_number;
+                    $no = $quote->project_quote->project->tid;
                     $tid = 'Prj-'.sprintf('%04d', $no);
                 }
                 return $tid;

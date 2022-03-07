@@ -48,7 +48,7 @@ class RjcsController extends Controller
 
         $projects =  Project::where('main_quote_id', '>', 0)
             ->orderBy('id', 'desc')
-            ->get(['id', 'name', 'project_number', 'main_quote_id']);
+            ->get(['id', 'name', 'tid', 'main_quote_id']);
         // append quote tid
         foreach($projects as $project) {
             $lead_tids = array();
@@ -119,7 +119,7 @@ class RjcsController extends Controller
         $items = $rjc->rjc_items()->orderBy('row_index')->get();
         $projects =  Project::where('main_quote_id', '>', 0)
             ->orderBy('id', 'desc')
-            ->get(['id', 'name', 'project_number', 'main_quote_id']);
+            ->get(['id', 'name', 'tid', 'main_quote_id']);
         // append quote tid
         foreach($projects as $project) {
             $lead_tids = array();

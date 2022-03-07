@@ -63,8 +63,8 @@ class ProjectsTableController extends Controller
                 }
                 return '<div class="todo-item media"><div class="media-body"><div class="todo-title">'.$project->name.'<div>' . $tg . '</div></div></div></div>';
             })
-            ->addColumn('project_number', function($project) {
-                return 'Prj-'.sprintf('%04d', $project->project_number);
+            ->addColumn('tid', function($project) {
+                return 'Prj-'.sprintf('%04d', $project->tid);
             })
             ->addColumn('quote_tid', function($project) {
                 $tids = array();                

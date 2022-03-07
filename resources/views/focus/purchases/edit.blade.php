@@ -404,8 +404,8 @@
                                                 @foreach($projects as $project)
                                     <option value="{{$project->id}}"
                                         data-type1="{{$project->customer_project->id}}" data-type2="{{$project->branch->id}}" 
-                                        data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}" {{ $project->id === @$purchase->payer_id ? " selected" : "" }}
-                                        > {{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}</option>
+                                        data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->tid}}" {{ $project->id === @$purchase->payer_id ? " selected" : "" }}
+                                        > {{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->tid}}</option>
                                                 @endforeach
 
                                                         </select>
@@ -689,7 +689,7 @@
                                                                       autocomplete="off">{{$purchase_item_tab_two->note}} </textarea><br></td>
                                          <td colspan="4"><input type="text" class="form-control" name="exp_project[]"
                                                        placeholder="Search  Project By Project Name , Clent, Branch"
-                                                       id='exp_project-{{$loop->index}}' value="{{$purchase_item_tab_two->project->customer->company}} {{$purchase_item_tab_two->branch->name}}-{{$purchase_item_tab_two->project->name}}-{{$purchase_item_tab_two->project->project_number}}">
+                                                       id='exp_project-{{$loop->index}}' value="{{$purchase_item_tab_two->project->customer->company}} {{$purchase_item_tab_two->branch->name}}-{{$purchase_item_tab_two->project->name}}-{{$purchase_item_tab_two->project->tid}}">
 
                                                           <input type="hidden" name="exp_project_id[]" id="exp_project_id-{{$loop->index}}" value="{{$purchase_item_tab_two->project_id}}" >
                                                           <input type="hidden" name="exp_client_id[]" id="exp_client_id-{{$loop->index}}" value="{{$purchase_item_tab_two->payer_id}}"  >

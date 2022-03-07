@@ -82,10 +82,10 @@ class QuoteVerifyTableController extends Controller
             ->addColumn('lpo_number', function($quote) {
                 return $quote->lpo ? $quote->lpo->lpo_no : '';
             })
-            ->addColumn('project_number', function($quote) {
+            ->addColumn('tid', function($quote) {
                 $tid = '';
                 if (isset($quote->project_quote->project)) {
-                    $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
+                    $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->tid);
                 }
                 return $tid;
             })
