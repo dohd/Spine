@@ -63,8 +63,9 @@
                     <b>Inventory Total ({{ config('currency.symbol') }})</b>
                 </td>
                 <td align="left" colspan="2">
-                    <input type="text" name="total" class="form-control" id="invtotal" readonly>
-                    <input type="hidden" id="invsubtotal">
+                    <input type="text" class="form-control" name="stock_grandttl" id="stock_grandttl" readonly>
+                    <input type="hidden" name="stock_subttl" id="stock_subttl" value="0">
+                    <input type="hidden" name="stock_tax" id="stock_tax" value="0">
                 </td>
             </tr>
         </tbody>

@@ -16,17 +16,18 @@
                                     <div class="col-5">
                                         <div><label for="supplier-type">Select Supplier Type</label></div>
                                         <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                            <input type="radio" class="custom-control-input bg-primary" name="payer_type" id="colorCheck1" value="walkin" checked>
+                                            <input type="radio" class="custom-control-input bg-primary" name="supplier_type" id="colorCheck1" value="walk-in" checked>
                                             <label class="custom-control-label" for="colorCheck1">Walkin</label>
                                         </div>
                                         <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                            <input type="radio" class="custom-control-input bg-purple" name="payer_type" value="supplier" id="colorCheck3">
+                                            <input type="radio" class="custom-control-input bg-purple" name="supplier_type" value="supplier" id="colorCheck3">
                                             <label class="custom-control-label" for="colorCheck3">{{trans('suppliers.supplier')}}</label>
                                         </div>
                                     </div>
                                     <div class="col-7">
                                             <label for="payer" class="caption">Search Supplier</label>                                       
                                             <select class="form-control" id="supplierbox" data-placeholder="Search Supplier" disabled></select>
+                                            <input type="hidden" name="supplier_id" value="0" id="supplierid">
                                     </div>
                                 </div>
                                 
@@ -44,7 +45,6 @@
                                             {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id'=>'taxid', 'required']) }}
                                         </div>
                                     </div>
-                                    <input type="hidden" name="supplier_id" value="0" id="supplierid">
                                 </div>
 
                                 <div class="form-group row">
@@ -61,31 +61,25 @@
                                                 <td class="text-center">Line Total</td>
                                                 @for ($i = 0; $i < 4; $i++)
                                                     <td class="text-center">0.00</td>
-                                                @endfor
-                                                @foreach (['stock_subttl', 'expense_subttl', 'asset_subttl', 'paidttl'] as $val)
-                                                    <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
-                                                @endforeach
+                                                @endfor                                                
                                             </tr>                                                  
                                             <tr>
                                                 <td class="text-center">Tax</td>
                                                 @for ($i = 0; $i < 4; $i++)
                                                     <td class="text-center">0.00</td>
-                                                @endfor
-                                                @foreach (['stock_tax', 'expense_tax', 'asset_tax', 'grandtax'] as $val)
-                                                    <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
-                                                @endforeach
+                                                @endfor                                                
                                             </tr>
                                             <tr>
                                                 <td class="text-center">Grand Total</td>
                                                 @for ($i = 0; $i < 4; $i++)
                                                     <td class="text-center">0.00</td>
-                                                @endfor
-                                                @foreach (['stock_grandttl', 'expense_grandttl', 'asset_grandttl', 'grandttl'] as $val)
-                                                    <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
-                                                @endforeach                                                       
+                                                @endfor                                                                                                      
                                             </tr>
                                             <tr class="sub_c" style="display: table-row;">
                                                 <td align="right" colspan="3">
+                                                    @foreach (['paidttl', 'grandtax', 'grandttl'] as $val)
+                                                        <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
+                                                    @endforeach 
                                                     {{ Form::submit('Post Transaction', ['class' => 'btn btn-success sub-btn btn-lg']) }}
                                                 </td>
                                             </tr>
@@ -152,7 +146,7 @@
                                     <div class="col-sm-12">
                                         <div class="form-group">
                                             <label for="project" class="caption">Projects</label>
-                                            <select class="form-control" name="project" id="project" required>
+                                            <select class="form-control" name="project_id" id="project" required>
                                                 <option value="">-- Select Project --</option>
                                             </select>
                                         </div>
@@ -215,7 +209,7 @@
         .datepicker('setDate', new Date())
         .change(function() { $(this).datepicker('hide') });
     
-    // On clicking payer_type
+    // On clicking supplier_type
     $("input[type='radio']").change(function() {
         $('#supplierbox').html('').attr('disabled', true);
         $('#taxid').val('').attr('readonly', false);
@@ -228,9 +222,10 @@
     });
     $('#supplierbox').change(function() {
         const name = $('#supplierbox option:selected').text().split(' : ')[0];
-        const taxId = $(this).val().split('-')[1];
-        $('#supplier').val(name);
+        const [id, taxId] = $(this).val().split('-');
         $('#taxid').val(taxId);
+        $('#supplierid').val(id);
+        $('#supplier').val(name);
     });
     // load suppliers
     $('#supplierbox').select2({
@@ -252,15 +247,9 @@
             ...ajaxConfig
         }
     });
-
-
-
-
-
-
-
-
-
+    $('#tax').change(function() {
+        taxRule(0, $(this).val());                      
+    });
 
 
     /**
@@ -269,7 +258,6 @@
     let stockRowId = 0;
     $('.stockname').autocomplete(predict(stockRowId));
     $('#rowtax-0').mousedown(function() {
-        if ($('#tax').val() == 0) alert('Please select TAX*');
         taxRule(0, $('#tax').val());                      
     });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
@@ -323,8 +311,9 @@
             grandTotal += amountInc;
         });
         $('#invtax').text(tax.toLocaleString());
-        $('#invtotal').val(grandTotal.toLocaleString());
-        $('#invsubtotal').val((grandTotal - tax).toLocaleString());
+        $('#stock_tax').val(tax.toLocaleString());
+        $('#stock_grandttl').val(grandTotal.toLocaleString());
+        $('#stock_subttl').val((grandTotal - tax).toLocaleString());
         transCalc();
     }
 
@@ -335,6 +324,8 @@
             $(this).removeClass('d-none');
             if (rowtax != tax && rowtax != 0) 
                 $(this).addClass('d-none');
+            $(this).attr('selected', false);
+            if (rowtax == tax) $(this).attr('selected', true);
         }); 
     }
 
@@ -373,13 +364,13 @@
         $('#transxnTbl tbody tr').each(function() {
             switch ($(this).index()*1) {
                 case 0:
-                    $(this).find('td:eq(1)').text($('#invsubtotal').val());
+                    $(this).find('td:eq(1)').text($('#stock_subttl').val());
                     break;
                 case 1:
-                    $(this).find('td:eq(1)').text($('#invtax').text());
+                    $(this).find('td:eq(1)').text($('#stock_tax').val());
                     break;
                 case 2:
-                    $(this).find('td:eq(1)').text($('#invtotal').val());
+                    $(this).find('td:eq(1)').text($('#stock_grandttl').val());
                     break;
             }
         });
@@ -429,7 +420,7 @@
         $.ajax({
             type: "POST",
             url: baseurl + 'transactions/payer_search',
-            data: 'keyword=' + $(this).val() + '&payer_type=' + payerType,
+            data: 'keyword=' + $(this).val() + '&supplier_type=' + payerType,
             beforeSend: function() {
                 $(`#${boxId}-box`).css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
             },

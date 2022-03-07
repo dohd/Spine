@@ -111,16 +111,11 @@ class PurchasesController extends Controller
     {
         // extract input details
         $bill = $request->only([
-            'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
-            'project_id', 'note'
+            'supplier_type', 'supplier_id', 'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
+            'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl'
         ]);
+        $stock = $request->only([]);
 
-
-
-
-
-
-        
 
         dd($bill);
 
