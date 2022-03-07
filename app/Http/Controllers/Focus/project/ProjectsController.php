@@ -74,8 +74,8 @@ class ProjectsController extends Controller
         $mics = Misc::all();
         $employees = Hrm::all();
         $accounts = Account::where('account_type', 'Income')->get();
-        $project = Project::orderBy('project_number', 'desc')->first('project_number');
-        $tid = $project ? $project->project_number : 1;
+        $project = Project::orderBy('tid', 'desc')->first('tid');
+        $tid = $project ? $project->tid : 1;
 
         return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts', 'tid'));
     }
@@ -91,7 +91,7 @@ class ProjectsController extends Controller
     {
         // extract input fields from request
         $project = $request->only([
-            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc',
+            'customer_id', 'branch_id', 'name', 'tid', 'status', 'priority', 'short_desc',
             'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
         ]);
         $project_quotes = $request->only(['main_quote', 'other_quote']);
@@ -126,7 +126,7 @@ class ProjectsController extends Controller
     {
         // extract input fields from request
         $data = $request->only([
-            'customer_id', 'branch_id', 'name', 'project_number', 'status', 'priority', 'short_desc',
+            'customer_id', 'branch_id', 'name', 'tid', 'status', 'priority', 'short_desc',
             'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
         ]);
         $quotes = $request->only(['main_quote', 'other_quote']);
@@ -412,26 +412,22 @@ class ProjectsController extends Controller
     /**
      * Project autocomplete search
      */
-    public function project_search(Request $request, $bill_type)
+    public function project_search(Request $request)
     {        
         if (!access()->allow('product_search')) return false;
-        // extract input fields
         $q = $request->post('keyword');
-        $w = $request->post('wid');
-        $s = $request->post('serial_mode');
-        if ($bill_type == 'label') $q = @$q['term'];
-        $wq = compact('q', 'w');
 
         $project = Project::where('name', 'LIKE', '%' . $q . '%')
-            ->orWhereHas('customer', function ($query) use ($wq) {
-                $query->where('company', 'LIKE', '%' . $wq['q'] . '%');
-                // return $query;
-            })->orWhereHas('branch', function ($query) use ($wq) {
-                $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
-                // return $query;
-            })->orWhereHas('quotes', function($q) use ($wq) {
-                $q->where('tid', 'LIKE', '%' . $wq['q'] . '%');
-            })->limit(6)->get();
+            ->orWhereHas('customer', function ($query) use ($q) {
+                $query->where('company', 'LIKE', '%' . $q . '%');
+            })
+            ->orWhereHas('branch', function ($query) use ($q) {
+                $query->where('name', 'LIKE', '%' . $q . '%');
+            })
+            ->orWhereHas('quotes', function($query) use ($q) {
+                $query->where('tid', 'LIKE', '%' . $q . '%');
+            })
+            ->limit(6)->get();
 
         // response format
         $output = array();
@@ -453,7 +449,7 @@ class ProjectsController extends Controller
             
             $customer = $project->customer_project->company;
             $branch = $project->branch->name . ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
-            $tid = 'Prj-'.sprintf('%04d', $project->project_number);
+            $tid = 'Prj-'.sprintf('%04d', $project->tid);
             $output[] = array(
                 'name' => implode(' - ', array($customer, $branch, $tid, $project->name)),
                 'id' => $project['id'], 
@@ -469,7 +465,7 @@ class ProjectsController extends Controller
     {
         $q = $request->post('keyword');
 
-        $projects = Project::where('project_number', 'LIKE', '%' . $q . '%')
+        $projects = Project::where('tid', 'LIKE', '%' . $q . '%')
             ->orWhereHas('customer', function ($query) use ($q) {
                 $query->where('company', 'LIKE', '%' . $q . '%');
                 return $query;
@@ -519,11 +515,14 @@ class ProjectsController extends Controller
         return json_encode($result);
     }
 
+    /**
+     * Projects select dropdown options
+     */
     public function project_load_select(Request $request)
     {
-        $q = $request->get('id');
-        $result = Project::all()->where('customer_id', '=', $q)->where('status', '=', 1);
+        $q = $request->post('q');
+        $projects = Project::where('name', 'LIKE', '%'.$q.'%')->limit(6)->get();
 
-        return json_encode($result);
+        return response()->json($projects);
     }
 }
