@@ -31,5 +31,5 @@ Route::group(['namespace' => 'project'], function () {
   //For Datatable
   Route::post('projects/get', 'ProjectsTableController')->name('projects.get');
   Route::post('projects/project_load_select', 'ProjectsController@project_load_select')->name('projects.project_load_select');
-  Route::post('projects/search/{bill_type}', 'ProjectsController@project_search')->name('projects.project_search');
+  Route::post('projects/search', 'ProjectsController@project_search')->name('projects.project_search');
 });
