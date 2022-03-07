@@ -19,12 +19,8 @@ namespace App\Http\Controllers\Focus\supplier;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Focus\purchaseorder\CreatePurchaseorderRequest;
-use App\Http\Requests\Focus\supplier\CreateSupplierRequest;
-use App\Http\Requests\Focus\supplier\DeleteSupplierRequest;
-use App\Http\Requests\Focus\supplier\EditSupplierRequest;
 use App\Http\Requests\Focus\supplier\ManageSupplierRequest;
 use App\Http\Requests\Focus\supplier\StoreSupplierRequest;
-use App\Http\Requests\Focus\supplier\UpdateSupplierRequest;
 use App\Http\Requests\Request;
 use App\Http\Responses\Focus\supplier\CreateResponse;
 use App\Http\Responses\Focus\supplier\EditResponse;
@@ -169,12 +165,18 @@ class SuppliersController extends Controller
         if (count($user) > 0) return view('focus.suppliers.partials.search')->with(compact('user'));
     }
 
+    /**
+     * Supllier select dropdown
+     */
     public function select(ManageSupplierRequest $request)
     {
+        $q = $request->post('q');
+        $suppliers = Supplier::where('name', 'LIKE', '%'.$q.'%')
+            ->where('active', 1)
+            ->orWhere('email', 'LIKE', '%'.$q.'')
+            ->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email', 'taxid']);
 
-        $q = $request->post('person');
-        $user = Supplier::where('name', 'LIKE', '%' . @$q['term'] . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . @$q['term'] . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email'));
-        if (count($user) > 0) return json_encode($user);
+        return response()->json($suppliers);
     }
 
     public function active(ManageSupplierRequest $request)
