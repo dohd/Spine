@@ -256,7 +256,8 @@
      * Stock Tab
      */
     let stockRowId = 0;
-    $('.stockname').autocomplete(predict(stockRowId));
+    const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
+    $('.stockname').autocomplete(stockPredict(stockRowId));
     $('#rowtax-0').mousedown(function() {
         taxRule(0, $('#tax').val());                      
     });
@@ -264,17 +265,13 @@
         if ($(this).is('#addstock')) {
             stockRowId++;
             const i = stockRowId;
-            let html = [
-                $('#stockTbl tbody tr:eq(0)').html(),
-                $('#stockTbl tbody tr:eq(1)').html()
-            ];
-            html = html.reduce((prev, curr) => {
+            const html = stockHtml.reduce((prev, curr) => {
                 const text = curr.replace(/-0/g, '-'+i).replace(/d-none/g, '');
                 return prev + '<tr>' + text + '</tr>';
             }, '');
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
-            $('.stockname').autocomplete(predict(i));
+            $('.stockname').autocomplete(stockPredict(i));
             taxRule(i, $('#tax').val());
         }
 
@@ -314,9 +311,8 @@
         $('#stock_tax').val(tax.toLocaleString());
         $('#stock_grandttl').val(grandTotal.toLocaleString());
         $('#stock_subttl').val((grandTotal - tax).toLocaleString());
-        transCalc();
+        transxnCalc();
     }
-
 
     function taxRule(i, tax) {
         $('#rowtax-'+ i +' option').each(function() {
@@ -329,7 +325,7 @@
         }); 
     }
 
-    function predict(i) {
+    function stockPredict(i) {
         return {
             source: function(request, response) {
                 $.ajax({
@@ -358,28 +354,95 @@
         };
     }
 
+    
+    /**
+     * Expense Tab
+     */
+    let expRowId = 0;
+    const expHtml = [$('#expTbl tbody tr:eq(0)').html(), $('#expTbl tbody tr:eq(1)').html()];
+    $('#expTbl').on('click', '#addexp, .remove', function() {
+        if ($(this).is('#addexp')) {
+            expRowId++;
+            const i = expRowId;
+            const html = expHtml.reduce((prev, curr) => {
+                const text = curr.replace(/-0/g, '-'+i).replace(/d-none/g, '');
+                return prev + '<tr>' + text + '</tr>';
+            }, '');
+
+            $('#expTbl tbody tr:eq(-3)').before(html);
+        }
+        if ($(this).is('.remove')) {
+            const $tr = $(this).parents('tr:first');
+            $tr.next().remove();
+            $tr.remove();
+        }    
+    });
+    $('#expTbl').on('change', '.exp_qty, .exp_price, .exp_vat, .exp_disc', function() {
+        const $tr = $(this).parents('tr:first');
+        const qty = $tr.find('.exp_qty').val();
+        const price = $tr.find('.exp_price').val().replace(/,/g, '') || 0;
+        const rowtax = $tr.find('.exp_vat').val()/100 + 1;
+        const amount = qty * price * rowtax;
+        const taxable = amount - (qty * price);
+
+        $tr.find('.exp_price').val((price*1).toLocaleString());
+        $tr.find('.exp_tax').text(taxable.toLocaleString());
+        $tr.find('.exp_amount').text(amount.toLocaleString());
+        calcExp();
+    });
+    function calcExp() {
+        let tax = 0;
+        let totalInc = 0;
+        let discTotal = 0;
+        $('#expTbl tbody tr').each(function() {
+            if (!$(this).find('.exp_qty').val()) return;
+            const qty = $(this).find('.exp_qty').val();
+            const price = $(this).find('.exp_price').val().replace(/,/g, '') || 0;
+            const rowtax = $(this).find('.exp_vat').val()/100 + 1;
+            const amountInc = qty * price * rowtax;
+            const amountExc = qty * price;
+            tax += (amountInc - amountExc);
+            totalInc += amountInc;
+        });
+        $('#exprow_taxttl').text(tax.toLocaleString());
+        $('#exp_tax').val(tax.toLocaleString());
+        $('#exp_subttl').val((totalInc - tax).toLocaleString());
+        $('#exp_grandttl').val((totalInc).toLocaleString());
+        transxnCalc();
+    }
+
+
 
     // Update transaction table
-    function transCalc() {
+    function transxnCalc() {
         $('#transxnTbl tbody tr').each(function() {
             switch ($(this).index()*1) {
                 case 0:
                     $(this).find('td:eq(1)').text($('#stock_subttl').val());
+                    $(this).find('td:eq(2)').text($('#exp_subttl').val());
+                    // $(this).find('td:eq(1)').text($('#stock_subttl').val());
                     break;
                 case 1:
                     $(this).find('td:eq(1)').text($('#stock_tax').val());
+                    $(this).find('td:eq(2)').text($('#exp_tax').val());
+                    // $(this).find('td:eq(1)').text($('#stock_subttl').val());
                     break;
                 case 2:
                     $(this).find('td:eq(1)').text($('#stock_grandttl').val());
+                    $(this).find('td:eq(2)').text($('#exp_grandttl').val());
+                    // $(this).find('td:eq(1)').text($('#stock_subttl').val());
                     break;
             }
         });
     }
 
 
-    /**
-     * Expense Tab
-     */
+
+
+
+
+
+
     // On selecting Project
     $('#project_id').select2();
     const projects = @json($projects);
@@ -410,24 +473,6 @@
                 $('#exp_project_id-' + i).val(v.id);
                 $('#exp_client_id-' + i).val(v.customer_id);
                 $('#exp_project_id-' + i).val(v.branch_id);
-            }
-        });
-    });
-
-    $(".user-box-new").keyup(function() {
-        const boxId = $(this).attr('data-section');
-        const payerType = $('input[type="radio"]:checked').val();
-        $.ajax({
-            type: "POST",
-            url: baseurl + 'transactions/payer_search',
-            data: 'keyword=' + $(this).val() + '&supplier_type=' + payerType,
-            beforeSend: function() {
-                $(`#${boxId}-box`).css("background", "#FFF url(" + baseurl + "assets/custom/load-ring.gif) no-repeat 165px");
-            },
-            success: function(data) {
-                $(`#${boxId}-box-result`).show();
-                $(`#${boxId}-box-result`).html(data);
-                $(`#${boxId}-box`).css("background", "none");
             }
         });
     });
