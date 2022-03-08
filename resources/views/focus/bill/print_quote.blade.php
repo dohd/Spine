@@ -239,20 +239,17 @@
 		<tbody>
 			@foreach($invoice->products as $product)
 				@if ($product->a_type == 1)	
-					@php
-						$product_qty = (int) $product->product_qty;
-					@endphp
 					<tr>
 						<td>{{ $product->numbering }}</td>
 						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ $product_qty }}</td>
+						<td class="align-c">{{ number_format($product->product_qty, 1) }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
 						@if ($invoice->print_type == 'inclusive')
 							<td class="align-r">{{ number_format($product->product_subtotal, 2) }}</td>
-							<td class="align-r">{{ number_format($product_qty * $product->product_subtotal, 2) }}</td>
+							<td class="align-r">{{ number_format($product->product_qty * $product->product_subtotal, 2) }}</td>
 						@else
 							<td class="align-r">{{ number_format($product->product_price, 2) }}</td>
-							<td class="align-r">{{ number_format($product_qty * $product->product_price, 2) }}</td>
+							<td class="align-r">{{ number_format($product->product_qty * $product->product_price, 2) }}</td>
 						@endif
 					</tr>
 				@else
