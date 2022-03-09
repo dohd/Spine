@@ -112,7 +112,9 @@ class PurchasesController extends Controller
             'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grand_tax', 'grand_ttl', 'paid_ttl'
         ]);
-        $stock = $request->only([]);
+        $bill_items = $request->only([
+            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
+        ]);
 
 
         dd($bill);
