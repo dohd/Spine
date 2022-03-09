@@ -77,7 +77,7 @@
                                             </tr>
                                             <tr class="sub_c" style="display: table-row;">
                                                 <td align="right" colspan="3">
-                                                    @foreach (['paidttl', 'grandtax', 'grandttl'] as $val)
+                                                    @foreach (['paid_ttl', 'grand_tax', 'grand_ttl'] as $val)
                                                         <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
                                                     @endforeach 
                                                     {{ Form::submit('Post Transaction', ['class' => 'btn btn-success sub-btn btn-lg']) }}
@@ -247,8 +247,15 @@
             ...ajaxConfig
         }
     });
+    // On Tax change
+    let taxIndx = 0;
     $('#tax').change(function() {
-        taxRule(0, $(this).val());                      
+        if (taxIndx > 0) return;
+        const tax = $(this).val();
+        taxRule(0, tax);
+        $('#expvat-0').val(tax);
+        $('#assetvat-0').val(tax);
+        taxIndx++;
     });
 
 
@@ -313,15 +320,14 @@
         $('#stock_subttl').val((grandTotal - tax).toLocaleString());
         transxnCalc();
     }
-
+    // Tax condition
     function taxRule(i, tax) {
         $('#rowtax-'+ i +' option').each(function() {
             const rowtax = $(this).val();
             $(this).removeClass('d-none');
-            if (rowtax != tax && rowtax != 0) 
-                $(this).addClass('d-none');
+            if (rowtax != tax && rowtax != 0) $(this).addClass('d-none');
             $(this).attr('selected', false);
-            if (rowtax == tax) $(this).attr('selected', true);
+            if (rowtax == tax) $(this).attr('selected', true).change();
         }); 
     }
 
@@ -370,6 +376,7 @@
             }, '');
 
             $('#expTbl tbody tr:eq(-3)').before(html);
+            $('#expvat-'+i).val($('#tax').val());
         }
         if ($(this).is('.remove')) {
             const $tr = $(this).parents('tr:first');
@@ -377,7 +384,7 @@
             $tr.remove();
         }    
     });
-    $('#expTbl').on('change', '.exp_qty, .exp_price, .exp_vat, .exp_disc', function() {
+    $('#expTbl').on('change', '.exp_qty, .exp_price, .exp_vat', function() {
         const $tr = $(this).parents('tr:first');
         const qty = $tr.find('.exp_qty').val();
         const price = $tr.find('.exp_price').val().replace(/,/g, '') || 0;
@@ -393,7 +400,6 @@
     function calcExp() {
         let tax = 0;
         let totalInc = 0;
-        let discTotal = 0;
         $('#expTbl tbody tr').each(function() {
             if (!$(this).find('.exp_qty').val()) return;
             const qty = $(this).find('.exp_qty').val();
@@ -412,32 +418,100 @@
     }
 
 
+    /**
+     * Asset tab
+     */
+    let assetRowId = 0;
+    const assetHtml = [$('#assetTbl tbody tr:eq(0)').html(), $('#assetTbl tbody tr:eq(1)').html()];
+    $('#assetTbl').on('click', '#addasset, .remove', function() {
+        if ($(this).is('#addasset')) {
+            assetRowId++;
+            const i = assetRowId;
+            const html = assetHtml.reduce((prev, curr) => {
+                const text = curr.replace(/-0/g, '-'+i).replace(/d-none/g, '');
+                return prev + '<tr>' + text + '</tr>';
+            }, '');
 
-    // Update transaction table
-    function transxnCalc() {
-        $('#transxnTbl tbody tr').each(function() {
-            switch ($(this).index()*1) {
-                case 0:
-                    $(this).find('td:eq(1)').text($('#stock_subttl').val());
-                    $(this).find('td:eq(2)').text($('#exp_subttl').val());
-                    // $(this).find('td:eq(1)').text($('#stock_subttl').val());
-                    break;
-                case 1:
-                    $(this).find('td:eq(1)').text($('#stock_tax').val());
-                    $(this).find('td:eq(2)').text($('#exp_tax').val());
-                    // $(this).find('td:eq(1)').text($('#stock_subttl').val());
-                    break;
-                case 2:
-                    $(this).find('td:eq(1)').text($('#stock_grandttl').val());
-                    $(this).find('td:eq(2)').text($('#exp_grandttl').val());
-                    // $(this).find('td:eq(1)').text($('#stock_subttl').val());
-                    break;
-            }
+            $('#assetTbl tbody tr:eq(-3)').before(html);
+            $('#assetvat-'+i).val($('#tax').val());
+        }
+        if ($(this).is('.remove')) {
+            const $tr = $(this).parents('tr:first');
+            $tr.next().remove();
+            $tr.remove();
+        }    
+    });    
+    $('#assetTbl').on('change', '.asset_qty, .asset_price, .asset_vat', function() {
+        const $tr = $(this).parents('tr:first');
+        const qty = $tr.find('.asset_qty').val();
+        const price = $tr.find('.asset_price').val().replace(/,/g, '') || 0;
+        const rowtax = $tr.find('.asset_vat').val()/100 + 1;
+        const amount = qty * price * rowtax;
+        const taxable = amount - (qty * price);
+
+        $tr.find('.asset_price').val((price*1).toLocaleString());
+        $tr.find('.asset_tax').text(taxable.toLocaleString());
+        $tr.find('.asset_amount').text(amount.toLocaleString());
+        calcAsset();
+    });
+    function calcAsset() {
+        let tax = 0;
+        let totalInc = 0;
+        $('#assetTbl tbody tr').each(function() {
+            if (!$(this).find('.asset_qty').val()) return;
+            const qty = $(this).find('.asset_qty').val();
+            const price = $(this).find('.asset_price').val().replace(/,/g, '') || 0;
+            const rowtax = $(this).find('.asset_vat').val()/100 + 1;
+            const amountInc = qty * price * rowtax;
+            const amountExc = qty * price;
+            tax += (amountInc - amountExc);
+            totalInc += amountInc;
         });
+        $('#assettaxrow').text(tax.toLocaleString());
+        $('#asset_tax').val(tax.toLocaleString());
+        $('#asset_subttl').val((totalInc - tax).toLocaleString());
+        $('#asset_grandttl').val((totalInc).toLocaleString());
+        transxnCalc();
     }
 
 
 
+
+
+
+    // Update transaction table
+    const sumLine = (...values) => values.reduce((prev, curr) => prev + curr*1, 0);
+    function transxnCalc() {
+        $('#transxnTbl tbody tr').each(function() {
+            let total;
+            switch ($(this).index()*1) {
+                case 0:
+                    $(this).find('td:eq(1)').text($('#stock_subttl').val());
+                    $(this).find('td:eq(2)').text($('#exp_subttl').val());
+                    $(this).find('td:eq(3)').text($('#asset_subttl').val());
+                    total = sumLine($('#stock_subttl').val(), $('#exp_subttl').val(), $('#asset_subttl').val());
+                    $('#paid_ttl').val(total.toLocaleString());
+                    $(this).find('td:eq(4)').text($('#paid_ttl').val());
+                    break;
+                case 1:
+                    $(this).find('td:eq(1)').text($('#stock_tax').val());
+                    $(this).find('td:eq(2)').text($('#exp_tax').val());
+                    $(this).find('td:eq(3)').text($('#asset_tax').val());
+                    total = sumLine($('#stock_tax').val(), $('#exp_tax').val(), $('#asset_tax').val());
+                    $('#grand_tax').val(total.toLocaleString());
+                    $(this).find('td:eq(4)').text($('#grand_tax').val());
+                    break;
+                case 2:
+                    $(this).find('td:eq(1)').text($('#stock_grandttl').val());
+                    $(this).find('td:eq(2)').text($('#exp_grandttl').val());
+                    $(this).find('td:eq(3)').text($('#asset_grandttl').val());
+                    total = sumLine($('#stock_grandttl').val(), $('#exp_grandttl').val(), $('#asset_grandttl').val());
+                    $('#grand_ttl').val(total.toLocaleString());
+                    $(this).find('td:eq(4)').text($('#grand_ttl').val());
+                    break;
+            }
+        });
+    }
 
 
 
