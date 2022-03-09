@@ -13,17 +13,22 @@
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" class="form-control" name="ledger_name[]" placeholder="Enter Ledger" id='ledgername-0'></td>
-                <td><input type="text" class="form-control exp_qty" name="exp_product_qty[]" id="expqty-0" value="1"></td>
-                <td><input type="text" class="form-control exp_price" name="exp_product_price[]" id="expprice-0"></td>
-                <td><input type="text" class="form-control exp_vat " name="exp_product_tax[]" id="expvat-0" value="0"></td>
+                <td><input type="text" class="form-control" name="name[]" placeholder="Enter Ledger" id='ledgername-0'></td>
+                <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
+                <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
+                <td><input type="text" class="form-control exp_vat " name="tax_rate[]" id="expvat-0" value="0"></td>
                 <td class="text-center"><span class="exp_tax" id="exptax-0">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-0">0</span></b></td>
                 <td><button type="button" class="btn btn-danger remove d-none">remove</button></td>
+                <input type="hidden" id="expitemid-0" name="item_id[]">
+                <input type="hidden" class="exptaxr" name="tax[]">
+                <input type="hidden" class="expamountr" name="amount[]">
+                <input type="hidden" class="expitemprojectid" name="itemproject_id[]" value="0">
+                <input type="hidden" name="type[]" value="Expense">
             </tr>
             <tr>
                 <td colspan="3">
-                    <textarea id="exp_descr-0" class="form-control" name="exp_product_description[]" placeholder="Enter Description"></textarea>
+                    <textarea id="exp_descr-0" class="form-control" name="description[]" placeholder="Enter Description"></textarea>
                 </td>
                 <td colspan="4">
                     <input type="text" class="form-control" name="exp_project[]" placeholder="Search  Project" id='expproject-0'>

@@ -79,13 +79,13 @@
         if (taxIndx > 0) return;
         const tax = $(this).val();
         taxRule(0, tax);
-        $('#expvat-0').val(tax);
-        $('#assetvat-0').val(tax);
+        $('#expvat-0').val(tax).change();
+        $('#assetvat-0').val(tax).change();
         taxIndx++;
     });
     
     // Update transaction table
-    const sumLine = (...values) => values.reduce((prev, curr) => prev + curr*1, 0);
+    const sumLine = (...values) => values.reduce((prev, curr) => prev + curr.replace(/,/g, '')*1, 0);
     function transxnCalc() {
         $('#transxnTbl tbody tr').each(function() {
             let total;
@@ -160,6 +160,8 @@
         $tr.find('.price').val((price*1).toLocaleString());
         $tr.find('.amount').text(amount.toLocaleString());
         $tr.find('.taxable').val(taxable.toLocaleString());
+        $tr.find('.stocktaxr').val(taxable.toLocaleString());
+        $tr.find('.stockamountr').val(amount.toLocaleString());
         calcStock();
     });
     function calcStock() {
@@ -217,6 +219,8 @@
                 const {data} = ui.item;
                 const price = parseFloat(data.purchase_price).toLocaleString();
                 $('#price-'+i).val(price).change();
+                $('#stockitemid-'+i).val(data.id);
+                console.log(data)
             }
         };
     }
@@ -256,6 +260,8 @@
         $tr.find('.exp_price').val((price*1).toLocaleString());
         $tr.find('.exp_tax').text(taxable.toLocaleString());
         $tr.find('.exp_amount').text(amount.toLocaleString());
+        $tr.find('.exptaxr').val(taxable.toLocaleString());
+        $tr.find('.expamountr').val(amount.toLocaleString());
         calcExp();
     });
     function calcExp() {
@@ -313,6 +319,8 @@
         $tr.find('.asset_price').val((price*1).toLocaleString());
         $tr.find('.asset_tax').text(taxable.toLocaleString());
         $tr.find('.asset_amount').text(amount.toLocaleString());
+        $tr.find('.assettaxr').val(taxable.toLocaleString());
+        $tr.find('.assetamountr').val(amount.toLocaleString());
         calcAsset();
     });
     function calcAsset() {

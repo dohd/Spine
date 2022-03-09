@@ -13,11 +13,11 @@
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" class="form-control stockname" name="product_name[]" placeholder="Product Name" id='stockname-0' required></td>
-                <td><input type="text" class="form-control qty" name="product_qty[]" id="qty-0" value="1" required></td>                    
-                <td><input type="text" class="form-control price" name="product_price[]" id="price-0" required></td>
+                <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0'></td>
+                <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="1"></td>                    
+                <td><input type="text" class="form-control price" name="rate[]" id="price-0"></td>
                 <td>
-                    <select class="form-control rowtax" name="rowtax" id="rowtax-0">
+                    <select class="form-control rowtax" name="tax_rate[]" id="rowtax-0">
                         @foreach ($additionals as $tax)
                             <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
                                 {{ $tax->name }}
@@ -27,13 +27,16 @@
                 </td>
                 <td><input type="text" class="form-control taxable" value="0"></td>
                 <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td>              
-                <td>
-                    <button type="button" class="btn btn-danger d-none remove">Remove</button>
-                </td>
+                <td><button type="button" class="btn btn-danger d-none remove">Remove</button></td>
+                <input type="hidden" id="stockitemid-0" name="item_id[]">
+                <input type="hidden" class="stocktaxr" name="tax[]">
+                <input type="hidden" class="stockamountr" name="amount[]">
+                <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
+                <input type="hidden" name="type[]" value="Stock">
             </tr>
             <tr>
                 <td colspan=2>
-                    <textarea id="product_desc-0" class="form-control" name="product_desc[]" placeholder="Product Description"></textarea>
+                    <textarea id="product_desc-0" class="form-control" name="description[]" placeholder="Product Description"></textarea>
                 </td>
                 <td colspan=5></td>
             </tr>
