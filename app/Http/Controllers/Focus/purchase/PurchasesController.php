@@ -110,17 +110,36 @@ class PurchasesController extends Controller
         $bill = $request->only([
             'supplier_type', 'supplier_id', 'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
             'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grand_tax', 'grand_ttl', 'paid_ttl'
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grand_tax', 'grand_ttl', 'paid_ttl', 'payment_status'
         ]);
         $bill_items = $request->only([
             'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
         ]);
 
+        $bill['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
+        $bill_items = modify_array($bill_items);
 
-        dd($bill);
+        $result = $this->repository->create(compact('bill', 'bill_items'));
 
-        print_log('+++ Direct Purchase ++++');
         return response()->json(['status' => 'Success', 'message' => 'Direct purchase successful']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
