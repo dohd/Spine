@@ -31,9 +31,6 @@ use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
 use App\Models\hrm\Hrm;
 
 use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
-//use App\Http\Requests\Focus\purchase\EditPurchaseorderRequest;
-//use App\Http\Requests\Focus\purchase\UpdatePurchaseorderRequest;
-//use App\Http\Requests\Focus\purchase\DeletePurchaseorderRequest;
 
 /**
  * PurchaseordersController
@@ -113,7 +110,7 @@ class PurchasesController extends Controller
         $bill = $request->only([
             'supplier_type', 'supplier_id', 'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
             'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grand_tax', 'grand_ttl', 'paid_ttl'
         ]);
         $stock = $request->only([]);
 
