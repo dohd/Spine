@@ -798,6 +798,7 @@ function strip_tags_deep($value, $key = null)
         return $value;
     }
 }
+
 // log to the browser console when return type is a view
 function browser_log(...$logs)
 {
