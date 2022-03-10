@@ -13,10 +13,10 @@
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" class="form-control" name="name[]" placeholder="Asset Or Equipment" id='assetname-0'></td>
+                <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
-                <td><input type="text" class="form-control asset_vat" name="tax_rate[]" id="assetvat-0"></td>
+                <td><input type="text" class="form-control asset_vat" name="tax_rate[]" value="0" id="assetvat-0"></td>
                 <td class="text-center"><span class="asset_tax">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class='asset_amount'>0</span></b></td>
                 <td><button type="button" class="btn btn-danger remove d-none">remove</button></td>
