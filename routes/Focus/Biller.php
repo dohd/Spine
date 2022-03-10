@@ -10,7 +10,7 @@ Route::group(['namespace' => 'account'], function () {
     Route::resource('accounts', 'AccountsController');
     //For Datatable
     Route::post('accounts/get', 'AccountsTableController')->name('accounts.get');
-    Route::post('accounts/search/{bill_type}', 'AccountsController@account_search')->name('accounts.account_search');
+    Route::post('accounts/search', 'AccountsController@account_search')->name('accounts.account_search');
     Route::post('accounts/search_next_account_no', 'AccountsController@search_next_account_no')->name('accounts.search_next_account_no');
 });
 
@@ -23,7 +23,7 @@ Route::group(['namespace' => 'additional'], function () {
 Route::group(['namespace' => 'assetequipment'], function () {
     Route::resource('assetequipments', 'AssetequipmentsController');
     Route::post('assetequipments/ledger_load', 'AssetequipmentsController@ledger_load')->name('assetequipments.ledger_load');
-    Route::post('assetequipments/search/{bill_type}', 'AssetequipmentsController@product_search')->name('assetequipments.product_search');
+    Route::post('assetequipments/search', 'AssetequipmentsController@product_search')->name('assetequipments.product_search');
     //For Datatable
     Route::post('assetequipments/get', 'AssetequipmentsTableController')->name('assetequipments.get');
 });
