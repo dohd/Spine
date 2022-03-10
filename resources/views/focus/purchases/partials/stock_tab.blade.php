@@ -36,7 +36,7 @@
             </tr>
             <tr>
                 <td colspan=2>
-                    <textarea id="product_desc-0" class="form-control" name="description[]" placeholder="Product Description"></textarea>
+                    <textarea id="stockdescr-0" class="form-control" name="description[]" placeholder="Product Description"></textarea>
                 </td>
                 <td colspan=5></td>
             </tr>
