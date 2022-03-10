@@ -171,35 +171,22 @@ class AccountsController extends Controller
         //returning with successfull message
         return new ViewResponse('focus.accounts.view', compact('account'));
     }
-    public function account_search(Request $request, $bill_type)
-    {
 
+    /**
+     * Search Expense accounts 
+     */
+    public function account_search(Request $request)
+    {
         if (!access()->allow('product_search')) return false;
 
         $q = $request->post('keyword');
-        $w = $request->post('wid');
-        $s = $request->post('serial_mode');
-        if ($bill_type == 'label') $q = @$q['term'];
-        $wq = compact('q', 'w');
 
-
-        $account = Account::where('holder', 'LIKE', '%' . $q . '%')
+        $accounts = Account::where('holder', 'LIKE', '%' . $q . '%')
             ->where('account_type', 'Expenses')
-            ->orWhere('number', 'LIKE', '%' . $q . '%')->limit(6)->get();
-        $output = array();
+            ->orWhere('number', 'LIKE', '%' . $q . '%')
+            ->limit(6)->get(['id', 'holder AS name', 'number']);
 
-        foreach ($account as $row) {
-
-            if ($row->id > 0) {
-                $output[] = array('name' => $row->holder . ' - ' . $row->number, 'id' => $row['id']);
-            }
-        }
-
-
-
-        if (count($output) > 0)
-
-            return view('focus.products.partials.search')->withDetails($output);
+        return response()->json($accounts);
     }
 
     public function balance_sheet(Request $request)
