@@ -75,6 +75,21 @@ class PurchaseRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        $bill = $input['bill'];
+        // filter out items without item_id
+        $bill_items = array_filter($input['bill_items'], function($val) { return $val['item_id']; });
+
+
+        dd($bill_items);
+
+
+
+
+
+
+
+
+
 
 
         $purchases_trans_category_id = Transactioncategory::where('code', 'p_material')->first();
