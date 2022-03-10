@@ -20,14 +20,18 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
-    const ajaxConfig = {
-        dataType: 'json',
-        type: 'POST',
-        quietMillis: 50,
-        data: function({term}) { 
-            return { q: term }
-        },
-    };
+    function select2Config(url, callback) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({q: term, keyword: term}),
+                processResults: callback
+            }
+        }
+    }
 
     // datepicker
     $('.datepicker')
@@ -54,25 +58,18 @@
         $('#supplier').val(name);
     });
     // load suppliers
-    $('#supplierbox').select2({
-        ajax: {
-            url: "{{ route('biller.suppliers.select') }}",
-            processResults: function(data) {
-                return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))};
-            },
-            ...ajaxConfig
-        }
-    });
+    const supplierUrl = "{{ route('biller.suppliers.select') }}";
+    function supplierData(data) {
+        return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))};
+    }
+    $('#supplierbox').select2(select2Config(supplierUrl, supplierData));
     // load projects dropdown
-    $("#project").select2({
-        ajax: {
-            url: "{{ route('biller.projects.project_search') }}",
-            processResults: function(data) {
-                return {results: data.map(v => ({id: v.id, text: v.name}))};
-            },
-            ...ajaxConfig
-        }
-    });
+    const projectUrl = "{{ route('biller.projects.project_search') }}";
+    function projectData(data) {
+        return {results: data.map(v => ({id: v.id, text: v.name}))};
+    }
+    $("#project").select2(select2Config(projectUrl, projectData));
+    
     // On Tax change
     let taxIndx = 0;
     $('#tax').change(function() {
@@ -83,7 +80,14 @@
         $('#assetvat-0').val(tax).change();
         taxIndx++;
     });
-    
+
+    // On project change
+    $("#project").change(function() {
+        const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
+        $('#projectexptext-0').val(projectText);
+        $('#projectexpval-0').val($(this).val());
+    });
+
     // Update transaction table
     const sumLine = (...values) => values.reduce((prev, curr) => prev + curr.replace(/,/g, '')*1, 0);
     function transxnCalc() {
@@ -119,16 +123,14 @@
     }
 
 
-
     /**
      * Stock Tab
      */
     let stockRowId = 0;
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
-    $('.stockname').autocomplete(stockPredict(stockRowId));
-    $('#rowtax-0').mousedown(function() {
-        taxRule(0, $('#tax').val());                      
-    });
+    const stockUrl = baseurl + 'products/quotesearch/1';
+    $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+    $('#rowtax-0').mousedown(function() { taxRule(0, $('#tax').val()); });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
             stockRowId++;
@@ -139,7 +141,7 @@
             }, '');
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
-            $('.stockname').autocomplete(stockPredict(i));
+            $('.stockname').autocomplete(predict(stockUrl, stockSelect));
             taxRule(i, $('#tax').val());
         }
 
@@ -193,36 +195,13 @@
             if (rowtax == tax) $(this).attr('selected', true).change();
         }); 
     }
-
-    function stockPredict(i) {
-        return {
-            source: function(request, response) {
-                $.ajax({
-                    url: baseurl + 'products/quotesearch/1',
-                    dataType: "json",
-                    method: 'POST',
-                    data: 'keyword=' + request.term,                        
-                    success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.name,
-                                value: item.name,
-                                data: item
-                            };
-                        }));
-                    }
-                });
-            },
-            autoFocus: true,
-            minLength: 0,
-            select: function(event, ui) {
-                const {data} = ui.item;
-                const price = parseFloat(data.purchase_price).toLocaleString();
-                $('#price-'+i).val(price).change();
-                $('#stockitemid-'+i).val(data.id);
-                console.log(data)
-            }
-        };
+    function stockSelect(event, ui) {
+        const {data} = ui.item;
+        const i = stockRowId;
+        $('#stockitemid-'+i).val(data.id);
+        $('#stockdescr-'+i).val(data.product_des);
+        const price = parseFloat(data.purchase_price).toLocaleString();
+        $('#price-'+i).val(price).change();
     }
 
     
@@ -231,6 +210,9 @@
      */
     let expRowId = 0;
     const expHtml = [$('#expTbl tbody tr:eq(0)').html(), $('#expTbl tbody tr:eq(1)').html()];
+    const expUrl = "{{ route('biller.accounts.account_search') }}";
+    $('.accountname').autocomplete(predict(expUrl, expSelect));
+    $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
     $('#expTbl').on('click', '#addexp, .remove', function() {
         if ($(this).is('#addexp')) {
             expRowId++;
@@ -241,7 +223,12 @@
             }, '');
 
             $('#expTbl tbody tr:eq(-3)').before(html);
+            $('.accountname').autocomplete(predict(expUrl, expSelect));
+            $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
             $('#expvat-'+i).val($('#tax').val());
+            const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
+            $('#projectexptext-'+i).val(projectText);
+            $('#projectexpval-'+i).val($(this).val());
         }
         if ($(this).is('.remove')) {
             const $tr = $(this).parents('tr:first');
@@ -283,13 +270,25 @@
         $('#exp_grandttl').val((totalInc).toLocaleString());
         transxnCalc();
     }
-
+    function expSelect(event, ui) {
+        const {data} = ui.item;
+        const i = expRowId;
+        $('#expitemid-'+i).val(data.id);
+        $('#expdescr-'+i).val(data.name + ' - ' + data.number);
+    }
+    function projectExpSelect(event, ui) {
+        const {data} = ui.item;
+        const i = expRowId;
+        $('#projectexpval-'+i).val(data.id);
+    }
 
     /**
      * Asset tab
      */
     let assetRowId = 0;
     const assetHtml = [$('#assetTbl tbody tr:eq(0)').html(), $('#assetTbl tbody tr:eq(1)').html()];
+    const assetUrl = "{{ route('biller.assetequipments.product_search') }}";
+    $('.assetname').autocomplete(predict(assetUrl, assetSelect));
     $('#assetTbl').on('click', '#addasset, .remove', function() {
         if ($(this).is('#addasset')) {
             assetRowId++;
@@ -300,6 +299,7 @@
             }, '');
 
             $('#assetTbl tbody tr:eq(-3)').before(html);
+            $('.assetname').autocomplete(predict(assetUrl, assetSelect));
             $('#assetvat-'+i).val($('#tax').val());
         }
         if ($(this).is('.remove')) {
@@ -342,39 +342,38 @@
         $('#asset_grandttl').val((totalInc).toLocaleString());
         transxnCalc();
     }
+    function assetSelect(event, ui) {
+        const {data} = ui.item;
+        const i = assetRowId;
+        $('#assetitemid-'+i).val(data.id);
+        $('#assetdescr-'+i).val(data.name);
+        const cost = parseFloat(data.cost).toLocaleString();
+        $('#assetprice-'+i).val(cost).change();
+    } 
 
-    // On selecting Project
-    $('#project_id').select2();
-    const projects = @json($projects);
-    $('#project_id').change(function() {
-        const text = $(this).find('option:selected').text().replace(/\s+/g, ' ');
-        const len = $('#saman-row-exp').find('input[name="exp_project[]"]').length;
-        // set default expense inputs
-        projects.forEach(v => {
-            if (v.id == $(this).val()) {
-                for (let i = 0; i < len; i++) {
-                    $('#exp_project-' + i).val(text);
-                    $('#exp_project_id-' + i).val(v.id);
-                    $('#exp_client_id-' + i).val(v.customer_id);
-                    $('#exp_project_id-' + i).val(v.branch_id);
-                }
-            }
-        });
-    });
-    // On clicking Expenses Add Row button
-    $('#expaddproduct').click(function() {
-        const text = $('#project_id option:selected').text().replace(/\s+/g, ' ');
-        const len = $('#saman-row-exp').find('input[name="exp_project[]"]').length;
-        const i = len - 1;
-        // set default expense inputs
-        projects.forEach(v => {
-            if (v.id == $('#project_id').val()) {
-                $('#exp_project-' + i).val(text);
-                $('#exp_project_id-' + i).val(v.id);
-                $('#exp_client_id-' + i).val(v.customer_id);
-                $('#exp_project_id-' + i).val(v.branch_id);
-            }
-        });
-    });
+
+    // autocomplete config method
+    function predict(url, callback) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url,
+                    dataType: "json",
+                    method: 'POST',
+                    data: 'keyword=' + request.term,                        
+                    success: function(data) {
+                        response(data.map(v => ({
+                            label: v.name,
+                            value: v.name,
+                            data: v
+                        })));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: callback
+        };
+    }
 </script>
 @endsection
