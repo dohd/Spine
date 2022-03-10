@@ -13,7 +13,7 @@
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" class="form-control" name="name[]" placeholder="Enter Ledger" id='ledgername-0'></td>
+                <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger"></td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
                 <td><input type="text" class="form-control exp_vat " name="tax_rate[]" id="expvat-0" value="0"></td>
@@ -23,15 +23,15 @@
                 <input type="hidden" id="expitemid-0" name="item_id[]">
                 <input type="hidden" class="exptaxr" name="tax[]">
                 <input type="hidden" class="expamountr" name="amount[]">
-                <input type="hidden" class="expitemprojectid" name="itemproject_id[]" value="0">
                 <input type="hidden" name="type[]" value="Expense">
             </tr>
             <tr>
                 <td colspan="3">
-                    <textarea id="exp_descr-0" class="form-control" name="description[]" placeholder="Enter Description"></textarea>
+                    <textarea id="expdescr-0" class="form-control" name="description[]" placeholder="Enter Description"></textarea>
                 </td>
                 <td colspan="4">
-                    <input type="text" class="form-control" name="exp_project[]" placeholder="Search  Project" id='expproject-0'>
+                    <input type="text" class="form-control projectexp" id="projectexptext-0" placeholder="Enter Project">
+                    <input type="hidden" name="itemproject_id[]" id="projectexpval-0">
                 </td>
             </tr>
             <tr class="bg-white">
