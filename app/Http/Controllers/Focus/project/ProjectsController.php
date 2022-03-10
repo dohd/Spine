@@ -41,6 +41,7 @@ use App\Models\project\BudgetItem;
 use App\Models\project\BudgetSkillset;
 use App\Models\project\Project;
 use App\Models\quote\Quote;
+
 use Yajra\DataTables\Facades\DataTables;
 
 /**
@@ -415,50 +416,49 @@ class ProjectsController extends Controller
     public function project_search(Request $request)
     {        
         if (!access()->allow('product_search')) return false;
+
         $q = $request->post('keyword');
 
-        $project = Project::where('name', 'LIKE', '%' . $q . '%')
+        $projects = Project::where('name', 'LIKE', '%'.$q.'%')
             ->orWhereHas('customer', function ($query) use ($q) {
-                $query->where('company', 'LIKE', '%' . $q . '%');
+                $query->where('company', 'LIKE', '%'.$q.'%');
             })
             ->orWhereHas('branch', function ($query) use ($q) {
-                $query->where('name', 'LIKE', '%' . $q . '%');
+                $query->where('name', 'LIKE', '%'.$q.'%');
             })
             ->orWhereHas('quotes', function($query) use ($q) {
-                $query->where('tid', 'LIKE', '%' . $q . '%');
+                $query->where('tid', 'LIKE', '%'.$q.'%');
             })
             ->limit(6)->get();
-
+        
         // response format
         $output = array();
-        foreach ($project as $project) {
-            if (!count($project->quotes)) continue;
+        foreach ($projects as $project) {
+            if (empty($project->quotes)) continue;
             // append tids
             $quote_tids = array();     
             $lead_tids = array();           
             foreach ($project->quotes as $quote) {
-                $lead_tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
-                // quote
                 $tid = sprintf('%04d', $quote->tid);
                 if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
                 else $quote_tids[] = 'QT-'. $tid;
+                $lead_tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
             }
-            
             $project['lead_tids'] =  implode(', ', $lead_tids);
             $project['quote_tids'] = implode(', ', $quote_tids);
-            
-            $customer = $project->customer_project->company;
             $branch = $project->branch->name . ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
+            $customer = $project->customer_project->company;
             $tid = 'Prj-'.sprintf('%04d', $project->tid);
+
             $output[] = array(
+                'id' => $project->id, 
                 'name' => implode(' - ', array($customer, $branch, $tid, $project->name)),
-                'id' => $project['id'], 
                 'client_id' => $project->customer_project->id, 
                 'branch_id' => $project->branch->id
             );
         }
 
-        return view('focus.products.partials.search')->withDetails($output);
+        return response()->json($output);
     }
 
     public function search(Request $request)
