@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\assetequipment;
 
 use App\Models\assetequipment\Assetequipment;
@@ -92,7 +93,7 @@ class AssetequipmentsController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-         
+
         $this->repository->create($input);
         //return with successfull message
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset & Equipment Successfully Created']);
@@ -119,7 +120,7 @@ class AssetequipmentsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
 
-   
+
 
 
     public function update(StoreAssetequipmentRequest $request, Assetequipment $assetequipment)
@@ -130,12 +131,11 @@ class AssetequipmentsController extends Controller
             'account_type' => 'required'
         ]);
         //Input received from the request
-        $input = $request->only(['name', 'account_type', 'account_id', 'condtition', 'vendor', 'location', 'serial', 'warranty', 'warranty_expiry_date', 'cost', 'qty' ,'purchase_date' ]);
+        $input = $request->only(['name', 'account_type', 'account_id', 'condtition', 'vendor', 'location', 'serial', 'warranty', 'warranty_expiry_date', 'cost', 'qty', 'purchase_date']);
         //Update the model using repository update method
         $this->repository->update($assetequipment, $input);
         //return with successfull message
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Record  Successfully Updated'  . ' <a href="' . route('biller.assetequipments.show', [$assetequipment->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-
     }
 
     /**
@@ -175,45 +175,26 @@ class AssetequipmentsController extends Controller
     public function ledger_load(Request $request)
     {
         $accounts = Account::where('account_type', $request->account_type)->get();
-        
+
         return response()->json($accounts);
     }
 
-    public function product_search(Request $request, $bill_type)
+    /**
+     * Search asset and equipments 
+     */
+    public function product_search(Request $request)
     {
-    
         if (!access()->allow('product_search')) return false;
 
         $q = $request->post('keyword');
-        $w = $request->post('wid');
-        $s = $request->post('serial_mode');
-        if ($bill_type == 'label') $q = @$q['term'];
-        $wq = compact('q', 'w');
-            
 
-         $equipments = Assetequipment::where('name', 'LIKE', '%' . $q . '%')
-           -> orWhere('account_type', 'LIKE', '%' . $q . '%')
-            -> orWhereHas('account', function ($query) use ($wq) {
-                $query->where('holder', 'LIKE', '%' . $wq['q'] . '%');
-                return $query;
-            })->limit(6)->get();
-            $output = array();
+        $equipments = Assetequipment::where('name', 'LIKE', '%'.$q.'%')
+            ->orWhere('account_type', 'LIKE', '%'.$q.'%')
+            ->orWhereHas('account', function ($query) use ($q) {
+                $query->where('holder', 'LIKE', '%'.$q.'%');
+            })
+            ->limit(6)->get(['id', 'name', 'account_id', 'account_type', 'cost']);
 
-            foreach ($equipments as $row) {
-
-                 if ($row->id > 0) {
-         $output[] = array('name' => $row->name.' - '.$row->account_type.' - '.$row->account->holder, 'id' => $row['id'], 'decription' => $row['name'],  'account_id' => $row['account_id'], 'account_type' => $row['account_type'],  'cost' => $row['cost'] );
-            }
-                
-            }
-
-        
-
-        if (count($output) > 0)
-
-            return view('focus.products.partials.search')->withDetails($output);
+        return response()->json($equipments);
     }
-
-    
-
 }
