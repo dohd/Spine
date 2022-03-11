@@ -15,7 +15,7 @@
                     <label for="payer" class="caption">Supplire Name*</label>
                     <div class="input-group ">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>                                            
-                        {{ Form::text('supplier', null, ['class' => 'form-control round', 'placeholder' => 'Supplier Name', 'id' => 'supplier', 'required', 'readonly']) }}
+                        {{ Form::text('suppliername', null, ['class' => 'form-control round', 'placeholder' => 'Supplier Name', 'id' => 'supplier', 'required', 'readonly']) }}
                     </div>
                 </div>
                 <div class="col-sm-4"><label for="taxid" class="caption">Tax ID</label>
