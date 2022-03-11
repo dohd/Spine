@@ -33,6 +33,7 @@ use App\Models\hrm\Hrm;
 
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
+use App\Http\Responses\RedirectResponse;
 
 /**
  * PurchaseordersController
@@ -121,7 +122,7 @@ class PurchaseordersController extends Controller
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
-        return response()->json(['status' => 'Success', 'message' => 'Posted purchase order successfully']);
+        return new RedirectResponse('biller.purchaseorders.index', ['flash_success' => 'Purchase Order successfully created']);
     }
 
     /**
