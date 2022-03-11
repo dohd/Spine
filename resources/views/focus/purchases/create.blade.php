@@ -99,24 +99,24 @@
                     $(this).find('td:eq(2)').text($('#exp_subttl').val());
                     $(this).find('td:eq(3)').text($('#asset_subttl').val());
                     total = sumLine($('#stock_subttl').val(), $('#exp_subttl').val(), $('#asset_subttl').val());
-                    $('#paid_ttl').val(total.toLocaleString());
-                    $(this).find('td:eq(4)').text($('#paid_ttl').val());
+                    $('#paidttl').val(total.toLocaleString());
+                    $(this).find('td:eq(4)').text($('#paidttl').val());
                     break;
                 case 1:
                     $(this).find('td:eq(1)').text($('#stock_tax').val());
                     $(this).find('td:eq(2)').text($('#exp_tax').val());
                     $(this).find('td:eq(3)').text($('#asset_tax').val());
                     total = sumLine($('#stock_tax').val(), $('#exp_tax').val(), $('#asset_tax').val());
-                    $('#grand_tax').val(total.toLocaleString());
-                    $(this).find('td:eq(4)').text($('#grand_tax').val());
+                    $('#grandtax').val(total.toLocaleString());
+                    $(this).find('td:eq(4)').text($('#grandtax').val());
                     break;
                 case 2:
                     $(this).find('td:eq(1)').text($('#stock_grandttl').val());
                     $(this).find('td:eq(2)').text($('#exp_grandttl').val());
                     $(this).find('td:eq(3)').text($('#asset_grandttl').val());
                     total = sumLine($('#stock_grandttl').val(), $('#exp_grandttl').val(), $('#asset_grandttl').val());
-                    $('#grand_ttl').val(total.toLocaleString());
-                    $(this).find('td:eq(4)').text($('#grand_ttl').val());
+                    $('#grandttl').val(total.toLocaleString());
+                    $(this).find('td:eq(4)').text($('#grandttl').val());
                     break;
             }
         });

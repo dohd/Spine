@@ -67,7 +67,7 @@
                         </tr>
                         <tr class="sub_c" style="display: table-row;">
                             <td align="right" colspan="3">
-                                @foreach (['paid_ttl', 'grand_tax', 'grand_ttl'] as $val)
+                                @foreach (['paidttl', 'grandtax', 'grandttl'] as $val)
                                     <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
                                 @endforeach 
                                 {{ Form::submit('Post Transaction', ['class' => 'btn btn-success sub-btn btn-lg']) }}
