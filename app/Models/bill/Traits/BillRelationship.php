@@ -2,20 +2,26 @@
 
 namespace App\Models\bill\Traits;
 
+use App\Models\supplier\Supplier;
+
 /**
  * Class InvoiceRelationship
  */
 trait BillRelationship
 {
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 
-      public function customer()
+    public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
     }
 
-     public function products()
+    public function products()
     {
-        return $this->hasMany('App\Models\items\InvoiceItem','invoice_id')->withoutGlobalScopes();
+        return $this->hasMany('App\Models\items\InvoiceItem', 'invoice_id')->withoutGlobalScopes();
     }
 
     public function user()
@@ -26,10 +32,8 @@ trait BillRelationship
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
-     public function transactions()
+    public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','bill_id')->where('relation_id','=',0)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 0)->withoutGlobalScopes();
     }
-
-
 }
