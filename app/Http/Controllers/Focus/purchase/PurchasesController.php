@@ -125,125 +125,6 @@ class PurchasesController extends Controller
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
         return response()->json(['status' => 'Success', 'message' => 'Direct purchase successful']);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        $invoice = $request->only(['payer_type', 'payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
-
-        $tax = $request->only(['payer_type', 'payer', 'payer_id', 'taxid', 'tid', 'ref_type', 'taxformat']);
-
-
-        $inventory_items = $request->only(['product_id', 'product_name', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'u_m', 'taxedvalue', 'salevalue', 'client_id', 'branch_id', 'inventory_project_id']);
-
-        $expense_items = $request->only(['ledger_id', 'exp_product_qty', 'exp_product_price', 'exp_product_tax', 'exp_product_discount', 'exp_product_subtotal', 'total_tax', 'exp_total_discount', 'exp_product_description', 'exp_taxedvalue', 'exp_salevalue', 'exp_client_id', 'exp_branch_id', 'exp_project_id']);
-
-        $stockable_items = $request->only(['item_id', 'account_id', 'account_type', 'itemname', 'item_product_qty', 'item_product_price', 'item_product_tax', 'item_product_discount', 'item_total_tax', 'item_product_subtotal', 'item_total_tax', 'item_total_discount', 'item_product_description', 'item_taxedvalue', 'item_salevalue', 'item_taxedvalue', 'item_client_id', 'item_branch_id', 'item_project_id']);
-
-
-        if (numberClean($request->input('grandtaxs')) > 0 && empty($request->input('taxid'))) {
-            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
-            exit;
-        }
-
-        //invoices
-        if ($request->input('ref_type') == "Invoice") {
-            $refer_no = "INV-" . $request->input('refer_no');
-        } else if ($request->input('ref_type') == "Receipt") {
-            $refer_no = "RCPT-" . $request->input('refer_no');
-        } else if ($request->input('ref_type') == "DNote") {
-            $refer_no = "DN-" . $request->input('refer_no');
-        } else if ($request->input('ref_type') == "Voucher") {
-            $refer_no = "VOU-" . $request->input('refer_no');
-        }
-
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice['refer_no'] = $refer_no;
-        $invoice['account_id'] = $request->input('credit_account_id');
-        $invoice['project_id'] = $request->input('all_project_id');
-        $invoice['for_who'] = $request->input('payer_id');
-
-        $invoice['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $invoice['due_date'] = date_for_database($request->input('due_date'));
-        $invoice['credit'] = numberClean($request->input('finaltotals'));
-        $invoice['discount'] = numberClean($request->input('granddiscounts'));
-        $invoice['tax_amount'] = numberClean($request->input('grandtaxs'));
-        $invoice['taxable_amount'] = numberClean($request->input('grandtaxable'));
-        $invoice['total_amount'] = numberClean($request->input('finaltotals'));
-        $invoice['note'] = strip_tags($request->input('note'));
-
-
-
-        //tax
-        $tax['ins'] = auth()->user()->ins;
-        $tax['user_id'] = auth()->user()->id;
-        $tax['refer_no'] = $refer_no;
-        $tax['for_who'] = $request->input('payer_id');
-        $tax['tax_amount'] = numberClean($request->input('grandtaxs'));
-        $tax['debit'] = numberClean($request->input('grandtaxs'));
-        $tax['taxable_amount'] = numberClean($request->input('grandtaxable'));
-        $tax['note'] = strip_tags($request->input('note'));
-        $tax['transaction_date'] = date_for_database($request->input('transaction_date'));
-
-
-        //inventory tab
-        $inventory_items['user_id'] = auth()->user()->id;
-        $inventory_items['ins'] = auth()->user()->ins;
-        $inventory_items['tid'] = $request->input('tid');
-        $inventory_items['for_who'] = $request->input('payer_id');
-        $inventory_items['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $inventory_items['s_warehouses'] = numberClean($request->input('s_warehouses'));
-        $inventory_items['totalsaleamount'] = numberClean($request->input('totalsaleamount'));
-
-
-        //stockable Inventory
-        $stockable_items['user_id'] = auth()->user()->id;
-        $stockable_items['ins'] = auth()->user()->ins;
-        $stockable_items['tid'] = $request->input('tid');
-        $stockable_items['for_who'] = $request->input('payer_id');
-        $stockable_items['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $stockable_items['s_warehouses'] = numberClean($request->input('s_warehouses'));
-        $stockable_items['item_totalsaleamount'] = numberClean($request->input('item_totalsaleamount'));
-
-
-
-        //expense tab
-        $expense_items['user_id'] = auth()->user()->id;
-        $expense_items['ins'] = auth()->user()->ins;
-        $expense_items['tid'] = $request->input('tid');
-        $expense_items['for_who'] = $request->input('payer_id');
-        $expense_items['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $expense_items['exp_totalsaleamount'] = numberClean($request->input('exp_totalsaleamount'));
-
-        //$invoice_items['ins'] = auth()->user()->ins;
-
-        $data2['ins'] = auth()->user()->ins;
-
-        $result = $this->repository->create(compact('invoice', 'inventory_items', 'tax', 'expense_items', 'stockable_items', 'data2'));
-
-
-
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchases.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Make Payment  </a>&nbsp; &nbsp;'));
     }
 
     /**
@@ -267,110 +148,7 @@ class PurchasesController extends Controller
      */
     public function update(StorePurchaseRequest $request, Purchase $purchase)
     {
-
-
-        $invoice = $request->only(['id', 'payer_type', 'payer', 'payer_id', 'tid', 'ref_type', 'taxformat', 'discountformat', 's_warehouses']);
-
-        $tax = $request->only(['payer_type', 'payer', 'payer_id', 'taxid', 'tid', 'ref_type', 'taxformat']);
-
-
-        $inventory_items = $request->only(['product_id', 'product_name', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'u_m', 'taxedvalue', 'salevalue', 'client_id', 'branch_id', 'inventory_project_id']);
-
-        $expense_items = $request->only(['ledger_id', 'exp_product_qty', 'exp_product_price', 'exp_product_tax', 'exp_product_discount', 'exp_product_subtotal', 'total_tax', 'exp_total_discount', 'exp_product_description', 'exp_taxedvalue', 'exp_salevalue', 'exp_client_id', 'exp_branch_id', 'exp_project_id']);
-
-        $stockable_items = $request->only(['account_id', 'itemname', 'item_product_qty', 'item_product_price', 'item_product_tax', 'item_product_discount', 'item_total_tax', 'item_product_subtotal', 'item_total_tax', 'item_total_discount', 'item_product_description', 'item_taxedvalue', 'item_salevalue', 'item_taxedvalue', 'item_client_id', 'item_branch_id', 'item_project_id']);
-
-
-        if (numberClean($request->input('grandtaxs')) > 0 && empty($request->input('taxid'))) {
-            echo json_encode(array('status' => 'Error', 'message' => 'Tax Pin Must be Provided'));
-            exit;
-        }
-
-        //invoices
-        if ($request->input('ref_type') == "Invoice") {
-            $refer_no = "INV-" . $request->input('refer_no');
-        } else if ($request->input('ref_type') == "Receipt") {
-            $refer_no = "RCPT-" . $request->input('refer_no');
-        } else if ($request->input('ref_type') == "DNote") {
-            $refer_no = "DN-" . $request->input('refer_no');
-        } else if ($request->input('ref_type') == "Voucher") {
-            $refer_no = "VOU-" . $request->input('refer_no');
-        }
-
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice['refer_no'] = $refer_no;
-        $invoice['account_id'] = $request->input('credit_account_id');
-        $invoice['project_id'] = $request->input('all_project_id');
-        $invoice['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $invoice['due_date'] = date_for_database($request->input('due_date'));
-        $invoice['credit'] = numberClean($request->input('finaltotals'));
-        $invoice['discount'] = numberClean($request->input('granddiscounts'));
-        $invoice['tax_amount'] = numberClean($request->input('grandtaxs'));
-        $invoice['taxable_amount'] = numberClean($request->input('grandtaxable'));
-        $invoice['total_amount'] = numberClean($request->input('finaltotals'));
-        $invoice['note'] = strip_tags($request->input('note'));
-
-
-
-        //tax
-        $tax['ins'] = auth()->user()->ins;
-        $tax['user_id'] = auth()->user()->id;
-        $tax['refer_no'] = $refer_no;
-        $tax['tax_amount'] = numberClean($request->input('grandtaxs'));
-        $tax['debit'] = numberClean($request->input('grandtaxs'));
-        $tax['taxable_amount'] = numberClean($request->input('grandtaxable'));
-        $tax['note'] = strip_tags($request->input('note'));
-        $tax['transaction_date'] = date_for_database($request->input('transaction_date'));
-
-
-        //inventory tab
-        $inventory_items['user_id'] = auth()->user()->id;
-        $inventory_items['ins'] = auth()->user()->ins;
-        $inventory_items['tid'] = $request->input('tid');
-        $inventory_items['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $inventory_items['s_warehouses'] = numberClean($request->input('s_warehouses'));
-        $inventory_items['totalsaleamount'] = numberClean($request->input('totalsaleamount'));
-
-        //expense tab
-        $expense_items['user_id'] = auth()->user()->id;
-        $expense_items['ins'] = auth()->user()->ins;
-        $expense_items['tid'] = $request->input('tid');
-        $expense_items['transaction_date'] = date_for_database($request->input('transaction_date'));
-        $expense_items['exp_totalsaleamount'] = numberClean($request->input('exp_totalsaleamount'));
-
-
-
-        //$invoice_items['ins'] = auth()->user()->ins;
-
-        $data2['ins'] = auth()->user()->ins;
-
-        $result = $this->repository->update($purchase, compact('invoice', 'inventory_items', 'tax', 'expense_items', 'stockable_items', 'data2'));
-
-
-
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchases.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . route('biller.makepayment.single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Make Payment  </a>&nbsp; &nbsp;'));
-
-
-
-
-        /* 
-        $invoice = $request->only(['supplier_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
-    
-        $invoice['ins'] = auth()->user()->ins;
-      
-        $invoice_items['ins'] = auth()->user()->ins;
-   
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-
-
-        $result = $this->repository->update($purchaseorder, compact('invoice', 'invoice_items', 'data2'));
-
-     
-
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.updated') . ' <a href="' . route('biller.purchaseorders.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));*/
+        // 
     }
 
     /**
@@ -382,9 +160,7 @@ class PurchasesController extends Controller
      */
     public function destroy(Purchase $purchase, StorePurchaseRequest $request)
     {
-        /* $this->repository->delete($purchaseorder);
-        
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')));*/
+        // 
     }
 
     /**
@@ -396,24 +172,17 @@ class PurchasesController extends Controller
      */
     public function show(Purchase $purchase, ManagePurchaseRequest $request)
     {
-        /*
-        $accounts = Account::all();
-       
-        $purchaseorder['bill_type'] = 1;
-        $words['prefix'] = prefix(9);
-        $words['pay_note'] = trans('purchaseorders.payment_for_order') . ' ' . $words['prefix'] . '#' . $purchaseorder->tid;
-
-        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'accounts', 'features', 'words'));*/
+        // 
     }
 
     public function customer_load(Request $request)
     {
         $q = $request->get('id');
-        if ($q == 'supplier') {
-            $result =  \App\Models\supplier\Supplier::select('id', 'suppliers.company AS name')->get();
-            //$result = Branch::all()->where('rel_id', '=', $q);
-        }
 
-        return json_encode($result);
+        $suppliers = array();
+        if ($q == 'supplier') 
+            $suppliers = Supplier::select('id', 'suppliers.company AS name')->get();
+
+        return response()->json($suppliers);
     }
 }
