@@ -599,12 +599,12 @@ class BillsController extends Controller
             $data = [
                 'transaction_id' => $payment->getId(),
                 'payment_amount' => $payment->transactions[0]->amount->total,
-                'payment_status' => $payment->getState(),
+                'status' => $payment->getState(),
                 'invoice_id' => $payment->transactions[0]->invoice_number,
                 'sign' => $payment->transactions[0]->custom
             ];
 
-            if ($data['payment_status'] === 'approved' and $sign == $data['sign']) {
+            if ($data['status'] === 'approved' and $sign == $data['sign']) {
                 $invoice = Invoice::withoutGlobalScopes()->find($data['invoice_id']);
                 $online_pay_account = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 6)->where('ins', '=', $invoice['ins'])->first('feature_value');
                 $transaction['ins'] = $invoice['ins'];
