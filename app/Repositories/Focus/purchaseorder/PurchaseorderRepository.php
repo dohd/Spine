@@ -6,6 +6,8 @@ namespace App\Repositories\Focus\purchaseorder;
 use App\Models\items\PurchaseItem;
 use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
+use App\Models\bill\Bill;
+use App\Models\billitem\BillItem;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
 
@@ -53,82 +55,31 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-        $extra_discount = numberClean($input['invoice']['after_disc']);
-        $input['invoice']['invoicedate'] = date_for_database($input['invoice']['invoicedate']);
-        $input['invoice']['invoiceduedate'] = date_for_database($input['invoice']['invoiceduedate']);
-        $input['invoice']['subtotal'] = numberClean($input['invoice']['subtotal']);
-        $input['invoice']['shipping'] = numberClean($input['invoice']['shipping']);
-        $input['invoice']['discount_rate'] = numberClean($input['invoice']['discount_rate']);
-        $input['invoice']['after_disc'] = numberClean($input['invoice']['after_disc']);
-        $input['invoice']['total'] = numberClean($input['invoice']['total']);
-        $input['invoice']['ship_tax_rate'] = numberClean($input['invoice']['ship_rate']);
-        $input['invoice']['ship_tax'] = numberClean($input['invoice']['ship_tax']);
-        $input['invoice']['extra_discount'] = $extra_discount;
-        $total_discount = $extra_discount;
-        unset($input['invoice']['after_disc']);
-        unset($input['invoice']['ship_rate']);
-
         DB::beginTransaction();
-         $input['invoice'] = array_map( 'strip_tags', $input['invoice']);
-        $result = Purchaseorder::create($input['invoice']);
-        if ($result) {
-            //      dd($result->id);
-            $products = array();
-            $subtotal = 0;
-            $total_qty = 0;
-            $total_tax = 0;
-            $stock_update = array();
-            foreach ($input['invoice_items']['product_id'] as $key => $value) {
-                $subtotal += numberClean(@$input['invoice_items']['product_price'][$key]) * numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $total_qty += numberClean(@$input['invoice_items']['product_qty'][$key]);
-                $total_tax += numberClean(@$input['invoice_items']['total_tax'][$key]);
-                $total_discount += numberClean(@$input['invoice_items']['total_discount'][$key]);
-                $products[] = array('bill_id' => $result->id,
-                    'product_id' => $input['invoice_items']['product_id'][$key],
-                    'product_name' => strip_tags(@$input['invoice_items']['product_name'][$key]),
-                    'code' => @$input['invoice_items']['code'][$key],
-                    'product_qty' => numberClean(@$input['invoice_items']['product_qty'][$key]),
-                    'product_price' => numberClean(@$input['invoice_items']['product_price'][$key]),
-                    'product_tax' => numberClean(@$input['invoice_items']['product_tax'][$key]),
-                    'product_discount' => numberClean(@$input['invoice_items']['product_discount'][$key]),
-                    'product_subtotal' => numberClean(@$input['invoice_items']['product_subtotal'][$key]),
-                    'total_tax' => numberClean(@$input['invoice_items']['total_tax'][$key]),
-                    'total_discount' => numberClean(@$input['invoice_items']['total_discount'][$key]),
-                    'product_des' => strip_tags(@$input['invoice_items']['product_description'][$key],config('general.allowed')),
-                    'i_class' => 0,
-                    'unit' => $input['invoice_items']['unit'][$key], 'ins' => $result->ins);
-            }
-            $stock_update[] = array('id' => $input['invoice_items']['product_id'][$key], 'qty' => numberClean($input['invoice_items']['product_qty'][$key]));
-            PurchaseItem::insert($products);
-            $invoice_d = Purchaseorder::find($result->id);
-            $invoice_d->subtotal = $subtotal;
-            $invoice_d->tax = $total_tax;
-            $invoice_d->discount = $total_discount;
-            $invoice_d->items = $total_qty;
-            $invoice_d->save();
 
+        $bill = $input['bill'];
+        $bill = array_replace($bill, [
+            'date' =>  date_for_database($bill['date']),
+            'due_date' => date_for_database($bill['due_date']),
+            'is_po' => 1
+        ]);
+        $result = Bill::create($bill);
 
-            if (@$result->id) {
-                $fields = array();
-                if (isset($input['data2']['custom_field'])) {
-                    foreach ($input['data2']['custom_field'] as $key => $value) {
-                        $fields[] = array('custom_field_id' => $key, 'rid' => $result->id, 'module' => 9, 'data' => strip_tags($value), 'ins' => $input['data2']['ins']);
-                    }
-                    CustomEntry::insert($fields);
-                }
-            }
-
-            $update_variation = new ProductVariation;
-            $index = 'id';
-            Batch::update($update_variation, $stock_update, $index, true,'+');
-
-            DB::commit();
-            return $result;
+        // inject new keys
+        $bill_items = $input['bill_items'];
+        foreach ($bill_items as $k => $item) {
+            $bill_items[$k] = $item + [
+                'ins' => $bill['ins'], 
+                'user_id' => $bill['user_id'],
+                'bills_id' => $result->id
+            ];
         }
+        BillItem::insert($bill_items);
+
+        DB::commit();
+        if ($result) return true;        
+
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
-
-
     }
 
     /**
