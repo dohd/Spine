@@ -110,7 +110,7 @@ class PurchasesController extends Controller
         $bill = $request->only([
             'supplier_type', 'supplier_id', 'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
             'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grand_tax', 'grand_ttl', 'paid_ttl', 'payment_status'
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl', 'payment_status'
         ]);
         $bill_items = $request->only([
             'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
@@ -118,7 +118,9 @@ class PurchasesController extends Controller
 
         $bill['ins'] = auth()->user()->ins;
         $bill['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
         $bill_items = modify_array($bill_items);
+        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
