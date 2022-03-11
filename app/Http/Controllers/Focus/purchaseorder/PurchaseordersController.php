@@ -103,20 +103,25 @@ class PurchaseordersController extends Controller
      */
     public function store(StorePurchaseorderRequest $request)
     {
-        //Input received from the request
-        $invoice = $request->only(['supplier_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit']);
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
-        //return with successfull message
+        // extract input details
+        $bill = $request->only([
+            'supplier_type', 'supplier_id', 'supplier', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
+            'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl', 'payment_status'
+        ]);
+        $bill_items = $request->only([
+            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
+        ]);
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchaseorders.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        $bill['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
+        $bill_items = modify_array($bill_items);
+        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
+
+        $result = $this->repository->create(compact('bill', 'bill_items'));
+
+        return response()->json(['status' => 'Success', 'message' => 'Posted purchase order successfully']);
     }
 
     /**
