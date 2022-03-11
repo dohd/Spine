@@ -7,7 +7,7 @@
     <div class="content-body"> 
         <div class="card">
             <div class="card-body">
-                {{ Form::open(['route' => 'biller.purchases.store', 'method' => 'POST', 'id' => 'data_form']) }}
+                {{ Form::open(['route' => 'biller.purchases.store', 'method' => 'POST']) }}
                     @include('focus.purchases.form')
                 {{ Form::close() }}
             </div>
