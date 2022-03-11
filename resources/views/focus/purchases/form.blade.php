@@ -173,4 +173,3 @@
     <!-- tab3 -->
     @include('focus.purchases.partials.asset_tab')
 </div>
-<input type="hidden" name="status"value="Pending">

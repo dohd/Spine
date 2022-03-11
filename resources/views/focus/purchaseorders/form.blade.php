@@ -162,5 +162,4 @@
     <!-- tab3 -->
     @include('focus.purchaseorders.partials.asset_tab')
 </div>
-<input type="hidden" name="status"value="Pending">
 <input type="hidden" name="supplier_type" value="supplier">
