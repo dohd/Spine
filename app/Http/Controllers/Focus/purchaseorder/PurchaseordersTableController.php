@@ -17,7 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\purchaseorder;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
@@ -51,30 +50,30 @@ class PurchaseordersTableController extends Controller
      */
     public function __invoke(ManagePurchaseorderRequest $request)
     {
-
-
         $core = $this->purchaseorder->getForDataTable();
 
         return Datatables::of($core)
+            ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function ($purchaseorder) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchaseorder->id]) . '">' . $purchaseorder->tid . '</a>';
+            ->addColumn('tid', function ($po) {
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $po->id . '</a>';
             })
-            ->addColumn('supplier_id', function ($purchaseorder) {
-                 if(isset($purchaseorder->supplier)) return $purchaseorder->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchaseorder->supplier->id]) . '"><i class="ft-eye"></i></a>';
+            ->addColumn('supplier', function ($po) {
+                 if($po->supplier)
+                    return $po->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '"><i class="ft-eye"></i></a>';
             })
-            ->addColumn('created_at', function ($purchaseorder) {
-                return dateFormat($purchaseorder->invoicedate);
+            ->addColumn('date', function ($po) {
+                return dateFormat($po->date);
             })
-            ->addColumn('total', function ($purchaseorder) {
-                return amountFormat($purchaseorder->total);
+            ->addColumn('amount', function ($po) {
+                return amountFormat($po->paidttl);
             })
-            ->addColumn('status', function ($purchaseorder) {
-                return '<span class="st-' . $purchaseorder->status . '">' . trans('payments.' . $purchaseorder->status) . '</span>';
+            ->addColumn('status', function ($po) {
+                return '<span class="st-' . $po->status . '">' . $po->status . '</span>';
             })
-            ->addColumn('actions', function ($purchaseorder) {
-                return $purchaseorder->action_buttons;
-            })->rawColumns(['tid', 'supplier_id', 'actions', 'status', 'total'])
+            ->addColumn('actions', function ($po) {
+                return $po->action_buttons;
+            })
             ->make(true);
     }
 }
