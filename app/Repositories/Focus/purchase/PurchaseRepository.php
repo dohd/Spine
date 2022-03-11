@@ -92,11 +92,8 @@ class PurchaseRepository extends BaseRepository
         }
         BillItem::insert($bill_items);
 
-
         DB::commit();
-
-        dd($bill_items);
-        return true;
+        if ($result) return true;        
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }

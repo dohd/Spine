@@ -124,7 +124,7 @@ class PurchasesController extends Controller
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
-        return response()->json(['status' => 'Success', 'message' => 'Direct purchase successful']);
+        return response()->json(['status' => 'Success', 'message' => 'Posted direct purchase successfully']);
     }
 
     /**
