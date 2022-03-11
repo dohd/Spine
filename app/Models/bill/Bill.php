@@ -73,6 +73,4 @@ class Bill extends Model
         parent::boot();
 
     }
-
-
 }
