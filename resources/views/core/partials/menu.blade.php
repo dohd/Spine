@@ -564,14 +564,17 @@
                     @endauth
 
                     @permission('purchaseorder-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-clipboard"></i> {{ trans('purchaseorders.management') }}
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('purchaseorders.management') }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.purchaseorders.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('purchaseorders.management') }}
+                            <li><a class="dropdown-item" href="{{ route('biller.purchaseorders.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Purchase Orders
                                 </a>
                             </li>
                             @permission('purchaseorder-data')
-                            <li><a class="dropdown-item" href="{{ route('biller.purchaseorders.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('labels.backend.purchaseorders.create') }}
+                            <li><a class="dropdown-item" href="{{ route('biller.purchaseorders.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Order
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-cubes"></i> Receive Goods
                                 </a>
                             </li>
                             @endauth
