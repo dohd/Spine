@@ -104,7 +104,7 @@ class PurchaseordersController extends Controller
      */
     public function store(StorePurchaseorderRequest $request)
     {
-        // extract input details
+        // extract input fields
         $bill = $request->only([
             'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
             'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
@@ -122,7 +122,7 @@ class PurchaseordersController extends Controller
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
-        return new RedirectResponse('biller.purchaseorders.index', ['flash_success' => 'Purchase Order successfully created']);
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
     }
 
     /**
