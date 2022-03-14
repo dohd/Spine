@@ -2,44 +2,56 @@
 
 namespace App\Models\purchaseorder\Traits;
 
+use App\Models\items\PurchaseItem;
+use App\Models\project\Project;
+
 /**
  * Class PurchaseorderRelationship
  */
 trait PurchaseorderRelationship
-
 {
-         public function customer()
+    public function items()
     {
-        return $this->belongsTo('App\Models\supplier\Supplier','supplier_id')->withoutGlobalScopes();
+        return $this->hasMany(PurchaseItem::class, 'bills_id');
+    } 
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
     }
-       public function supplier()
+
+    public function customer()
+    {
+        return $this->belongsTo('App\Models\supplier\Supplier', 'supplier_id')->withoutGlobalScopes();
+    }
+
+    public function supplier()
     {
         return $this->belongsTo('App\Models\supplier\Supplier')->withoutGlobalScopes();
     }
 
-
-
-     public function products()
+    public function products()
     {
-        return $this->hasMany('App\Models\items\PurchaseItem','bill_id')->withoutGlobalScopes();
+        return $this->hasMany('App\Models\items\PurchaseItem', 'bill_id')->withoutGlobalScopes();
     }
 
     public function user()
     {
         return $this->belongsTo('App\Models\Access\User\User')->withoutGlobalScopes();
     }
+
     public function term()
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
-     public function transactions()
+    
+    public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','bill_id')->where('relation_id','=',9)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 9)->withoutGlobalScopes();
     }
 
     public function attachment()
     {
-        return $this->hasMany('App\Models\items\MetaEntry','rel_id')->where('rel_type','=',9)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\items\MetaEntry', 'rel_id')->where('rel_type', '=', 9)->withoutGlobalScopes();
     }
-
 }
