@@ -15,12 +15,14 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\purchase;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
+
 /**
  * Class PurchaseordersTableController.
  */
@@ -49,78 +51,42 @@ class PurchasesTableController extends Controller
      */
     public function __invoke(ManagePurchaseRequest $request)
     {
-
-
- 
         $core = $this->purchase->getForDataTable();
 
         return Datatables::of($core)
             ->addIndexColumn()
+            ->escapeColumns(['id'])
             ->addColumn('tid', function ($purchase) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchase->id]) . '">' . $purchase->tid . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchase->id]) . '">' . $purchase->id . '</a>';
             })
-            ->addColumn('trans_date', function ($purchase) {
-                return dateFormat($purchase->transaction_date);
+            ->addColumn('date', function ($purchase) {
+                return dateFormat($purchase->date);
             })
+            ->addColumn('supplier', function ($purchase) {
+                if ($purchase->supplier)
+                    return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '">
+                        <i class="ft-eye"></i></a>';
 
-            ->addColumn('supplier_id', function ($purchase) {
-
-                if ($purchase->payer_id) {
-                    switch ($purchase->payer_type) {
-                        case 'supplier':
-                            return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '"><i class="ft-eye"></i></a>';
-                            break;
-                        case 'customer':
-                          return $purchase->customer->company . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->customer->id]) . '"><i class="ft-eye"></i></a>';
-                            break;
-                             case 'walkin':
-                            return $purchase->payer;
-                            break;
-                    }
-                }
-                if ($purchase->payer) return $purchase->payer;
-
-
+                return $purchase->suppliername;
             })
-
             ->addColumn('debit', function ($purchase) {
-                return amountFormat($purchase->debit);
+                return;
             })
-
-             ->addColumn('credit', function ($purchase) {
-                return amountFormat($purchase->credit);
+            ->addColumn('credit', function ($purchase) {
+                return;
             })
-             ->addColumn('balance', function ($purchase) {
-                return amountFormat($purchase->credit-$purchase->total_paid_amount);
+            ->addColumn('balance', function ($purchase) {
+                return;
             })
-            ->addColumn('created_at', function ($purchaseorder) {
-                return dateFormat($purchaseorder->invoicedate);
-            })
-            
-           
             ->addColumn('actions', function ($purchase) {
-
-                 
-                    switch ($purchase->payer_type) {
-                        case 'supplier':
-                             return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List"><i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
-                            break;
-                        case 'customer':
-                        if($purchase->debit>0){
-                               return '<a class="btn btn-purple round" href="' . route('biller.makepayment.receive_single_payment', [$purchase->id]) . '" title="List"><i class="fa fa-cc-visa"></i></a>' ;
-
-                        }
-                       
-                          //.$purchase->action_buttons;
-                            break;
-                             case 'walkin':
-                             return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List"><i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
-                            break;
-                    }
-                
-
-                //return $purchase->action_buttons;
-            })->rawColumns(['tid', 'supplier_id','actions'])
+                $type = $purchase->supplier_type;
+                if ($type == 'supplier') {
+                    return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
+                        <i class="fa fa-cc-visa"></i></a>'. $purchase->action_buttons;
+                }
+                return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
+                    <i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
+            })
             ->make(true);
     }
 }
