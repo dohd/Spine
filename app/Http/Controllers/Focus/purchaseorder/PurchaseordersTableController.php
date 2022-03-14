@@ -48,7 +48,7 @@ class PurchaseordersTableController extends Controller
      *
      * @return mixed
      */
-    public function __invoke(ManagePurchaseorderRequest $request)
+    public function __invoke()
     {
         $core = $this->purchaseorder->getForDataTable();
 
@@ -59,8 +59,7 @@ class PurchaseordersTableController extends Controller
                 return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $po->id . '</a>';
             })
             ->addColumn('supplier', function ($po) {
-                 if($po->supplier)
-                    return $po->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '"><i class="ft-eye"></i></a>';
+                return $po->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '"><i class="ft-eye"></i></a>';
             })
             ->addColumn('date', function ($po) {
                 return dateFormat($po->date);
