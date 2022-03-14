@@ -189,16 +189,10 @@ class PurchaseordersController extends Controller
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Purchaseorder $purchaseorder, ManagePurchaseorderRequest $request)
+    public function show(Purchaseorder $purchaseorder)
     {
-
-        $accounts = Account::all();
-        $features = ConfigMeta::where('feature_id', 9)->first();
-        //returning with successfull message
-        $purchaseorder['bill_type'] = 1;
-        $words['prefix'] = prefix(9);
-        $words['pay_note'] = trans('purchaseorders.payment_for_order') . ' ' . $words['prefix'] . '#' . $purchaseorder->tid;
-
-        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'accounts', 'features', 'words'));
+        $po = $purchaseorder;
+        
+        return new ViewResponse('focus.purchaseorders.view', compact('po'));
     }
 }
