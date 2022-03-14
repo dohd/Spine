@@ -71,7 +71,6 @@ class PurchasesController extends Controller
      */
     public function create(StorePurchaseRequest $request)
     {
-
         return new CreateResponse('focus.purchases.create');
     }
 
@@ -149,9 +148,9 @@ class PurchasesController extends Controller
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Purchase $purchase, ManagePurchaseRequest $request)
+    public function show(Purchase $purchase)
     {
-        // 
+        return new ViewResponse('focus.purchases.view', compact('purchase'));
     }
 
     public function customer_load(Request $request)
