@@ -48,6 +48,14 @@ class BillsController extends Controller
 
     public $pheight;
 
+    // pdf print request headers
+    protected $headers = [
+        "Content-type" => "application/pdf",
+        "Pragma" => "no-cache",
+        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+        "Expires" => "0"
+    ];
+
     public function __construct()
     {
         $this->pheight = 0;
@@ -58,7 +66,19 @@ class BillsController extends Controller
     {
         $data = $this->bill_details($request);
         session(['bill_url' => $data['link']['preview']]);
+
         return view('focus.bill.preview', $data);
+    }
+
+    public function print_purchaseorder(Request $request)
+    {
+        $data = $this->bill_details($request);
+
+        $html = view('focus.bill.print_purchaseorder', $data)->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+
+        return Response::stream($pdf->Output('purchaseorder.pdf', 'I'), 200, $this->headers);
     }
 
 
@@ -69,15 +89,10 @@ class BillsController extends Controller
         $html = view('focus.bill.print_invoice', $data)->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-         
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
         
-        return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
+        $name = $data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf';
+
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_djc_pdf(Request $request)
@@ -85,46 +100,27 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_djc', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-        $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
-        $pdf = new \Mpdf\Mpdf($pdf_config);
+        $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
         $pdf->WriteHTML($html);
 
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
-
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'DjR-' . sprintf('%04d', $tid) . '.pdf';
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);    
     }
 
     public function print_rjc_pdf(Request $request)
     {
         $data = $this->bill_details($request);
         
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
         $html = view('focus.bill.print_rjc', $data)->render();
-        
-        $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
-        $pdf = new \Mpdf\Mpdf($pdf_config);
+        $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
         $pdf->WriteHTML($html);
-
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
 
         $tid = $data['invoice']['tid'];
         $name = 'RjR-' . sprintf('%04d', $tid) . '.pdf';
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);    
     }
 
     public function print_quote_pdf(Request $request)
@@ -132,17 +128,8 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_quote', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
 
         $tid = $data['invoice']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '.pdf';
@@ -150,7 +137,7 @@ class BillsController extends Controller
             $name = 'PI-' . sprintf('%04d', $tid) . '.pdf';
         }
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_verified_quote_pdf(Request $request)
@@ -158,17 +145,8 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_verified_quote', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
 
         $tid = $data['invoice']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '-V.pdf';
@@ -176,7 +154,7 @@ class BillsController extends Controller
             $name = 'PI-' . sprintf('%04d', $tid) . '-V.pdf';
         }
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_budget_pdf(Request $request)
@@ -184,17 +162,8 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_project_budget', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
 
         $tid = $data['invoice']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
@@ -202,7 +171,7 @@ class BillsController extends Controller
             $name = 'PI-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
         }
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_budget_quote_pdf(Request $request)
@@ -210,17 +179,8 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_budget_quote', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
 
         $tid = $data['invoice']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
@@ -228,12 +188,11 @@ class BillsController extends Controller
             $name = 'PI-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
         }
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_compact(Request $request)
     {
-
         $data = $this->bill_details($request);
 
         $this->pheight = 0;
