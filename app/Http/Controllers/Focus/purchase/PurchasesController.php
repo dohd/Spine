@@ -60,26 +60,7 @@ class PurchasesController extends Controller
      */
     public function index(ManagePurchaseRequest $request)
     {
-        $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
-        $words = array();
-
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Supplier::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-            }
-        }
-
-        return new ViewResponse('focus.purchases.index', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.purchases.index');
     }
 
     /**
@@ -100,10 +81,6 @@ class PurchasesController extends Controller
      * @param StoreInvoiceRequestNamespace $request
      * @return \App\Http\Responses\RedirectResponse
      */
-
-
-
-
     public function store(StorePurchaseRequest $request)
     {
         // extract input details
@@ -158,9 +135,11 @@ class PurchasesController extends Controller
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Purchase $purchase, StorePurchaseRequest $request)
+    public function destroy(Purchase $purchase)
     {
-        // 
+        $this->repository->delete($purchase);
+        
+        return json_encode(array('status' => 'Success', 'message' => 'Purchase record deleted successfully'));
     }
 
     /**
