@@ -28,39 +28,9 @@ class PurchaseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
+        $q = $this->query()->where('is_po', 0);
 
-        $q = $this->query();
-
-        $q->when(request('rel_type') == 2, function ($q) {
-            return $q->where('payer_id', '=', request('rel_id', 0));
-        });
-        $q->when(request('rel_type') == 3, function ($q) {
-            return $q->where('payer_id', '=', request('rel_id', 0));
-        });
-
-        $q->when(request('rel_type') == 2, function ($q) {
-            return $q->where('payer_type', '=', 'supplier');
-        });
-        $q->when(request('rel_type') == 3, function ($q) {
-            return $q->where('payer_type', '=', 'customer');
-        });
-
-
-
-        $q->when(request('rel_type') == 1, function ($q) {
-            return  $q->where('is_bill', 1);
-        });
-        $q->when(request('rel_type') == 1, function ($q) {
-            return  $q->where('transaction_type', 'purchases');;
-        });
-
-        $q->when(request('i_rel_type') == 1, function ($q) {
-
-            return $q->where('supplier_id', '=', request('i_rel_id', 0));
-        });
-
-        return
-            $q->get();
+        return $q->get();
     }
 
     /**
@@ -133,12 +103,10 @@ class PurchaseRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Purchaseorder $purchaseorder)
+    public function delete($purchase)
     {
-        if ($purchaseorder->delete()) {
-            return true;
-        }
-
+        if ($purchase->delete()) return true;
+            
         throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
     }
 }
