@@ -200,6 +200,7 @@
 				<td width="8%">No.</td>
 				<td width="42%">ITEM DESCRIPTION</td>
 				<td width="10%">QTY</td>
+				<td width="10%">UoM</td>
 				<td width="15%">RATE</td>
 				<td width="15%">AMOUNT</td>
 			</tr>
@@ -213,8 +214,11 @@
                     <td>{{ $i+1 }}</td>
                     <td>{{ $item->description }}</td>
                     <td class="align-c">{{ (int) $item->qty }}</td>
-                    <td>{{ number_format($item->rate, 2) }}</td>
-                    <td>{{ number_format($item->amount, 2) }}</td>
+					<td class="align-c">
+						{{ in_array($item->type, ['Stock', 'Asset'], 1) ? 'Pc' : '' }}
+					</td>
+                    <td class="align-r">{{ number_format($item->rate, 2) }}</td>
+                    <td class="align-r">{{ number_format($item->amount, 2) }}</td>
                     @php
                         $tax_rate = (int) $item->tax_rate;
                     @endphp
@@ -223,14 +227,14 @@
 			<!-- 20 dynamic empty rows -->
 			@for ($i = count($resource->products); $i < 15; $i++)
 				<tr>
-					@for($j = 0; $j < 5; $j++) 
+					@for($j = 0; $j < 6; $j++) 
 						<td></td>
 					@endfor
 				</tr>
 			@endfor
 			<!--  -->
 			<tr>
-				<td colspan="3" class="bd-t" rowspan="2"></td>
+				<td colspan="4" class="bd-t" rowspan="2"></td>
 				<td class="bd align-r">Sub Total:</td>
                 <td class="bd align-r">{{ number_format($resource->paidttl, 2) }}</td>
 			</tr>
@@ -239,7 +243,7 @@
                 <td class="align-r">{{ number_format($resource->grandtax, 2) }}</td>
 			</tr>
 			<tr>
-				<td colspan="3"><em>Approved By : </em><b>{{ 'Sheila.M' }}</b></td>
+				<td colspan="4"><em>Approved By : </em><b>{{ 'Sheila.M' }}</b></td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ number_format($resource->grandttl, 2) }}</td>
 			</tr>
