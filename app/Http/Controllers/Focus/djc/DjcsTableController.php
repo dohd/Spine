@@ -74,7 +74,7 @@ class DjcsTableController extends Controller
                 $valid_token = token_validator('', 'd' . $djc->id, true);
                 $link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
 
-                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
+                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
                     . $djc->action_buttons;
             })
             ->make(true);
