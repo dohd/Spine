@@ -11,7 +11,7 @@ class PurchaseItem extends Model
         // CustomfieldAttribute::getEditButtonAttribute insteadof ModelTrait;
     }
 
-    protected $table = 'purchase_order_items';
+    protected $table = 'bill_items';
 
     /**
      * Mass Assignable fields of model
