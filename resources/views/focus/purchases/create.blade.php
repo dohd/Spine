@@ -1,9 +1,22 @@
 @extends('core.layouts.app')
 
-@section('title', 'Purchases | Create')
+@section('title', 'Direct Purchase | Create')
 
 @section('content')
 <div class="content-wrapper">
+    <div class="content-header row">
+        <div class="content-header-left col-md-6 col-12">
+            <h4 class="content-header-title">Direct Purchase Management</h4>
+        </div>
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right mr-3">
+                <div class="media-body media-right text-right">
+                    @include('focus.purchases.partials.purchases-header-buttons')
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="content-body"> 
         <div class="card">
             <div class="card-body">
