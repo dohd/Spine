@@ -27,35 +27,37 @@ class ValidTokenMiddleware
         if (App::environment('production')) error_reporting(0);        
         if (!isset($request->type)) abort(403, 'Access denied');
         
+        $resource = (object) array();
+        $id = $request->id;
         switch ($request->type) {
             case 1:
-                $invoice = Invoice::withoutGlobalScopes()->find($request->id);
+                $resource = Invoice::withoutGlobalScopes()->find($id);
                 break;
             case 3:
-                $invoice = Bill::withoutGlobalScopes()->find($request->id);
+                $resource = Bill::withoutGlobalScopes()->find($id);
                 break;
             case 4:
-                $invoice = Quote::withoutGlobalScopes()->find($request->id);
+                $resource = Quote::withoutGlobalScopes()->find($id);
                 break;
             case 5:
-                $invoice = Order::withoutGlobalScopes()->find($request->id);
+                $resource = Order::withoutGlobalScopes()->find($id);
                 break;
             case 9:
-                $invoice = Purchaseorder::withoutGlobalScopes()->find($request->id);
+                $resource = Purchaseorder::withoutGlobalScopes()->find($id);
                 break;
             case 10:
-                $invoice = Djc::withoutGlobalScopes()->find($request->id);
+                $resource = Djc::withoutGlobalScopes()->find($id);
                 break;
             case 11:
-                $invoice = Rjc::withoutGlobalScopes()->find($request->id);
+                $resource = Rjc::withoutGlobalScopes()->find($id);
                 break;
         }
 
-        if (isset($invoice->ins)) {
-            session(['theme' => ConfigMeta::withoutGlobalScopes()
-                ->where(['ins' => $invoice->ins, 'feature_id' => 15])
-                ->first('value1')->value1
-            ]);
+        if (isset($resource->ins)) {
+            $meta = ConfigMeta::withoutGlobalScopes()
+                ->where(['ins' => $resource->ins, 'feature_id' => 15])
+                ->first('value1')->value1;
+            session(['theme' => $meta]);
         }
         
         return $next($request);
