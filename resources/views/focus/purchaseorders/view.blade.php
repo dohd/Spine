@@ -20,10 +20,10 @@
     <div class="card">
         <h5 class="card-header">
             @php
-                //$valid_token = token_validator('', 'd' . $djc->id, true);
-                //$link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
+                $valid_token = token_validator('', 'po' . $po->id, true);
+                $link = route('biller.print_purchaseorder', [$po->id, 9, $valid_token, 1]);
             @endphp
-            <a href="{{ '' }}" class="btn btn-purple">
+            <a href="{{ $link }}" class="btn btn-purple" target="_blank">
                 <i class="fa fa-print" aria-hidden="true"></i> Print
             </a>
         </h5>
@@ -102,7 +102,7 @@
                             <th>Amount</th>
                         </tr>
                         <tbody>
-                            @foreach ($po->items as $item)
+                            @foreach ($po->products as $item)
                                 @if ($item->type == 'Stock')
                                     <tr>
                                         <td>{{ $item->description }}</td>
@@ -129,7 +129,7 @@
                             <th>Amount</th>
                         </tr>
                         <tbody>
-                            @foreach ($po->items as $item)
+                            @foreach ($po->products as $item)
                                 @if ($item->type == 'Expense')
                                     <tr>
                                         <td>{{ $item->description }}</td>
@@ -156,7 +156,7 @@
                             <th>Amount</th>
                         </tr>
                         <tbody>
-                            @foreach ($po->items as $item)
+                            @foreach ($po->products as $item)
                                 @if ($item->type == 'Asset')
                                     <tr>
                                         <td>{{ $item->description }}</td>
