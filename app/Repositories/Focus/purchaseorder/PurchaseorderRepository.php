@@ -18,7 +18,7 @@ class PurchaseorderRepository extends BaseRepository
     /**
      * Associated Repository Model.
      */
-    const MODEL = Bill::class;
+    const MODEL = Purchaseorder::class;
 
     /**
      * This method is used by Table Controller
@@ -45,21 +45,36 @@ class PurchaseorderRepository extends BaseRepository
         DB::beginTransaction();
 
         $bill = $input['bill'];
-        $bill = array_replace($bill, [
-            'date' =>  date_for_database($bill['date']),
-            'due_date' => date_for_database($bill['due_date']),
-            'is_po' => 1
-        ]);
+        $bill['is_po'] = 1;
+        // sanitize
+        $rate_keys = [
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ];
+        foreach ($bill as $key => $val) {
+            if (in_array($key, ['date', 'due_date'], 1)) {
+                $bill[$key] = date_for_database($val);
+            }
+            if (in_array($key, $rate_keys, 1)) {
+                $bill[$key] = numberClean($val);
+            }
+        }
         $result = Bill::create($bill);
 
-        // inject new keys
         $bill_items = $input['bill_items'];
-        foreach ($bill_items as $k => $item) {
-            $bill_items[$k] = $item + [
+        foreach ($bill_items as $i => $item) {
+            // inject new keys
+            $bill_items[$i] = $item + [
                 'ins' => $bill['ins'],
                 'user_id' => $bill['user_id'],
                 'bills_id' => $result->id
             ];
+            // sanitize
+            foreach ($item as $key => $val) {
+                if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
+                    $bill_items[$i][$key] = numberClean($val);
+                }
+            }
         }
         BillItem::insert($bill_items);
 
