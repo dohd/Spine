@@ -26,6 +26,8 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
 
     Route::group(['namespace' => 'communication', 'middleware' => 'valid_token'], function () {
         Route::get('view_bill/{id}/{type}/{token}/{pdf}', 'BillsController@index')->name('view_bill');
+
+        Route::get('print_purchaseorder/{id}/{type}/{token}/{pdf}', 'BillsController@print_purchaseorder')->name('print_purchaseorder');
         Route::get('print_bill/{id}/{type}/{token}/{pdf}', 'BillsController@print_invoice')->name('print_bill');
         Route::get('print_djc/{id}/{type}/{token}/{pdf}', 'BillsController@print_djc_pdf')->name('print_djc');
         Route::get('print_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_quote_pdf')->name('print_quote');
