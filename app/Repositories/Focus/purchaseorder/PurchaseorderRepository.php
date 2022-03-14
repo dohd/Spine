@@ -105,12 +105,10 @@ class PurchaseorderRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Purchaseorder $purchaseorder)
+    public function delete($purchaseorder)
     {
-        if ($purchaseorder->delete()) {
-            return true;
-        }
-
+        if ($purchaseorder->delete()) return true;            
+        
         throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
     }
 }

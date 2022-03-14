@@ -173,11 +173,10 @@ class PurchaseordersController extends Controller
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Purchaseorder $purchaseorder, StorePurchaseorderRequest $request)
+    public function destroy(Purchaseorder $purchaseorder)
     {
-        //Calling the delete method on repository
         $this->repository->delete($purchaseorder);
-        //returning with successfull message
+        
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')));
     }
 
