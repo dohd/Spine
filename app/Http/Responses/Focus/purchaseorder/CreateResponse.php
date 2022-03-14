@@ -17,10 +17,10 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
 
-        $last_invoice = Purchaseorder::orderBy('id', 'desc')->where('i_class', 0)->first();
+        $last_order = Purchaseorder::orderBy('id', 'DESC')->first();
 
         return view('focus.purchaseorders.create')
-            ->with(['last_invoice' => $last_invoice])
+            ->with(['last_invoice' => $last_order])
             ->with(bill_helper(3, 9));
     }
 }
