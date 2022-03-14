@@ -96,7 +96,7 @@ class PurchaseRepository extends BaseRepository
             $bill_items[$i] = $item + [
                 'ins' => $bill['ins'],
                 'user_id' => $bill['user_id'],
-                'bills_id' => $result->id
+                'bill_id' => $result->id
             ];
             // sanitize
             foreach ($item as $key => $val) {
