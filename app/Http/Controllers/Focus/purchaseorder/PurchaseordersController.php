@@ -177,7 +177,7 @@ class PurchaseordersController extends Controller
     {
         $this->repository->delete($purchaseorder);
         
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')));
+        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')]);
     }
 
 
