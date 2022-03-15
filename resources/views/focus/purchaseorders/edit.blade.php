@@ -20,7 +20,7 @@
     <div class="content-body"> 
         <div class="card">
             <div class="card-body">
-                {{ Form::model($po, ['route' => ['biller.purchaseorders.update', $po], 'method' => 'POST']) }}
+                {{ Form::model($po, ['route' => ['biller.purchaseorders.update', $po], 'method' => 'PATCH']) }}
                     @include('focus.purchaseorders.form')
                 {{ Form::close() }}
             </div>
@@ -46,8 +46,10 @@
         }
     }
 
-    // document type
+    // defaults
     $('#ref_type').val("{{ $po->doc_ref_type }}");
+    $('#taxid').val("{{ $po->supplier_taxid }}");
+    $('#supplierid').val("{{ $po->supplier_id }}");
 
     // default datepicker values
     $('.datepicker')
