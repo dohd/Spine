@@ -59,8 +59,9 @@
     $('#due_date').datepicker('setDate', new Date("{{ $po->due_date }}"));
 
     // On searching supplier
-    const suppliername = "{{ $po->suppliername }}";
-    $('#supplierbox').append(new Option(suppliername, suppliername, true, true));
+    const supplierText = "{{ $po->suppliername }}";
+    const supplierVal = "{{ $po->supplier_id }}-{{ $po->supplier_taxid }}";
+    $('#supplierbox').append(new Option(supplierText, supplierVal, true, true));
     $('#supplierbox').change(function() {
         const name = $('#supplierbox option:selected').text().split(' : ')[0];
         const [id, taxId] = $(this).val().split('-');
@@ -349,7 +350,7 @@
         calcAsset();
     });
     $('#assetqty-0').change();
-    
+
     function calcAsset() {
         let tax = 0;
         let totalInc = 0;
