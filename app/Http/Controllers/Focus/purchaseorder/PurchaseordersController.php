@@ -61,28 +61,9 @@ class PurchaseordersController extends Controller
      * @param App\Http\Requests\Focus\purchaseorder\ManagePurchaseorderRequest $request
      * @return \App\Http\Responses\ViewResponse
      */
-    public function index(ManagePurchaseorderRequest $request)
+    public function index()
     {
-        $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Supplier::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-            }
-        }
-
-
-        return new ViewResponse('focus.purchaseorders.index', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.purchaseorders.index');
     }
 
     /**
