@@ -63,7 +63,7 @@
                             <td><input type="text" class="form-control taxable" value="0" readonly></td>
                             <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-{{$i}}">0</span></b></td>              
                             <td><button type="button" class="btn btn-danger remove">Remove</button></td>
-                            <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]">
+                            <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="stocktaxr" name="tax[]">
                             <input type="hidden" class="stockamountr" name="amount[]">
                             <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
