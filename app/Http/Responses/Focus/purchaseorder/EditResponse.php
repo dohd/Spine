@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\purchaseorder;
 
+use App\Models\additional\Additional;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -29,7 +30,8 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $po = $this->purchaseorder;
+        $additionals = Additional::all();
 
-        return view('focus.purchaseorder.edit', compact('po'));
+        return view('focus.purchaseorders.edit', compact('po', 'additionals'));
     }
 }
