@@ -4,9 +4,9 @@
             <h3 class="title">Bill </h3>                                                                
             <div class="form-group row">
                 <div class="col-12">
-                        <label for="payer" class="caption">Search Supplier</label>                                       
-                        <select class="form-control" id="supplierbox" data-placeholder="Search Supplier"></select>
-                        <input type="hidden" name="supplier_id" value="0" id="supplierid">
+                    <label for="payer" class="caption">Search Supplier</label>                                       
+                    <select class="form-control" id="supplierbox" data-placeholder="Search Supplier"></select>
+                    <input type="hidden" name="supplier_id" value="0" id="supplierid">
                 </div>
             </div>
             
@@ -21,7 +21,7 @@
                 <div class="col-sm-4"><label for="taxid" class="caption">Tax ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id'=>'taxid', 'required', 'readonly']) }}
+                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id' => 'taxid', 'required', 'readonly']) }}
                     </div>
                 </div>
             </div>
@@ -81,7 +81,7 @@
                 </div>
                 <div class="col-sm-4"><label for="transaction_date" class="caption">Purchase Date*</label>
                     <div class="input-group">                                            
-                        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'transaction_date', 'data-date-auto-close']) }}
+                        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
                     </div>
                 </div>
                 <div class="col-sm-4"><label for="due_date" class="caption">Due Date*</label>
