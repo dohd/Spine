@@ -132,7 +132,7 @@ class PurchaseordersController extends Controller
      * @param EditPurchaseorderRequestNamespace $request
      * @return \App\Http\Responses\Focus\purchaseorder\EditResponse
      */
-    public function edit(Purchaseorder $purchaseorder, StorePurchaseorderRequest $request)
+    public function edit(Purchaseorder $purchaseorder)
     {
         return new EditResponse($purchaseorder);
     }
