@@ -43,7 +43,7 @@
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Expense')
                         <tr>
-                            <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger"></td>
+                            <td><input type="text" class="form-control accountname" name="name[]" value="{{ $item->account->holder }}" placeholder="Enter Ledger"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ (int) $item->qty }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_vat " name="tax_rate[]" value="{{ (int) $item->tax_rate }}" id="expvat-{{$i}}" value="0"></td>
@@ -60,7 +60,7 @@
                                 <textarea id="expdescr-{{$i}}" class="form-control" name="description[]" placeholder="Enter Description">{{ $item->description }}</textarea>
                             </td>
                             <td colspan="4">
-                                <input type="text" class="form-control projectexp" id="projectexptext-{{$i}}" placeholder="Enter Project">
+                                <input type="text" class="form-control projectexp" value="{{ $item->project->name }}" id="projectexptext-{{$i}}" placeholder="Enter Project">
                                 <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectexpval-{{$i}}">
                             </td>
                         </tr>
