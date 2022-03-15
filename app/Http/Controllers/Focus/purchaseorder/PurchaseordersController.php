@@ -19,17 +19,10 @@
 namespace App\Http\Controllers\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
-use App\Models\supplier\Supplier;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\purchaseorder\EditResponse;
 use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
-use App\Http\Requests\Focus\purchaseorder\ManagePurchaseorderRequest;
-
-//Ported
-use App\Models\account\Account;
-use App\Models\Company\ConfigMeta;
-use App\Models\hrm\Hrm;
 
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
@@ -127,24 +120,25 @@ class PurchaseordersController extends Controller
      */
     public function update(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
     {
+        // extract input fields
+        $bill = $request->only([
+            'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
+            'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ]);
+        $bill_items = $request->only([
+            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
+        ]);
 
-        //Input received from the request
-        $invoice = $request->only(['supplier_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
-        //dd($request->id);
-        $invoice['ins'] = auth()->user()->ins;
-        //$invoice['user_id']=auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
+        $bill['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
+        $bill_items = modify_array($bill_items);
+        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
 
+        $result = $this->repository->update($purchaseorder, compact('bill', 'bill_items'));
 
-        $result = $this->repository->update($purchaseorder, compact('invoice', 'invoice_items', 'data2'));
-
-        //return with successfull message
-
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.updated') . ' <a href="' . route('biller.purchaseorders.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => trans('alerts.backend.purchaseorders.updated')]);
     }
 
     /**
