@@ -799,15 +799,15 @@ function strip_tags_deep($value, $key = null)
     }
 }
 
-// log to the browser console when return type is a view
-function browser_log(...$logs)
+// log to the browser console via a view template
+function browserlog(...$logs)
 {
     foreach ($logs as $log) {
         echo '<script>console.log(' . json_encode($log) . ')</script>';
     }
 }
 // log to the server console
-function print_log(...$logs)
+function printlog(...$logs)
 {
     foreach ($logs as $log) {
         error_log(print_r($log, 1));
