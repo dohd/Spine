@@ -45,12 +45,13 @@
 
             <!-- fetched rows -->
             @isset ($po)
-                @foreach ($po->products as $i => $item)
+                @php ($i = 0)
+                @foreach ($po->products as $item)
                     @if ($item->type == 'Stock')
                         <tr>
                             <td><input type="text" class="form-control stockname" name="name[]" value="{{ $item->product->name }}" placeholder="Product Name" id='stockname-{{$i}}'></td>
                             <td><input type="text" class="form-control qty" name="qty[]" value="{{ (int) $item->qty }}" id="qty-{{$i}}"></td>                    
-                            <td><input type="text" class="form-control price" name="rate[]" value="{{ (int) $item->rate }}" id="price-{{$i}}"></td>
+                            <td><input type="text" class="form-control price" name="rate[]" value="{{ (float) $item->rate }}" id="price-{{$i}}"></td>
                             <td>
                                 <select class="form-control rowtax" name="tax_rate[]" id="rowtax-{{$i}}">
                                     @foreach ($additionals as $tax)
@@ -75,6 +76,7 @@
                             </td>
                             <td colspan=5></td>
                         </tr>
+                        @php ($i++)
                     @endif
                 @endforeach
             @endisset
