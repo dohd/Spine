@@ -332,7 +332,7 @@ class InvoiceRepository extends BaseRepository
         // credit and debit data
         $dr_data = $input['dr_data'];
         $cr_data = $input['cr_data'];
-        $is_actual = boolval($dr_data && $cr_data);
+        $is_actual = isset($dr_data) && isset($cr_data);
 
         $invoice = $input['invoice_data'];
         // sanitize values
@@ -351,8 +351,8 @@ class InvoiceRepository extends BaseRepository
             $invoice['tid'] = $last_inv->tid + 1;
         }
         if ($is_actual) $invoice['type'] = 'actual';
-        unset($invoice['taxid']);
         $invoice['status'] = 'due';
+        unset($invoice['taxid']);
         $result = Invoice::create($invoice);
 
         // invoice items
