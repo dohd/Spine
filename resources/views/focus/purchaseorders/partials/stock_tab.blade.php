@@ -12,6 +12,7 @@
             </tr>
         </thead>
         <tbody>
+            <!-- layout -->
             <tr>
                 <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0'></td>
                 <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="1"></td>                    
@@ -40,6 +41,45 @@
                 </td>
                 <td colspan=5></td>
             </tr>
+            <!-- end layout -->
+
+            <!-- fetched rows -->
+            @isset ($po)
+                @foreach ($po->products as $i => $item)
+                    @if ($item->type == 'Stock')
+                        <tr>
+                            <td><input type="text" class="form-control stockname" name="name[]" value="{{ $item->product->name }}" placeholder="Product Name" id='stockname-{{$i}}'></td>
+                            <td><input type="text" class="form-control qty" name="qty[]" value="{{ (int) $item->qty }}" id="qty-{{$i}}"></td>                    
+                            <td><input type="text" class="form-control price" name="rate[]" value="{{ (int) $item->rate }}" id="price-{{$i}}"></td>
+                            <td>
+                                <select class="form-control rowtax" name="tax_rate[]" id="rowtax-{{$i}}">
+                                    @foreach ($additionals as $tax)
+                                        <option value="{{ intval($tax->value) }}" {{ intval($tax->value) == intval($item->tax_rate) ? 'selected' : ''}}>
+                                            {{ $tax->name }}
+                                        </option>
+                                    @endforeach                                                    
+                                </select>
+                            </td>
+                            <td><input type="text" class="form-control taxable" value="0" readonly></td>
+                            <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-{{$i}}">0</span></b></td>              
+                            <td><button type="button" class="btn btn-danger remove">Remove</button></td>
+                            <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]">
+                            <input type="hidden" class="stocktaxr" name="tax[]">
+                            <input type="hidden" class="stockamountr" name="amount[]">
+                            <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
+                            <input type="hidden" name="type[]" value="Stock">
+                        </tr>
+                        <tr>
+                            <td colspan=2>
+                                <textarea id="stockdescr-{{$i}}" class="form-control" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
+                            </td>
+                            <td colspan=5></td>
+                        </tr>
+                    @endif
+                @endforeach
+            @endisset
+            <!-- end fetched rows -->
+
             <tr class="bg-white">
                 <td>
                     <button type="button" class="btn btn-success" aria-label="Left Align" id="addstock">
