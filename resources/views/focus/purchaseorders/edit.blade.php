@@ -227,7 +227,7 @@
     /**
      * Expense Tab
      */
-    let expRowId = @json(count($po->products));;
+    let expRowId = @json(count($po->products));
     const expHtml = [$('#expTbl tbody tr:eq(0)').html(), $('#expTbl tbody tr:eq(1)').html()];
     $('#expTbl tbody tr:lt(2)').remove(); 
     const expUrl = "{{ route('biller.accounts.account_search') }}";
@@ -308,8 +308,9 @@
     /**
      * Asset tab
      */
-    let assetRowId = 0;
+    let assetRowId = @json(count($po->products));;
     const assetHtml = [$('#assetTbl tbody tr:eq(0)').html(), $('#assetTbl tbody tr:eq(1)').html()];
+    $('#assetTbl tbody tr:lt(2)').remove(); 
     const assetUrl = "{{ route('biller.assetequipments.product_search') }}";
     $('.assetname').autocomplete(predict(assetUrl, assetSelect));
     $('#assetTbl').on('click', '#addasset, .remove', function() {
@@ -329,6 +330,7 @@
             const $tr = $(this).parents('tr:first');
             $tr.next().remove();
             $tr.remove();
+            calcAsset();
         }    
     });    
     $('#assetTbl').on('change', '.asset_qty, .asset_price, .asset_vat', function() {
@@ -346,6 +348,8 @@
         $tr.find('.assetamountr').val(amount.toLocaleString());
         calcAsset();
     });
+    $('#assetqty-0').change();
+    
     function calcAsset() {
         let tax = 0;
         let totalInc = 0;
