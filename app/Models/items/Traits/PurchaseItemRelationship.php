@@ -8,15 +8,13 @@ namespace App\Models\items\Traits;
  */
 trait PurchaseItemRelationship
 {
-
-       public function product()
+    public function product()
     {
-        return $this->belongsTo('App\Models\product\ProductVariation','product_id','product_id');
+        return $this->belongsTo('App\Models\product\ProductVariation', 'item_id');
     }
 
-           public function variation()
+    public function variation()
     {
-        return $this->belongsTo('App\Models\product\ProductVariation','product_id','id')->withoutGlobalScopes();
+        return $this->belongsTo('App\Models\product\ProductVariation', 'item_id')->withoutGlobalScopes();
     }
-
 }
