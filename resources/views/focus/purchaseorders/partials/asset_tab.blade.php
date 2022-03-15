@@ -39,7 +39,7 @@
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Asset')
                         <tr>
-                            <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment"></td>
+                            <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ (int) $item->qty }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_vat" name="tax_rate[]" value="{{ (int) $item->tax_rate }}" id="assetvat-{{$i}}"></td>
