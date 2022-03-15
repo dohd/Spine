@@ -227,8 +227,9 @@
     /**
      * Expense Tab
      */
-    let expRowId = 0;
+    let expRowId = @json(count($po->products));;
     const expHtml = [$('#expTbl tbody tr:eq(0)').html(), $('#expTbl tbody tr:eq(1)').html()];
+    $('#expTbl tbody tr:lt(2)').remove(); 
     const expUrl = "{{ route('biller.accounts.account_search') }}";
     $('.accountname').autocomplete(predict(expUrl, expSelect));
     $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
@@ -253,6 +254,7 @@
             const $tr = $(this).parents('tr:first');
             $tr.next().remove();
             $tr.remove();
+            calcExp();
         }    
     });
     $('#expTbl').on('change', '.exp_qty, .exp_price, .exp_vat', function() {
@@ -270,6 +272,8 @@
         $tr.find('.expamountr').val(amount.toLocaleString());
         calcExp();
     });
+    $('#expqty-0').change();
+
     function calcExp() {
         let tax = 0;
         let totalInc = 0;
