@@ -79,22 +79,22 @@ class PurchaseordersController extends Controller
     public function store(StorePurchaseorderRequest $request)
     {
         // extract input fields
-        $bill = $request->only([
-            'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
-            'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+        $order = $request->only([
+            'supplier_id', 'tid', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 'project_id', 'note', 'tax',
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $bill_items = $request->only([
-            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
+        $order_items = $request->only([
+            'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
         ]);
 
-        $bill['ins'] = auth()->user()->ins;
-        $bill['user_id'] = auth()->user()->id;
+        $order['ins'] = auth()->user()->ins;
+        $order['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
-        $bill_items = modify_array($bill_items);
-        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
+        $order_items = modify_array($order_items);
+        $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
 
-        $result = $this->repository->create(compact('bill', 'bill_items'));
+        $result = $this->repository->create(compact('order', 'order_items'));
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
     }
@@ -121,22 +121,22 @@ class PurchaseordersController extends Controller
     public function update(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
     {
         // extract input fields
-        $bill = $request->only([
-            'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
-            'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+        $order = $request->only([
+            'supplier_id', 'tid', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 'project_id', 'note', 'tax',
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $bill_items = $request->only([
-            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
+        $order_items = $request->only([
+            'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
         ]);
 
-        $bill['ins'] = auth()->user()->ins;
-        $bill['user_id'] = auth()->user()->id;
+        $order['ins'] = auth()->user()->ins;
+        $order['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
-        $bill_items = modify_array($bill_items);
-        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
+        $order_items = modify_array($order_items);
+        $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
 
-        $result = $this->repository->update($purchaseorder, compact('bill', 'bill_items'));
+        $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => trans('alerts.backend.purchaseorders.updated')]);
     }
