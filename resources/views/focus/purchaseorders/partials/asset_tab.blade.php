@@ -44,7 +44,7 @@
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ (int) $item->qty }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>
-                            <td><input type="text" class="form-control asset_vat" name="taxrate[]" value="{{ (int) $item->taxrate }}" id="assetvat-{{$i}}"></td>
+                            <td><input type="text" class="form-control asset_vat" name="taxrate[]" value="0" id="assetvat-{{$i}}"></td>
                             <td class="text-center"><span class="asset_tax">0</span></td>
                             <td>{{config('currency.symbol')}} <b><span class='asset_amount'>0</span></b></td>
                             <td><button type="button" class="btn btn-danger remove">remove</button></td>

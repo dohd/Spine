@@ -44,12 +44,11 @@
                 @php ($i = 0)
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Expense')
-                    {{browserlog($item)}}
                         <tr>
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ $item->account->holder }}" placeholder="Enter Ledger"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ (int) $item->qty }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
-                            <td><input type="text" class="form-control exp_vat " name="taxrate[]" value="{{ (int) $item->taxrate }}" id="expvat-{{$i}}" value="0"></td>
+                            <td><input type="text" class="form-control exp_vat " name="taxrate[]" value="0" id="expvat-{{$i}}" value="0"></td>
                             <td class="text-center"><span class="exp_tax" id="exptax-{{$i}}">0</span></td>
                             <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-{{$i}}">0</span></b></td>
                             <td><button type="button" class="btn btn-danger remove">remove</button></td>

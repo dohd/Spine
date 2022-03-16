@@ -59,7 +59,7 @@
                             <td>
                                 <select class="form-control rowtax" name="tax_rate[]" id="rowtax-{{$i}}">
                                     @foreach ($additionals as $tax)
-                                        <option value="{{ intval($tax->value) }}" {{ intval($tax->value) == intval($item->tax_rate) ? 'selected' : ''}}>
+                                        <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->itemtax ? 'selected' : ''}}>
                                             {{ $tax->name }}
                                         </option>
                                     @endforeach                                                    
@@ -79,7 +79,7 @@
                             <td colspan=2>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
                             </td>
-                            <td colspan=5></td>
+                            <td colspan=6></td>
                         </tr>
                         @php ($i++)
                     @endif
@@ -93,16 +93,16 @@
                         <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
                     </button>
                 </td>
-                <td colspan="6"></td>
+                <td colspan="7"></td>
             </tr>
             <tr class="bg-white">
-                <td colspan="5" align="right"><b>{{trans('general.total_tax')}}</b></td>                   
+                <td colspan="6" align="right"><b>{{trans('general.total_tax')}}</b></td>                   
                 <td align="left" colspan="2">
                     {{config('currency.symbol')}} <span id="invtax" class="lightMode">0</span>
                 </td>
             </tr>
             <tr class="bg-white">
-                <td colspan="5" align="right">
+                <td colspan="6" align="right">
                     <b>Inventory Total ({{ config('currency.symbol') }})</b>
                 </td>
                 <td align="left" colspan="2">
