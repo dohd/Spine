@@ -14,7 +14,7 @@
                     @include('focus.purchaseorders.partials.purchaseorders-header-buttons')
                 </div>
             </div>
-        </div>
+        </div> 
     </div>    
 
     <div class="content-body"> 
@@ -45,6 +45,11 @@
             }
         }
     }
+
+    $('form').submit(function(e) {
+        // e.preventDefault();
+        // console.log($(this).serializeArray());
+    });
 
     // datepicker
     $('.datepicker')
@@ -152,6 +157,7 @@
             const $tr = $(this).parents('tr:first');
             $tr.next().remove();
             $tr.remove();
+            calcStock();
         }    
     })
     $('#stockTbl').on('change', '.qty, .price, .rowtax', function() {
@@ -168,6 +174,11 @@
         $tr.find('.stocktaxr').val(taxable.toLocaleString());
         $tr.find('.stockamountr').val(amount.toLocaleString());
         calcStock();
+
+        if ($(this).is('.price')) {
+            $tr.find('.uom').attr('required', true);
+            $tr.next().find('.descr').attr('required', true);
+        }
     });
     function calcStock() {
         let tax = 0;
@@ -202,7 +213,6 @@
         const {data} = ui.item;
         const i = stockRowId;
         $('#stockitemid-'+i).val(data.id);
-        $('#stockdescr-'+i).val(data.product_des);
         const price = parseFloat(data.purchase_price).toLocaleString();
         $('#price-'+i).val(price).change();
     }
@@ -231,12 +241,13 @@
             $('#expvat-'+i).val($('#tax').val());
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectexptext-'+i).val(projectText);
-            $('#projectexpval-'+i).val($(this).val());
+            $('#projectexpval-'+i).val($("#project").val());
         }
         if ($(this).is('.remove')) {
             const $tr = $(this).parents('tr:first');
             $tr.next().remove();
             $tr.remove();
+            calcExp();
         }    
     });
     $('#expTbl').on('change', '.exp_qty, .exp_price, .exp_vat', function() {
@@ -253,6 +264,10 @@
         $tr.find('.exptaxr').val(taxable.toLocaleString());
         $tr.find('.expamountr').val(amount.toLocaleString());
         calcExp();
+
+        if ($(this).is('.exp_price')) {
+            $tr.next().find('.descr').attr('required', true);
+        }
     });
     function calcExp() {
         let tax = 0;
@@ -277,7 +292,6 @@
         const {data} = ui.item;
         const i = expRowId;
         $('#expitemid-'+i).val(data.id);
-        $('#expdescr-'+i).val(data.name + ' - ' + data.number);
     }
     function projectExpSelect(event, ui) {
         const {data} = ui.item;
@@ -309,6 +323,7 @@
             const $tr = $(this).parents('tr:first');
             $tr.next().remove();
             $tr.remove();
+            calcAsset();
         }    
     });    
     $('#assetTbl').on('change', '.asset_qty, .asset_price, .asset_vat', function() {
@@ -325,6 +340,10 @@
         $tr.find('.assettaxr').val(taxable.toLocaleString());
         $tr.find('.assetamountr').val(amount.toLocaleString());
         calcAsset();
+
+        if ($(this).is('.asset_price')) {
+            $tr.next().find('.descr').attr('required', true);
+        }
     });
     function calcAsset() {
         let tax = 0;
@@ -349,7 +368,6 @@
         const {data} = ui.item;
         const i = assetRowId;
         $('#assetitemid-'+i).val(data.id);
-        $('#assetdescr-'+i).val(data.name);
         const cost = parseFloat(data.cost).toLocaleString();
         $('#assetprice-'+i).val(cost).change();
     } 
