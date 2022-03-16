@@ -56,7 +56,7 @@ class PurchaseordersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($po) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $po->id . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $po->tid . '</a>';
             })
             ->addColumn('supplier', function ($po) {
                 return $po->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '"><i class="ft-eye"></i></a>';
