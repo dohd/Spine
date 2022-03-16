@@ -48,8 +48,7 @@
 
     // defaults
     $('#ref_type').val("{{ $po->doc_ref_type }}");
-    $('#taxid').val("{{ $po->supplier_taxid }}");
-    $('#supplierid').val("{{ $po->supplier_id }}");
+    $('#tax').val("{{ $po->tax }}")
 
     // default datepicker values
     $('.datepicker')
@@ -59,9 +58,6 @@
     $('#due_date').datepicker('setDate', new Date("{{ $po->due_date }}"));
 
     // On searching supplier
-    const supplierText = "{{ $po->suppliername }}";
-    const supplierVal = "{{ $po->supplier_id }}-{{ $po->supplier_taxid }}";
-    $('#supplierbox').append(new Option(supplierText, supplierVal, true, true));
     $('#supplierbox').change(function() {
         const name = $('#supplierbox option:selected').text().split(' : ')[0];
         const [id, taxId] = $(this).val().split('-');
@@ -69,6 +65,10 @@
         $('#supplierid').val(id);
         $('#supplier').val(name);
     });
+    const supplierText = "{{ $po->supplier->name }} : ";
+    const supplierVal = "{{ $po->supplier_id }}-{{ $po->supplier->taxid }}";
+    $('#supplierbox').append(new Option(supplierText, supplierVal, true, true)).change();
+
 
     // load suppliers
     const supplierUrl = "{{ route('biller.suppliers.select') }}";
@@ -95,14 +95,14 @@
     });
 
     // On project change
-    const projectName = "{{ $po->project->name }}";
-    const projectId = "{{ $po->project_id }}";
-    $('#project').append(new Option(projectName, projectId, true, true));
     $("#project").change(function() {
         const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
         $('#projectexptext-0').val(projectText);
         $('#projectexpval-0').val($(this).val());
     });
+    const projectName = "{{ $po->project->name }}";
+    const projectId = "{{ $po->project_id }}";
+    $('#project').append(new Option(projectName, projectId, true, true)).change();
 
     // Update transaction table
     const sumLine = (...values) => values.reduce((prev, curr) => prev + curr.replace(/,/g, '')*1, 0);
@@ -183,6 +183,11 @@
         $tr.find('.stocktaxr').val(taxable.toLocaleString());
         $tr.find('.stockamountr').val(amount.toLocaleString());
         calcStock();
+
+        if ($(this).is('.price')) {
+            $tr.find('.uom').attr('required', true);
+            $tr.next().find('.descr').attr('required', true);
+        }
     });
     $('#qty-0').change();
 
@@ -219,7 +224,6 @@
         const {data} = ui.item;
         const i = stockRowId;
         $('#stockitemid-'+i).val(data.id);
-        $('#stockdescr-'+i).val(data.product_des);
         const price = parseFloat(data.purchase_price).toLocaleString();
         $('#price-'+i).val(price).change();
     }
@@ -249,7 +253,7 @@
             $('#expvat-'+i).val($('#tax').val());
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectexptext-'+i).val(projectText);
-            $('#projectexpval-'+i).val($(this).val());
+            $('#projectexpval-'+i).val($("#project option:selected").val());
         }
         if ($(this).is('.remove')) {
             const $tr = $(this).parents('tr:first');
@@ -272,6 +276,10 @@
         $tr.find('.exptaxr').val(taxable.toLocaleString());
         $tr.find('.expamountr').val(amount.toLocaleString());
         calcExp();
+
+        if ($(this).is('.exp_price')) {
+            $tr.next().find('.descr').attr('required', true);
+        }
     });
     $('#expqty-0').change();
 
@@ -298,7 +306,6 @@
         const {data} = ui.item;
         const i = expRowId;
         $('#expitemid-'+i).val(data.id);
-        $('#expdescr-'+i).val(data.name + ' - ' + data.number);
     }
     function projectExpSelect(event, ui) {
         const {data} = ui.item;
@@ -348,6 +355,10 @@
         $tr.find('.assettaxr').val(taxable.toLocaleString());
         $tr.find('.assetamountr').val(amount.toLocaleString());
         calcAsset();
+
+        if ($(this).is('.asset_price')) {
+            $tr.next().find('.descr').attr('required', true);
+        }
     });
     $('#assetqty-0').change();
 
@@ -374,7 +385,6 @@
         const {data} = ui.item;
         const i = assetRowId;
         $('#assetitemid-'+i).val(data.id);
-        $('#assetdescr-'+i).val(data.name);
         const cost = parseFloat(data.cost).toLocaleString();
         $('#assetprice-'+i).val(cost).change();
     } 
