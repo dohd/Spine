@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\purchaseorder;
 
+use App\Models\additional\Additional;
 use App\Models\purchaseorder\Purchaseorder;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -16,11 +17,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $last_order = Purchaseorder::orderBy('tid', 'DESC')->first(['tid']);
+        $additionals = Additional::all();
 
-        $last_order = Purchaseorder::orderBy('id', 'DESC')->first();
-
-        return view('focus.purchaseorders.create')
-            ->with(['last_invoice' => $last_order])
-            ->with(bill_helper(3, 9));
+        return view('focus.purchaseorders.create', compact('last_order', 'additionals'));
     }
 }
