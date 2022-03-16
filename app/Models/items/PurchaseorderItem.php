@@ -2,10 +2,12 @@
 
 namespace App\Models\items;
 
+use App\Models\items\Traits\PurchaseorderItemRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class PurchaseorderItem extends Model
 {
+    use PurchaseorderItemRelationship;
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
