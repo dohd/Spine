@@ -24,7 +24,7 @@ class Purchaseorder extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'bills';
+    protected $table = 'purchase_orders';
 
     /**
      * Mass Assignable fields of model
