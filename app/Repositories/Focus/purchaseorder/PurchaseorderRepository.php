@@ -4,8 +4,7 @@ namespace App\Repositories\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
-use App\Models\bill\Bill;
-use App\Models\billitem\BillItem;
+use App\Models\items\PurchaseorderItem;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
@@ -28,7 +27,7 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->where('is_po', 1);
+        $q = $this->query();
 
         return $q->get();
     }
@@ -42,41 +41,42 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
+
         DB::beginTransaction();
 
-        $bill = $input['bill'];
-        $bill['is_po'] = 1;
+        $order = $input['order'];
         // sanitize
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ];
-        foreach ($bill as $key => $val) {
+        foreach ($order as $key => $val) {
             if (in_array($key, ['date', 'due_date'], 1)) {
-                $bill[$key] = date_for_database($val);
+                $order[$key] = date_for_database($val);
             }
             if (in_array($key, $rate_keys, 1)) {
-                $bill[$key] = numberClean($val);
+                $order[$key] = numberClean($val);
             }
         }
-        $result = Bill::create($bill);
+        $result = Purchaseorder::create($order);
 
-        $bill_items = $input['bill_items'];
-        foreach ($bill_items as $i => $item) {
+        $order_items = $input['order_items'];
+        foreach ($order_items as $i => $item) {
             // inject new keys
-            $bill_items[$i] = $item + [
-                'ins' => $bill['ins'],
-                'user_id' => $bill['user_id'],
-                'bill_id' => $result->id
+            $order_items[$i] = $item + [
+                'ins' => $order['ins'],
+                'user_id' => $order['user_id'],
+                'purchaseorder_id' => $result->id
             ];
             // sanitize
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
-                    $bill_items[$i][$key] = numberClean($val);
+                    $order_items[$i][$key] = numberClean($val);
                 }
             }
         }
-        BillItem::insert($bill_items);
+        PurchaseorderItem::insert($order_items);
 
         DB::commit();
         if ($result) return true;
@@ -92,9 +92,51 @@ class PurchaseorderRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Purchaseorder $purchaseorder, array $input)
+    public function update($purchaseorder, array $input)
     {
-       
+        dd($input);
+        DB::beginTransaction();
+
+        $order = $input['order'];
+        // sanitize
+        $rate_keys = [
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ];
+        foreach ($order as $key => $val) {
+            if (in_array($key, ['date', 'due_date'], 1)) {
+                $order[$key] = date_for_database($val);
+            }
+            if (in_array($key, $rate_keys, 1)) {
+                $order[$key] = numberClean($val);
+            }
+        }
+        
+        $purchaseorder->update($order);
+
+        // update or create new items
+        $order_items = $input['order_items'];
+        foreach ($order_items as $item) {
+            $item = $item + [
+                'ins' => $order['ins'],
+                'user_id' => $order['user_id'],
+                'purchaseorder_id' => $purchaseorder->id
+            ];
+
+            $order_item = PurchaseorderItem::firstOrNew(['id' => $item['id']]);
+            foreach($item as $key => $value) {
+                if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
+                    $order_items[$key] = numberClean($value);
+                } else $order_item[$key] = $value;
+            }
+            
+            unset($order_item['id']);
+            $order_item->save();                
+        }
+
+        DB::commit();
+        if ($purchaseorder) return true;
+
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
