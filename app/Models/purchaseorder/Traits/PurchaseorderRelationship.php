@@ -26,7 +26,7 @@ trait PurchaseorderRelationship
 
     public function products()
     {
-        return $this->hasMany('App\Models\items\PurchaseItem', 'bill_id')->withoutGlobalScopes();
+        return $this->hasMany('App\Models\items\PurchaseorderItem')->withoutGlobalScopes();
     }
 
     public function user()
