@@ -12,16 +12,16 @@
             
             <div class="form-group row">
                 <div class="col-sm-8">
-                    <label for="payer" class="caption">Supplire Name*</label>
-                    <div class="input-group ">
+                    <label for="payer" class="caption">Supplier Name*</label>
+                    <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>                                            
-                        {{ Form::text('suppliername', null, ['class' => 'form-control round', 'placeholder' => 'Supplier Name', 'id' => 'supplier', 'required', 'readonly']) }}
+                        {{ Form::text('suppliername', null, ['class' => 'form-control round', 'placeholder' => 'Supplier Name', 'id' => 'supplier', 'disabled']) }}
                     </div>
                 </div>
                 <div class="col-sm-4"><label for="taxid" class="caption">Tax ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id' => 'taxid', 'required', 'readonly']) }}
+                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id' => 'taxid', 'disabled']) }}
                     </div>
                 </div>
             </div>
@@ -59,7 +59,7 @@
                                 @foreach (['paidttl', 'grandtax', 'grandttl'] as $val)
                                     <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
                                 @endforeach 
-                                {{ Form::submit('Post Transaction', ['class' => 'btn btn-success sub-btn btn-lg']) }}
+                                {{ Form::submit('Generate Order', ['class' => 'btn btn-success sub-btn btn-lg']) }}
                             </td>
                         </tr>
                     </tbody>
@@ -76,10 +76,10 @@
                     <label for="tid" class="caption">Transaction ID*</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        {{ Form::number('transxn_ref', @$last_id->tid+1, ['class' => 'form-control round']) }}
+                        {{ Form::number('tid', @$last_order->tid+1, ['class' => 'form-control round', 'readonly']) }}
                     </div>
                 </div>
-                <div class="col-sm-4"><label for="transaction_date" class="caption">Purchase Date*</label>
+                <div class="col-sm-4"><label for="transaction_date" class="caption">Order Date*</label>
                     <div class="input-group">                                            
                         {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
                     </div>
@@ -96,7 +96,7 @@
                     <div class="input-group">                                            
                         <select class="form-control" name="doc_ref_type" id="ref_type" required>
                             <option value="">-- Select Type --</option>
-                            @foreach (['Invoice', 'Receipt', 'DNote', 'Voucher'] as $val)
+                            @foreach (['Voucher'] as $val)
                                 <option value="{{ $val }}">{{ $val }}</option>
                             @endforeach                                                        
                         </select>
