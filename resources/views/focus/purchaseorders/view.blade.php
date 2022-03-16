@@ -57,15 +57,11 @@
                         <tbody>                            
                             <tr>
                                 <th>Supplier</th>
-                                <td>{{ $po->suppliername }}</td>
-                            </tr>
-                            <tr>
-                                <th>Tax ID</th>
-                                <td>{{ $po->supplier_taxid }}</td>
+                                <td>{{ $po->supplier->name }}</td>
                             </tr>
                             <tr>
                                 <th>Transaction ID</th>
-                                <td>{{ $po->transxn_ref }}</td>
+                                <td>{{ $po->tid }}</td>
                             </tr>
                             <tr>
                                 <th>Order Date</th>
@@ -96,9 +92,9 @@
                         <tr>
                             <th>Product Description</th>
                             <th>Quantity</th>
+                            <th>UoM</th>
                             <th>Price</th>
-                            <th>Tax Rate</th>
-                            <th>Tax</th>
+                            <th>Tax Rate</th>                            
                             <th>Amount</th>
                         </tr>
                         <tbody>
@@ -107,9 +103,9 @@
                                     <tr>
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
-                                        <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ (int) $item->tax_rate }}%</td>
-                                        <td>{{ number_format($item->tax, 2) }}</td>
+                                        <td>{{ $item->uom }}</td>
+                                        <td>{{ number_format($item->rate, 2) }}</td>                                        
+                                        <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
@@ -124,7 +120,6 @@
                             <th>Product Description</th>
                             <th>Quantity</th>
                             <th>Price</th>
-                            <th>Tax Rate</th>
                             <th>Tax</th>
                             <th>Amount</th>
                         </tr>
@@ -135,8 +130,7 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ (int) $item->tax_rate }}%</td>
-                                        <td>{{ number_format($item->tax, 2) }}</td>
+                                        <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
@@ -151,7 +145,6 @@
                             <th>Product Description</th>
                             <th>Quantity</th>
                             <th>Price</th>
-                            <th>Tax Rate</th>
                             <th>Tax</th>
                             <th>Amount</th>
                         </tr>
@@ -162,8 +155,7 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ (int) $item->tax_rate }}%</td>
-                                        <td>{{ number_format($item->tax, 2) }}</td>
+                                        <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
