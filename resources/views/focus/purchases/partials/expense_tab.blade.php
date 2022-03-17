@@ -40,9 +40,9 @@
             <!-- end layout -->
 
             <!-- fetched rows -->
-            @isset ($po)
+            @isset ($purchase)
                 @php ($i = 0)
-                @foreach ($po->products as $item)
+                @foreach ($purchase->products as $item)
                     @if ($item->type == 'Expense')
                         <tr>
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ $item->account->holder }}" placeholder="Enter Ledger"></td>

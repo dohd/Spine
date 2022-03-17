@@ -45,9 +45,9 @@
             <!-- end layout -->
 
             <!-- fetched rows -->
-            @isset ($po)
+            @isset ($purchase)
                 @php ($i = 0)
-                @foreach ($po->products as $item)
+                @foreach ($purchase->products as $item)
                     @if ($item->type == 'Stock')
                         <tr>
                             <td><input type="text" class="form-control stockname" name="name[]" value="{{ $item->product->name }}" placeholder="Product Name" id='stockname-{{$i}}'></td>

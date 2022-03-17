@@ -36,9 +36,9 @@
             <!-- end layout -->
             
             <!-- fetched rows -->
-            @isset ($po)
+            @isset ($purchase)
                 @php ($i = 0)
-                @foreach ($po->products as $item)
+                @foreach ($purchase->products as $item)
                     @if ($item->type == 'Asset')
                         <tr>
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
