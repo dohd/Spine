@@ -26,6 +26,9 @@
             <a href="{{ $link }}" class="btn btn-purple" target="_blank">
                 <i class="fa fa-print" aria-hidden="true"></i> Print
             </a>
+            <a href="{{ route('biller.purchaseorders.edit', [$po, 'grn']) }}" class="btn btn-primary">
+                <i class="fa fa-cubes"></i> Receive Goods
+            </a>
         </h5>
         <div class="card-body">            
             <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
