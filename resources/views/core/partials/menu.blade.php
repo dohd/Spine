@@ -573,10 +573,7 @@
                             @permission('purchaseorder-data')
                             <li><a class="dropdown-item" href="{{ route('biller.purchaseorders.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Order
                                 </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-cubes"></i> Receive Goods
-                                </a>
-                            </li>
+                            </li>                            
                             @endauth
                         </ul>
                     </li>
