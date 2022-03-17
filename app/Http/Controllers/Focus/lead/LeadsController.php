@@ -151,7 +151,8 @@ class LeadsController extends Controller
         $resp = $this->repository->delete($lead);
 
         $params = array('flash_success' => 'Ticket Successfully Deleted');
-        if (!$resp) $params = array('flash_error' => 'Tkt-'.sprintf('%04d', $lead->reference).' is attached to a Quote / Proforma Invoice.');
+        if (!$resp) 
+            $params = ['flash_error' => 'Tkt-'.sprintf('%04d', $lead->reference).' is attached to a Quote / PI or Djc.'];
         
         return new RedirectResponse(route('biller.leads.index'), $params);
     }

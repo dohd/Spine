@@ -4,14 +4,19 @@ namespace App\Models\lead\Traits;
 
 use App\Models\branch\Branch;
 use App\Models\customer\Customer;
+use App\Models\djc\Djc;
 use App\Models\quote\Quote;
-use DB;
 
 /**
  * Class ProductcategoryRelationship
  */
 trait LeadRelationship
 {
+     public function djcs()
+     {
+          return $this->hasMany(Djc::class);
+     }
+
      public function quotes() 
      {
           return $this->hasMany(Quote::class);
