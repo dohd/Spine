@@ -23,7 +23,7 @@
             
             <div class="form-group row">
                 <div class="col-sm-8">
-                    <label for="payer" class="caption">Supplire Name*</label>
+                    <label for="payer" class="caption">Supplier Name*</label>
                     <div class="input-group ">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>                                            
                         {{ Form::text('suppliername', null, ['class' => 'form-control round', 'placeholder' => 'Supplier Name', 'id' => 'supplier', 'required']) }}
@@ -92,7 +92,7 @@
                 </div>
                 <div class="col-sm-4"><label for="transaction_date" class="caption">Purchase Date*</label>
                     <div class="input-group">                                            
-                        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'transaction_date', 'data-date-auto-close']) }}
+                        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
                     </div>
                 </div>
                 <div class="col-sm-4"><label for="due_date" class="caption">Due Date*</label>
