@@ -176,20 +176,20 @@
 		<tr>
 			<td width="50%">
 				<span class="customer-dt-title">SUPPLIER DETAILS:</span><br><br>
+				<b>Dated :</b> {{ dateFormat($resource->date, 'd-M-Y') }}<br><br>
 				<b>Name :</b> {{ $resource->supplier->name }}<br>
 				<b>Address :</b> P.O Box {{ $resource->supplier->postbox }}<br>
 				<b>Email :</b> {{ $resource->supplier->email }}<br>
-				<b>Cell :</b> {{ $resource->supplier->phone }}<br><br>
-                <b>Dated :</b> {{ dateFormat($resource->date, 'd-M-Y') }}
+				<b>Cell :</b> {{ $resource->supplier->phone }}
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
-				<span class="customer-dt-title">SHIPPING DETAILS:</span><br><br>				
+				<span class="customer-dt-title">SHIPPING DETAILS:</span><br><br>
+				<b>PO Number :</b> 0001<br><br>				
 				<b>Branch :</b> Head Office<br>		
 				<b>Client :</b> Lean Ventures Ltd<br>		
 				<b>Address :</b> P.O Box 36082-00200, Nairobi <br>
-				<b>Email :</b> info@leanventures.co.ke <br><br>
-                <b>PO Number :</b> 0001
+				<b>Email :</b> info@leanventures.co.ke
 			</td>
 		</tr>
 	</table><br>
@@ -206,22 +206,14 @@
 			</tr>
 		</thead>
 		<tbody>
-            @php
-                $tax_rate = 0;
-            @endphp
 			@foreach($resource->products as $i => $item)
                 <tr>
                     <td>{{ $i+1 }}</td>
                     <td>{{ $item->description }}</td>
                     <td class="align-c">{{ (int) $item->qty }}</td>
-					<td class="align-c">
-						{{ in_array($item->type, ['Stock', 'Asset'], 1) ? 'Pc' : '' }}
-					</td>
+					<td class="align-c">{{ $item->uom }}</td>
                     <td class="align-r">{{ number_format($item->rate, 2) }}</td>
                     <td class="align-r">{{ number_format($item->amount, 2) }}</td>
-                    @php
-                        $tax_rate = (int) $item->tax_rate;
-                    @endphp
                 </tr>
 			@endforeach
 			<!-- 20 dynamic empty rows -->
@@ -239,7 +231,7 @@
                 <td class="bd align-r">{{ number_format($resource->paidttl, 2) }}</td>
 			</tr>
 			<tr>
-                <td class="align-r">Tax {{ $tax_rate ? $tax_rate . '%' : 'Off' }}</td>
+                <td class="align-r">Tax {{ $resource->tax ? $resource->tax . '%' : 'Off' }}</td>
                 <td class="align-r">{{ number_format($resource->grandtax, 2) }}</td>
 			</tr>
 			<tr>
