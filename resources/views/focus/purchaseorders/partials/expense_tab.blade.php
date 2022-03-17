@@ -48,13 +48,13 @@
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ $item->account->holder }}" placeholder="Enter Ledger"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ (int) $item->qty }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
-                            <td><input type="text" class="form-control exp_vat " name="taxrate[]" value="0" id="expvat-{{$i}}" value="0"></td>
-                            <td class="text-center"><span class="exp_tax" id="exptax-{{$i}}">0</span></td>
-                            <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-{{$i}}">0</span></b></td>
+                            <td><input type="text" class="form-control exp_vat " name="itemtax[]" value="{{ (int) $item->itemtax }}" id="expvat-{{$i}}" value="0"></td>
+                            <td class="text-center"><span class="exp_tax" id="exptax-{{$i}}">{{ (float) $item->taxrate }}</span></td>
+                            <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-{{$i}}">{{ (float) $item->amount }}</span></b></td>
                             <td><button type="button" class="btn btn-danger remove">remove</button></td>
                             <input type="hidden" id="expitemid-{{$i}}" name="item_id[]"value="{{ $item->item_id }}" >
-                            <input type="hidden" class="exptaxr" name="itemtax[]">
-                            <input type="hidden" class="expamountr" name="amount[]">
+                            <input type="hidden" class="exptaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
+                            <input type="hidden" class="expamountr" name="amount[]" value="{{ (float) $item->amount }}">
                             <input type="hidden" name="type[]" value="Expense">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                             <input type="hidden" name="uom[]">

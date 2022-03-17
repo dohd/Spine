@@ -44,13 +44,13 @@
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ (int) $item->qty }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>
-                            <td><input type="text" class="form-control asset_vat" name="taxrate[]" value="0" id="assetvat-{{$i}}"></td>
-                            <td class="text-center"><span class="asset_tax">0</span></td>
-                            <td>{{config('currency.symbol')}} <b><span class='asset_amount'>0</span></b></td>
+                            <td><input type="text" class="form-control asset_vat" name="itemtax[]" value="{{ (int) $item->itemtax }}" id="assetvat-{{$i}}"></td>
+                            <td class="text-center"><span class="asset_tax">{{ (float) $item->taxrate }}</span></td>
+                            <td>{{config('currency.symbol')}} <b><span class='asset_amount'>{{ (float) $item->amount }}</span></b></td>
                             <td><button type="button" class="btn btn-danger remove">remove</button></td>
                             <input type="hidden" id="assetitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
-                            <input type="hidden" class="assettaxr" name="itemtax[]">
-                            <input type="hidden" class="assetamountr" name="amount[]">
+                            <input type="hidden" class="assettaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
+                            <input type="hidden" class="assetamountr" name="amount[]" value="{{ (float) $item->amount }}">
                             <input type="hidden" class="assetitemprojectid" name="itemproject_id[]" value="0">
                             <input type="hidden" name="type[]" value="Asset">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">

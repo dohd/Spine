@@ -57,7 +57,7 @@
                             <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    
                             <td><input type="text" class="form-control price" name="rate[]" value="{{ (float) $item->rate }}" id="price-{{$i}}"></td>
                             <td>
-                                <select class="form-control rowtax" name="tax_rate[]" id="rowtax-{{$i}}">
+                                <select class="form-control rowtax" name="itemtax[]" id="rowtax-{{$i}}">
                                     @foreach ($additionals as $tax)
                                         <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->itemtax ? 'selected' : ''}}>
                                             {{ $tax->name }}
@@ -65,16 +65,17 @@
                                     @endforeach                                                    
                                 </select>
                             </td>
-                            <td><input type="text" class="form-control taxable" value="0" readonly></td>
-                            <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-{{$i}}">0</span></b></td>              
+                            <td><input type="text" class="form-control taxable" value="{{ (float) $item->taxrate }}" readonly></td>
+                            <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-{{$i}}">{{ (float) $item->amount }}</span></b></td>              
                             <td><button type="button" class="btn btn-danger remove">Remove</button></td>
                             <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
-                            <input type="hidden" class="stocktaxr" name="tax[]">
-                            <input type="hidden" class="stockamountr" name="amount[]">
+                            <input type="hidden" class="stocktaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
+                            <input type="hidden" class="stockamountr" name="amount[]" value="{{ (float) $item->amount }}">
                             <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
                             <input type="hidden" name="type[]" value="Stock">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
+                        {{browserlog($item)}}
                         <tr>
                             <td colspan=2>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
