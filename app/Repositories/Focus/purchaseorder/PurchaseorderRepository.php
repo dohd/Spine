@@ -155,4 +155,14 @@ class PurchaseorderRepository extends BaseRepository
         
         throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
     }
+
+    
+    /**
+     * For storing grn 
+     */
+    public function create_grn($purchaseorder, array $input)
+    {
+        dd($input);
+        // 
+    }
 }
