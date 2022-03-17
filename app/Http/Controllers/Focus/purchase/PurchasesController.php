@@ -28,9 +28,10 @@ use App\Http\Responses\Focus\purchase\EditResponse;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
 
-use App\Models\hrm\Hrm;
 
 use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
+use App\Http\Responses\RedirectResponse;
+use Redirect;
 
 /**
  * PurchaseordersController
@@ -39,13 +40,13 @@ class PurchasesController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var PurchaseorderRepository
+     * @var PurchaseRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param PurchaseorderRepository $repository ;
+     * @param PurchaseRepository $repository ;
      */
     public function __construct(PurchaseRepository $repository)
     {
@@ -83,24 +84,24 @@ class PurchasesController extends Controller
     public function store(StorePurchaseRequest $request)
     {
         // extract input details
-        $bill = $request->only([
+        $purchase = $request->only([
             'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
-            'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'tax', 'tid', 'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $bill_items = $request->only([
-            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'tax_rate', 'tax', 'amount', 'type'
+        $purchase_items = $request->only([
+            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
         ]);
 
-        $bill['ins'] = auth()->user()->ins;
-        $bill['user_id'] = auth()->user()->id;
+        $purchase['ins'] = auth()->user()->ins;
+        $purchase['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
-        $bill_items = modify_array($bill_items);
-        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
+        $purchase_items = modify_array($purchase_items);
+        $purchase_items = array_filter($purchase_items, function ($val) { return $val['item_id']; });
 
-        $result = $this->repository->create(compact('bill', 'bill_items'));
+        $result = $this->repository->create(compact('purchase', 'purchase_items'));
 
-        return response()->json(['status' => 'Success', 'message' => 'Posted direct purchase successfully']);
+        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase posted successfully']);
     }
 
     /**
@@ -124,7 +125,25 @@ class PurchasesController extends Controller
      */
     public function update(StorePurchaseRequest $request, Purchase $purchase)
     {
-        // 
+        // extract input details
+        $bill = $request->only([
+            'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
+            'tax', 'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ]);
+        $bill_items = $request->only([
+            'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
+        ]);
+
+        $bill['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
+        $bill_items = modify_array($bill_items);
+        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
+
+        $result = $this->repository->update($purchase, compact('bill', 'bill_items'));
+
+        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase updated successfully']);
     }
 
     /**
@@ -138,7 +157,7 @@ class PurchasesController extends Controller
     {
         $this->repository->delete($purchase);
         
-        return json_encode(array('status' => 'Success', 'message' => 'Purchase record deleted successfully'));
+        return response()->json(['status' => 'Success', 'message' => 'Purchase record deleted successfully']);
     }
 
     /**
