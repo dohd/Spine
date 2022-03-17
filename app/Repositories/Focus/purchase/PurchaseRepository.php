@@ -6,6 +6,7 @@ use App\Models\purchase\Purchase;
 use App\Exceptions\GeneralException;
 use App\Models\bill\Bill;
 use App\Models\billitem\BillItem;
+use App\Models\items\PurchaseItem;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->where('is_po', 1);
+        $q = $this->query()->where('is_po', 0);
 
         return $q->get();
     }
@@ -44,38 +45,37 @@ class PurchaseRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        $bill = $input['bill'];
+        $purchase = $input['purchase'];
         // sanitize
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ];
-        foreach ($bill as $key => $val) {
+        foreach ($purchase as $key => $val) {
             if (in_array($key, ['date', 'due_date'], 1)) {
-                $bill[$key] = date_for_database($val);
+                $purchase[$key] = date_for_database($val);
             }
             if (in_array($key, $rate_keys, 1)) {
-                $bill[$key] = numberClean($val);
+                $purchase[$key] = numberClean($val);
             }
         }
-        $result = Bill::create($bill);
+        $result = Purchase::create($purchase);
 
-        $bill_items = $input['bill_items'];
-        foreach ($bill_items as $i => $item) {
-            // inject new keys
-            $bill_items[$i] = $item + [
-                'ins' => $bill['ins'],
-                'user_id' => $bill['user_id'],
+        $purchase_items = $input['purchase_items'];
+        // sanitize
+        foreach ($purchase_items as $i => $item) {
+            $purchase_items[$i] = $item + [
+                'ins' => $result->ins,
+                'user_id' => $result->user_id,
                 'bill_id' => $result->id
             ];
-            // sanitize
             foreach ($item as $key => $val) {
-                if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
-                    $bill_items[$i][$key] = numberClean($val);
+                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
+                    $purchase_items[$i][$key] = numberClean($val);
                 }
             }
         }
-        BillItem::insert($bill_items);
+        PurchaseItem::insert($purchase_items);
 
         DB::commit();
         if ($result) return true;        
@@ -93,6 +93,55 @@ class PurchaseRepository extends BaseRepository
      */
     public function update(Purchase $purchase, array $input)
     {
+        dd($input);
+        DB::beginTransaction();
+
+        $bill = $input['bill'];
+        // sanitize
+        $rate_keys = [
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ];
+        foreach ($bill as $key => $val) {
+            if (in_array($key, ['date', 'due_date'], 1)) {
+                $bill[$key] = date_for_database($val);
+            }
+            if (in_array($key, $rate_keys, 1)) {
+                $bill[$key] = numberClean($val);
+            }
+        }
+        $purchase->update($bill);
+
+        $bill_items = $input['order_items'];
+        // delete items excluded
+        $item_ids = array_reduce($bill_items, function ($init, $item) {
+            array_push($init, $item['id']);
+            return $init;
+        }, []);
+        $purchase->products()->whereNotIn('id', $item_ids)->delete();
+
+        // update or create new items
+        foreach ($bill_items as $item) {
+            $item = $item + [
+                'ins' =>  $purchase->ins,
+                'user_id' =>  $purchase->user_id,
+                'bill_id' => $purchase->id
+            ];
+
+            $bill_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
+            foreach($item as $key => $val) {
+                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
+                    $bill_item[$key] = numberClean($val);
+                } 
+                else $bill_item[$key] = $val;
+            }
+            if (!$bill_item->id) unset($bill_item['id']);
+            $bill_item->save();                
+        }
+
+        DB::commit();
+        if ($purchase) return true;
+
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
