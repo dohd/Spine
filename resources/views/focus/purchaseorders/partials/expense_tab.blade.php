@@ -3,11 +3,14 @@
         <thead>
             <tr class="item_header bg-gradient-directional-danger white">
                 <th width="30%" class="text-center">Ledger Name</th>
-                <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
+                <th width="7%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="10%" class="text-center">{{trans('general.rate')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
                 <th width="8%" class="text-center">Tax</th>
-                <th width="10%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
+                <th width="10%" class="text-center">{{trans('general.amount')}}</th>
+                @if ($is_grn)
+                    <th width="10%" class="text-center">DNote</th>
+                @endif
                 <th width="5%" class="text-center">{{trans('general.action')}}</th>
             </tr>
         </thead>
@@ -20,7 +23,7 @@
                 <td><input type="text" class="form-control exp_vat " name="itemtax[]" id="expvat-0" value="0"></td>
                 <td class="text-center"><span class="exp_tax" id="exptax-0">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-0">0</span></b></td>
-                <td><button type="button" class="btn btn-danger remove d-none">remove</button></td>
+                <td><button type="button" class="btn btn-danger remove d-none"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
                 <input type="hidden" id="expitemid-0" name="item_id[]">
                 <input type="hidden" class="exptaxr" name="taxrate[]">
                 <input type="hidden" class="expamountr" name="amount[]">
@@ -51,7 +54,10 @@
                             <td><input type="text" class="form-control exp_vat " name="itemtax[]" value="{{ (int) $item->itemtax }}" id="expvat-{{$i}}" value="0"></td>
                             <td class="text-center"><span class="exp_tax" id="exptax-{{$i}}">{{ (float) $item->taxrate }}</span></td>
                             <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-{{$i}}">{{ (float) $item->amount }}</span></b></td>
-                            <td><button type="button" class="btn btn-danger remove">remove</button></td>
+                            @if ($is_grn)
+                                <td><input type="text" class="form-control" name="dnote[]"></td>
+                            @endif
+                            <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
                             <input type="hidden" id="expitemid-{{$i}}" name="item_id[]"value="{{ $item->item_id }}" >
                             <input type="hidden" class="exptaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="expamountr" name="amount[]" value="{{ (float) $item->amount }}">
@@ -63,7 +69,7 @@
                             <td colspan="3">
                                 <textarea id="expdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Enter Description">{{ $item->description }}</textarea>
                             </td>
-                            <td colspan="4">
+                            <td colspan="{{ $is_grn ? 5 : 4 }}">
                                 <input type="text" class="form-control projectexp" value="{{ $item->project ? $item->project->name : '' }}" id="projectexptext-{{$i}}" placeholder="Enter Project">
                                 <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectexpval-{{$i}}">
                             </td>
@@ -76,7 +82,7 @@
 
             <tr class="bg-white">
                 <td>
-                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addexp">
+                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addexp" {{ $is_grn ? 'disabled' : '' }}>
                         <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
                     </button>
                 </td>

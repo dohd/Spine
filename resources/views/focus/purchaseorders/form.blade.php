@@ -59,7 +59,7 @@
                                 @foreach (['paidttl', 'grandtax', 'grandttl'] as $val)
                                     <input type="hidden" name="{{ $val }}" id="{{ $val }}" value="0"> 
                                 @endforeach 
-                                {{ Form::submit('Generate Order', ['class' => 'btn btn-success sub-btn btn-lg']) }}
+                                {{ Form::submit($is_grn ? 'Receive Goods' : 'Update Order', ['class' => 'btn btn-success sub-btn btn-lg']) }}
                             </td>
                         </tr>
                     </tbody>

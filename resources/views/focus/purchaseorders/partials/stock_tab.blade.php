@@ -3,12 +3,15 @@
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
                 <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
-                <th width="10%" class="text-center">{{trans('general.quantity')}}</th>
-                <th width="10%" class="text-center">UoM</th>
-                <th width="15%" class="text-center">{{trans('general.rate')}}</th>
+                <th width="7%" class="text-center">{{trans('general.quantity')}}</th>
+                <th width="7%" class="text-center">UoM</th>
+                <th width="10%" class="text-center">{{trans('general.rate')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
                 <th width="10%" class="text-center">Tax</th>
-                <th width="15%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
+                <th width="12%" class="text-center">{{trans('general.amount')}}</th>
+                @if ($is_grn)
+                    <th width="10%" class="text-center">DNote</th>
+                @endif
                 <th width="5%" class="text-center">Action</th>                   
             </tr>
         </thead>
@@ -29,8 +32,8 @@
                     </select>
                 </td>
                 <td><input type="text" class="form-control taxable" value="0"></td>
-                <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td>              
-                <td><button type="button" class="btn btn-danger d-none remove">Remove</button></td>
+                <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td> 
+                <td><button type="button" class="btn btn-danger d-none remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
                 <input type="hidden" id="stockitemid-0" name="item_id[]">
                 <input type="hidden" class="stocktaxr" name="taxrate[]">
                 <input type="hidden" class="stockamountr" name="amount[]">
@@ -67,7 +70,10 @@
                             </td>
                             <td><input type="text" class="form-control taxable" value="{{ (float) $item->taxrate }}" readonly></td>
                             <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-{{$i}}">{{ (float) $item->amount }}</span></b></td>              
-                            <td><button type="button" class="btn btn-danger remove">Remove</button></td>
+                            @if ($is_grn)
+                                <td><input type="text" class="form-control" name="dnote[]"></td>
+                            @endif
+                            <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
                             <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="stocktaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="stockamountr" name="amount[]" value="{{ (float) $item->amount }}">
@@ -79,7 +85,7 @@
                             <td colspan=2>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
                             </td>
-                            <td colspan=6></td>
+                            <td colspan="{{ $is_grn ? 7 : 6}}"></td>
                         </tr>
                         @php ($i++)
                     @endif
@@ -89,7 +95,7 @@
 
             <tr class="bg-white">
                 <td>
-                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addstock">
+                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addstock" {{ $is_grn ? 'disabled' : '' }}>
                         <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
                     </button>
                 </td>
