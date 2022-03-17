@@ -75,7 +75,6 @@
                             <input type="hidden" name="type[]" value="Stock">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
-                        {{browserlog($item)}}
                         <tr>
                             <td colspan=2>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
