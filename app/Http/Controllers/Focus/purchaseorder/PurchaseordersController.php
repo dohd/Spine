@@ -169,4 +169,31 @@ class PurchaseordersController extends Controller
         
         return new ViewResponse('focus.purchaseorders.view', compact('po'));
     }
+
+    /**
+     * Receive purchase order goods
+     */
+    public function store_grn(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
+    {
+        // extract input fields
+        $order = $request->only([
+            'supplier_id', 'tid', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 'project_id', 'note', 'tax',
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ]);
+        $order_items = $request->only([
+            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type',
+            'dnote'
+        ]);
+
+        $order['ins'] = auth()->user()->ins;
+        $order['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
+        $order_items = modify_array($order_items);
+        $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
+
+        $result = $this->repository->create_grn($purchaseorder, compact('order', 'order_items'));
+
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order Goods successfully received']);
+    }
 }
