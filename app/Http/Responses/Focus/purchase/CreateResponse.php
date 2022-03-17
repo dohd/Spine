@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\purchase;
 
+use App\Models\additional\Additional;
 use App\Models\purchase\Purchase;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -16,8 +17,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_id = Purchase::orderBy('id', 'desc')->first();
+        $last_tid = Purchase::where('is_po', 0)->orderBy('tid', 'desc')->first(['tid']);
+        $additionals = Additional::all();
 
-        return view('focus.purchases.create', compact('last_id'))->with(bill_helper(3, 9));
+        return view('focus.purchases.create', compact('last_tid', 'additionals'));
     }
 }
