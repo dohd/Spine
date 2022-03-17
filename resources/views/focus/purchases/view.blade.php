@@ -18,9 +18,6 @@
     </div>
     
     <div class="card">
-        <h5 class="card-header">
-            
-        </h5>
         <div class="card-body">            
             <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
                 <li class="nav-item">
@@ -59,7 +56,7 @@
                             </tr>
                             <tr>
                                 <th>Transaction ID</th>
-                                <td>{{ $purchase->transxn_ref }}</td>
+                                <td>{{ $purchase->tid }}</td>
                             </tr>
                             <tr>
                                 <th>Order Date</th>
@@ -90,9 +87,9 @@
                         <tr>
                             <th>Product Description</th>
                             <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Tax Rate</th>
+                            <th>Rate</th>
                             <th>Tax</th>
+                            <th>Tax Rate</th>
                             <th>Amount</th>
                         </tr>
                         <tbody>
@@ -102,8 +99,8 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ (int) $item->tax_rate }}%</td>
-                                        <td>{{ number_format($item->tax, 2) }}</td>
+                                        <td>{{ (int) $item->itemtax }}%</td>
+                                        <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
@@ -117,9 +114,9 @@
                         <tr>
                             <th>Product Description</th>
                             <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Tax Rate</th>
+                            <th>Rate</th>
                             <th>Tax</th>
+                            <th>Tax Rate</th>                            
                             <th>Amount</th>
                         </tr>
                         <tbody>
@@ -129,8 +126,8 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ (int) $item->tax_rate }}%</td>
-                                        <td>{{ number_format($item->tax, 2) }}</td>
+                                        <td>{{ (int) $item->itemtax }}%</td>
+                                        <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
@@ -144,9 +141,9 @@
                         <tr>
                             <th>Product Description</th>
                             <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Tax Rate</th>
+                            <th>Rate</th>
                             <th>Tax</th>
+                            <th>Tax Rate</th>                            
                             <th>Amount</th>
                         </tr>
                         <tbody>
@@ -156,8 +153,8 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ (int) $item->tax_rate }}%</td>
-                                        <td>{{ number_format($item->tax, 2) }}</td>
+                                        <td>{{ (int) $item->itemtax }}%</td>
+                                        <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
