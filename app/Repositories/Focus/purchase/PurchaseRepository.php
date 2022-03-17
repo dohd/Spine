@@ -93,7 +93,6 @@ class PurchaseRepository extends BaseRepository
      */
     public function update(Purchase $purchase, array $input)
     {
-        dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
@@ -112,7 +111,7 @@ class PurchaseRepository extends BaseRepository
         }
         $purchase->update($bill);
 
-        $bill_items = $input['order_items'];
+        $bill_items = $input['bill_items'];
         // delete items excluded
         $item_ids = array_reduce($bill_items, function ($init, $item) {
             array_push($init, $item['id']);
@@ -135,7 +134,7 @@ class PurchaseRepository extends BaseRepository
                 } 
                 else $bill_item[$key] = $val;
             }
-            if (!$bill_item->id) unset($bill_item['id']);
+            if (!$bill_item->id) unset($bill_item->id);
             $bill_item->save();                
         }
 
