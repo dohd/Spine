@@ -41,8 +41,6 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
-
         DB::beginTransaction();
 
         $order = $input['order'];
@@ -62,14 +60,13 @@ class PurchaseorderRepository extends BaseRepository
         $result = Purchaseorder::create($order);
 
         $order_items = $input['order_items'];
+        // sanitize
         foreach ($order_items as $i => $item) {
-            // inject new keys
             $order_items[$i] = $item + [
                 'ins' => $order['ins'],
                 'user_id' => $order['user_id'],
                 'purchaseorder_id' => $result->id
             ];
-            // sanitize
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
                     $order_items[$i][$key] = numberClean($val);
@@ -94,7 +91,6 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function update($purchaseorder, array $input)
     {
-        dd($input);
         DB::beginTransaction();
 
         $order = $input['order'];
@@ -111,11 +107,17 @@ class PurchaseorderRepository extends BaseRepository
                 $order[$key] = numberClean($val);
             }
         }
-        
         $purchaseorder->update($order);
 
-        // update or create new items
         $order_items = $input['order_items'];
+        // delete items excluded
+        $item_ids = array_reduce($order_items, function ($init, $item) {
+            array_push($init, $item['id']);
+            return $init;
+        }, []);
+        $purchaseorder->products()->whereNotIn('id', $item_ids)->delete();
+
+        // update or create new items
         foreach ($order_items as $item) {
             $item = $item + [
                 'ins' => $order['ins'],
@@ -124,13 +126,13 @@ class PurchaseorderRepository extends BaseRepository
             ];
 
             $order_item = PurchaseorderItem::firstOrNew(['id' => $item['id']]);
-            foreach($item as $key => $value) {
-                if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
-                    $order_items[$key] = numberClean($value);
-                } else $order_item[$key] = $value;
+            foreach($item as $key => $val) {
+                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
+                    $order_item[$key] = numberClean($val);
+                } 
+                else $order_item[$key] = $val;
             }
-            
-            unset($order_item['id']);
+            if (!$order_item->id) unset($order_item['id']);
             $order_item->save();                
         }
 
