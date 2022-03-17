@@ -63,6 +63,7 @@
             $('#supplier').attr('readonly', true);
         }
     });
+    // On clicking supplier_type
     $('#supplierbox').change(function() {
         const name = $('#supplierbox option:selected').text().split(' : ')[0];
         const [id, taxId] = $(this).val().split('-');
