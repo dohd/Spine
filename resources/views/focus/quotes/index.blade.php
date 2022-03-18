@@ -1,4 +1,4 @@
-@extends ('core.layouts.app')
+@extends('core.layouts.app')
 
 @php
     $query_str = request()->getQueryString();
@@ -24,58 +24,53 @@
             </div>
         </div>
         <div class="content-body">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-2">{{ trans('general.search_date')}} </div>
-                                    <div class="col-md-2">
-                                        <input type="text" name="start_date" id="start_date" class="date30 form-control form-control-sm datepicker" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
-                                    </div>
-                                </div>
-                                <hr>
-                                <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
-                                            <th>Customer & Branch</th>   
-                                            <th>Title</th> 
-                                            <th>Created At</th>                                      
-                                            <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                            <th>Client Ref</th>
-                                            <th>Ticket No</th>
-                                            <th>{{ trans('general.status') }}</th>
-                                            <th>Verified</th>                                          
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="8" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2">{{ trans('general.search_date')}} </div>
+                            <div class="col-md-2">
+                                <input type="text" name="start_date" id="start_date" class="date30 form-control form-control-sm datepicker" />
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker" />
+                            </div>
+                            <div class="col-md-2">
+                                <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
                             </div>
                         </div>
+                        <hr>
+                        <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
+                                    <th>Customer & Branch</th>   
+                                    <th>Title</th> 
+                                    <th>Created At</th>                                      
+                                    <th>{{ trans('general.amount') }} (Ksh.)</th>
+                                    <th>Client Ref</th>
+                                    <th>Ticket No</th>
+                                    <th>{{ trans('general.status') }}</th>
+                                    <th>Verified</th>                                          
+                                    <th>{{ trans('labels.general.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
+            </div>             
         </div>
     </div>
 </div>
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     const time = @json(config('master.delay'));
@@ -110,26 +105,22 @@
     $('#end_date').datepicker('setDate', new Date());
 
     $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
     });
 
     function draw_data(start_date = '', end_date = '') {
-        const segment = @json($segment);
-        const input = @json($input);
-        const tableLang = { @lang('datatable.strings') };
+        const tableLan = {@lang('datatable.strings')};
 
         const table = $('#quotes-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLang,
+            language: tableLan,
             ajax: {
                 url: "{{ route('biller.quotes.get') }}",
                 type: 'post',
                 data: {
-                    i_rel_id: segment['id'],
-                    i_rel_type: input['rel_type'],
                     start_date: start_date,
                     end_date: end_date,
                     pi_page: location.href.includes('page=pi') ? 1 : 0
@@ -191,21 +182,21 @@
                         extend: 'csv',
                         footer: true,
                         exportOptions: {
-                            columns: [0, 1]
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
                     },
                     {
                         extend: 'excel',
                         footer: true,
                         exportOptions: {
-                            columns: [0, 1]
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
                     },
                     {
                         extend: 'print',
                         footer: true,
                         exportOptions: {
-                            columns: [0, 1]
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
                     }
                 ]
