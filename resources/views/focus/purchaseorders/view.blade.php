@@ -16,17 +16,17 @@
             </div>
         </div>
     </div>
-    
+    @php
+        $po = $purchaseorder;
+        $valid_token = token_validator('', 'po' . $po->id, true);
+        $link = route('biller.print_purchaseorder', [$po->id, 9, $valid_token, 1]);
+    @endphp
     <div class="card">
         <h5 class="card-header">
-            @php
-                $valid_token = token_validator('', 'po' . $po->id, true);
-                $link = route('biller.print_purchaseorder', [$po->id, 9, $valid_token, 1]);
-            @endphp
             <a href="{{ $link }}" class="btn btn-purple" target="_blank">
                 <i class="fa fa-print" aria-hidden="true"></i> Print
             </a>
-            <a href="{{ route('biller.purchaseorders.edit', [$po, 'grn']) }}" class="btn btn-primary">
+            <a href="{{ route('biller.purchaseorders.create_grn', $po) }}" class="btn btn-primary">
                 <i class="fa fa-cubes"></i> Receive Goods
             </a>
         </h5>
