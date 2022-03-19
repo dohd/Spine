@@ -164,10 +164,16 @@ class PurchaseordersController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function show(Purchaseorder $purchaseorder)
+    {        
+        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder'));
+    }
+
+    /**
+     * 
+     */
+    public function create_grn(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
     {
-        $po = $purchaseorder;
-        
-        return new ViewResponse('focus.purchaseorders.view', compact('po'));
+        return new ViewResponse('focus.purchaseorders.create_grn', compact('purchaseorder'));
     }
 
     /**
@@ -177,20 +183,17 @@ class PurchaseordersController extends Controller
     {
         // extract input fields
         $order = $request->only([
-            'supplier_id', 'tid', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 'project_id', 'note', 'tax',
+            'stock_grn', 'expense_grn', 'asset_grn',
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $order_items = $request->only([
-            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type',
-            'dnote'
-        ]);
+        $order_items = $request->only(['poitem_id', 'grn_qty', 'qty', 'dnote', 'date']);
 
+        $order['purchaseorder_id'] = $purchaseorder->id;
         $order['ins'] = auth()->user()->ins;
         $order['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
         $order_items = modify_array($order_items);
-        $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
 
         $result = $this->repository->create_grn($purchaseorder, compact('order', 'order_items'));
 
