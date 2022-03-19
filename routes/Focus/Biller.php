@@ -252,7 +252,9 @@ Route::group(['namespace' => 'purchase'], function () {
     Route::post('purchases/get', 'PurchasesTableController')->name('purchases.get');
 });
 Route::group(['namespace' => 'purchaseorder'], function () {
-    Route::post('purchaseorders/grn/{id}', 'PurchaseordersController@store_grn')->name('purchaseorders.grn');
+    Route::get('purchaseorders/create_grn/{purchaseorder}', 'PurchaseordersController@create_grn')->name('purchaseorders.create_grn');
+    Route::post('purchaseorders/grn/{purchaseorder}', 'PurchaseordersController@store_grn')->name('purchaseorders.grn');
+    
     Route::resource('purchaseorders', 'PurchaseordersController');
     //For Datatable
     Route::post('purchaseorders/get', 'PurchaseordersTableController')->name('purchaseorders.get');
