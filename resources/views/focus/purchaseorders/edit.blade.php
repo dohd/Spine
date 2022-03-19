@@ -1,11 +1,6 @@
 @extends('core.layouts.app')
 
-@php 
-    $is_grn = request()->getQueryString() == 'grn=';
-    $part_title = $is_grn ? 'GRN' : 'Edit';
-@endphp
-
-@section('title', 'Purchase Order | '. $part_title)
+@section('title', 'Purchase Order | Edit')
 
 @section('content')
 <div class="content-wrapper">
@@ -25,11 +20,7 @@
     <div class="content-body"> 
         <div class="card">
             <div class="card-body">
-                @if ($is_grn)
-                    {{ Form::model($po, ['route' => ['biller.purchaseorders.grn', $po], 'method' => 'POST']) }}
-                @else
-                    {{ Form::model($po, ['route' => ['biller.purchaseorders.update', $po], 'method' => 'PATCH']) }}
-                @endif
+                {{ Form::model($po, ['route' => ['biller.purchaseorders.update', $po], 'method' => 'PATCH']) }}
                     @include('focus.purchaseorders.form')
                 {{ Form::close() }}
             </div>
