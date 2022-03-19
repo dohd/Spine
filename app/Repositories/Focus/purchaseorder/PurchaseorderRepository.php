@@ -4,7 +4,9 @@ namespace App\Repositories\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
+use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
+use App\Models\purchaseorder\Grn;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
@@ -162,7 +164,29 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create_grn($purchaseorder, array $input)
     {
-        dd($input);
-        // 
+        DB::beginTransaction();
+
+        $order = $input['order'];
+        $result = Grn::create($order);
+
+        $order_items = $input['order_items'];
+        foreach ($order_items as $k => $item) {
+            $item = $item + [
+                'grn_id' => $result->id,
+                'ins' => $order['ins'],
+                'user_id' => $order['user_id'],
+            ];
+            $item['date'] = date_for_database($item['date']);
+            if (!$item['qty']) $item['qty'] = 0;
+            if ($item['grn_qty']) {
+                $item['grn_qty'] = $item['grn_qty'] + $item['qty'];
+            } else $item['grn_qty'] = $item['qty'];
+
+            $order_items[$k] = $item;
+        }
+        GrnItem::insert($order_items);
+
+        DB::commit();
+        if ($result) return true;
     }
 }
