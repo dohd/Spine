@@ -4,10 +4,16 @@ namespace App\Models\items\Traits;
 
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
+use App\Models\items\GrnItem;
 use App\Models\project\Project;
 
 trait PurchaseorderItemRelationship
 {
+    public function grn_items()
+    {
+        return $this->hasMany(GrnItem::class, 'poitem_id');
+    }
+
     public function asset()
     {
         return $this->belongsTo(Assetequipment::class, 'item_id');
