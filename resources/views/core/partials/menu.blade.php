@@ -591,6 +591,17 @@
                         </ul>
                     </li>
                     @endauth
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>Bills Management
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Bills
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.create') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Bills Payment
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     @permission('transaction-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i>Transaction Charges
                         </a>
