@@ -251,6 +251,14 @@ Route::group(['namespace' => 'purchase'], function () {
     //For Datatable
     Route::post('purchases/get', 'PurchasesTableController')->name('purchases.get');
 });
+
+Route::group(['namespace' => 'bills'], function () {
+    Route::get('bills/supplier_bills', 'BillsController@supplier_bills')->name('bills.supplier_bills');
+    Route::resource('bills', 'BillsController');
+    //For Datatable
+    Route::post('bills/get', 'BillsTableController')->name('bills.get');
+});
+
 Route::group(['namespace' => 'purchaseorder'], function () {
     Route::get('purchaseorders/create_grn/{purchaseorder}', 'PurchaseordersController@create_grn')->name('purchaseorders.create_grn');
     Route::post('purchaseorders/grn/{purchaseorder}', 'PurchaseordersController@store_grn')->name('purchaseorders.grn');
