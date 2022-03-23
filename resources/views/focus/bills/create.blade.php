@@ -96,7 +96,7 @@
                                 </tr>
                             </thead>
                             <tbody>                                
-                                <tr>
+                                <tr class="bg-white">
                                     <td colspan="4"></td>
                                     <td colspan="2">
                                         <div class="row no-gutters mb-1">
@@ -169,7 +169,7 @@
                 <td class="text-center">${v.note}</td>
                 <td>${v.status}</td>
                 <td class="text-center amount"><b>${amount}</b></td>
-                <td><input type="text" class="form-control paid" name="paid[]" value=""></td>
+                <td><input type="text" class="form-control paid" name="paid[]"></td>
                 <input type="hidden" name="bill_id[]" value="${v.id}">
             </tr>
         `;
