@@ -41,7 +41,6 @@ class BillRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
@@ -55,7 +54,6 @@ class BillRepository extends BaseRepository
         }
         $result = Paidbill::create($bill);
 
-        // bill_items
         $bill_items = $input['bill_items'];
         foreach ($bill_items as $k => $item) {
             $item = $item + ['paidbill_id' => $result->id];
@@ -63,6 +61,14 @@ class BillRepository extends BaseRepository
             $bill_items[$k] = $item;
         }
         PaidbillItem::insert($bill_items);
+
+        // update bill payment status
+        foreach ($result->items as $item) {
+            if (!$item->paid) continue;
+            $payable = $item->bill->grandttl;
+            if ($item->paid < $payable) $item->bill->update(['status' => 'Partial']);
+            if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);
+        }
 
         DB::commit();
         if ($result) return true;
