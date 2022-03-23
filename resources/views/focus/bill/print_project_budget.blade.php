@@ -175,17 +175,17 @@
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
 				@php
-					$clientname = $invoice->lead->client_name;
+					$clientname = $resource->lead->client_name;
 					$branch = 'Head Office';
-					$address = $invoice->lead->client_address;
-					$email = $invoice->lead->client_email;
-					$cell = $invoice->lead->client_contact;
-					if ($invoice->client) {
-						$clientname = $invoice->client->company;						
-						$branch = $invoice->branch->name;
-						$address = $invoice->client->address;
-						$email = $invoice->client->email;
-						$cell = $invoice->client->phone;
+					$address = $resource->lead->client_address;
+					$email = $resource->lead->client_email;
+					$cell = $resource->lead->client_contact;
+					if ($resource->client) {
+						$clientname = $resource->client->company;						
+						$branch = $resource->branch->name;
+						$address = $resource->client->address;
+						$email = $resource->client->email;
+						$cell = $resource->client->phone;
 					}					
 				@endphp
 				<b>Client Name :</b> {{ $clientname }}<br>
@@ -193,34 +193,34 @@
 				<b>Address :</b> {{ $address }}<br>
 				<b>Email :</b> {{ $email }}<br>
 				<b>Cell :</b> {{ $cell }}<br>
-				<b>Attention :</b> {{ $invoice->attention }}<br>
+				<b>Attention :</b> {{ $resource->attention }}<br>
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>
-				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
+				<b>Date :</b> {{ dateFormat($resource->invoicedate, 'd-M-Y') }}<br>
 				@php
-					$tid = sprintf('%04d', $invoice->tid);
+					$tid = sprintf('%04d', $resource->tid);
 					$field_name = 'Quotation No';
 					$field_value = 'QT-' . $tid;
-					if ($invoice->bank_id) {
+					if ($resource->bank_id) {
 						$field_name = 'Proforma No';
 						$field_value = 'PI-' . $tid;
 					}
 				@endphp
 				<b>{{ $field_name }} :</b> {{ $field_value }}<br>				
-				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
+				<b>Valid Till :</b> {{ dateFormat($resource->invoiceduedate, 'd-M-Y') }} <br>
 				<b>Currency :</b> Kenya Shillings <br><br>
-				<b>Client Ref: </b> {{ $invoice->client_ref }}
+				<b>Client Ref: </b> {{ $resource->client_ref }}
 			</td>
 		</tr>
 	</table><br>
 	<table  class="ref" cellpadding="10">
-		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
+		<tr><td colspan="2">Ref : <b>{{ $resource->notes }}</b></td></tr>
 	</table>
 	<br>
 	@php
-		$budget = $invoice->budgets()->first();                
+		$budget = $resource->budgets()->first();                
 	@endphp
 	<table class="items" cellpadding="8">
 		<thead>
@@ -251,7 +251,7 @@
 				@endif				
 			@endforeach
 			<!-- 20 dynamic empty rows -->
-			@for ($i = count($invoice->products); $i < 15; $i++)
+			@for ($i = count($resource->products); $i < 15; $i++)
 				<tr>
 					@for($j = 0; $j < 4; $j++) 
 						<td></td>
