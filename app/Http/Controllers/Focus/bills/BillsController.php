@@ -68,7 +68,7 @@ class BillsController extends Controller
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
-        return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'Bill payment successfully received']);
+        return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'Bills payment successfully received']);
     }
 
     /**
