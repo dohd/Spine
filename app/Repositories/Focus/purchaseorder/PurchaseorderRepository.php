@@ -4,6 +4,7 @@ namespace App\Repositories\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
+use App\Models\bill\Bill;
 use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
 use App\Models\purchaseorder\Grn;
@@ -167,7 +168,7 @@ class PurchaseorderRepository extends BaseRepository
         DB::beginTransaction();
 
         $order = $input['order'];
-        $result = Grn::create($order);
+        $result = Grn::create($order);    
 
         $order_items = $input['order_items'];
         foreach ($order_items as $k => $item) {
@@ -185,6 +186,15 @@ class PurchaseorderRepository extends BaseRepository
             $order_items[$k] = $item;
         }
         GrnItem::insert($order_items);
+
+        // create bill
+        $exclude_keys = ['purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
+        $bill = array_diff_key($order, array_flip($exclude_keys));
+        $bill = $bill + [
+            'supplier_id' => $result->purchaseorder->supplier_id, 
+            'po_id' => $result->purchaseorder->id
+        ];
+        Bill::create($bill);
 
         DB::commit();
         if ($result) return true;
