@@ -452,6 +452,36 @@ class InvoiceRepository extends BaseRepository
         throw new GeneralException('Error Creating Invoice');
     }
 
+    /**
+     * Create Invoice Payment
+     */
+    public function create_invoice_payment(array $input)
+    {
+        DB::beginTransaction();
+
+        $bill = $input['bill'];
+        foreach ($bill as $key => $val) {
+            if (in_array($key, ['date'], 1)) {
+                $bill[$key] = date_for_database($val);
+            }
+            if (in_array($key, ['amount_ttl', 'deposit_ttl'], 1)) {
+                $bill[$key] = numberClean($val);
+            }
+        }
+        $result = PaidInvoice::create($bill);
+
+        $bill_items = $input['bill_items'];
+        foreach ($bill_items as $k => $item) {
+            $item = $item + ['paidinvoice_id' => $result->id];
+            $item['paid'] = numberClean($item['paid']);
+            $bill_items[$k] = $item;
+        }
+        PaidInvoiceItem::insert($bill_items);
+
+        DB::commit();
+        if ($result) return true;
+    }
+
 
     private function update_dual(Model $table, array $values, string $index = null, $index2 = null)
     {
