@@ -187,13 +187,11 @@ class PurchaseorderRepository extends BaseRepository
         }
         GrnItem::insert($order_items);
 
-        // create bill
+        // create bill        
+        $po = $result->purchaseorder;
+        $bill = $order + ['supplier_id' => $po->supplier_id, 'po_id' => $po->id, 'note' => $po->note];
         $exclude_keys = ['purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
-        $bill = array_diff_key($order, array_flip($exclude_keys));
-        $bill = $bill + [
-            'supplier_id' => $result->purchaseorder->supplier_id, 
-            'po_id' => $result->purchaseorder->id
-        ];
+        $bill = array_diff_key($bill, array_flip($exclude_keys));
         Bill::create($bill);
 
         DB::commit();
