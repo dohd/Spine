@@ -306,24 +306,17 @@ class InvoicesController extends Controller
     public function store_payment(Request $request)
     {
         // extract request input
-        $payment_info = $request->only(['date', 'tid', 'account_id', 'customer_id', 'total_depo', 'total']);
-        $depos = $request->only(['invoice_id', 'depo']); 
+        $bill = $request->only(['account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl']);
+        $bill_items = $request->only(['invoice_id', 'paid']); 
 
-        // filter paid invoices
-        $paid_inv = array();
-        for ($i = 0; $i < count($depos['invoice_id']); $i++) {
-            $row = array();
-            foreach (array_keys($depos) as $key) {
-                $row[$key] = $depos[$key][$i];
-            }
-            if ($row['depo']) $paid_inv[] = $row;
-        }
+        $bill['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
 
-        $input = compact('payment_info', 'paid_inv');
-        // 
+        $bill_items = modify_array($bill_items);
 
+        $result = $this->repository->create_invoice_payment(compact('bill', 'bill_items'));
 
-        return redirect()->back()->with(['flash_success' => 'Invoice payments successful']);
+        return redirect()->back()->with(['flash_success' => 'Invoices Payment successfully recieved']);
     }
 
     /**
@@ -333,7 +326,7 @@ class InvoicesController extends Controller
     {
         $id = $request->client_id;
         $invoices = Invoice::where(['customer_id' => $id, 'type' => 'actual'])
-            ->whereNotIn('status', ['paid'])
+            // ->whereNotIn('status', ['paid'])
             ->get(['id', 'tid', 'total', 'notes']);
 
         return response()->json($invoices);
