@@ -2,6 +2,7 @@
 
 namespace App\Models\bill\Traits;
 
+use App\Models\items\PaidbillItem;
 use App\Models\supplier\Supplier;
 
 /**
@@ -9,6 +10,11 @@ use App\Models\supplier\Supplier;
  */
 trait BillRelationship
 {
+    public function paidbill() 
+    {
+        return $this->hasOne(PaidbillItem::class);
+    }
+
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
@@ -28,10 +34,12 @@ trait BillRelationship
     {
         return $this->belongsTo('App\Models\Access\User\User');
     }
+
     public function term()
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
+
     public function transactions()
     {
         return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 0)->withoutGlobalScopes();
