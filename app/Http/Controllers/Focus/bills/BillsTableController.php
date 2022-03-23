@@ -66,6 +66,7 @@ class BillsTableController extends Controller
                     $paid = $bill->paidbill->paid;
                     if ($paid < $bill->grandttl) $status = ['primary', 'Partial'];
                 }
+                
                 return '<span class="badge badge-'.$status[0].'">'.$status[1].'</span>';
             })
             ->addColumn('supplier', function ($bill) {
@@ -73,12 +74,20 @@ class BillsTableController extends Controller
                 return $bill->supllier_name;
             })
             ->addColumn('document', function ($bill) {
+                if ($bill->po_id) 
+                    return $bill->purchaseorder->doc_ref_type . ' - ' . $bill->purchaseorder->doc_ref;
+
                 return $bill->doc_ref_type . ' - ' . $bill->doc_ref; 
             })
             ->addColumn('date', function ($bill) {
+                if ($bill->po_id) 
+                    return dateFormat($bill->purchaseorder->date);
+
                 return dateFormat($bill->date); 
             })
             ->addColumn('due_date', function ($bill) {
+                if ($bill->po_id) return dateFormat($bill->purchaseorder->due_date); 
+
                 return dateFormat('due_date'); 
             })
             ->make(true);
