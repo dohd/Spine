@@ -2,10 +2,12 @@
 
 namespace App\Models\items;
 
+use App\Models\items\Traits\PaidbillItemRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class PaidbillItem extends Model
 {
+    use PaidbillItemRelationship;
     /**
      * The database table used by the model.
      * @var string
