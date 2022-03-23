@@ -4,8 +4,6 @@ namespace App\Repositories\Focus\purchase;
 
 use App\Models\purchase\Purchase;
 use App\Exceptions\GeneralException;
-use App\Models\bill\Bill;
-use App\Models\billitem\BillItem;
 use App\Models\items\PurchaseItem;
 use App\Repositories\BaseRepository;
 
