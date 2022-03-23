@@ -60,14 +60,16 @@ class BillsTableController extends Controller
                 if ($bill->paidbill) return number_format($bill->paidbill->paid, 2);
             })
             ->addColumn('status', function ($bill) {
-                $status = ['secondary', 'Pending'];
-                if ($bill->paidbill) {
-                    $status =  ['success', 'Paid'];
-                    $paid = $bill->paidbill->paid;
-                    if ($paid < $bill->grandttl) $status = ['primary', 'Partial'];
+                $badge = 'secondary';
+                switch ($bill->status) {
+                    case 'Paid': 
+                        $badge = 'success';
+                        break;
+                    case 'Partial':
+                        $badge = 'primary';
+                        break;
                 }
-                
-                return '<span class="badge badge-'.$status[0].'">'.$status[1].'</span>';
+                return '<span class="badge badge-'.$badge.'">'.$bill->status.'</span>';
             })
             ->addColumn('supplier', function ($bill) {
                 if ($bill->supplier_id) return $bill->supplier->name;
