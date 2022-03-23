@@ -3,12 +3,29 @@
 namespace App\Http\Controllers\Focus\bills;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\bill\Bill;
+use App\Repositories\Focus\bill\BillRepository;
 use Illuminate\Http\Request;
 
 class BillsController extends Controller
 {
+    /**
+     * variable to store the repository object
+     * @var BillRepository
+     */
+    protected $repository;
+
+    /**
+     * contructor to initialize repository object
+     * @param BillRepository $repository ;
+     */
+    public function __construct(BillRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -37,7 +54,21 @@ class BillsController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // extract input fields
+        $bill = $request->only([
+            'supplier_id', 'tid', 'date', 'due_date', 'payment_mode', 'deposit', 'doc_ref_type',
+            'doc_ref', 'amount_ttl', 'deposit_ttl'
+        ]);
+        $bill_items = $request->only(['bill_id', 'paid']);
+
+        $bill['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
+
+        $bill_items = modify_array($bill_items);
+
+        $result = $this->repository->create(compact('bill', 'bill_items'));
+
+        return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'Bill payment successfully received']);
     }
 
     /**
@@ -95,15 +126,5 @@ class BillsController extends Controller
             ->get(['id', 'tid', 'supplier_id', 'note', 'status', 'grandttl']);
 
         return response()->json($bills);
-    }
-
-    /**
-     * dataTable method
-     */
-    static function getForDataTable()
-    {
-        $q = Bill::query();
-
-        return $q->get();
     }
 }
