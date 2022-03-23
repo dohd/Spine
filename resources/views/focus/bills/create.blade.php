@@ -5,8 +5,15 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12">
+        <div class="content-header-left col-md-6 col-12 mb-2">
             <h4 class="content-header-title">Bills Payment</h4>
+        </div>
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right mr-3">
+                <div class="media-body media-right text-right">
+                    @include('focus.bills.partials.bills-header-buttons')
+                </div>
+            </div>
         </div>
     </div>
 
@@ -144,6 +151,12 @@
                 return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))}; 
             },
         }
+    });
+
+    // On adding paid values
+    $('#billsTbl').on('change', '.paid', function() {
+        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '');
+        if (paid > amount) $(this).val((amount*1).toLocaleString());
     });
 
     // bill row
