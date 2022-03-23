@@ -201,8 +201,9 @@ class ProjectsController extends Controller
     {
         $quote = Quote::find($quote_id);
         $budget = Budget::find($budget_id);
+        $budget_items = $budget->items()->orderBy('row_index')->get();
 
-        return view('focus.projects.edit_project_budget', compact('quote', 'budget'));
+        return view('focus.projects.edit_project_budget', compact('quote', 'budget', 'budget_items'));
     }
 
     /**
