@@ -27,7 +27,9 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Supplier</th>
+                                    <th>Amount</th>
                                     <th>Status</th>
+                                    <th>Paid</th>
                                     <th>Document</th>
                                     <th>Date</th>
                                     <th>Due Date</th>                                            
@@ -76,8 +78,16 @@
                     name: 'supplier'
                 },
                 {
+                    data: 'amount',
+                    name: 'amount'
+                },
+                {
                     data: 'status',
                     name: 'status'
+                },
+                {
+                    data: 'paid',
+                    name: 'paid'
                 },
                 {
                     data: 'document',
