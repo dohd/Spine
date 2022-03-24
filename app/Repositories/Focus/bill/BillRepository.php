@@ -8,6 +8,7 @@ use App\Models\bill\Bill;
 use App\Models\bill\Paidbill;
 use App\Models\items\PaidbillItem;
 use Illuminate\Support\Facades\DB;
+use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class PurchaseorderRepository.
@@ -69,6 +70,15 @@ class BillRepository extends BaseRepository
             if ($item->paid < $payable) $item->bill->update(['status' => 'Partial']);
             if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);
         }
+
+        // update bill total paid amount
+        $bill_ids = $result->items()->pluck('bill_id')->toArray();
+        $paid_bills = PaidbillItem::whereIn('bill_id', $bill_ids)
+            ->select(DB::raw('bill_id as id, SUM(paid) as amountpaid'))
+            ->groupBy('bill_id')
+            ->get()->toArray();
+            
+        Batch::update(new Bill, $paid_bills, 'id');
 
         DB::commit();
         if ($result) return true;
