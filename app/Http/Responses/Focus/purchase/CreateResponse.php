@@ -17,7 +17,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_tid = Purchase::where('is_po', 0)->orderBy('tid', 'desc')->first(['tid']);
+        $last_tid = Purchase::where('po_id', 0)->orderBy('tid', 'desc')->first(['tid']);
         $additionals = Additional::all();
 
         return view('focus.purchases.create', compact('last_tid', 'additionals'));
