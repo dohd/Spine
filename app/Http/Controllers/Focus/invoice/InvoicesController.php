@@ -324,9 +324,8 @@ class InvoicesController extends Controller
      */
     public function client_invoices(Request $request)
     {
-        $id = $request->client_id;
-        $invoices = Invoice::where(['customer_id' => $id, 'type' => 'actual'])
-            // ->whereNotIn('status', ['paid'])
+        $invoices = Invoice::where(['customer_id' => $request->id, 'type' => 'actual'])
+            ->whereIn('status', ['due', 'partial'])
             ->get(['id', 'tid', 'total', 'notes']);
 
         return response()->json($invoices);
