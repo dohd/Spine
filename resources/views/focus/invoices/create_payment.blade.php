@@ -68,7 +68,7 @@
                             <thead>
                                 <tr class="item_header bg-gradient-directional-blue white">
                                     <th width="10%" class="text-center">#</th>
-                                    <th width="10%">Invoice No.</th>
+                                    <th width="10%">Invoice Number</th>
                                     <th width="40%" class="text-center">Description</th>
                                     <th width="20%" class="text-center">Amount (VAT Inc)</th>
                                     <th width="20%" class="text-center">Deposit (Ksh.)</th>
@@ -78,13 +78,17 @@
                                 <tr class="bg-white">
                                     <td colspan="3"></td>
                                     <td colspan="2">
-                                        <div class="row mb-1">
-                                            <div class="col-6 pt-1 text-right"><b>Total Amount:</b></div>
-                                            <div class="col-6">{{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}</div>
+                                        <div class="row no-gutters mb-1">
+                                            <div class="col-6 pl-3 pt-1"><b>Total Bill Amount:</b></div>
+                                            <div class="col-6">
+                                                 {{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}
+                                            </div>                          
                                         </div>
-                                        <div class="row">
-                                            <div class="col-6 pt-1 text-right"><b>Total Deposit:</b></div>
-                                            <div class="col-6">{{ Form::text('deposit_ttl', 0, ['class' => 'form-control', 'id' => 'deposit_ttl', 'readonly']) }}</div>
+                                        <div class="row no-gutters">
+                                            <div class="col-6 pl-3 pt-1"><b>Total Deposited:</b></div>
+                                            <div class="col-6">
+                                            {{ Form::text('deposit_ttl', 0, ['class' => 'form-control', 'id' => 'deposit_ttl', 'readonly']) }}
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -140,7 +144,7 @@
     // load customer invoices
     $('#person').change(function() {
         $.ajax({
-            url: "{{ route('biller.invoices.client_invoices') }}id=" + $(this).val(),
+            url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
             success: result => {
                 if (!result.length) $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
                 result.forEach((v, i) => {
