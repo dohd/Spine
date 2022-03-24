@@ -10,6 +10,8 @@ use App\Models\items\DraftItem;
 use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
+use App\Models\invoice\PaidInvoice;
+use App\Models\items\PaidInvoiceItem;
 use App\Models\items\Register;
 use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
@@ -453,7 +455,7 @@ class InvoiceRepository extends BaseRepository
     }
 
     /**
-     * Create Invoice Payment
+     * Create invoice payment
      */
     public function create_invoice_payment(array $input)
     {
