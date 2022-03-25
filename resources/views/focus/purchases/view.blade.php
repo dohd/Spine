@@ -22,7 +22,7 @@
             <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">
-                        Purchase Order Details
+                        Direct Purchase Details
                     </a>
                 </li>
                 <li class="nav-item">
@@ -75,7 +75,7 @@
                                 <td>{{ $purchase->note }}</td>
                             </tr>
                             <tr>
-                                <th>Order Items Cost</th>
+                                <th>Purchase Items Cost</th>
                                 <td>
                                     <b>Stock:</b>   {{ amountFormat($purchase->stock_grandttl) }}<br>
                                     <b>Expense:</b> {{ amountFormat($purchase->expense_grandttl) }}<br>
