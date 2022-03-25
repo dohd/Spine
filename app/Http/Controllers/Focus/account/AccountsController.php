@@ -182,7 +182,7 @@ class AccountsController extends Controller
         $q = $request->post('keyword');
 
         $accounts = Account::where('holder', 'LIKE', '%' . $q . '%')
-            ->where('account_type', 'Expenses')
+            ->where('account_type', 'Expense')
             ->orWhere('number', 'LIKE', '%' . $q . '%')
             ->limit(6)->get(['id', 'holder AS name', 'number']);
 
