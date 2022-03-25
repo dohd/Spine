@@ -2,6 +2,7 @@
 
 namespace App\Models\purchaseorder\Traits;
 
+use App\Models\items\PurchaseorderItem;
 use App\Models\project\Project;
 
 /**
@@ -9,6 +10,11 @@ use App\Models\project\Project;
  */
 trait PurchaseorderRelationship
 {
+    public function items()
+    {
+        return $this->hasMany(PurchaseorderItem::class);
+    }
+
     public function project()
     {
         return $this->belongsTo(Project::class);
