@@ -26,9 +26,9 @@
                         @endforeach                                                    
                     </select>
                 </td>
-                <td><input type="text" class="form-control taxable" value="0"></td>
+                <td><input type="text" class="form-control taxable" value="0" readonly></td>
                 <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td>              
-                <td><button type="button" class="btn btn-danger d-none remove">Remove</button></td>
+                <td><button type="button" class="btn btn-danger d-none remove"><i class="fa fa-minus-square"></i></button></td>
                 <input type="hidden" id="stockitemid-0" name="item_id[]">
                 <input type="hidden" class="stocktaxr" name="taxrate[]">
                 <input type="hidden" class="stockamountr" name="amount[]">
@@ -64,7 +64,7 @@
                             </td>
                             <td><input type="text" class="form-control taxable" value="{{ (float) $item->taxrate }}" readonly></td>
                             <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-{{$i}}">{{ (float) $item->amount }}</span></b></td>              
-                            <td><button type="button" class="btn btn-danger remove">Remove</button></td>
+                            <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square"></i></button></td>
                             <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="stocktaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="stockamountr" name="amount[]" value="{{ (float) $item->amount }}">
@@ -93,13 +93,13 @@
                 <td colspan="6"></td>
             </tr>
             <tr class="bg-white">
-                <td colspan="6" align="right"><b>{{trans('general.total_tax')}}</b></td>                   
+                <td colspan="5" align="right"><b>{{trans('general.total_tax')}}</b></td>                   
                 <td align="left" colspan="2">
                     {{config('currency.symbol')}} <span id="invtax" class="lightMode">0</span>
                 </td>
             </tr>
             <tr class="bg-white">
-                <td colspan="6" align="right">
+                <td colspan="5" align="right">
                     <b>Inventory Total ({{ config('currency.symbol') }})</b>
                 </td>
                 <td align="left" colspan="2">

@@ -17,10 +17,18 @@
                 <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger"></td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
-                <td><input type="text" class="form-control exp_vat " name="itemtax[]" id="expvat-0" value="0"></td>
+                <td>
+                    <select class="form-control exp_vat" name="itemtax[]" id="expvat-0">
+                        @foreach ($additionals as $tax)
+                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
+                                {{ $tax->name }}
+                            </option>
+                        @endforeach                                                    
+                    </select>
+                </td>  
                 <td class="text-center"><span class="exp_tax" id="exptax-0">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-0">0</span></b></td>
-                <td><button type="button" class="btn btn-danger remove d-none">remove</button></td>
+                <td><button type="button" class="btn btn-danger remove d-none"><i class="fa fa-minus-square"></i></button></td>
                 <input type="hidden" id="expitemid-0" name="item_id[]">
                 <input type="hidden" class="exptaxr" name="taxrate[]">
                 <input type="hidden" class="expamountr" name="amount[]">
@@ -48,10 +56,18 @@
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" placeholder="Enter Ledger"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ (int) $item->qty }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
-                            <td><input type="text" class="form-control exp_vat " name="itemtax[]" value="{{ (int) $item->itemtax }}" id="expvat-{{$i}}" value="0"></td>
+                            <td>
+                                <select class="form-control exp_vat" name="itemtax[]" id="expvat-{{$i}}">
+                                    @foreach ($additionals as $tax)
+                                        <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->itemtax ? 'selected' : ''}}>
+                                            {{ $tax->name }}
+                                        </option>
+                                    @endforeach                  
+                                </select>
+                            </td>                          
                             <td class="text-center"><span class="exp_tax" id="exptax-{{$i}}">{{ (float) $item->taxrate }}</span></td>
                             <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-{{$i}}">{{ (float) $item->amount }}</span></b></td>
-                            <td><button type="button" class="btn btn-danger remove">remove</button></td>
+                            <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square"></i></button></td>
                             <input type="hidden" id="expitemid-{{$i}}" name="item_id[]"value="{{ $item->item_id }}" >
                             <input type="hidden" class="exptaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="expamountr" name="amount[]" value="{{ (float) $item->amount }}">

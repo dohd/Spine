@@ -17,10 +17,18 @@
                 <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
-                <td><input type="text" class="form-control asset_vat" name="itemtax[]" value="0" id="assetvat-0"></td>
+                <td>
+                    <select class="form-control asset_vat" name="itemtax[]" id="assetvat-0">
+                        @foreach ($additionals as $tax)
+                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
+                                {{ $tax->name }}
+                            </option>
+                        @endforeach                                                    
+                    </select>
+                </td>  
                 <td class="text-center"><span class="asset_tax">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class='asset_amount'>0</span></b></td>
-                <td><button type="button" class="btn btn-danger remove d-none">remove</button></td>
+                <td><button type="button" class="btn btn-danger remove d-none"><i class="fa fa-minus-square"></i></button></td>
                 <input type="hidden" id="assetitemid-0" name="item_id[]">
                 <input type="hidden" class="assettaxr" name="taxrate[]">
                 <input type="hidden" class="assetamountr" name="amount[]">
@@ -44,10 +52,18 @@
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ (int) $item->qty }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>
-                            <td><input type="text" class="form-control asset_vat" name="itemtax[]" value="{{ (int) $item->itemtax }}" id="assetvat-{{$i}}"></td>
+                            <td>
+                                <select class="form-control asset_vat" name="itemtax[]" id="assetvat-{{$i}}">
+                                    @foreach ($additionals as $tax)
+                                        <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->itemtax ? 'selected' : ''}}>
+                                            {{ $tax->name }}
+                                        </option>
+                                    @endforeach                                                    
+                                </select>
+                            </td>
                             <td class="text-center"><span class="asset_tax">{{ (float) $item->taxrate }}</span></td>
                             <td>{{config('currency.symbol')}} <b><span class='asset_amount'>{{ (float) $item->amount }}</span></b></td>
-                            <td><button type="button" class="btn btn-danger remove">remove</button></td>
+                            <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square"></i></button></td>
                             <input type="hidden" id="assetitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="assettaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="assetamountr" name="amount[]" value="{{ (float) $item->amount }}">
