@@ -123,7 +123,7 @@ class BillsController extends Controller
     {
         $bills = Bill::where('supplier_id', $request->id)
             ->whereIn('status', ['Pending', 'Partial'])
-            ->get(['id', 'tid', 'supplier_id', 'note', 'status', 'grandttl']);
+            ->get(['id', 'tid', 'supplier_id', 'note', 'status', 'grandttl', 'due_date', 'amountpaid']);
 
         return response()->json($bills);
     }
