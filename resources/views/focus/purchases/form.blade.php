@@ -15,9 +15,9 @@
                     </div>
                 </div>
                 <div class="col-7">
-                        <label for="payer" class="caption">Search Supplier</label>                                       
-                        <select class="form-control" id="supplierbox" data-placeholder="Search Supplier" disabled></select>
-                        <input type="hidden" name="supplier_id" value="0" id="supplierid">
+                    <label for="payer" class="caption">Search Supplier</label>                                       
+                    <select class="form-control" id="supplierbox" data-placeholder="Search Supplier" disabled></select>
+                    <input type="hidden" name="supplier_id" value="{{ @$supplier->id }}" id="supplierid">
                 </div>
             </div>
             
