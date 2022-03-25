@@ -427,33 +427,18 @@ class ProjectsController extends Controller
             ->orWhereHas('branch', function ($query) use ($q) {
                 $query->where('name', 'LIKE', '%'.$q.'%');
             })
-            ->orWhereHas('quotes', function($query) use ($q) {
-                $query->where('tid', 'LIKE', '%'.$q.'%');
-            })
             ->limit(6)->get();
         
         // response format
         $output = array();
         foreach ($projects as $project) {
             if (empty($project->quotes)) continue;
-            // append tids
-            $quote_tids = array();     
-            $lead_tids = array();           
-            foreach ($project->quotes as $quote) {
-                $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
-                else $quote_tids[] = 'QT-'. $tid;
-                $lead_tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
-            }
-            $project['lead_tids'] =  implode(', ', $lead_tids);
-            $project['quote_tids'] = implode(', ', $quote_tids);
-            $branch = $project->branch->name . ' ['.$project->quote_tids.'] ' . ' ['.$project->lead_tids.'] ';
-            $customer = $project->customer_project->company;
+            
             $tid = 'Prj-'.sprintf('%04d', $project->tid);
-
+            $name = implode(' - ', array($tid, $project->name));
             $output[] = array(
                 'id' => $project->id, 
-                'name' => implode(' - ', array($customer, $branch, $tid, $project->name)),
+                'name' => $name,
                 'client_id' => $project->customer_project->id, 
                 'branch_id' => $project->branch->id
             );
