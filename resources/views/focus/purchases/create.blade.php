@@ -136,6 +136,17 @@
         });
     }
 
+    // Tax condition
+    function taxRule(id, tax) {
+        $('#'+ id +' option').each(function() {
+            const itemtax = $(this).val();
+            $(this).removeClass('d-none');
+            if (itemtax != tax && itemtax != 0) $(this).addClass('d-none');
+            $(this).attr('selected', false);
+            if (itemtax == tax) $(this).attr('selected', true).change();
+        }); 
+    }
+
 
     /**
      * Stock Tab
@@ -144,7 +155,7 @@
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
     const stockUrl = baseurl + 'products/quotesearch/1';
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
-    $('#rowtax-0').mousedown(function() { taxRule(0, $('#tax').val()); });
+    $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
             stockRowId++;
@@ -156,7 +167,7 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
-            taxRule(i, $('#tax').val());
+            taxRule('rowtax-'+i, $('#tax').val());
         }
 
         if ($(this).is('.remove')) {
@@ -204,22 +215,13 @@
         $('#stock_subttl').val((grandTotal - tax).toLocaleString());
         transxnCalc();
     }
-    // Tax condition
-    function taxRule(i, tax) {
-        $('#rowtax-'+ i +' option').each(function() {
-            const rowtax = $(this).val();
-            $(this).removeClass('d-none');
-            if (rowtax != tax && rowtax != 0) $(this).addClass('d-none');
-            $(this).attr('selected', false);
-            if (rowtax == tax) $(this).attr('selected', true).change();
-        }); 
-    }
     function stockSelect(event, ui) {
         const {data} = ui.item;
         const i = stockRowId;
         $('#stockitemid-'+i).val(data.id);
         const price = parseFloat(data.purchase_price).toLocaleString();
         $('#price-'+i).val(price).change();
+        $('#stockdescr-'+i).val(data.name);
     }
 
     
@@ -231,6 +233,7 @@
     const expUrl = "{{ route('biller.accounts.account_search') }}";
     $('.accountname').autocomplete(predict(expUrl, expSelect));
     $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
+    $('#expvat-0').mousedown(function() { taxRule('expvat-0', $('#tax').val()); });
     $('#expTbl').on('click', '#addexp, .remove', function() {
         if ($(this).is('#addexp')) {
             expRowId++;
@@ -243,10 +246,10 @@
             $('#expTbl tbody tr:eq(-3)').before(html);
             $('.accountname').autocomplete(predict(expUrl, expSelect));
             $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
-            $('#expvat-'+i).val($('#tax').val());
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectexptext-'+i).val(projectText);
             $('#projectexpval-'+i).val($(this).val());
+            taxRule('expvat-'+i, $('#tax').val());
         }
         if ($(this).is('.remove')) {
             const $tr = $(this).parents('tr:first');
@@ -311,6 +314,7 @@
     const assetHtml = [$('#assetTbl tbody tr:eq(0)').html(), $('#assetTbl tbody tr:eq(1)').html()];
     const assetUrl = "{{ route('biller.assetequipments.product_search') }}";
     $('.assetname').autocomplete(predict(assetUrl, assetSelect));
+    $('#assetvat-0').mousedown(function() { taxRule('assetvat-0', $('#tax').val()); });
     $('#assetTbl').on('click', '#addasset, .remove', function() {
         if ($(this).is('#addasset')) {
             assetRowId++;
@@ -322,7 +326,7 @@
 
             $('#assetTbl tbody tr:eq(-3)').before(html);
             $('.assetname').autocomplete(predict(assetUrl, assetSelect));
-            $('#assetvat-'+i).val($('#tax').val());
+            taxRule('assetvat-'+i, $('#tax').val());
         }
         if ($(this).is('.remove')) {
             const $tr = $(this).parents('tr:first');
