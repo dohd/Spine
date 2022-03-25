@@ -59,16 +59,12 @@
                                 <td>{{ $purchase->tid }}</td>
                             </tr>
                             <tr>
-                                <th>Order Date</th>
-                                <td>{{ dateFormat($purchase->date) }}</td>
+                                <th>Order Date & Due Date</th>
+                                <td>{{ dateFormat($purchase->date) }} <b>:</b> {{ dateFormat($purchase->due_date) }}</td>
                             </tr>
                             <tr>
-                                <th>Order Due Date</th>
-                                <td>{{ dateFormat($purchase->due_date) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Reference No.</th>
-                                <td>{{ $purchase->doc_ref }}</td>
+                                <th>Reference</th>
+                                <td>{{ $purchase->doc_ref }} - {{ $purchase->doc_ref_type }}</td>
                             </tr>
                             <tr>
                                 <th>Project</th>
@@ -77,7 +73,16 @@
                             <tr>
                                 <th>Note</th>
                                 <td>{{ $purchase->note }}</td>
-                            </tr>                             
+                            </tr>
+                            <tr>
+                                <th>Order Items Cost</th>
+                                <td>
+                                    <b>Stock:</b>   {{ amountFormat($purchase->stock_grandttl) }}<br>
+                                    <b>Expense:</b> {{ amountFormat($purchase->expense_grandttl) }}<br>
+                                    <b>Asset:</b> {{ amountFormat($purchase->asset_grandttl) }}<br>
+                                    <b>Total:</b> {{ amountFormat($purchase->grandttl) }}<br>
+                                </td>
+                            </tr>                              
                         </tbody>
                     </table>
                 </div>
