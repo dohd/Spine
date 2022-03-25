@@ -87,12 +87,12 @@
                         <table class="table-responsive tfr my_stripe_single" id="billsTbl">
                             <thead>
                                 <tr class="item_header bg-gradient-directional-blue white">
-                                    <th width="10%" class="text-center">#</th>
-                                    <th width="10%">Bill Number</th>
+                                    <th width="15%" class="text-center">Due date</th>
+                                    <th width="5%">Bill Number</th>
                                     <th width="40%" class="text-center">Note</th>
                                     <th width="10%">Status</th>
                                     <th width="15%" class="text-center">Amount (VAT Inc)</th>
-                                    <th width="15%" class="text-center">Deposited (Ksh.)</th>
+                                    <th width="15%" class="text-center">Paid (Ksh.)</th>
                                 </tr>
                             </thead>
                             <tbody>                                
@@ -100,13 +100,13 @@
                                     <td colspan="4"></td>
                                     <td colspan="2">
                                         <div class="row no-gutters mb-1">
-                                            <div class="col-6 pl-3 pt-1"><b>Total Bill Amount:</b></div>
+                                            <div class="col-6 pl-3 pt-1"><b>Total Bill:</b></div>
                                             <div class="col-6">
                                                  {{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}
                                             </div>                          
                                         </div>
                                         <div class="row no-gutters">
-                                            <div class="col-6 pl-3 pt-1"><b>Total Deposited:</b></div>
+                                            <div class="col-6 pl-3 pt-1"><b>Total Paid:</b></div>
                                             <div class="col-6">
                                             {{ Form::text('deposit_ttl', 0, ['class' => 'form-control', 'id' => 'deposit_ttl', 'readonly']) }}
                                             </div>
@@ -161,10 +161,10 @@
 
     // bill row
     function billRow(v, i) {
-        const amount = parseFloat(v.grandttl).toLocaleString();
+        const amount = parseFloat(v.grandttl - v.amountpaid).toLocaleString();
         return `
             <tr>
-                <td class="text-center">${i+1}</td>
+                <td class="text-center">${new Date(v.due_date).toDateString()}</td>
                 <td>${v.tid}</td>
                 <td class="text-center">${v.note}</td>
                 <td>${v.status}</td>
