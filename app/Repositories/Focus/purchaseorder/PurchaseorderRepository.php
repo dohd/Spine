@@ -189,7 +189,13 @@ class PurchaseorderRepository extends BaseRepository
 
         // create bill        
         $po = $result->purchaseorder;
-        $bill = $order + ['supplier_id' => $po->supplier_id, 'po_id' => $po->id, 'note' => $po->note];
+        $bill = $order + [
+            'supplier_id' => $po->supplier_id, 
+            'po_id' => $po->id, 
+            'note' => $po->note, 
+            'date' => $po->date, 
+            'due_date' => $po->due_date
+        ];
         $exclude_keys = ['purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
         $bill = array_diff_key($bill, array_flip($exclude_keys));
         Bill::create($bill);
