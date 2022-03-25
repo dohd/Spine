@@ -5,6 +5,8 @@ namespace App\Repositories\Focus\purchase;
 use App\Models\purchase\Purchase;
 use App\Exceptions\GeneralException;
 use App\Models\items\PurchaseItem;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
@@ -44,7 +46,6 @@ class PurchaseRepository extends BaseRepository
         DB::beginTransaction();
 
         $purchase = $input['purchase'];
-        // sanitize
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
@@ -57,15 +58,14 @@ class PurchaseRepository extends BaseRepository
                 $purchase[$key] = numberClean($val);
             }
         }
-        $result = Purchase::create($purchase);
+        $bill = Purchase::create($purchase);
 
         $purchase_items = $input['purchase_items'];
-        // sanitize
         foreach ($purchase_items as $i => $item) {
             $purchase_items[$i] = $item + [
-                'ins' => $result->ins,
-                'user_id' => $result->user_id,
-                'bill_id' => $result->id
+                'ins' => $bill->ins,
+                'user_id' => $bill->user_id,
+                'bill_id' => $bill->id
             ];
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
@@ -75,8 +75,63 @@ class PurchaseRepository extends BaseRepository
         }
         PurchaseItem::insert($purchase_items);
 
+
+        /** credit */ 
+        $account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $purchase['grandttl'],
+            'tr_date' => date_for_database(date('Y-m-d')),
+            'due_date' => $purchase['due_date'],
+            'user_id' => $purchase['user_id'],
+            'note' => $purchase['note'],
+            'ins' => $purchase['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $bill->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1
+        ];
+
+        /** debit */
+        $dr_data = array();
+        $init_dr_data = array_diff_key($cr_data, array_flip(['credit', 'is_primary']));
+        // stock
+        $account = Account::where('system', 'stock')->first(['id']);
+        $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
+        $dr_data[] = $init_dr_data + [
+            'account_id' => $account->id,
+            'trans_category_id' => $stock_tr_category->id,
+            'debit' => $purchase['stock_subttl'],
+        ];
+        // expenses and assets
+        $exp_tr_category = Transactioncategory::where('code', 'BILL')->first(['id']);
+        $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
+        foreach ($purchase_items as $item) {
+            $subttl = $item['amount'] - $item['taxrate'];
+            if ($item['type'] == 'Expense') {
+                $dr_data[] = $init_dr_data + [
+                    'account_id' => $item['item_id'],
+                    'trans_category_id' => $exp_tr_category->id,
+                    'debit' => $subttl,
+                ];
+            }
+            if ($item['type'] == 'Asset') {
+                $dr_data[] = $init_dr_data + [
+                    'account_id' => $item['item_id'],
+                    'trans_category_id' => $asset_tr_category->id,
+                    'debit' => $subttl,
+                ];
+            }
+        }
+            
+        Transaction::insert(array_merge([$cr_data], $dr_data));
+        $tr = Transaction::where(['bill_id' => $bill->id, 'is_primary' => 1])->first(['id']);
+        $bill->update(['tr_ref' => $tr->id]);
+
         DB::commit();
-        if ($result) return true;        
+        if ($bill) return true;        
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
@@ -94,7 +149,6 @@ class PurchaseRepository extends BaseRepository
         DB::beginTransaction();
 
         $bill = $input['bill'];
-        // sanitize
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
@@ -135,6 +189,60 @@ class PurchaseRepository extends BaseRepository
             if (!$bill_item->id) unset($bill_item->id);
             $bill_item->save();                
         }
+
+        /** credit */ 
+        $account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $purchase['grandttl'],
+            'tr_date' => date_for_database(date('Y-m-d')),
+            'due_date' => $purchase['due_date'],
+            'user_id' => $purchase['user_id'],
+            'note' => $purchase['note'],
+            'ins' => $purchase['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $purchase->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1
+        ];
+
+        /** debit */
+        $dr_data = array();
+        $init_dr_data = array_diff_key($cr_data, array_flip(['credit', 'is_primary']));
+        // stock
+        $account = Account::where('system', 'stock')->first(['id']);
+        $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
+        $dr_data[] = $init_dr_data + [
+            'account_id' => $account->id,
+            'trans_category_id' => $stock_tr_category->id,
+            'debit' => $purchase['stock_subttl'],
+        ];
+        // expenses and assets
+        $exp_tr_category = Transactioncategory::where('code', 'BILL')->first(['id']);
+        $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
+        $purchase_items = PurchaseItem::where('bill_id', $purchase->id)->get();
+        foreach ($purchase_items as $item) {
+            $subttl = $item['amount'] - $item['taxrate'];
+            if ($item['type'] == 'Expense') {
+                $dr_data[] = $init_dr_data + [
+                    'account_id' => $item['item_id'],
+                    'trans_category_id' => $exp_tr_category->id,
+                    'debit' => $subttl,
+                ];
+            }
+            if ($item['type'] == 'Asset') {
+                $dr_data[] = $init_dr_data + [
+                    'account_id' => $item['item_id'],
+                    'trans_category_id' => $asset_tr_category->id,
+                    'debit' => $subttl,
+                ];
+            }
+        }
+        
+        Transaction::where('tr_ref', $purchase->id)->delete();
+        Transaction::insert(array_merge([$cr_data], $dr_data));        
 
         DB::commit();
         if ($purchase) return true;

@@ -187,18 +187,71 @@ class PurchaseorderRepository extends BaseRepository
         }
         GrnItem::insert($order_items);
 
-        // create bill        
-        $po = $result->purchaseorder;
-        $bill = $order + [
-            'supplier_id' => $po->supplier_id, 
-            'po_id' => $po->id, 
-            'note' => $po->note, 
-            'date' => $po->date, 
-            'due_date' => $po->due_date
-        ];
-        $exclude_keys = ['purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
-        $bill = array_diff_key($bill, array_flip($exclude_keys));
-        Bill::create($bill);
+        // // create bill        
+        // $po = $result->purchaseorder;
+        // $bill = $order + [
+        //     'supplier_id' => $po->supplier_id, 
+        //     'po_id' => $po->id, 
+        //     'note' => $po->note, 
+        //     'date' => $po->date, 
+        //     'due_date' => $po->due_date
+        // ];
+        // $exclude_keys = ['purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
+        // $bill = array_diff_key($bill, array_flip($exclude_keys));
+        // $bill = Bill::create($bill);
+
+        // /** credit */ 
+        // $account = Account::where('system', 'payable')->first(['id']);
+        // $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
+        // $cr_data = [
+        //     'account_id' => $account->id,
+        //     'trans_category_id' => $tr_category->id,
+        //     'credit' => $po['grandttl'],
+        //     'tr_date' => date_for_database(date('Y-m-d')),
+        //     'due_date' => $po['due_date'],
+        //     'user_id' => $po['user_id'],
+        //     'note' => $po['note'],
+        //     'ins' => $po['ins'],
+        //     'tr_type' => $tr_category->code,
+        //     'tr_ref' => $bill->id,
+        //     'user_type' => 'supplier',
+        //     'is_primary' => 1
+        // ];
+
+        // /** debit */
+        // $dr_data = array();
+        // $init_dr_data = array_diff_key($cr_data, array_flip(['credit', 'is_primary']));
+        // // stock
+        // $account = Account::where('system', 'stock')->first(['id']);
+        // $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
+        // $dr_data[] = $init_dr_data + [
+        //     'account_id' => $account->id,
+        //     'trans_category_id' => $stock_tr_category->id,
+        //     'debit' => $po['stock_subttl'],
+        // ];
+        // // expenses and assets
+        // $exp_tr_category = Transactioncategory::where('code', 'BILL')->first(['id']);
+        // $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
+        // $purchase_items = PurchaseItem::where('bill_id', $po->id)->get();
+        // foreach ($purchase_items as $item) {
+        //     $subttl = $item['amount'] - $item['taxrate'];
+        //     if ($item['type'] == 'Expense') {
+        //         $dr_data[] = $init_dr_data + [
+        //             'account_id' => $item['item_id'],
+        //             'trans_category_id' => $exp_tr_category->id,
+        //             'debit' => $subttl,
+        //         ];
+        //     }
+        //     if ($item['type'] == 'Asset') {
+        //         $dr_data[] = $init_dr_data + [
+        //             'account_id' => $item['item_id'],
+        //             'trans_category_id' => $asset_tr_category->id,
+        //             'debit' => $subttl,
+        //         ];
+        //     }
+        // }
+        
+        // Transaction::insert(array_merge([$cr_data], $dr_data));    
 
         DB::commit();
         if ($result) return true;
