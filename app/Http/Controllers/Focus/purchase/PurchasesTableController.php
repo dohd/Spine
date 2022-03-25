@@ -63,27 +63,24 @@ class PurchasesTableController extends Controller
                 return dateFormat($purchase->date);
             })
             ->addColumn('supplier', function ($purchase) {
-                if ($purchase->supplier)
-                    return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '">
-                        <i class="ft-eye"></i></a>';
+                return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '">
+                    <i class="ft-eye"></i></a>';
 
-                return $purchase->suppliername;
+            })
+            ->addColumn('reference', function ($purchase) {
+                return $purchase->doc_ref . ' - ' .$purchase->doc_ref_type;
             })
             ->addColumn('debit', function ($purchase) {
                 return;
             })
             ->addColumn('credit', function ($purchase) {
-                return;
+                return number_format($purchase->grandttl);
             })
             ->addColumn('balance', function ($purchase) {
-                return;
+                $amount = $purchase->paidamount ? $purchase->paidamount : $purchase->grandttl;
+                return number_format($amount);
             })
             ->addColumn('actions', function ($purchase) {
-                $type = $purchase->supplier_type;
-                if ($type == 'supplier') {
-                    return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
-                        <i class="fa fa-cc-visa"></i></a>'. $purchase->action_buttons;
-                }
                 return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
                     <i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
             })
