@@ -184,7 +184,6 @@
     $('#stockTbl tbody tr:lt(2)').remove(); 
     const stockUrl = baseurl + 'products/quotesearch/1';
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
-    $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
             stockRowId++;
@@ -252,6 +251,7 @@
         $('#stockitemid-'+i).val(data.id);
         const price = parseFloat(data.purchase_price).toLocaleString();
         $('#price-'+i).val(price).change();
+        $('#stockdescr-'+i).val(data.name);
     }
 
 
@@ -264,7 +264,6 @@
     const expUrl = "{{ route('biller.accounts.account_search') }}";
     $('.accountname').autocomplete(predict(expUrl, expSelect));
     $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
-    $('#expvat-0').mousedown(function() { taxRule('expvat-0', $('#tax').val()); });
     $('#expTbl').on('click', '#addexp, .remove', function() {
         if ($(this).is('#addexp')) {
             expRowId++;
@@ -347,7 +346,6 @@
     $('#assetTbl tbody tr:lt(2)').remove(); 
     const assetUrl = "{{ route('biller.assetequipments.product_search') }}";
     $('.assetname').autocomplete(predict(assetUrl, assetSelect));
-    $('#assetvat-0').mousedown(function() { taxRule('assetvat-0', $('#tax').val()); });
     $('#assetTbl').on('click', '#addasset, .remove', function() {
         if ($(this).is('#addasset')) {
             assetRowId++;
