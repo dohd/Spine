@@ -82,8 +82,8 @@
                 name: 'date'
             },
             {
-                data: 'doc_ref',
-                name: 'doc_ref'
+                data: 'reference',
+                name: 'reference'
             },
             {
                 data: 'supplier',
