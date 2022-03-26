@@ -6,10 +6,13 @@
                 <select name="account_type" class="form-control" id="accType" required>
                     <option value="">-- Select Account Type --</option>
                     @foreach ($account_types as $k => $row)
-                        <option value="{{ $row->category }}" key="{{ $row->id }}"
+                        <option 
+                            value="{{ $row->category }}" 
+                            key="{{ $row->id }}"
                             opening_balance_check="{{ $row->is_opening_balance }}"
                             is_multiple="{{ $row->is_multiple }}"
-                            {{ $row->id == @$account->account_type_id ? 'selected' : '' }}>
+                            {{ $row->id == @$account->account_type_id ? 'selected' : '' }}
+                        >
                             {{ $k + 1 }}. {{ $row->name }}
                         </option>
                     @endforeach
@@ -101,61 +104,61 @@
     </div>
 </div>
 @section('after-scripts')
-    <script>
-        // on selecting account type
-        $('#accType').change(function() {
-            const key = $(this).find('option:selected').attr('key');
-            const is_multiple = $(this).find('option:selected').attr('is_multiple');
-            $('#accTypeId').val(key);
-            $('#is_multiple').val(is_multiple);
-            const account_type = $(this).val();
-            const opening_balance_check = $(this).find('option:selected').attr('opening_balance_check');
+<script>
+    // on selecting account type
+    $('#accType').change(function() {
+        const key = $(this).find('option:selected').attr('key');
+        const is_multiple = $(this).find('option:selected').attr('is_multiple');
+        $('#accTypeId').val(key);
+        $('#is_multiple').val(is_multiple);
+        const account_type = $(this).val();
+        const opening_balance_check = $(this).find('option:selected').attr('opening_balance_check');
 
-            $('#balance').prop('readonly', true);
-            $('#opening_balance_date').prop('disabled', true);
-            if (opening_balance_check == 1) {
-                $('#balance').prop('readonly', false);
-                $('#opening_balance_date').prop('disabled', false);
-            }
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                url: "{{ route('biller.accounts.search_next_account_no') }}",
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    account_type
-                },
-                success: function(data) {
-                    $('#account_number').val(data.account_number);
-                }
-            });
-            //  console.log(key);
-        });
-        // on update page
-        if (@json(@$account)) {
-            const key = $('#accType option:selected').attr('key');
-            $('#accTypeId').val(key);
+        $('#balance').prop('readonly', true);
+        $('#opening_balance_date').prop('disabled', true);
+        if (opening_balance_check == 1) {
+            $('#balance').prop('readonly', false);
+            $('#opening_balance_date').prop('disabled', false);
         }
-        $('#is_parent').on('change', function() {
-            $('#category_id').prop('disabled', true);
-            if ($(this).val() == 1) {
-                $('#category_id').prop('disabled', false);
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
             }
-            return false;
-        })
-        // Initialize datepicker
-        $('.datepicker').datepicker({
-            format: "{{ config('core.user_date_format') }}"
-        })
-        $('#opening_balance_date').datepicker('setDate', new Date());
-        //number format
-        $("#balance").change(function() {
-            const input_val = $(this).val();
-            $("#balance").val(accounting.formatNumber(input_val));
         });
-    </script>
+        $.ajax({
+            url: "{{ route('biller.accounts.search_next_account_no') }}",
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                account_type
+            },
+            success: function(data) {
+                $('#account_number').val(data.account_number);
+            }
+        });
+        //  console.log(key);
+    });
+    // on update page
+    if (@json(@$account)) {
+        const key = $('#accType option:selected').attr('key');
+        $('#accTypeId').val(key);
+    }
+    $('#is_parent').on('change', function() {
+        $('#category_id').prop('disabled', true);
+        if ($(this).val() == 1) {
+            $('#category_id').prop('disabled', false);
+        }
+        return false;
+    })
+    // Initialize datepicker
+    $('.datepicker').datepicker({
+        format: "{{ config('core.user_date_format') }}"
+    })
+    $('#opening_balance_date').datepicker('setDate', new Date());
+    //number format
+    $("#balance").change(function() {
+        const input_val = $(this).val();
+        $("#balance").val(accounting.formatNumber(input_val));
+    });
+</script>
 @endsection
