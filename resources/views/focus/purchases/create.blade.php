@@ -89,7 +89,7 @@
     $('#tax').change(function() {
         if (taxIndx > 0) return;
         const tax = $(this).val();
-        taxRule(0, tax);
+        $('#rowtax-0').val(tax).change();
         $('#expvat-0').val(tax).change();
         $('#assetvat-0').val(tax).change();
         taxIndx++;
