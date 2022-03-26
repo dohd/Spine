@@ -47,7 +47,6 @@ class PurchaseorderRepository extends BaseRepository
         DB::beginTransaction();
 
         $order = $input['order'];
-        // sanitize
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
@@ -63,18 +62,18 @@ class PurchaseorderRepository extends BaseRepository
         $result = Purchaseorder::create($order);
 
         $order_items = $input['order_items'];
-        // sanitize
         foreach ($order_items as $i => $item) {
-            $order_items[$i] = $item + [
+            $item = $item + [
                 'ins' => $order['ins'],
                 'user_id' => $order['user_id'],
                 'purchaseorder_id' => $result->id
             ];
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
-                    $order_items[$i][$key] = numberClean($val);
+                    $item[$key] = numberClean($val);
                 }
             }
+            $order_items[$i] = $item;
         }
         PurchaseorderItem::insert($order_items);
 
@@ -97,7 +96,6 @@ class PurchaseorderRepository extends BaseRepository
         DB::beginTransaction();
 
         $order = $input['order'];
-        // sanitize
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
