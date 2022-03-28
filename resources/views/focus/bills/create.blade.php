@@ -68,6 +68,15 @@
                                 </div>
                             </div>  
                             <div class="col-2">
+                                <label for="paid_from">Paid From</label>
+                                <select name="account_id" id="" class="form-control" required>
+                                   <option value="">-- Select Bank --</option>
+                                    @foreach ($accounts as $row)
+                                        <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                    @endforeach
+                                </select>
+                            </div>  
+                            <div class="col-2">
                                 <label for="payment_mode">Document Type</label>
                                 <select name="doc_ref_type" id="" class="form-control" required>
                                    <option value="">-- Select Type --</option>
@@ -155,8 +164,10 @@
 
     // On adding paid values
     $('#billsTbl').on('change', '.paid', function() {
-        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '');
-        if (paid > amount) $(this).val((amount*1).toLocaleString());
+        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
+        const paid = $(this).val().replace(/,/g, '') * 1;
+        if (paid > amount) $(this).val(amount.toLocaleString());
+        calcTotal();
     });
 
     // bill row
@@ -183,7 +194,8 @@
         $.ajax({
             url: "{{ route('biller.bills.supplier_bills') }}?id=" + supplier_id,
             success: result => {
-                if (!result.length) $('#billsTbl tbody tr:not(:eq(-1))').remove();
+                $('#billsTbl tbody tr:not(:eq(-1))').remove();
+                if (!result.length) return;
                 result.forEach((v, i) => {
                     $('#billsTbl tbody tr:eq(-1)').before(billRow(v, i));
                 });
@@ -193,31 +205,40 @@
 
     // On deposit change
     $('#deposit').change(function() {
-        const depo = $(this).val().replace(/,/g, '');
+        let amountSum = 0;
+        let depoSum = 0;
+        let depo = $(this).val().replace(/,/g, '') * 1;
         $(this).val(parseFloat(depo).toLocaleString());
+        const rows = $('#billsTbl tbody tr').length;
+        $('#billsTbl tbody tr').each(function() {
+            if ($(this).index() == rows-1) return;
+            $(this).find('.paid').val(0);
+            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
 
-        let init = depo*1;
+            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
+            else if (depo > 0) $(this).find('.paid').val((depo).toLocaleString());
+            depo -= amount;
+            amountSum += amount;
+            depoSum += paid;
+        });
+        $('#amount_ttl').val(amountSum.toLocaleString());
+        $('#deposit_ttl').val(depoSum.toLocaleString());
+    });
+
+    function calcTotal() {
         let amountSum = 0;
         let depoSum = 0;
         const rows = $('#billsTbl tbody tr').length;
         $('#billsTbl tbody tr').each(function() {
             if ($(this).index() == rows-1) return;
-
-            const amount = $(this).find('.amount').text().replace(/,/g, '');
-            $(this).find('.paid').val(0);
-
-            if (init > amount){
-                $(this).find('.paid').val((amount*1).toLocaleString());
-            } else if (init > 0) $(this).find('.paid').val((init*1).toLocaleString());
-            const paid = $(this).find('.paid').val().replace(/,/g, '');
-            
-            init -= amount;
-            amountSum += amount*1;
-            depoSum += paid*1;
+            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
+            amountSum += amount;
+            depoSum += paid;
         });
-
         $('#amount_ttl').val(amountSum.toLocaleString());
         $('#deposit_ttl').val(depoSum.toLocaleString());
-    });
+    }
 </script>
 @endsection
