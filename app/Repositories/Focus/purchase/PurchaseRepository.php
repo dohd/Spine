@@ -176,7 +176,7 @@ class PurchaseRepository extends BaseRepository
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $purchase['grandttl'],
-            'tr_date' => date_for_database(date('Y-m-d')),
+            'tr_date' => date('Y-m-d'),
             'due_date' => $purchase['due_date'],
             'user_id' => $purchase['user_id'],
             'note' => $purchase['note'],
