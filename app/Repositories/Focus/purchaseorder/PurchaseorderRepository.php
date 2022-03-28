@@ -259,7 +259,6 @@ class PurchaseorderRepository extends BaseRepository
             $account = Account::where('system', 'stock')->first(['id']);
             $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
             $dr_data[] = array_replace($cr_data, [
-                'account_id' => $account->id,
                 'trans_category_id' => $stock_tr_category->id,
                 'debit' => $order['stock_subttl'],
             ]);    
@@ -284,11 +283,8 @@ class PurchaseorderRepository extends BaseRepository
         }
         // tax
         $account = Account::where('system', 'tax')->first(['id']);
-        $dr_data[] = array_replace($cr_data, [
-            'account_id' => $account->id,
-            'debit' => $order['grandtax'],
-        ]);
-
+        $dr_data[] = array_replace($cr_data, ['debit' => $order['grandtax'],]);
+            
         Transaction::insert($dr_data);        
     }
 }
