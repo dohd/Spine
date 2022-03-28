@@ -12,7 +12,7 @@ trait GrnRelationship
         return $this->belongsTo(Purchaseorder::class);
     }
 
-    public function products()
+    public function items()
     {
         return $this->hasMany(GrnItem::class);
     }
