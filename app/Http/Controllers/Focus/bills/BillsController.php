@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Focus\bills;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\account\Account;
 use App\Models\bill\Bill;
 use App\Repositories\Focus\bill\BillRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BillsController extends Controller
 {
@@ -43,7 +45,10 @@ class BillsController extends Controller
      */
     public function create()
     {
-        return new ViewResponse('focus.bills.create');
+        $acc_type = DB::table('account_types')->where('name', 'Bank')->first();
+        $accounts = Account::where('account_type_id', $acc_type->id)->get();
+
+        return new ViewResponse('focus.bills.create', compact('accounts'));
     }
 
     /**
@@ -57,7 +62,7 @@ class BillsController extends Controller
         // extract input fields
         $bill = $request->only([
             'supplier_id', 'tid', 'date', 'due_date', 'payment_mode', 'deposit', 'doc_ref_type',
-            'doc_ref', 'amount_ttl', 'deposit_ttl'
+            'doc_ref', 'amount_ttl', 'deposit_ttl', 'account_id'
         ]);
         $bill_items = $request->only(['bill_id', 'paid']);
 
