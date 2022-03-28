@@ -63,22 +63,49 @@ class BillRepository extends BaseRepository
         }
         PaidbillItem::insert($bill_items);
 
-        // update bill payment status
+        // update payment status in bills
         foreach ($result->items as $item) {
-            if (!$item->paid) continue;
-            $payable = $item->bill->grandttl;
-            if ($item->paid < $payable) $item->bill->update(['status' => 'Partial']);
-            if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);
+            if ($item->paid) {
+                $payable = $item->bill->grandttl;
+                if ($item->paid < $payable) $item->bill->update(['status' => 'Partial']);
+                if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);    
+            }
         }
 
-        // update bill total paid amount
+        // update paid amount in bills
         $bill_ids = $result->items()->pluck('bill_id')->toArray();
         $paid_bills = PaidbillItem::whereIn('bill_id', $bill_ids)
             ->select(DB::raw('bill_id as id, SUM(paid) as amountpaid'))
             ->groupBy('bill_id')
             ->get()->toArray();
-            
         Batch::update(new Bill, $paid_bills, 'id');
+
+        /** accounting */
+        // credit
+        $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $bill['account_id'],
+            'trans_category_id' => $tr_category->id,
+            'credit' => $bill['deposit_ttl'],
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $bill['due_date'],
+            'user_id' => $bill['user_id'],
+            'ins' => $bill['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result['id'],
+            'user_type' => 'supplier',
+            'is_primary' => 1
+        ];
+        Transaction::create($cr_data);
+
+        // debit
+        unset($cr_data['credit'], $dr_data['is_primary']);
+        $account = Account::where('system', 'payable')->first(['id']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $account->id,
+            'debit' => $bill['deposit_ttl'],
+        ]);
+        Transaction::create($dr_data);
 
         DB::commit();
         if ($result) return true;
