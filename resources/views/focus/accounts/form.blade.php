@@ -5,7 +5,7 @@
             <div class='col'>
                 <select name="account_type" class="form-control" id="accType" required>
                     <option value="">-- Select Account Type --</option>
-                    @foreach ($account_types as $k => $row)
+                    @foreach ($account_types as $row)
                         <option 
                             value="{{ $row->category }}" 
                             key="{{ $row->id }}"
@@ -13,7 +13,7 @@
                             is_multiple="{{ $row->is_multiple }}"
                             {{ $row->id == @$account->account_type_id ? 'selected' : '' }}
                         >
-                            {{ $k + 1 }}. {{ $row->name }}
+                            {{ $row->name }}
                         </option>
                     @endforeach
                 </select>
