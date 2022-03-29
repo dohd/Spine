@@ -212,12 +212,12 @@
         const rows = $('#billsTbl tbody tr').length;
         $('#billsTbl tbody tr').each(function() {
             if ($(this).index() == rows-1) return;
-            $(this).find('.paid').val(0);
             const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
+            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
+            else $(this).find('.paid').val(0);
             const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
 
-            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
-            else if (depo > 0) $(this).find('.paid').val((depo).toLocaleString());
             depo -= amount;
             amountSum += amount;
             depoSum += paid;
