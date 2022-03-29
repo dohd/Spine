@@ -3,10 +3,13 @@
 namespace App\Repositories\Focus\bill;
 
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
 use App\Repositories\BaseRepository;
 use App\Models\bill\Bill;
 use App\Models\bill\Paidbill;
 use App\Models\items\PaidbillItem;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use Illuminate\Support\Facades\DB;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
@@ -67,7 +70,7 @@ class BillRepository extends BaseRepository
         foreach ($result->items as $item) {
             if ($item->paid) {
                 $payable = $item->bill->grandttl;
-                if ($item->paid < $payable) $item->bill->update(['status' => 'Partial']);
+                if ($item->paid && $item->paid < $payable) $item->bill->update(['status' => 'Partial']);
                 if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);    
             }
         }
@@ -99,7 +102,7 @@ class BillRepository extends BaseRepository
         Transaction::create($cr_data);
 
         // debit
-        unset($cr_data['credit'], $dr_data['is_primary']);
+        unset($cr_data['credit'], $cr_data['is_primary']);
         $account = Account::where('system', 'payable')->first(['id']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $account->id,
