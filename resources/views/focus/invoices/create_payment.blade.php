@@ -79,13 +79,13 @@
                                     <td colspan="3"></td>
                                     <td colspan="2">
                                         <div class="row no-gutters mb-1">
-                                            <div class="col-6 pl-3 pt-1"><b>Total Bill Amount:</b></div>
+                                            <div class="col-6 pl-3 pt-1"><b>Total Bill:</b></div>
                                             <div class="col-6">
                                                  {{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}
                                             </div>                          
                                         </div>
                                         <div class="row no-gutters">
-                                            <div class="col-6 pl-3 pt-1"><b>Total Deposited:</b></div>
+                                            <div class="col-6 pl-3 pt-1"><b>Total Paid:</b></div>
                                             <div class="col-6">
                                             {{ Form::text('deposit_ttl', 0, ['class' => 'form-control', 'id' => 'deposit_ttl', 'readonly']) }}
                                             </div>
