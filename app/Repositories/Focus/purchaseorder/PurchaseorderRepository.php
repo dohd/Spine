@@ -4,10 +4,14 @@ namespace App\Repositories\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
 use App\Models\bill\Bill;
+use App\Models\billitem\BillItem;
 use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
 use App\Models\purchaseorder\Grn;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
@@ -69,7 +73,7 @@ class PurchaseorderRepository extends BaseRepository
                 'purchaseorder_id' => $result->id
             ];
             foreach ($item as $key => $val) {
-                if (in_array($key, ['rate', 'tax', 'amount'], 1)) {
+                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
                     $item[$key] = numberClean($val);
                 }
             }
@@ -199,7 +203,8 @@ class PurchaseorderRepository extends BaseRepository
             'doc_ref_type' => $po->doc_ref_type,
             'doc_ref' => $po->doc_ref,
             'po_id' => $po->id,
-            'tax' => $po->tax
+            'tax' => $po->tax,
+            'note' => $po->note
         ];
         $bill = Bill::create($bill_inp);
 
@@ -211,12 +216,12 @@ class PurchaseorderRepository extends BaseRepository
             $bill_item = array_replace($bill_item, [
                 'bill_id' => $bill->id,
                 'qty' => $item->qty,
-                'taxrate' => ($poitem->taxrate / $poitem->qty) * $item->qty,
-                'amount' => ($poitem->amount / $poitem->qty) * $item->qty,
+                'taxrate' => ($poitem['taxrate'] / $poitem['qty']) * $item->qty,
+                'amount' => ($poitem['amount'] / $poitem['qty']) * $item->qty,
             ]);
             $bill_items[] = $bill_item;
         }
-        Bill::insert($bill_items);
+        BillItem::insert($bill_items);
 
         // accounting
         $this->post_transaction($bill_inp, $bill_items, $bill);
@@ -240,7 +245,7 @@ class PurchaseorderRepository extends BaseRepository
             'tr_date' => date('Y-m-d'),
             'due_date' => $order['due_date'],
             'user_id' => $order['user_id'],
-            'note' => $order['note'],
+            'note' => $bill->note,
             'ins' => $order['ins'],
             'tr_type' => $tr_category->code,
             'tr_ref' => $bill->id,
@@ -283,8 +288,11 @@ class PurchaseorderRepository extends BaseRepository
         }
         // tax
         $account = Account::where('system', 'tax')->first(['id']);
-        $dr_data[] = array_replace($cr_data, ['debit' => $order['grandtax'],]);
-            
+        $dr_data[] = array_replace($cr_data, [
+            'account_id' => $account->id, 
+            'debit' => $order['grandtax'],
+        ]);
+        
         Transaction::insert($dr_data);        
     }
 }
