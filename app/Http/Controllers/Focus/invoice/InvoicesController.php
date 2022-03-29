@@ -42,7 +42,6 @@ use App\Http\Responses\RedirectResponse;
 use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
-use App\Models\transaction\Transaction;
 use App\Models\bank\Bank;
 use App\Models\lpo\Lpo;
 use Bitly;
@@ -295,9 +294,9 @@ class InvoicesController extends Controller
      */
     public function create_payment(Request $request)
     {
-        $accounts = Account::where('account_type', 'Assets')->get(['id', 'holder']);
+        $accounts = Account::where('account_type', 'Asset')->get(['id', 'holder']);
 
-        return view('focus.invoices.create_payment', compact('accounts'));
+        return new ViewResponse('focus.invoices.create_payment', compact('accounts'));
     }
 
     /**
