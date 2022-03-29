@@ -246,16 +246,16 @@
     });
 
     // calculate totals
+    let stockSubttl = 0;
+    let stockTax = 0;
+    let stockGrn = 0;
+    let expSubttl = 0;
+    let expTax = 0;
+    let expGrn = 0;
+    let assetSubttl = 0;
+    let assetTax = 0;
+    let assetGrn = 0;
     function calcTotal(id) {
-        let stockSubttl = 0;
-        let stockTax = 0;
-        let stockGrn = 0;
-        let expSubttl = 0;
-        let expTax = 0;
-        let expGrn = 0;
-        let assetSubttl = 0;
-        let assetTax = 0;
-        let assetGrn = 0;
         $('#'+id+' tbody tr').each(function() {
             const qty = $(this).find('.qty').val() * 1;
             if (qty) {
@@ -301,9 +301,10 @@
                 $('#asset_grandttl').val(assetSubttl+assetTax);
                 break;
         }
+        
         $('#grandtax').val(stockTax + expTax + assetTax);
         $('#paidttl').val(stockSubttl + expSubttl + assetSubttl);
-        const grandTtl = $('#grandtax').val()*1 + $('#paidttl').val()*1;
+        const grandTtl = [$('#grandtax').val(), $('#paidttl').val()].reduce((prev, curr) => prev + curr*1, 0);
         $('#grandttl').val(grandTtl);
     }
 </script>
