@@ -222,7 +222,10 @@ class PurchaseRepository extends BaseRepository
         }
         // tax
         $account = Account::where('system', 'tax')->first(['id']);
-        $dr_data[] = array_replace($cr_data, ['debit' => $purchase['grandtax'],]);
+        $dr_data[] = array_replace($cr_data, [
+            'account_id' => $account->id, 
+            'debit' => $purchase['grandtax'],
+        ]);
             
         Transaction::insert($dr_data);        
     }
