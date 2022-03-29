@@ -110,6 +110,13 @@ class BillRepository extends BaseRepository
         ]);
         Transaction::create($dr_data);
 
+        // update account ledgers debit and credit totals
+        $tr_totals = Transaction::where('tr_ref', $bill->id)
+            ->select(DB::raw('SELECT account_id as id, SUM(credit) as credit_ttl, SUM(debit) as debit_ttl'))
+            ->groupBy('account_id')
+            ->get()->toArray();
+        Batch::update(new Account, $tr_totals, 'id');
+
         DB::commit();
         if ($result) return true;
 

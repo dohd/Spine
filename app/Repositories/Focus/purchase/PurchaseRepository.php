@@ -11,6 +11,7 @@ use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
+use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class PurchaseorderRepository.
@@ -226,7 +227,13 @@ class PurchaseRepository extends BaseRepository
             'account_id' => $account->id, 
             'debit' => $purchase['grandtax'],
         ]);
-            
-        Transaction::insert($dr_data);        
+        Transaction::insert($dr_data); 
+        
+        // update account ledgers debit and credit totals
+        $tr_totals = Transaction::where('tr_ref', $bill->id)
+            ->select(DB::raw('SELECT account_id as id, SUM(credit) as credit_ttl, SUM(debit) as debit_ttl'))
+            ->groupBy('account_id')
+            ->get()->toArray();
+        Batch::update(new Account, $tr_totals, 'id');
     }
 }
