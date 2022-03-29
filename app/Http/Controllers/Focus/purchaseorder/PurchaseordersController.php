@@ -192,8 +192,9 @@ class PurchaseordersController extends Controller
         $order['purchaseorder_id'] = $purchaseorder->id;
         $order['ins'] = auth()->user()->ins;
         $order['user_id'] = auth()->user()->id;
-        // modify and filter items without item_id
+        // modify and filter items with 0 qty
         $order_items = modify_array($order_items);
+        $order_items = array_filter($order_items, function ($item) { return $item['qty']; });
 
         $result = $this->repository->create_grn($purchaseorder, compact('order', 'order_items'));
 
