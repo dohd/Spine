@@ -234,29 +234,33 @@ class InvoicesController extends Controller
      * Filter invoice quotes and return form for creating 
      * project invoice
      */
-    public function filter_invoice_quotes()
+    public function filter_invoice_quotes(Request $request)
     {
         // extract input fields
-        $inp_customer = request('customer');
-        $inp_quote_ids = request('selected_products');
+        $customer_id = $request->customer;
+        $quote_ids = explode(',', $request->selected_products);
 
-        if ($inp_customer && $inp_quote_ids) {
-            $quotes = Quote::whereIn('id', explode(',', $inp_quote_ids))->get();
-            $customer = Customer::find($inp_customer);
-            $banks = Bank::all();
-            $last_inv = Invoice::orderBy('tid', 'desc')->first('tid');
+        if (!$customer_id || !$quote_ids) {
+            $customers = Customer::where('active', '1')->pluck('company', 'id');
+            $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
+            $projects = Project::pluck('name', 'id');
     
-            return view('focus.invoices.create_project_invoice')
-                ->with(compact('quotes', 'customer', 'last_inv', 'banks'))
-                ->with(bill_helper(1, 2));
+            return redirect()->route('biller.invoices.project_invoice')
+                ->with(compact('customers', 'lpos', 'projects'));
+    
         }
 
-        $customers = Customer::where('active', '1')->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
-        $projects = Project::pluck('name', 'id');
-
-        return redirect()->route('biller.invoices.project_invoice')
-            ->with(compact('customers', 'lpos', 'projects'));
+        $quotes = Quote::whereIn('id', $quote_ids)->get();
+        $customer = Customer::find($customer_id);
+        $banks = Bank::all();
+        $last_inv = Invoice::orderBy('tid', 'desc')->first('tid');
+        $accounts = Account::whereHas('accountType', function ($query) {
+            $query->whereIn('name', ['Income', 'Other Income']);
+        })->with(['accountType' => function ($query) {
+            $query->select('id', 'name');
+        }])->get();
+                
+        return new ViewResponse('focus.invoices.create_project_invoice', compact('quotes', 'customer', 'last_inv', 'banks', 'accounts'));
     }
 
     /**
@@ -264,27 +268,30 @@ class InvoicesController extends Controller
      */
     public function store_project_invoice(Request $request)
     {
-        // return response()->json($request->all());
-
         // extract request input fields
-        $invoice_data = $request->only([
-            'customer_id', 'taxid', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 
-            'notes', 'subtotal', 'tax', 'total', 'term_id'
+        $bill = $request->only([
+            'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',
+            'subtotal', 'tax', 'total', 
         ]);
-        $dr_data = $request->only(['customer_name', 'dr_account_id', 'tid']);
-        $cr_data = $request->only(['cr_account_id']);
-        $tax_data = $request->only(['tax']);
-        $data_items = $request->only(['description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id']);
+        $bill_items = $request->only([
+            'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id'
+        ]);
 
-        $invoice_data['user_id'] = auth()->user()->id;
-        $invoice_data['ins'] = auth()->user()->ins;
+        $bill['user_id'] = auth()->user()->id;
+        $bill['ins'] = auth()->user()->ins;
 
-        $result = $this->repository->create_project_invoice(compact('invoice_data', 'dr_data', 'cr_data', 'tax_data', 'data_items'));
+        $bill_items = modify_array($bill_items);
+
+        $result = $this->repository->create_project_invoice(compact('bill', 'bill_items'));
 
         $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $msg = trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-md bg-purple ml-2"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  
-            <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> 
-            <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-warning"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;';
+        $msg = trans('alerts.backend.invoices.created') . 
+            '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-md bg-purple ml-2">
+                <span class="fa fa-print" aria-hidden="true"></span>Print  </a>  
+            <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md">
+                <span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> 
+            <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-warning">
+                <span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;';
 
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => $msg]);
     }
