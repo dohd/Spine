@@ -331,125 +331,76 @@ class InvoiceRepository extends BaseRepository
     public function create_project_invoice(array $input)
     {
         DB::beginTransaction();
-        // credit and debit data
-        $dr_data = $input['dr_data'];
-        $cr_data = $input['cr_data'];
-        $is_actual = isset($dr_data) && isset($cr_data);
 
-        $invoice = $input['invoice_data'];
-        // sanitize values
-        foreach ($invoice as $key => $value) {
-            if (in_array($key, ['total', 'subtotal', 'tax', 'invoicedate'])) {
-                if ($key == 'invoicedate') $invoice[$key] = date_for_database($value);                
-                else $invoice[$key] = numberClean($value);
+        $bill = $input['bill'];
+        foreach ($bill as $key => $val) {
+            if (in_array($key, ['total', 'subtotal', 'tax', 'invoicedate'], 1)) {
+                if ($key == 'invoicedate') $bill[$key] = date_for_database($val);                
+                else $bill[$key] = numberClean($val);
             }
         }
-        $duedate = $invoice['invoicedate'] . ' + ' . $invoice['validity'] . ' days';
-        $invoice['invoiceduedate'] = date_for_database($duedate);
-
+        $duedate = $bill['invoicedate'] . ' + ' . $bill['validity'] . ' days';
+        $bill['invoiceduedate'] = date_for_database($duedate);
         // increament tid
-        $last_inv = Invoice::orderBy('id', 'desc')->first('tid');
-        if ($last_inv && $invoice['tid'] <= $last_inv->tid) {
-            $invoice['tid'] = $last_inv->tid + 1;
+        $last_inv = Invoice::orderBy('id', 'DESC')->first('tid');
+        if ($last_inv && $bill['tid'] <= $last_inv->tid) {
+            $bill['tid'] = $last_inv->tid + 1;
         }
-        if ($is_actual) $invoice['type'] = 'actual';
-        $invoice['status'] = 'due';
-        unset($invoice['taxid']);
-        $result = Invoice::create($invoice);
-
-        // invoice items
-        $invoice_items = array();
-        $item = $input['data_items'];
-        for ($i = 0; $i < count($item['quote_id']); $i++) {
-            $row = array('invoice_id' => $result->id, 'ins' => $result->ins);
-            foreach (array_keys($item) as $key) {
-                $value = $item[$key][$i];
-                if ($key == 'product_price') $row[$key] = numberClean($value);
-                else $row[$key] = $value;               
-            }
-            $invoice_items[] = $row;
+        $result = Invoice::create($bill);
+        
+        $bill_items = $input['bill_items'];
+        foreach ($bill_items as $k => $item) {
+            $bill_items[$k]['product_price'] = numberClean($item['product_price']);
         }
-        InvoiceItem::insert($invoice_items);
+        InvoiceItem::insert($bill_items);
 
-        // actual invoice
-        if ($is_actual) {
-            // update invoiced Quote or PI
-            Quote::whereIn('id', function($q) use ($result) {
-                $q->select('quote_id')->from('invoice_items')->where(['invoice_id' => $result->id]);
-            })->update(['invoiced' => 'Yes']);
+        // update Quote or PI invoice status
+        Quote::whereIn('id', function($q) use ($result) {
+            $q->select('quote_id')->from('invoice_items')->where('invoice_id', $result->id);
+        })->update(['invoiced' => 'Yes']);
+        
+        /** accounting */
+        // debit payable
+        $account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
+        $dr_data = [
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'debit' => $result->total,
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $result->invoiceduedate,
+            'user_id' => $result->user_id,
+            'note' => $result->notes,
+            'ins' => $result->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1
+        ];
+        Transaction::create($dr_data);
 
-            // increament transaction id
-            $tr_id = $dr_data['tid'];
-            $transxn_no = Transaction::orderBy('id', 'desc')->first();
-            if ($transxn_no && $dr_data['tid'] <= $transxn_no->tid) {
-                $tr_id = $transxn_no->tid + 1;
-            }
+        // credit income and tax
+        unset($dr_data['credit'], $dr_data['is_primary']);
+        $income_cr_data = array_replace($dr_data, [
+            'account_id' => $result->account_id,
+            'credit' => $result->subtotal,
+        ]);
+        $account = Account::where('system', 'tax')->first(['id']);
+        $tax_cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'credit' => $result->tax,
+        ]);
+        Transaction::insert([$income_cr_data, $tax_cr_data]);
 
-            $tr_category = Transactioncategory::where('code', 'sales')->first();
-            $customer_name = $dr_data['customer_name'];
-            $dr_account_id = $dr_data['dr_account_id'];
-            
-            $dr_data = array_replace($dr_data, [
-                'payer_type' => 'customer',
-                'payer' => $customer_name,
-                'payer_id' => $invoice['customer_id'],
-                'trans_category_id' => $tr_category->id,
-                'is_bill' => 2,
-                'transaction_type' => 'sales',
-                'ins' => $invoice['ins'],
-                'user_id' => $invoice['user_id'],
-                'tid' => $tr_id,
-                'refer_no' => $result->tid,
-                'account_id' => $dr_account_id,
-                'transaction_date' => $invoice['invoicedate'],
-                'due_date' => $invoice['invoiceduedate'],
-                'debit' => $invoice['total'],
-                'note' => $invoice['notes'],
-                'invoice_id' => $result->id
-            ]);
-            // debit
-            unset($dr_data['customer_name']);
-            unset($dr_data['dr_account_id']);
-            Purchase::create($dr_data);
+        // update account ledgers debit and credit totals
+        $tr_totals = Transaction::where('tr_ref', $result->id)
+            ->select(DB::raw('account_id as id, SUM(credit) as credit_ttl, SUM(debit) as debit_ttl'))
+            ->groupBy('account_id')
+            ->get()->toArray();
+        Batch::update(new Account, $tr_totals, 'id');
 
-            //Cr Income amount exclusive tax
-            $cr_account_id = $cr_data['cr_account_id'];
-            $cr_data = array_replace($dr_data, [
-                'is_bill' => 0,
-                'account_id' => $cr_account_id,
-                'credit' => $invoice['subtotal']
-            ]);
-            // credit
-            unset($cr_data['debit']);
-            Purchase::create($cr_data);
-
-            //Cr Tax
-            $inp_tax = numberClean($input['tax_data']['tax']);
-            if ($inp_tax > 0) {
-                $tr_tax_category = Transactioncategory::where('code', 'p_taxes')->first();
-                $account_id = Account::where('system', 'tax')->first();
-
-                $tax_data = array_replace($cr_data, [
-                    'account_id' => $account_id->id,
-                    'trans_category_id' => $tr_tax_category->id,
-                    'secondary_account_id' => $account_id->id,
-                    'tax_type' => 'sales_purchases',
-                    'tax_amount' => $invoice['subtotal'],
-                    'credit' => $inp_tax,
-                    'taxable_amount' => $invoice['tax'],
-                    'bill_id' => $result->id
-                ]);
-                // credit tax
-                unset($tax_data['is_bill']);
-                unset($tax_data['due_date']);
-                Purchase::create($tax_data);
-            }
-        }
-
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
+        DB::commit();
+        if ($result) return $result;
 
         throw new GeneralException('Error Creating Invoice');
     }
