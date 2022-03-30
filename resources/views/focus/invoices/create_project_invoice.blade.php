@@ -10,24 +10,55 @@
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.invoices.store_project_invoice', 'method' => 'POST', 'id' => 'storeInvoice']) }}
                         <div class="row mb-1">
-                            <div class="col-3"><label for="payer" class="caption">Customer Name*</label>
+                            <div class="col-4"><label for="payer" class="caption">Customer Name*</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                     {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
                                     <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-2">
+                                <label for="tid" class="caption">Transaction ID*</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', @$last_inv->tid+1), ['class' => 'form-control round', 'disabled']) }}
+                                    <input type="hidden" name="tid" value={{ @$last_inv->tid+1 }}>
+                                </div>
+                            </div>
+                            <div class="col-2">
                                 <label for="taxid" class="caption">KRA PIN</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                                     {{ Form::text('taxid', $customer->taxid, ['class' => 'form-control round', 'required']) }}
                                 </div>
                             </div>
+                            <div class="col-2">
+                                <label for="invoicedate" class="caption">Invoice Date*</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                    {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate']) }}
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <label for="tid" class="caption">Select {{ trans('general.tax') }}*</label>
+                                <div class="input-group">
+                                    <select class="form-control round" name='tax_id' id="tax_id">
+                                        @foreach ([16, 8, 0] as $val)
+                                        <option value="{{ $val }}" {{ $val == 16 ? 'selected' : '' }}>
+                                            {{ $val ? $val.'% VAT' : 'Off' }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>   
+                        </div>
+
+                        <div class="row mb-1">
                             <div class="col-3"> 
                                 <label for="refer_no" class="caption">Bank Account*</label>                                   
                                 <div class="input-group">
-                                    <select class="form-control round select-box required" name="bank_id" id="bank_id" required>
+                                    <select class="form-control required" name="bank_id" id="bank_id" required>
                                         <option value="">-- Select Bank --</option>
                                         @foreach ($banks as $bank)
                                             <option value="{{ $bank->id }}">{{ $bank->bank }}</option>
@@ -36,81 +67,39 @@
                                 </div>                                
                             </div>
                             <div class="col-3">
-                                <label for="tid" class="caption">Select {{ trans('general.tax') }}*</label>
-                                <div class="input-group">
-                                    <select class="form-control round" name='tax_id' id="tax_id">
-                                        <option value="16" selected>16% VAT</option>
-                                        <option value="8">8% VAT</option>
-                                        <option value="0">Off</option>
-                                    </select>
-                                </div>
-                            </div>                            
-                        </div>
-
-                        <div class="row mb-1">
-                            <div class="col-3">
-                                <label for="invoicedate" class="caption">Invoice Date*</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                    {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate']) }}
-                                </div>
-                            </div>
-                            <div class="col-3">
                                 <label for="validity" class="caption">Credit Period*</label>
                                 <div class="input-group">
-                                    <select class="form-control round  select-box" name="validity" id="validity">
-                                        <option value="0" selected>On Receipt</option>
-                                        <option value="14">Valid For 14 Days</option>
-                                        <option value="30">Valid For 30 Days</option>
-                                        <option value="45">Valid For 45 Days</option>
-                                        <option value="60">Valid For 60 Days</option>
-                                        <option value="90">Valid For 90 Days</option>
+                                    <select class="form-control" name="validity" id="validity">
+                                        @foreach ([0, 14, 30, 45, 60, 90] as $val)
+                                        <option value="{{ $val }}" {{ !$val ? 'selected' : ''}}>
+                                            {{ $val ? 'Valid For ' . $val . ' Days' : 'On Receipt' }}
+                                        </option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-3">
-                                <label for="tid" class="caption">Transaction ID*</label>
+                                <label for="income_category" class="caption">Income Category*</label>
                                 <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('tid', 'Inv-'.sprintf('%04d', @$last_inv->tid+1), ['class' => 'form-control round', 'disabled']) }}
-                                    <input type="hidden" name="tid" value={{ @$last_inv->tid+1 }}>
+                                    <select class="form-control" name="account_id" id="" required>
+                                        <option value="">-- Select Category --</option>                                        
+                                        @foreach ($accounts as $row)
+                                            @if ($row->accountType->name == 'Income')
+                                                <optgroup label="{{ $row->accountType->name }}">
+                                                    <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                                </optgroup>
+                                            @else
+                                                <optgroup label="{{ $row->accountType->name }}">
+                                                    <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                                </optgroup>
+                                            @endif
+                                        @endforeach                                        
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row mb-1">
-                            <div class="col-4">                                
-                                <div class="input-group"><label for="ledger-off">Invoice Type</label></div>
-                                <select class="form-control" name="ledger_toggle" id="ledgertoggle">
-                                    <option value="0" selected>Dummy</option>
-                                    <option value="1">Actual</option>                                    
-                                </select>
-                            </div>
-                            <div class="col-4">                                
-                                <div class="input-group">
-                                    <label for="refer_no" class="caption">Ledger Account Asset (Debit)*</label>
-                                </div>
-                                <select name="dr_account_id" class="form-control" id="dr_account" required disabled>
-                                    <option value="">-- Select Ledger Account--</option>
-                                    @foreach ($receivables as $account)
-                                        <option value="{{ $account->id }}"> {{ $account->holder }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-4">
-                                <div class="input-group">
-                                    <label for="tid" class="caption">Ledger Account/Income Account (Credit)*</label>
-                                </div>
-                                <select name="cr_account_id" class="form-control" id="cr_account" required disabled>
-                                    <option value="">-- Select Ledger Account --</option>
-                                    @foreach ($income_accounts as $account)
-                                        <option value="{{ $account->id }}">{{ $account->holder }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>                     
-                        
                         <div class="row mb-1">
                             <div class="col-12">
                                 <div class="input-group"><label for="title" class="caption">Note</label></div>
@@ -211,16 +200,6 @@
     $('.datepicker')
         .datepicker({ format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date());
-
-    // Disable Account ledgers
-    $('#ledgertoggle').change(function() {
-        $('#dr_account').attr('disabled', true);
-        $('#cr_account').attr('disabled', true);
-        if ($(this).val() == 1) {
-            $('#dr_account').attr('disabled', false);
-            $('#cr_account').attr('disabled', false);
-        }
-    });
 
     // On selecting Tax
     $('#tax_id').change(function() {
