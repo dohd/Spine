@@ -1,9 +1,13 @@
 <?php
+
 use App\Helpers\uuid;
+use App\Models\account\Account;
 use App\Models\hrm\Hrm;
 use App\Models\Settings\Setting;
 use Illuminate\Support\Facades\DB;
 use App\Models\transaction\Transaction;
+use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
+
 /**
  * Henerate UUID.
  *
@@ -814,7 +818,7 @@ function printlog(...$logs)
     }
 }
 // modify input array
-function modify_array($input=[])
+function modify_array(array $input)
 {
     $output = array();
     foreach ($input as $key => $list) {
