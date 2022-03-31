@@ -230,10 +230,6 @@ class PurchaseRepository extends BaseRepository
         Transaction::insert($dr_data); 
         
         // update account ledgers debit and credit totals
-        $tr_totals = Transaction::where('tr_ref', $bill->id)
-            ->select(DB::raw('account_id as id, SUM(credit) as credit_ttl, SUM(debit) as debit_ttl'))
-            ->groupBy('account_id')
-            ->get()->toArray();
-        Batch::update(new Account, $tr_totals, 'id');
+        aggregate_account_transactions($bill->id);
     }
 }
