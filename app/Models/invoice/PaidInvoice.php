@@ -2,10 +2,13 @@
 
 namespace App\Models\invoice;
 
+use App\Models\invoice\Traits\PaidInvoiceRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class PaidInvoice extends Model
 {
+    use PaidInvoiceRelationship;
+    
     /**
      * The database table used by the model.
      * @var string
