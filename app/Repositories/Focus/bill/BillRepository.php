@@ -84,7 +84,7 @@ class BillRepository extends BaseRepository
         Batch::update(new Bill, $paid_bills, 'id');
 
         /** accounting */
-        // credit
+        // credit supplier
         $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $bill['account_id'],
@@ -101,7 +101,7 @@ class BillRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit
+        // debit accounts payable
         unset($cr_data['credit'], $cr_data['is_primary']);
         $account = Account::where('system', 'payable')->first(['id']);
         $dr_data = array_replace($cr_data, [
