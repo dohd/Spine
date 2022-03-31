@@ -14,69 +14,95 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'stoPaymnt']) }}
+                {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'stoPaymnt']) }}
                         <div class="row mb-1">
                             <div class="col-5">
                                 <label for="customer" class="caption">Search Customer</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    <select id="person" name="customer_id" class="form-control select-box" required>
-                                        <option value="">-- Select Customer --</option>
+                                    <select id="person" name="customer_id" class="form-control select-box" data-placeholder="Search Customer" required>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-3">
-                                <label for="ledgerAccount" class="caption">Ledger Account</label>
+
+                            <div class="col-2">
+                                <label for="reference" class="caption">Transaction ID</label>
                                 <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    <select class="form-control" name="account_id" id="account_id" required>
-                                        <option value="">-- Select Ledger Account --</option>
-                                        @foreach ($accounts as $row)
-                                            <option value="{{ $row->id }}">{{ $row->holder }}</option>
-                                        @endforeach
-                                    </select>
+                                    {{ Form::text('tid', 1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
                                 </div>
                             </div> 
+
                             <div class="col-2">
                                 <label for="date" class="caption">Date</label>
                                 <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                                     {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
                                 </div>
                             </div>
-                            
+
                             <div class="col-2">
-                                <label for="tid" class="caption">Transaction ID</label>
+                                <label for="date" class="caption">Due Date</label>
                                 <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('tid', 1, ['class' => 'form-control round', 'id' => 'tid', 'readonly']) }}
-                                    <input type="hidden" name="tid" value=1>
+                                    {{ Form::text('due_date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
                                 </div>
-                            </div>                                                       
+                            </div>                                                                            
                         </div> 
 
-                        <div class="row mb-1">
+                        <div class="row mb-2">  
+                            <div class="col-3">
+                                <label for="payment_mode">Payment Mode</label>
+                                <select name="payment_mode" id="" class="form-control" required>
+                                   <option value="">-- Select Mode --</option>
+                                    @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
+                                        <option value="{{ $val }}">{{ strtoupper($val) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>  
                             <div class="col-2">
                                 <label for="deposit" class="caption">Deposit (Ksh.)</label>
                                 <div class="input-group">
                                     {{ Form::text('deposit', null, ['class' => 'form-control', 'id' => 'deposit', 'required']) }}
                                 </div>
                             </div>  
+                            <div class="col-2">
+                                <label for="paid_from">Paid From</label>
+                                <select name="account_id" id="" class="form-control" required>
+                                   <option value="">-- Select Bank --</option>
+                                    @foreach ($accounts as $row)
+                                        <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                    @endforeach
+                                </select>
+                            </div>  
+                            <div class="col-2">
+                                <label for="payment_mode">Document Type</label>
+                                <select name="doc_ref_type" id="" class="form-control" required>
+                                   <option value="">-- Select Type --</option>
+                                    @foreach (['receipt', 'dnote', 'voucher'] as $val)
+                                        <option value="{{ $val }}">{{ ucfirst($val) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>     
+                            <div class="col-2">
+                                <label for="reference" class="caption">Document Reference</label>
+                                <div class="input-group">
+                                    {{ Form::text('doc_ref', null, ['class' => 'form-control', 'required']) }}
+                                </div>
+                            </div>                                                     
                         </div>
 
                         <table class="table-responsive tfr my_stripe_single" id="invoiceTbl">
                             <thead>
                                 <tr class="item_header bg-gradient-directional-blue white">
-                                    <th width="10%" class="text-center">#</th>
-                                    <th width="10%">Invoice Number</th>
-                                    <th width="40%" class="text-center">Description</th>
-                                    <th width="20%" class="text-center">Amount (VAT Inc)</th>
-                                    <th width="20%" class="text-center">Deposit (Ksh.)</th>
+                                    <th width="15%" class="text-center">Due date</th>
+                                    <th width="5%">Invoice Number</th>
+                                    <th width="40%" class="text-center">Note</th>
+                                    <th width="10%">Status</th>
+                                    <th width="15%" class="text-center">Amount (VAT Inc)</th>
+                                    <th width="15%" class="text-center">Paid (Ksh.)</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody>                                
                                 <tr class="bg-white">
-                                    <td colspan="3"></td>
+                                    <td colspan="4"></td>
                                     <td colspan="2">
                                         <div class="row no-gutters mb-1">
                                             <div class="col-6 pl-3 pt-1"><b>Total Bill:</b></div>
@@ -93,7 +119,7 @@
                                     </td>
                                 </tr>
                             </tbody>                
-                        </table>                        
+                        </table>
 
                         <div class="row mt-1">                            
                             <div class="col-12"> 
@@ -125,28 +151,44 @@
             dataType: 'json',
             type: 'POST',
             quietMillis: 50,
-            data: function(params) { 
-                return { search: params.term }
-            },
-            processResults: function(data) {
-                return {
-                    results: $.map(data, function(item) {
-                        return {
-                            text: `${item.name} - ${item.company}`,
-                            id: item.id
-                        }
-                    })
-                };
-            },
+            data: ({term}) => ({search: term}),
+            processResults: result => {
+                return { results: result.map(v => ({text: `${v.name} - ${v.company}`, id: v.id }))};
+            }      
         }
     });
 
-    // load customer invoices
+    // On adding paid values
+    $('#invoiceTbl').on('change', '.paid', function() {
+        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
+        const paid = $(this).val().replace(/,/g, '') * 1;
+        if (paid > amount) $(this).val(amount.toLocaleString());
+        calcTotal();
+    });
+
+    // invoice row
+    function invoiceRow(v, i) {
+        const amount = parseFloat(v.total - v.amountpaid).toLocaleString();
+        return `
+            <tr>
+                <td class="text-center">${new Date(v.invoiceduedate).toDateString()}</td>
+                <td>${v.tid}</td>
+                <td class="text-center">${v.notes}</td>
+                <td>${v.status}</td>
+                <td class="text-center amount"><b>${amount}</b></td>
+                <td><input type="text" class="form-control paid" name="paid[]"></td>
+                <input type="hidden" name="invoice_id[]" value="${v.id}">
+            </tr>
+        `;
+    }
+
+    // load client invoices
     $('#person').change(function() {
         $.ajax({
             url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
             success: result => {
-                if (!result.length) $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
+                $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
+                if (!result.length) return;
                 result.forEach((v, i) => {
                     $('#invoiceTbl tbody tr:eq(-1)').before(invoiceRow(v, i));
                 });
@@ -154,54 +196,41 @@
         });
     });
 
-    // On adding paid values
-    $('#invoiceTbl').on('change', '.paid', function() {
-        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '');
-        if (paid > amount) $(this).val((amount*1).toLocaleString());
-    });
-
-    // invoice rows
-    function invoiceRow(v, i) {
-        const total = parseFloat(v.total).toLocaleString();
-        return `
-            <tr>
-                <td class="text-center">${i+1}</td>
-                <td>${v.tid}</td>
-                <td class="text-center">${v.notes}</td>
-                <td class="text-center amount"><b>${total}</b></td>
-                <td><input type="text" class="form-control paid" name="paid[]"></td>
-                <input type="hidden" name="invoice_id[]" value="${v.id}" id="invoiceid-${i}">
-            </tr>
-        `;
-    }
-
     // On deposit change
     $('#deposit').change(function() {
-        const depo = $(this).val().replace(/,/g, '');
+        let amountSum = 0;
+        let depoSum = 0;
+        let depo = $(this).val().replace(/,/g, '') * 1;
         $(this).val(parseFloat(depo).toLocaleString());
+        const rows = $('#invoiceTbl tbody tr').length;
+        $('#invoiceTbl tbody tr').each(function() {
+            if ($(this).index() == rows-1) return;
+            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
+            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
+            else $(this).find('.paid').val(0);
+            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
+            depo -= amount;
+            amountSum += amount;
+            depoSum += paid;
+        });
+        $('#amount_ttl').val(amountSum.toLocaleString());
+        $('#deposit_ttl').val(depoSum.toLocaleString());
+    });
 
-        let init = depo*1;
+    function calcTotal() {
         let amountSum = 0;
         let depoSum = 0;
         const rows = $('#invoiceTbl tbody tr').length;
         $('#invoiceTbl tbody tr').each(function() {
             if ($(this).index() == rows-1) return;
-
-            const amount = $(this).find('.amount').text().replace(/,/g, '');
-            $(this).find('.paid').val(0);
-
-            if (init > amount){
-                $(this).find('.paid').val((amount*1).toLocaleString());
-            } else if (init > 0) $(this).find('.paid').val((init*1).toLocaleString());
-            const paid = $(this).find('.paid').val().replace(/,/g, '');
-            
-            init -= amount;
-            amountSum += amount*1;
-            depoSum += paid*1;
+            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
+            amountSum += amount;
+            depoSum += paid;
         });
-
         $('#amount_ttl').val(amountSum.toLocaleString());
         $('#deposit_ttl').val(depoSum.toLocaleString());
-    });
+    }
 </script>
 @endsection
