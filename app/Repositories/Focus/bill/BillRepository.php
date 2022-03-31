@@ -68,11 +68,9 @@ class BillRepository extends BaseRepository
 
         // update payment status in bills
         foreach ($result->items as $item) {
-            if ($item->paid) {
-                $payable = $item->bill->grandttl;
-                if ($item->paid && $item->paid < $payable) $item->bill->update(['status' => 'Partial']);
-                if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);    
-            }
+            $payable = $item->bill->grandttl;
+            if ($item->paid < $payable) $item->bill->update(['status' => 'Partial']);
+            if ($item->paid == $payable) $item->bill->update(['status' => 'Paid']);    
         }
 
         // update paid amount in bills
@@ -111,11 +109,7 @@ class BillRepository extends BaseRepository
         Transaction::create($dr_data);
 
         // update account ledgers debit and credit totals
-        $tr_totals = Transaction::where('tr_ref', $result->id)
-            ->select(DB::raw('account_id as id, SUM(credit) as credit_ttl, SUM(debit) as debit_ttl'))
-            ->groupBy('account_id')
-            ->get()->toArray();
-        Batch::update(new Account, $tr_totals, 'id');
+        aggregate_account_transactions($result->id);
 
         DB::commit();
         if ($result) return true;
