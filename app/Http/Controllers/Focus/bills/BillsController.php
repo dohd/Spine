@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
+use App\Models\account\AccountType;
 use App\Models\bill\Bill;
 use App\Repositories\Focus\bill\BillRepository;
 use Illuminate\Http\Request;
@@ -45,8 +46,9 @@ class BillsController extends Controller
      */
     public function create()
     {
-        $acc_type = DB::table('account_types')->where('name', 'Bank')->first();
-        $accounts = Account::where('account_type_id', $acc_type->id)->get();
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->where('name', 'Bank');
+        })->get();
 
         return new ViewResponse('focus.bills.create', compact('accounts'));
     }
@@ -69,7 +71,9 @@ class BillsController extends Controller
         $bill['ins'] = auth()->user()->ins;
         $bill['user_id'] = auth()->user()->id;
 
+        // modify and filter paid bill
         $bill_items = modify_array($bill_items);
+        $bill_items = array_filter($bill_items, function ($item) { return $item['paid']; });
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
