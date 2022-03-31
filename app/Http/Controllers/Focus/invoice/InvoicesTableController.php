@@ -57,11 +57,12 @@ class InvoicesTableController extends Controller
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
                 $tid = 'Inv-'.sprintf('%04d', $invoice->tid);
-                
-                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' . $tid . '</a><br>'. $invoice->type . ':';
+                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($invoice) {
-                return $invoice->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '"><i class="ft-eye"></i></a>';
+                return $invoice->customer->name . 
+                    ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '">
+                        <i class="ft-eye"></i></a>';
             })
             ->addColumn('invoicedate', function ($invoice) {
                 return dateFormat($invoice->invoicedate);
@@ -82,7 +83,6 @@ class InvoicesTableController extends Controller
                     $tid = sprintf('%04d', $item->quote->tid);
                     $tids[] = $item->quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;
                 }
-
                 return implode(', ', $tids);
             })
             ->addColumn('lead_tid', function ($invoice) {
@@ -91,7 +91,6 @@ class InvoicesTableController extends Controller
                     if (!$item->quote) continue;
                     $tids[] = 'Tkt-'.sprintf('%04d',$item->quote->lead->reference);                        
                 }
-
                 return implode(', ', $tids); 
             })
             ->addColumn('actions', function ($invoice) {
