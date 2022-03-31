@@ -314,13 +314,18 @@ class InvoicesController extends Controller
     public function store_payment(Request $request)
     {
         // extract request input
-        $bill = $request->only(['account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl']);
+        $bill = $request->only([
+            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl',
+            'due_date', 'payment_mode', 'doc_ref_type', 'doc_ref'
+        ]);
         $bill_items = $request->only(['invoice_id', 'paid']); 
 
         $bill['ins'] = auth()->user()->ins;
         $bill['user_id'] = auth()->user()->id;
 
+        // modify and filter paid bill items 
         $bill_items = modify_array($bill_items);
+        $bill_items = array_filter($bill_items, function ($item) { return $item['paid']; });
 
         $result = $this->repository->create_invoice_payment(compact('bill', 'bill_items'));
 
@@ -332,9 +337,9 @@ class InvoicesController extends Controller
      */
     public function client_invoices(Request $request)
     {
-        $invoices = Invoice::where(['customer_id' => $request->id, 'type' => 'actual'])
+        $invoices = Invoice::where('customer_id', $request->id)
             ->whereIn('status', ['due', 'partial'])
-            ->get(['id', 'tid', 'total', 'notes']);
+            ->get();
 
         return response()->json($invoices);
     }
