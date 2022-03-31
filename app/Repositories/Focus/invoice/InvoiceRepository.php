@@ -45,7 +45,7 @@ class InvoiceRepository extends BaseRepository
         $q = $this->query();
 
         $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', '=', request('i_rel_id', 0));
+            return $q->where('customer_id', request('i_rel_id', 0));
         });
 
         if (request('project_id')) {
@@ -53,10 +53,6 @@ class InvoiceRepository extends BaseRepository
                 return $sq->where('project_id', request('project_id', 0));
             });
         }
-
-        if (request('sub') == 1) $q->where('i_class', '>', 1);
-        if (request('sub') == 2) $q->where('i_class', 1);
-        else $q->where('i_class', '<', 1);
         
         if (request('start_date') && request('end_date')) {
             $q->whereBetween('invoicedate', [
@@ -65,7 +61,7 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
-        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes', 'type']);
+        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes']);
     }
 
     public function getSelfDataTable($self_id = false)
@@ -414,10 +410,10 @@ class InvoiceRepository extends BaseRepository
 
         $bill = $input['bill'];
         foreach ($bill as $key => $val) {
-            if (in_array($key, ['date'], 1)) {
+            if (in_array($key, ['date', 'due_date'], 1)) {
                 $bill[$key] = date_for_database($val);
             }
-            if (in_array($key, ['amount_ttl', 'deposit_ttl'], 1)) {
+            if (in_array($key, ['amount_ttl', 'deposit_ttl', 'deposit'], 1)) {
                 $bill[$key] = numberClean($val);
             }
         }
@@ -430,6 +426,51 @@ class InvoiceRepository extends BaseRepository
             $bill_items[$k] = $item;
         }
         PaidInvoiceItem::insert($bill_items);
+
+        // update payment status in invoices
+        foreach ($result->items as $item) {
+            $payable = $item->invoice->total;
+            if ($item->paid < $payable) $item->invoice->update(['status' => 'partial']);
+            if ($item->paid == $payable) $item->invoice->update(['status' => 'paid']);    
+        }
+
+        // update paid amount in invoices
+        $invoice_ids = $result->items()->pluck('invoice_id')->toArray();
+        $paid_invoices = PaidInvoice::whereIn('invoice_id', $invoice_ids)
+            ->select(DB::raw('invoice_id as id, SUM(paid) as amountpaid'))
+            ->groupBy('invoice_id')
+            ->get()->toArray();
+        Batch::update(new Invoice, $paid_invoices, 'id');
+
+        /** accounting */
+        // credit receivable
+        $account = Account::where('system', 'receivable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $bill['deposit_ttl'],
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $bill['due_date'],
+            'user_id' => $bill['user_id'],
+            'ins' => $bill['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result['id'],
+            'user_type' => 'customer',
+            'is_primary' => 1
+        ];
+        Transaction::create($cr_data);
+
+        // debit bank
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $bill['account_id'],
+            'debit' => $bill['deposit_ttl'],
+        ]);
+        Transaction::create($dr_data);
+        
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions($result->id);
 
         DB::commit();
         if ($result) return true;
