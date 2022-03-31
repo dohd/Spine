@@ -236,7 +236,7 @@ class PurchaseorderRepository extends BaseRepository
      */
     protected function post_transaction($order, $order_items, $bill) 
     {
-        /** credit */ 
+        /** credit accounts payable */ 
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
         $cr_data = [
@@ -265,6 +265,7 @@ class PurchaseorderRepository extends BaseRepository
             $account = Account::where('system', 'stock')->first(['id']);
             $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
             $dr_data[] = array_replace($cr_data, [
+                'account_id' => $account->id,
                 'trans_category_id' => $stock_tr_category->id,
                 'debit' => $order['stock_subttl'],
             ]);    
