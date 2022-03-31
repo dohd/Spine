@@ -78,7 +78,7 @@ class PurchaseRepository extends BaseRepository
         }
         PurchaseItem::insert($purchase_items);
 
-        // accounts
+        // accounting
         $this->post_transaction($purchase, $purchase_items, $bill);
 
         DB::commit();
@@ -117,7 +117,7 @@ class PurchaseRepository extends BaseRepository
         $bill_items = $input['bill_items'];
         // delete items excluded
         $item_ids = array_reduce($bill_items, function ($init, $item) {
-            array_push($init, $item['id']);
+            $init[] = $item['id'];
             return $init;
         }, []);
         $purchase->products()->whereNotIn('id', $item_ids)->delete();
@@ -134,10 +134,9 @@ class PurchaseRepository extends BaseRepository
             foreach($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
                     $bill_item[$key] = numberClean($val);
-                } 
-                else $bill_item[$key] = $val;
+                } else $bill_item[$key] = $val;
             }
-            if (!$bill_item->id) unset($bill_item->id);
+            if (!$bill_item->id) unset($bill_item['id']);
             $bill_item->save();                
         }
 
@@ -170,7 +169,7 @@ class PurchaseRepository extends BaseRepository
      */
     protected function post_transaction(array $purchase, array $purchase_items, $bill) 
     {
-        /** credit */ 
+        /** credit accounts payable */ 
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
         $cr_data = [
@@ -199,6 +198,7 @@ class PurchaseRepository extends BaseRepository
             $account = Account::where('system', 'stock')->first(['id']);
             $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
             $dr_data[] = array_replace($cr_data, [
+                'account_id' => $account->id,
                 'trans_category_id' => $stock_tr_category->id,
                 'debit' => $purchase['stock_subttl'],
             ]);    
