@@ -56,7 +56,7 @@
                                 <label for="payment_mode">Payment Mode</label>
                                 <select name="payment_mode" id="" class="form-control" required>
                                    <option value="">-- Select Mode --</option>
-                                    @foreach (['eft', 'rtg','cash', 'mpesa', 'cheque'] as $val)
+                                    @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
                                         <option value="{{ $val }}">{{ strtoupper($val) }}</option>
                                     @endforeach
                                 </select>
@@ -217,7 +217,6 @@
             else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
             else $(this).find('.paid').val(0);
             const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
-
             depo -= amount;
             amountSum += amount;
             depoSum += paid;
