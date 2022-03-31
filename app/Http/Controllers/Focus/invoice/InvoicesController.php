@@ -301,7 +301,9 @@ class InvoicesController extends Controller
      */
     public function create_payment(Request $request)
     {
-        $accounts = Account::where('account_type', 'Asset')->get(['id', 'holder']);
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->where('name', 'Bank');
+        })->get();
 
         return new ViewResponse('focus.invoices.create_payment', compact('accounts'));
     }
