@@ -90,7 +90,7 @@ class BillsController extends Controller
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
         
-        $name = $data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf';
+        $name = $data['resource']['title'] . '_' . $data['resource']['tid'] . '.pdf';
 
         return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
