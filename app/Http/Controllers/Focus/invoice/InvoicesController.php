@@ -45,6 +45,7 @@ use App\Models\project\Project;
 use App\Models\bank\Bank;
 use App\Models\lpo\Lpo;
 use Bitly;
+use Illuminate\Support\Facades\Redirect;
 
 /**
  * InvoicesController
@@ -206,14 +207,11 @@ class InvoicesController extends Controller
     {
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
-        if ($invoice->i_class < 2) {
-            $words['prefix'] = prefix(1);
-        } else {
-            $words['prefix'] = prefix(6);
-        }
-        //returning with successfull message
+
+        $words = ['prefix' => ''];
         $invoice['bill_type'] = 1;
         $words['pay_note'] = trans('invoices.payment_for_invoice') . ' ' . $words['prefix'] . '#' . $invoice->tid;
+        
         return new ViewResponse('focus.invoices.view', compact('invoice', 'accounts', 'features', 'words'));
     }    
 
@@ -329,7 +327,7 @@ class InvoicesController extends Controller
 
         $result = $this->repository->create_invoice_payment(compact('bill', 'bill_items'));
 
-        return redirect()->back()->with(['flash_success' => 'Invoices Payment successfully recieved']);
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoices Payment successfully recieved']);
     }
 
     /**
