@@ -546,15 +546,17 @@
                     @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage All Invoices
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Project Invoice
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.project_invoice') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Project Invoice
                                 </a>
                             </li>
+                            {{-- 
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Standard Invoice
                                 </a>
                             </li>
+                            --}}
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}?md=pos" data-toggle="dropdown"><i class="ft-zap"></i> {{ trans('labels.backend.invoices.pos_management') }}
                                 </a>
                             </li>
