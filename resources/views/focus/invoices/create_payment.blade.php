@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title">Invoice Payment Management</h4>
+            <h4 class="content-header-title">Invoice Payment</h4>
         </div>
     </div>
 
