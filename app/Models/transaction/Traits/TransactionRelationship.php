@@ -37,8 +37,9 @@ trait TransactionRelationship
 
     public function category()
     {
-        return $this->belongsTo('App\Models\transactioncategory\Transactioncategory', 'trans_category_id', 'id');
+        return $this->belongsTo('App\Models\transactioncategory\Transactioncategory', 'trans_category_id');
     }
+
     public function invoice()
     {
         return $this->hasOne('App\Models\invoice\Invoice', 'id', 'bill_id');
