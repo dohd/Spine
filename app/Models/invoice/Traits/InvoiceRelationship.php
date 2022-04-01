@@ -35,9 +35,10 @@ trait InvoiceRelationship
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
+
     public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 0)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref');
     }
 
     public function attachment()
