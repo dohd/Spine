@@ -26,7 +26,7 @@ class AddColumnAccountIdToInvoicesTable extends Migration
     public function down()
     {
         Schema::table('invoices', function (Blueprint $table) {
-            //
+            $table->dropColumn('account_id');
         });
     }
 }
