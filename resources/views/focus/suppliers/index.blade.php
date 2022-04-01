@@ -36,41 +36,53 @@
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 @php
                                                     $labels = [
-                                                        'Supplier No', 'Name', 'Phone', 'Email', 'Address', 'City', 'Region', 'Country',
-                                                        'PostBox', 'Tax ID', 'Bank', 'Account No', 'Account Name', 'Bank Code', 'Mpesa Account'
+                                                        'Name', 'Email', 'Address', 'City', 'Region', 'Country', 'PostBox', 'Bank',
+                                                        'Supplier No' => 'supplier_no', 
+                                                        'Tax ID' => 'taxid',  
+                                                        'Account No' => 'account_no', 
+                                                        'Account Name' => 'account_name', 
+                                                        'Bank Code' =>  'bank_code',
+                                                        'Mpesa Account' => 'mpesa_payment',
+                                                        'Document ID' => 'docid'
                                                     ];
                                                 @endphp
                                                 <tbody> 
-                                                    @foreach ($labels as $val)
+                                                    @foreach ($labels as $key => $val)
                                                         <tr>
-                                                            <th>{{ $val }}</th>
-                                                            <td>{{ '' }}</td>
+                                                            <th>{{ is_numeric($key) ? $val : $key }}</th>
+                                                            <td></td>
                                                         </tr>
                                                     @endforeach                        
                                                 </tbody>
                                             </table>
                                         </div>
+
+                                        @php
+                                            $labels = ['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'];
+                                        @endphp
                                         <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
-                                            <table id="" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Type</th>
-                                                        <th>Description</th>
-                                                        <th>Amount</th>
-                                                        <th>Paid</th>
-                                                        <th>Balance</th>
+                                                    <tr>                                            
+                                                        @foreach ($labels as $val)
+                                                            <th>{{ $val }}</th>
+                                                        @endforeach
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
                                             </table>
                                         </div>
                                         <div class="tab-pane" id="active3" aria-labelledby="link-tab3" role="tabpanel">
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('customers.docid')}}</p>
-                                                </div>
-                                            </div>
+                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>                                                    
+                                                        @foreach ($labels as $val)
+                                                            <th>{{ $val }}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>                                               
+                                            </table>                                            
                                         </div>
                                     </div>
                                 </div>
