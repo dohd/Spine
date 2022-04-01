@@ -2,6 +2,7 @@
 
 namespace App\Models\transaction\Traits;
 
+use App\Models\bill\Bill;
 use App\Models\hrm\Hrm;
 
 /**
@@ -9,33 +10,38 @@ use App\Models\hrm\Hrm;
  */
 trait TransactionRelationship
 {
-      public function account()
+    public function bill()
+    {
+        return $this->belongsTo(Bill::class, 'tr_ref');
+    }
+
+    public function account()
     {
         return $this->belongsTo('App\Models\account\Account');
     }
 
-        public function customer()
+    public function customer()
     {
-        return $this->belongsTo('App\Models\customer\Customer','payer_id','id');
+        return $this->belongsTo('App\Models\customer\Customer', 'payer_id', 'id');
     }
 
-     public function supplier()
+    public function supplier()
     {
-        return $this->belongsTo('App\Models\supplier\Supplier','payer_id','id');
+        return $this->belongsTo('App\Models\supplier\Supplier', 'payer_id', 'id');
     }
 
-            public function employee()
+    public function employee()
     {
-        return $this->belongsTo(Hrm::class,'payer_id','id');
+        return $this->belongsTo(Hrm::class, 'payer_id', 'id');
     }
 
-         public function category()
+    public function category()
     {
-        return $this->belongsTo('App\Models\transactioncategory\Transactioncategory','trans_category_id','id');
+        return $this->belongsTo('App\Models\transactioncategory\Transactioncategory', 'trans_category_id', 'id');
     }
-        public function invoice()
+    public function invoice()
     {
-        return $this->hasOne('App\Models\invoice\Invoice','id','bill_id');
+        return $this->hasOne('App\Models\invoice\Invoice', 'id', 'bill_id');
     }
 
     public function user()
