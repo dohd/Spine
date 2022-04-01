@@ -8,6 +8,6 @@ trait PaidInvoiceRelationship
 {
     public function items()
     {
-        return $this->hasMany(PaidInvoiceItem::class);
+        return $this->hasMany(PaidInvoiceItem::class, 'paidinvoice_id');
     }
 }
