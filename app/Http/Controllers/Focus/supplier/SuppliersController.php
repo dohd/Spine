@@ -148,12 +148,15 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
-       
-        $pri_account = Account::where('system', 'payable')->first();
-        $transactions=Transaction::where('account_id',$pri_account->id)->where('tr_user_id',$supplier->id)->orderBy('transaction_date', 'desc')->get();
-       
+        $transactions = Transaction::whereHas('account', function ($q) {
+            $q->where('system', 'payable');
+        })
+        ->whereHas('bill', function ($q) use($supplier) {
+            $q->where('supplier_id', $supplier->id);
+        })
+        ->orderBy('tr_date', 'DESC')
+        ->get();
 
-        //returning with successfull message
         return new ViewResponse('focus.suppliers.view', compact('supplier','transactions'));
     }
 
