@@ -107,7 +107,7 @@
                             </div>
                         </div>
 
-                        <table id="quotation" class="table-responsive tfr my_stripe_single pb-1">
+                        <table id="quoteTbl" class="table-responsive tfr my_stripe_single pb-1">
                             <thead>
                                 <tr class="item_header bg-gradient-directional-blue white">
                                     <th class="text-center">#</th>
@@ -159,32 +159,30 @@
                                         <input type="hidden" name="project_id[]" value="{{ $project_id }}" id="projectid-{{ $k }}">
                                     </tr>
                                 @endforeach
+                                <tr class="bg-white">
+                                    <td colspan="4"></td>
+                                    <td colspan="3">
+                                        <div class="form-inline">
+                                            <label for="subtotal" class="caption font-weight-bold ml-5">Subtotal:</label>
+                                            <input type="text" class="form-control mb-1 ml-auto" name="subtotal" id="subtotal" readonly>
+                                        </div>
+                                        <div class="form-inline">
+                                            <label for="totaltax" class="caption font-weight-bold ml-5">Total Tax:</label>
+                                            <input type="text" class="form-control mb-1 ml-auto" name="tax" id="tax" readonly>
+                                        </div>
+                                        <div class="form-inline">
+                                            <label for="grandtotal" class="caption font-weight-bold ml-3">Grand Total:</label>
+                                            <input type="text" class="form-control mb-1 ml-auto" name="total" id="total" readonly>
+                                        </div>
+                                </div>                                                         
+                                        </div>
+                                        <div class="form-inline">
+                                        {{ Form::submit('Create Invoice', ['class' => 'btn btn-primary btn-lg ml-auto']) }}                          
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
-
-                        <div class="row">
-                            <div class="col-9">
-                                <div class="input-group">
-                                    <label for="notes" class="caption font-weight-bold">Remark</label>
-                                </div>
-                                {{ Form::textarea('remark', null, ['class' => 'form-control text-danger', 'rows' => '4']) }}
-                            </div>
-                            <div class="col-3">
-                                <div>
-                                    <label for="subtotal" class="caption font-weight-bold">Subtotal</label>
-                                    <input type="text" class="form-control mb-1" name="subtotal" id="subtotal" readonly>
-                                </div>                                                         
-                                <div>
-                                    <label for="totaltax" class="caption font-weight-bold">Total Tax</label>
-                                    <input type="text" class="form-control mb-1" name="tax" id="tax" readonly>
-                                </div>
-                                <div>
-                                    <label for="grandtotal" class="caption font-weight-bold">Grand Total</label>
-                                    <input type="text" class="form-control mb-1" name="total" id="total" readonly>
-                                </div> 
-                                {{ Form::submit('Create Invoice', ['class' => 'btn btn-primary btn-lg']) }}                          
-                            </div>
-                        </div>
                     {{ Form::close() }}
                 </div>
             </div>
@@ -206,7 +204,9 @@
         let total = 0;
         let subtotal = 0; 
         const taxRate = $('#tax_id').val() / 100;
-        $('#quotation tbody tr').each(function(i) {
+        $('#quoteTbl tbody tr').each(function(i) {
+            if ($('#quoteTbl tbody tr:last').index() == i) return;
+
             const subtStr = $('#initprice-'+i).val().replace(/,/g, '');
             const rateExc = parseFloat(subtStr);
             const rateInc = rateExc + (taxRate * rateExc);
@@ -218,9 +218,10 @@
             $rateInput.val(rateExc.toLocaleString());
             $amountSpan.text(rateExc.toLocaleString());
         });
-        $('#subtotal').val(subtotal.toLocaleString());
-        $('#total').val(total.toLocaleString());
-        $('#tax').val((total - subtotal).toLocaleString());
+        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
+        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
+        const tax = (total - subtotal).toFixed(2);
+        $('#tax').val(parseFloat(tax).toLocaleString());
     });
     $('#tax_id').trigger('change');
 </script>
