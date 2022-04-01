@@ -51,8 +51,5 @@ class PaidInvoiceItem extends Model
     protected static function boot()
     {
         parent::boot();
-        static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', '=', auth()->user()->ins);
-        });
     }
 }
