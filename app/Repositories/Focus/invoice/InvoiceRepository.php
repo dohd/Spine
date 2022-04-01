@@ -346,7 +346,9 @@ class InvoiceRepository extends BaseRepository
         
         $bill_items = $input['bill_items'];
         foreach ($bill_items as $k => $item) {
-            $bill_items[$k]['product_price'] = numberClean($item['product_price']);
+            $item['invoice_id'] = $result->id;
+            $item['product_price'] = numberClean($item['product_price']);
+            $bill_items[$k] = $item;
         }
         InvoiceItem::insert($bill_items);
 
@@ -370,7 +372,7 @@ class InvoiceRepository extends BaseRepository
             'ins' => $result->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $result->id,
-            'user_type' => 'supplier',
+            'user_type' => 'customer',
             'is_primary' => 1
         ];
         Transaction::create($dr_data);
@@ -389,11 +391,7 @@ class InvoiceRepository extends BaseRepository
         Transaction::insert([$income_cr_data, $tax_cr_data]);
 
         // update account ledgers debit and credit totals
-        $tr_totals = Transaction::where('tr_ref', $result->id)
-            ->select(DB::raw('account_id as id, SUM(credit) as credit_ttl, SUM(debit) as debit_ttl'))
-            ->groupBy('account_id')
-            ->get()->toArray();
-        Batch::update(new Account, $tr_totals, 'id');
+        aggregate_account_transactions($result->id);
 
         DB::commit();
         if ($result) return $result;
@@ -421,7 +419,7 @@ class InvoiceRepository extends BaseRepository
 
         $bill_items = $input['bill_items'];
         foreach ($bill_items as $k => $item) {
-            $item = $item + ['paidinvoice_id' => $result->id];
+            $item['paidinvoice_id'] = $result->id;
             $item['paid'] = numberClean($item['paid']);
             $bill_items[$k] = $item;
         }
@@ -436,7 +434,7 @@ class InvoiceRepository extends BaseRepository
 
         // update paid amount in invoices
         $invoice_ids = $result->items()->pluck('invoice_id')->toArray();
-        $paid_invoices = PaidInvoice::whereIn('invoice_id', $invoice_ids)
+        $paid_invoices = PaidInvoiceItem::whereIn('invoice_id', $invoice_ids)
             ->select(DB::raw('invoice_id as id, SUM(paid) as amountpaid'))
             ->groupBy('invoice_id')
             ->get()->toArray();
