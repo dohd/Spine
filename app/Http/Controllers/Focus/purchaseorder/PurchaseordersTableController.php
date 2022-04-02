@@ -65,7 +65,7 @@ class PurchaseordersTableController extends Controller
                 return dateFormat($po->date);
             })
             ->addColumn('amount', function ($po) {
-                return amountFormat($po->paidttl);
+                return amountFormat($po->grandttl);
             })
             ->addColumn('status', function ($po) {
                 return '<span class="st-' . $po->status . '">' . $po->status . '</span>';
