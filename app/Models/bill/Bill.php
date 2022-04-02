@@ -30,17 +30,13 @@ class Bill extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -71,6 +67,5 @@ class Bill extends Model
     protected static function boot()
     {
         parent::boot();
-
     }
 }
