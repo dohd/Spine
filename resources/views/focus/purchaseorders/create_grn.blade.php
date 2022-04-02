@@ -107,7 +107,7 @@
                                             <td><input type="text" class="form-control datepicker" name="date[]"></td>
                                             <input type="hidden" name="poitem_id[]" value="{{ $item->id }}">
                                             <input type="hidden" class="porate" name="poitem_rate[]" value="{{ $item->rate }}">
-                                            <input type="hidden" class="potax" name="poitem_taxrate[]" value="{{ $item->taxrate }}">
+                                            <input type="hidden" class="potax" name="poitem_taxrate[]" value="{{ $item->taxrate/$item->qty }}">
                                         </tr>
                                         @php ($i++)
                                     @endif
@@ -154,7 +154,7 @@
                                             <td><input type="text" class="form-control datepicker" name="date[]"></td>
                                             <input type="hidden" name="poitem_id[]" value="{{ $item->id }}">
                                             <input type="hidden" class="porate" name="poitem_rate[]" value="{{ $item->rate }}">
-                                            <input type="hidden" class="potax" name="poitem_taxrate[]" value="{{ $item->taxrate }}">
+                                            <input type="hidden" class="potax" name="poitem_taxrate[]" value="{{ $item->taxrate/$item->qty }}">
                                         </tr>
                                         @php ($i++)
                                     @endif
@@ -200,8 +200,8 @@
                                             <td><input type="text" class="form-control" name="dnote[]"></td>
                                             <td><input type="text" class="form-control datepicker" name="date[]"></td>
                                             <input type="hidden" name="poitem_id[]" value="{{ $item->id }}">
-                                            <input type="hidden" class="porate" name="poitem_rate[]" value="{{ (float) $item->rate }}">
-                                            <input type="hidden" class="potax" name="poitem_taxrate[]" value="{{ (float) $item->taxrate }}">
+                                            <input type="hidden" class="porate" name="poitem_rate[]" value="{{ $item->rate }}">
+                                            <input type="hidden" class="potax" name="poitem_taxrate[]" value="{{ $item->taxrate/$item->qty }}">
                                         </tr>
                                         @php ($i++)
                                     @endif
@@ -263,19 +263,19 @@
                 const poTax = $(this).find('.potax').val();
                 switch(id) {
                     case 'stockTbl':
-                        stockSubttl += qty * poRate;
-                        stockTax += qty * poTax;
-                        stockGrn += qty*1;
+                        stockSubttl = qty * poRate;
+                        stockTax = qty * poTax;
+                        stockGrn = qty*1;
                         break;
                     case 'expTbl':
                         expSubttl += qty * poRate;
-                        expTax += qty * poTax;
-                        expGrn += qty*1;
+                        expTax = qty * poTax;
+                        expGrn = qty*1;
                         break;
                     case 'assetTbl':
-                        assetSubttl += qty * poRate;
-                        assetTax += qty * poTax;
-                        assetGrn += qty*1;
+                        assetSubttl = qty * poRate;
+                        assetTax = qty * poTax;
+                        assetGrn = qty*1;
                         break;
                 }
             }
