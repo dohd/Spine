@@ -56,28 +56,24 @@
                                             </table>
                                         </div>
                                         
-                                        @php
-                                            $labels = ['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'];
-                                        @endphp
                                         <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
                                             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                        
-                                                        @foreach ($labels as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Credit', 'Debit'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($transactions as $tr)
-                                                        @if (in_array($tr->category->code, ['BILL', 'PMT'], 1))
+                                                        @if (in_array($tr->category->code, ['BILL', 'PMT'], 1))                                                       
                                                             <tr>
                                                                 <td>{{ dateFormat($tr->tr_date) }}</td>
                                                                 <td>{{ $tr->category->code }}</td>
                                                                 <td>{{ $tr->note }}</td>                                                           
-                                                                <td>{{ number_format($tr->credit) }}</td>
-                                                                <td>{{ number_format($tr->debit) }}</td>
-                                                                <td>{{ number_format($tr->credit_ttl - $tr->debit_ttl) }}</td>
+                                                                <td>{{ number_format($tr->credit, 2) }}</td>
+                                                                <td>{{ number_format($tr->debit, 2) }}</td>
                                                             </tr>
                                                         @endif
                                                     @endforeach
@@ -89,29 +85,21 @@
                                             <table class="table table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                    
-                                                        @foreach ($labels as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @php 
-                                                        $bill_ids = array(); 
-                                                    @endphp
-                                                    @foreach ($transactions as $tr)
-                                                        @if ($tr->bill->po_id && !in_array($tr->tr_ref, $bill_ids, 1))
-                                                            <tr>
-                                                                <td>{{ dateFormat($tr->bill->date) }}</td>
-                                                                <td>{{ $tr->bill->doc_ref_type }} - {{ $tr->bill->doc_ref }}</td>
-                                                                <td>{{ $tr->bill->note }}</td>                                                      
-                                                                <td>{{ number_format($tr->bill->grandttl) }}</td>
-                                                                <td>{{ number_format($tr->bill->amountpaid) }}</td>
-                                                                <td>{{ number_format($tr->credit_ttl - $tr->debit_ttl) }}</td>
-                                                            </tr>
-                                                            @php
-                                                                $bill_ids[] = $tr->tr_ref;
-                                                            @endphp                                                                                                      
-                                                        @endif                                                       
+                                                    @foreach ($bills as $bill)
+                                                        <tr>
+                                                            <td>{{ dateFormat($bill->date) }}</td>
+                                                            <td>{{ $bill->doc_ref_type }} - {{ $bill->doc_ref }}</td>
+                                                            <td>{{ $bill->note }}</td>                                                      
+                                                            <td>{{ number_format($bill->grandttl, 2) }}</td>
+                                                            <td>{{ number_format($bill->amountpaid, 2) }}</td>
+                                                            <td>{{ number_format($bill->grandttl - $bill->amountpaid, 2) }}</td>
+                                                        </tr>
                                                     @endforeach
                                                 </tbody>
                                             </table>                        
