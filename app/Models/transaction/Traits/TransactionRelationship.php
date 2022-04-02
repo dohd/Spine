@@ -3,6 +3,7 @@
 namespace App\Models\transaction\Traits;
 
 use App\Models\bill\Bill;
+use App\Models\bill\Paidbill;
 use App\Models\hrm\Hrm;
 
 /**
@@ -10,6 +11,11 @@ use App\Models\hrm\Hrm;
  */
 trait TransactionRelationship
 {
+    public function paidbill()
+    {
+        return $this->belongsTo(Paidbill::class, 'tr_ref');
+    }
+
     public function bill()
     {
         return $this->belongsTo(Bill::class, 'tr_ref');
