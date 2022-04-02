@@ -18,7 +18,6 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <!-- Task List table -->
                                 <div class="card-body">
                                     <ul class="nav nav-tabs nav-top-border no-hover-bg " role="tablist">
                                         <li class="nav-item">
@@ -57,14 +56,11 @@
                                             </table>
                                         </div>
 
-                                        @php
-                                            $labels = ['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'];
-                                        @endphp
                                         <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                            
-                                                        @foreach ($labels as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Credit', 'Debit'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
@@ -76,7 +72,7 @@
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                    
-                                                        @foreach ($labels as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
