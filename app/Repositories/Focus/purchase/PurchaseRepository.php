@@ -214,8 +214,9 @@ class PurchaseRepository extends BaseRepository
                 ]);
             }
             if ($item['type'] == 'Asset') {
+                $asset = Assetequipment::find($item['item_id']);
                 $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $item['item_id'],
+                    'account_id' => $asset->account_id,
                     'trans_category_id' => $asset_tr_category->id,
                     'debit' => $subttl,
                 ]);

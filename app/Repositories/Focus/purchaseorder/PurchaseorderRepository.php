@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\purchaseorder;
 use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
+use App\Models\assetequipment\Assetequipment;
 use App\Models\bill\Bill;
 use App\Models\billitem\BillItem;
 use App\Models\items\GrnItem;
@@ -182,9 +183,8 @@ class PurchaseorderRepository extends BaseRepository
             ];
             $item['date'] = date_for_database($item['date']);
             if (!$item['qty']) $item['qty'] = 0;
-            if ($item['grn_qty']) {
-                $item['grn_qty'] = $item['grn_qty'] + $item['qty'];
-            } else $item['grn_qty'] = $item['qty'];
+            if ($item['grn_qty']) $item['grn_qty'] = $item['grn_qty'] + $item['qty'];
+            else $item['grn_qty'] = $item['qty'];
 
             $order_items[$k] = $item;
         }
@@ -281,8 +281,9 @@ class PurchaseorderRepository extends BaseRepository
                 ]);
             }
             if ($item['type'] == 'Asset') {
+                $asset = Assetequipment::find($item['item_id']);
                 $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $item['item_id'],
+                    'account_id' => $asset->account_id,
                     'trans_category_id' => $asset_tr_category->id,
                     'debit' => $subttl,
                 ]);
