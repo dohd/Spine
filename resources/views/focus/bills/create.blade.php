@@ -80,7 +80,7 @@
                                 <label for="payment_mode">Document Type</label>
                                 <select name="doc_ref_type" id="" class="form-control" required>
                                    <option value="">-- Select Type --</option>
-                                    @foreach (['receipt', 'dnote', 'voucher'] as $val)
+                                    @foreach (['receipt', 'dnote', 'invoice'] as $val)
                                         <option value="{{ $val }}">{{ ucfirst($val) }}</option>
                                     @endforeach
                                 </select>
@@ -209,9 +209,8 @@
         let depoSum = 0;
         let depo = $(this).val().replace(/,/g, '') * 1;
         $(this).val(parseFloat(depo).toLocaleString());
-        const rows = $('#billsTbl tbody tr').length;
-        $('#billsTbl tbody tr').each(function() {
-            if ($(this).index() == rows-1) return;
+        $('#billsTbl tbody tr').each(function(i) {
+            if ($('#billsTbl tbody tr:last').index() == i) return;
             const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
             if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
             else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
@@ -228,9 +227,8 @@
     function calcTotal() {
         let amountSum = 0;
         let depoSum = 0;
-        const rows = $('#billsTbl tbody tr').length;
-        $('#billsTbl tbody tr').each(function() {
-            if ($(this).index() == rows-1) return;
+        $('#billsTbl tbody tr').each(function(i) {
+            if ($('#billsTbl tbody tr:last').index() == i) return;
             const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
             const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
             amountSum += amount;

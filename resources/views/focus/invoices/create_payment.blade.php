@@ -73,12 +73,9 @@
                                 </select>
                             </div>  
                             <div class="col-2">
-                                <label for="payment_mode">Document Type</label>
+                                <label for="doc_ref_type">Document Type</label>
                                 <select name="doc_ref_type" id="" class="form-control" required>
-                                   <option value="">-- Select Type --</option>
-                                    @foreach (['receipt', 'dnote', 'voucher'] as $val)
-                                        <option value="{{ $val }}">{{ ucfirst($val) }}</option>
-                                    @endforeach
+                                    <option value="receipt" selected>Receipt</option>
                                 </select>
                             </div>     
                             <div class="col-2">
