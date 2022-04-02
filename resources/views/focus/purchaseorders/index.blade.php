@@ -30,7 +30,7 @@
                                         <th>#{{ trans('purchaseorders.purchaseorder')}}</th>
                                         <th>{{ trans('suppliers.supplier') }}</th>
                                         <th>Order date</th>
-                                        <th>{{ trans('general.amount') }}</th>
+                                        <th>{{ trans('general.amount') }} (VAT Inc)</th>
                                         <th>{{ trans('general.status') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
