@@ -455,7 +455,8 @@ class InvoiceRepository extends BaseRepository
             'tr_type' => $tr_category->code,
             'tr_ref' => $result['id'],
             'user_type' => 'customer',
-            'is_primary' => 1
+            'is_primary' => 1,
+            'note' => $bill['doc_ref_type'] . ' - ' . $bill['doc_ref'],
         ];
         Transaction::create($cr_data);
 
