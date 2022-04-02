@@ -1,6 +1,8 @@
-@extends ('core.layouts.app',['page'=>'class="horizontal-layout horizontal-menu content-detached-left-sidebar app-contacts " data-open="click" data-menu="horizontal-menu" data-col="content-detached-left-sidebar"'])
+@extends('core.layouts.app', [
+    'page' => 'class = "horizontal-layout horizontal-menu content-detached-left-sidebar app-contacts" data-open = "click" data-menu = "horizontal-menu" data-col = "content-detached-left-sidebar"'
+])
 
-@section ('title', trans('labels.backend.suppliers.management') . ' | ' . trans('labels.backend.customers.create'))
+@section('title', trans('labels.backend.suppliers.management') . ' | ' . trans('labels.backend.customers.create'))
 
 @section('content')
 <div class="content-wrapper">
@@ -10,22 +12,17 @@
     
     <div class="content-detached content-right">
         <div class="content-body">
-            <div class="content-overlay"></div>
-
             <section class="row all-contacts">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <!-- Task List table -->
-                                <a href="{{route('biller.suppliers.edit',[$supplier->id])}}" class="btn btn-blue btn-outline-accent-5 btn-sm float-right"><i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}</a>
+                                <a href="{{route('biller.suppliers.edit', [$supplier->id])}}" class="btn btn-blue btn-outline-accent-5 btn-sm float-right"><i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}</a>
                                 <div class="card-body">
-
                                     <ul class="nav nav-tabs nav-top-border no-hover-bg " role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Supplier Info</a>
                                         </li>
-
                                         <li class="nav-item">
                                             <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Transactions</a>
                                         </li>
@@ -73,14 +70,16 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($transactions as $tr)
-                                                        <tr>
-                                                            <td>{{ dateFormat($tr->tr_date) }}</td>
-                                                            <td>{{ $tr->category->code }}</td>
-                                                            <td>{{ $tr->note }}</td>                                                           
-                                                            <td>{{ number_format($tr->credit) }}</td>
-                                                            <td>{{ number_format($tr->debit) }}</td>
-                                                            <td>{{ number_format($tr->credit_ttl - $tr->debit_ttl) }}</td>
-                                                        </tr>
+                                                        @if (in_array($tr->category->code, ['BILL', 'PMT'], 1))
+                                                            <tr>
+                                                                <td>{{ dateFormat($tr->tr_date) }}</td>
+                                                                <td>{{ $tr->category->code }}</td>
+                                                                <td>{{ $tr->note }}</td>                                                           
+                                                                <td>{{ number_format($tr->credit) }}</td>
+                                                                <td>{{ number_format($tr->debit) }}</td>
+                                                                <td>{{ number_format($tr->credit_ttl - $tr->debit_ttl) }}</td>
+                                                            </tr>
+                                                        @endif
                                                     @endforeach
                                                 </tbody>                                                
                                             </table>
@@ -115,7 +114,7 @@
                                                         @endif                                                       
                                                     @endforeach
                                                 </tbody>
-                                            </table>                                            
+                                            </table>                        
                                         </div>
                                     </div>
                                 </div>
