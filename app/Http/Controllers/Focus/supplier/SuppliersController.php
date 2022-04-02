@@ -27,6 +27,8 @@ use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
+use App\Models\bill\Bill;
+use App\Models\purchaseorder\Purchaseorder;
 use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
 use App\Repositories\Focus\supplier\SupplierRepository;
@@ -148,16 +150,22 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
-        $transactions = Transaction::whereHas('account', function ($q) {
-            $q->where('system', 'payable');
+        $transactions = Transaction::whereHas('account', function ($q) { 
+            $q->where('system', 'payable');  
         })
-        ->whereHas('bill', function ($q) use($supplier) {
-            $q->where('supplier_id', $supplier->id);
+        ->where(function ($q) use($supplier) {
+            $q->whereHas('bill', function ($q) use($supplier) { 
+                $q->where('supplier_id', $supplier->id); 
+            })
+            ->orwhereHas('paidbill', function ($q) use($supplier) {
+                $q->where('supplier_id', $supplier->id);
+            });
         })
-        ->orderBy('tr_date', 'DESC')
         ->get();
 
-        return new ViewResponse('focus.suppliers.view', compact('supplier','transactions'));
+        $bills = Bill::where('supplier_id', $supplier->id)->where('po_id', '>', 0)->get();
+
+        return new ViewResponse('focus.suppliers.view', compact('supplier', 'transactions', 'bills'));
     }
 
     public function search(CreatePurchaseorderRequest $request)
