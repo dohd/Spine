@@ -15,7 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\transaction;
+
 use App\Models\account\Account;
 use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
@@ -62,54 +64,52 @@ class TransactionsController extends Controller
      */
     public function index(ManageTransactionRequest $request)
     {
-
         $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
-        $words = array();
-        if (isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 0 :
-                    $segment = Transactioncategory::find($input['rel_id']);
-                    $words['name'] = trans('transactioncategories.transactioncategory');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 1 :
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
-                    break;
-                case 2 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
-                    break;
-                case 3 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
-                    break;
-                case 4 :
-                    $segment = Supplier::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
-                    break;
-                case 9 :
-                    $segment = Account::find($input['rel_id']);
-                    $words['name'] = trans('accounts.holder');
-                    $words['name_data'] = $segment->holder;
-                    break;
-            }
 
+        $segment = (object) array();
+        $words = array();
+        switch ($input['rel_type']) {
+            case 0:
+                $segment = Transactioncategory::find($input['rel_id']);
+                $words['name'] = trans('transactioncategories.transactioncategory');
+                $words['name_data'] = $segment->name;
+                break;
+            case 1:
+                $segment = Customer::find($input['rel_id']);
+                $words['name'] = trans('customers.title');
+                $words['name_data'] = $segment->name;
+                $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
+                break;
+            case 2:
+                $segment = Hrm::find($input['rel_id']);
+                $words['name'] = trans('hrms.employee');
+                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
+                $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
+                break;
+            case 3:
+                $segment = Hrm::find($input['rel_id']);
+                $words['name'] = trans('hrms.employee');
+                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
+                $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
+                break;
+            case 4:
+                $segment = Supplier::find($input['rel_id']);
+                $words['name'] = trans('customers.title');
+                $words['name_data'] = $segment->name;
+                $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
+                break;
+            case 9:
+                $segment = Account::find($input['rel_id']);
+                $words['name'] = trans('accounts.holder');
+                $words['name_data'] = $segment->holder;
+                break;
         }
-        return view('focus.transactions.index', compact('input', 'segment', 'words'));
+    
+        return new ViewResponse('focus.transactions.index', compact('input', 'segment', 'words'));
     }
 
     /**
@@ -132,19 +132,18 @@ class TransactionsController extends Controller
     public function store(StoreTransactionRequest $request)
     {
 
-          $invoice = $request->only(['tid', 'transaction_date', 'account_id', 'debit', 'credit', 'note']);
-          $invoice['user_id'] = auth()->user()->id;
-          $invoice['ins'] = auth()->user()->ins;
-        
-          $result = $this->repository->create(compact('invoice'));
+        $invoice = $request->only(['tid', 'transaction_date', 'account_id', 'debit', 'credit', 'note']);
+        $invoice['user_id'] = auth()->user()->id;
+        $invoice['ins'] = auth()->user()->ins;
 
-           echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.transactions.created') . '<a href="' . route('biller.transactions.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.transactions.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>'));
+        $result = $this->repository->create(compact('invoice'));
 
+        $msg = trans('alerts.backend.transactions.created') . '<a href="' . route('biller.transactions.create') . '" class="btn btn-outline-light round btn-min-width bg-purple">
+            <span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' 
+            . ' <a href="' . route('biller.transactions.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber">
+            <span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>';
 
-
-
-        //return new RedirectResponse(route('biller.transactions.show', [$result->id]), ['flash_success' => trans('alerts.backend.transactions.created') . ' <a href="' . route('biller.transactions.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.transactions.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.transactions.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-        // return new RedirectResponse(route('biller.transactions.index'), ['flash_success' => trans('alerts.backend.transactions.created')]);
+        return response()->json(['status' => 'Success', 'message' => $msg]);
     }
 
     /**
@@ -200,8 +199,6 @@ class TransactionsController extends Controller
      */
     public function show(Transaction $transaction, ManageTransactionRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.transactions.view', compact('transaction'));
     }
 
@@ -225,13 +222,9 @@ class TransactionsController extends Controller
                 break;
             default:
                 $user = false;
-
         }
 
         if (!$q) return false;
         if (count($user) > 0) return view('focus.transactions.partials.search')->with(compact('user', 't'));
-
     }
-
-
 }
