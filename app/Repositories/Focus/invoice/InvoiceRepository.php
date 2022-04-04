@@ -391,7 +391,7 @@ class InvoiceRepository extends BaseRepository
         Transaction::insert([$income_cr_data, $tax_cr_data]);
 
         // update account ledgers debit and credit totals
-        aggregate_account_transactions($result->id);
+        aggregate_account_transactions();
 
         DB::commit();
         if ($result) return $result;
@@ -469,7 +469,7 @@ class InvoiceRepository extends BaseRepository
         Transaction::create($dr_data);
         
         // update account ledgers debit and credit totals
-        aggregate_account_transactions($result->id);
+        aggregate_account_transactions();
 
         DB::commit();
         if ($result) return true;

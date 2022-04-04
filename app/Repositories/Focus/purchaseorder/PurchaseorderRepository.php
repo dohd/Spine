@@ -298,6 +298,6 @@ class PurchaseorderRepository extends BaseRepository
         Transaction::insert($dr_data); 
         
         // update account ledgers debit and credit totals
-        aggregate_account_transactions($bill->id);
+        aggregate_account_transactions();
     }
 }

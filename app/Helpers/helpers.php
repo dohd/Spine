@@ -828,6 +828,17 @@ function modify_array(array $input)
     }
     return $output;
 }
+
+// aggregate transaction credits and debits
+function aggregate_account_transactions()
+{
+    $tr_totals = Transaction::select(DB::raw('account_id AS id, SUM(credit) AS credit_ttl, SUM(debit) AS debit_ttl'))
+        ->groupBy('account_id')
+        ->get()->toArray();
+    Batch::update(new Account, $tr_totals, 'id');
+}
+
+
 // accounts numbering
 function accounts_numbering($account)
 {
