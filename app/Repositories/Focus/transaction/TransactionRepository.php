@@ -31,30 +31,35 @@ class TransactionRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
         $q->when(request('p_rel_type') == 0 AND request('p_rel_id'), function ($q) {
             return $q->where('trans_category_id', '=', request('p_rel_id', 0));
         });
+
         $q->when(request('p_rel_type') == 1 AND request('p_rel_id'), function ($q) {
             $q->where('payer_id', '=', request('p_rel_id', 0));
             return $q->where('relation_id', '=', 1);
         });
+
         $q->when(request('p_rel_type') == 2 AND request('p_rel_id'), function ($q) {
             return $q->where('user_id', '=', request('p_rel_id', 0));
         });
+
         $q->when(request('p_rel_type') == 9 AND request('p_rel_id'), function ($q) {
             return $q->where('account_id', '=', request('p_rel_id', 0));
         });
+
         $q->when(request('p_rel_type') == 3 AND request('p_rel_id'), function ($q) {
             $q->where('payer_id', '=', request('p_rel_id', 0));
             return $q->where('relation_id', '=', 3);
         });
 
-             $q->when(request('p_rel_type') ==4 AND request('p_rel_id'), function ($q) {
+        $q->when(request('p_rel_type') ==4 AND request('p_rel_id'), function ($q) {
             $q->where('payer_id', '=', request('p_rel_id', 0));
             return $q->where('relation_id', '=', 9);
         });
 
-        return $q->get(['id', 'tid', 'refer_no', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 'relation_id', 'payer_id', 'payment_date','transaction_date','payer_type']);
+        return $q->get(['id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 'tr_date', 'user_type']);
     }
 
     /**
@@ -127,7 +132,7 @@ class TransactionRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Transaction $transaction, array $input)
+    public function update($transaction, array $input)
     {
 
         //if ($transaction->update($input))
@@ -143,7 +148,7 @@ class TransactionRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function delete(Transaction $transaction)
+    public function delete($transaction)
     {
         $feature = feature(11);
         $alert = json_decode($feature->value2, true);

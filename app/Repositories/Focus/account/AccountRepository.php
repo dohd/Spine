@@ -28,9 +28,9 @@ class AccountRepository extends BaseRepository
    */
   public function getForDataTable()
   {
-    return $this->query()
-      ->get(['id', 'number', 'holder', 'balance', 'account_type', 'created_at']);
+    return $this->query()->get(['id', 'number', 'holder', 'balance', 'account_type', 'created_at']);
   }
+
   /**
    * For Creating the respective model in storage
    *
@@ -159,6 +159,7 @@ class AccountRepository extends BaseRepository
       throw new GeneralException(trans('exceptions.backend.accounts.create_error'));
     }
   }
+
   /**
    * For updating the respective Model in storage
    *
@@ -172,6 +173,7 @@ class AccountRepository extends BaseRepository
     if ($account->update($input)) return true;
     throw new GeneralException(trans('exceptions.backend.accounts.update_error'));
   }
+  
   /**
    * For deleting the respective model from storage
    *
