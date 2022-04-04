@@ -51,8 +51,8 @@ class AccountsTableController extends Controller
      */
     public function __invoke(ManageAccountRequest $request)
     {
-        //
         $core = $this->account->getForDataTable();
+        
         return Datatables::of($core)
             ->escapeColumns(['id', 'number', 'holder'])
             ->addIndexColumn()
