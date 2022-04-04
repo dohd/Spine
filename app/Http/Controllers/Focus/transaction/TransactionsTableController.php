@@ -17,7 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\transaction;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\transaction\TransactionRepository;
@@ -56,40 +55,21 @@ class TransactionsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('account_id', function ($transaction) {
-                return $transaction->account->holder;
+            ->addColumn('account_id', function ($tr) {
+                return $tr->account->holder;
             })
-           // ->addColumn('trans_category_id', function ($transaction) {
-
-                //return '<a class="font-weight-bold" href="' . route('biller.transactions.index') . '?rel_type=0&rel_id=' . $transaction->category['id'] . '">' . $transaction->category['name'] . '</a>';
-           // })
-            ->addColumn('debit', function ($transaction) {
-                return numberFormat($transaction->debit);
-            })->addColumn('credit', function ($transaction) {
-                return numberFormat($transaction->credit);
+            ->addColumn('debit', function ($tr) {
+                return numberFormat($tr->debit);
+            })->addColumn('credit', function ($tr) {
+                return numberFormat($tr->credit);
             })
-            ->addColumn('payer', function ($transaction) {
-
-                if ($transaction->payer_id) {
-                    switch ($transaction->payer_type) {
-                        case 'supplier':
-                            return '<a class="font-weight-bold" href="' . route('biller.transactions.index') . '?rel_type=1&rel_id=' . $transaction->supplier['id'] . '">' . $transaction->supplier['name'] . '</a>';
-                            break;
-                        case 'customer':
-                            return '<a class="font-weight-bold" href="' . route('biller.transactions.index') . '?rel_type=3&rel_id=' . $transaction->customer['id'] . '">' . $transaction->customer['company'] . '</a>';
-                            break;
-                             case 'walkin':
-                            return $transaction->payer;
-                            break;
-                    }
-                }
-                if ($transaction->payer) return $transaction->payer;
-
-            })->addColumn('transaction_date', function ($transaction) {
-                return dateFormat($transaction->transaction_date);
+            ->addColumn('tr_date', function ($tr) {
+                return dateFormat($tr->tr_date);
             })
-            ->addColumn('actions', function ($transaction) {
-                return '<a href="' . route('biller.print_payslip', [$transaction['id'], 1, 1]) . '" class="btn btn-blue round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-print"></i> </a>' . $transaction->action_buttons;
+            ->addColumn('actions', function ($tr) {
+                return '<a href="' . route('biller.print_payslip', [$tr['id'], 1, 1]) . '" class="btn btn-blue round" data-toggle="tooltip" data-placement="top" title="View">
+                    <i class="fa fa-print"></i> </a>' 
+                    .$tr->action_buttons;
             })
             ->make(true);
     }
