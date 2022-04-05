@@ -61,6 +61,8 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
         Route::post('bill_payment', 'PaymentsController@payment')->name('bill_payment');
         Route::post('bulk_payment', 'PaymentsController@bill_bulk_payment')->name('bill_bulk_payment');
         Route::post('receive_payment', 'PaymentsController@receive_payment')->name('receive_payment');
+        // 
+        Route::get('payment/transactions/{transaction}', 'PaymentsController@show_transaction_payment')->name('show_transaction_payment');
     });
 
     //public
