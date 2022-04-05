@@ -1,9 +1,8 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.invoices.management'))
+@section ('title', 'Project Invoices')
 
 @section('content')
-
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
@@ -70,9 +69,7 @@
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
-
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
