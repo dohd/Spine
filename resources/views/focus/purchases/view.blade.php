@@ -45,35 +45,24 @@
             <div class="tab-content px-1 pt-1">
                 <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
                     <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                        <tbody>                            
-                            <tr>
-                                <th>Supplier</th>
-                                <td>{{ $purchase->suppliername }}</td>
-                            </tr>
-                            <tr>
-                                <th>Tax ID</th>
-                                <td>{{ $purchase->supplier_taxid }}</td>
-                            </tr>
-                            <tr>
-                                <th>Transaction ID</th>
-                                <td>{{ $purchase->tid }}</td>
-                            </tr>
-                            <tr>
-                                <th>Order Date & Due Date</th>
-                                <td>{{ dateFormat($purchase->date) }} <b>:</b> {{ dateFormat($purchase->due_date) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Reference</th>
-                                <td>{{ $purchase->doc_ref }} - {{ $purchase->doc_ref_type }}</td>
-                            </tr>
-                            <tr>
-                                <th>Project</th>
-                                <td>{{ $purchase->project ? $purchase->project->name : '' }}</td>
-                            </tr>
-                            <tr>
-                                <th>Note</th>
-                                <td>{{ $purchase->note }}</td>
-                            </tr>
+                        <tbody>   
+                            @php
+                                $purchase_details = [
+                                    'Supplier' => $purchase->suppliername,
+                                    'Tax ID' => $purchase->supplier_taxid,
+                                    'Transaction ID' => $purchase->tid,
+                                    'Order Date & Due Date' => $purchase->date . ' : ' . $purchase->due_date,
+                                    'Reference' => $purchase->doc_ref_type . ' - ' . $purchase->doc_ref,
+                                    'Project' => $purchase->project ?: $purchase->project->name,
+                                    'Note' => $purchase->note,
+                                ];
+                            @endphp   
+                            @foreach ($purchase_details as $key => $val)
+                                <tr>
+                                    <th>{{ $key }}</th>
+                                    <td>{{ $value }}</td>
+                                </tr>
+                            @endforeach                      
                             <tr>
                                 <th>Purchase Items Cost</th>
                                 <td>
