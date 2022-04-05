@@ -2,6 +2,7 @@
 
 namespace App\Models\bill\Traits;
 
+use App\Models\billitem\BillItem;
 use App\Models\items\PaidbillItem;
 use App\Models\purchaseorder\Purchaseorder;
 use App\Models\supplier\Supplier;
@@ -11,6 +12,11 @@ use App\Models\supplier\Supplier;
  */
 trait BillRelationship
 {
+    public function items()
+    {
+        return $this->hasMany(BillItem::class);
+    }
+
     public function purchaseorder()
     {
         return $this->belongsTo(Purchaseorder::class, 'po_id');
