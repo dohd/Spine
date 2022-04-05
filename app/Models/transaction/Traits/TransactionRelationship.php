@@ -5,12 +5,23 @@ namespace App\Models\transaction\Traits;
 use App\Models\bill\Bill;
 use App\Models\bill\Paidbill;
 use App\Models\hrm\Hrm;
+use App\Models\invoice\PaidInvoice;
 
 /**
  * Class TransactionRelationship
  */
 trait TransactionRelationship
 {
+    public function paidinvoice()
+    {
+        return $this->belongsTo(PaidInvoice::class, 'tr_ref');
+    }
+    
+    public function invoice()
+    {
+        return $this->belongsTo('App\Models\invoice\Invoice', 'tr_ref');
+    }
+
     public function paidbill()
     {
         return $this->belongsTo(Paidbill::class, 'tr_ref');
@@ -44,11 +55,6 @@ trait TransactionRelationship
     public function category()
     {
         return $this->belongsTo('App\Models\transactioncategory\Transactioncategory', 'trans_category_id');
-    }
-
-    public function invoice()
-    {
-        return $this->hasOne('App\Models\invoice\Invoice', 'id', 'bill_id');
     }
 
     public function user()
