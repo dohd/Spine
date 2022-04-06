@@ -3,7 +3,6 @@
 @section ('title', trans('labels.backend.customers.management'))
 
 @section('content')
-
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
@@ -20,14 +19,10 @@
                         {{ trans('customers.delete_selected') }}</a>
                 </li>
                 @endif
-
-
             </ul>
         </div>
         <div class="content-header-right col-md-6 col-12">
-
             <div class="media width-250 float-right">
-
                 <div class="media-body media-right text-right">
                     @include('focus.customers.partials.customers-header-buttons')
                 </div>
@@ -36,85 +31,75 @@
     </div>
 
     @if(@$segment->group_data)
-    <div class="card">
-
-        <div class="card-body">
-            <div class="row">
-                <div class="col-sm-2">
-                    <p> {{trans('customergroups.title')}}</p>
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <p> {{trans('customergroups.title')}}</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p>
+                            <a href="{{route('biller.customergroups.show',[$segment->group_data['id']])}}">
+                                {{$segment->group_data['title']}}
+                            </a>
+                        </p>
+                    </div>
                 </div>
-                <div class="col-sm-6">
-                    <p>
-                        <a href="{{route('biller.customergroups.show',[$segment->group_data['id']])}}">{{$segment->group_data['title']}}</a>
-                    </p>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <p>{{trans('customergroups.summary')}}</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p>{{$segment->group_data['summary']}}</p>
+                    </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <p>{{trans('customergroups.members')}}</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p>{{numberFormat($segment->group_data->count('id'))}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <p>{{trans('customergroups.disc_rate')}}</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p>{{numberFormat(@$segment->group_data->disc_rate)}} %</p>
+                    </div>
+                </div>
+                <a href="#sendEmailGroup" data-toggle="modal" class="btn btn-primary btn-sm my-1">
+                    <i class="fa fa-paper-plane-o"></i> {{trans('customergroups.group_message')}}
+                </a>
             </div>
-            <div class="row">
-                <div class="col-sm-2">
-                    <p>{{trans('customergroups.summary')}}</p>
-                </div>
-                <div class="col-sm-6">
-                    <p>{{$segment->group_data['summary']}}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-2">
-                    <p>{{trans('customergroups.members')}}</p>
-                </div>
-                <div class="col-sm-6">
-                    <p>{{numberFormat($segment->group_data->count('id'))}}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-2">
-                    <p>{{trans('customergroups.disc_rate')}}</p>
-                </div>
-                <div class="col-sm-6">
-                    <p>{{numberFormat(@$segment->group_data->disc_rate)}} %</p>
-                </div>
-            </div>
-            <a href="#sendEmailGroup" data-toggle="modal" class="btn btn-primary btn-sm my-1"><i class="fa fa-paper-plane-o"></i> {{trans('customergroups.group_message')}}
-            </a>
-
         </div>
-    </div>
-
     @endif
 
     <div class="content-body">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-
-                    <div class="card-content">
-
-                        <div class="card-body">
-                            <table id="customers-table" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>{{ trans('customers.picture') }}</th>
-                                        <th class="all">{{ trans('customers.name') }}</th>
-                                        <th>{{ trans('customers.company') }}</th>
-                                        <th>{{ trans('customers.email') }}</th>
-                                        <th>{{ trans('customers.address') }}</th>
-                                        <th>{{ trans('customers.gid') }}</th>
-                                        <th>{{ trans('general.active') }}</th>
-                                        <th class="all">{{ trans('labels.general.actions') }}</th>
-                                    </tr>
-                                </thead>
-
-
-                                <tbody>
-                                    <tr>
-                                        <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-
-                    </div>
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <table id="customers-table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{{ trans('customers.picture') }}</th>
+                                <th class="all">{{ trans('customers.name') }}</th>
+                                <th>{{ trans('customers.company') }}</th>
+                                <th>{{ trans('customers.email') }}</th>
+                                <th>{{ trans('customers.address') }}</th>
+                                <th>{{ trans('customers.gid') }}</th>
+                                <th>{{ trans('general.active') }}</th>
+                                <th class="all">{{ trans('labels.general.actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -201,7 +186,9 @@ $customergroup= $segment->group_data;
         const customerGroup = @json(@$segment['customer_group_id ']);
         const relType = @json(@$input['rel_type ']);
 
-        const tableLan = { @lang('datatable.strings') };
+        const tableLan = {
+            @lang('datatable.strings')
+        };
         var dataTable = $('#customers-table').dataTable({
             destroy: true,
             processing: true,
@@ -214,7 +201,7 @@ $customergroup= $segment->group_data;
                 type: 'post',
                 data: {
                     due_filter: dueFilter ? true : '',
-                    g_rel_id: relId ? customerGroup: '',
+                    g_rel_id: relId ? customerGroup : '',
                     g_rel_type: relId ? relType : ''
                 },
             },
@@ -257,7 +244,9 @@ $customergroup= $segment->group_data;
                     sortable: false
                 }
             ],
-            order: [[0, 'desc']],
+            order: [
+                [0, 'desc']
+            ],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: {
@@ -287,15 +276,15 @@ $customergroup= $segment->group_data;
             drawCallback: function(settings) {
                 let api = this.api();
                 var info = api.page.info();
-                const rowCount = api.rows({page: 'current'}).count();
+                const rowCount = api.rows({
+                    page: 'current'
+                }).count();
                 if (info.pages !== 0 && api.page() > 0 && rowCount === 0) {
                     api.page('first').state.save();
                     window.location.reload();
                 }
             }
         });
-
-        $('#customers-table_wrapper').removeClass('form-inline');
     }
 
 
@@ -304,7 +293,7 @@ $customergroup= $segment->group_data;
         if ($("#notify").length == 0) {
             $("#c_body").html('<div id="notify" class="alert" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
         }
-        
+
         $.ajax({
             url: "{{route('biller.customers.selected_action')}}",
             type: 'POST',
