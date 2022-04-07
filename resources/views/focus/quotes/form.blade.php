@@ -65,11 +65,13 @@
                 <div class="input-group">
                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                     @php
-                        $label = $query_str ? 'PI-' : 'QT-';
-                        $label .= sprintf('%04d', $lastquote->tid+1);
+                        $label = $is_pi ? 'PI-' : 'QT-';
+                        $tid = sprintf('%04d', $lastquote->tid);
+                        if (!isset($words['edit_mode'])) $tid = sprintf('%04d', $lastquote->tid+1);
+                        $label .= $tid;
                     @endphp
                     {{ Form::text('tid', $label, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
-                    <input type="hidden" name="tid" value="{{ $lastquote->tid+1 }}">
+                    <input type="hidden" name="tid" value="{{ $tid }}">
                 </div>
             </div>
         </div>
@@ -94,7 +96,7 @@
 
     <!-- Properties -->
     <div class="col-6">
-        <h3 class="form-group">{{ $query_str ? 'PI Properties' : trans('quotes.properties')}}</h3>
+        <h3 class="form-group">{{ $is_pi ? 'PI Properties' : trans('quotes.properties')}}</h3>
         <div class="form-group row">
             <div class="col-4">
                 <label for="reference" class="caption">Djc Reference</label>
@@ -192,10 +194,27 @@
     </div>                        
 </div>
 <div class="form-group row">
-    <div class="col-12">
-        <label for="subject" class="caption">Subject / Title</label>
-        {{ Form::text('notes', null, ['class' => 'form-control', 'id' => 'subject', 'required']) }}
-    </div>
+    @if (isset($revisions))
+        <div class="col-10">
+            <label for="subject" class="caption">Subject / Title</label>
+            {{ Form::text('notes', null, ['class' => 'form-control', 'id' => 'subject', 'required']) }}
+        </div>
+        <div class="col-2">
+            <label for="revision" class="caption">Revision</label>
+            <select class="form-control" name='revision' id="rev" required>
+                @foreach ($revisions as $val)
+                <option value="_r{{ $val }}" {{ @$quote->revision == '_r'.$val ? 'selected' : '' }}>
+                    R{{ $val }}
+                </option>
+                @endforeach                                            
+            </select>
+        </div>
+    @else
+        <div class="col-12">
+            <label for="subject" class="caption">Subject / Title</label>
+            {{ Form::text('notes', null, ['class' => 'form-control', 'id' => 'subject', 'placeholder' => 'Subject or Title', 'required']) }}
+        </div>
+    @endif
 </div>
 @include('focus.quotes.partials.quote-items-table')
 
@@ -226,7 +245,7 @@
         <div class="form-group">
             <label>
                 {{trans('general.grand_total')}} ({{ config('currency.symbol') }})
-                @if (!$query_str)
+                @if (!$is_pi)
                     <b class="text-primary">
                         (Profit: &nbsp;<span class="text-dark profit">0</span>)
                     </b>
