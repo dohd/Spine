@@ -1,7 +1,7 @@
 @php
     $query_str = request()->getQueryString();
     $edit_link = ($query_str == 'page=pi') ? route('biller.quotes.edit', [$quote, $query_str]) : route('biller.quotes.edit', $quote);
-    $copy_link = $quote->bank_id ? route('biller.quotes.edit', [$quote, 'page=copy_to_qt']) : route('biller.quotes.edit', [$quote, 'page=copy_to_pi']);
+    $copy_link = $quote->bank_id ? route('biller.quotes.edit', [$quote, 'task=pi_to_quote']) : route('biller.quotes.edit', [$quote, 'page=pi&task=quote_to_pi']);
     $valid_token = token_validator('', 'q'.$quote->id . $quote->tid, true);
 @endphp
 <div class="row">
