@@ -27,10 +27,14 @@ class CreateResponse implements Responsable
             $banks = Bank::all();
             $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
             $words['title'] = 'Create Proforma Invoice';
-            
-            return view('focus.quotes.create_pi')
-                ->with(compact('lastquote', 'leads', 'banks', 'words'))
+
+            return view('focus.quotes.create')
+                ->with(compact('lastquote','leads', 'words', 'banks'))
                 ->with(bill_helper(2, 4));
+            
+            // return view('focus.quotes.create_pi')
+            //     ->with(compact('lastquote', 'leads', 'banks', 'words'))
+            //     ->with(bill_helper(2, 4));
         }
         // create default quote
         return view('focus.quotes.create')
