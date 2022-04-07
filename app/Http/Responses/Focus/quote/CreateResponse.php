@@ -31,10 +31,6 @@ class CreateResponse implements Responsable
             return view('focus.quotes.create')
                 ->with(compact('lastquote','leads', 'words', 'banks'))
                 ->with(bill_helper(2, 4));
-            
-            // return view('focus.quotes.create_pi')
-            //     ->with(compact('lastquote', 'leads', 'banks', 'words'))
-            //     ->with(bill_helper(2, 4));
         }
         // create default quote
         return view('focus.quotes.create')
