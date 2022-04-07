@@ -18,21 +18,23 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_quote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
+        $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
         $leads = Lead::where('status', 0)->orderBy('id', 'desc') ->get();
-        
+        $words = ['title' => 'Create Quote'];
+
         // create proforma invoice
         if (request('page') == 'pi') {
             $banks = Bank::all();
-            $last_quote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
+            $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
+            $words['title'] = 'Create Proforma Invoice';
             
             return view('focus.quotes.create_pi')
-                ->with(compact('last_quote', 'leads', 'banks'))
+                ->with(compact('lastquote', 'leads', 'banks', 'words'))
                 ->with(bill_helper(2, 4));
         }
         // create default quote
         return view('focus.quotes.create')
-            ->with(compact('last_quote','leads'))
+            ->with(compact('lastquote','leads', 'words'))
             ->with(bill_helper(2, 4));
     }
 }
