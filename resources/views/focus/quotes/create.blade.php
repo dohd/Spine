@@ -1,8 +1,9 @@
 @extends('core.layouts.app')
 @php
-    $query_str = request()->getQueryString();
     $header_title = trans('labels.backend.quotes.management');
-    if ($query_str == 'page=pi') $header_title = 'Proforma Invoice Management';
+    $is_pi = request('page') == 'pi';
+    $task = request('task');
+    if ($is_pi) $header_title = 'Proforma Invoice Management';
 @endphp
 
 @section('title', $header_title)
@@ -10,7 +11,7 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        @if (!$query_str)
+        @if (!$is_pi)
             <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
                 <strong>Profit Margin Not Met!</strong> Check line item rates.
             </div>
@@ -40,7 +41,7 @@
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
     });
-    const isQuote = @json(!$query_str);
+    const isQuote = @json(!$is_pi);
 
     // initialize datepicker
     $('.datepicker')
