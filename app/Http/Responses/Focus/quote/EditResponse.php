@@ -31,50 +31,45 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-        $products = $quote->products()->orderBy('row_index', 'asc')->get();
-
         // open leads (status = 0)
-        $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
-
-        // default parameters
-        $params = array('quote', 'products', 'leads');
-        if ($quote->bank_id ) $banks = Bank::all();
+        $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
+        $banks = Bank::all();
+        $lastquote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
+        $lastpi = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
+        $words = array();
         
         // copy page 
         if (request('page') == 'copy') {
-            // copy proforma invoice
-            if (isset($banks)) {
-                $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
+            // copy pi
+            if ($quote->bank_id) {
+                $lastquote = $lastpi;
 
                 return view('focus.quotes.edit_pi')
-                    ->with(compact('banks', 'last_quote', ...$params))
+                    ->with(compact('banks', 'lastquote', 'quote', 'leads'))
                     ->with(bill_helper(2, 4));
             }
 
             // copy quote
-            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
             return view('focus.quotes.edit')
-                ->with(compact('last_quote', ...$params))
+                ->with(compact('lastquote', 'quote', 'leads'))
                 ->with(bill_helper(2, 4));
         }
 
         // copy quote to pi page
         if (request('page') == 'copy_to_pi') {
-            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
-            $banks = Bank::all();
+            $lastquote = $lastpi;
 
             return view('focus.quotes.edit_pi')
-                ->with(compact('banks', 'last_quote', ...$params))
+                ->with(compact('banks', 'lastquote', 'quote', 'leads'))
                 ->with(bill_helper(2, 4));
         }
 
         // copy pi to quote page
         if (request('page') == 'copy_to_qt') {
-            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
             $copy_from_pi = true;
 
             return view('focus.quotes.edit')
-                ->with(compact('last_quote', 'copy_from_pi', ...$params))
+                ->with(compact('lastquote', 'copy_from_pi', 'quote', 'leads'))
                 ->with(bill_helper(2, 4));        
         }
 
@@ -82,14 +77,15 @@ class EditResponse implements Responsable
         $leads[] = Lead::find($quote->lead_id);
 
         // edit proforma invoice
-        if (isset($banks)) {            
+        if ($quote->bank_id) {           
             return view('focus.quotes.edit_pi')
-                ->with(compact('banks', ...$params))
+                ->with(compact('banks', 'leads', 'quote', 'lastquote'))
                 ->with(bill_helper(2, 4));
         }
         // edit quote
+        $words['title'] = 'Edit Quote';
         return view('focus.quotes.edit')
-            ->with(compact(...$params))
+            ->with(compact('leads', 'quote', 'lastquote', 'words'))
             ->with(bill_helper(2, 4));
     }
 }
