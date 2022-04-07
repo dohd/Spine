@@ -1,8 +1,9 @@
 @extends ('core.layouts.app')
 @php
-    $query_str = request()->getQueryString();
     $header_title = trans('labels.backend.quotes.management');
-    if ($query_str == 'page=pi') $header_title = 'Proforma Invoice Management';
+    $is_pi = request('page') == 'pi';
+    $task = request('task');
+    if ($is_pi) $header_title = 'Proforma Invoice Management';
 @endphp
 
 @section('title', $header_title)
@@ -10,7 +11,7 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        @if (!$query_str)
+        @if (!$is_pi)
             <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
                 <strong>Profit Margin Not Met!</strong> Check line item rates.
             </div>
@@ -27,7 +28,11 @@
 
     <div class="card">
         <div class="card-body">
-        {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'method' => 'PATCH']) }}
+        @if ($is_pi && !$task)
+            {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'method' => 'PATCH']) }}
+        @else
+            {{ Form::model($quote, ['route' => ['biller.quotes.store', $quote], 'method' => 'POST']) }}
+        @endif
             @include('focus.quotes.form')
         {{ Form::close() }}
         </div>
@@ -40,11 +45,11 @@
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
     });
-    const isQuote = @json(!$query_str);
+    const isQuote = @json(!$is_pi);
 
     // default edit values
     $('#branch_id').val("{{ $quote->branch_id }}");
-    $('#customer_id').val("{{$quote->customer_id }}");
+    $('#customer_id').val("{{ $quote->customer_id }}");
     const printType = "{{ $quote->print_type }}"
     if (printType == 'inclusive') {
         $('#colorCheck7').attr('checked', false);
@@ -172,10 +177,10 @@
         $('#total').val(parseFloat(grandttl.toFixed(2)).toLocaleString());
         $('#subtotal').val(parseFloat(subttl.toFixed(2)).toLocaleString());
         $('#tax').val(parseFloat((grandttl - subttl).toFixed(2)).toLocaleString());
-        if (isQuote) {
+        if (isQuote && bp_subttl) {
             // profit
             const profit = parseFloat((subttl - bp_subttl).toFixed(2));
-            const pcent = Math.round(profit/bp_subttl * 100);
+            const pcent = bp_subttl ? Math.round(profit/bp_subttl * 100) : 0;
             $('.profit').text(profit.toLocaleString() + ' : ' + pcent + '%');
             // budget limit 30 percent
             $('.budget-alert').addClass('d-none');
