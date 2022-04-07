@@ -376,19 +376,15 @@ class ProductsController extends Controller
     /**
      * Autocomplete product search dropdown options
      */
-    public function product_quote_search(Request $request)
+    public function quote_product_search(Request $request)
     {
         if (!access()->allow('product_search')) return false;
 
-        $input = $request->only(['keyword', 'pricing', 'warehouse_id']);
-        if (!$request->warehouse_id) $input['warehouse_id'] = 0;
-        if (!$request->pricing) $input['pricing'] = 0;
+        $k = request('keyword', '');
 
-        $product_variations = ProductVariation::whereHas('product', function ($q) use ($input) {
-            $q->where('name', 'LIKE', '%'.$input['keyword'].'%');
-        })
-        ->when($input['warehouse_id'] > 0, function ($q) use ($input) {
-            $q->where('warehouse_id', $input['warehouse_id']);
+        $product_variations = ProductVariation::where('qty', '>', 0)
+        ->whereHas('product', function ($q) use ($k) {
+            $q->where('name', 'LIKE', '%'. $k .'%');
         })
         ->with(['warehouse' => function($q) {
             $q->select(['id', 'title']);
@@ -397,49 +393,22 @@ class ProductsController extends Controller
 
         $output = array();
         foreach ($product_variations as $row) {
-            if (!$row->product->stock_type || ($row->product->stock_type > 0 && $row->qty > 0)) {
-                $output[] = array(
-                    'name' => $row->product->name . ' ' . $row->name, 
-                    'disrate' => numberFormat($row->disrate), 
-                    'purchase_price' => numberFormat($row->purchase_price), 
-                    'price' => numberFormat($row->price), 
-                    'id' => $row->id, 
-                    'taxrate' => numberFormat($row->product->taxrate), 
-                    'product_des' => $row->product['product_des'], 
-                    'unit' => $row->product['unit'], 
-                    'code' => $row->code, 
-                    'alert' => $row->qty, 
-                    'image' => $row->image,
-                    'warehouse' => $row->warehouse
-                );
-            }
-        }
-        // has price
-        if ($input['pricing']) {
-            $product_variations = ProductVariation::whereHas('product', function ($q) use ($input) {
-                $q->where('name', 'LIKE', '%'.$input['keyword'].'%');
-            })
-            ->whereHas('v_prices', function ($q) use ($input) {
-                $q->where('pricegroup_id', $input['pricing']);
-            })
-            ->when($input['warehouse_id'] > 0, function ($q) use ($input) {
-                $q->where('warehouse_id', $input['warehouse_id']);
-            })
-            ->with(['warehouse' => function($q) {
-                $q->select(['id', 'title']);
-            }])    
-            ->limit(6)->get();
-    
-            foreach ($product_variations as $row) {
-                if (!$row->product->stock_type || ($row->product->stock_type > 0 && $row->qty > 0)) {
-                    $output = array_replace($output, [
-                        'price' => numberFormat($row->v_prices->selling_price)
-                    ]);  
-                }
-            }
+            $output[] = [
+                'id' => $row->id, 
+                'name' => $row->name, 
+                'purchase_price' => numberFormat($row->purchase_price), 
+                'price' => numberFormat($row->price), 
+                'product_des' => $row->product['product_des'], 
+                'unit' => $row->product['unit'], 
+                'code' => $row->code, 
+                'qty' => $row->qty, 
+                'image' => $row->image,
+                'warehouse' => $row->warehouse
+            ];
         }
 
-        return view('focus.products.partials.search')->withDetails($output);
+        return response()->json($output);
+        // return view('focus.products.partials.search')->withDetails($output);
     }
 
 
