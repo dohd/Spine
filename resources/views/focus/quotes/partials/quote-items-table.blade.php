@@ -1,7 +1,7 @@
 <table id="quoteTbl" class="table-responsive pb-5 tfr my_stripe_single">
     <thead>
         <tr class="item_header bg-gradient-directional-blue white">
-            @if ($query_str)
+            @if ($is_pi)
                 <th width="7%" class="text-center">Numbering</th>
                 <th width="40%" class="text-center">{{ trans('general.item_name') }}</th>
                 <th width="7%" class="text-center">UOM</th>
@@ -28,7 +28,7 @@
         <!-- product row template-->
         <tr id="productRow">
             <td><input type="text" class="form-control" name="numbering[]" id="numbering-p0" required></td>
-            @if ($query_str)
+            @if ($is_pi)
                 <td><input name="product_name[]" id="name-p0" class="form-control" placeholder="{{trans('general.enter_product')}}" required></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-p0"></td>
                 <input type="hidden" name="buy_price[]" vlaue="0">
@@ -65,7 +65,7 @@
         <!-- title row template-->
         <tr id="titleRow">
             <td><input type="text" class="form-control" name="numbering[]" id="numbering-t1" required></td>
-            <td colspan="{{ $query_str ? 6 : 8 }}">
+            <td colspan="{{ $is_pi ? 6 : 8 }}">
                 <input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading" id="name-t1" required>
             </td>
             <td class="text-center">
@@ -98,7 +98,7 @@
                 @if ($item->a_type == 1)
                     <tr>
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-p{{$k}}" required></td>
-                        @if ($query_str)
+                        @if ($is_pi)
                             <td><input name="product_name[]" value="{{ $item->product_name }}" id="name-p{{$k}}" class="form-control" placeholder="{{trans('general.enter_product')}}" required></td>
                             <td><input type="text" class="form-control" name="unit[]" value="{{ $item->unit }}" id="unit-p{{$k}}"></td>
                             <input type="hidden" name="buy_price[]" vlaue="0">
@@ -135,7 +135,7 @@
                 @else
                     <tr>
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-t{{$k}}" required></td>
-                        <td colspan="{{ $query_str ? 6 : 8 }}">
+                        <td colspan="{{ $is_pi ? 6 : 8 }}">
                             <input type="text"  class="form-control" name="product_name[]" value="{{ $item->product_name }}" placeholder="Enter Title Or Heading" id="name-t{{$k}}" required>
                         </td>
                         <td class="text-center">
