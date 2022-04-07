@@ -16,7 +16,7 @@
         //For Datatable
         Route::post('products/get', 'ProductsTableController')->name('products.get');
         Route::post('products/search/{bill_type}', 'ProductsController@product_search')->name('products.product_search');
-        Route::post('products/quotesearch/{bill_type}', 'ProductsController@product_quote_search')->name('products.product_quote_search');
+        Route::get('products/quote', 'ProductsController@quote_product_search')->name('products.quote_product_search');
 
         
         Route::post('products/product_sub_load', 'ProductsController@product_sub_load')->name('products.product_sub_load');
