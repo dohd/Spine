@@ -31,62 +31,63 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
-        // open leads (status = 0)
-        $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
+        $words['title'] = 'Edit Quote';
+        $revisions = range(1, 5);
         $banks = Bank::all();
+        $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
         $lastquote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
         $lastpi = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
-        
-        // copy page 
-        if (request('page') == 'copy') {
-            // copy pi
-            if ($quote->bank_id) {
-                $lastquote = $lastpi;
 
-                return view('focus.quotes.edit_pi')
-                    ->with(compact('banks', 'lastquote', 'quote', 'leads'))
-                    ->with(bill_helper(2, 4));
-            }
+        // copy quote to quote
+        if (request('task') == 'quote_to_quote') {
+            $words['title'] = 'Copy Quote to Quote';
 
-            // copy quote
             return view('focus.quotes.edit')
-                ->with(compact('lastquote', 'quote', 'leads'))
+                ->with(compact('lastquote', 'quote', 'leads', 'words'))
                 ->with(bill_helper(2, 4));
         }
-
-        // copy quote to pi page
-        if (request('page') == 'copy_to_pi') {
+        // copy quote to pi
+        if (request('task') == 'quote_to_pi') {
+            $words['title'] = 'Copy Quote to PI';
             $lastquote = $lastpi;
 
-            return view('focus.quotes.edit_pi')
-                ->with(compact('banks', 'lastquote', 'quote', 'leads'))
+            return view('focus.quotes.edit')
+                ->with(compact('lastquote', 'quote', 'leads', 'words', 'banks'))
                 ->with(bill_helper(2, 4));
         }
-
-        // copy pi to quote page
-        if (request('page') == 'copy_to_qt') {
-            $copy_from_pi = true;
+        // copy pi to pi
+        if (request('task') == 'pi_to_pi') {
+            $words['title'] = 'Copy PI to PI';
+            $lastquote = $lastpi;
 
             return view('focus.quotes.edit')
-                ->with(compact('lastquote', 'copy_from_pi', 'quote', 'leads'))
-                ->with(bill_helper(2, 4));        
+                ->with(compact('lastquote', 'quote', 'leads', 'words', 'banks'))
+                ->with(bill_helper(2, 4));
+        }
+        // copy pi to quote
+        if (request('task') == 'pi_to_quote') {
+            $words['title'] = 'Copy PI to Quote';
+
+            return view('focus.quotes.edit')
+                ->with(compact('lastquote', 'quote', 'leads', 'words'))
+                ->with(bill_helper(2, 4));
         }
 
         // append previous lead when editing
         $leads[] = Lead::find($quote->lead_id);
+        $words['edit_mode'] = true;
 
         // edit proforma invoice
         if ($quote->bank_id) {    
             $words['title'] = 'Edit Proforma Invoice';
        
             return view('focus.quotes.edit')
-                ->with(compact('banks', 'leads', 'quote', 'lastquote', 'words'))
+                ->with(compact('banks', 'leads', 'quote', 'lastquote', 'words', 'revisions'))
                 ->with(bill_helper(2, 4));
         }
         // edit quote
-        $words['title'] = 'Edit Quote';
         return view('focus.quotes.edit')
-            ->with(compact('leads', 'quote', 'lastquote', 'words'))
+            ->with(compact('leads', 'quote', 'lastquote', 'words', 'revisions'))
             ->with(bill_helper(2, 4));
     }
 }
