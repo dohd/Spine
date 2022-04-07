@@ -162,7 +162,7 @@ class QuotesController extends Controller
             'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
             'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
             'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
-            'customer_id', 'branch_id', 'bank_id'
+            'customer_id', 'branch_id', 'bank_id', 'revision'
         ]);
         $data_items = $request->only([
             'id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
