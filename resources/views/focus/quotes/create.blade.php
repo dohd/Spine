@@ -1,451 +1,177 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.quotes.management')." | Create Quote" )
-
-@section('page-header')
-    <h1>{{ trans('labels.backend.quotes.management') }}</h1>
-@endsection
+@section ('title', trans('labels.backend.quotes.management'))
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
+            <strong>Profit Margin Not Met!</strong> Check line item rates.
+        </div>
+        <div class="content-header-left col-md-6 col-12">
             <h4 class="content-header-title">{{ trans('labels.backend.quotes.management') }}</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
-                <div class="media-body media-right text-right">
-                    @include('focus.quotes.partials.quotes-header-buttons')
-                </div>
+                @include('focus.quotes.partials.quotes-header-buttons')
             </div>
         </div>
     </div>
 
-    <div class="content-body">
-            <div class="card">
-                <div class="card-body">
-                {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST']) }}
-                    <div class="row">
-                        <div class="col-sm-6 cmp-pnl">
-                            <div id="customerpanel" class="inner-cmp-pnl">
-                                <div class="form-group row">
-                                    <div class="fcol-sm-12">                                        
-                                        <h3 class="title pl-1">Create Quote</h3>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-12">
-                                        <label for="ref_type" class="caption">Search Ticket</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>                                                 
-                                                <option value="">-- Select Ticket --</option>
-                                                @foreach ($leads as $lead)
-                                                    @php
-                                                        $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
-                                                        $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
-                                                        $branch = isset($lead->branch) ? $lead->branch->name : '';
-                                                        if ($name && $branch) $name .= ' - ' . $branch;  
-                                                    @endphp
-                                                    <option value="{{ $lead->id }}">
-                                                        {{ $tid }} - {{ $name }} - {{ $lead->title }}
-                                                    </option>
-                                                @endforeach                                                                                             
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class='col-md-6'>
-                                        <div class='col m-1'>
-                                            {{ Form::label('method', 'Print Type', ['class' => 'col-12 control-label']) }}
-                                            <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-primary" name="print_type" value="inclusive" id="colorCheck6" />
-                                                <label class="custom-control-label" for="colorCheck6">VAT-Inclusive</label>
-                                            </div>
-                                            <div class="d-inline-block custom-control custom-checkbox mr-1">
-                                                <input type="radio" class="custom-control-input bg-purple" name="print_type" value="exclusive" id="colorCheck7" checked />
-                                                <label class="custom-control-label" for="colorCheck7">VAT-Exclusive</label>
-                                            </div>
-                                            <input type="hidden" id="document_type" value="QUOTE" name="document_type" />
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3"><label for="pricing" class="caption">Pricing</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                            </div>
-                                            <select id="pricing" name="pricing" class="form-control round">
-                                                <option value="0" selected>Default </option>
-                                                @foreach($selling_prices as $selling_price)
-                                                    <option value="{{$selling_price->id}}">{{$selling_price->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <label for="invocieno" class="caption">#{{prefix(5)}} {{trans('general.serial_no')}} </label>
-                                        <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                            {{ Form::text('tid', 'QT-' . sprintf('%04d', $last_quote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
-                                            <input type="hidden" name="tid" value="{{ $last_quote->tid+1 }}" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-6">
-                                        <label for="attention" class="caption">Attention</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention', 'required']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label for="prepared_by" class="caption"> Prepared By</label>
-                                        {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepaired By', 'id'=>'prepared_by', 'required']) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 cmp-pnl">
-                            <div class="inner-cmp-pnl">
-                                <div class="form-group row">
-                                    <div class="col-sm-12">
-                                        <h3 class="title">{{trans('quotes.properties')}}</h3>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-4">
-                                        <label for="invocieno" class="caption">Djc Reference</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference', 'required']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4"><label for="reference_date" class="caption">Djc Reference Date</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id' => 'invoicedate']) }}
-                                        </div>
-                                    </div>                                    
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-4"><label for="revision" class="caption">Validity Period</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control round" name="validity" id="validity">
-                                                <option value="0" selected>On Receipt</option>
-                                                <option value="14">Valid For 14 Days</option>
-                                                <option value="30">Valid For 30 Days</option>
-                                                <option value="45">Valid For 45 Days</option>
-                                                <option value="60">Valid For 60 Days</option>
-                                                <option value="90">Valid For 90 Days</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4"><label for="ref_type" class="caption">Currency <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select class="form-control" name="currency" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
-                                                @foreach($currencies as $currency)
-                                                    <option value="{{ $currency->id }}" {{ $currency->id === 1? 'selected' : '' }}>
-                                                        {{ $currency->symbol }} - {{ $currency->code }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'required']) }}
-                                        </div>
-                                    </div>                                                                          
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-4"><label for="source" class="caption">Quotation Terms <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                            <select id="term_id" name="term_id" class="form-control round" required>
-                                                <option value="">-- Select Term --</option>
-                                                @foreach($terms as $term)
-                                                    <option value="{{ $term->id }}">{{ $term->title }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label for="taxFormat" class="caption">Select {{trans('general.tax')}}</label>
-                                        <select class="form-control round" name='tax_id' id="tax_id">
-                                            <option value="16" selected>16% VAT</option>
-                                            <option value="8">8% VAT</option>
-                                            <option value="0">Off</option>
-                                        </select>
-                                        <input type="hidden" name="tax_format" value="exclusive" id="tax_format" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>                        
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-10">
-                            <label for="subject" class="caption">Subject / Title</label>
-                            {{ Form::text('notes', null, ['class' => 'form-control round', 'id' => 'subject', 'required']) }}
-                        </div>
-                    </div>
-
-                    <div>                            
-                        <table id="quotation" class="table-responsive pb-5 tfr my_stripe_single">
-                            <thead>
-                                <tr class="item_header bg-gradient-directional-blue white">
-                                    <th width="7%" class="text-center">Numbering</th>
-                                    <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
-                                    <th width="7%" class="text-center">UOM</th>
-                                    <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
-                                    <th width="14%" class="text-center">{{trans('general.rate')}} Exclusive</th>
-                                    <th width="14%" class="text-center">{{trans('general.rate')}} Inclusive</th>
-                                    <th width="10%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
-                                    <th width="5%" class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-
-                        <div class="row">
-                            <div class="col-md-8 col-xs-7 payment-method last-item-row sub_c">
-                                <div id="load_instruction" class="col-md-6 col-lg-12 mg-t-20 mg-lg-t-0-force"></div>
-                                <button type="button" class="btn btn-success" aria-label="Left Align" id="add-product">
-                                    <i class="fa fa-plus-square"></i> Add Product
-                                </button>
-                                <button type="button" class="btn btn-primary" aria-label="Left Align" id="add-title">
-                                    <i class="fa fa-plus-square"></i> Add Title
-                                </button>
-                            </div>
-
-                            <div class="col-md-4 col-xs-5 invoice-block pull-right">
-                                <div class="unstyled amounts">
-                                    <div class="form-group">
-                                        <label>SubTotal ({{ config('currency.symbol') }})</label>
-                                        <div class="input-group m-bot15">
-                                            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label id="tax-label">{{ trans('general.total_tax') }}
-                                            <span>16%</span>
-                                            <span class="text-danger">VAT-Exclusive (print type)</span>
-                                        </label>
-                                        <div class="input-group m-bot15">
-                                            <input type="text" name="tax" id="tax" class="form-control" readonly />
-                                        </div>
-                                    </div>                                    
-                                    <div class="form-group">
-                                        <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
-                                        <div class="input-group m-bot15">
-                                            <input type="text" name="total" class="form-control" id="total" readonly />
-                                        </div>
-                                    </div>
-                                    {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{ Form::close() }}
-                </div>
-            </div>   
+    <div class="card">
+        <div class="card-body">
+        {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST']) }}
+            @include('focus.quotes.form')
+        {{ Form::close() }}
         </div>
-    </div>
+    </div> 
 </div>
 @endsection
 
 @section('extra-scripts')
 <script>    
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
+    });
+
     // initialize datepicker
-    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('.datepicker')
+    .datepicker({ format: "{{ config('core.user_date_format') }}" })
+    .change(function() { return $(this).datepicker('hide') });
     $('#referencedate').datepicker('setDate', new Date());
-    $('#invoicedate').datepicker('setDate', new Date());
+    $('#date').datepicker('setDate', new Date());
 
     // on selecting lead
-    const leads = @json($leads);
     $('#lead_id').change(function() {
-        leads.forEach(v => {
-            if (v.id == $(this).val()) {
-                $('#subject').val(v.title);
-                $('#client_ref').val(v.client_ref);
-            }
-        });
+        const option = $('#lead_id option:selected');
+        $('#subject').val(option.attr('title'));
+        $('#client_ref').val(option.attr('client_ref'));
+        $('#branch_id').val(option.attr('branch_id'));
+        $('#customer_id').val(option.attr('customer_id'));
     });
-    // on selecting Djc reference
+
+    // on Djc reference change
     $('#reference').change(function() {
-        leads.forEach(v => {
-            if (v.id == $('#lead_id').val()) {
-                $('#subject').val(v.title);
-                if ($(this).val()) $('#subject').val(v.title + ' ; Djc-' + $(this).val());
-            }
+        const title = $('#lead_id option:selected').attr('title');
+        const djc = $(this).val();
+        if (djc) $('#subject').val(title + ' ; Djc-' + djc);
+    });
+
+
+    /**
+     * Table logic
+     */
+    // 
+    function assignIndex() {
+        $("#quoteTbl tbody tr").each(function(i) {
+            $(this).find('.index').val(i);
         });
-    });
-
-    // Check if radio button is checked
-    $('input[type="radio"]').change(function() {
-        const $span = $('#tax-label').find('span').eq(1);
-        if ($(this).is(':checked')) {
-            if ($(this).val() === 'exclusive') {
-                $span.text('VAT-Exclusive (print type)');
-            } else if ($(this).val() === 'inclusive') {
-                $span.text('VAT-Inclusive (print type)');
-            }
-        }
-    });
-
-    // row dropdown menu
-    function dropDown(val) {
-        return `
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Action
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item removeProd" href="javascript:void(0);">Remove</a>
-                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
-                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
-                </div>
-            </div>            
-        `;
     }
 
-    // product row
-    function productRow(n) {
-        return `
-            <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
-                <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${n}' required></td>
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}"></td>                
-                <td><input type="text" class="form-control req amnt" name="product_qty[]" id="amount-${n}" onchange="qtyChange(event)" required></td>
-                <td><input type="text" class="form-control req prc" name="product_price[]" id="price-${n}" onchange="priceChange(event)" required></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${n}" readonly></td>
-                <td><strong><span class='ttlText' id="result-${n}">0</span></strong></td>
-                <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">
-            </tr>
-        `;
-    }
-
-    // product title row
-    // with extra hidden input fields to imitate product row state
-    function productTitleRow(n) {
-        return `
-            <tr>
-                <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
-                <td colspan="6"><input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading " titlename-${n}" required></td>
-                <td class="text-center">${dropDown()}</td>
-                <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
-                <input type="hidden" name="unit[]">
-                <input type="hidden" name="product_qty[]" value="0">
-                <input type="hidden" name="product_price[]" value="0">
-                <input type="hidden" name="product_subtotal[]" value="0">
-                <input type="hidden" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="2" id="atype-${n}">
-            </tr>
-        `;
-    }
-
-    // product row counter
-    let rowIndx = 0;
-    $('#quotation tr:last').after(productRow(0));
-    $('#itemname-0').autocomplete(autocompleteProp(0));
-
-    // on clicking Add Product button
-    $('#add-product').click(function() {
-        rowIndx++;
-        const i = rowIndx;
-        $('#quotation tr:last').after(productRow(i));
-        $('#itemname-'+i).autocomplete(autocompleteProp(i));
-    });
-    // on clicking Add Title button
-    $('#add-title').click(function() {
-        rowIndx++;
-        const i = rowIndx;
-        $('#quotation tr:last').after(productTitleRow(i));
-    });
-
-    // on clicking Product row drop down menu
-    $("#quotation").on("click", ".up,.down,.removeProd", function() {
+    // on clicking action drop down
+    $("#quoteTbl").on("click", ".up, .down, .remv", function() {
         var row = $(this).parents("tr:first");
-        // move row up 
         if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
-        if ($(this).is('.removeProd')) $(this).closest('tr').remove();
-        
-        totals();
+        if ($(this).is('.remv')) $(this).closest('tr').remove();
+        calcTotal();
+        assignIndex();
+    });
+    // add product
+    let rowId = 1;
+    const rowHtml = $("#quoteTbl tbody tr:first").html();
+    $('#name-p0').autocomplete(autoComp('p0'));
+    $('#addProduct').click(function() {
+        const i = 'p' + rowId;
+        const newRowHtml = '<tr>' + rowHtml.replace(/p0/g, i) + '</tr>';
+        $("#quoteTbl tbody").append(newRowHtml);
+        $('#name-'+i).autocomplete(autoComp(i));
+        assignIndex();
+        rowId++;
     });
 
-    // default tax
-    let taxRate = 1.16;
-    // on select Tax change
+    // add title
+    let titleId = 2;
+    const titleHtml = $("#quoteTbl tbody tr:eq(1)").html();
+    $("#quoteTbl tbody tr:eq(1)").remove();
+    $('#addTitle').click(function() {
+        const i = 't'+titleId;
+        const newTitleHtml = '<tr>' + titleHtml.replace(/t1/g, i) + '</tr>';
+        $("#quoteTbl tbody").append(newTitleHtml);
+        assignIndex();
+        titleId++;
+    });
+
+    // on change qty and rate
+    $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty", function() {
+        const id = $(this).attr('id').split('-')[1];
+        const qty = $('#qty-'+id).val() || '0';
+        const rate = $('#rate-'+id).val() || '0';
+        const price = rate.replace(/,/g, '') * ($('#tax_id').val()/100 + 1);
+        $('#rate-'+id).val(parseFloat(rate.replace(/,/g, '')).toLocaleString());
+        $('#price-'+id).val(price.toLocaleString());
+        $('#amount-'+id).text((qty * price).toLocaleString());
+        if (!qty) $('#qty-'+id).val(1);
+        if (!$('#buyprice-'+id).val()) $('#buyprice-'+id).val(0);
+        if (!$('#estqty-'+id).val()) $('#estqty-'+id).val(1);
+        calcTotal();
+    });
+
+    // on tax change
     $('#tax_id').change(function() {
-        const tax = Number($(this).val()); 
-        const $span = $('#tax-label').find('span').eq(0);
-
-        if (tax) {
-            $('#tax_format').val('inclusive');
-            $span.text(tax+'%');
-        } 
-        else {
-            $('#tax_format').val('exclusive');
-            $span.text('OFF');
-        }
-       
-        // loop throw product rows while adjusting values
-        taxRate = (tax+100)/100;
-        $('#quotation tr').each(function(i) {
-            if (!i) return;
-            const productQty = $(this).find('td').eq(3).children().val()
-            if (productQty) {
-                const productPrice = $(this).find('td').eq(4).children().val();
-
-                const rateInclusive = taxRate * parseFloat(productPrice.replace(',', ''));
-                $(this).find('td').eq(5).children().val(rateInclusive.toFixed(2));
-
-                const rowAmount = productQty * parseFloat(rateInclusive);
-                $(this).find('td').eq(6).find('.ttlText').text(rowAmount.toFixed(2))
+        const tax = $(this).val(); 
+        $('#quoteTbl tbody tr').each(function() {
+            const qty = $(this).find('.qty').val() * 1;
+            if (qty) {
+                const rate = $(this).find('.rate').val().replace(/,/g, '');
+                const price = rate * (tax/100 + 1);
+                $(this).find('.price').val(price.toLocaleString());
+                $(this).find('.rate').change();
             }
         });
-        totals();
     });    
 
-    // ajax setup
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    // compute totals
+    function calcTotal() {
+        let grandttl = 0;
+        let subttl = 0;
+        let bp_subttl = 0;
+        $("#quoteTbl tbody tr").each(function(i) {
+            const qty = $(this).find('.qty').val() * 1;
+            if (qty > 0) {
+                const amount = $(this).find('.amount').text().replace(/,/g, '');
+                const rate = $(this).find('.rate').val().replace(/,/g, '');
+                const buyprice = $(this).find('.buyprice').val().replace(/,/g, '');
+                const estqty = $(this).find('.estqty').val();
+                grandttl += amount * 1;
+                subttl += qty * rate;
+                bp_subttl += estqty * buyprice;
+            }
+        });
+        $('#total').val(parseFloat(grandttl.toFixed(2)).toLocaleString());
+        $('#subtotal').val(parseFloat(subttl.toFixed(2)).toLocaleString());
+        $('#tax').val(parseFloat((grandttl - subttl).toFixed(2)).toLocaleString());
+        // profit
+        const profit = parseFloat((subttl - bp_subttl).toFixed(2));
+        const pcent = Math.round(profit/bp_subttl * 100);
+        $('.profit').text(profit.toLocaleString() + ' : ' + pcent + '%');
+        // budget limit 30 percent
+        $('.budget-alert').addClass('d-none');
+        if (subttl < bp_subttl * 1.3) {
+            $('.budget-alert').removeClass('d-none');
+            scroll(0, 0);
+        }
+    }
 
-    // autocompleteProp returns autocomplete object properties
-    function autocompleteProp(i) {
+    // autocomplete function
+    function autoComp(i) {
         return {
             source: function(request, response) {
                 $.ajax({
-                    url: baseurl + 'products/quotesearch/' + billtype,
-                    dataType: "json",
-                    method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&pricing=' 
-                        + $("#pricing").val(),
-                    success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.name,
-                                value: item.name,
-                                data: item
-                            };
-                        }));
+                    url: "{{ route('biller.products.quote_product_search') }}",
+                    data: 'keyword=' + request.term,
+                    success: result => {
+                        response(result.map(v => ({label: v.name, value: v.name, data: v})));
                     }
                 });
             },
@@ -454,86 +180,18 @@
             select: function(event, ui) {
                 const {data} = ui.item;
                 $('#productid-'+i).val(data.id);
-                $('#itemname-'+i).val(data.name);
+                $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#amount-'+i).val(1);
-
-                const productPrice = parseFloat(data.price.replace(',',''));
-                $('#price-'+i).val(productPrice.toFixed(2));
-
-                // Initial values
-                const rateInclusive = taxRate * productPrice;
-                $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
-                // displayed Amount
-                $('#result-'+i).text(rateInclusive.toFixed(2));
-                // Compute Totals
-                totals();
+                $('#qty-'+i).val(1);
+                const rate = parseFloat(data.price.replace(/,/g, ''));
+                const price = rate * ($('#tax_id').val() / 100 + 1);
+                const buyprice = parseFloat(data.purchase_price.replace(/,/g, ''));
+                $('#buyprice-'+i).val(buyprice.toLocaleString());                
+                $('#price-'+i).val(price.toLocaleString());                
+                $('#amount-'+i).text(price.toLocaleString());
+                $('#rate-'+i).val(rate.toLocaleString()).change();
             }
         };
-    }
-
-    // on quantity input change
-    function qtyChange(e) {
-        const id = e.target.id;
-        const indx = id.split('-')[1];
-
-        const productQty = $('#'+id).val();
-
-        let productPrice = $('#price-'+indx).val();
-        productPrice = parseFloat(productPrice.replace(',', ''));
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
-
-        totals();
-    }
-    // on price input change
-    function priceChange(e) {
-        // change value to float
-        e.target.value = Number(e.target.value).toFixed(2);
-
-        const id = e.target.id;
-        indx = id.split('-')[1];
-
-        const productQty = $('#amount-'+indx).val();
-
-        let productPrice = $('#'+id).val();
-        productPrice = parseFloat(productPrice.replace(',', ''));
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
-
-        totals();
-    }
-
-    // totals
-    function totals() {
-        let subTotal = 0;
-        let grandTotal = 0;
-        $('#quotation tr').each(function() {
-            if (!$(this).index()) return;
-            const productQty = $(this).find('td').eq(3).children().val()
-            if (productQty) {
-                const productPrice = $(this).find('td').eq(4).children().val();
-                const rateInclusive = $(this).find('td').eq(5).children().val();
-                // increament
-                subTotal += Number(productQty) * parseFloat(productPrice);
-                grandTotal += Number(productQty) * parseFloat(rateInclusive);
-            }
-            // update row_index
-            $(this).find('input[name="row_index[]"]').val($(this).index());
-        });
-
-        const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
-        $('#tax').val(taxTotal.toFixed(2));        
-        $('#subtotal').val(subTotal.toFixed(2));
-        $('#total').val(grandTotal.toFixed(2));
     }
 </script>
 @endsection
