@@ -1,5 +1,4 @@
 @extends('core.layouts.app')
-
 @php
     $quote_type = $quote->bank_id ? 'PI' : 'Quote';
 @endphp
@@ -83,14 +82,11 @@
                             @endphp
                             <h2>{{ $tid . $quote->revision }}</h2>
                             <h3>{{ '#Tkt-' . sprintf('%04d', $quote->lead->reference) }}</h3>
-                            <p>                                
-                                {{trans('quotes.invoicedate')}} : {{dateFormat($quote['invoicedate'])}}<br>
-                                {{trans('quotes.invoiceduedate')}} : {{dateFormat($quote['invoiceduedate'])}}
-                            </p>
                             <div class="row">
                                 <div class="col">
                                     <br><hr>
                                     <p class="text-danger">{{ $quote->notes }}</p>
+                                    <p>Quote Date: {{ dateFormat($quote->date) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -111,25 +107,25 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($products as $product)
-                                            @if ($product['a_type'] == 1)                                               
+                                        @foreach ($quote->products as $item)
+                                            @if ($item['a_type'] == 1)                                               
                                                 <tr>
-                                                    <td scope="row">{{ $product['numbering'] }}</td>
+                                                    <td scope="row">{{ $item['numbering'] }}</td>
                                                     <td>
-                                                        <p>{{$product['product_name']}}</p>
-                                                        <p class="text-muted"> {!!$product['product_des'] !!} </p>
+                                                        <p>{{$item['product_name']}}</p>
+                                                        <p class="text-muted"> {!!$item['product_des'] !!} </p>
                                                     </td>
-                                                    <td class="text-right">{{amountFormat($product['product_price'])}}</td>
-                                                    <td class="text-right">{{ (int) $product['product_qty'] }} {{$product['unit']}}</td>
-                                                    <td class="text-right">{{ amountFormat($product->product_subtotal - $product->product_price) }}
+                                                    <td class="text-right">{{amountFormat($item['product_price'])}}</td>
+                                                    <td class="text-right">{{ (int) $item['product_qty'] }} {{$item['unit']}}</td>
+                                                    <td class="text-right">{{ amountFormat($item->product_price - $item->product_subtotal) }}
                                                         <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                     </td>
-                                                    <td class="text-right">{{ amountFormat(intval($product->product_qty) * $product->product_subtotal) }}</td>
+                                                    <td class="text-right">{{ amountFormat(intval($item->product_qty) * $item->product_subtotal) }}</td>
                                                 </tr>
                                             @else
                                                 <tr>
-                                                    <td scope="row">{{ $product['numbering'] }}</td>
-                                                    <td><p>{{$product['product_name']}}</p></td>
+                                                    <td scope="row">{{ $item['numbering'] }}</td>
+                                                    <td><p>{{$item['product_name']}}</p></td>
                                                     @for ($i = 0; $i < 4; $i++)
                                                         <td class="text-right"></td>                                                    
                                                     @endfor                                                    
@@ -271,6 +267,10 @@
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 
 <script type="text/javascript">
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
+    });
+
     // initialize editor
     editor();
 
@@ -347,72 +347,6 @@
                 $('#approveddate').attr('readonly', true).datepicker('setDate', new Date())
                     .on('mousedown', function(e) { e.preventDefault(); });   
             }
-        });
-    });
-
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
-
-    $(function() {
-        $('.summernote').summernote({
-            height: 150,
-            toolbar: [
-                // [groupName, [list of button]]
-                ['style', ['bold', 'italic', 'underline', 'clear']],
-                ['font', ['strikethrough', 'superscript', 'subscript']],
-                ['fontsize', ['fontsize']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['height', ['height']],
-                ['fullscreen', ['fullscreen']],
-                ['codeview', ['codeview']]
-            ],
-            popover: {}
-        });
-
-        /*jslint unparam: true */
-        /*global window, $ */
-        $(function() {
-            'use strict';
-            // Change this to the location of your server-side upload handler:
-            const url = "{{ route('biller.bill_attachment') }}"
-            $('#fileupload')
-                .fileupload({
-                    url,
-                    dataType: 'json',
-                    formData: {
-                        _token: "{{ csrf_token() }}",
-                        id: "{{$quote['id ']}}",
-                        bill: 4
-                    },
-                    done: function(e, data) {
-                        $.each(data.result, function(index, file) {
-                            const row = `<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id=${file.id}" class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a>${file.name}</td></tr>`;
-                            $('#files').append(row);
-                        });
-                    },
-                    progressall: function(e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css('width', progress + '%');
-                    }
-                })
-                .prop('disabled', !$.support.fileInput)
-                .parent().addClass($.support.fileInput ? undefined : 'disabled');
-        });
-
-        $(document).on('click', ".aj_delete", function(e) {
-            e.preventDefault();
-            var url = $(this).attr('data-url');
-            $.ajax({
-                url: url,
-                type: 'POST',
-                dataType: 'json',
-                success: function(data) {
-                    $(this).closest('tr').remove();
-                    $(this).remove();
-                }
-            });
         });
     });
 </script>
