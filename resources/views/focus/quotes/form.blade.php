@@ -64,7 +64,11 @@
                 <label for="serial_no" class="caption">#{{prefix(5)}} {{trans('general.serial_no')}} </label>
                 <div class="input-group">
                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                    {{ Form::text('tid', 'QT-' . sprintf('%04d', $lastquote->tid+1), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                    @php
+                        $label = $query_str ? 'PI-' : 'QT-';
+                        $label .= sprintf('%04d', $lastquote->tid+1);
+                    @endphp
+                    {{ Form::text('tid', $label, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                     <input type="hidden" name="tid" value="{{ $lastquote->tid+1 }}">
                 </div>
             </div>
@@ -90,7 +94,7 @@
 
     <!-- Properties -->
     <div class="col-6">
-        <h3 class="form-group">{{trans('quotes.properties')}}</h3>
+        <h3 class="form-group">{{ $query_str ? 'PI Properties' : trans('quotes.properties')}}</h3>
         <div class="form-group row">
             <div class="col-4">
                 <label for="reference" class="caption">Djc Reference</label>
@@ -161,7 +165,7 @@
                 </select>               
             </div>
             <div class="col-4">
-                <label for="taxFormat" class="caption">Select {{trans('general.tax')}}</label>
+                <label for="taxFormat" class="caption">{{trans('general.tax')}}</label>
                 <select class="form-control" name='tax_id' id="tax_id">
                     @foreach ([16, 8, 0] as $val)
                     <option value="{{ $val }}" {{ $val == 16 ? 'selected' : '' }}>
@@ -171,6 +175,19 @@
                 </select>
                 <input type="hidden" name="tax_format" value="exclusive" id="tax_format">
             </div>
+            @if (isset($banks))
+                <div class="col-4">
+                    <label for="bank" class="caption">Bank</label>
+                    <select class="form-control" name='bank_id' id="bank_id" required>
+                        <option value="">-- Select Bank --</option>
+                        @foreach ($banks as $bank)
+                        <option value="{{ $bank->id }}" {{ $bank->id == @$quote->bank_id ? 'selected' : '' }}>
+                            {{ $bank->bank }}
+                        </option>
+                        @endforeach                                            
+                    </select>
+                </div>
+            @endif
         </div>
     </div>                        
 </div>
@@ -209,9 +226,11 @@
         <div class="form-group">
             <label>
                 {{trans('general.grand_total')}} ({{ config('currency.symbol') }})
-                <b class="text-primary">
-                    (Profit: &nbsp;<span class="text-dark profit">0</span>)
-                </b>
+                @if (!$query_str)
+                    <b class="text-primary">
+                        (Profit: &nbsp;<span class="text-dark profit">0</span>)
+                    </b>
+                @endif
             </label>
             <div class="input-group">
                 <input type="text" name="total" class="form-control" id="total" readonly>
@@ -220,4 +239,3 @@
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
     </div>
 </div>
-<input type="hidden" name="bank_id" id="bank_id" value="0">
