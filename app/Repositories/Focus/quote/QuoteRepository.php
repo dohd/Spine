@@ -51,8 +51,8 @@ class QuoteRepository extends BaseRepository
         $q->orderBy('updated_at', 'desc');
 
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'status', 'bank_id', 'verified', 'revision', 'client_ref', 'lpo_id'
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
+            'verified', 'revision', 'client_ref', 'lpo_id'
         ]);
     }
 
@@ -137,47 +137,39 @@ class QuoteRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        $quote = $input['data'];
-        // sanitize values
-        foreach ($quote as $key => $val) {
-            if (in_array($key, ['invoicedate', 'reference_date'], 1)) {
-                $quote[$key] = date_for_database($val);
-            } else if (in_array($key, ['total', 'subtotal', 'tax'], 1)) {
-                $quote[$key] = numberClean($val);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if (in_array($key, ['date', 'reference_date'], 1)) {
+                $data[$key] = date_for_database($val);
             }
-        }
-        $duedate = $quote['invoicedate'] . ' + ' . $quote['validity'] . ' days';
-        $quote['invoiceduedate'] = date_for_database($duedate);
-
+            if (in_array($key, ['total', 'subtotal', 'tax'], 1)) {
+                $data[$key] = numberClean($val);
+            }
+        }   
         // increament tid
-        $ref = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
-        if (isset($quote['bank_id'])) {
-            $ref = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
+        $last_qt = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
+        if ($data['bank_id']) {
+            $last_qt = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
         }
-        if ($ref && $quote['tid'] <= $ref->tid) {
-            $quote['tid'] = $ref->tid + 1;
+        if ($last_qt && $data['tid'] <= $last_qt->tid) {
+            $data['tid'] = $last_qt->tid + 1;
         }  
-        // update lead info
-        $lead = Lead::find($quote['lead_id']);
-        if ($lead) {
-            $quote['customer_id'] = $lead->client_id;
-            $quote['branch_id'] = $lead->branch_id;
-            // close Lead (status = 1)
-            $lead->update(['status' => 1, 'reason' => 'won']);
-        }
-        $result = Quote::create($quote);
+        // close lead
+        Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+        $result = Quote::create($data);
 
         // quote items
-        $quote_items = modify_array($input['data_items']);
-        $quote_items = array_map(function($item) use ($result) {
-            foreach ($item as $key => $val) {
-                if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
-                    $item[$key] = numberClean($val);
-                }
-            }
-            return $item + ['quote_id' => $result['id'], 'ins' => $result['ins']];            
-        }, $quote_items);
-        QuoteItem::insert($quote_items);
+        $data_items = $input['data_items'];
+        foreach ($data_items as $k => $item) {
+            $data_items[$k] = array_replace($item, [
+                'quote_id' => $result->id, 
+                'ins' => $result->ins,
+                'product_price' => numberClean($item['product_price']),
+                'product_subtotal' => numberClean($item['product_subtotal']),
+                'buy_price' => numberClean($item['buy_price']),
+            ]);
+        }
+        QuoteItem::insert($data_items);
 
         DB::commit();
         if ($result) return $result;
@@ -193,56 +185,52 @@ class QuoteRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(array $input)
+    public function update($quote, array $input)
     {
         DB::beginTransaction();
 
-        $quote = $input['data'];
-        // sanitize values
-        foreach ($quote as $key => $val) {
-            if (in_array($key, ['invoicedate', 'reference_date'], 1)) {
-                $quote[$key] = date_for_database($val);
-            } else if (in_array($key, ['total', 'subtotal', 'tax'], 1)) {
-                $quote[$key] = numberClean($val);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if (in_array($key, ['date', 'reference_date'], 1)) {
+                $data[$key] = date_for_database($val);
             }
+            if (in_array($key, ['total', 'subtotal', 'tax'], 1)) {
+                $data[$key] = numberClean($val);
+            }
+        }   
+        // update lead status
+        if ($quote->lead_id != $data['lead_id']) {
+            $quote->lead->update(['status' => 0, 'reason' => 'new']);
+            Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         }
-        $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
-        $quote['invoiceduedate'] = date_for_database($duedate);
+        $quote->update($data);
 
-        $result = Quote::find($quote['id']);
-        // If lead is updated, open previous lead
-        if ($result->lead_id != $quote['lead_id']) {
-            $lead = Lead::find($quote['lead_id']);
-            $quote['customer_id'] = $lead->client_id;
-            $quote['branch_id'] = $lead->branch_id;
-            // open previous lead (status = 0)
-            $lead->update(['status' => 0, 'reason' => 'new']);
-        }
-        $result->update($quote);
+        $data_items = $input['data_items'];
+        // delete exempted items
+        $item_ids = array_reduce($data_items, function ($init, $item) {
+            $init[] = $item['id'];
+            return $init;
+        }, []);
+        $quote->products()->whereNotIn('id', $item_ids)->delete();
 
         // update or create new quote item
-        $quote_items = modify_array($input['data_items']);
-        foreach($quote_items as $item) {
-            $new_item = $item + ['quote_id' => $quote['id'], 'ins' => $quote['ins']];
+        foreach($data_items as $item) {
+            $item = $item + ['quote_id' => $quote['id'], 'ins' => $quote['ins']];
             $quote_item = QuoteItem::firstOrNew([
-                'id' => $new_item['item_id'],
-                'quote_id' => $quote['id'],
+                'id' => $item['id'],
+                'quote_id' => $item['quote_id'],
             ]);
-            
-            foreach ($new_item as $key => $val) {
-                if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
+            foreach ($item as $key => $val) {
+                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price'], 1)) {
                     $quote_item[$key] = numberClean($val);
                 } else $quote_item[$key] = $val;
             }
-
-            unset($quote_item['item_id']);
-            if ($quote_item['id'] == 0) unset($quote_item['id']);
-            print_log(json_encode($quote_item, JSON_PRETTY_PRINT));
+            if (!$quote_item['id']) unset($quote_item['id']);
             $quote_item->save();
         }
 
         DB::commit();
-        if ($result) return $quote;      
+        if ($quote) return $quote;      
                
         throw new GeneralException('Error Updating Quote');
     }
@@ -256,6 +244,8 @@ class QuoteRepository extends BaseRepository
      */
     public function delete($quote)
     {
+        // open lead
+        $quote->lead->update(['status' => 0, 'reason' => 'new']);
         if ($quote->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
