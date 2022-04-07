@@ -36,7 +36,6 @@ class EditResponse implements Responsable
         $banks = Bank::all();
         $lastquote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
         $lastpi = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
-        $words = array();
         
         // copy page 
         if (request('page') == 'copy') {
@@ -77,9 +76,11 @@ class EditResponse implements Responsable
         $leads[] = Lead::find($quote->lead_id);
 
         // edit proforma invoice
-        if ($quote->bank_id) {           
-            return view('focus.quotes.edit_pi')
-                ->with(compact('banks', 'leads', 'quote', 'lastquote'))
+        if ($quote->bank_id) {    
+            $words['title'] = 'Edit Proforma Invoice';
+       
+            return view('focus.quotes.edit')
+                ->with(compact('banks', 'leads', 'quote', 'lastquote', 'words'))
                 ->with(bill_helper(2, 4));
         }
         // edit quote
