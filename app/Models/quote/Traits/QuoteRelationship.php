@@ -57,7 +57,7 @@ trait QuoteRelationship
 
     public function products()
     {
-        return $this->hasMany(QuoteItem::class);
+        return $this->hasMany(QuoteItem::class)->orderBy('row_index', 'ASC');
     }
 
     public function user()
