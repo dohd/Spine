@@ -109,17 +109,20 @@ class QuotesController extends Controller
     {
         // extract request input fields
         $data = $request->only([
-            'client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 
-            'currency', 'subtotal', 'tax', 'total', 'tax_format', 'term_id', 'tax_id', 'lead_id', 'attention', 
-            'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type'
+            'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
+            'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
+            'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
+            'customer_id', 'branch_id', 'bank_id'
         ]);
         $data_items = $request->only([
-            'row_index', 'numbering', 'product_id', 'a_type', 'product_name', 'product_qty', 'product_price', 
-            'product_subtotal', 'unit'
+            'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
+            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 
         ]);
 
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
+
+        $data_items = modify_array($data_items);
 
         $result = $this->repository->create(compact('data', 'data_items'));
 
@@ -127,7 +130,7 @@ class QuotesController extends Controller
         $msg = trans('alerts.backend.quotes.created');
         if ($result['bank_id']) {
             $route = route('biller.quotes.index', 'page=pi');
-            $msg = 'Proforma Invoice successfully created';
+            $msg = 'Proforma Invoice created successfully';
         }
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -154,27 +157,30 @@ class QuotesController extends Controller
      */
     public function update(EditQuoteRequest $request, Quote $quote)
     {
-        //filter request input fields
+        // extract request input fields
         $data = $request->only([
-            'client_ref', 'tid', 'term_id', 'bank_id', 'invoicedate', 'notes', 'subtotal', 'extra_discount', 
-            'currency', 'subtotal', 'tax', 'total', 'tax_format', 'revision', 'term_id', 'tax_id', 'lead_id', 
-            'attention', 'reference', 'reference_date', 'validity', 'pricing', 'prepared_by', 'print_type'
+            'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
+            'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
+            'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
+            'customer_id', 'branch_id', 'bank_id'
         ]);
         $data_items = $request->only([
-            'row_index', 'item_id', 'numbering', 'a_type', 'product_id', 'product_name', 
-            'product_qty', 'product_price', 'product_subtotal', 'unit'
+            'id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
+            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 
         ]);
 
-        $data['id'] = $quote->id;
+        $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
 
-        $result = $this->repository->update(compact('data', 'data_items'));
+        $data_items = modify_array($data_items);
+
+        $result = $this->repository->update($quote, compact('data', 'data_items'));
 
         $route = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.updated');
-        if (isset($result['bank_id'])) {
+        if ($result['bank_id']) {
             $route = route('biller.quotes.index', 'page=pi');
-            $msg = 'PI updated successfully';
+            $msg = 'Proforma Invoice updated successfully';
         }
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -211,15 +217,12 @@ class QuotesController extends Controller
      */
     public function show(Quote $quote)
     {
-        $products = $quote->products()->orderBy('row_index', 'ASC')->get();
+        $quote['bill_type'] = 4;
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
         $lpos = Lpo::where('customer_id', $quote->customer_id)->get();
 
-        $quote['bill_type'] = 4;
-
-        $params = array('quote', 'accounts', 'features', 'products', 'lpos');
-        return new ViewResponse('focus.quotes.view', compact(...$params));
+        return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'lpos'));
     }
 
     /**
