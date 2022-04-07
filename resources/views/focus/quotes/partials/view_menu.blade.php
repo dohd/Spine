@@ -11,7 +11,7 @@
         </a>
         <a href="{{ $copy_link }}" class="btn btn-cyan mb-1">
             <i class="fa fa-clone" aria-hidden="true"></i></i>
-            {{ $quote->bank_id ? 'Quote Copy' : 'PI Copy' }}            
+            {{ $quote->bank_id ? 'Copy to Quote' : 'Copy to PI' }}            
         </a>
 
         @if (access()->allow('quote-delete'))
