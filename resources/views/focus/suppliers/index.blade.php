@@ -5,14 +5,13 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="content-header-left col-md-6 col-12 mb-1">
             <h4 class="content-header-title">Supplier Management</h4>
         </div>
     </div>
     
     <div class="content-detached content-right">
         <div class="content-body">
-            <div class="content-overlay"></div>
             <section class="row all-contacts">
                 <div class="col-12">
                     <div class="card">
@@ -28,6 +27,9 @@
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Purchase Orders</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Aging</a>
                                         </li>
                                     </ul>
                                     <div class="tab-content px-1 pt-1">
@@ -79,6 +81,9 @@
                                                 </thead>
                                                 <tbody></tbody>                                               
                                             </table>                                            
+                                        </div>
+                                        <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
+                                          <!-- aging tab -->
                                         </div>
                                     </div>
                                 </div>
