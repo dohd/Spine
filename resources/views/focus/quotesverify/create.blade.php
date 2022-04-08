@@ -12,7 +12,7 @@
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     <div class="btn-group float-right" role="group" aria-label="quotes">
-                        <a href="{{ route('biller.quotes.project_quotes') }}" class="btn btn-info  btn-lighten-2">
+                        <a href="{{ route('biller.quotes.get_verify_quote') }}" class="btn btn-info  btn-lighten-2">
                             <i class="fa fa-list-alt"></i> {{trans('general.list')}}
                         </a>
                     </div>                    
@@ -177,7 +177,7 @@
                                 </button>
                                 <div class="form-group mt-3">
                                     <div><label for="gen_remark" class="caption">General Remark</label></div>
-                                    <textarea class="form-control" name="gen_remark" id="gen_remark" cols="30" rows="10"></textarea>
+                                    <textarea class="form-control" name="gen_remark" id="gen_remark" cols="30" rows="5"></textarea>
                                 </div>
                             </div>
 
@@ -471,20 +471,13 @@
         return {
             source: function(request, response) {
                 $.ajax({
-                    url: baseurl + 'products/quotesearch/' + billtype,
-                    dataType: "json",
-                    method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&pricing=' 
-                        + $("#pricing").val(),
-                    success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.name,
-                                value: item.name,
-                                data: item
-                            };
-                        }));
-                    }
+                    url: "{{ route('biller.products.quote_product_search') }}",
+                    data: 'keyword=' + request.term,
+                    success: result => response(result.map(v => ({
+                        label: v.name,
+                        value: v.name,
+                        data: v
+                    })))
                 });
             },
             autoFocus: true,
@@ -495,16 +488,10 @@
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
-
                 const productPrice = parseFloat(data.price.replace(',',''));
                 $('#price-'+i).val(productPrice.toFixed(2));
-
-                // Initial values                
-                const rateInclusive = taxRate * productPrice;
-                $('#rateinclusive-'+i).val(rateInclusive.toFixed(2));                
-                // displayed Amount
-                $('#result-'+i).text(rateInclusive.toFixed(2));
-                // Compute Totals
+                $('#rateinclusive-'+i).val((taxRate * productPrice).toFixed(2));                
+                $('#result-'+i).text((taxRate * productPrice).toFixed(2));
                 totals();
             }
         };

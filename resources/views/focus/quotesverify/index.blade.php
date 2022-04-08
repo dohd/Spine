@@ -31,10 +31,10 @@
                                 <div class="row">
                                     <div class="col-md-2">{{ trans('general.search_date')}} </div>
                                     <div class="col-md-2">
-                                        <input type="text" name="start_date" id="start_date" data-toggle="datepicker" class="date30 form-control form-control-sm" autocomplete="off" />
+                                        <input type="text" name="start_date" id="start_date" class="form-control datepicker date30  form-control-sm" autocomplete="off" />
                                     </div>
                                     <div class="col-md-2">
-                                        <input type="text" name="end_date" id="end_date" class="form-control form-control-sm" data-toggle="datepicker" autocomplete="off" />
+                                        <input type="text" name="end_date" id="end_date" class="form-control datepicker form-control-sm" autocomplete="off" />
                                     </div>
                                     <div class="col-md-2">
                                         <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
@@ -78,33 +78,29 @@
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $(function() {
-        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
-        $('#search').click(function() {
-            var start_date = $('#start_date').val();
-            var end_date = $('#end_date').val();
-            if (start_date && end_date) {
-                $('#quotes-table').DataTable().destroy();
-                return draw_data(start_date, end_date);
-            } 
-            alert("Date range is Required");            
-        });
-
-        $('[data-toggle="datepicker"]')
-            .datepicker({ format: "{{ config('core.user_date_format') }}" })
-            .datepicker('setDate', new Date());
-    });
-
     $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
     });
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+
+    $('#search').click(function() {
+        var start_date = $('#start_date').val();
+        var end_date = $('#end_date').val();
+        if (start_date && end_date) {
+            $('#quotes-table').DataTable().destroy();
+            return draw_data(start_date, end_date);
+        } 
+        alert("Date range is Required");            
+    });
+
+    $('.datepicker')
+    .datepicker({ format: "{{ config('core.user_date_format') }}" })
+    .datepicker('setDate', new Date())
+    .change(function() { $(this).datepicker('hide') });
+
 
     function draw_data(start_date = '', end_date = '') {
-        const segment = @json($segment);
-        const input = @json($input);
         const tableLang = { @lang('datatable.strings') };
-
         const table = $('#quotes-table').dataTable({
             processing: true,
             serverSide: true,
@@ -115,8 +111,6 @@
                 url: '{{ route("biller.quotes.get_project") }}',
                 type: 'post',
                 data: {
-                    i_rel_id: segment['id'],
-                    i_rel_type: input['rel_type'],
                     start_date: start_date,
                     end_date: end_date,
                     pi_page: location.href.includes('page=pi') ? 1 : 0
