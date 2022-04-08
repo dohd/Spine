@@ -226,33 +226,12 @@ class QuotesController extends Controller
     }
 
     /**
-     *  List approved project Quotes
+     *  Fetch verify quotes
      */
-    public function project_quotes(ManageQuoteRequest $request)
+    public function get_verify_quote(ManageQuoteRequest $request)
     {
-        // extract request input
-        $input = $request->only('rel_type', 'rel_id');
-        $relshp_type = request('rel_type');
-        $relshp_id = request('rel_id');
-
-        $segment = array();
-        $words = array();
-        if ($relshp_type && $relshp_id) {
-            if ($relshp_type == 1) {
-                $segment = Customer::find($relshp_id);
-                $words['name'] = trans('customers.title');
-                $words['name_data'] = $segment->name;
-            }
-            else {
-                $segment = Hrm::find($relshp_id);
-                $words['name'] = trans('hrms.employee');
-                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-            }
-        }
-
-        return new ViewResponse('focus.quotes.approved.index', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.quotesverify.index');
     }
-
 
     /**
      * Show the form for verifying the specified resource.
@@ -260,21 +239,16 @@ class QuotesController extends Controller
      * @param string $id
      * @return \App\Http\Responses\Focus\quote\EditResponse
      */
-    public function verify(Quote $quote)
+    public function verify_quote(Quote $quote)
     {
-        // default Quote items
-        $products = $quote->products()->orderBy('row_index')->get();
         $verified_jc = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first();
-        // increament verify_no if it exists
-        $verify_no = isset($verified_jc) ? $verified_jc->verify_no+1 : 1;
-        // fetch verified_items
+        $verify_no = $verified_jc ? $verified_jc->verify_no+1 : 1;
+        $products = $quote->products;
         if ($verify_no > 1) {
             $products = VerifiedItem::where('quote_id', $quote->id)->orderBy('row_index')->get();
         }
 
-        return view('focus.quotes.approved.verify')
-            ->with(compact('quote', 'products', 'verify_no'))
-            ->with(bill_helper(2, 4));
+        return new ViewResponse('focus.quotesverify.create', compact('quote', 'products', 'verify_no') + bill_helper(2, 4));
     }
 
     /**
@@ -299,7 +273,7 @@ class QuotesController extends Controller
         if ($result->bank_id) $tid .= 'PI-'.sprintf('%04d', $result->tid);
         else $tid .= 'QT-'.sprintf('%04d', $result->tid);
 
-        return new RedirectResponse(route('biller.quotes.project_quotes'), ['flash_success' => $tid . ' verified successfully']);
+        return new RedirectResponse(route('biller.quotes.get_verify_quote'), ['flash_success' => $tid . ' verified successfully']);
     }
 
     // Fetch Verified Job cards
