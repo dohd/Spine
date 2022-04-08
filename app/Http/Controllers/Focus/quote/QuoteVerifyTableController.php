@@ -91,12 +91,14 @@ class QuoteVerifyTableController extends Controller
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-
                 if ($quote->verified == 'No')
-                    return '<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify"><i class="fa fa-check"></i></a>';
+                    return '<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify">
+                        <i class="fa fa-check"></i></a>';
 
-                return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
-                    .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify"><i class="fa fa-check"></i></a>';
+                return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print">
+                    <i class="fa fa-print"></i></a> '
+                    .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify">
+                    <i class="fa fa-check"></i></a>';
             })
             ->make(true);
     }
