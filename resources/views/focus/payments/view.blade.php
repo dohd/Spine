@@ -27,7 +27,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">
-                            Payment Items
+                            Payments
                         </a>
                     </li>
                 </ul>
@@ -78,6 +78,7 @@
                                             <td>{{ $item->bill->date }}</td>
                                             <td>{{ $item->bill->due_date }}</td>
                                         </tr>
+                                    {{-- 
                                     @else
                                         <tr>
                                             <td>{{ $item->invoice->customer->name }}</td>
@@ -87,6 +88,7 @@
                                             <td>{{ $item->invoice->invoicedate }}</td>
                                             <td>{{ $item->invoice->invoiceduedate }}</td>
                                         </tr>
+                                    --}}
                                     @endif
                                 @endforeach  
                             </tbody>
