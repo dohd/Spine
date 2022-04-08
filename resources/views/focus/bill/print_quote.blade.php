@@ -214,8 +214,8 @@
 					}
 				@endphp
 				<b>{{ $field_name }} :</b> {{ $field_value . $resource->revision }}<br><br>		
-				<b>Date :</b> {{ dateFormat($resource->invoicedate, 'd-M-Y') }}<br>		
-				<b>Valid Till :</b> {{ dateFormat($resource->invoiceduedate, 'd-M-Y') }} <br>
+				<b>Date :</b> {{ dateFormat($resource->date, 'd-M-Y') }}<br>	
+				<b>Valid Till :</b> {{ dateFormat($resource->date . ' + ' . $resource->validity . ' days', 'd-M-Y') }} <br>
 				<b>Currency :</b> Kenya Shillings <br>
 				<b>Client Ref :</b> {{ $resource->client_ref }}
 			</td>
