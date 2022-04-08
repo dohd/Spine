@@ -59,7 +59,10 @@ class TransactionRepository extends BaseRepository
             return $q->where('relation_id', '=', 9);
         });
 
-        return $q->get(['id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 'tr_date', 'user_type']);
+        return $q->get([
+            'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 'tr_date', 'user_type',
+            'tr_type', 'tr_ref'
+        ]);
     }
 
     /**
