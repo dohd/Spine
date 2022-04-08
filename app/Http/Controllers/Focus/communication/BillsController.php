@@ -131,9 +131,9 @@ class BillsController extends Controller
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
 
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '.pdf';
-        if ($data['invoice']['bank_id']) {
+        if ($data['resource']['bank_id']) {
             $name = 'PI-' . sprintf('%04d', $tid) . '.pdf';
         }
 
@@ -148,9 +148,9 @@ class BillsController extends Controller
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
 
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '-V.pdf';
-        if ($data['invoice']['bank_id']) {
+        if ($data['resource']['bank_id']) {
             $name = 'PI-' . sprintf('%04d', $tid) . '-V.pdf';
         }
 
