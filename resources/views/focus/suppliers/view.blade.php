@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
+    <div class="content-header mb-1">
         <h4 class="content-header-title">Supplier Management</h4>
     </div>
     
@@ -28,6 +28,9 @@
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Purchase Orders</a>
+                                        </li>   
+                                        <li class="nav-item">
+                                            <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Aging</a>
                                         </li>                                        
                                     </ul>
                                     <div class="tab-content px-1 pt-1">
@@ -49,6 +52,7 @@
                                                     @foreach ($labels as $key => $val)
                                                         <tr>
                                                             <th>{{ is_numeric($key) ? $val : $key }}</th>
+
                                                             <td>{{ $supplier[strtolower($val)] }}</td>
                                                         </tr>
                                                     @endforeach                        
@@ -60,22 +64,31 @@
                                             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                        
-                                                        @foreach (['Date', 'Type', 'Note', 'Credit', 'Debit'] as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($transactions as $tr)
-                                                        @if (in_array($tr->category->code, ['BILL', 'PMT'], 1))                                                       
-                                                            <tr>
-                                                                <td>{{ dateFormat($tr->tr_date) }}</td>
-                                                                <td>{{ $tr->category->code }}</td>
-                                                                <td>{{ $tr->note }}</td>                                                           
-                                                                <td>{{ number_format($tr->credit, 2) }}</td>
-                                                                <td>{{ number_format($tr->debit, 2) }}</td>
-                                                            </tr>
-                                                        @endif
+                                                    @php
+                                                        $balance = $transactions[0]['credit'];
+                                                    @endphp
+                                                    @foreach ($transactions as $k => $tr)
+                                                        <tr>
+                                                            <td>{{ dateFormat($tr->tr_date) }}</td>
+                                                            <td>{{ $tr->tr_type }}</td>
+                                                            <td>{{ $tr->note }}</td>                                                           
+                                                            <td>{{ number_format($tr->credit, 2) }}</td>
+                                                            <td>{{ number_format($tr->debit, 2) }}</td>
+                                                            <td>{{ number_format($balance, 2) }}</td>
+                                                        </tr>
+                                                        @php
+                                                            if (isset($transactions[$k+1])) {
+                                                                if ($transactions[$k+1]['tr_type'] == 'PMT') {
+                                                                    $balance -= $transactions[$k+1]['debit'];                                                                    
+                                                                } else $balance = $transactions[$k+1]['credit'];  
+                                                            }
+                                                        @endphp
                                                     @endforeach
                                                 </tbody>                                                
                                             </table>
@@ -85,7 +98,7 @@
                                             <table class="table table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                    
-                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'] as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
@@ -98,11 +111,13 @@
                                                             <td>{{ $bill->note }}</td>                                                      
                                                             <td>{{ number_format($bill->grandttl, 2) }}</td>
                                                             <td>{{ number_format($bill->amountpaid, 2) }}</td>
-                                                            <td>{{ number_format($bill->grandttl - $bill->amountpaid, 2) }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
                                             </table>                        
+                                        </div>
+                                        <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
+                                         <!-- aging tab -->
                                         </div>
                                     </div>
                                 </div>
