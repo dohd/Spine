@@ -33,22 +33,20 @@ class QuoteRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+        
         // distinguish pi from quote
         if (request('pi_page') == 1) $q->where('bank_id', '>', 0);
         else $q->where('bank_id', 0);
         
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
-        });
         if (request('start_date') && request('end_date')) {
-            $q->whereBetween('invoicedate', [
+            $q->whereBetween('date', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
 
         // order by latest updated record
-        $q->orderBy('updated_at', 'desc');
+        $q->orderBy('updated_at', 'DESC');
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
@@ -62,22 +60,17 @@ class QuoteRepository extends BaseRepository
     public function getForVerifyDataTable()
     {
         $q = $this->query();
-        $quote_ids = Budget::pluck('quote_id');
-        $q->whereIn('id', $quote_ids);
-        
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
-        });
+        $q->whereHas('budget');
 
         if (request('start_date') && request('end_date')) {
-            $q->whereBetween('invoicedate', [
+            $q->whereBetween('date', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
         
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 
             'total', 'bank_id', 'verified', 'client_ref', 'lpo_id', 'revision'
         ]);
     }
