@@ -264,10 +264,9 @@ Route::group(['namespace' => 'quote'], function () {
    
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
     Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');
-    Route::get('quotes/verify/{quote}', 'QuotesController@verify')->name('quotes.verify');
+    Route::get('quotes/verify/{quote}', 'QuotesController@verify_quote')->name('quotes.verify');
     Route::post('quotes/verified_jcs/{id}', 'QuotesController@fetch_verified_jcs')->name('quotes.fetch_verified_jcs');
-
-    Route::get('quotes/project_quotes', 'QuotesController@project_quotes')->name('quotes.project_quotes');
+    Route::get('quotes/get_verify', 'QuotesController@get_verify_quote')->name('quotes.get_verify_quote');
 
     // should be delete methods
     Route::get('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
