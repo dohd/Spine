@@ -58,9 +58,13 @@ class TransactionsTableController extends Controller
             ->addColumn('account_id', function ($tr) {
                 return $tr->account->holder;
             })
+            ->addColumn('supplier', function ($tr) {
+                return $tr->bill ? $tr->bill->supplier->name : '';
+            })
             ->addColumn('debit', function ($tr) {
                 return numberFormat($tr->debit);
-            })->addColumn('credit', function ($tr) {
+            })
+            ->addColumn('credit', function ($tr) {
                 return numberFormat($tr->credit);
             })
             ->addColumn('tr_date', function ($tr) {
