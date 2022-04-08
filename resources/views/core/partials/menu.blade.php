@@ -289,7 +289,7 @@
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Verification</a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('biller.quotes.project_quotes') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a>
+                                <a class="dropdown-item" href="{{ route('biller.quotes.get_verify_quote') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a>
                             </li>                            
                         </ul>                        
                     </li>

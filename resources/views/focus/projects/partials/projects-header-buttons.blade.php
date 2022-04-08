@@ -5,7 +5,7 @@
             <i class="fa fa-plus-circle"></i> Create
         </a>&nbsp;&nbsp;
         @endauth
-        <a href="{{ route('biller.quotes.project_quotes') }}" class="btn btn-success">
+        <a href="{{ route('biller.quotes.get_verify_quote') }}" class="btn btn-success">
             <i class="fa fa-list-alt"></i> Verification
         </a>  
     </div>
