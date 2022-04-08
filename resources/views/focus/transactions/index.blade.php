@@ -95,7 +95,9 @@
                             <table id="transactions-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>{{ trans('labels.backend.transactions.table.id') }}</th>                                        
+                                        <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
+                                        <th>Transaction Type</th>
+                                        <th>Supplier</th>                                      
                                         <th>Note</th>
                                         <th>{{ trans('transactions.debit') }}</th>
                                         <th>{{ trans('transactions.credit') }}</th>
@@ -151,6 +153,14 @@
             columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
+                },
+                {
+                    data: 'tr_type',
+                    name: 'tr_type'
+                },
+                {
+                    data: 'supplier',
+                    name: 'supplier'
                 },
                 {
                     data: 'note',
