@@ -70,9 +70,6 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @php
-                                                        $balance = $transactions[0]['credit'];
-                                                    @endphp
                                                     @foreach ($transactions as $k => $tr)
                                                         <tr>
                                                             <td>{{ dateFormat($tr->tr_date) }}</td>
@@ -80,15 +77,12 @@
                                                             <td>{{ $tr->note }}</td>                                                           
                                                             <td>{{ number_format($tr->credit, 2) }}</td>
                                                             <td>{{ number_format($tr->debit, 2) }}</td>
-                                                            <td>{{ number_format($balance, 2) }}</td>
-                                                        </tr>
-                                                        @php
-                                                            if (isset($transactions[$k+1])) {
-                                                                if ($transactions[$k+1]['tr_type'] == 'PMT') {
-                                                                    $balance -= $transactions[$k+1]['debit'];                                                                    
-                                                                } else $balance = $transactions[$k+1]['credit'];  
-                                                            }
-                                                        @endphp
+                                                            <td>
+                                                                @if ($tr->tr_type == 'BILL')
+                                                                    {{ number_format($tr->credit - $tr->bill->amountpaid, 2)  }}
+                                                                @endif
+                                                            </td>
+                                                        </tr>                                                        
                                                     @endforeach
                                                 </tbody>                                                
                                             </table>
