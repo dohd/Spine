@@ -1,18 +1,16 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Project Invoices')
+@section ('title', 'Project Invoice Management')
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title mb-0">Project Invoice Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
-            <div class="media width-250 float-right">
-                <div class="media-body media-right text-right">
-                    @include('focus.invoices.partials.invoices-header-buttons',$input)
-                </div>
+        <div class="col-6">
+            <div class="btn-group float-right">
+                @include('focus.invoices.partials.invoices-header-buttons')
             </div>
         </div>
     </div>
