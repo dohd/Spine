@@ -4,11 +4,17 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">Create Project Invoice</h4>
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Create Project Invoice</h4>
+        </div>
+        <div class="col-6">
+            <div class="btn-group float-right">
+                @include('focus.invoices.partials.invoices-header-buttons')
+            </div>
         </div>
     </div>
+
     <div class="content-body">
         <div class="row">
             <div class="col-12">
@@ -80,10 +86,9 @@
         </div>
     </div>
 </div>
-
 @endsection
+
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
@@ -191,9 +196,9 @@
         var customer_id = $('#customer_id').val()
         var lpo_number = $('#lpo_number').val()
         var project_id = $('#project_id').val()
-
         $('#customer').val(customer_id);
         $('#quotes-table').DataTable().destroy();
+
         return draw_data(customer_id, lpo_number, project_id);
     });
 
@@ -203,49 +208,42 @@
             $input.each(function() {
                 if (!this.checked) $(this).prop('checked', true).change();
             });
-        } 
-        else {
+        } else {
             $input.each(function() {
                 if (this.checked) $(this).prop('checked', false).change();                
             });
         }      
     });
 
-    //add selected
+    //get selected items
+    function getSelectedRows() {
+        const rows = [];
+        $('.row-select:checked').each(function() {
+            rows.push($(this).val());
+        });
+        return rows;
+    }
+
+    //add selected rows
     $(document).on('click', '#add-selected', function(e) {
         e.preventDefault();
-        var customer_id = $('#customer_id').val();
-        if (!customer_id) return swal('Filter Customer');
+        if (!$('#customer_id').val()) return swal('Filter Customer');
         
         var selected_rows = getSelectedRows();
         if (!selected_rows.length) {
-            $('input#selected_products').val('');
+            $('#selected_products').val('');
             return swal('No record Selected');
         }
-
         $('input#selected_products').val(selected_rows);
-        swal(
-            {
-                title: 'Are You  Sure?',
-                icon: "warning",
-                buttons: true,
-                dangerMode: true,
-                showCancelButton: true,
-            }, 
-            function() {
-                $('form#mass_add_form').submit();
-            }
-        );     
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, function() { 
+            $('form#mass_add_form').submit();
+        }); 
     });
-
-    //get selected items
-    function getSelectedRows() {
-        const selected_rows = [];
-        $('.row-select:checked').each(function() {
-            selected_rows.push($(this).val());
-        });
-
-        return selected_rows;
-    }
 </script>
 @endsection
