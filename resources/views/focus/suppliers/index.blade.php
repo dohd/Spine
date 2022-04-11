@@ -5,8 +5,13 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-1">
+        <div class="content-header-left col-md-6 col-12">
             <h4 class="content-header-title">Supplier Management</h4>
+        </div>
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right">
+                @include('focus.suppliers.partials.suppliers-header-buttons')
+            </div>
         </div>
     </div>
     
@@ -133,24 +138,6 @@
 
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
     
-    $(document).on('click', ".customer_active", function() {
-        var cid = $(this).attr('data-cid');
-        var active = $(this).attr('data-active');
-        $(this).addClass('checked');
-        $(this).attr('data-active', 1);
-
-        if (active == 1) {
-            $(this).removeClass('checked');
-            $(this).attr('data-active', 0);
-        } 
-
-        $.ajax({
-            url: '{{ route("biller.suppliers.active") }}',
-            type: 'post',
-            data: {'cid': cid, 'active': active}
-        });
-    });    
-
     function draw_data() {
         const tableLan = {@lang('datatable.strings')};
         const dataTable = $('#supplierTbl').dataTable({
