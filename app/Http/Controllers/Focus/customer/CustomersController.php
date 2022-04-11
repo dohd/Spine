@@ -20,7 +20,6 @@ namespace App\Http\Controllers\Focus\customer;
 use App\Http\Requests\Focus\general\CommunicationRequest;
 use App\Models\account\Account;
 use App\Models\customer\Customer;
-use App\Models\customergroup\CustomerGroupEntry;
 use App\Models\transaction\TransactionHistory;
 use App\Repositories\Focus\general\RosemailerRepository;
 use App\Repositories\Focus\general\RosesmsRepository;
@@ -34,6 +33,8 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
+use App\Models\invoice\Invoice;
+use App\Models\transaction\Transaction;
 
 /**
  * CustomersController
@@ -61,16 +62,9 @@ class CustomersController extends Controller
      * @param App\Http\Requests\Focus\customer\ManageCustomerRequest $request
      * @return \App\Http\Responses\ViewResponse
      */
-    public function index(ManageCustomerRequest $request)
+    public function index()
     {
-        $input = $request->only('rel_type', 'rel_id', 'due_filter');
-
-        $segment = array();
-        if (isset($input['rel_id'])) {
-            $segment = CustomerGroupEntry::where('customer_group_id', '=', $input['rel_id'])->first();
-        }
-
-        return new ViewResponse('focus.customers.index', compact('input', 'segment'));
+        return new ViewResponse('focus.customers.index');
     }
 
     /**
@@ -184,8 +178,22 @@ class CustomersController extends Controller
      */
     public function show(Customer $customer, ManageCustomerRequest $request)
     {
-        $accounts = Account::all();
-        return new ViewResponse('focus.customers.view', compact('customer', 'accounts'));
+        $invoices = Invoice::where('customer_id', $customer->id)->get();
+        $transactions = Transaction::whereHas('account', function ($q) { 
+            $q->where('system', 'payable');  
+        })
+        ->where(function ($q) use($customer) {
+            $q->whereHas('invoice', function ($q) use($customer) { 
+                $q->where('customer_id', $customer->id); 
+            })
+            ->orwhereHas('paidinvoice', function ($q) use($customer) {
+                $q->where('customer_id', $customer->id);
+            });
+        })
+        ->whereIn('tr_type', ['RCPT', 'PMT'])
+        ->get();
+
+        return new ViewResponse('focus.customers.view', compact('customer', 'transactions', 'invoices'));
     }
 
     public function send_bill(CommunicationRequest $request)
