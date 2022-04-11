@@ -18,7 +18,7 @@
                     <div class="row">
                         @if($invoice['status']!='canceled')
                         <div class="col">
-                            <a href="{{$invoice['id']}}/edit" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> {{trans('labels.backend.invoices.edit')}}</a>
+                            <a href="{{ route('biller.invoices.edit_project_invoice', $invoice) }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
                             <a href="#modal_bill_payment_1" data-toggle="modal" data-remote="false" data-type="reminder" class="btn btn-large btn-info mb-1" title="Partial Payment"><span class="fa fa-money"></span> {{trans('general.make_payment')}} </a>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-facebook dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
