@@ -79,9 +79,9 @@ class QuoteRepository extends BaseRepository
     {
         if ($self_id) {
             $q = $this->query()->withoutGlobalScopes();
-            $q->where('customer_id', '=', $self_id);
+            $q->where('customer_id', $self_id);
 
-            return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
+            return $q->get(['id', 'tid', 'customer_id', 'date', 'total', 'status']);
         }
     }
 
@@ -114,7 +114,7 @@ class QuoteRepository extends BaseRepository
         $q->orderBy('id', 'desc');
         
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'date', 
             'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id'
         ]);
     }
