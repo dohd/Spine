@@ -17,6 +17,8 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::get('invoices/client_invoices', 'InvoicesController@client_invoices')->name('invoices.client_invoices');
 
     // project invoice
+    Route::get('invoices/edit_project_invoice/{invoice}', 'InvoicesController@edit_project_invoice')->name('invoices.edit_project_invoice');
+    Route::post('invoices/update_project_invoice/{invoice}', 'InvoicesController@update_project_invoice')->name('invoices.update_project_invoice');
     Route::get('filter_invoice_quotes', 'InvoicesController@filter_invoice_quotes')->name('invoices.filter_invoice_quotes');
     Route::post('store_project_invoice', 'InvoicesController@store_project_invoice')->name('invoices.store_project_invoice');
     Route::get('project_invoice', 'InvoicesController@project_invoice')->name('invoices.project_invoice');
