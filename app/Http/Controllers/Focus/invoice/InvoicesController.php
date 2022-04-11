@@ -229,8 +229,7 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Filter invoice quotes and return form for creating 
-     * project invoice
+     * Filter invoice quotes and return Create Project Invoice Form
      */
     public function filter_invoice_quotes(Request $request)
     {
@@ -293,6 +292,48 @@ class InvoicesController extends Controller
 
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => $msg]);
     }
+
+    /**
+     * Edit Project Invoice Form
+     */
+    public function edit_project_invoice(Invoice $invoice)
+    {
+        $banks = Bank::all();
+        $accounts = Account::whereHas('accountType', function ($query) {
+            $query->whereIn('name', ['Income', 'Other Income']);
+        })->with(['accountType' => function ($query) {
+            $query->select('id', 'name');
+        }])->get();
+
+        return new ViewResponse('focus.invoices.edit_project_invoice', compact('invoice', 'banks', 'accounts'));
+    }
+
+    /**
+     * Edit Project Invoice Form
+     */
+    public function update_project_invoice(Invoice $invoice, Request $request)
+    {
+        // extract request input fields
+        $bill = $request->only([
+            'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',
+            'subtotal', 'tax', 'total', 
+        ]);
+        $bill_items = $request->only([
+            'id', 'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 
+            'branch_id'
+        ]);
+
+        $bill['user_id'] = auth()->user()->id;
+        $bill['ins'] = auth()->user()->ins;
+
+        $bill_items = modify_array($bill_items);
+
+        $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
+
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice Updated successfully']);
+    }
+
+
 
     /**
      * Create invoice payment
