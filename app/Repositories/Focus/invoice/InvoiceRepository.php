@@ -475,6 +475,34 @@ class InvoiceRepository extends BaseRepository
         if ($result) return true;
     }
 
+    public function update_project_invoice($invoice, array $input)
+    {
+        DB::beginTransaction();
+
+        $bill = $input['bill'];
+        $date = date_for_database($bill['invoicedate']);
+        $duedate = $date . ' + ' . $bill['validity'] . ' days';
+        $invoice->update([
+            'invoicedate' => $date,
+            'invoiceduedate' => date_for_database($duedate),
+            'notes' => $bill['notes'],
+        ]);
+
+        $bill_items = $input['bill_items'];
+        $bill_items = array_reduce($bill_items, function ($init, $item) {
+            $init[] = [
+                'id' => $item['id'],
+                'reference' => $item['reference'], 
+                'description' => $item['description']
+            ];
+            return $init;
+        }, []);
+        Batch::update(new InvoiceItem, $bill_items, 'id');
+
+        DB::commit();
+        if ($bill) return true;        
+    }
+
 
     private function update_dual(Model $table, array $values, string $index = null, $index2 = null)
     {
