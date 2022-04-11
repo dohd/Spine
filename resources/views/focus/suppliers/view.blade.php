@@ -6,8 +6,15 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header mb-1">
-        <h4 class="content-header-title">Supplier Management</h4>
+    <div class="content-header row">
+        <div class="content-header-left col-md-6 col-12">
+            <h4 class="content-header-title">Supplier Management</h4>
+        </div>
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right">
+                @include('focus.suppliers.partials.suppliers-header-buttons')
+            </div>
+        </div>
     </div>
     
     <div class="content-detached content-right">
@@ -17,7 +24,9 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <a href="{{route('biller.suppliers.edit', [$supplier->id])}}" class="btn btn-blue btn-outline-accent-5 btn-sm float-right"><i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}</a>
+                                <a href="{{route('biller.suppliers.edit', [$supplier->id])}}" class="btn btn-blue btn-outline-accent-5 btn-sm float-right">
+                                    <i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}
+                                </a>
                                 <div class="card-body">
                                     <ul class="nav nav-tabs nav-top-border no-hover-bg " role="tablist">
                                         <li class="nav-item">
@@ -52,7 +61,6 @@
                                                     @foreach ($labels as $key => $val)
                                                         <tr>
                                                             <th>{{ is_numeric($key) ? $val : $key }}</th>
-
                                                             <td>{{ $supplier[strtolower($val)] }}</td>
                                                         </tr>
                                                     @endforeach                        
@@ -129,11 +137,15 @@
                 <div class="card">
                     <div class="card-head">
                         <div class="media-body media p-1">
-                            <div class="media-middle pr-1"><span class="avatar avatar-lg rounded-circle ml-2"><img src="{{Storage::disk('public')->url('app/public/img/supplier/' . $supplier->picture)}}" alt="avatar"><i></i></span></div>
+                            <div class="media-middle pr-1">
+                                <span class="avatar avatar-lg rounded-circle ml-2">
+                                    <img src="{{ Storage::disk('public')->url('app/public/img/supplier/' . $supplier->picture) }}" alt="avatar">
+                                </span>
+                            </div>
                         </div>
                         <div class="media-body media-middle p-1">
-                            <h5 class="media-heading">{{$supplier['name']}} </h5>
-                            <h5 class="info"> {{trans('suppliers.supplier')}}</h5>
+                            <h5 class="media-heading">{{ $supplier->name }} </h5>
+                            <h5 class="info">{{ trans('suppliers.supplier') }}</h5>
                         </div>
                     </div>
                     <div class="card-body">
@@ -166,22 +178,6 @@
         }
     });
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
-    $(document).on('click', ".customer_active", function(e) {
-        var cid = $(this).attr('data-cid');
-        var active = $(this).attr('data-active');
-        $(this).addClass('checked');
-        $(this).attr('data-active', 1);
-        if (active == 1) {
-            $(this).removeClass('checked');
-            $(this).attr('data-active', 0);
-        }
-        $.ajax({
-            url: '{{ route("biller.customers.active") }}',
-            type: 'post',
-            data: {cid, active}
-        });
-    });
 
     function draw_data() {
         const tableLan = {
