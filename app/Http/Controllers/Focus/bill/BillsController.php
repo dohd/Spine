@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Focus\bills;
+namespace App\Http\Controllers\Focus\bill;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
-use App\Models\account\AccountType;
 use App\Models\bill\Bill;
 use App\Repositories\Focus\bill\BillRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class BillsController extends Controller
 {

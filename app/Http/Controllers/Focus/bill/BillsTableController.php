@@ -16,7 +16,7 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\bills;
+namespace App\Http\Controllers\Focus\bill;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\Focus\bill\BillRepository;
