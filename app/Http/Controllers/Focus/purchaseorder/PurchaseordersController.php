@@ -27,6 +27,7 @@ use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\RedirectResponse;
+use App\Models\items\GrnItem;
 
 /**
  * PurchaseordersController
@@ -164,8 +165,12 @@ class PurchaseordersController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function show(Purchaseorder $purchaseorder)
-    {        
-        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder'));
+    {   
+        $grn_items = GrnItem::whereHas('grn', function ($q) use($purchaseorder) {
+            $q->where('purchaseorder_id', $purchaseorder->id);
+        })->get(); 
+
+        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'grn_items'));
     }
 
     /**
