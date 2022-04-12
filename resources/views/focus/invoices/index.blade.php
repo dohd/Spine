@@ -34,7 +34,7 @@
                                 </div>
                             </div>
                             <hr>
-                            <table id="invoices-table_{{ $input['meta'] }}" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="invoiceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -52,7 +52,9 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="8" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
+                                        <td colspan="8" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -69,16 +71,14 @@
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
-    const meta = @json($input['meta']);
-    $('#invoices-table_'+ meta +'_wrapper').removeClass('form-inline');
     
     $('#search').click(function() {
         var start_date = $('#start_date').val();
         var end_date = $('#end_date').val();
         if (start_date && end_date) {
-            $('#invoices-table_'+ meta).DataTable().destroy();
+            $('#invoiceTbl').DataTable().destroy();
             return draw_data(start_date, end_date);
         } 
         alert("Date range is Required");
@@ -86,33 +86,25 @@
 
     // Initialize datepicker
     $('.datepicker')
-        .datepicker({ format: "{{ config('core.user_date_format') }}"})
-        .datepicker('setDate', new Date());
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+    .datepicker({ format: "{{ config('core.user_date_format') }}"})
+    .datepicker('setDate', new Date())
+    .change(function() { $(this).datepicker('hide') });
 
     function draw_data(start_date = '', end_date = '') {
-        const segmentId = @json($segment);
-        const relType = @json($input);
-        const subJson = @json($input)['sub_json'];
-        const tableLan = { @lang('datatable.strings') };
-
-        var dataTable = $('#invoices-table_' + meta).dataTable({
+        const language = { @lang('datatable.strings') };
+        var dataTable = $('#invoiceTbl').dataTable({
             processing: true,
             stateSave: true,
             serverSide: true,
             responsive: true,
             deferRender: true,
-            language: tableLan,
+            language,
             ajax: {
                 url: "{{ route('biller.invoices.get') }}",
                 type: 'post',
                 data: {
-                    i_rel_id: segmentId['id'],
-                    i_rel_type: relType['rel_type'],
-                    subJson: { subJson },
-                    start_date: start_date,
-                    end_date: end_date
+                    start_date,
+                    end_date,
                 },
             },
             columns: [{
