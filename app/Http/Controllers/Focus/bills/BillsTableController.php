@@ -53,6 +53,11 @@ class BillsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function ($bill) {
+                $tid = 'BILL-'.sprintf('%04d', $bill->tid);
+                $link = $bill->po_id ? route('biller.purchaseorders.show', [$bill->purchaseorder->id]) : route('biller.purchases.show', [$bill->id]);
+                return '<a class="font-weight-bold" href="' . $link . '">' . $tid . '</a>';
+            })
             ->addColumn('amount', function ($bill) {
                 return number_format($bill->grandttl, 2);
             })
@@ -78,18 +83,15 @@ class BillsTableController extends Controller
             ->addColumn('document', function ($bill) {
                 if ($bill->po_id) 
                     return $bill->purchaseorder->doc_ref_type . ' - ' . $bill->purchaseorder->doc_ref;
-
                 return $bill->doc_ref_type . ' - ' . $bill->doc_ref; 
             })
             ->addColumn('date', function ($bill) {
                 if ($bill->po_id) 
                     return dateFormat($bill->purchaseorder->date);
-
                 return dateFormat($bill->date); 
             })
             ->addColumn('due_date', function ($bill) {
                 if ($bill->po_id) return dateFormat($bill->purchaseorder->due_date); 
-
                 return dateFormat('due_date'); 
             })
             ->make(true);
