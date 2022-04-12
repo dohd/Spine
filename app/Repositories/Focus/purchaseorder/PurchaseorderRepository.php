@@ -190,6 +190,14 @@ class PurchaseorderRepository extends BaseRepository
         }
         GrnItem::insert($order_items);
 
+        // update purchaseorder status
+        $grn_qty = $purchaseorder->grn_items->sum('qty');
+        if ($grn_qty) {
+            $order_qty = $purchaseorder->items->sum('qty');
+            if ($grn_qty < $order_qty) $purchaseorder->update(['status' => 'Partial']);
+            else $purchaseorder->update(['status' => 'Complete']);
+        }
+        
         // create bill
         $exclude_keys = ['id', 'purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
         $bill_inp = array_diff_key($grn->toArray(), array_flip($exclude_keys));
