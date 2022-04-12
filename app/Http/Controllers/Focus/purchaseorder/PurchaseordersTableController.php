@@ -56,10 +56,14 @@ class PurchaseordersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($po) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $po->tid . '</a>';
+                $tid = 'PO-'.sprintf('%04d', $po->tid);
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $tid . '</a>';
             })
             ->addColumn('supplier', function ($po) {
                 return $po->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '"><i class="ft-eye"></i></a>';
+            })
+            ->addColumn('qty', function ($po) {
+                return number_format($po->items->sum('qty'));
             })
             ->addColumn('date', function ($po) {
                 return dateFormat($po->date);
@@ -69,6 +73,9 @@ class PurchaseordersTableController extends Controller
             })
             ->addColumn('status', function ($po) {
                 return '<span class="st-' . $po->status . '">' . $po->status . '</span>';
+            })
+            ->addColumn('grn_qty', function ($po) {
+                return number_format($po->grn_items->sum('qty'));
             })
             ->addColumn('actions', function ($po) {
                 return $po->action_buttons;
