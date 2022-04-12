@@ -2,14 +2,26 @@
 
 namespace App\Models\purchaseorder\Traits;
 
+use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
 use App\Models\project\Project;
+use App\Models\purchaseorder\Grn;
 
 /**
  * Class PurchaseorderRelationship
  */
 trait PurchaseorderRelationship
 {
+    public function grn_items()
+    {
+        return $this->hasManyThrough(GrnItem::class, Grn::class, 'purchaseorder_id', 'grn_id')->withoutGlobalScopes();
+    }
+
+    public function grn()
+    {
+        return $this->hasMany(Grn::class, 'purchaseorder_id');
+    }
+
     public function items()
     {
         return $this->hasMany(PurchaseorderItem::class);
