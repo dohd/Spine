@@ -676,7 +676,7 @@ class InvoiceRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function delete(Invoice $invoice)
+    public function delete($invoice)
     {
         if ($invoice->invoice_items()->delete() && $invoice->delete()) return true;
 
