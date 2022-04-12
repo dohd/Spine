@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">{{ trans('labels.backend.purchaseorders.management') }}</h4>
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">{{ trans('labels.backend.purchaseorders.management') }}</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.purchaseorders.partials.purchaseorders-header-buttons')
@@ -27,15 +27,23 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#{{ trans('purchaseorders.purchaseorder')}}</th>
+                                        <th>#Order No</th>
                                         <th>{{ trans('suppliers.supplier') }}</th>
-                                        <th>Order date</th>
+                                        <th>Order Qty</th>
                                         <th>{{ trans('general.amount') }} (VAT Inc)</th>
+                                        <th>Order date</th>
                                         <th>{{ trans('general.status') }}</th>
+                                        <th>Received Qty</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -79,16 +87,24 @@
                 name: 'supplier'
             },
             {
-                data: 'date',
-                name: 'date'
+                data: 'qty',
+                name: 'qty'
             },
             {
                 data: 'amount',
                 name: 'amount'
             },
             {
+                data: 'date',
+                name: 'date'
+            },
+            {
                 data: 'status',
                 name: 'status'
+            },
+            {
+                data: 'grn_qty',
+                name: 'grn_qty'
             },
             {
                 data: 'actions',
