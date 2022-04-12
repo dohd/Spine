@@ -26,6 +26,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>#Bill No</th>
                                     <th>Supplier</th>
                                     <th>Amount</th>
                                     <th>Status</th>
@@ -74,6 +75,10 @@
                     name: 'id'
                 },
                 {
+                    data: 'tid',
+                    name: 'tid'
+                },
+                {
                     data: 'supplier',
                     name: 'supplier'
                 },
@@ -101,12 +106,6 @@
                     data: 'due_date',
                     name: 'due_date'
                 },
-                // {
-                //     data: 'actions',
-                //     name: 'actions',
-                //     searchable: false,
-                //     sortable: false
-                // }
             ],
             order: [[0, "desc"]],
             searchDelay: 500,
