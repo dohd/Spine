@@ -24,7 +24,6 @@ use App\Http\Requests\Focus\invoice\ManagePosRequest;
 use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
 use App\Models\customer\Customer;
-use App\Models\hrm\Hrm;
 use App\Models\invoice\Draft;
 use App\Models\invoice\Invoice;
 use App\Models\template\Template;
@@ -45,7 +44,6 @@ use App\Models\project\Project;
 use App\Models\bank\Bank;
 use App\Models\lpo\Lpo;
 use Bitly;
-use Illuminate\Support\Facades\Redirect;
 
 /**
  * InvoicesController
@@ -75,49 +73,7 @@ class InvoicesController extends Controller
      */
     public function index(ManageInvoiceRequest $request)
     {
-        $input = $request->only('rel_type', 'rel_id', 'md');
-        $segment = array();
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-            }
-        }
-
-        if (isset($input['md'])) {
-            if ($input['md'] == 'sub') {
-                $input['sub_json'] = "sub: 1";
-                $input['sub_url'] = '?md=sub';
-                $input['title'] = trans('invoices.subscriptions');
-                $input['meta'] = 'sub';
-                $input['pre'] = 6;
-            } 
-            elseif ($input['md'] == 'pos') {
-                $input['sub_json'] = "sub: 2";
-                $input['sub_url'] = '?md=pos';
-                $input['title'] = trans('invoices.pos');
-                $input['meta'] = 'pos';
-                $input['pre'] = 10;
-            }
-        } 
-        else {
-            $input['sub_json'] = "sub: 0";
-            $input['sub_url'] = '';
-            $input['title'] = trans('labels.backend.invoices.management');
-            $input['meta'] = 'sub';
-            $input['pre'] = 1;
-        }
-
-        return new ViewResponse('focus.invoices.index', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.invoices.index');
     }
 
     /**
@@ -144,55 +100,31 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateInvoiceRequestNamespace $request
-     * @param App\Models\invoice\Invoice $invoice
-     * @return \App\Http\Responses\RedirectResponse
-     */
-    public function update(EditInvoiceRequest $request, Invoice $invoice_r)
-    {
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock', 'recur_after']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty', 'unit_m']);
-        //dd($request->id);
-        $invoice['ins'] = auth()->user()->ins;
-        //$invoice['user_id']=auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        $result = $this->repository->update($invoice_r, compact('invoice', 'invoice_items', 'data2'));
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-        $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-        $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.updated') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-info btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . $link . '" class="btn btn-purple btn-md"><span class="fa fa-print" aria-hidden="true"></span> ' . trans('general.print') . '  </a> <a href="' . $link_download . '" class="btn btn-warning btn-md"><span class="fa fa-file-pdf-o" aria-hidden="true"></span> ' . trans('general.pdf') . '  </a> <a href="' . $link_preview . '" class="btn btn-purple btn-md"><span class="fa fa-globe" aria-hidden="true"></span> ' . trans('general.preview') . '  </a> <a href="' . route('biller.invoices.create') . '" class="btn btn-blue-grey btn-md"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a> &nbsp; &nbsp;'));
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param DeleteInvoiceRequestNamespace $request
      * @param App\Models\invoice\Invoice $invoice
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Invoice $invoice, DeleteInvoiceRequest $request)
+    public function destroy(Invoice $invoice)
     {
         $feature = feature(11);
         $alert = json_decode($feature->value2, true);
         if ($alert['del_invoice']) {
+            $mail = [
+                'mail_to' => [$feature->value1],
+                'customer_name' => $invoice->customer->name,
+                'subject' => trans('meta.delete_invoice_alert') . ' #' . $invoice->tid,
+            ];
+            $mail['text'] = trans('invoices.invoice') . ' #' . $invoice->tid . '<br>' . trans('invoices.invoice_date') . ' : ' . dateFormat($invoice->invoicedate) 
+                . '<br>' . trans('general.amount') . ' : ' . amountFormat($invoice->total) 
+                . '<br>' . trans('general.employee') . ' : ' . $invoice->user->first_name . ' ' . $invoice->user->last_name;
 
-            $mail = array();
-            $mail['mail_to'][] = $feature->value1;
-            $mail['customer_name'] = $invoice->customer->name;
-            $mail['subject'] = trans('meta.delete_invoice_alert') . ' #' . $invoice->tid;
-            $mail['text'] = trans('invoices.invoice') . ' #' . $invoice->tid . '<br>' . trans('invoices.invoice_date') . ' : ' . dateFormat($invoice->invoicedate) . '<br>' . trans('general.amount') . ' : ' . amountFormat($invoice->total) . '<br>' . trans('general.employee') . ' : ' . $invoice->user->first_name . ' ' . $invoice->user->last_name;
             business_alerts($mail);
         }
-        //Calling the delete method on repository
+
         $this->repository->delete($invoice);
-        //returning with successfull message
+
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.deleted')));
     }
 
@@ -207,10 +139,11 @@ class InvoicesController extends Controller
     {
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
-
-        $words = ['prefix' => ''];
         $invoice['bill_type'] = 1;
-        $words['pay_note'] = trans('invoices.payment_for_invoice') . ' ' . $words['prefix'] . '#' . $invoice->tid;
+        $words = [
+            'prefix' => '',
+            'paynote' => trans('invoices.payment_for_invoice') . ' '. '#' . $invoice->tid
+        ];
         
         return new ViewResponse('focus.invoices.view', compact('invoice', 'accounts', 'features', 'words'));
     }    
@@ -333,8 +266,6 @@ class InvoicesController extends Controller
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice Updated successfully']);
     }
 
-
-
     /**
      * Create invoice payment
      */
@@ -377,13 +308,13 @@ class InvoicesController extends Controller
     public function client_invoices(Request $request)
     {
         $invoices = Invoice::where('customer_id', $request->id)
-            ->whereIn('status', ['due', 'partial'])
-            ->get();
+            ->whereIn('status', ['due', 'partial'])->get();
 
         return response()->json($invoices);
     }
 
 
+    
     public function print_document(Invoice $invoice, ManageInvoiceRequest $request)
     {
         $invoice = $this->repository->find($request->id);
