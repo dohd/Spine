@@ -252,7 +252,7 @@ Route::group(['namespace' => 'purchase'], function () {
     Route::post('purchases/get', 'PurchasesTableController')->name('purchases.get');
 });
 
-Route::group(['namespace' => 'bills'], function () {
+Route::group(['namespace' => 'bill'], function () {
     Route::get('bills/supplier_bills', 'BillsController@supplier_bills')->name('bills.supplier_bills');
     Route::resource('bills', 'BillsController');
     //For Datatable
@@ -346,4 +346,10 @@ Route::group(['namespace' => 'withholding'], function () {
     Route::resource('withholdings', 'WithholdingsController');
     //For Datatable
     Route::post('withholdings/get', 'WithholdingsTableController')->name('withholdings.get');
+});
+
+Route::group(['namespace' => 'creditnote'], function () {
+    Route::resource('creditnotes', 'CreditNotesController');
+    // for DataTable
+    Route::post('creditnotes/get', 'CreditNotesTableController')->name('creditnotes.get');
 });
