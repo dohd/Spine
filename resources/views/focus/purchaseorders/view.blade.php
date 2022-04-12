@@ -27,7 +27,7 @@
                 <i class="fa fa-print" aria-hidden="true"></i> Print
             </a>
             <a href="{{ route('biller.purchaseorders.create_grn', $po) }}" class="btn btn-primary">
-                <i class="fa fa-cubes"></i> Receive Goods
+                <i class="fa fa-cubes"></i> Goods Received Note
             </a>
         </h5>
         <div class="card-body">            
@@ -52,36 +52,33 @@
                         Asset & Equipments
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link " id="active-tab5" data-toggle="tab" href="#active5" aria-controls="active5" role="tab">
+                        Received Goods
+                    </a>
+                </li>
             </ul>
 
             <div class="tab-content px-1 pt-1">
                 <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
                     <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                        <tbody>                            
-                            <tr>
-                                <th>Supplier</th>
-                                <td>{{ $po->supplier->name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Transaction ID</th>
-                                <td>{{ $po->tid }}</td>
-                            </tr>
-                            <tr>
-                                <th>Order Date & Due Date</th>
-                                <td>{{ dateFormat($po->date) }} <b>:</b> {{ dateFormat($po->due_date) }}</td>
-                            </tr>                            
-                            <tr>
-                                <th>Reference</th>
-                                <td>{{ $po->doc_ref }} - {{ $po->doc_ref_type }}</td>
-                            </tr>
-                            <tr>
-                                <th>Project</th>
-                                <td>{{ $po->project ? $po->project->name : '' }}</td>
-                            </tr>
-                            <tr>
-                                <th>Note</th>
-                                <td>{{ $po->note }}</td>
-                            </tr> 
+                        <tbody>  
+                            @php   
+                                $details = [
+                                    'Supplier' => $po->supplier->name,
+                                    'Transaction ID' => $po->tid,
+                                    'Date & Due Date' => dateFormat($po->date) . ' : ' . dateFormat($po->due_date),
+                                    'Reference' =>$po->doc_ref_type . ' - ' . $po->doc_ref,
+                                    'Project' => $po->project ? $po->project->name : '',
+                                    'Note' => $po->note,
+                                ];                       
+                            @endphp
+                            @foreach ($details as $key => $val)
+                                <tr>
+                                    <th>{{ $key }}</th>
+                                    <td>{{ $val }}</td>
+                                </tr>
+                            @endforeach                            
                             <tr>
                                 <th>Order Items Cost</th>
                                 <td>
@@ -167,6 +164,29 @@
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-pane" id="active5" aria-labelledby="other-details" role="tabpanel">
+                    <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <tr>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>DNote</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                        </tr>
+                        <tbody>
+                            @foreach ($grn_items as $item)
+                                <tr>
+                                    <td>{{ $item->purchaseorder_item->description }}</td>
+                                    <td>{{ number_format($item->qty) }}</td>
+                                    <td>{{ $item->dnote }}</td>
+                                    <td>{{ dateFormat($item->date) }}</td>
+                                    <td>{{ $item->purchaseorder_item->type }}</td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
