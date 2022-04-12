@@ -686,11 +686,11 @@
                     @permission('creditnote-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.credit_notes') }}</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=creditnote" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
                                 </a>
                             </li>
                             @permission('data-creditnote')
-                            <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=creditnote" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
                                 </a>
                             </li>
                             @endauth
