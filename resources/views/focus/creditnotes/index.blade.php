@@ -26,7 +26,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>#CreditNote No</th>
+                                    <th>#CN No</th>
                                     <th>Customer</th>
                                     <th>#Invoice No</th>
                                     <th>Amount</th>
