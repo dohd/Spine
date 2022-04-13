@@ -3,10 +3,13 @@
 namespace App\Repositories\Focus\creditnote;
 
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
 use App\Repositories\BaseRepository;
 use App\Models\creditnote\CreditNote;
+use App\Models\invoice\Invoice;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use Illuminate\Support\Facades\DB;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class PurchaseorderRepository.
@@ -40,7 +43,47 @@ class CreditNoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // 
+        DB::beginTransaction();
+
+        foreach ($input as $key => $val) {
+            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['subtotal', 'tax', 'total'], 1)) {
+                $input[$key] = numberClean($val);
+            }
+        }
+        $result = CreditNote::create($input);
+
+        /** accounts  */
+        // credit payable
+        $account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $result->total,
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $result->date,
+            'user_id' => $result->user_id,
+            'note' => $result->notes,
+            'ins' => $result->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result->id,
+            'user_type' => 'customer',
+            'is_primary' => 1
+        ];
+        Transaction::create($cr_data);
+
+        // debit income 
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => Invoice::find($result->invoice_id)->account_id,
+            'debit' => $result->subtotal,
+        ]);
+        Transaction::create($dr_data);
+        
+        DB::commit();
+        if ($result) return $result;
+
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
