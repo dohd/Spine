@@ -697,6 +697,20 @@
                         </ul>
                     </li>
                     @endauth
+                    @permission('creditnote-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> Debit Notes</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}?is_debit=1" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Debit Notes
+                                </a>
+                            </li>
+                            @permission('data-creditnote')
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}?is_debit=1" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Debit Note
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
                     @permission('account-manage')
                     <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance',['v']) }}"><i class="fa fa-balance-scale"></i> Trial Balance
                         </a>
