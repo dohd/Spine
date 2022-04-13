@@ -9,11 +9,11 @@ trait CreditNoteRelationship
 {
     public function invoice()
     {
-        $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Invoice::class);
     }
 
     public function customer()
     {
-        $this->belongsTo(Customer::class);
+        return $this->belongsTo(Customer::class);
     }
 }
