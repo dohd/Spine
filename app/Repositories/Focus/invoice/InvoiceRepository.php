@@ -378,7 +378,7 @@ class InvoiceRepository extends BaseRepository
         Transaction::create($dr_data);
 
         // credit income and tax
-        unset($dr_data['credit'], $dr_data['is_primary']);
+        unset($dr_data['debit'], $dr_data['is_primary']);
         $income_cr_data = array_replace($dr_data, [
             'account_id' => $result->account_id,
             'credit' => $result->subtotal,
