@@ -234,8 +234,8 @@
             amountSum += amount;
             depoSum += paid;
         });
-        $('#amount_ttl').val(amountSum.toLocaleString());
-        $('#deposit_ttl').val(depoSum.toLocaleString());
+        $('#amount_ttl').val(parseFloat(amountSum.toFixed(2)).toLocaleString());
+        $('#deposit_ttl').val(parseFloat(depoSum.toFixed(2)).toLocaleString());
     }
 </script>
 @endsection
