@@ -1,13 +1,16 @@
 @extends('core.layouts.app')
+@php
+    $is_debit = request('is_debit') == 1;
+@endphp
 
-@section('title', 'Credit Notes Management')
+@section('title', $is_debit ? 'Debit Notes Management' : 'Credit Notes Management')
 
 @section('content')
 <div>
     <div class="content-wrapper">
         <div class="content-header row">
             <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Credit Notes Management</h4>
+                <h4 class="content-header-title">{{ $is_debit ? 'Debit Notes Management' : 'Credit Notes Management' }}</h4>
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right mr-3">
@@ -26,8 +29,13 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>#CN No</th>
-                                    <th>Customer</th>
+                                    @if ($is_debit)
+                                        <th>#DN No</th>
+                                        <th>Supplier</th>
+                                    @else
+                                        <th>#CN No</th>
+                                        <th>Customer</th>
+                                    @endif
                                     <th>#Invoice No</th>
                                     <th>Amount</th>
                                     <th>Date</th>                                                                             
