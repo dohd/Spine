@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Credit Notes Management')
+@section('title', $is_debit ? 'Debit Notes Management' : 'Credit Notes Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Credit Notes Management</h4>
+            <h4 class="content-header-title">{{ $is_debit ? 'Debit Notes Management' : 'Credit Notes Management' }}</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right mr-3">
@@ -24,15 +24,28 @@
                     {{ Form::open(['route' => 'biller.creditnotes.store', 'method' => 'POST']) }}
                     <div class="row">
                         <div class="form-group col-3">
-                            <label for="customer">Seach Customer</label>
-                            <select name="customer_id" id="customer" class="form-control" data-placeholder="Seach Customer" required>
-                            </select>
+                            @if ($is_debit)
+                                <label for="supplier">Seach Supplier</label>
+                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Seach Supplier" required>
+                                </select>
+                            @else
+                                <label for="customer">Seach Customer</label>
+                                <select name="customer_id" id="customer" class="form-control" data-placeholder="Seach Customer" required>
+                                </select>
+                            @endif                            
                         </div>
                         <div class="form-group col-3">
-                            <label for="invoice">Customer Invoice</label>
-                            <select name="invoice_id" id="invoice" class="form-control" required>
-                                <option value="">-- Select Customer Invoice --</option>
-                            </select>
+                            @if ($is_debit)
+                                <label for="bill">Supplier Invoice</label>
+                                <select name="bill_id" id="bill" class="form-control" required>
+                                    <option value="">-- Select Invoice --</option>
+                                </select>
+                            @else
+                                <label for="invoice">Customer Invoice</label>
+                                <select name="invoice_id" id="invoice" class="form-control" required>
+                                    <option value="">-- Select Invoice --</option>
+                                </select>
+                            @endif
                         </div>
                         <div class="form-group col-2">
                             <div><label for="tid">Note No.</label></div>
@@ -65,11 +78,11 @@
                             {{ Form::text('subtotal', null, ['class' => 'form-control', 'id' => 'subtotal']) }}
                         </div>  
                         <div class="col-2 form-group">
-                            <div><label for="tax">Tax</label></div>
+                            <div><label for="tax">Tax Amount</label></div>
                             {{ Form::text('tax', null, ['class' => 'form-control', 'id' => 'tax', 'readonly']) }}
                         </div>  
                         <div class="col-2 form-group">
-                            <div><label for="total">Total</label></div>
+                            <div><label for="total">Total Amount</label></div>
                             {{ Form::text('total', null, ['class' => 'form-control', 'id' => 'total', 'readonly']) }}
                         </div> 
                     </div>
@@ -117,6 +130,34 @@
             success: result => {
                 $('#invoice option:not(:eq(0))').remove();
                 result.forEach((v, i) => {
+                    $('#invoice').append(new Option(v.notes, v.id));
+                });
+            }
+        });
+    });
+
+    // Load suppliers
+    $('#supplier').select2({
+        ajax: {
+            url: "{{ route('biller.suppliers.select') }}",
+            dataType: 'json',
+            type: 'POST',
+            quietMillis: 50,
+            data: ({term}) => ({keyword: term}),
+            processResults: function(data) {
+                return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))}; 
+            },
+        }
+    });
+
+    // load supplier invoices (bills)
+    $('#supplier').change(function() {
+        $.ajax({
+            url: "{{ route('biller.bills.supplier_bills') }}?id=" + $(this).val(),
+            success: result => {
+                $('#invoice option:not(:eq(0))').remove();
+                result.forEach((v, i) => {
+                    if (v.doc_ref_type != 'Invoice') return;
                     $('#invoice').append(new Option(v.notes, v.id));
                 });
             }

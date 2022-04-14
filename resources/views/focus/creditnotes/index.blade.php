@@ -65,6 +65,12 @@
 
     function draw_data() {
         const language = {@lang("datatable.strings")};
+        const is_debit = @json($is_debit);
+        const isDebit = (val = 'customer') => {
+            if (is_debit) val = 'supplier';
+            return {data: val, name: val,}
+        };
+
         const dataTable = $('#creditnotesTbl').dataTable({
             processing: true,
             serverSide: true,
@@ -73,6 +79,7 @@
             ajax: {
                 url: "{{ route('biller.creditnotes.get') }}",
                 type: 'post',
+                data: {is_debit: is_debit ? 1 : 0}
             },
             columns: [
                 {
@@ -84,8 +91,7 @@
                     name: 'tid'
                 },
                 {
-                    data: 'customer',
-                    name: 'customer'
+                    ...isDebit()
                 },
                 {
                     data: 'invoice_no',

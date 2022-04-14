@@ -1,5 +1,5 @@
 <div class="btn-group">
-    <a href="{{ route('biller.creditnotes.index') }}" class="btn btn-info  btn-lighten-2">
+    <a href="{{ route('biller.creditnotes.index') }}{{ @$is_debit ? '?is_debit=1' : '' }}" class="btn btn-info  btn-lighten-2">
         <i class="fa fa-list-alt"></i> {{ trans('general.list') }}
     </a>
     <a href="{{ route('biller.creditnotes.create') }}{{ @$is_debit ? '?is_debit=1' : '' }}" class="btn btn-pink  btn-lighten-3">
