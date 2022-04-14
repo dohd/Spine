@@ -55,9 +55,19 @@ class CreditNotesTableController extends Controller
                 return $tid;
             })
             ->addColumn('customer', function ($creditnote) {
-                return $creditnote->customer->name;
+                if ($creditnote->customer)
+                    return $creditnote->customer->name;
+            })
+            ->addColumn('supplier', function ($creditnote) {
+                if ($creditnote->supplier)
+                    return $creditnote->supplier->name;
             })
             ->addColumn('invoice_no', function ($creditnote) {
+                if ($creditnote->supplier_id) {
+                    $tid = $creditnote->bill->doc_ref_type . '-' . $creditnote->bill->doc_ref;
+                    return '<a class="font-weight-bold" href="' . route('biller.bills.show', $creditnote->bill_id) . '">' . $tid . '</a>';
+                }
+
                 $tid = 'INV-'.sprintf('%04d', $creditnote->invoice->tid);
                 return '<a class="font-weight-bold" href="' . route('biller.invoices.show', $creditnote->invoice) . '">' . $tid . '</a>';
             })
