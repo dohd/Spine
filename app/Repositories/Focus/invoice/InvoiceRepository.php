@@ -358,8 +358,8 @@ class InvoiceRepository extends BaseRepository
         })->update(['invoiced' => 'Yes']);
         
         /** accounting */
-        // debit payable
-        $account = Account::where('system', 'payable')->first(['id']);
+        // debit accounts receivable
+        $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
         $dr_data = [
             'account_id' => $account->id,
@@ -377,12 +377,13 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit income and tax
+        // credit accounts income
         unset($dr_data['debit'], $dr_data['is_primary']);
         $income_cr_data = array_replace($dr_data, [
             'account_id' => $result->account_id,
             'credit' => $result->subtotal,
         ]);
+        // tax
         $account = Account::where('system', 'tax')->first(['id']);
         $tax_cr_data = array_replace($dr_data, [
             'account_id' => $account->id,
@@ -441,7 +442,7 @@ class InvoiceRepository extends BaseRepository
         Batch::update(new Invoice, $paid_invoices, 'id');
 
         /** accounting */
-        // credit receivable
+        // credit accounts receivable
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
         $cr_data = [
@@ -460,7 +461,7 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit bank
+        // debit accounts income
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $bill['account_id'],
