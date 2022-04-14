@@ -684,7 +684,7 @@
                     </li>
                     @endauth
                     @permission('creditnote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.credit_notes') }}</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> {{ trans('orders.credit_notes') }}</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
                                 </a>
@@ -698,7 +698,7 @@
                     </li>
                     @endauth
                     @permission('creditnote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> Debit Notes</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Debit Notes</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}?is_debit=1" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Debit Notes
                                 </a>
