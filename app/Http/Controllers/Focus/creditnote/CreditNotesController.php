@@ -43,9 +43,17 @@ class CreditNotesController extends Controller
      */
     public function create()
     {
-        $last_cn = CreditNote::orderBy('id', 'DESC')->first(['tid']);
+        $is_debit = request('is_debit');
 
-        return new ViewResponse('focus.creditnotes.create', compact('last_cn'));
+        $last_cn = CreditNote::where('customer_id', '>', 0)
+            ->orderBy('id', 'DESC')->first(['tid']);
+
+        if ($is_debit == 1) {
+            $last_cn = CreditNote::where('supplier_id', '>', 0)
+                ->orderBy('id', 'DESC')->first(['tid']);
+        }
+
+        return new ViewResponse('focus.creditnotes.create', compact('last_cn', 'is_debit'));
     }
 
     /**
