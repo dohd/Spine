@@ -56,33 +56,10 @@ class CreditNoteRepository extends BaseRepository
         $result = CreditNote::create($input);
 
         /** accounts  */
-        // credit payable
-        $account = Account::where('system', 'payable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
-        $cr_data = [
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $result->total,
-            'tr_date' => date('Y-m-d'),
-            'due_date' => $result->date,
-            'user_id' => $result->user_id,
-            'note' => $result->notes,
-            'ins' => $result->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $result->id,
-            'user_type' => 'customer',
-            'is_primary' => 1
-        ];
-        Transaction::create($cr_data);
+        $this->post_transaction($result);
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
 
-        // debit income 
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => Invoice::find($result->invoice_id)->account_id,
-            'debit' => $result->subtotal,
-        ]);
-        Transaction::create($dr_data);
-        
         DB::commit();
         if ($result) return $result;
 
@@ -100,5 +77,60 @@ class CreditNoteRepository extends BaseRepository
     public function delete($creditnote)
     {
         // 
+    }
+
+    static function post_transaction($creditnote)
+    {
+        $data = [
+            'account_id' => Account::where('system', 'payable')->first()->id,
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $creditnote->date,
+            'user_id' => $creditnote->user_id,
+            'note' => $creditnote->note,
+            'ins' => $creditnote->ins,
+            'tr_ref' => $creditnote->id,
+            'user_type' => 'customer',
+            'is_primary' => 1
+        ];
+
+        // credit note
+        if ($creditnote->customer_id) {
+            // credit payable
+            $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
+            $cr_data = $data + [
+                'trans_category_id' => $tr_category->id,
+                'credit' => $creditnote->total,
+                'tr_type' => $tr_category->code,
+            ];
+            Transaction::create($cr_data);
+
+            // debit income 
+            unset($cr_data['credit'], $cr_data['is_primary']);
+            $dr_data = array_replace($cr_data, [
+                'account_id' => Invoice::find($creditnote->invoice_id)->account_id,
+                'debit' => $creditnote->subtotal,
+            ]);
+            Transaction::create($dr_data);
+        }
+        
+        // debit note
+        if ($creditnote->supplier_id) {
+            // debit supplier
+            $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
+            $dr_data = $data + [
+                'account_id' => $creditnote->bill->account_id,
+                'trans_category_id' => $tr_category->id,
+                'debit' => $creditnote->total,
+                'tr_type' => $tr_category->code,
+            ];
+            Transaction::create($dr_data);
+
+            // credit accounts payable
+            unset($dr_data['debit'], $dr_data['is_primary']);
+            $cr_data = array_replace($dr_data, [
+                'credit' => $creditnote->subtotal,
+            ]);
+            Transaction::create($cr_data);
+        }
     }
 }
