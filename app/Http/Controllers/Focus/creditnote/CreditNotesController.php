@@ -33,7 +33,8 @@ class CreditNotesController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.creditnotes.index');
+        $is_debit = request('is_debit');
+        return new ViewResponse('focus.creditnotes.index', compact('is_debit'));
     }
 
     /**
@@ -45,12 +46,9 @@ class CreditNotesController extends Controller
     {
         $is_debit = request('is_debit');
 
-        $last_cn = CreditNote::where('customer_id', '>', 0)
-            ->orderBy('id', 'DESC')->first(['tid']);
-
+        $last_cn = CreditNote::where('is_debit', 0)->orderBy('id', 'DESC')->first(['tid']);
         if ($is_debit == 1) {
-            $last_cn = CreditNote::where('supplier_id', '>', 0)
-                ->orderBy('id', 'DESC')->first(['tid']);
+            $last_cn = CreditNote::where('is_debit', 1)->orderBy('id', 'DESC')->first(['tid']);
         }
 
         return new ViewResponse('focus.creditnotes.create', compact('last_cn', 'is_debit'));
