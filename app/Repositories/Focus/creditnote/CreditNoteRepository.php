@@ -30,6 +30,8 @@ class CreditNoteRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = CreditNote::query();
+        if (request('is_debit', 0)) $q->where('supplier_id', '>', 0);
+        else $q->where('customer_id', '>', 0);
 
         return $q->get();
     }
