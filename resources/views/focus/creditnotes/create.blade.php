@@ -24,28 +24,15 @@
                     {{ Form::open(['route' => 'biller.creditnotes.store', 'method' => 'POST']) }}
                     <div class="row">
                         <div class="form-group col-3">
-                            @if ($is_debit)
-                                <label for="supplier">Seach Supplier</label>
-                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Seach Supplier" required>
-                                </select>
-                            @else
-                                <label for="customer">Seach Customer</label>
-                                <select name="customer_id" id="customer" class="form-control" data-placeholder="Seach Customer" required>
-                                </select>
-                            @endif                            
+                            <label for="customer">Seach Customer</label>
+                            <select name="customer_id" id="customer" class="form-control" data-placeholder="Seach Customer" required>
+                            </select>                          
                         </div>
                         <div class="form-group col-3">
-                            @if ($is_debit)
-                                <label for="bill">Supplier Invoice</label>
-                                <select name="bill_id" id="bill" class="form-control" required>
-                                    <option value="">-- Select Invoice --</option>
-                                </select>
-                            @else
-                                <label for="invoice">Customer Invoice</label>
-                                <select name="invoice_id" id="invoice" class="form-control" required>
-                                    <option value="">-- Select Invoice --</option>
-                                </select>
-                            @endif
+                            <label for="invoice">Customer Invoice</label>
+                            <select name="invoice_id" id="invoice" class="form-control" required>
+                                <option value="">-- Select Invoice --</option>
+                            </select>
                         </div>
                         <div class="form-group col-2">
                             <div><label for="tid">Note No.</label></div>
@@ -91,6 +78,9 @@
                             {{ Form::submit('Generate', ['class' => 'btn btn-success block btn-lg']) }}
                         </div>
                     </div>
+                    @if ($is_debit)
+                        <input type="hidden" name="is_debit" value="1">
+                    @endif
                     {{ Form::close() }}
                 </div>
             </div>
@@ -130,34 +120,6 @@
             success: result => {
                 $('#invoice option:not(:eq(0))').remove();
                 result.forEach((v, i) => {
-                    $('#invoice').append(new Option(v.notes, v.id));
-                });
-            }
-        });
-    });
-
-    // Load suppliers
-    $('#supplier').select2({
-        ajax: {
-            url: "{{ route('biller.suppliers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({keyword: term}),
-            processResults: function(data) {
-                return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))}; 
-            },
-        }
-    });
-
-    // load supplier invoices (bills)
-    $('#supplier').change(function() {
-        $.ajax({
-            url: "{{ route('biller.bills.supplier_bills') }}?id=" + $(this).val(),
-            success: result => {
-                $('#invoice option:not(:eq(0))').remove();
-                result.forEach((v, i) => {
-                    if (v.doc_ref_type != 'Invoice') return;
                     $('#invoice').append(new Option(v.notes, v.id));
                 });
             }

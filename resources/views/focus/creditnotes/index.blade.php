@@ -1,7 +1,4 @@
 @extends('core.layouts.app')
-@php
-    $is_debit = request('is_debit') == 1;
-@endphp
 
 @section('title', $is_debit ? 'Debit Notes Management' : 'Credit Notes Management')
 
@@ -29,13 +26,8 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    @if ($is_debit)
-                                        <th>#DN No</th>
-                                        <th>Supplier</th>
-                                    @else
-                                        <th>#CN No</th>
-                                        <th>Customer</th>
-                                    @endif
+                                    <th>#CN No</th>
+                                    <th>Customer</th>
                                     <th>#Invoice No</th>
                                     <th>Amount</th>
                                     <th>Date</th>                                                                             
@@ -65,11 +57,7 @@
 
     function draw_data() {
         const language = {@lang("datatable.strings")};
-        const is_debit = @json($is_debit);
-        const isDebit = (val = 'customer') => {
-            if (is_debit) val = 'supplier';
-            return {data: val, name: val,}
-        };
+        const is_debit = "{{ $is_debit ? 1 : 0 }}";
 
         const dataTable = $('#creditnotesTbl').dataTable({
             processing: true,
@@ -79,7 +67,7 @@
             ajax: {
                 url: "{{ route('biller.creditnotes.get') }}",
                 type: 'post',
-                data: {is_debit: is_debit ? 1 : 0}
+                data: {is_debit}
             },
             columns: [
                 {
@@ -91,7 +79,8 @@
                     name: 'tid'
                 },
                 {
-                    ...isDebit()
+                    data: 'customer', 
+                    name: 'customer',
                 },
                 {
                     data: 'invoice_no',
