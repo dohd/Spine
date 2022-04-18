@@ -598,13 +598,13 @@
                         </ul>
                     </li>
                     @permission('transaction-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i>Transaction Charges
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Charges Management
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.charges.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Charges
+                            <li><a class="dropdown-item" href="{{ route('biller.charges.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Charges
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.charges.create') }}" data-toggle="dropdown"> <i class="ft-list"></i> Create Charges
+                            <li><a class="dropdown-item" href="{{ route('biller.charges.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Charges
                                 </a>
                             </li>
                         </ul>
@@ -617,7 +617,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.banktransfers.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Transfer
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.banktransfers.create') }}" data-toggle="dropdown"> <i class="ft-list"></i> Create Transfer
+                            <li><a class="dropdown-item" href="{{ route('biller.banktransfers.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Transfer
                                 </a>
                             </li>
                         </ul>
@@ -630,7 +630,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.withholdings.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage WithHolding Tax
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.withholdings.create') }}" data-toggle="dropdown"> <i class="ft-list"></i> Create WithHolding Tax
+                            <li><a class="dropdown-item" href="{{ route('biller.withholdings.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create WithHolding Tax
                                 </a>
                             </li>
                         </ul>
@@ -643,7 +643,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.loans.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Loans
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.loans.create') }}" data-toggle="dropdown"> <i class="ft-list"></i> Create Loan
+                            <li><a class="dropdown-item" href="{{ route('biller.loans.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Loan
                                 </a>
                             </li>
                         </ul>
