@@ -2,6 +2,8 @@
 
 namespace App\Http\Responses\Focus\charge;
 
+use App\Models\account\Account;
+use App\Models\charge\Charge;
 use App\Models\transaction\Transaction;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -16,8 +18,10 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-         // $customers=Customer::all();
-           $last_id=Transaction::orderBy('id', 'desc')->first();
-        return view('focus.charges.create')->with(array('last_id'=>$last_id))->with(bill_helper(3,9));;
+        $last_charge = Charge::orderBy('id', 'desc')->first(['tid']);
+        $accounts = Account::whereIn('account_type_id', [4, 6])->get(['id', 'holder', 'number', 'account_type_id']);
+        $payment_modes = ['Cash', 'Bank Transfer', 'Cheque', 'Mpesa', 'Card' ];
+            
+        return view('focus.charges.create', compact('last_charge', 'accounts', 'payment_modes'));
     }
 }
