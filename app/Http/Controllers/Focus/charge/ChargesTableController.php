@@ -17,8 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\charge;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\charge\ChargeRepository;
@@ -31,13 +29,13 @@ class ChargesTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var BankRepository
+     * @var ChargeRepository
      */
     protected $charge;
 
     /**
      * contructor to initialize repository object
-     * @param BankRepository $charge ;
+     * @param ChargeRepository $charge ;
      */
     public function __construct(ChargeRepository $charge)
     {
@@ -46,32 +44,25 @@ class ChargesTableController extends Controller
 
     /**
      * This method return the data of the model
-     * @param ManageBankRequest $request
+     * @param ManageChargeRequest $request
      *
      * @return mixed
      */
     public function __invoke(ManageChargeRequest $request)
     {
-        //
         $core = $this->charge->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('account_id', function ($charge) {
-                return $charge->account->holder;
+            ->addColumn('bank', function ($charge) {
+                return $charge->bank->holder;
             })
-             ->addColumn('transaction_date', function ($charge) {
+             ->addColumn('date', function ($charge) {
                 return dateFormat($charge->transaction_date);
             })
-              ->addColumn('debit', function ($charge) {
-                return amountFormat($charge->debit);
-            })
-           ->addColumn('credit', function ($charge) {
-                return amountFormat($charge->credit);
-            })
-
-            ->addColumn('created_at', function ($charge) {
-                return Carbon::parse($charge->created_at)->toDateString();
+            ->addColumn('amount', function ($charge) {
+                return amountFormat($charge->amount);
             })
             ->addColumn('actions', function ($charge) {
                 return $charge->action_buttons;
