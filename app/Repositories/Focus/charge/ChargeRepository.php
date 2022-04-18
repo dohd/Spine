@@ -3,17 +3,13 @@
 namespace App\Repositories\Focus\charge;
 
 use DB;
-use Carbon\Carbon;
 use App\Models\charge\Charge;
 use App\Exceptions\GeneralException;
-use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\items\PurchaseItem;
+use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
-
-
+use App\Repositories\BaseRepository;
 /**
- * Class BankRepository.
+ * Class ChargeRepository.
  */
 class ChargeRepository extends BaseRepository
 {
@@ -30,9 +26,9 @@ class ChargeRepository extends BaseRepository
      */
     public function getForDataTable()
     {
+        $q = $this->query();
 
-        return $this->query()->where('transaction_type','banckcharges')
-        ->get();
+        return $q->get();  
     }
 
     /**
@@ -44,54 +40,55 @@ class ChargeRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        //credit entry
-       $credit_trans_category_id = Transactioncategory::where('code', 'bc_transactions')->first();
-       $credit_trans_category_id=$credit_trans_category_id->id;
-
-        $input['credit']['tid'] = $input['credit']['tid'];
-        $input['credit']['account_id'] = $input['credit']['account_id'];
-        $input['credit']['method'] = $input['credit']['method'];
-        $input['credit']['refer_no'] = $input['credit']['refer_no'];
-        $input['credit']['note'] = strip_tags(@$input['credit']['note']);
-        $input['credit']['trans_category_id'] = $credit_trans_category_id;
-        $input['credit']['transaction_type'] ='banckcharges';
-       
-
+        // dd($input);
         DB::beginTransaction();
-        $input['credit'] = array_map( 'strip_tags', $input['credit']);
-        $result = Charge::create($input['credit']);
 
+        $input = array_replace($input, [
+            'date' => date_for_database($input['date']),
+            'amount' => numberClean($input['amount'])
+        ]);
+        $result = Charge::create($input);
 
-        if ($result) {
+        /** accounts */
+        // credit accounts income (bank)
+        $tr_category = Transactioncategory::where('code', 'CHRG')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $result->bank_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $result['amount'],
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $result['date'],
+            'user_id' => $result['user_id'],
+            'ins' => $result['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result['id'],
+            'user_type' => 'charge',
+            'is_primary' => 1,
+            'note' => $result['note'],
+        ];
+        Transaction::create($cr_data);
 
-         //begin debit entry for bank charges
-       $debit_trans_category_id = Transactioncategory::where('code', 'exp')->first();
-       $debit_trans_category_id=$debit_trans_category_id->id;
-        //$invoice_d = Purchase::where('id',$input['debit']['id'])->first();
-        $input['debit']['tid'] = $input['debit']['tid'];
-        $input['debit']['bill_id'] = $result->id;
-        $input['debit']['trans_category_id'] = $debit_trans_category_id;
-        $input['debit']['method'] = $input['method']['id'];
-        $input['debit']['refer_no'] = $input['debit']['refer_no'];
-        $input['debit']['note'] = strip_tags(@$input['debit']['note']);
-        $input['debit']['second_trans'] = 1;
-        $input['debit']['transaction_type'] ='expenses';
-        $input['debit'] = array_map( 'strip_tags', $input['debit']);
-         Charge::create($input['debit']);
-
-
-
-
-            DB::commit();
-            return $result;
-        }
+        // debit accounts expense (bank charge)
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $result['expense_id'],
+            'debit' => $result['amount'],
+        ]);
+        Transaction::create($dr_data);
+        
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
+        
+        DB::commit();
+        if ($result) return $result;
+        
         throw new GeneralException(trans('exceptions.backend.charges.create_error'));
     }
 
     /**
      * For updating the respective Model in storage
      *
-     * @param Bank $bank
+     * @param Charge $charge
      * @param  $input
      * @throws GeneralException
      * return bool
@@ -99,8 +96,8 @@ class ChargeRepository extends BaseRepository
     public function update(Charge $charge, array $input)
     {
         $input = array_map( 'strip_tags', $input);
-    	if ($charge->update($input))
-            return true;
+    	if ($charge->update($input)) return true;
+            
 
         throw new GeneralException(trans('exceptions.backend.charges.update_error'));
     }
@@ -108,16 +105,14 @@ class ChargeRepository extends BaseRepository
     /**
      * For deleting the respective model from storage
      *
-     * @param Bank $bank
+     * @param Charge $charge
      * @throws GeneralException
      * @return bool
      */
     public function delete(Charge $charge)
     {
-        if ($bank->delete()) {
-            return true;
-        }
-
+        if ($charge->delete()) return true;       
+        
         throw new GeneralException(trans('exceptions.backend.charges.delete_error'));
     }
 }
