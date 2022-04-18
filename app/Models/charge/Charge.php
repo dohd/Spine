@@ -24,7 +24,7 @@ class Charge extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'transactions';
+    protected $table = 'charges';
 
     /**
      * Mass Assignable fields of model
