@@ -1,117 +1,76 @@
 <div class='row'>
-    <div class='col-md-6'>
-        <div class='form-group'>
-            {{ Form::label( 'account_id', 'Money Account (Credited)',['class' => 'col-12 control-label']) }}
-            <div class="col">
-                <select name="account_id" class='form-control round required'>
-                    @foreach($assert_accounts as $account)
-                        <option value="{{$account['id']}}">{{$account['holder'].' '.$account['number']}}</option>
-                    @endforeach
-                </select></div>
-        </div> 
-
-
-      
-    </div>
-    <div class='col-md-6'>
-      <div class='form-group'>
-            {{ Form::label( 'expense_account_id', 'Expense  Account (Debited)',['class' => 'col-12 control-label']) }}
-            <div class="col">
-                <select name="expense_account_id" class='form-control round required'>
-                    @foreach($expense_accounts as $account)
-                        <option value="{{$account['id']}}">{{$account['holder'].' '.$account['number']}}</option>
-                    @endforeach
-                </select></div>
-        </div> 
-    </div>
+    <div class='form-group col-5'>
+        <div><label for="bank">Bank</label></div>
+        <select name="bank_id" class='form-control round' required>
+            <option value="">-- Select Bank --</option>
+            @foreach($accounts as $account)
+                @if ($account->account_type_id == 6)
+                    <option value="{{ $account['id'] }}">
+                        {{ $account['holder'] }}
+                    </option>
+                @endif
+            @endforeach
+        </select>
+    </div> 
+    <div class='form-group col-5'>
+        <div><label for="expense">Expense Category</label></div>
+        <select name="expense_id" class='form-control round' required>
+            <option value="">-- Select Expense --</option>
+            @foreach($accounts as $account)
+                @if ($account->account_type_id == 4)
+                    <option value="{{ $account['id'] }}">
+                        {{ $account['holder'] }}
+                    </option>
+                @endif
+            @endforeach
+        </select>
+    </div> 
 </div>
+
 <div class='row'>
-
-    <div class='col-md-3'>
-        <div class='form-group'>
-            {{ Form::label( 'tid', 'Transaction ID',['class' => 'col-6 control-label']) }}
-            <div class='col'>
-                {{ Form::text('tid', @$last_id->tid+1, ['class' => 'form-control round required', 'placeholder' => trans('general.note'),'autocomplete'=>'off','readonly']) }}
-            </div>
-        </div>
+    <div class='form-group col-2'>
+        <div><label for="tid">Charge ID</label></div>
+        {{ Form::text('tid', @$last_charge->tid+1, ['class' => 'form-control round', 'readonly']) }}
     </div>
-    
-  
-    <div class='col-md-3'>
-        <div class='form-group'>
-            {{ Form::label( 'method', trans('transactions.method'),['class' => 'col-12 control-label']) }}
-            <div class="col">
-                <select name="method" class='col form-control round'>
-                    @foreach(payment_methods() as $payment_method)
-                        <option value="{{$payment_method}}">{{$payment_method}}</option>
-                    @endforeach
-                    <option value="Card">Card</option>
-
-                </select>
-            </div>
-        </div>
+    <div class='form-group col-3'>
+        <div><label for="method">Payment Mode</label></div>
+        <select name="payment_mode" class='form-control round' required>
+            <option value="">-- Select Mode --</option>
+            @foreach($payment_modes as $mode)
+                <option value="{{ $mode }}">
+                    {{ $mode }}
+                </option>
+            @endforeach
+        </select>            
     </div>
-    <div class='col-md-6'>
-        <div class='form-group'>
-            {{ Form::label( 'transaction_date', trans('transactions.payment_date'),['class' => 'col control-label']) }}
-            <div class='col-6'>
-                <fieldset class="form-group position-relative has-icon-left">
-                    <input type="text" class="form-control round required"
-                           placeholder="{{trans('general.payment_date')}}*" name="transaction_date"
-                           data-toggle="datepicker" required="required">
-                    <div class="form-control-position">
-                      <span class="fa fa-calendar"
-                            aria-hidden="true"></span>
-                    </div>
-
-                </fieldset>
-            </div>
-        </div>
+    <div class='form-group col-3'>
+        <div><label for="date">Payment Date</label></div>
+        <input type="text" name="date" class="form-control datepicker round">
     </div>
 </div>
+
 <div class='row'>
-   <div class='col-md-3'>
-        <div class='form-group'>
-            {{ Form::label( 'amount', 'Amount',['class' => 'col control-label']) }}
-            <div class="col">
-                {{ Form::text('amount', numberFormat(0), ['class' => 'form-control round required', 'placeholder' => trans('transactions.debit').'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}</div>
-        </div>
+    <div class='form-group col-2'>
+        <div><label for="reference">Reference</label></div>
+        {{ Form::text('reference', null, ['class' => 'form-control round', 'required']) }}
     </div>
-     <div class='col-md-3'>
-        <div class='form-group'>
-            {{ Form::label( 'refer_no', 'Reference',['class' => 'col-6 control-label']) }}
-            <div class='col'>
-                {{ Form::text('refer_no', null, ['class' => 'form-control round', 'placeholder' => 'Reference','autocomplete'=>'off']) }}
-            </div>
-        </div>
+    <div class='form-group col-3'>
+        <div><label for="amount">Amount</label></div>
+        {{ Form::text('amount', null, ['class' => 'form-control round', 'required']) }}
     </div>
-   
-
-    <div class='col-md-6'>
-        <div class='form-group'>
-            {{ Form::label( 'refer_no', trans('general.note'),['class' => 'col-6 control-label']) }}
-            <div class='col'>
-                {{ Form::text('note', null, ['class' => 'form-control round', 'placeholder' => trans('general.note'),'autocomplete'=>'off']) }}
-            </div>
-        </div>
+    <div class='form-group col-5'>
+        <div><label for="note">Note</label></div>
+        {{ Form::text('note', null, ['class' => 'form-control round', 'required']) }}
     </div>
-  
-
 </div>
-
-
-
 
 @section("after-scripts")
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('[data-toggle="datepicker"]').datepicker({
-                autoHide: true,
-                format: '{{config('core.user_date_format')}}'
-            });
-            $('[data-toggle="datepicker"]').datepicker('setDate', '{{date(config('core.user_date_format'))}}');
-        });
-
-        
-    </script>
+<script type="text/javascript">
+    $('.datepicker')
+    .datepicker({
+        autoHide: true,
+        format: "{{ config('core.user_date_format') }}"
+    })
+    .datepicker('setDate', new Date());
+</script>
 @endsection
