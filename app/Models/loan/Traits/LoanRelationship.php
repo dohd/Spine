@@ -2,50 +2,17 @@
 
 namespace App\Models\loan\Traits;
 
-use App\Models\branch\Branch;
-use App\Models\customfield\Customfield;
-use App\Models\transaction\Transaction;
-use App\Models\project\Project;
+use App\Models\account\Account;
 
-
-/**
- * Class CustomerRelationship
- */
 trait LoanRelationship
 {
-   
-   /* public function group()
+    public function lender()
     {
-        return $this->hasMany('App\Models\customergroup\CustomerGroupEntry');
+        return $this->belongsTo(Account::class, 'lender_id');
     }
 
-    public function primary_group()
+    public function bank()
     {
-        return $this->hasOne('App\Models\customergroup\CustomerGroupEntry')->oldest();
-    }
-
-    public function invoices()
-    {
-        return $this->hasMany('App\Models\invoice\Invoice')->orderBy('id','DESC');
-    }
-
-       public function amount()
-        {
-             return $this->hasMany(Transaction::class,'payer_id');
-        }*/
-
-    public function project()
-    {
-        return $this->belongsTo(Project::class);
-    }
-
-       public function branch()
-    {
-        return $this->hasMany(Branch::class);
-    }
-
-           public function transactions()
-    {
-        return $this->hasMany('App\Models\transaction\Transaction','payer_id')->where('payer_type','=','customer')->withoutGlobalScopes();
+        return $this->belongsTo(Account::class, 'bank_id');
     }
 }
