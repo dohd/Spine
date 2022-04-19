@@ -80,27 +80,27 @@ class CreditNoteRepository extends BaseRepository
 
     static function post_transaction($creditnote)
     {
+        $account = Account::where('system', 'receivable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'INV')->first(['id', 'code']);
         $data = [
             'tr_date' => date('Y-m-d'),
+            'trans_category_id' => $tr_category->id,
+            'tr_type' => $tr_category->code,
             'due_date' => $creditnote->date,
             'user_id' => $creditnote->user_id,
             'note' => $creditnote->note,
             'ins' => $creditnote->ins,
             'tr_ref' => $creditnote->id,
-            'user_type' => 'customer',
             'is_primary' => 1
         ];
-        $account = Account::where('system', 'receivable')->first(['id']);
-        
+
         // debit note,
         if ($creditnote->is_debit) {
             // credit income
-            $tr_category = Transactioncategory::where('code', 'DNOTE')->first(['id', 'code']);
             $cr_data = array_replace($data, [
                 'account_id' => Invoice::find($creditnote->invoice_id)->account_id,
-                'trans_category_id' => $tr_category->id,
                 'debit' => $creditnote->subtotal,
-                'tr_type' => $tr_category->code,
+                'user_type' => 'dnote',
             ]);
             Transaction::create($cr_data);
 
@@ -115,12 +115,10 @@ class CreditNoteRepository extends BaseRepository
         // credit note
         else {
             // credit accounts receivable
-            $tr_category = Transactioncategory::where('code', 'CNOTE')->first(['id', 'code']);
             $cr_data = $data + [
                 'account_id' => $account->id,
-                'trans_category_id' => $tr_category->id,
                 'credit' => $creditnote->total,
-                'tr_type' => $tr_category->code,
+                'user_type' => 'cnote',
             ];
             Transaction::create($cr_data);
 
