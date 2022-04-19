@@ -155,9 +155,10 @@ Route::group(['namespace' => 'lead'], function () {
 });
 
 Route::group(['namespace' => 'loan'], function () {
+    Route::get('loans/approve/{loan}', 'LoansController@approve_loan')->name('loans.approve_loan');
     Route::resource('loans', 'LoansController');
     //For Datatable
-    //Route::post('loans/get', 'DeptorsTableController')->name('deptors.get');
+    Route::post('loans/get', 'LoansTableController')->name('loans.get');
 });
 
 Route::group(['namespace' => 'makepayment'], function () {
