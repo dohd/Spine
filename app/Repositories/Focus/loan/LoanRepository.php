@@ -2,50 +2,21 @@
 
 namespace App\Repositories\Focus\loan;
 
-use App\Models\customergroup\CustomerGroupEntry;
-use App\Models\items\CustomEntry;
 use DB;
-use Carbon\Carbon;
-use App\Models\loan\Loan;
 use App\Exceptions\GeneralException;
+use App\Models\loan\Loan;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Responses\RedirectResponse;
 /**
  * Class CustomerRepository.
  */
 class LoanRepository extends BaseRepository
 {
-
-    /**
-     *customer_picture_path .
-     *
-     * @var string
-     */
-    protected $customer_picture_path;
-
-
-    /**
-     * Storage Class Object.
-     *
-     * @var \Illuminate\Support\Facades\Storage
-     */
-    protected $storage;
     /**
      * Associated Repository Model.
      */
-    const MODEL = Deptor::class;
-
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->customer_picture_path = 'img' . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR;
-        $this->storage = Storage::disk('public');
-    }
+    const MODEL = Loan::class;
 
     /**
      * This method is used by Table Controller
@@ -57,16 +28,7 @@ class LoanRepository extends BaseRepository
     {
         $q = $this->query();
        
-        $q->when(request('g_rel_type'), function ($q) {
-
-            return $q->where('rel_id', '=',request('g_rel_id',-1));
-        });
-        if (!request('g_rel_type') AND request('g_rel_id')) {
-            $q->whereHas('group', function ($s) {
-                return $s->where('customer_group_id', '=', request('g_rel_id', 0));
-            });
-        }
-        return $q->get(['id','taxid', 'name','company','email','address','picture','active','created_at']);
+        return $q->get();
     }
 
 
@@ -80,45 +42,18 @@ class LoanRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-        if (!empty($input['data']['picture'])) {
-            $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-        }
-        $groups = @$input['data']['groups'];
-        unset($input['data']['groups']);
         DB::beginTransaction();
-        $input['data'] = array_map( 'strip_tags', $input['data']);
-        try {
-            $result = Customer::create($input['data']);
-        } catch (QueryException $e){
-            $errorCode = $e->errorInfo[1];
-            if($errorCode == '1062'){
-                session()->flash('flash_error', 'Duplicate Email');
-            }
-            new RedirectResponse(route('biller.customers.create'), ['flash_success' =>trans('exceptions.backend.customers.create_error')]);
-           // throw new GeneralException(trans('exceptions.backend.customers.create_error'));
-        }
 
+        $input = array_replace($input, [
+            'date' => date_for_database($input['date']),
+            'amount' => numberClean($input['amount']),
+            'amount_pm' => numberClean($input['amount_pm']),
+        ]);
+        $result = Loan::create($input);
 
-        if (@$result->id) {
-            $fields = array();
-            if (isset($groups)) {
-                $insert_groups = array();
-                foreach ($groups as $key => $value) {
-                    $insert_groups[] = array('customer_id' => $result->id, 'customer_group_id' => strip_tags($value));
-                }
-                CustomerGroupEntry::insert($insert_groups);
-            }
+        DB::commit();
+        if ($result) return $result;
 
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $result->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $input['data']['ins']);
-                }
-                CustomEntry::insert($fields);
-            }
-            DB::commit();
-            return $result;
-        }
         throw new GeneralException(trans('exceptions.backend.customers.create_error'));
     }
 
@@ -133,98 +68,10 @@ class LoanRepository extends BaseRepository
     public function update(Customer $customer, array $input)
     {
 
-        if (!empty($input['data']['picture'])) {
-            $this->removePicture($customer, 'picture');
-
-            $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-        }
-        if (empty($input['data']['password'])) {
-
-
-          unset($input['data']['password']);
-        }
-        DB::beginTransaction();
-        $groups = @$input['data']['groups'];
-
-        unset($input['data']['groups']);
-          $input['data'] = array_map( 'strip_tags', $input['data']);
-
-        try {
-            $customer->update($input['data']);
-
-         } catch (QueryException $e) {
-            $errorCode = $e->errorInfo[1];
-            if ($errorCode == '1062') {
-                session()->flash('flash_error', 'Duplicate Email');
-            }
-               return false;
-        }
-
-
-            if (isset($groups)) {
-
-                $insert_groups = array();
-                foreach ($groups as $key => $value) {
-                    $insert_groups[] = array('customer_id' => $customer->id, 'customer_group_id' => $value);
-                }
-                CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
-
-                CustomerGroupEntry::insert($insert_groups);
-
-            } else {
-                CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
-            }
-
-
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $customer->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $customer->ins);
-                    CustomEntry::where('custom_field_id', '=', $key)->where('rid', '=', $customer->id)->delete();
-                }
-                CustomEntry::insert($fields);
-            }
-            DB::commit();
-            return true;
-        
-
-
         throw new GeneralException(trans('exceptions.backend.customers.update_error'));
     }
 
-    /*
- * Upload logo image
- */
-    public function uploadPicture($logo)
-    {
-        $path = $this->customer_picture_path;
-
-        $image_name = time() . $logo->getClientOriginalName();
-
-        $this->storage->put($path . $image_name, file_get_contents($logo->getRealPath()));
-
-        return $image_name;
-    }
-
-    /*
-    * remove logo or favicon icon
-    */
-    public function removePicture(Customer $customer, $type)
-    {
-        $path = $this->customer_picture_path;
-
-        if ($customer->$type && $this->storage->exists($path . $customer->$type)) {
-            $this->storage->delete($path . $customer->$type);
-        }
-
-        $result = $customer->update([$type => null]);
-
-        if ($result) {
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.settings.update_error'));
-    }
-
+  
     /**
      * For deleting the respective model from storage
      *
@@ -239,5 +86,40 @@ class LoanRepository extends BaseRepository
         }
 
         throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
+    }
+
+    /**
+     * Accounting
+     */
+    public function post_transaction($result)
+    {
+        // credit liability (loan)
+        $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $result->lender_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $result['amount'],
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $result['date'],
+            'user_id' => $result['user_id'],
+            'ins' => $result['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result['id'],
+            'user_type' => 'user',
+            'is_primary' => 1,
+            'note' => $result->note,
+        ];
+        Transaction::create($cr_data);
+
+        // debit accounts income (bank)
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $result->bank_id,
+            'debit' => $result->amount,
+        ]);
+        Transaction::create($dr_data);
+        
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
     }
 }
