@@ -40,7 +40,6 @@ class ChargeRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
         DB::beginTransaction();
 
         $input = array_replace($input, [
@@ -62,7 +61,7 @@ class ChargeRepository extends BaseRepository
             'ins' => $result['ins'],
             'tr_type' => $tr_category->code,
             'tr_ref' => $result['id'],
-            'user_type' => 'charge',
+            'user_type' => 'customer',
             'is_primary' => 1,
             'note' => $result['note'],
         ];
