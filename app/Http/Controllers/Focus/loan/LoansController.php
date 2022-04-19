@@ -15,21 +15,17 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\loan;
 
-use App\Http\Requests\Focus\general\CommunicationRequest;
 use App\Repositories\Focus\loan\LoanRepository;
-use App\Http\Requests\Focus\loan\ManageLoanRequest;
 use App\Http\Responses\ViewResponse;
-use App\Models\account\Account;
-use App\Models\loan\Loan;
-use App\Models\purchase\Purchase;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
-use App\Http\Requests\Focus\loan\StoreLoanRequest;
-
-
+use App\Models\account\Account;
+use App\Models\lead\Lead;
+use App\Models\loan\Loan;
+use Illuminate\Http\Request;
 
 /**
  * CustomersController
@@ -38,13 +34,13 @@ class LoansController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var CustomerRepository
+     * @var LoanRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param CustomerRepository $repository ;
+     * @param LoanRepository $repository ;
      */
     public function __construct(LoanRepository $repository)
     {
@@ -57,20 +53,9 @@ class LoansController extends Controller
      * @param App\Http\Requests\Focus\customer\ManageCustomerRequest $request
      * @return \App\Http\Responses\ViewResponse
      */
-    public function index(ManageLoanRequest $request)
+    public function index()
     {
-        $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
-         $customer = false;
-              if (isset($input['rel_id']) and isset($input['rel_type'])) {
-             $segment = Purchase::where('payer_id',$input['rel_id'])->where('payer_type','customer')->get();
-              $customer = Customer::find($input['rel_id']);
-
-           // $segment = CustomerGroupEntry::where('customer_group_id', '=', $input['rel_id'])->first();
-
-        }
-       
-        return new ViewResponse('focus.loans.index', compact('input', 'segment', 'customer'));
+        return new ViewResponse('focus.loans.index');
     }
 
     /**
@@ -79,10 +64,12 @@ class LoansController extends Controller
      * @param CreateCustomerRequestNamespace $request
      * @return \App\Http\Responses\Focus\customer\CreateResponse
      */
-    public function create( $request)
+    public function create()
     {
+        $last_loan = Loan::orderBy('id', 'desc')->first(['tid']);
+        $accounts = Account::whereIn('account_type_id', [2, 7])->get(['id', 'holder', 'account_type_id']);
 
-        return new CreateResponse('focus.loans.create');
+        return new ViewResponse('focus.loans.create', compact('last_loan', 'accounts'));
     }
 
     /**
@@ -91,10 +78,22 @@ class LoansController extends Controller
      * @param StoreCustomerRequestNamespace $request
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function store( $request)
+    public function store(Request $request)
     {
-        
+        // extract input fields
+        $data = $request->only([
+            'tid', 'bank_id', 'lender_id', 'amount', 'amount_pm', 'date', 'note',
+            'time_pm'
+        ]);
 
+        $data = $data + [
+            'ins' => auth()->user()->ins,
+            'user_id' => auth()->user()->id
+        ];
+
+        $result = $this->repository->create($data);
+
+        return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan created successfully']);
     }
 
     /**
@@ -116,10 +115,8 @@ class LoansController extends Controller
      * @param App\Models\customer\Customer $customer
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(  $customer)
+    public function update($customer)
     {
-        
-
     }
 
     /**
@@ -129,11 +126,10 @@ class LoansController extends Controller
      * @param App\Models\customer\Customer $customer
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy( $request)
+    public function destroy($request)
     {
-
     }
-        
+
 
     /**
      * Remove the specified resource from storage.
@@ -142,12 +138,20 @@ class LoansController extends Controller
      * @param App\Models\customer\Customer $customer
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show( $request)
+    public function show(Loan $loan)
     {
-        
+        return new ViewResponse('focus.loans.view', compact('loan'));
     }
 
-    
-    
+    /**
+     * Approve Loan
+     */
+    public function approve_loan(Loan $loan)
+    {
+        $loan->update(['is_approved' => 1]);
+        // accounts
+        $this->repository->post_transaction($loan);
 
+        return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan approved successfully']);
+    }
 }
