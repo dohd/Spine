@@ -23,8 +23,8 @@ use App\Http\Responses\ViewResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\account\Account;
-use App\Models\lead\Lead;
 use App\Models\loan\Loan;
+use App\Models\loan\Paidloan;
 use Illuminate\Http\Request;
 
 /**
@@ -97,41 +97,6 @@ class LoansController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param App\Models\customer\Customer $customer
-     * @param EditCustomerRequestNamespace $request
-     * @return \App\Http\Responses\Focus\customer\EditResponse
-     */
-    public function edit($request)
-    {
-        //return new EditResponse($customer);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateCustomerRequestNamespace $request
-     * @param App\Models\customer\Customer $customer
-     * @return \App\Http\Responses\RedirectResponse
-     */
-    public function update($customer)
-    {
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param DeleteCustomerRequestNamespace $request
-     * @param App\Models\customer\Customer $customer
-     * @return \App\Http\Responses\RedirectResponse
-     */
-    public function destroy($request)
-    {
-    }
-
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param DeleteCustomerRequestNamespace $request
@@ -148,10 +113,68 @@ class LoansController extends Controller
      */
     public function approve_loan(Loan $loan)
     {
-        $loan->update(['is_approved' => 1]);
-        // accounts
-        $this->repository->post_transaction($loan);
+        $this->repository->approve_loan($loan);
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan approved successfully']);
+    }
+
+    /**
+     * Form for paying loan
+     */
+    public function pay_loans()
+    {
+        $last_paidloan = Paidloan::orderBy('id', 'DESC')->first(['tid']);
+        $accounts = Account::where('account_type_id', 6)->get(['id', 'holder', 'account_type_id']);
+        $payment_modes = ['Cash', 'Bank Transfer', 'Cheque', 'Mpesa', 'Card' ];
+
+        return new ViewResponse('focus.loans.pay_loans', compact('last_paidloan', 'accounts', 'payment_modes'));
+    }
+
+    /**
+     * Persist paid loan in storage
+     */
+    public function store_loans(Request $request)
+    {
+        // extract input fields
+        $data = $request->only([
+            'lender_id', 'bank_id', 'tid', 'date', 'payment_mode', 'amount', 'ref'
+        ]);
+        $data_items = $request->only(['loan_id', 'paid', 'interest', 'penalty']);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        // modify and filter paid bill
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($item) { return $item['paid']; });
+
+        $result = $this->repository->store_loans(compact('data', 'data_items'));
+
+        return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loans payment successfully received']);
+    }
+
+    /**
+     * Lenders for select box
+     */
+    public function lenders()
+    {
+        $k = request('keyword');
+
+        $accounts = Account::where('account_type_id', 2)
+        ->where('holder', 'LIKE', '%'. $k .'%')
+        ->limit(6)->get(['id', 'holder']);
+
+        return response()->json($accounts);
+    }
+
+    /**
+     * Lender loans
+     */
+    public function lender_loans()
+    {
+        $accounts = Loan::where(['lender_id' => request('id'), 'is_approved' => 1])
+        ->whereIn('status', ['pending', 'partial'])->get();
+
+        return response()->json($accounts);
     }
 }
