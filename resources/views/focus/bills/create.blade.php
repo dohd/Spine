@@ -204,6 +204,9 @@
     });
 
     // On deposit change
+    $('#deposit').on('focus', function(e) {
+        if (!$('#supplierbox').val()) $(this).blur();
+    });
     $('#deposit').change(function() {
         let amountSum = 0;
         let depoSum = 0;
