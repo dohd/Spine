@@ -155,6 +155,10 @@ Route::group(['namespace' => 'lead'], function () {
 });
 
 Route::group(['namespace' => 'loan'], function () {
+    Route::get('loans/lender_loans', 'LoansController@lender_loans')->name('loans.lender_loans');
+    Route::post('loans/lenders', 'LoansController@lenders')->name('loans.lenders');
+    Route::get('loans/pay_loans', 'LoansController@pay_loans')->name('loans.pay_loans');
+    Route::post('loans/store_loans', 'LoansController@store_loans')->name('loans.store_loans');
     Route::get('loans/approve/{loan}', 'LoansController@approve_loan')->name('loans.approve_loan');
     Route::resource('loans', 'LoansController');
     //For Datatable
