@@ -4,10 +4,14 @@ namespace App\Repositories\Focus\loan;
 
 use DB;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
+use App\Models\items\PaidloanItem;
 use App\Models\loan\Loan;
+use App\Models\loan\Paidloan;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 /**
  * Class CustomerRepository.
  */
@@ -30,8 +34,6 @@ class LoanRepository extends BaseRepository
        
         return $q->get();
     }
-
-
 
     /**
      * For Creating the respective model in storage
@@ -58,45 +60,100 @@ class LoanRepository extends BaseRepository
     }
 
     /**
-     * For updating the respective Model in storage
-     *
-     * @param Customer $customer
-     * @param  $input
-     * @throws GeneralException
-     * return bool
+     * approve loan
      */
-    public function update(Customer $customer, array $input)
+    public function approve_loan($loan)
     {
+        DB::beginTransaction();
 
-        throw new GeneralException(trans('exceptions.backend.customers.update_error'));
-    }
+        $loan->update(['is_approved' => 1]);
 
-  
-    /**
-     * For deleting the respective model from storage
-     *
-     * @param Customer $customer
-     * @return bool
-     * @throws GeneralException
-     */
-    public function delete(Customer $customer)
-    {
-        if ($customer->delete()) {
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
-    }
-
-    /**
-     * Accounting
-     */
-    public function post_transaction($result)
-    {
+        /** accounts  */
         // credit liability (loan)
         $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
         $cr_data = [
-            'account_id' => $result->lender_id,
+            'account_id' => $loan->lender_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $loan['amount'],
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $loan['date'],
+            'user_id' => $loan['user_id'],
+            'ins' => $loan['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $loan['id'],
+            'user_type' => 'employee',
+            'is_primary' => 1,
+            'note' => $loan->note,
+        ];
+        Transaction::create($cr_data);
+
+        // debit accounts income (bank)
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $loan->bank_id,
+            'debit' => $loan->amount,
+        ]);
+        Transaction::create($dr_data);
+        
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
+
+        DB::commit();
+        return true;
+    }
+
+    /**
+     * pay loans
+     */
+    public function store_loans(array $input)
+    {
+        // dd($input);
+        DB::beginTransaction();
+
+        $data = $input['data'];
+        $data['date'] = date_for_database($data['date']);
+        $data['amount'] = numberClean($data['amount']);
+        $result = Paidloan::create($data);
+
+        $data_items = $input['data_items'];
+        foreach ($data_items as $k => $item) {
+            $item['paid_loan_id'] = $result->id;
+            foreach ($item as $key => $val) {
+                if (in_array($key, ['paid', 'interest', 'penalty'], 1))
+                    $item[$key] = numberClean($val);
+            }
+            $data_items[$k] = $item;
+        }
+        PaidloanItem::insert($data_items);
+
+        // update paid amount in loans
+        $loan_ids = $result->items()->pluck('loan_id')->toArray();
+        $paid_loans = PaidloanItem::whereIn('loan_id', $loan_ids)
+            ->select(DB::raw('loan_id as id, SUM(paid) as amountpaid'))
+            ->groupBy('loan_id')
+            ->get()->toArray();
+        Batch::update(new Loan, $paid_loans, 'id');
+        
+        // update payment status in loans
+        foreach ($result->items as $item) {
+            $loan = $item->loan;
+            if ($loan->amount == $loan->amountpaid) $loan->update(['status' => 'paid']);
+            if ($loan->amount > $loan->amountpaid) $loan->update(['status' => 'partial']);
+        }
+
+        /** accounts */
+        $this->post_transaction($result);
+
+        DB::commit();
+        if ($result) return true;
+    }
+
+    public function post_transaction($result)
+    {
+        // credit account income (bank)
+        $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $result['bank_id'],
             'trans_category_id' => $tr_category->id,
             'credit' => $result['amount'],
             'tr_date' => date('Y-m-d'),
@@ -105,21 +162,41 @@ class LoanRepository extends BaseRepository
             'ins' => $result['ins'],
             'tr_type' => $tr_category->code,
             'tr_ref' => $result['id'],
-            'user_type' => 'user',
+            'user_type' => 'employee',
             'is_primary' => 1,
-            'note' => $result->note,
+            'note' => $result['payment_mode'] . ' - ' . $result['doc_ref'],
         ];
         Transaction::create($cr_data);
 
-        // debit accounts income (bank)
         unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $result->bank_id,
-            'debit' => $result->amount,
+
+        // debit account expense (lender)
+        $principle = $result->items->sum('paid');
+        $dr_data_1 = array_replace($cr_data, [
+            'account_id' =>  $result['lender_id'],
+            'debit' => $principle,
         ]);
-        Transaction::create($dr_data);
+        Transaction::create($dr_data_1);
+
+        // debit account income (loan interest)
+        $interest = $result->items->sum('interest');
+        $account = Account::where('system', 'loan_interest')->first(['id']);
+        $dr_data_2 = array_replace($cr_data, [
+            'account_id' =>  $account->id,
+            'debit' => $result['amount'],
+        ]);
+        if ($interest) Transaction::create($dr_data_2);
+
+        // debit account income (loan penalty)
+        $penalty = $result->items->sum('penalty');
+        $account = Account::where('system', 'loan_penalty')->first(['id']);
+        $dr_data_3 = array_replace($cr_data, [
+            'account_id' =>  $account->id,
+            'debit' => $result['amount'],
+        ]);
+        if ($penalty) Transaction::create($dr_data_3);
         
         // update account ledgers debit and credit totals
-        aggregate_account_transactions();
+        aggregate_account_transactions();    
     }
 }
