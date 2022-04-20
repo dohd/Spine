@@ -9,7 +9,7 @@ class PaidInvoiceItem extends Model
 {
     use PaidInvoiceItemRelationship;
 
-    protected $table = 'paidinvoice_items';
+    protected $table = 'paid_invoice_items';
 
     /**
      * Mass Assignable fields of model

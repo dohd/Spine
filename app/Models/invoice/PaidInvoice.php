@@ -13,7 +13,7 @@ class PaidInvoice extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'paidinvoices';
+    protected $table = 'paid_invoices';
 
     /**
      * Mass Assignable fields of model
