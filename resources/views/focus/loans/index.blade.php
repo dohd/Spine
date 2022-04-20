@@ -30,7 +30,7 @@
                                         <th>Lending Date</th>
                                         <th>Amount</th>
                                         <th>Lending period (months)</th>
-                                        <th>Status</th>
+                                        <th>Approval</th>
                                         <th>Amount Paid</th>   
                                         <th>Actions</th>
                                     </tr>
