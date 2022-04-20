@@ -86,12 +86,10 @@ class ChargesController extends Controller
             'reference', 'note'
         ]);
 
-        $data = $data + [
-            'ins' => auth()->user()->ins,
-            'user_id' => auth()->user()->id
-        ];
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
-        $result = $this->repository->create($data);
+        $this->repository->create($data);
 
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.charges.created')]);
     }
