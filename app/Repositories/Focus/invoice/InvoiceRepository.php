@@ -426,13 +426,6 @@ class InvoiceRepository extends BaseRepository
         }
         PaidInvoiceItem::insert($bill_items);
 
-        // update payment status in invoices
-        foreach ($result->items as $item) {
-            $payable = $item->invoice->total;
-            if ($item->paid < $payable) $item->invoice->update(['status' => 'partial']);
-            if ($item->paid == $payable) $item->invoice->update(['status' => 'paid']);    
-        }
-
         // update paid amount in invoices
         $invoice_ids = $result->items()->pluck('invoice_id')->toArray();
         $paid_invoices = PaidInvoiceItem::whereIn('invoice_id', $invoice_ids)
@@ -441,7 +434,22 @@ class InvoiceRepository extends BaseRepository
             ->get()->toArray();
         Batch::update(new Invoice, $paid_invoices, 'id');
 
+        // update payment status in invoices
+        foreach ($result->items as $item) {            
+            $invoice = $item->invoice;
+            if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            if ($invoice->total < $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        }
+        
         /** accounting */
+        $this->post_transaction($result);
+
+        DB::commit();
+        if ($result) return true;
+    }
+
+    public function post_transaction($bill)
+    {
         // credit accounts receivable
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
@@ -454,7 +462,7 @@ class InvoiceRepository extends BaseRepository
             'user_id' => $bill['user_id'],
             'ins' => $bill['ins'],
             'tr_type' => $tr_category->code,
-            'tr_ref' => $result['id'],
+            'tr_ref' => $bill['id'],
             'user_type' => 'customer',
             'is_primary' => 1,
             'note' => $bill['doc_ref_type'] . ' - ' . $bill['doc_ref'],
@@ -471,9 +479,6 @@ class InvoiceRepository extends BaseRepository
         
         // update account ledgers debit and credit totals
         aggregate_account_transactions();
-
-        DB::commit();
-        if ($result) return true;
     }
 
     public function update_project_invoice($invoice, array $input)
