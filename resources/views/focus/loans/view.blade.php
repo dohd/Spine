@@ -25,7 +25,7 @@
                         $loan_details = [
                             'Loan ID' => $loan->tid,
                             'Date' => dateFormat($loan->date),
-                            'Approval Status' => $loan->is_approved ? 'Approved' : 'Pending',
+                            'Approval' => $loan->is_approved ? 'Approved' : 'Pending',
                             'Lender' => $loan->lender->holder,
                             'Bank Account' => $loan->bank->holder,
                             'Loan Period' => $loan->time_pm . ' months',
