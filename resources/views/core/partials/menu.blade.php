@@ -656,11 +656,11 @@
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-newspaper-o"></i> Manual Journal
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.transactions.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Journal
+                            <li><a class="dropdown-item" href="{{ route('biller.journals.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Journal
                                 </a>
                             </li>
                             @permission('transaction-data')
-                            <li><a class="dropdown-item" href="{{ route('biller.transactions.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Journal
+                            <li><a class="dropdown-item" href="{{ route('biller.journals.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Journal
                                 </a>
                             </li>
                             @endauth
