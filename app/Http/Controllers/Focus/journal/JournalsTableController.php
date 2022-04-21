@@ -18,27 +18,24 @@
 namespace App\Http\Controllers\Focus\journal;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Focus\loan\LoanRepository;
+use App\Repositories\Focus\journal\JournalRepository;
 use Yajra\DataTables\Facades\DataTables;
 
-/**
- * Class BanksTableController.
- */
 class JournalsTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var LoanRepository
+     * @var JournalRepository
      */
-    protected $loan;
+    protected $journal;
 
     /**
      * contructor to initialize repository object
-     * @param LoanRepository $loan ;
+     * @param JournalRepository $journal ;
      */
-    public function __construct(LoanRepository $loan)
+    public function __construct(JournalRepository $journal)
     {
-        $this->loan = $loan;
+        $this->journal = $journal;
     }
 
     /**
@@ -48,30 +45,22 @@ class JournalsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->loan->getForDataTable();
+        $core = $this->journal->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('lender', function ($loan) {
-                return $loan->lender->holder;
+            ->addColumn('date', function ($journal) {
+                return dateFormat($journal->date);
             })
-            ->addColumn('date', function ($loan) {
-                return dateFormat($loan->date);
+            ->addColumn('credit_ttl', function ($journal) {
+                return number_format($journal->credit_ttl, 2);
             })
-            ->addColumn('amount', function ($loan) {
-                return number_format($loan->amount, 2);
+            ->addColumn('debit_ttl', function ($journal) {
+                return number_format($journal->debit_ttl, 2);
             })
-            ->addColumn('amountpaid', function ($loan) {
-                return number_format($loan->amountpaid, 2);
-            })
-            ->addColumn('is_approved', function ($loan) {
-                return $loan->is_approved ? 'Approved' : 'Pending';
-            })
-            ->addColumn('actions', function ($loan) {
-                return '<a href="' . route('biller.loans.show', $loan) . '" class="btn btn-primary round"><i class="fa fa-eye"></i></a> ' 
-                    .' <a href="' . route('biller.loans.approve_loan', $loan) . '" type="button" class="btn btn-success round" data-toggle="tooltip" title="Approve" data-placement="top">
-                        <i class="fa fa-check"></i></a>';
+            ->addColumn('actions', function ($journal) {
+                return '<a href="' . route('biller.journals.show', $journal) . '" class="btn btn-primary round"><i class="fa fa-eye"></i></a> '; 
             })
             ->make(true);
     }
