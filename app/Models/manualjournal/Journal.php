@@ -2,47 +2,34 @@
 
 namespace App\Models\manualjournal;
 
-use App\Models\manualjournal\Traits\ManualJournalAttribute;
-use App\Models\manualjournal\Traits\ManualJournalRelationship;
+use App\Models\manualjournal\Traits\JournalAttribute;
+use App\Models\manualjournal\Traits\JournalRelationship;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
-
-class ManualJournal extends Model
+class Journal extends Model
 {
     use ModelTrait,
-    ManualJournalAttribute,
-    ManualJournalRelationship {
-        // BankAttribute::getEditButtonAttribute insteadof ModelTrait;
-    }
-      
-
-    /**
-     * NOTE : If you want to implement Soft Deletes in this model,
-     * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
-     */
+        JournalAttribute,
+        JournalRelationship;
 
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'manual_journals';
+    protected $table = 'journals';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -71,9 +58,9 @@ class ManualJournal extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
