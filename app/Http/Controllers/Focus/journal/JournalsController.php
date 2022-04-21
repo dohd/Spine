@@ -3,13 +3,30 @@
 namespace App\Http\Controllers\Focus\journal;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
 use App\Models\manualjournal\Journal;
+use App\Repositories\Focus\journal\JournalRepository;
 use Illuminate\Http\Request;
 
 class JournalsController extends Controller
 {
+    /**
+     * variable to store the repository object
+     * @var JournalRepository
+     */
+    protected $repository;
+
+    /**
+     * contructor to initialize repository object
+     * @param JournalRepository $repository ;
+     */
+    public function __construct(JournalRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -40,8 +57,17 @@ class JournalsController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        $data = $request->only(['tid', 'date', 'note', 'debit_ttl', 'credit_ttl']);
+        $data_items = $request->only(['account_id', 'debit', 'credit']);
 
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        $data_items = modify_array($data_items);
+
+        $this->repository->create(compact('data', 'data_items'));
+
+        return new RedirectResponse(route('biller.journals.index'), ['flash_success' => 'Manual Journal created successfully']);
     }
 
     /**
