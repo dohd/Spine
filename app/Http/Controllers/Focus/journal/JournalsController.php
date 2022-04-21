@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\journal;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
+use App\Models\account\Account;
 use App\Models\manualjournal\Journal;
 use Illuminate\Http\Request;
 
@@ -86,5 +87,17 @@ class JournalsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * Fetch ledgers for select
+     */
+    public function journal_ledgers()
+    {
+        $accounts = Account::where('is_manual_journal', 1)->with(['accountType' => function ($q) {
+            $q->select('id', 'category')->get();
+        }])->get();
+
+        return response()->json($accounts);
     }
 }
