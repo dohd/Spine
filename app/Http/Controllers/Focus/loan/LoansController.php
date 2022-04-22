@@ -124,7 +124,7 @@ class LoansController extends Controller
     public function pay_loans()
     {
         $last_paidloan = Paidloan::orderBy('id', 'DESC')->first(['tid']);
-        $accounts = Account::where('account_type_id', 6)->get(['id', 'holder', 'account_type_id']);
+        $accounts = Account::whereIn('account_type_id', [6, 3])->get(['id', 'holder', 'account_type_id']);
         $payment_modes = ['Cash', 'Bank Transfer', 'Cheque', 'Mpesa', 'Card' ];
 
         return new ViewResponse('focus.loans.pay_loans', compact('last_paidloan', 'accounts', 'payment_modes'));
@@ -137,7 +137,7 @@ class LoansController extends Controller
     {
         // extract input fields
         $data = $request->only([
-            'lender_id', 'bank_id', 'tid', 'date', 'payment_mode', 'amount', 'ref'
+            'lender_id', 'bank_id', 'tid', 'date', 'payment_mode', 'amount', 'ref', 'interest_id', 'penalty_id'
         ]);
         $data_items = $request->only(['loan_id', 'paid', 'interest', 'penalty']);
 

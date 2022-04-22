@@ -180,22 +180,24 @@ class LoanRepository extends BaseRepository
 
         // debit account income (loan interest)
         $interest = $result->items->sum('interest');
-        $account = Account::where('system', 'loan_interest')->first(['id']);
-        $dr_data_2 = array_replace($cr_data, [
-            'account_id' =>  $account->id,
-            'debit' => $result['amount'],
-        ]);
-        if ($interest) Transaction::create($dr_data_2);
+        if ($interest && $result->interest_id) {
+            $dr_data_2 = array_replace($cr_data, [
+                'account_id' =>  $result->interest_id,
+                'debit' => $result['amount'],
+            ]);
+            Transaction::create($dr_data_2);
+        } 
 
         // debit account income (loan penalty)
         $penalty = $result->items->sum('penalty');
-        $account = Account::where('system', 'loan_penalty')->first(['id']);
-        $dr_data_3 = array_replace($cr_data, [
-            'account_id' =>  $account->id,
-            'debit' => $result['amount'],
-        ]);
-        if ($penalty) Transaction::create($dr_data_3);
-        
+        if ($penalty && $result->penalty_id) {
+            $dr_data_3 = array_replace($cr_data, [
+                'account_id' =>  $result->penalty_id,
+                'debit' => $result['amount'],
+            ]);
+            Transaction::create($dr_data_3);
+        } 
+
         // update account ledgers debit and credit totals
         aggregate_account_transactions();    
     }

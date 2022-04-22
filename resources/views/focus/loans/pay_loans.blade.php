@@ -39,25 +39,6 @@
                                     {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
                                 </div>
                             </div> 
-                                                                                                                                 
-                        </div> 
-
-                        <div class="form-group row">  
-                            <div class="col-3">
-                                <label for="paid_from">Paid From</label>
-                                <select name="bank_id" id="" class="form-control" required>
-                                   <option value="">-- Select Bank --</option>
-                                    @foreach ($accounts as $row)
-                                        <option value="{{ $row->id }}">{{ $row->holder }}</option>
-                                    @endforeach
-                                </select>
-                            </div>                             
-                            <div class="col-2">
-                                <label for="amount" class="caption">Amount (Ksh.)</label>
-                                <div class="input-group">
-                                    {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
-                                </div>
-                            </div>                              
                             <div class="col-2">
                                 <label for="payment_mode">Payment Mode</label>
                                 <select name="payment_mode" class="form-control" required>
@@ -66,7 +47,50 @@
                                         <option value="{{ $val }}">{{ $val }}</option>
                                     @endforeach
                                 </select>
-                            </div> 
+                            </div>                                                                                                                                  
+                        </div> 
+
+                        <div class="form-group row">  
+                            <div class="col-3">
+                                <label for="paid_from">Paid From</label>
+                                <select name="bank_id" id="" class="form-control" required>
+                                   <option value="">-- Select Bank --</option>
+                                    @foreach ($accounts as $row)
+                                        @if ($row->account_type_id == 6)
+                                            <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>                             
+                            <div class="col-2">
+                                <label for="amount" class="caption">Amount (Ksh.)</label>
+                                <div class="input-group">
+                                    {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
+                                </div>
+                            </div>    
+                            <div class="col-2">
+                                <label for="interest_account">Interest Account</label>
+                                <select name="interest_id" id="interest" class="form-control">
+                                   <option value="">-- Select Bank --</option>
+                                    @foreach ($accounts as $row)
+                                        @if ($row->account_type_id == 3)
+                                            <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="penalty_account">Penalty Account</label>
+                                <select name="penalty_id" id="penalty" class="form-control">
+                                   <option value="">-- Select Bank --</option>
+                                    @foreach ($accounts as $row)
+                                        @if ($row->account_type_id == 3)
+                                            <option value="{{ $row->id }}">{{ $row->holder }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>                          
+                            
                             <div class="col-2">
                                 <label for="reference" class="caption">Reference</label>
                                 <div class="input-group">
@@ -146,10 +170,14 @@
     });
 
     // On adding paid values
-    $('#loansTbl').on('change', '.paid', function() {
-        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
-        const paid = $(this).val().replace(/,/g, '');
-        if (paid > amount) $(this).val(amount.toLocaleString());
+    $('#loansTbl').on('change', '.paid, .interest, .penalty', function() {
+        if ($(this).is('.paid')) {
+            const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
+            const paid = $(this).val().replace(/,/g, '');
+            if (paid > amount) $(this).val(amount.toLocaleString());
+        }
+        $('#interest').attr('required', false);
+        $('#penalty').attr('required', false);
         calcTotal();
     });
 
@@ -173,7 +201,6 @@
 
     // load bills
     $('#lender').change(function() {
-        // ajax call
         $.ajax({
             url: "{{ route('biller.loans.lender_loans') }}?id=" + $(this).val(),
             success: result => {
@@ -187,9 +214,7 @@
     });
 
     // On deposit change
-    $('#amount').focus(function() {
-        if (!$('#lender').val()) $(this).blur();
-    });
+    $('#amount').focus(function() { if (!$('#lender').val()) $(this).blur();  });
     $('#amount').change(function(e) {
         let amountSum = 0;
         let depoSum = 0;
@@ -198,8 +223,8 @@
         $('#loansTbl tbody tr').each(function(i) {
             if ($('#loansTbl tbody tr:last').index() == i) return;
             const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
-            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
-            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
+            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString()).change();
+            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString()).change();
             else $(this).find('.paid').val(0);
             const paid = $(this).find('.paid').val().replace(/,/g, '');
             depo -= amount;
@@ -219,6 +244,11 @@
             const paid = $(this).find('.paid').val().replace(/,/g, '');
             amountSum += amount * 1;
             depoSum += paid * 1;
+
+            const interest = $(this).find('.interest').val();
+            if (interest) $('#interest').attr('required', true);
+            const penalty = $(this).find('.penalty').val();
+            if (penalty) $('#penalty').attr('required', true);
         });
         $('#amount_ttl').val(parseFloat(amountSum.toFixed(2)).toLocaleString());
         $('#deposit_ttl').val(parseFloat(depoSum.toFixed(2)).toLocaleString());
