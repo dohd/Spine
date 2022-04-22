@@ -54,8 +54,11 @@
     function select2Config() {
         return {
             ajax: {
-                url: "{{ route('biller.journals.journal_ledgers') }}",
-                quietMillis: 50,
+            url: "{{ route('biller.journals.journal_ledgers') }}",
+            dataType: 'json',
+            type: 'POST',
+            quietMillis: 50,
+            data: ({term}) => ({keyword: term}),
                 processResults: data => {
                     const results = data
                         .map(v => ({id: v.id, text: v.holder + ' - ' + v.account_type.category}))

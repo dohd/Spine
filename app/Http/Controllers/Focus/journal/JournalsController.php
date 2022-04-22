@@ -120,7 +120,11 @@ class JournalsController extends Controller
      */
     public function journal_ledgers()
     {
-        $accounts = Account::where('is_manual_journal', 1)->with(['accountType' => function ($q) {
+        $k = request('keyword');
+
+        $accounts = Account::where('is_manual_journal', 1)
+        ->where('holder', 'LIKE', '%'. $k .'%')
+        ->with(['accountType' => function ($q) {
             $q->select('id', 'category')->get();
         }])->get();
 
