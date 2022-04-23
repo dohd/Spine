@@ -20,13 +20,16 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- skill row template -->
                         <tr>
                             <td>
                                 <select class="form-control type" name="skill[]" id="skill-0" required>
                                     <option value="">-- Select Skill --</option>                        
-                                    <option value="casual">Casual</option>
-                                    <option value="contract">Contract</option>
-                                    <option value="outsourced">Outsourced</option>
+                                    @foreach (['casual', 'contract', 'outsourced'] as $val)
+                                        <option value="{{ $val }}">
+                                            {{ ucfirst($val) }}
+                                        </option>    
+                                    @endforeach 
                                 </select>
                             </td>
                             <td><input type="number" class="form-control chrg" name="charge[]" id="charge-0" required readonly></td>
@@ -36,6 +39,29 @@
                             <td class="text-center"><button type="button" class="btn btn-danger btn-sm rem"><i class="fa fa-trash"></i></button></td>
                             <input type="hidden" name="skill_id[]" id="skillid-0">
                         </tr>  
+                        <!-- edit quote or pi skill row -->
+                        @isset($quote)
+                            @foreach ($quote->skill_items as $k => $item)
+                            <tr>
+                                <td>
+                                    <select class="form-control type" name="skill[]" id="skill-{{$k}}" required>
+                                        <option value="">-- Select Skill --</option> 
+                                        @foreach (['casual', 'contract', 'outsourced'] as $val)
+                                            <option value="{{ $val }}" {{ $val == $item->skill ? 'selected' : ''}}>
+                                                {{ ucfirst($val) }}
+                                            </option>    
+                                        @endforeach                  
+                                    </select>
+                                </td>
+                                <td><input type="number" class="form-control chrg" name="charge[]" value="{{ $item->charge }}" id="charge-{{$k}}" required readonly></td>
+                                <td><input type="number" class="form-control hrs" name="hours[]" value="{{ $item->hours }}" id="hours-{{$k}}" required></td>               
+                                <td><input type="number" class="form-control tech" name="no_technician[]" value="{{ $item->no_technician }}" id="notech-{{$k}}" required></td>
+                                <td class="text-center"><span class="amount">0</span></td>
+                                <td class="text-center"><button type="button" class="btn btn-danger btn-sm rem"><i class="fa fa-trash"></i></button></td>
+                                <input type="hidden" name="skill_id[]" value="{{ $item->id }}" id="skillid-{{$k}}">
+                            </tr> 
+                            @endforeach
+                        @endisset
                     </tbody>
                 </table>                
                 <div class="row">
