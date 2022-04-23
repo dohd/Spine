@@ -151,13 +151,15 @@ class QuotesController extends Controller
             'id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
             'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 
         ]);
+        $skill_items = $request->only(['skill_id', 'skill', 'charge', 'hours', 'no_technician' ]);
 
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
 
         $data_items = modify_array($data_items);
+        $skill_items = modify_array($skill_items);
 
-        $result = $this->repository->update($quote, compact('data', 'data_items'));
+        $result = $this->repository->update($quote, compact('data', 'data_items', 'skill_items'));
 
         $route = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.updated');
