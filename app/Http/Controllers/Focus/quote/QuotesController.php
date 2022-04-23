@@ -66,26 +66,7 @@ class QuotesController extends Controller
      */
     public function index(ManageQuoteRequest $request)
     {
-        $input = $request->only('rel_type', 'rel_id');
-        
-        $segment = array();
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-            }
-        }
-
-        return new ViewResponse('focus.quotes.index', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.quotes.index');
     }
 
     /**
@@ -118,13 +99,15 @@ class QuotesController extends Controller
             'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
             'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 
         ]);
-
+        $skill_items = $request->only(['skill', 'charge', 'hours', 'no_technician' ]);
+            
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
 
         $data_items = modify_array($data_items);
+        $skill_items = modify_array($skill_items);
 
-        $result = $this->repository->create(compact('data', 'data_items'));
+        $result = $this->repository->create(compact('data', 'data_items', 'skill_items'));
 
         $route = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.created');
