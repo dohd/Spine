@@ -11,6 +11,7 @@ use App\Models\items\QuoteItem;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
 use App\Models\project\Budget;
+use App\Models\project\BudgetSkillset;
 use App\Models\project\ProjectQuote;
 use App\Models\term\Term;
 use App\Models\verifiedjcs\VerifiedJc;
@@ -20,6 +21,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function skill_items(Type $var = null)
+    {
+        return $this->hasMany(BudgetSkillset::class);
+    }
+
     public function invoice_item()
     {
         return $this->hasOne(InvoiceItem::class);
