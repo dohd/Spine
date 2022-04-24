@@ -1,6 +1,6 @@
 @extends('core.layouts.app')
 @php
-    $quote_type = $quote->bank_id ? 'PI' : 'Quote';
+    $quote_type = $quote->bank_id ? 'Proforma Invoice' : 'Quote';
 @endphp
 
 @section('title', $quote_type . ' Approval')
@@ -19,11 +19,11 @@
             </button>
         </div>
 
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
                 <h4 class="content-header-title">{{ $quote_type }} Approval</h4>
             </div>
-            <div class="content-header-right col-md-6 col-12">
+            <div class="content-header-right col-6">
                 <div class="media width-250 float-right">
                     <div class="media-body media-right text-right">
                         @include('focus.quotes.partials.quotes-header-buttons')
@@ -86,7 +86,7 @@
                                 <div class="col">
                                     <br><hr>
                                     <p class="text-danger">{{ $quote->notes }}</p>
-                                    <p>Quote Date: {{ dateFormat($quote->date) }}</p>
+                                    <p>{{ $quote->bank_id ? 'PI' : 'Quote' }} Date: {{ dateFormat($quote->date) }}</p>
                                 </div>
                             </div>
                         </div>

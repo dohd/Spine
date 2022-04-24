@@ -96,13 +96,18 @@ class QuotesTableController extends Controller
                 return $quote->verified . ':; <br>' . $tid;
             })
             ->addColumn('actions', function ($quote) {
+                $action_buttons = $quote->action_buttons;
+                if (request('page') == 'pi') {
+                    $name = 'biller.quotes.show';
+                    $action_buttons = str_replace(route($name, $quote), route($name, [$quote, 'page=pi']), $action_buttons);
+                }
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-                $copy_text = ($quote->bank_id) ? 'PI Copy' : 'Quote Copy';
+                $copy_text = $quote->bank_id ? 'PI Copy' : 'Quote Copy';
                 $task = $quote->bank_id ? 'page=pi&task=pi_to_pi' : 'task=quote_to_quote';
 
                 return '<a href="'.route('biller.print_quote', [$quote->id, 4, $valid_token, 1]).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
                     .'<a href="'.route('biller.quotes.edit', [$quote, $task]).'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="'. $copy_text .'"><i class="fa fa-clone" aria-hidden="true"></i></a> '
-                    .$quote->action_buttons;
+                    .$action_buttons;
             })
             ->make(true);
     }

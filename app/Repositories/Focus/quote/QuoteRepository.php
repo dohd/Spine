@@ -35,7 +35,7 @@ class QuoteRepository extends BaseRepository
         $q = $this->query();
         
         // distinguish pi from quote
-        if (request('pi_page') == 1) $q->where('bank_id', '>', 0);
+        if (request('page') == 'pi') $q->where('bank_id', '>', 0);
         else $q->where('bank_id', 0);
         
         if (request('start_date') && request('end_date')) {

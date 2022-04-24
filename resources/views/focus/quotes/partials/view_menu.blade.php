@@ -1,26 +1,20 @@
 @php
-    $query_str = request()->getQueryString();
-    $edit_link = ($query_str == 'page=pi') ? route('biller.quotes.edit', [$quote, $query_str]) : route('biller.quotes.edit', $quote);
-    $copy_link = $quote->bank_id ? route('biller.quotes.edit', [$quote, 'task=pi_to_quote']) : route('biller.quotes.edit', [$quote, 'page=pi&task=quote_to_pi']);
-    $valid_token = token_validator('', 'q'.$quote->id . $quote->tid, true);
+    $name = 'biller.quotes.edit';
+    $edit_link = request('page') == 'pi' ? route($name, [$quote, 'page=pi']) : route($name, $quote);
+    $copy_link = $quote->bank_id ? route($name, [$quote, 'task=pi_to_quote']) : route($name, [$quote, 'page=pi&task=quote_to_pi']);
+    $valid_token = token_validator('', 'q' . $quote->id . $quote->tid, true);
 @endphp
 <div class="row">
     <div class="col">
-        <a href="{{ $edit_link }}" class="btn btn-warning mb-1">
-            <i class="fa fa-pencil"></i> Edit
-        </a>
-        <a href="{{ $copy_link }}" class="btn btn-cyan mb-1">
-            <i class="fa fa-clone" aria-hidden="true"></i></i>
+        <a href="{{ $edit_link }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
+        <a href="{{ $copy_link }}" class="btn btn-cyan mb-1"><i class="fa fa-clone"></i></i>
             {{ $quote->bank_id ? 'Copy to Quote' : 'Copy to PI' }}            
         </a>
-
         @if (access()->allow('quote-delete'))
-            <a class="btn btn-danger mb-1 quote-delete" href="javascript:void(0);">
-                <i class="fa fa-trash"></i> Delete
+            <a class="btn btn-danger mb-1 quote-delete" href="javascript:void(0);"><i class="fa fa-trash"></i> Delete
                 {{ Form::open(['route' => ['biller.quotes.destroy', $quote], 'method' => 'delete']) }} {{ Form::close() }}               
             </a>
         @endif
-        
         <div class="btn-group">
             <button type="button" class="btn btn-large btn-blue mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-check"></i> {{trans('general.change_status')}}
@@ -31,7 +25,6 @@
                 </a>
             </div>
         </div>
-
         @if ($quote->status == 'approved')
             <a href="#pop_model_4" data-toggle="modal" data-remote="false" class="btn btn-large btn-cyan mb-1" title="Add LPO">
                 <span class="fa fa-retweet"></span> Add LPO
@@ -39,7 +32,6 @@
         @else
             <button class="btn btn-large btn-cyan mb-1" disabled><span class="fa fa-retweet"></span> Add LPO</button>
         @endif
-
         <div  class="d-inline-block ml-5">
             <div class="btn-group">
                 <button type="button" class="btn btn-facebook dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -62,10 +54,11 @@
                     </a>
                 </div>
             </div>
-            
+            {{-- 
             <a href="{{ route('biller.view_bill', [$quote->id, 4, $valid_token, 0]) }}" class="btn btn-blue-grey mb-1">
                 <i class="fa fa-globe"></i> {{trans('general.preview')}}
             </a>
+            --}}
         </div>
     </div>
 </div>

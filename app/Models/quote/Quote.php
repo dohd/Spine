@@ -11,8 +11,8 @@ class Quote extends Model
 {
     use ModelTrait,
         QuoteAttribute,
-        QuoteRelationship; 
-    
+        QuoteRelationship;
+
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,

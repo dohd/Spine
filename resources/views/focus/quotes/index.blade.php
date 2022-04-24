@@ -11,11 +11,11 @@
 @section('content')
 <div>
     <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
                 <h4 class="content-header-title">{{ $quote_label }}</h4>
             </div>
-            <div class="content-header-right col-md-6 col-12">
+            <div class="content-header-right col-6">
                 <div class="media width-250 float-right">
                     <div class="media-body media-right text-right">
                         @include('focus.quotes.partials.quotes-header-buttons')
@@ -58,7 +58,8 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
+                                    <td colspan="8" class="text-center text-success font-large-1">
+                                        <i class="fa fa-spinner spinner"></i></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -73,20 +74,7 @@
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    const time = @json(config('master.delay'));
-    setTimeout(() => draw_data(), time);
-
-    // Update view button link td after dataTable has been drawn
-    setTimeout(() => {
-        const queryString = location.search;
-        $('#quotes-table tbody tr').each(function() {
-            const $a = $(this).find('td').eq(9).find('a').eq(2);
-            const href = $a.attr('href');
-            if (queryString.includes('page=pi')) {
-                $a.attr('href', href + queryString);
-            }
-        });
-    }, time+300);
+    setTimeout(() => draw_data(), @json(config('master.delay')));
 
     // on clicking search by date
     $('#search').click(function() {
@@ -100,30 +88,25 @@
     });
 
     // Initialize datepicker
-    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     $('#start_date').datepicker('setDate', new Date());
     $('#end_date').datepicker('setDate', new Date());
 
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
-    });
-
     function draw_data(start_date = '', end_date = '') {
-        const tableLan = {@lang('datatable.strings')};
-
+        const language = {@lang('datatable.strings')};
         const table = $('#quotes-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLan,
+            language,
             ajax: {
                 url: "{{ route('biller.quotes.get') }}",
                 type: 'post',
                 data: {
                     start_date: start_date,
                     end_date: end_date,
-                    pi_page: location.href.includes('page=pi') ? 1 : 0
+                    page: location.href.includes('page=pi') ? 'pi' : 0
                 },
             },
             columns: [{

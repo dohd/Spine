@@ -39,6 +39,7 @@
                             <td class="text-center"><button type="button" class="btn btn-danger btn-sm rem"><i class="fa fa-trash"></i></button></td>
                             <input type="hidden" name="skill_id[]" id="skillid-0">
                         </tr>  
+                        
                         <!-- edit quote or pi skill row -->
                         @isset($quote)
                             @foreach ($quote->skill_items as $k => $item)

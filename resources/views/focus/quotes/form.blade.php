@@ -18,11 +18,11 @@
                             @endphp
                             <option 
                                 value="{{ $lead->id }}" 
-                                {{ $lead->id == @$quote->lead_id ? 'selected' : '' }}
                                 title="{{ $lead->title }}" 
                                 client_ref="{{ $lead->client_ref }}"
                                 customer_id="{{ $lead->client_id }}"
                                 branch_id="{{ $lead->branch_id }}"
+                                {{ $lead->id == @$quote->lead_id ? 'selected' : '' }}
                             >
                                 {{ $tid }} - {{ $name }} - {{ $lead->title }}
                             </option>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             <div class="col-3">
-                <label for="serial_no" >{{trans('general.serial_no')}} </label>
+                <label for="serial_no" >{{ trans('general.serial_no') }}.</label>
                 <div class="input-group">
                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                     @php
@@ -216,45 +216,30 @@
         </div>
     @endif
 </div>
-
 <!-- quotes item table -->
 @include('focus.quotes.partials.quote-items-table')
-
 <!-- footer -->
 <div class="form-group row">
     <div class="col-9">
-        <button type="button" class="btn btn-success" aria-label="Left Align" id="addProduct">
-            <i class="fa fa-plus-square"></i> Add Product
-        </button>
-        <button type="button" class="btn btn-primary" aria-label="Left Align" id="addTitle">
-            <i class="fa fa-plus-square"></i> Add Title
-        </button>
+        <button type="button" class="btn btn-success" id="addProduct"><i class="fa fa-plus-square"></i> Add Product</button>
+        <button type="button" class="btn btn-primary" id="addTitle"><i class="fa fa-plus-square"></i> Add Title</button>
         <button type="button" class="btn btn-secondary ml-1" data-toggle="modal" data-target="#skillModal" id="addSkill">
-            <i class="fa fa-plus-square"></i> Add Skillset
+            <i class="fa fa-wrench"></i> Labour
         </button>
     </div>
-
     <div class="col-3">
         <label>SubTotal ({{ config('currency.symbol') }})</label>
-        <div class="input-group">
-            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
-        </div>
+        <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
         <label id="tax-label">{{ trans('general.total_tax') }} ({{ config('currency.symbol') }})</label>
-        <div class="input-group">
-            <input type="text" name="tax" id="tax" class="form-control" readonly>
-        </div>
+        <input type="text" name="tax" id="tax" class="form-control" readonly>
         <label>
             {{trans('general.grand_total')}} ({{ config('currency.symbol') }})
             <b class="text-primary">
                 (Profit: &nbsp;<span class="text-dark profit">0</span>)
             </b>
         </label>
-        <div class="input-group">
-            <input type="text" name="total" class="form-control" id="total" readonly>
-        </div>
+        <input type="text" name="total" class="form-control" id="total" readonly>
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg mt-1']) }}
     </div>
 </div>
-
-<!-- skillset modal -->
 @include('focus.quotes.partials.skillset-modal')
