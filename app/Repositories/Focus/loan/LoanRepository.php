@@ -164,7 +164,7 @@ class LoanRepository extends BaseRepository
             'tr_ref' => $result['id'],
             'user_type' => 'employee',
             'is_primary' => 1,
-            'note' => $result['payment_mode'] . ' - ' . $result['doc_ref'],
+            'note' => $result['payment_mode'] . ' - ' . $result['ref'],
         ];
         Transaction::create($cr_data);
 
