@@ -101,7 +101,7 @@
 
                         <table class="table-responsive tfr my_stripe_single" id="loansTbl">
                             <thead>
-                                <tr class="item_header bg-gradient-directional-blue white">
+                                <tr class="bg-gradient-directional-blue white">
                                     <th width="10%" class="text-center">Date</th>
                                     <th width="5%">Loan Number</th>
                                     <th width="35%" class="text-center">Note</th>
@@ -205,7 +205,6 @@
             url: "{{ route('biller.loans.lender_loans') }}?id=" + $(this).val(),
             success: result => {
                 $('#loansTbl tbody tr:not(:eq(-1))').remove();
-                if (!result.length) return;
                 result.forEach((v, i) => {
                     $('#loansTbl tbody tr:eq(-1)').before(loanRow(v, i));
                 });
