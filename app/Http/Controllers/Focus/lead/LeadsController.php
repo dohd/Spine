@@ -35,13 +35,13 @@ class LeadsController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var ProductcategoryRepository
+     * @var LeadRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param ProductcategoryRepository $repository ;
+     * @param LeadRepository $repository ;
      */
     public function __construct(LeadRepository $repository)
     {
