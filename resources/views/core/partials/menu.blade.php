@@ -637,7 +637,7 @@
                     </li>
                     @endauth
                     @permission('transaction-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-handshake-o"></i>Loans
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-briefcase"></i>Loans
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.loans.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Loan
@@ -649,6 +649,19 @@
                             <li><a class="dropdown-item" href="{{ route('biller.loans.pay_loans') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Pay Loans
                                 </a>
                             </li>
+                        </ul>
+                    </li>
+                    @endauth
+                    @permission('transaction-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-handshake-o"></i>Reconciliations
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.reconciliations.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Reconciliation
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.reconciliations.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Reconciliations
+                                </a>
+                            </li>                         
                         </ul>
                     </li>
                     @endauth

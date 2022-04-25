@@ -172,6 +172,13 @@ Route::group(['namespace' => 'journal'], function () {
     Route::post('journals/get', 'JournalsTableController')->name('journals.get');
 });
 
+Route::group(['namespace' => 'reconciliation'], function () {
+    Route::get('reconciliations/ledger_transactions', 'ReconciliationsController@ledger_transactions')->name('reconciliations.ledger_transactions');
+    Route::resource('reconciliations', 'ReconciliationsController');
+    //For Datatable
+    Route::post('reconciliations/get', 'ReconciliationsTableController')->name('reconciliations.get');
+});
+
 
 Route::group(['namespace' => 'makepayment'], function () {
     Route::resource('makepayments', 'MakepaymentsController');
