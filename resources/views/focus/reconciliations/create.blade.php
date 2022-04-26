@@ -6,10 +6,10 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Reconciliation Management</h4>
+            <h4 class="content-header-title">Reconciliations Management</h4>
         </div>
         <div class="content-header-right col-6">
-            <div class="media width-250 float-right mr-3">
+            <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.reconciliations.partials.reconciliations-header-buttons')
                 </div>
@@ -21,7 +21,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.reconciliations.store', 'method' => 'POST', 'id' => 'reconForm']) }}
+                    {{ Form::open(['route' => 'biller.reconciliations.store', 'method' => 'POST', 'id' => 'reconciliation']) }}
                         @include('focus.reconciliations.form')
                     {{ Form::close() }}
                 </div>
@@ -32,25 +32,23 @@
 @endsection
 
 @section('after-scripts')
-{{ Html::script('focus/js/select2.min.js') }}
 <script>
     $('.datepicker')
     .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date())
 
-    // check equality between system and closing balance
-    $('#reconForm').submit(function(e) {
-        const system = $('#systemBal').val().replace(/,/g, '')*1;
-        const close = $('#closeBal').val().replace(/,/g, '')*1;
-        if (system != close) {
-            e.preventDefault();
-            return alert('System balance must be equivalent to Closing balance !');
-        }
+    // on form submit
+    $('#reconciliation').submit(function(e) {
         $('#startDate').attr('disabled', false);
+        const systemBal = $('#systemBal').val().replace(/,/g, '');
+        const closeBal = $('#closeBal').val().replace(/,/g, '');
+        if (systemBal == closeBal * 1) return;
+        e.preventDefault();
+        alert('System balance must be equivalent to Closing balance !');
     });
 
     // transaction row
-    function tranxRow(v, i) {
+    function tranxRow(v) {
         return `
             <tr>
                 <td class="text-center">${new Date(v.tr_date).toDateString()}</td>
@@ -68,15 +66,22 @@
     $('#bank').change(function() {
         $.ajax({
             url: "{{ route('biller.reconciliations.ledger_transactions') }}?id=" + $(this).val(),
-            success: result => {
+            success: data => {
                 $('#tranxTbl tbody tr').remove();
-                result.forEach((v, i) => {
-                    $('#tranxTbl tbody').append(tranxRow(v, i));
-                });
+                data.forEach(v => $('#tranxTbl tbody').append(tranxRow(v)));
             }
         });
     });
 
+    // On next reconciliation
+    const obj = @json($reconciliation);
+    if (obj && obj.tid > 0) {
+        $('#startDate').datepicker('setDate', new Date(obj.end_date)).attr('disabled', 'true');
+        $('#systemBal').val(parseFloat(obj.system_amount).toLocaleString());
+        $('#openBal').val(parseFloat(obj.close_amount).toLocaleString()).attr('readonly', true);
+    }
+
+    // on checking a checkbox
     let balance = 0;
     let debitTtl = 0;
     let creditTtl = 0;
@@ -94,10 +99,14 @@
             debitTtl -= debit;
             if (credit) balance -= credit;
             else if (debit) balance += debit;
-        }            
-        $('#systemBal').val(balance.toLocaleString());
+        }
         $('#debitTtl').val(debitTtl.toLocaleString());
         $('#creditTtl').val(creditTtl.toLocaleString());
+        if (!obj) $('#systemBal').val(balance.toLocaleString()); 
+        else {
+            const prev = parseFloat(obj.system_amount);
+            $('#systemBal').val((prev + balance).toLocaleString());  
+        }
     });
 
     // check all transactions
@@ -105,13 +114,5 @@
         if ($(this).is(':checked')) $('.check').prop('checked', true).change();
         else $('.check').prop('checked', false).change();
     });
-
-    // On next reconciliation
-    const obj = @json($reconciliation);
-    if (obj && obj.tid > 0) {
-        $('#startDate').datepicker('setDate', new Date(obj.end_date)).attr('disabled', 'true');
-        $('#systemBal').val(parseFloat(obj.system_amount).toLocaleString());
-        $('#openBal').val(parseFloat(obj.close_amount).toLocaleString()).attr('readonly', true);
-    }
 </script>
 @endsection
