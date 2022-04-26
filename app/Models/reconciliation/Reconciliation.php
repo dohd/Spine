@@ -2,12 +2,14 @@
 
 namespace App\Models\reconciliation;
 
+use App\Models\ModelTrait;
+use App\Models\reconciliation\Traits\ReconciliationAtrribute;
 use App\Models\reconciliation\Traits\ReconciliationRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class Reconciliation extends Model
 {
-    use ReconciliationRelationship;
+    use ModelTrait, ReconciliationAtrribute, ReconciliationRelationship;
 
     /**
      * The database table used by the model.
