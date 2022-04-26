@@ -60,7 +60,7 @@ class JournalsTableController extends Controller
                 return number_format($journal->debit_ttl, 2);
             })
             ->addColumn('actions', function ($journal) {
-                return '<a href="' . route('biller.journals.show', $journal) . '" class="btn btn-primary round"><i class="fa fa-eye"></i></a> '; 
+                return $journal->action_buttons;
             })
             ->make(true);
     }

@@ -10,10 +10,6 @@ trait JournalAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return '
-         ' . $this->getViewButtonAttribute("business_settings", "biller.banks.show") . '
-                ' . $this->getEditButtonAttribute("business_settings", "biller.banks.edit") . '
-                ' . $this->getDeleteButtonAttribute("business_settings", "biller.banks.destroy") . '
-                ';
+        return $this->getViewButtonAttribute("business_settings", "biller.journals.show");
     }
 }
