@@ -22,11 +22,13 @@
             <div class="card-body">
                 @php
                     $tr = $transaction;
-                    $tr_types = ['BILL' => 'BILL', 'PMT' => 'PAYMENT', 'INV' => 'INVOICE'];
+                    $tr_types = ['BILL' => 'BILL', 'PMT' => 'PAYMENT', 'INV' => 'INVOICE', 'loan' => 'LOAN', 'CHRG' => 'CHARGE'];
                     $tr_type_urls = [
                         'BILL' => $tr->bill ? route('biller.bills.show', $tr->bill->id) : '#',
                         'PAYMENT' => route('biller.show_transaction_payment', $tr->id),
                         'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice->id) : '#',
+                        'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan->id) : '#',
+                        'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge->id) : '#',
                     ];
                     $tr_details = [
                         trans('transactions.account_id') => $tr->account['holder'],
