@@ -39,7 +39,7 @@
                 </tbody>
             </table>
 
-            <div class="table-responsive mt-3">        
+            <div class="table-responsive">        
                 <table id="ledgerTbl" class="table">
                     <thead>
                         <tr class="bg-gradient-directional-blue white">
