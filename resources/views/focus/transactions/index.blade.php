@@ -106,8 +106,8 @@
     });    
 
     function draw_data() {
-        const p_rel_id = @json(@$input['rel_id']);
-        const p_rel_type = @json(@$input['rel_type']);
+        const rel_id = @json(@$input['rel_id']);
+        const rel_type = @json(@$input['rel_type']);
         const language = {
             @lang('datatable.strings')
         };
@@ -120,7 +120,7 @@
             ajax: {
                 url: '{{ route("biller.transactions.get") }}',
                 type: 'post',
-                data: {p_rel_id, p_rel_type},
+                data: {rel_id, rel_type},
             },
             columns: [{
                     data: 'DT_Row_Index',
