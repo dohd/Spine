@@ -9,29 +9,15 @@
             <strong>Budget Limit Exceeded!</strong> You should check on your list items.
         </div>
     </div>
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Stock Issuance</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    <div class="btn-group">
-                        <a href="{{ route('biller.stockissuance.index') }}" class="btn btn-primary">
-                            <i class="ft-list"></i> List
-                        </a>&nbsp;&nbsp;
-                        @php
-                            $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-                            $budget_url = route('biller.print_budget', [$quote->id, 4, $valid_token, 1]);
-                            $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
-                        @endphp
-                        <a href="{{ $budget_url }}" class="btn btn-purple" target="_blank">
-                            <i class="fa fa-print"></i> Store
-                        </a>&nbsp;
-                        <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
-                            <i class="fa fa-print"></i> Technician
-                        </a> 
-                    </div>
+                    @include('focus.stockissuance.partials.issuance-header-buttons')
                 </div>
             </div>
         </div>
@@ -173,12 +159,11 @@
                         </div>                              
                     </div>
                 </div>
-                
             </div>             
         </div>
     </div>
 </div>
-@include('focus.stockissuance.issuance_log');
+@include('focus.stockissuance.partials.issuelog_modal');
 @endsection
 
 @section('extra-scripts')

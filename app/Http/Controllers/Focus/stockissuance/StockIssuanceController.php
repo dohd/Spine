@@ -20,28 +20,7 @@ class StockIssuanceController extends Controller
      */
     public function index(Request $request)
     {
-        // extract input fields
-        $relshp_type = request('rel_type');
-        $relshp_id = request('rel_id');
-
-        $segment = array();
-        $words = array();
-        if ($relshp_type && $relshp_id) {
-            if ($relshp_type == 1) {
-                $segment = Customer::find($relshp_id);
-                $words['name'] = trans('customers.title');
-                $words['name_data'] = $segment->name;
-            }
-            else {
-                $segment = Hrm::find($relshp_id);
-                $words['name'] = trans('hrms.employee');
-                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-            }
-        }
-
-        $input = array($relshp_type, $relshp_id);
-
-        return view('focus.stockissuance.index', compact('input', 'segment', 'words'));
+        return view('focus.stockissuance.index');
     }
 
     /**
@@ -164,17 +143,7 @@ class StockIssuanceController extends Controller
      */
     public function post_issuedstock(Request $request)
     {
-        $items = Quote::find($request->id)->budget->items;
-
-        $stock_cost = 0;
-        foreach ($items as $item) {
-            $ttl_qty = $item->issuance_logs()->sum('issue_qty');
-            $stock_cost += ($item->price * $item->issue_qty);
-            print_log(json_encode($item, JSON_PRETTY_PRINT));
-        }
-
-        print_log('+++ Stock cost +++ '.$stock_cost);
-
+        // 
         return response()->json(['status' => 'Success', 'message' => 'Issued items successfully posted']);
     }
 
@@ -184,24 +153,17 @@ class StockIssuanceController extends Controller
     static function getForDataTable()
     {
         $q = Quote::query();
-        // Budgeted quotes
-        $quote_ids = Budget::get()->pluck('quote_id');
-        $q->whereIn('id', $quote_ids);
+        $q->whereHas('budget');
         
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
-        });
-
         if (request('start_date') && request('end_date')) {
-            $q->whereBetween('invoicedate', [
+            $q->whereBetween('date', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
 
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'branch_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'status', 'bank_id'
+            'id', 'notes', 'tid', 'customer_id', 'branch_id', 'lead_id', 'date', 'total', 'status', 'bank_id'
         ]);
     }
 

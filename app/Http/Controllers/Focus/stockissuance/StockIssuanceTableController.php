@@ -35,6 +35,7 @@ class StockIssuanceTableController extends Controller
         
         return Datatables::of($core)
             ->addIndexColumn()
+            ->escapeColumns(['id'])
             ->addColumn('notes', function($quote) {
                 return $quote->notes;
             })
@@ -46,10 +47,9 @@ class StockIssuanceTableController extends Controller
                 return $tid;               
             })
             ->addColumn('customer', function ($quote) {
-                if (isset($quote->customer) && isset($quote->branch)) {
+                if (isset($quote->customer) && isset($quote->branch)) 
                     return $quote->customer->name.' - '.$quote->branch->name;
-                }
-                
+                    
                 return $quote->lead->client_name;
             })
             ->addColumn('quote_date', function ($quote) {
@@ -70,11 +70,8 @@ class StockIssuanceTableController extends Controller
                 return '
                         <a href="'. route('biller.stockissuance.create', $quote->id) .'" class="btn btn-link" data-toggle="tooltip" data-placement="bottom" title="Issue">
                             <i class="fa fa-cubes text-primary fa-lg" aria-hidden="true"></i></a>
-                        <a href="javascript:void(0);" data-toggle="modal" data-target="#mergedLog" class="btn btn-link issued-stock" data-toggle="tooltip" data-placement="bottom" title="Issued-stock" data-id="'.$quote->id.'">
-                            <i class="fa fa-list fa-lg text-primary" aria-hidden="true"></i></a>
                     ';
             })
-            ->rawColumns(['actions'])
             ->make(true);
     }
 }
