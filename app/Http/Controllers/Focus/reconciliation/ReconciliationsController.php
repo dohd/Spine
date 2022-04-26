@@ -46,8 +46,14 @@ class ReconciliationsController extends Controller
     public function create()
     {
         // banks
-        $accounts = Account::where('account_type_id', 6)->get(['id', 'holder']);
+        $accounts = Account::where(['account_type_id' => 6])
+        ->whereIn('id', function ($q) {
+            $q->select('account_id')->distinct()->from('transactions')->where('reconciliation_id', 0);
+        })
+        ->get(['id', 'holder']);
+
         $reconciliation = Reconciliation::orderBy('id', 'DESC')->first();
+        // $reconciliation = null;
 
         return new ViewResponse('focus.reconciliations.create', compact('accounts', 'reconciliation'));
     }
@@ -77,9 +83,9 @@ class ReconciliationsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(ReconciliationRepository $reconcilliation)
+    public function show(Reconciliation $reconciliation)
     {
-        return new ViewResponse('focus.reconciliations.view', compact('reconcilliation'));
+        return new ViewResponse('focus.reconciliations.view', compact('reconciliation'));
     }
 
     /**
