@@ -4,27 +4,23 @@ namespace App\Http\Controllers\Focus\reconciliation;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
-use App\Repositories\Focus\reconcilliation\ReconciliationRepository;
+use App\Repositories\Focus\reconciliation\ReconciliationRepository;
 
-/**
- * Class BranchTableController.
- */
 class ReconciliationsTableController extends Controller
 {
     /**
      * variable to store the repository object
      * @var ReconciliationRepository
      */
-    protected $reconcilliation;
+    protected $reconciliation;
 
     /**
      * contructor to initialize repository object
-     * @param ReconciliationRepository $productcategory ;
+     * @param ReconciliationRepository $reconciliation ;
      */
-    public function __construct(ReconciliationRepository $reconcilliation)
+    public function __construct(ReconciliationRepository $reconciliation)
     {
-
-        $this->reconcilliation = $reconcilliation;
+        $this->reconciliation = $reconciliation;
     }
 
     /**
@@ -33,31 +29,31 @@ class ReconciliationsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->reconcilliation->getForDataTable();
+        $core = $this->reconciliation->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('account', function ($reconcilliation) {
-                return $reconcilliation->account->holder;
+            ->addColumn('account', function ($reconciliation) {
+                return $reconciliation->account->holder;
             })
-            ->addColumn('start_date', function ($reconcilliation) {
-                return dateFormat($reconcilliation->start_date);
+            ->addColumn('start_date', function ($reconciliation) {
+                return dateFormat($reconciliation->start_date);
             })
-            ->addColumn('end_date', function ($reconcilliation) {
-                return dateFormat($reconcilliation->end_date);
+            ->addColumn('end_date', function ($reconciliation) {
+                return dateFormat($reconciliation->end_date);
             })
-            ->addColumn('open_amount', function ($reconcilliation) {
-                return number_format($reconcilliation->open_amount, 2);
+            ->addColumn('open_amount', function ($reconciliation) {
+                return number_format($reconciliation->open_amount, 2);
             })
-            ->addColumn('close_amount', function ($reconcilliation) {
-                return number_format($reconcilliation->close_amount, 2);
+            ->addColumn('close_amount', function ($reconciliation) {
+                return number_format($reconciliation->close_amount, 2);
             })
-            ->addColumn('system_amount', function ($reconcilliation) {
-                return number_format($reconcilliation->system_amount, 2);
+            ->addColumn('system_amount', function ($reconciliation) {
+                return number_format($reconciliation->system_amount, 2);
             })
-            ->addColumn('actions', function ($reconcilliation) {
-                return;
+            ->addColumn('actions', function ($reconciliation) {
+                return $reconciliation->action_buttons;
             })
             ->make(true);
     }
