@@ -1,14 +1,14 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.transactions.management'))
+@section ('title', 'Transactions Management')
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="mb-0">{{ trans('labels.backend.transactions.management') }}</h4>
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Transactions Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.transactions.partials.transactions-header-buttons')
@@ -40,49 +40,22 @@
                         trans('transactions.credit') => amountFormat($segment->amount->sum('credit'))
                     ],
                 );
+
+                $rows = array();
+                if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
+                elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
+                elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
             @endphp
-            @if ($input['rel_type'] == 0)
-                @foreach ($model_details['tr_category'] as $key => $value)
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{ $key }}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{ $value }}</p>
-                        </div>
-                    </div>
-                @endforeach
-            @endif
-            @if ($input['rel_type'] == 9)
-                @foreach ($model_details['account'] as $key => $value)
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{ $key }}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{ $value }}</p>
-                        </div>
-                    </div>
-                @endforeach
-            @endif
-            @if ($input['rel_type'] && $input['rel_type'] < 9) 
-                @foreach ($model_details['customer'] as $key => $value)
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{ $key }}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>
-                                @if ($value == $words['url'])
-                                    {!! $value !!}
-                                @else
-                                    {{ $value }}
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                @endforeach                
-            @endif
+            <table id="modelsTbl" class="table table-md table-bordered zero-configuration" cellspacing="0" width="100%">
+                <tbody>
+                    @foreach ($rows as $key => $val)
+                        <tr>
+                            <th>{{ $key }}</th>
+                            <td>{!! $val !!} </td>
+                        </tr> 
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -92,7 +65,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="transactions-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="transactionsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
@@ -125,26 +98,25 @@
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
     });    
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     function draw_data() {
-        const tableLan = {
-            @lang('datatable.strings')
-        };
         const p_rel_id = @json(@$input['rel_id']);
         const p_rel_type = @json(@$input['rel_type']);
-
-        var dataTable = $('#transactions-table').dataTable({
+        const language = {
+            @lang('datatable.strings')
+        };
+        const dataTable = $('#transactionsTbl').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLan,
+            language,
             ajax: {
                 url: '{{ route("biller.transactions.get") }}',
                 type: 'post',
@@ -186,7 +158,7 @@
                 }
             ],
             order: [
-                [0, "asc"]
+                [0, "desc"]
             ],
             searchDelay: 500,
             dom: 'Blfrtip',
