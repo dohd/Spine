@@ -12,7 +12,6 @@
         {{ Form::text('note', null, ['class' => 'form-control round', 'required']) }}
     </div>
 </div>
-
 <div class="table-responsive">        
     <table id="ledgerTbl" class="table">
         <thead>
@@ -40,14 +39,14 @@
 </div>
 <div class="row">
     <div class="form-inline col-3 ml-auto">
-        <label for="debit_total">Debit Total</label>
+        <label for="debit_total">Debit Total:</label>
         <input type="text" class="form-control ml-2 mb-1" name="debit_ttl" id="debitTtl" readonly>
-        <label for="debit_total">Credit Total</label>
+        <label for="debit_total">Credit Total:</label>
         <input type="text" class="form-control ml-2" name="credit_ttl"  id="creditTtl" readonly>
     </div>
 </div>
 <div class="form-group row">
-    <div class="col-2 ml-auto mr-2">
-        {{ Form::submit('Create Journal', ['class' => 'btn btn-primary btn-lg block round mt-3']) }}
+    <div class="col-2 ml-auto mr-2 mt-1">
+        {{ Form::submit('Create Journal', ['class' => 'btn btn-primary btn-lg block round']) }}
     </div>
 </div>
