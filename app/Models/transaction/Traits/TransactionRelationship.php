@@ -4,14 +4,32 @@ namespace App\Models\transaction\Traits;
 
 use App\Models\bill\Bill;
 use App\Models\bill\Paidbill;
+use App\Models\charge\Charge;
 use App\Models\hrm\Hrm;
 use App\Models\invoice\PaidInvoice;
+use App\Models\loan\Loan;
+use App\Models\loan\Paidloan;
 
 /**
  * Class TransactionRelationship
  */
 trait TransactionRelationship
 {
+    public function charge()
+    {
+        return $this->belongsTo(Charge::class, 'tr_ref');
+    }
+
+    public function paidloan()
+    {
+        return $this->belongsTo(Paidloan::class, 'tr_ref');
+    }
+    
+    public function loan()
+    {
+        return $this->belongsTo(Loan::class, 'tr_ref');
+    }
+
     public function paidinvoice()
     {
         return $this->belongsTo(PaidInvoice::class, 'tr_ref');
