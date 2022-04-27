@@ -176,17 +176,13 @@ class PurchaseorderRepository extends BaseRepository
 
         $order_items = $input['order_items'];
         foreach ($order_items as $k => $item) {
-            $item = $item + [
+            if (!isset($item['qty'])) $item['qty'] = 0;
+            $order_items[$k] = array_replace($item, [
                 'grn_id' => $grn->id,
                 'ins' => $order['ins'],
                 'user_id' => $order['user_id'],
-            ];
-            $item['date'] = date_for_database($item['date']);
-            if (!$item['qty']) $item['qty'] = 0;
-            if ($item['grn_qty']) $item['grn_qty'] = $item['grn_qty'] + $item['qty'];
-            else $item['grn_qty'] = $item['qty'];
-
-            $order_items[$k] = $item;
+                'date' => date_for_database($item['date']),
+            ]);
         }
         GrnItem::insert($order_items);
 

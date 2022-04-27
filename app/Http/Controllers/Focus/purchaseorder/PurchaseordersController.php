@@ -192,7 +192,7 @@ class PurchaseordersController extends Controller
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $order_items = $request->only(['poitem_id', 'grn_qty', 'qty', 'dnote', 'date']);
+        $order_items = $request->only(['poitem_id', 'qty', 'dnote', 'date']);
 
         $order['purchaseorder_id'] = $purchaseorder->id;
         $order['ins'] = auth()->user()->ins;

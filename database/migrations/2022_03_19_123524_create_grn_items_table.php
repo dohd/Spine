@@ -17,7 +17,6 @@ class CreateGrnItemsTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('grn_id')->unsigned();
             $table->bigInteger('poitem_id')->unsigned();
-            $table->decimal('grn_qty', 16, 4);
             $table->decimal('qty', 16, 4);
             $table->string('dnote');
             $table->date('date');
