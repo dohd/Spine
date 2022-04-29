@@ -24,14 +24,13 @@ use App\Models\hrm\Hrm;
 use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\transaction\CreateResponse;
 use App\Repositories\Focus\transaction\TransactionRepository;
 use App\Http\Requests\Focus\transaction\ManageTransactionRequest;
 
 use App\Http\Requests\Focus\transaction\StoreTransactionRequest;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -130,24 +129,70 @@ class TransactionsController extends Controller
     {
         $result = $this->repository->delete($transaction);
 
-        $res = ['flash_success' => 'Transaction deleted successfully'];
-        if ($result) $res = ['flash_error' => 'Reconciled transaction cannot be deleted'];
+        $msg = ['flash_success' => 'Transaction deleted successfully'];
+        if (!$result) $msg = ['flash_error' => 'Reconciled transaction cannot be deleted'];
 
-        return redirect()->back()->with($res);
+        return redirect()->back()->with($msg);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Display the specified resource.
      *
-     * @param DeleteTransactionRequestNamespace $request
-     * @param App\Models\transaction\Transaction $transaction
-     * @return \App\Http\Responses\RedirectResponse
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
     public function show(Transaction $transaction, ManageTransactionRequest $request)
     {
         return new ViewResponse('focus.transactions.view', compact('transaction'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param App\Models\Transaction $transaction,
+     * @param EditProductcategoryRequestNamespace $request
+     * @return \App\Http\Responses\Focus\productcategory\EditResponse
+     */
+    public function edit(Transaction $transaction)
+    {
+        // 
+    }
+
+    /**
+     * Update the specified resource.
+     * 
+     * @param App\Models\Transaction $transaction
+     * @param EditProductcategoryRequestNamespace $request
+     * @return \App\Http\Responses\Focus\productcategory\EditResponse
+     */
+    public function update(Request $request, Transaction $transaction)
+    {
+        // extract input fields
+        $input = $request->only(['account_id', 'debit', 'credit', 'note']);
+        $input['user_id'] = auth()->user()->id;
+    
+        //Update the model using repository update method
+        $this->repository->update($transaction, $input);
+
+        return redirect()->back();
+    }
+
+    /**
+     * Search transaction account
+     */
+    public function account_search(Request $request)
+    {
+        $q = $request->keyword;
+        $accounts = Account::where('holder', 'LIKE', '%' . $q . '%')
+            ->orWhere('number', 'LIKE', '%' . $q . '%')
+            ->limit(6)->get(['id', 'holder']);
+
+        return response()->json($accounts);
+    }
+
+    /**
+     * Payer search
+     */
     public function payer_search(ManageTransactionRequest $request)
     {
         $q = $request->post('keyword');
