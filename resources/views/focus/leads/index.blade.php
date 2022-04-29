@@ -57,21 +57,18 @@
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
-
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
     function draw_data() {
-        const datatableLang = { @lang("datatable.strings") };
-        var dataTable = $('#leads-table').dataTable({
+        const language = { @lang("datatable.strings") };
+        const dataTable = $('#leads-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
-            language: datatableLang,
+            language,
             ajax: {
                 url: '{{ route("biller.leads.get") }}',
                 type: 'post',
