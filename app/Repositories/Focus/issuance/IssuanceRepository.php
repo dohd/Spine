@@ -7,7 +7,6 @@ use App\Models\account\Account;
 use App\Models\issuance\Issuance;
 use App\Models\items\IssuanceItem;
 use App\Models\product\ProductVariation;
-use App\Models\project\Budget;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
@@ -110,9 +109,9 @@ class IssuanceRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
+        // debit work in progress account (WIP)
         unset($cr_data['credit'], $cr_data['is_primary']);
         $account = Account::where('holder', 'LIKE', '%WIP%')->first('id');
-        // debit work in progress account (WIP)
         $dr_data = array_replace($cr_data, [
             'account_id' =>  $account->id,
             'debit' => $result['total'],
@@ -122,17 +121,4 @@ class IssuanceRepository extends BaseRepository
         // update account ledgers debit and credit totals
         aggregate_account_transactions();
     }    
-
-
-    /**
-     * For deleting the respective model from storage
-     *
-     * @param Productcategory $productcategory
-     * @throws GeneralException
-     * @return bool
-     */
-    public function delete(Lead $lead)
-    {
-        throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
-    }
 }
