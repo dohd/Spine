@@ -828,7 +828,6 @@ function modify_array(array $input)
     }
     return $output;
 }
-
 // aggregate transaction credits and debits
 function aggregate_account_transactions()
 {
@@ -836,6 +835,12 @@ function aggregate_account_transactions()
         ->groupBy('account_id')
         ->get()->toArray();
     Batch::update(new Account, $tr_totals, 'id');
+}
+// generate char identifier
+function gen4tid($str='', $n=0)
+{
+    if ($str) return $str . sprintf('%04d', $n);
+    return sprintf('%04d', $n);
 }
 
 
