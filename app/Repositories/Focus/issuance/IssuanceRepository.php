@@ -91,7 +91,7 @@ class IssuanceRepository extends BaseRepository
     public function post_transaction($result)
     {
         // credit stock/inventory account
-        $account = Account::where('holder', 'LIKE', '%Inventory%')->first('id');
+        $account = Account::where('system', 'stock')->first('id');
         $tr_category = Transactioncategory::where('code', 'stock')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $account->id,
