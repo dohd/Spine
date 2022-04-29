@@ -238,16 +238,12 @@ Route::group(['namespace' => 'projectstocktransfer'], function () {
     Route::post('projectstocktransfers/get', 'ProjectstocktransfersTableController')->name('projectstocktransfers.get');
 });
 
-Route::group(['namespace' => 'stockissuance'], function () {
-    Route::post('issue_stock', 'StockIssuanceController@issue_stock')->name('stockissuance.issue_stock');
-    Route::get('issued_stock_log/delete', 'StockIssuanceController@delete_log')->name('stockissuance.delete_log');
-    Route::get('issued_stock_log/{id}', 'StockIssuanceController@get_issued_log')->name('stockissuance.get_issued_log');
-    Route::post('issued_quote_stock', 'StockIssuanceController@post_issuedstock')->name('stockissuance.post_issuedstock');
-
-    Route::resource('stockissuance', 'StockIssuanceController');
+Route::group(['namespace' => 'issuance'], function () {
+    Route::post('issuance/update_status', 'IssuanceController@update_status')->name('issuance.update_status');
+    Route::get('issuance/issuance_items', 'IssuanceController@get_items')->name('issuance.get_items');
+    Route::resource('issuance', 'IssuanceController');
     // for dataTable
-    Route::post('stockissuancelog/get', 'StockIssuanceLogTableController')->name('stockissuance.getlog');
-    Route::post('stockissuance/get', 'StockIssuanceTableController')->name('stockissuance.get');
+    Route::post('issuance/get', 'IssuanceTableController')->name('issuance.get');
 });
 
 Route::group(['namespace' => 'lpo'], function () {

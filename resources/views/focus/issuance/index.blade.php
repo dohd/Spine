@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Stock Issuance Management')
+@section ('title', 'Issuance Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Stock Issuance Management</h4>
+            <h4 class="content-header-title">Issuance Management</h4>
         </div>   
     </div>
     
@@ -33,12 +33,11 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>{{ trans('customers.customer') }}</th>
-                                        <th># {{ trans('quotes.quote') }} / PI</th>
-                                        <th>Title</th>                                            
-                                        <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                        <th>Quote / PI Date</th>        
-                                        <th>Project No</th>                                   
+                                        <th>Project No</th> 
+                                        <th># {{ trans('quotes.quote') }} / PI No</th>
+                                        <th>Title</th>
+                                        <th>Customer</th>                                               
+                                        <th>Status</th>                                                                
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -80,9 +79,15 @@
         .datepicker('setDate', new Date());
 
     function draw_data(start_date = '', end_date = '') {
+        const language = { @lang("datatable.strings") };
         const table = $('#quoteTbl').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            stateSave: true,
+            language,
             ajax: {
-                url: "{{ route('biller.stockissuance.get') }}",
+                url: "{{ route('biller.issuance.get') }}",
                 type: 'post',
                 data: {start_date, end_date},
             },
@@ -91,8 +96,8 @@
                     name: 'id'
                 },
                 {
-                    data: 'customer',
-                    name: 'customer'
+                    data: 'project_tid',
+                    name: 'project_tid'
                 },
                 {
                     data: 'tid',
@@ -103,16 +108,12 @@
                     name: 'notes'
                 },
                 {
-                    data: 'total',
-                    name: 'total'
+                    data: 'customer',
+                    name: 'customer'
                 },
                 {
-                    data: 'quote_date',
-                    name: 'quote_date'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
+                    data: 'status',
+                    name: 'status'
                 },
                 {
                     data: 'actions',
@@ -121,18 +122,6 @@
                     sortable: false
                 }
             ],
-            ...tableConfig()
-        });
-    }
-
-    function tableConfig() {
-        const language = {@lang('datatable.strings')};
-        return {
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            stateSave: true,
-            language,
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
@@ -160,8 +149,8 @@
                         }
                     }
                 ]
-            }
-        }
+            }        
+        });
     }
 </script>
 @endsection

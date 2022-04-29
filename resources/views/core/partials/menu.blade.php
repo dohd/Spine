@@ -366,7 +366,7 @@
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cubes" aria-hidden="true"></i> Stock Issuance</a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('biller.stockissuance.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Stock Issuance Management</a>
+                                <a class="dropdown-item" href="{{ route('biller.issuance.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Issuance Management</a>
                             </li>                            
                         </ul>
                     </li>
