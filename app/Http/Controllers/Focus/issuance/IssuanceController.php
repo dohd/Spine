@@ -86,8 +86,10 @@ class IssuanceController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Issuance $issuance)
-    {
-        return new ViewResponse('focus.issuance.view', compact('issuance'));
+    {   
+        $issuance_items = $issuance->items()->with('product', 'warehouse')->get();
+        
+        return new ViewResponse('focus.issuance.view', compact('issuance', 'issuance_items'));
     }
 
     /**
