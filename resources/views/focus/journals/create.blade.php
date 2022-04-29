@@ -38,6 +38,8 @@
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
+    $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+
     $('#journal').submit(function(e) {
         if ($('#debitTtl').val() != $('#creditTtl').val()) {
             e.preventDefault();

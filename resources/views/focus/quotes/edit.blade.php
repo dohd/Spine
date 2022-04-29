@@ -40,7 +40,9 @@
 @endsection
 
 @section('extra-scripts')
-<script>    
+<script>   
+    $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+
     // default edit values
     $('#branch_id').val("{{ $quote->branch_id }}");
     $('#customer_id').val("{{ $quote->customer_id }}");
@@ -191,6 +193,7 @@
             source: function(request, response) {
                 $.ajax({
                     url: "{{ route('biller.products.quote_product_search') }}",
+                    method: 'POST',
                     data: 'keyword=' + request.term,
                     success: result => {
                         response(result.map(v => ({label: v.name, value: v.name, data: v})));

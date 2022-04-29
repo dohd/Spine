@@ -37,6 +37,8 @@
 
 @section('extra-scripts')
 <script>    
+    $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+
     // initialize datepicker
     $('.datepicker')
     .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
@@ -175,8 +177,9 @@
             source: function(request, response) {
                 $.ajax({
                     url: "{{ route('biller.products.quote_product_search') }}",
+                    method: 'POST',
                     data: 'keyword=' + request.term,
-                    success: data => response(data.map(v => ({label: v.name, value: v.name, data: v}))),
+                    success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
                 });
             },
             autoFocus: true,
