@@ -65,6 +65,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>  
+                                        @foreach ($issuance_items as $item)
+                                            <tr>
+                                                <td>{{ $item->product->name }}</td>
+                                                <td>{{ $item->qty }}</td>
+                                                <td>{{ $item->ref }}</td>
+                                                <td>{{ $item->warehouse->title }}</td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
