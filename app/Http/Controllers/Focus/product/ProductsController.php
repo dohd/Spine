@@ -408,7 +408,6 @@ class ProductsController extends Controller
         }
 
         return response()->json($output);
-        // return view('focus.products.partials.search')->withDetails($output);
     }
 
 
