@@ -7,6 +7,7 @@ use App\Models\bill\Paidbill;
 use App\Models\charge\Charge;
 use App\Models\hrm\Hrm;
 use App\Models\invoice\PaidInvoice;
+use App\Models\issuance\Issuance;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
 
@@ -15,6 +16,11 @@ use App\Models\loan\Paidloan;
  */
 trait TransactionRelationship
 {
+    public function issuance()
+    {
+        return $this->belongsTo(Issuance::class, 'tr_ref');
+    }
+
     public function charge()
     {
         return $this->belongsTo(Charge::class, 'tr_ref');
