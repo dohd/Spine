@@ -5,6 +5,7 @@ namespace App\Models\quote\Traits;
 use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
+use App\Models\issuance\Issuance;
 use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
@@ -21,6 +22,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function issuance()
+    {
+        return $this->hasMany(Issuance::class);
+    }
+
     public function skill_items(Type $var = null)
     {
         return $this->hasMany(BudgetSkillset::class);
