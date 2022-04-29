@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Focus\transaction;
 
-use App\Models\account\Account;
 use DB;
 use App\Models\transaction\Transaction;
 use App\Exceptions\GeneralException;
@@ -39,9 +38,36 @@ class TransactionRepository extends BaseRepository
         }
 
         return $q->get([
-            'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 'tr_date', 'user_type',
-            'tr_type', 'tr_ref'
+            'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 
+            'tr_date', 'user_type', 'tr_type', 'tr_ref'
         ]);
+    }
+
+    /**
+     * For updating the respective Model in storage
+     *
+     * @param App\Models\Transaction $transaction
+     * @param  $input
+     * @throws GeneralException
+     * return bool
+     */
+    public function update($transaction, array $input)
+    {
+        // dd($input);
+        DB::beginTransaction();
+
+        $input['debit'] = numberClean($input['debit']);
+        $input['credit'] = numberClean($input['credit']);
+
+        $transaction->update($input);
+
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
+
+        DB::commit();
+        return true;
+
+        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
     /**
@@ -53,9 +79,8 @@ class TransactionRepository extends BaseRepository
      */
     public function delete($transaction)
     {
-        if ($transaction->reconciliation_id) return $transaction;
-        $transaction->delete();
-        return false;
+        if ($transaction->reconciliation_id) return false;
+        return $transaction->delete();
 
         throw new GeneralException(trans('exceptions.backend.transactions.delete_error'));
     }
