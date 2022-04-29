@@ -143,7 +143,7 @@
      */
     let stockRowId = 0;
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
-    const stockUrl = baseurl + 'products/quotesearch/1';
+    const stockUrl = "{{ route('biller.products.quote_product_search') }}"
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
     $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
@@ -380,7 +380,7 @@
                 $.ajax({
                     url,
                     dataType: "json",
-                    method: 'POST',
+                    method: "POST",
                     data: 'keyword=' + request.term,                        
                     success: function(data) {
                         response(data.map(v => ({
