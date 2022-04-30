@@ -109,9 +109,9 @@ class IssuanceRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit work in progress account (WIP)
+        // debit wip account
         unset($cr_data['credit'], $cr_data['is_primary']);
-        $account = Account::where('holder', 'LIKE', '%WIP%')->first('id');
+        $account = Account::where('system', 'wip')->first('id');
         $dr_data = array_replace($cr_data, [
             'account_id' =>  $account->id,
             'debit' => $result['total'],
