@@ -27,7 +27,7 @@ trait QuoteRelationship
         return $this->hasMany(Issuance::class);
     }
 
-    public function skill_items(Type $var = null)
+    public function skill_items()
     {
         return $this->hasMany(BudgetSkillset::class);
     }
