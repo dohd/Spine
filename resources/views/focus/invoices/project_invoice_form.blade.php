@@ -196,7 +196,7 @@
                     <input type="text" class="form-control col-7 mb-1 ml-1" name="total" id="total" readonly>
                 </div>                                    
                 <div class="form-inline">
-                    {{ Form::submit('Update Invoice', ['class' => 'btn btn-primary btn-lg ml-auto mr-1']) }}                          
+                    {{ Form::submit('Generate Invoice', ['class' => 'btn btn-primary btn-lg ml-auto mr-1']) }}                          
                 </div>
             </td>
         </tr>
