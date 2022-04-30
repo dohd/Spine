@@ -165,7 +165,7 @@ class PurchaseorderRepository extends BaseRepository
 
     
     /**
-     * For storing grn 
+     * Store goods received
      */
     public function create_grn($purchaseorder, array $input)
     {
@@ -185,6 +185,12 @@ class PurchaseorderRepository extends BaseRepository
             ]);
         }
         GrnItem::insert($order_items);
+
+        // increase stock
+        foreach ($grn->items as $item) {
+            $product = $item->purchaseorder_item->product;
+            if ($product) $product->increment('qty', $item->qty);
+        }
 
         // update purchaseorder status
         $grn_qty = $purchaseorder->grn_items->sum('qty');
@@ -221,8 +227,8 @@ class PurchaseorderRepository extends BaseRepository
             $bill_item = array_replace($bill_item, [
                 'bill_id' => $bill->id,
                 'qty' => $item->qty,
-                'taxrate' => ($poitem['taxrate'] / $poitem['qty']) * $item->qty,
-                'amount' => ($poitem['amount'] / $poitem['qty']) * $item->qty,
+                'taxrate' => ($poitem['taxrate'] / $poitem['qty'] * $item->qty),
+                'amount' => ($poitem['amount'] / $poitem['qty'] * $item->qty),
             ]);
             $bill_items[] = $bill_item;
         }
