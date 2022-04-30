@@ -181,22 +181,22 @@
         @endif
 
         <tr class="bg-white">
-            <td colspan="4"></td>
-            <td colspan="3">
+            <td colspan="5"></td>
+            <td colspan="2">
                 <div class="form-inline">
-                    <label for="subtotal" class="caption font-weight-bold ml-5">Subtotal:</label>
-                    <input type="text" class="form-control mb-1 ml-auto" name="subtotal" id="subtotal" readonly>
+                    <label for="subtotal">Subtotal</label>
+                    <input type="text" class="form-control col-7 mb-1 ml-2" name="subtotal" id="subtotal" readonly>
                 </div>
                 <div class="form-inline">
-                    <label for="totaltax" class="caption font-weight-bold ml-5">Total Tax:</label>
-                    <input type="text" class="form-control mb-1 ml-auto" name="tax" id="tax" readonly>
+                    <label for="totaltax">Total Tax</label>
+                    <input type="text" class="form-control col-7 mb-1 ml-2" name="tax" id="tax" readonly>
                 </div>
                 <div class="form-inline">
-                    <label for="grandtotal" class="caption font-weight-bold ml-3">Grand Total:</label>
-                    <input type="text" class="form-control mb-1 ml-auto" name="total" id="total" readonly>
+                    <label for="grandtotal">Grand Total</label>
+                    <input type="text" class="form-control col-7 mb-1 ml-1" name="total" id="total" readonly>
                 </div>                                    
                 <div class="form-inline">
-                    {{ Form::submit('Update Invoice', ['class' => 'btn btn-primary btn-lg ml-auto']) }}                          
+                    {{ Form::submit('Update Invoice', ['class' => 'btn btn-primary btn-lg ml-auto mr-1']) }}                          
                 </div>
             </td>
         </tr>
