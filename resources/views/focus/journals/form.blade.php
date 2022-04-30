@@ -27,7 +27,7 @@
                 <td><select name="account_id[]" id="account-0" class="form-control account" data-placeholder="Search Ledger"></select></td>
                 <td><input type="text" class="form-control debit" name="debit[]" placeholder="0.00" id="debit-0"></td>
                 <td><input type="text" class="form-control credit" name="credit[]" placeholder="0.00" id="credit-0"></td>
-                <td><button type="button" class="btn btn-danger d-none remove">Remove</button></td>
+                <td><button type="button" class="btn btn-danger d-none remove"><i class="fa fa-trash"></i></button></td>
             </tr>
         </tbody>
     </table>
@@ -37,7 +37,7 @@
         <button type="button" class="btn btn-success" id="addLedger">Add Ledger</button>
     </div>
 </div>
-<div class="row">
+<div class="form-group row">
     <div class="form-inline col-3 ml-auto">
         <label for="debit_total">Debit Total:</label>
         <input type="text" class="form-control ml-2 mb-1" name="debit_ttl" id="debitTtl" readonly>
@@ -46,7 +46,7 @@
     </div>
 </div>
 <div class="form-group row">
-    <div class="col-2 ml-auto mr-2 mt-1">
-        {{ Form::submit('Create Journal', ['class' => 'btn btn-primary btn-lg block round']) }}
+    <div class="col-2 ml-auto mr-2">
+        {{ Form::submit('Create Journal', ['class' => 'btn btn-primary btn-lg block']) }}
     </div>
 </div>
