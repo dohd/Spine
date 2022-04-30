@@ -68,6 +68,20 @@ class JournalRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.customers.create_error'));
     }
 
+    /**
+     * Delete method from storage
+     */
+    public function delete($journal)
+    {
+        if ($journal->delete()) {
+            // update account ledgers debit and credit totals
+            aggregate_account_transactions(); 
+            return true;
+        }
+
+        throw new GeneralException(trans('exceptions.backend.customers.create_error'));
+    }
+
 
     public function post_transaction($result)
     {

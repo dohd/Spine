@@ -82,51 +82,28 @@ class JournalsController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Journal $journal)
     {
-        //
+        $this->repository->delete($journal);
+
+        return new RedirectResponse(route('biller.journals.index'), ['flash_success' => 'Manual Journal deleted successfully']);
     }
 
     /**
-     * Fetch ledgers for select
+     * Fetch journal accounts
      */
-    public function journal_ledgers()
+    public function journal_accounts()
     {
-        $k = request('keyword');
-
         $accounts = Account::where('is_manual_journal', 1)
-        ->where('holder', 'LIKE', '%'. $k .'%')
-        ->with(['accountType' => function ($q) {
-            $q->select('id', 'category')->get();
-        }])->get();
+            ->where('holder', 'LIKE', '%'. request('keyword') .'%')
+            ->with(['accountType' => function ($q) {
+                $q->select('id', 'category')->get();
+            }])->get();
 
         return response()->json($accounts);
     }
