@@ -56,7 +56,7 @@
     function select2Config() {
         return {
             ajax: {
-            url: "{{ route('biller.journals.journal_ledgers') }}",
+            url: "{{ route('biller.journals.journal_accounts') }}",
             dataType: 'json',
             type: 'POST',
             quietMillis: 50,

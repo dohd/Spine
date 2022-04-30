@@ -166,7 +166,7 @@ Route::group(['namespace' => 'loan'], function () {
 });
 
 Route::group(['namespace' => 'journal'], function () {
-    Route::post('journals/journal_ledgers', 'JournalsController@journal_ledgers')->name('journals.journal_ledgers');
+    Route::post('journals/journal_accounts', 'JournalsController@journal_accounts')->name('journals.journal_accounts');
     Route::resource('journals', 'JournalsController');
     //For Datatable
     Route::post('journals/get', 'JournalsTableController')->name('journals.get');
