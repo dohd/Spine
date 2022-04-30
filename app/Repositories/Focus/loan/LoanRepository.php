@@ -69,7 +69,7 @@ class LoanRepository extends BaseRepository
         $loan->update(['is_approved' => 1]);
 
         /** accounts  */
-        // credit liability (loan)
+        // credit  loan account (liability)
         $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $loan->lender_id,
@@ -87,7 +87,7 @@ class LoanRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit accounts income (bank)
+        // debit income account (bank)
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $loan->bank_id,
