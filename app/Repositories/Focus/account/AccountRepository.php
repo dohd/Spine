@@ -62,6 +62,7 @@ class AccountRepository extends BaseRepository
     if ($result->opening_balance > 0) {
       $account_type = AccountType::find($result->account_type_id);
       $seco_account = Account::where('system', 'share_capital')->first();
+      $system = $account_type->system;
       $tid = Transaction::max('tid') + 1;
       $date = date('Y-m-d');
       $memo = 'Account Opening Balance';
@@ -72,8 +73,8 @@ class AccountRepository extends BaseRepository
         'ins' => $result->ins,
       ];
 
-      //deposit bank and credit Equity Share Capital
-      if ($account_type->system == 'bank') {
+      // debit bank and credit Equity Share Capital
+      if ($system == 'bank') {
         $pri_tr = Transactioncategory::where('code', 'DEP')->first();
         $tr_ref = 'DEP';
         $data = $data + [
@@ -90,9 +91,13 @@ class AccountRepository extends BaseRepository
         ];
         if ($deposit) double_entry(...$args);
       }
-      //deposit asset and credit Equity Share Capital
-      $systems = ['fixed_asset', 'other_current_asset', 'other_asset', 'other_current_liability', 'long_term_liability', 'equity'];
-      if (in_array($account_type->system, $systems, 1)) {
+      // debit asset and credit Equity Share Capital
+      // credit liability and debit Equity Share Capital
+      $systems = [
+        'fixed_asset', 'other_current_asset', 'other_asset', 
+        'other_current_liability', 'long_term_liability', 'equity'
+      ];
+      if (in_array($system, $systems, 1)) {
         $pri_tr = Transactioncategory::where('code', 'GENJRNL')->first();  
         $tr_ref = 'GENJRNL';
         $open_bal = $result->opening_balance;
@@ -101,9 +106,9 @@ class AccountRepository extends BaseRepository
           'debit_ttl' => $open_bal,
           'credit_ttl' =>  $open_bal
         ];
-        $jrnl = Journal::create($data);
+        $journal = Journal::create($data);
         $item_data = [
-          'journal_id' => $jrnl->id, 
+          'journal_id' => $journal->id, 
           'account_id' => $result->id, 
           'debit' => $open_bal, 
         ];
@@ -111,12 +116,14 @@ class AccountRepository extends BaseRepository
         unset($item_data['debit']);
         $item_data['credit'] = $open_bal;
         JournalItem::create($item_data);
-        
+
+        $dr_pri = 'dr';
+        if (in_array($system, array_splice($systems, 3, 3), 1)) $dr_pri = 'cr';
         $args = [
-          $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id, '0', '0', 
+          $tid, $result->id, $seco_account->id, $result->opening_balance, $dr_pri, $pri_tr->id, '0', '0', 
           $date, $result->opening_balance_date, $tr_ref, $memo, $result->ins
         ];
-        if ($deposit) double_entry(...$args);
+        if ($journal) double_entry(...$args);
       }
     }
 
