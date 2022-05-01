@@ -843,103 +843,50 @@ function gen4tid($str='', $n=0)
     return sprintf('%04d', $n);
 }
 
-
 // accounts numbering
 function accounts_numbering($account)
 {
     switch ($account) {
-        case 'Asset' :
-           return 100;
-        case 'Liability' :
-            return 200; 
-        case 'Income' :
-             return 400;   
-        case 'Expense' :
-             return 500;
-        case 'Equity' :
-             return 300;       
+        case 'Asset' :  return 100;
+        case 'Liability' : return 200;
+        case 'Income' : return 400;
+        case 'Expense' : return 500;
+        case 'Equity' : return 300; 
     }
 }
-// douible entry function
+// double transaction entry
 function double_entry($tid,$pr_count_id,$sec_count_id,$amount,$dr_pri,$pri_tr_id,$user_type,$user_id,$date,$duedate,$tr_ref,$memo,$ins)
 {
+    $data = [
+        'tid' => $tid,
+        'trans_category_id' => $pri_tr_id,
+        'transaction_date' =>$date,
+        'due_date' => $duedate,
+        'user_type' => $user_type,
+        'tr_user_id' => $user_id,
+        'tr_ref' => $tr_ref,
+        'note' => $memo,
+        'user_id' => auth()->user()->id,
+        'ins' => $ins,
+    ];
+    $dr_data = $data + [
+        'account_id' => $pr_count_id,
+        'is_primary' => 1,
+        'debit' => $amount,
+    ];
+    $cr_data = $data + [
+        'account_id' => $sec_count_id,
+        'is_primary' => 0,
+        'credit' => $amount,
+
+    ];
     
-    if($dr_pri=='dr'){
-        //dr primary and cr secondary
-        // dr primary
-         $transaction_dr = array(
-            'tid' => $tid,
-            'account_id' => $pr_count_id,
-            'is_primary' => 1,
-            'trans_category_id' => $pri_tr_id,
-            'debit' => $amount,
-            'transaction_date' =>$date,
-            'due_date' => $duedate,
-            'user_type' => $user_type,
-            'tr_user_id' => $user_id,
-            'tr_ref' => $tr_ref,
-            'note' => $memo,
-            'user_id' => auth()->user()->id,
-            'ins' => $ins,
-        );
-        //cr secondary
-        $transaction_cr = array(
-            'tid' => $tid,
-            'account_id' => $sec_count_id,
-            'is_primary' => 0,
-            'trans_category_id' => $pri_tr_id,
-            'credit' => $amount,
-            'transaction_date' =>$date,
-            'due_date' => $duedate,
-            'user_type' => $user_type,
-            'tr_user_id' => $user_id,
-            'tr_ref' => $tr_ref,
-            'note' => $memo,
-            'user_id' => auth()->user()->id,
-            'ins' => $ins,
-        );
-   
-     Transaction::create($transaction_dr);
-     Transaction::create($transaction_cr);
-        return true;
-   
-    }else{
-        // cr primary and dr primapry
-        //cr primary
-        $transaction_dr = array(
-            'tid' => $tid,
-            'account_id' => $pr_count_id,
-            'is_primary' => 1,
-            'trans_category_id' => $pri_tr_id,
-            'credit' => $amount,
-            'transaction_date' =>$date,
-            'due_date' => $duedate,
-            'user_type' => $user_type,
-            'tr_user_id' => $user_id,
-            'tr_ref' => $tr_ref,
-            'note' => $memo,
-            'user_id' => auth()->user()->id,
-            'ins' => $ins,
-        );
-        //cr secondary
-        $transaction_cr = array(
-            'tid' => $tid,
-            'account_id' => $sec_count_id,
-            'is_primary' => 0,
-            'trans_category_id' => $pri_tr_id,
-            'debit' => $amount,
-            'transaction_date' =>$date,
-            'due_date' => $duedate,
-            'user_type' => $user_type,
-            'tr_user_id' => $user_id,
-            'tr_ref' => $tr_ref,
-            'note' => $memo,
-            'user_id' => auth()->user()->id,
-            'ins' => $ins,
-        );
-   
-     Transaction::create($transaction_dr);
-     Transaction::create($transaction_cr);
-        return true;
+    if ($dr_pri != 'dr') {    
+        unset($dr_data['debit'], $cr_data['credit']);
+        $dr_data['credit'] = $amount;
+        $cr_data['debit'] = $amount;
     }
+    Transaction::create($dr_data);
+    Transaction::create($cr_data);
+    return true;
 }
