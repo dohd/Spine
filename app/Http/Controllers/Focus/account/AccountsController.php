@@ -90,10 +90,11 @@ class AccountsController extends Controller
             'is_manual_journal'=> 'required',
             'account_type' => 'required',
         ]);
-        
         // extract request input
-        $input = $request->except(['_token', 'ins']);
-      
+        $input = $request->except(['_token', 'is_multiple']);
+
+        $input['ins'] =  auth()->user()->ins;
+
         $this->repository->create($input);
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.created')]);
