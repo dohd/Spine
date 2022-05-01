@@ -881,7 +881,7 @@ function double_entry($tid,$pr_count_id,$sec_count_id,$amount,$dr_pri,$pri_tr_id
 
     ];
     
-    if ($dr_pri != 'dr') {    
+    if ($dr_pri == 'cr') {    
         unset($dr_data['debit'], $cr_data['credit']);
         $dr_data['credit'] = $amount;
         $cr_data['debit'] = $amount;
