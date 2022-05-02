@@ -1,164 +1,117 @@
-<div class="row">
+<div class="form-group row">
     <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('account_type', trans('accounts.account_type')) }}
-            <div class='col'>
-                <select name="account_type" class="form-control" id="accType" required>
-                    <option value="">-- Select Account Type --</option>
-                    @foreach ($account_types as $row)
-                        <option 
-                            value="{{ $row->category }}" 
-                            key="{{ $row->id }}"
-                            opening_balance_check="{{ $row->is_opening_balance }}"
-                            is_multiple="{{ $row->is_multiple }}"
-                            {{ $row->id == @$account->account_type_id ? 'selected' : '' }}
-                        >
-                            {{ $row->name }}
-                        </option>
-                    @endforeach
-                </select>
-                <input type="hidden" name="account_type_id" id="accTypeId">
-                <input type="hidden" name="is_multiple" id="is_multiple">
-            </div>
-        </div>
+        {{ Form::label('account_type', trans('accounts.account_type')) }}
+        <select name="account_type" class="form-control" id="accType" required>
+            <option value="">-- Select Account Type --</option>
+            @foreach ($account_types as $row)
+                <option 
+                    value="{{ $row->category }}" 
+                    key="{{ $row->id }}"
+                    isMultiple="{{ $row->is_multiple }}"
+                    isOpenBalance="{{ $row->is_opening_balance }}"
+                    {{ $row->id == @$account->account_type_id ? 'selected' : '' }}
+                >
+                    {{ $row->name }}
+                </option>
+            @endforeach
+        </select>
+        <input type="hidden" name="account_type_id" id="accTypeId">
+        <input type="hidden" name="is_multiple" id="isMultiple">
     </div>
     <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('number', trans('accounts.number')) }}
-            <div class='col'>
-                {{ Form::text('number', null, ['class' => 'form-control box-size','id' => 'account_number','required','readonly']) }}
-            </div>
-        </div>
+        {{ Form::label('number', trans('accounts.number')) }}
+        {{ Form::text('number', null, ['class' => 'form-control', 'id' => 'account_number', 'readonly']) }}
     </div>
 </div>
-<div class="row">
+<div class="form-group row">
     <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('holder', 'Account Name') }}
-            <div class='col'>
-                {{ Form::text('holder', null, ['class' => 'form-control box-size','placeholder' => 'Account Name *','required' => 'required']) }}
-            </div>
-        </div>
+        {{ Form::label('holder', 'Account Name') }}
+        {{ Form::text('holder', null, ['class' => 'form-control box-size','placeholder' => 'Account Name *','required' => 'required']) }}
     </div>
     <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('number', 'Can Be Used In Manual Journal') }}
-            <div class='col'>
-                <select name="is_manual_journal" class="form-control" required id="is_manual_journal" required>
-                    <option value="">-- Select If Account Can Be Used In Manual Journal --</option>
-                    <option value="0">No </option>
-                    <option value="1">Yes </option>
-                </select>
-            </div>
-        </div>
+        {{ Form::label('number', 'Account Can Be Used In Manual Journal') }}
+        <select name="is_manual_journal" class="form-control" required id="is_manual_journal" required>
+            <option value="">-- Select --</option>
+            @foreach (['No', 'Yes'] as $k => $val) 
+                <option value="{{ $k }}">{{ $val }}</option>
+            @endforeach
+        </select>
     </div>
 </div>
-<div class="row">
+<div class="form-group row">
     <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('is_parent', 'Is This Account Sub-Category') }}
-            <div class='col'>
-                <select name="is_parent" class="form-control" id="is_parent" required>
-                    <option value="">-- Select If Account is Sub-Category --</option>
-                    <option value="0">No </option>
-                    <option value="1">Yes </option>
-                </select>
-            </div>
-        </div>
+        {{ Form::label('is_parent', 'Is Account Sub-Category') }}
+        <select name="is_parent" class="form-control" id="is_parent" required>
+            <option value="">-- Select --</option>
+            @foreach (['No', 'Yes'] as $k => $val) 
+                <option value="{{ $k }}">{{ $val }}</option>
+            @endforeach
+        </select>       
     </div>
-    <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('number', 'Category') }}
-            <div class='col'>
-                {!! Form::select('category_id', $account_category, null, ['disabled' => 'disabled', 'placeholder' => 'Select Category', 'class' => 'form-control ', 'id' => 'category_id']) !!}
-            </div>
-        </div>
+    <div class="col-md-6">       
+        {{ Form::label('category', 'Account Category') }}            
+        {!! Form::select('category_id', $account_categories, null, ['class' => 'form-control ', 'placeholder' => '-- Select Category --', 'id' => 'category_id', 'disabled']) !!}            
     </div>
 </div>
-<div class="row">
-    <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('opening_balance', 'Opening Balance') }}
-            <div class='col'>
-                {{ Form::text('opening_balance', null, ['class' => 'form-control','readonly' => 'readonly','placeholder' => 'Opening Balance','onkeypress' => 'return isNumber(event)','id' => 'balance']) }}
-            </div>
-        </div>
+<div class="form-group row">
+    <div class="col-md-6">        
+        {{ Form::label('opening_balance', 'Opening Balance') }}           
+        {{ Form::text('opening_balance', '0.00', ['class' => 'form-control', 'readonly', 'id' => 'openBalance']) }}
     </div>
     <div class="col-md-6">
-        <div class='form-group'>
-            {{ Form::label('opening_balance_date', 'Date') }}
-            <div class='col'>
-                {{ Form::text('opening_balance_date', null, ['class' => 'form-control datepicker','disabled' => 'disabled','placeholder' => 'Date*','id' => 'opening_balance_date','required' => 'required']) }}
-            </div>
-        </div>
+        {{ Form::label('date', 'Date') }}
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'disabled', 'id' => 'openBalanceDate']) }}
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12">
-        <div class='form-group'>
-            {{ Form::label('balance', trans('accounts.note')) }}
-            <div class='col'>
-                {{ Form::text('note', null, ['class' => 'form-control box-size', 'placeholder' => trans('accounts.note')]) }}
-            </div>
-        </div>
+<div class="form-group row">
+    <div class="col-md-12">        
+        {{ Form::label('note', trans('accounts.note')) }}
+        {{ Form::text('note', null, ['class' => 'form-control', 'placeholder' => trans('accounts.note')]) }}
     </div>
 </div>
+
 @section('after-scripts')
 <script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        }
+    });
+    // initialize datepicker
+    $('.datepicker').datepicker({
+        format: "{{ config('core.user_date_format') }}",
+        autoHide: true
+    }).datepicker('setDate', new Date());
+
     // on selecting account type
     $('#accType').change(function() {
-        const key = $(this).find('option:selected').attr('key');
-        const is_multiple = $(this).find('option:selected').attr('is_multiple');
-        $('#accTypeId').val(key);
-        $('#is_multiple').val(is_multiple);
-        const account_type = $(this).val();
-        const opening_balance_check = $(this).find('option:selected').attr('opening_balance_check');
+        const opt = $('#accType option:selected');
+        $('#accTypeId').val(opt.attr('key'));
+        $('#isMultiple').val(opt.attr('isMultiple'));
 
-        $('#balance').prop('readonly', true);
-        $('#opening_balance_date').prop('disabled', true);
-        if (opening_balance_check == 1) {
-            $('#balance').prop('readonly', false);
-            $('#opening_balance_date').prop('disabled', false);
+        $('#openBalance').attr('readonly', true);
+        $('#openBalanceDate').attr('disabled', true);
+        if (opt.attr('isOpenBalance') == 1) {
+            $('#openBalance').attr('readonly', false);
+            $('#openBalanceDate').attr('disabled', false);
         }
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': "{{ csrf_token() }}"
-            }
-        });
         $.ajax({
             url: "{{ route('biller.accounts.search_next_account_no') }}",
             type: 'POST',
             dataType: 'json',
-            data: {
-                account_type
-            },
-            success: function(data) {
-                $('#account_number').val(data.account_number);
-            }
+            data: {account_type: $(this).val()},
+            success: data => $('#account_number').val(data.account_number),            
         });
-        //  console.log(key);
     });
-    // on update page
-    if (@json(@$account)) {
-        const key = $('#accType option:selected').attr('key');
-        $('#accTypeId').val(key);
-    }
+    // on open balance change
+    $("#openBalance").change(function() {
+        const val = $(this).val().replace(/,/g, '');
+        $(this).val((val*1).toLocaleString());
+    });
+    // on account sub-category change
     $('#is_parent').on('change', function() {
         $('#category_id').prop('disabled', true);
-        if ($(this).val() == 1) {
-            $('#category_id').prop('disabled', false);
-        }
-        return false;
-    })
-    // Initialize datepicker
-    $('.datepicker').datepicker({
-        format: "{{ config('core.user_date_format') }}"
-    })
-    $('#opening_balance_date').datepicker('setDate', new Date());
-    //number format
-    $("#balance").change(function() {
-        const input_val = $(this).val();
-        $("#balance").val(accounting.formatNumber(input_val));
+        if ($(this).val() == 1) $('#category_id').prop('disabled', false);
     });
 </script>
 @endsection
