@@ -45,24 +45,20 @@ class AccountRepository extends BaseRepository
     // dd($input);
     DB::beginTransaction();
 
+    $input['opening_balance'] = numberClean($input['opening_balance']);
+    $input['opening_balance_date'] = date_for_database($input['date']);
+    unset($input['date'], $input['is_multiple']);
     // increment account number
     $account = Account::where('account_type_id', $input['account_type_id'])
       ->where('number', '>', 1)->orderBy('number', 'DESC')->first();
     if ($account && $input['number'] <= $account->number) {
       $input['number'] = $account->number + 1;
     }
-    // sanitize
-    $open_bal = $input['opening_balance'];
-    $open_bal_date = $input['opening_balance_date'];
-    if (!$open_bal) $input['opening_balance'] = 0;
-    $input['opening_balance'] = numberClean($open_bal);
-    $input['opening_balance_date'] = date_for_database($open_bal_date);
     $result = Account::create($input);
 
     if ($result->opening_balance > 0) {
       $account_type = AccountType::find($result->account_type_id);
       $seco_account = Account::where('system', 'share_capital')->first();
-      $system = $account_type->system;
       $tid = Transaction::max('tid') + 1;
       $date = date('Y-m-d');
       $memo = 'Account Opening Balance';
@@ -74,6 +70,7 @@ class AccountRepository extends BaseRepository
       ];
 
       // debit bank and credit Equity Share Capital
+      $system = $account_type->system;
       if ($system == 'bank') {
         $pri_tr = Transactioncategory::where('code', 'DEP')->first();
         $tr_ref = 'DEP';
@@ -91,6 +88,7 @@ class AccountRepository extends BaseRepository
         ];
         if ($deposit) double_entry(...$args);
       }
+      
       // debit asset and credit Equity Share Capital
       // credit liability and debit Equity Share Capital
       $systems = [
@@ -141,7 +139,7 @@ class AccountRepository extends BaseRepository
    * @throws GeneralException
    * return bool
    */
-  public function update(Account $account, array $input)
+  public function update($account, array $input)
   {
     if ($account->update($input)) return true;
 
@@ -155,7 +153,7 @@ class AccountRepository extends BaseRepository
    * @throws GeneralException
    * @return bool
    */
-  public function delete(Account $account)
+  public function delete($account)
   {
     if ($account->delete())  return true;
 
