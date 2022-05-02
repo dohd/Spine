@@ -2,8 +2,9 @@
 
 namespace App\Http\Responses\Focus\account;
 
+use App\Models\account\Account;
+use App\Models\account\AccountType;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Support\Facades\DB;
 
 class EditResponse implements Responsable
 {
@@ -30,8 +31,9 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $account = $this->accounts;
-        $account_types = DB::table('account_types')->get(['id', 'name', 'category']);
+        $account_types = AccountType::all();
+        $account_categories = Account::where('is_parent', 0)->pluck('holder', 'id');
 
-        return view('focus.accounts.edit', compact('account_types', 'account'));
+        return view('focus.accounts.edit', compact('account_types', 'account', 'account_categories'));
     }
 }

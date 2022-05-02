@@ -3,8 +3,8 @@
 namespace App\Http\Responses\Focus\account;
 
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Support\Facades\DB;
 use App\Models\account\Account;
+use App\Models\account\AccountType;
 
 class CreateResponse implements Responsable
 {
@@ -17,9 +17,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $account_types = DB::table('account_types')->get(['id', 'name', 'category','is_opening_balance','is_multiple']);
-        $account_category= Account::where('is_parent','0')->pluck('holder', 'id');
+        $account_types = AccountType::all();
+        $account_categories = Account::where('is_parent', 0)->pluck('holder', 'id');
         
-        return view('focus.accounts.create', compact('account_types','account_category'));
+        return view('focus.accounts.create', compact('account_types', 'account_categories'));
     }
 }
