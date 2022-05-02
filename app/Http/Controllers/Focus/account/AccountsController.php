@@ -30,7 +30,7 @@ use App\Repositories\Focus\account\AccountRepository;
 use App\Http\Requests\Focus\account\ManageAccountRequest;
 use App\Http\Requests\Focus\account\StoreAccountRequest;
 use Illuminate\Support\Facades\Response;
-use mPDF;
+use Illuminate\Validation\ValidationException;
 
 /**
  * AccountsController
@@ -60,7 +60,6 @@ class AccountsController extends Controller
      */
     public function index(ManageAccountRequest $request)
     {
-
         return new ViewResponse('focus.accounts.index');
     }
 
@@ -90,9 +89,12 @@ class AccountsController extends Controller
             'is_manual_journal'=> 'required',
             'account_type' => 'required',
         ]);
-        // extract request input
-        $input = $request->except(['_token', 'is_multiple']);
+        // restrict duplicate account receivable and payable
+        if (!$request->is_multiple) 
+            throw ValidationException::withMessages(['account_type' => 'Duplicate account type is not allowed']);
 
+        // extract request input
+        $input = $request->except(['_token']);
         $input['ins'] =  auth()->user()->ins;
 
         $this->repository->create($input);
@@ -107,7 +109,7 @@ class AccountsController extends Controller
      * @param EditAccountRequestNamespace $request
      * @return \App\Http\Responses\Focus\account\EditResponse
      */
-    public function edit(Account $account, StoreAccountRequest $request)
+    public function edit(Account $account)
     {
         return new EditResponse($account);
     }
@@ -125,11 +127,10 @@ class AccountsController extends Controller
             'number' => 'required',
             'holder' => 'required'
         ]);
-        //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
+
         $this->repository->update($account, $input);
-        //return with successfull message
+
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.updated')]);
     }
 
@@ -140,11 +141,10 @@ class AccountsController extends Controller
      * @param App\Models\account\Account $account
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Account $account, StoreAccountRequest $request)
+    public function destroy(Account $account)
     {
-        //Calling the delete method on repository
         $this->repository->delete($account);
-        //returning with successfull message
+
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.deleted')]);
     }
 
@@ -157,8 +157,6 @@ class AccountsController extends Controller
      */
     public function show(Account $account, ManageAccountRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.accounts.view', compact('account'));
     }
 
@@ -226,18 +224,17 @@ class AccountsController extends Controller
         }
     }
 
-
+    /**
+     * Search next account number
+     */
     public function search_next_account_no(Request $request)
     {
-        $account_type = $request->post('account_type');
+        $account_type = $request->account_type;
+
         $account = Account::where('account_type', $account_type)->max('number');
-
         $netx_account = accounts_numbering($account_type);
-        if ($account > 0) {
-            $netx_account = $account+1;
-        }
-        $data = ['account_number' => $netx_account];
-
-        return  json_encode($data);
+        if ($account > 0) $netx_account = $account + 1;
+            
+        return response()->json(['account_number' => $netx_account]);
     }
 }
