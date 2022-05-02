@@ -60,7 +60,7 @@
     </div>
     <div class="col-md-6">
         {{ Form::label('date', 'Date') }}
-        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'disabled', 'id' => 'openBalanceDate']) }}
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'disabled', 'id' => 'date']) }}
     </div>
 </div>
 <div class="form-group row">
@@ -82,6 +82,9 @@
         format: "{{ config('core.user_date_format') }}",
         autoHide: true
     }).datepicker('setDate', new Date());
+    const date = @json(@$account->opening_balance_date);
+    if (date) $('#date').datepicker('setDate', new Date(date)); 
+        
 
     // on selecting account type
     $('#accType').change(function() {
