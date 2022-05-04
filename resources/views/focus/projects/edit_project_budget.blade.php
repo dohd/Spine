@@ -426,9 +426,9 @@
         return {
             source: function(request, response) {
                 $.ajax({
-                    url: baseurl + 'products/quotesearch/'+i,
-                    dataType: "json",
-                    method: 'post',
+                    url: "{{ route('biller.products.quote_product_search') }}",
+                    method: 'POST',
+                    data: 'keyword=' + request.term,
                     success: function(data) {
                         response(data.map(v => ({
                             label: v.name,
