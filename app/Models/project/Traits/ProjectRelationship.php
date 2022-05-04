@@ -29,6 +29,11 @@ trait ProjectRelationship
         return $this->hasManyThrough(Quote::class, ProjectQuote::class);
     }
 
+    public function rjc()
+    {
+        return $this->hasOne(Rjc::class);
+    }
+
     public function rjcs()
     {
         return $this->hasMany(Rjc::class)->withoutGlobalScopes;
