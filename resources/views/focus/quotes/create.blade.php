@@ -220,7 +220,7 @@
         switch (row.find('.type').val()) {
             case 'casual': chrg.val(200).attr('readonly', true); break;
             case 'contract': chrg.val(350).attr('readonly', true); break;
-            case 'outsourced': chrg.val(0).attr('readonly', false); break;
+            case 'outsourced': chrg.val(chrg.val()).attr('readonly', false); break;
         }
         skillTotal();
     });
