@@ -49,6 +49,7 @@ class RjcsTableController extends Controller
     public function __invoke(ManageRjcRequest $request)
     {
         $core = $this->rjc->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -56,32 +57,29 @@ class RjcsTableController extends Controller
                 return 'RjR-'.sprintf('%04d', $rjc->tid);
             })
             ->addColumn('project_no', function ($rjc) {
-                $no = $rjc->project->tid;
-
-                return 'Prj-'.sprintf('%04d', $no);
+                if ($rjc->project) 
+                    return gen4tid('Prj-', $rjc->project->tid);
             })
             ->addColumn('customer', function ($rjc) {
-                $client_name = $rjc->project->customer_project ? $rjc->project->customer_project->name : '';
-                $branch_name = $rjc->project->branch ? $rjc->project->branch->name : '';
+                $client_name = $rjc->project ? $rjc->project->customer_project->name : '';
+                $branch_name = $rjc->project ? $rjc->project->branch->name : '';
                 if ($client_name && $branch_name) 
                     return $client_name . ' - ' . $branch_name;
             })
             ->addColumn('lead_tid', function($rjc) {
+                $quotes = $rjc->project ? $rjc->project->quotes : array();
                 $tids = array();                
-                foreach ($rjc->project->quotes as $quote) {
-                    $tids[] = 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                foreach ($quotes as $quote) {
+                    $tids[] = gen4tid('Tkt-', $quote->lead->reference);
                 }
-
                 return implode(', ', $tids);
             })
             ->addColumn('quote_tid', function($rjc) {
+                $quotes = $rjc->project ? $rjc->project->quotes : array();
                 $tids = array();                
-                foreach ($rjc->project->quotes as $quote) {
-                    $tid = sprintf('%04d', $quote->tid);
-                    $tid = ($quote->bank_id) ? 'PI-'. $tid : $tid = 'QT-'. $tid;
-                    $tids[] = $tid;
+                foreach ($quotes as $quote) {
+                    $tids[] = $quote->bank_id ? gen4tid('PI-', $quote->tid) : gen4tid('QT-', $quote->tid);
                 }
-
                 return implode(', ', $tids);
             })
             ->addColumn('created_at', function ($rjc) {
@@ -91,8 +89,8 @@ class RjcsTableController extends Controller
                 $valid_token = token_validator('', 'd' . $rjc->id, true);
                 $link = route('biller.print_rjc', [$rjc->id, 11, $valid_token, 1]);
 
-                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
-                    . $rjc->action_buttons;
+                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print">
+                    <i class="fa fa-print"></i></a> '. $rjc->action_buttons;
             })
             ->make(true);
     }
