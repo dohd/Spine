@@ -3,223 +3,221 @@
 @section ('title', 'Repair Job Card | Create')
 
 @section('content')
-<div class="">
-    <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Rjc Report Management</h4>
-            </div>
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right">
-                    <div class="media-body media-right text-right">
-                        @include('focus.rjcs.partials.rjcs-header-buttons')
-                    </div>
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Rjc Report Management</h4>
+        </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.rjcs.partials.rjcs-header-buttons')
                 </div>
             </div>
         </div>
-        <div class="content-body">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        {{ Form::open(['route' => 'biller.rjcs.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'files' => true ]) }}
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div>
-                                    <div class="form-group row">
-                                        <div class="fcol-sm-12">
-                                            <h3 class="title pl-1">Repair Job Card Details</h3>
-                                        </div>
-                                    </div>
+    </div>
 
-                                    <div class="form-group row">
-                                        <div class="col-sm-12"><label for="ref_type" class="caption">Search Project </label>
-                                            <div class="input-group">
-                                                <select class="form-control  round  select-box" name="project_id" id="project" required>
-                                                    <option value="">-- Select Project --</option>
-                                                    @foreach ($projects as $project)
-                                                        <option value="{{ $project->id }}">
-                                                            {{ 'Prj-'.sprintf('%04d', $project->tid) }} 
-                                                            [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ] 
-                                                            {{ $project->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>                                                
-                                            </div>
-                                        </div>
+    <div class="content-body">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    {{ Form::open(['route' => 'biller.rjcs.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'POST', 'files' => true ]) }}
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div>
+                                <div class="form-group row">
+                                    <div class="fcol-sm-12">
+                                        <h3 class="title pl-1">Repair Job Card Details</h3>
                                     </div>
-                                    <div class="form-group row">
-                                        <div class="col-12">
-                                            <label for="attention" class="attention">Attention <span class="text-danger">*</span></label>
-                                            {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention']) }}
-                                        </div>                                        
-                                    </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
-                                            <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('tid', 'RjR-'.sprintf('%04d', $tid), ['class' => 'form-control round', 'disabled']) }}
-                                                <input type="hidden" name="tid" value="{{ $tid }}">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
-                                            <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'client_ref', 'required']) }}
-                                            </div>
-                                        </div>                                        
-                                    </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-4">
-                                            <label for="region" class="caption"> Region</label>
-                                            {{ Form::text('region', null, ['class' => 'form-control round ', 'placeholder' => 'Region','autocomplete'=>'false','id'=>'region']) }}
-                                        </div>
-                                        <div class="col-sm-4"><label for="prepared_by" class="caption">Prepared By <span class="text-danger">*<span></label>
-                                            <div class="input-group">
-                                                <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepared By']) }}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <label for="technician" class="caption"> Technician <span class="text-danger">*<span></label>
-                                            {{ Form::text('technician', null, ['class' => 'form-control round required', 'placeholder' => 'Technician', 'autocomplete'=>'false', 'id'=>'technician', 'required' => 'required']) }}
-                                        </div>
-                                    </div>
+                                </div>
 
-                                    <div class="form-group row">
-                                        <div class="col-sm-3"><label for="client_name" class="caption"> Image 1 </label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                                {!! Form::file('image_one', array('class'=>'input', 'id'=>'image_one' )) !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 2</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                                {!! Form::file('image_two', array('class'=>'input', 'id'=>'image_two' )) !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 3</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                                {!! Form::file('image_three', array('class'=>'input', 'id'=>'image_three' )) !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 4</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                                {!! Form::file('image_four', array('class'=>'input', 'id'=>'image_four' )) !!}
-                                            </div>
-                                        </div>                                    
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <div class="col-sm-3"><label for="caption" class="caption"> Caption 1 </label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('caption_one', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 1','id'=>'caption_one']) }}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Caption 2</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('caption_two', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 2','id'=>'caption_two']) }}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="caption_three" class="caption"> Caption 3</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('caption_three', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 4','id'=>'caption_three']) }}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3"><label for="client_email" class="caption"> Caption 4</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
-                                                </div>
-                                                {{ Form::text('caption_four', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 4','id'=>'caption_four']) }}
-                                            </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12"><label for="ref_type" class="caption">Search Project </label>
+                                        <div class="input-group">
+                                            <select class="form-control  round  select-box" name="project_id" id="project" required>
+                                                <option value="">-- Select Project --</option>
+                                                @foreach ($projects as $project)
+                                                    <option value="{{ $project->id }}">
+                                                        {{ 'Prj-'.sprintf('%04d', $project->tid) }} 
+                                                        [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ] 
+                                                        {{ $project->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>                                                
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="inner-cmp-pnl">
-                                    <div class="form-group row">
-                                        <div class="col-sm-12">
-                                            <h3 class="subject">Report</h3>
+                                <div class="form-group row">
+                                    <div class="col-12">
+                                        <label for="attention" class="attention">Attention <span class="text-danger">*</span></label>
+                                        {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention']) }}
+                                    </div>                                        
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            {{ Form::text('tid', gen4tid('RjR-', @$last_rjc->tid+1), ['class' => 'form-control round', 'disabled']) }}
+                                            <input type="hidden" name="tid" value="{{ @$last_rjc->tid+1 }}">
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-12">
-                                            <label for="subject" class="caption">Subject / Title <span class="text-danger">*<span></label>
-                                            {{ Form::text('subject', null, ['class' => 'form-control round required', 'placeholder' => 'Subject / Title', 'autocomplete'=>'false', 'id'=>'subject']) }}
+                                    <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-12">
-                                            <label for="toAddInfo" class="root_cause">Findings and Root Cause</label>
-                                            {{ Form::textarea('root_cause', null, ['class' => 'form-control round html_editor', 'placeholder' => 'Root Cause','rows'=>'4']) }}
+                                    <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('client_ref', null, ['class' => 'form-control round ', 'placeholder' => 'Client Ref', 'id' => 'client_ref', 'required']) }}
+                                        </div>
+                                    </div>                                        
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-4">
+                                        <label for="region" class="caption"> Region</label>
+                                        {{ Form::text('region', null, ['class' => 'form-control round ', 'placeholder' => 'Region','autocomplete'=>'false','id'=>'region']) }}
+                                    </div>
+                                    <div class="col-sm-4"><label for="prepared_by" class="caption">Prepared By <span class="text-danger">*<span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepared By']) }}
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-12">
-                                            <label for="toAddInfo" class="action_taken">Action Taken</label>
-                                            {{ Form::textarea('action_taken', null, ['class' => 'form-control round html_editor', 'placeholder' => 'Action Taken','rows'=>'4']) }}
+                                    <div class="col-sm-4">
+                                        <label for="technician" class="caption"> Technician <span class="text-danger">*<span></label>
+                                        {{ Form::text('technician', null, ['class' => 'form-control round required', 'placeholder' => 'Technician', 'autocomplete'=>'false', 'id'=>'technician', 'required' => 'required']) }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-3"><label for="client_name" class="caption"> Image 1 </label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {!! Form::file('image_one', array('class'=>'input', 'id'=>'image_one' )) !!}
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-12">
-                                            <label for="toAddInfo" class="recommendations">Recommendations</label>
-                                            {{ Form::textarea('recommendations', null, ['class' => 'form-control round html_editor', 'placeholder' => 'Recommendations','rows'=>'4']) }}
+                                    <div class="col-sm-3"><label for="client_email" class="caption"> Image 2</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {!! Form::file('image_two', array('class'=>'input', 'id'=>'image_two' )) !!}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3"><label for="client_email" class="caption"> Image 3</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {!! Form::file('image_three', array('class'=>'input', 'id'=>'image_three' )) !!}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3"><label for="client_email" class="caption"> Image 4</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                            {!! Form::file('image_four', array('class'=>'input', 'id'=>'image_four' )) !!}
+                                        </div>
+                                    </div>                                    
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-3"><label for="caption" class="caption"> Caption 1 </label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('caption_one', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 1','id'=>'caption_one']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3"><label for="client_email" class="caption"> Caption 2</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('caption_two', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 2','id'=>'caption_two']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3"><label for="caption_three" class="caption"> Caption 3</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('caption_three', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 4','id'=>'caption_three']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3"><label for="client_email" class="caption"> Caption 4</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span>
+                                            </div>
+                                            {{ Form::text('caption_four', null, ['class' => 'form-control round ', 'placeholder' => 'Caption 4','id'=>'caption_four']) }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div>
-                            <table id="equipment" class="table-responsive tfr my_stripe_single">
-                                <thead>
-                                    <tr class="item_header bg-gradient-directional-blue white">
-                                        <th width="20%" class="text-center">Tag/Unique Number</th>
-                                        <th width="10%" class="text-center">Jobcard</th>
-                                        <th width="10%" class="text-center">Type</th>
-                                        <th width="10%" class="text-center">Make</th>
-                                        <th width="10%" class="text-center">Capacity</th>
-                                        <th width="10%" class="text-center">Location</th>
-                                        <th width="10%" class="text-center">Last Service Date</th>
-                                        <th width="10%" class="text-center">&nbsp;Next Service Date</th>
-                                        <th width="10%" class="text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-
-                            <div class="row mt-1">
-                                <div class="col-6">
-                                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addqproduct">
-                                        <i class="fa fa-plus-square"></i> Add Equipment
-                                    </button>
+                        <div class="col-sm-6">
+                            <div class="inner-cmp-pnl">
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <h3 class="subject">Report</h3>
+                                    </div>
                                 </div>
-                                <div class="col-5">
-                                    {{ Form::submit(trans('buttons.general.crud.create') . ' Report', ['class' => 'btn btn-primary btn-lg mt-3 float-right']) }}
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="subject" class="caption">Subject / Title <span class="text-danger">*<span></label>
+                                        {{ Form::text('subject', null, ['class' => 'form-control round required', 'placeholder' => 'Subject / Title', 'autocomplete'=>'false', 'id'=>'subject']) }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="toAddInfo" class="root_cause">Findings and Root Cause</label>
+                                        {{ Form::textarea('root_cause', null, ['class' => 'form-control round html_editor', 'placeholder' => 'Root Cause','rows'=>'4']) }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="toAddInfo" class="action_taken">Action Taken</label>
+                                        {{ Form::textarea('action_taken', null, ['class' => 'form-control round html_editor', 'placeholder' => 'Action Taken','rows'=>'4']) }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <label for="toAddInfo" class="recommendations">Recommendations</label>
+                                        {{ Form::textarea('recommendations', null, ['class' => 'form-control round html_editor', 'placeholder' => 'Recommendations','rows'=>'4']) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        {{ Form::close() }}
                     </div>
+
+                    <div>
+                        <table id="equipment" class="table-responsive tfr my_stripe_single">
+                            <thead>
+                                <tr class="item_header bg-gradient-directional-blue white">
+                                    <th width="20%" class="text-center">Tag/Unique Number</th>
+                                    <th width="10%" class="text-center">Jobcard</th>
+                                    <th width="10%" class="text-center">Type</th>
+                                    <th width="10%" class="text-center">Make</th>
+                                    <th width="10%" class="text-center">Capacity</th>
+                                    <th width="10%" class="text-center">Location</th>
+                                    <th width="10%" class="text-center">Last Service Date</th>
+                                    <th width="10%" class="text-center">&nbsp;Next Service Date</th>
+                                    <th width="10%" class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div class="row mt-1">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-success" aria-label="Left Align" id="addqproduct">
+                                    <i class="fa fa-plus-square"></i> Add Equipment
+                                </button>
+                            </div>
+                            <div class="col-5">
+                                {{ Form::submit(trans('buttons.general.crud.create') . ' Report', ['class' => 'btn btn-primary btn-lg mt-3 float-right']) }}
+                            </div>
+                        </div>
+                    </div>
+                    {{ Form::close() }}
                 </div>
             </div>
         </div>
@@ -230,14 +228,13 @@
 @section('extra-scripts')
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
- 
 <script type="text/javascript">
     // initialize html editor
     editor();
 
     // ajax setup
     $.ajaxSetup({ 
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}"}
     });
 
     // initialize date picker 
@@ -251,7 +248,6 @@
         projects.forEach(prj => {
             if (prj.id == $(this).val()) {
                 $('#subject').val(prj.name);
-
                 prj.quotes.forEach(qt => {
                     if (qt.id == prj.main_quote_id) {
                         $('#client_ref').val(qt.client_ref).prop('readonly', true);

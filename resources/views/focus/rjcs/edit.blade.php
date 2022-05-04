@@ -3,13 +3,13 @@
 @section ('title', ' Diagnosis Job Card | Edit Diagnosis Job Card')
 
 @section('content')
-<div class="">
+
     <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
                 <h4 class="content-header-title">Rjc Report Management</h4>
             </div>
-            <div class="content-header-right col-md-6 col-12">
+            <div class="content-header-right col-6">
                 <div class="media width-250 float-right">
                     <div class="media-body media-right text-right">
                         @include('focus.rjcs.partials.rjcs-header-buttons')
@@ -59,7 +59,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('tid', 'RjR-'.sprintf('%04d', $rjc->tid), ['class' => 'form-control round', 'disabled']) }}
+                                                {{ Form::text('tid', gen4tid('RjR-', $rjc->tid), ['class' => 'form-control round', 'disabled']) }}
                                                 <input type="hidden" name="tid" value="{{ $rjc->tid }}">
                                             </div>
                                         </div>
@@ -197,16 +197,20 @@
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @section('extra-scripts')
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
 <script type="text/javascript">
     // initialize html editor
     editor();
+
+    // ajax setup
+    $.ajaxSetup({ 
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}"}
+    });
+
 
     // initialize datepicker
     $('[data-toggle="datepicker"]')
