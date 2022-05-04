@@ -117,7 +117,7 @@ class BillsController extends Controller
         $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
         $pdf->WriteHTML($html);
 
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'RjR-' . sprintf('%04d', $tid) . '.pdf';
 
         return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);    

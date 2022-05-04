@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>{{ 'RjR-'.sprintf('%04d', $invoice->tid) }}</title>
+	<title>{{ 'RjR-'.sprintf('%04d', $resource->tid) }}</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -114,23 +114,23 @@
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name : </b>{{ $invoice->quote->client->company }}<br>
-				<b>Site / Branch : </b>{{ $invoice->quote->branch->name }}<br>
-				<b>Region : </b>{{ $invoice->region }}<br>
-				<b>Attention : </b> {{ $invoice->attention }}<br>
+				<b>Client Name : </b>{{ $resource->quote->client->company }}<br>
+				<b>Site / Branch : </b>{{ $resource->quote->branch->name }}<br>
+				<b>Region : </b>{{ $resource->region }}<br>
+				<b>Attention : </b> {{ $resource->attention }}<br>
 			<td width="5%">&nbsp;</td>
 			<td width="45%" style="border: 0.1mm solid #888888;">
 				<span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
-				<b>Report No : </b> {{ 'RjR-'.sprintf('%04d', $invoice->tid) }}<br>
-				<b>Date : </b>{{ dateFormat($invoice->report_date, 'd-M-Y') }}<br><br>
-				<b>Prepared By : </b>{{ $invoice->prepared_by }}<br>
+				<b>Report No : </b> {{ 'RjR-'.sprintf('%04d', $resource->tid) }}<br>
+				<b>Date : </b>{{ dateFormat($resource->report_date, 'd-M-Y') }}<br><br>
+				<b>Prepared By : </b>{{ $resource->prepared_by }}<br>
 			</td>
 		</tr>
 	</table><br>
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td style="border: 0.1mm solid #888888;">
-				Ref : <b>{{ $invoice->subject }}</b>
+				Ref : <b>{{ $resource->subject }}</b>
 			</td>
 		</tr>
 	</table>
@@ -149,7 +149,7 @@
 		</thead>
 		<tbody>
 			<!-- ITEMS HERE -->
-			@foreach($invoice->rjc_items as $item)
+			@foreach($resource->rjc_items as $item)
 				<tr class="dotted">
 					<td class="mytotalss">{{ $item->tag_number }}</td>
 					<td class="mytotalss">{{ $item->equipment_type }}</td>
@@ -166,8 +166,8 @@
 	<div>
 		<h5><span>b.</span> Call Out Details</h5>
 		<p>
-			{{ $invoice->quote->lead->title }} <b>on</b> <i>{{ dateFormat($invoice->quote->lead->date_of_request, 'd-M-Y') }}</i> <b>as
-			per call reference</b> <i>{{ $invoice->quote->lead->client_ref }}</i>
+			{{ $resource->quote->lead->title }} <b>on</b> <i>{{ dateFormat($resource->quote->lead->date_of_request, 'd-M-Y') }}</i> <b>as
+			per call reference</b> <i>{{ $resource->quote->lead->client_ref }}</i>
 		</p><br>
 		<table class="items items-table" cellpadding=8>
 			<thead>
@@ -181,24 +181,24 @@
 			<tbody>
 				<tr class="dotted">
 					<td>
-						@foreach ($invoice->djcs as $djc)
+						@foreach ($resource->djcs as $djc)
 							{{ 'DjR-'.sprintf('%04d', $djc->tid) }} ; 
 							{{ dateFormat($djc->report_date, 'd-m-Y') }} 
 							<br>
 						@endforeach
 					</td>
 					@php
-						$tid = sprintf('%04d', $invoice->quote->tid);
-						if ($invoice->quote->bank_id) $tid = 'PI-'.$tid;
+						$tid = sprintf('%04d', $resource->quote->tid);
+						if ($resource->quote->bank_id) $tid = 'PI-'.$tid;
 						else $tid = 'QT-'.$tid;
 					@endphp
-					<td>{{ $tid }} ; {{ dateFormat($invoice->quote->invoicedate, 'd-m-Y') }}</td>
+					<td>{{ $tid }} ; {{ dateFormat($resource->quote->resourcedate, 'd-m-Y') }}</td>
 					<td>
-						{{ $invoice->quote->reference }} ; 
-						{{ dateFormat($invoice->quote->reference_date, 'd-m-Y') }}
+						{{ $resource->quote->reference }} ; 
+						{{ dateFormat($resource->quote->reference_date, 'd-m-Y') }}
 					</td>
 					<td>
-						@foreach ($invoice->quote->verified_jcs as $rjc)
+						@foreach ($resource->quote->verified_jcs as $rjc)
 							@if ($rjc->type == 2 && $rjc->date)
 								DN-{{ $rjc->reference }} ; {{ dateFormat($rjc->date, 'd-m-Y') }} ; {{ $rjc->technician }}
 							@elseif ($rjc->date)
@@ -213,18 +213,18 @@
 	</div>
 	<div>
 		<h5><span>c.</span> Findings & Root Cause</h5>
-		<p>{!! $invoice->root_cause !!}</p>
+		<p>{!! $resource->root_cause !!}</p>
 	</div>
 	<div>
 		<h5><span>d.</span> Action Taken</h5>
-		<p>{!! $invoice->action_taken !!}</p>
+		<p>{!! $resource->action_taken !!}</p>
 	</div>
 	<div>
 		<h5><span>e.</span> Recommendation</h5>
-		<p>{!! $invoice->recommendations !!}</p>
+		<p>{!! $resource->recommendations !!}</p>
 	</div>
 	@php
-		$is_image = isset($invoice->image_one) || isset($invoice->image_two) || isset($invoice->image_three) || isset($invoice->image_four);
+		$is_image = isset($resource->image_one) || isset($resource->image_two) || isset($resource->image_three) || isset($resource->image_four);
 	@endphp
 	@if($is_image)
 		<h5><span>f.</span> Pictorials</h5>
@@ -237,31 +237,31 @@
 			</tr>
 			<tr class="dotted">
 				<td>
-					@isset($invoice->image_one)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_one) }}" alt="image_one" border=3 height=300 width=300></img>
+					@isset($resource->image_one)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_one) }}" alt="image_one" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 				<td>
-					@isset($invoice->image_two)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_two) }}" alt="image_two" border=3 height=300 width=300></img>
+					@isset($resource->image_two)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_two) }}" alt="image_two" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 				<td>
-					@isset($invoice->image_three)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_three) }}" alt="image_three" border=3 height=300 width=300></img>
+					@isset($resource->image_three)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_three) }}" alt="image_three" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 				<td>
-					@isset($invoice->image_four)
-						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $invoice->image_four) }}" alt="image_four" border=3 height=300 width=300></img>
+					@isset($resource->image_four)
+						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_four) }}" alt="image_four" border=3 height=300 width=300></img>
 					@endisset
 				</td>
 			</tr>
 			<tr>
-				<td class="cost">{{ $invoice->caption_one }}</td>
-				<td class="cost">{{ $invoice->caption_two }}</td>
-				<td class="cost">{{ $invoice->caption_three }}</td>
-				<td class="cost">{{ $invoice->caption_four }}</td>
+				<td class="cost">{{ $resource->caption_one }}</td>
+				<td class="cost">{{ $resource->caption_two }}</td>
+				<td class="cost">{{ $resource->caption_three }}</td>
+				<td class="cost">{{ $resource->caption_four }}</td>
 			</tr>
 		</table>
 	@endif
