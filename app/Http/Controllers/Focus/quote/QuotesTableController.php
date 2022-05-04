@@ -72,8 +72,8 @@ class QuotesTableController extends Controller
 
                 return $quote->lead->client_name;
             })
-            ->addColumn('created_at', function ($quote) {
-                return dateFormat($quote->invoicedate);
+            ->addColumn('date', function ($quote) {
+                return dateFormat($quote->date);
             })
             ->addColumn('total', function ($quote) {
                 return number_format($quote->total, 2);
