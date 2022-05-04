@@ -230,7 +230,9 @@
     <div class="col-3">
         <label>SubTotal ({{ config('currency.symbol') }})</label>
         <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
-        <label id="tax-label">{{ trans('general.total_tax') }} ({{ config('currency.symbol') }})</label>
+        <label id="tax-label">{{ trans('general.total_tax') }} ({{ config('currency.symbol') }})
+            <span id="vatText" class="text-danger">(VAT-Exclusive)</span>
+        </label>
         <input type="text" name="tax" id="tax" class="form-control" readonly>
         <label>
             {{trans('general.grand_total')}} ({{ config('currency.symbol') }})

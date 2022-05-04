@@ -45,6 +45,12 @@
     $('#referencedate').datepicker('setDate', new Date());
     $('#date').datepicker('setDate', new Date());
 
+    // print type
+    $('input[type=radio]').change(function() {
+        if ($(this).val() == 'inclusive') $('#vatText').text('(VAT-Inclusive)');
+        else $('#vatText').text('(VAT-Exclusive)');
+    });
+
     // on selecting lead
     $('#lead_id').change(function() {
         const opt = $('#lead_id option:selected');
