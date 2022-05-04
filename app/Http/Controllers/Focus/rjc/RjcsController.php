@@ -43,28 +43,21 @@ class RjcsController extends Controller
      */
     public function create()
     {
-        $rjc =  Rjc::orderBy('tid', 'desc')->first('tid');
-        $tid = isset($rjc) ? $rjc->tid+1 : 1;
-
-        $projects =  Project::where('main_quote_id', '>', 0)
-            ->orderBy('id', 'desc')
-            ->get(['id', 'name', 'tid', 'main_quote_id']);
-        // append quote tid
+        $last_rjc =  Rjc::orderBy('tid', 'DESC')->first('tid');
+        $projects =  Project::doesntHave('rjc')->get(['id', 'name', 'tid', 'main_quote_id']);
         foreach($projects as $project) {
-            $lead_tids = array();
-            $quote_tids = array();                
+            $lead_tids = [];
+            $quote_tids = [];                
             foreach ($project->quotes as $quote) {
-                $lead_tids[] = 'Tkt-'.sprintf('%04d', $quote->lead->reference);
-                // quote
-                $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
-                else $quote_tids[] = 'QT-'. $tid;
+                $lead_tids[] = gen4tid('Tkt-', $quote->lead->reference);
+                if ($quote->bank_id) $quote_tids[] = gen4tid('PI-', $quote->tid);
+                else $quote_tids[] = gen4tid('QT-', $quote->tid);
             }
             $project['lead_tids'] = implode(', ', $lead_tids);            
             $project['quote_tids'] = implode(', ', $quote_tids);            
         }
         
-        return view('focus.rjcs.create')->with(compact('projects', 'tid'));
+        return view('focus.rjcs.create', compact('projects', 'last_rjc'));
     }
 
     /**
