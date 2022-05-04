@@ -356,6 +356,21 @@
                         </ul>
                     </li>
                     @endauth
+                    @permission('supplier-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-target"></i> {{ trans('suppliers.management') }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.suppliers.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('suppliers.management') }}
+                                </a>
+                            </li>
+                            @permission('supplier-data')
+                            <li><a class="dropdown-item" href="{{ route('biller.suppliers.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('labels.backend.suppliers.create') }}
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
                 </ul>
             </li>
             @endif
@@ -441,21 +456,7 @@
                         </ul>
                     </li>
                     @endauth
-                    @permission('supplier-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-target"></i> {{ trans('suppliers.management') }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.suppliers.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('suppliers.management') }}
-                                </a>
-                            </li>
-                            @permission('supplier-data')
-                            <li><a class="dropdown-item" href="{{ route('biller.suppliers.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('labels.backend.suppliers.create') }}
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
+                    
                     @permission('stockreturn-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-exchange"></i> Project Stock Transfer</a>
                         <ul class="dropdown-menu">
