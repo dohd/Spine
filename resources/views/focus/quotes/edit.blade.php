@@ -97,6 +97,15 @@
     /**
      * Table logic
      */
+    // default autocomplete
+    $("#quoteTbl tbody tr").each(function() {
+        const id = $(this).find('.pname').attr('id');
+        if (id) {
+            const i = id.split('-')[1];
+            $('#name-'+i).autocomplete(autoComp(i));
+        }
+    })
+
     // on clicking action drop down
     $("#quoteTbl").on("click", ".up, .down, .remv", function() {
         var row = $(this).parents("tr:first");
