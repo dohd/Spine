@@ -2,13 +2,6 @@
 
 @section ('title', trans('labels.backend.invoices.management') . ' | ' . trans('labels.backend.invoices.create'))
 
-@section('page-header')
-<h1>
-    {{ trans('labels.backend.invoices.management') }}
-    <small>{{ trans('labels.backend.invoices.create') }}</small>
-</h1>
-@endsection
-
 @section('content')
 <div class="app-content">
     <div class="content-wrapper">
@@ -462,19 +455,16 @@
 @include("focus.modal.cancel_model")
 @include("focus.modal.subscription_model")
 @endsection
+
 @section('extra-style')
 {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
 @endsection
+
 @section('extra-scripts')
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 <script type="text/javascript">
-    $('[data-toggle="datepicker"]').datepicker({
-        autoHide: true,
-        format: '{{config('
-        core.user_date_format ')}}'
-    });
-    $('[data-toggle="datepicker"]').datepicker('setDate', '{{date(config('
-        core.user_date_format '))}}');
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
+
     $(function() {
         'use strict';
         $('.summernote').summernote({
@@ -492,57 +482,44 @@
             ],
             popover: {}
         });
+
         // Change this to the location of your server-side upload handler:
-        var url = '{{route('biller.bill_attachment')}}';
+        var url = "{{ route('biller.bill_attachment') }}";
         $('#fileupload').fileupload({
-                url: url,
-                dataType: 'json',
-                formData: {
-                    _token: "{{ csrf_token() }}",
-                    id: '{{$invoice['
-                    id ']}}',
-                    'bill': 1
-                },
-                done: function(e, data) {
-                    $.each(data.result, function(index, file) {
-                        $('#files').append(
-                            '<tr><td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
-                    });
-                },
-                progressall: function(e, data) {
-
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
-
-                    $('#progress .progress-bar').css(
-                        'width',
-                        progress + '%'
-                    );
-
-                }
-            }).prop('disabled', !$.support.fileInput)
-            .parent().addClass($.support.fileInput ? undefined : 'disabled');
+            url: url,
+            dataType: 'json',
+            formData: {
+                _token: "{{ csrf_token() }}",
+                id: "{{$invoice['id']}}",
+                bill: 1
+            },
+            done: function(e, data) {
+                const tr = `<tr>
+                    <td><a data-url="{{route('biller.bill_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red">
+                    <i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>`;
+                $.each(data.result, function(index, file) { $('#files').append(tr) });
+            },
+            progressall: function(e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css('width', progress + '%' );
+            }
+        })
+        .prop('disabled', !$.support.fileInput)
+        .parent().addClass($.support.fileInput ? undefined : 'disabled');
 
         $(document).on('click', ".aj_delete", function(e) {
             e.preventDefault();
-            var aurl = $(this).attr('data-url');
-            var obj = $(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+            const ancr = $(this);
             $.ajax({
-                url: aurl,
+                url: $(this).attr('data-url'),
                 type: 'POST',
                 dataType: 'json',
                 success: function(data) {
-                    obj.closest('tr').remove();
-                    obj.remove();
+                    ancr.closest('tr').remove();
+                    ancr.remove();
                 }
             });
-
         });
     });
 </script>
-
 @endsection
