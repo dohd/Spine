@@ -17,9 +17,9 @@
 
                         <div class="col">
                             @php
-                                $remaining = $invoice['total'] - $invoice['pamnt'];
+                                $remaining = $resource['total'] - $resource['pamnt'];
                             @endphp
-                            @if($invoice['status'] != 'canceled')
+                            @if($resource['status'] != 'canceled')
                                 <div class="row">
 
 
@@ -43,7 +43,7 @@
                                             @endif
                                             @if ($logged_in_user)
                                                 <a class="btn btn-warning  mr-1"
-                                                   href="{{$invoice['url']}}"
+                                                   href="{{$resource['url']}}"
                                                    role="button"><i
                                                             class="fa fa-backward"></i> </a>
 
@@ -76,7 +76,7 @@
 
                                 </div>
                             @else
-                                <h2 class="btn btn-oval btn-danger">{{trans('payments.'.$invoice['status'])}}</h2>
+                                <h2 class="btn btn-oval btn-danger">{{trans('payments.'.$resource['status'])}}</h2>
                             @endif
                         </div>
                     </div>
@@ -105,16 +105,16 @@
                                 @if($company['taxid'])
                                     <li>{{$general['tax_id']}}: {{$company['taxid']}}</li>
                                 @endif
-                                 {!! custom_fields_view(6,$invoice['ins'],false,$invoice['ins']) !!}
+                                 {!! custom_fields_view(6,$resource['ins'],false,$resource['ins']) !!}
                             </ul>
                         </div>
                         <div class="col-md-6 col-sm-12 text-xs-center text-md-right mt-2">
                             <h2>{{$general['bill_type']}}</h2>
-                            <p class="pb-1"> {{prefix($general['prefix'],$invoice['ins'])}} # {{$invoice['tid']}}</p>
-                            <p class="pb-1">{{trans('general.reference')}} : {{$invoice['refer']}}</p>
+                            <p class="pb-1"> {{prefix($general['prefix'],$resource['ins'])}} # {{$resource['tid']}}</p>
+                            <p class="pb-1">{{trans('general.reference')}} : {{$resource['refer']}}</p>
                             <ul class="px-0 list-unstyled">
                                 <li>{{trans('general.gross_amount')}}</li>
-                                <li class="lead text-bold-800"> {{amountFormat($invoice['total'],$invoice['currency'])}}</li>
+                                <li class="lead text-bold-800"> {{amountFormat($resource['total'],$resource['currency'])}}</li>
                             </ul>
                         </div>
 
@@ -133,30 +133,30 @@
                             <ul class="px-0 list-unstyled">
 
 
-                                <li class="text-bold-800"><strong>  {{$invoice->customer->name}}</strong></li>
-                                <li>{{$invoice->customer->address}},</li>
-                                <li>{{$invoice->customer->city}},{{$invoice->customer->region}}</li>
-                                <li>{{$invoice->customer->country}}-{{$invoice->customer->postbox}}.</li>
-                                <li>{{$invoice->customer->email}},</li>
-                                <li>{{$invoice->customer->phone}},</li>
-                                @if($invoice->customer->taxid)
-                                    <li>{{$general['tax_id']}}: {{$invoice->customer->taxid}}</li>@endif
-                                {!! custom_fields_view($invoice['person'],$invoice['person_id'],false,$invoice['ins']) !!}
+                                <li class="text-bold-800"><strong>  {{$resource->customer->name}}</strong></li>
+                                <li>{{$resource->customer->address}},</li>
+                                <li>{{$resource->customer->city}},{{$resource->customer->region}}</li>
+                                <li>{{$resource->customer->country}}-{{$resource->customer->postbox}}.</li>
+                                <li>{{$resource->customer->email}},</li>
+                                <li>{{$resource->customer->phone}},</li>
+                                @if($resource->customer->taxid)
+                                    <li>{{$general['tax_id']}}: {{$resource->customer->taxid}}</li>@endif
+                                {!! custom_fields_view($resource['person'],$resource['person_id'],false,$resource['ins']) !!}
                             </ul>
 
 
                         </div>
-                        <div class="col-md-4 col-sm-12 text-xs-center text-md-left">@if ($invoice->customer->name_s)
+                        <div class="col-md-4 col-sm-12 text-xs-center text-md-left">@if ($resource->customer->name_s)
                                 <p class="text-muted">{{trans('customers.address_s')}}</p>
                                 <ul class="px-0 list-unstyled">
 
 
-                                    <li class="text-bold-800"><strong>  {{$invoice->customer->name_s}}</strong></li>
-                                    <li>{{$invoice->customer->address_s}},</li>
-                                    <li>{{$invoice->customer->city_s}},{{$invoice->customer->region_s}}</li>
-                                    <li>{{$invoice->customer->country_s}}-{{$invoice->customer->postbox_s}}.</li>
-                                    <li>{{$invoice->customer->email_s}},</li>
-                                    <li>{{$invoice->customer->phone_s}},</li>
+                                    <li class="text-bold-800"><strong>  {{$resource->customer->name_s}}</strong></li>
+                                    <li>{{$resource->customer->address_s}},</li>
+                                    <li>{{$resource->customer->city_s}},{{$resource->customer->region_s}}</li>
+                                    <li>{{$resource->customer->country_s}}-{{$resource->customer->postbox_s}}.</li>
+                                    <li>{{$resource->customer->email_s}},</li>
+                                    <li>{{$resource->customer->phone_s}},</li>
 
                                 </ul>
                             @endif
@@ -168,22 +168,22 @@
                             @endphp
 
                             <p><span class="text-muted">{{$general['lang_bill_date']}}</span>
-                                : {{dateFormat($invoice['invoicedate'],$company['main_date_format'])}}</p>
+                                : {{dateFormat($resource['invoicedate'],$company['main_date_format'])}}</p>
                             <p><span class="text-muted">{{$general['lang_bill_due_date']}}</span>
-                                : {{dateFormat($invoice['invoiceduedate'],$company['main_date_format'])}}</p>
+                                : {{dateFormat($resource['invoiceduedate'],$company['main_date_format'])}}</p>
                             <p><span class="text-muted">{{trans('general.payment_terms')}}</span>
-                                : {{@$invoice->term->title}}</p>
+                                : {{@$resource->term->title}}</p>
                         </div>
                     </div>
 
                     <!--/ Invoice Customer Details -->
-                    @if(isset($invoice['proposal']))
+                    @if(isset($resource['proposal']))
                         <div class="row">
                             <div class="col">
 
                                 <hr>
 
-                                <p>{!! $invoice['proposal']  !!}}</p>
+                                <p>{!! $resource['proposal']  !!}}</p>
                             </div>
 
                         </div>@endif
@@ -194,7 +194,7 @@
                                 <table class="table table-striped">
                                     <thead>
 
-                                    @if($invoice['tax_format']=='exclusive' OR $invoice['tax_format']=='inclusive')
+                                    @if($resource['tax_format']=='exclusive' OR $resource['tax_format']=='inclusive')
                                         <tr>
                                             <th>#</th>
                                             <th> {{trans('products.product_des')}}</th>
@@ -206,7 +206,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    @foreach($invoice->products as $product)
+                                    @foreach($resource->products as $product)
 
                                         @php
                                             if ($fill == true) {
@@ -227,19 +227,19 @@
                                                 {{numberFormat($product['product_qty'])}} {{$product['unit']}}
                                             </td>
                                             <td>
-                                                {{amountFormat($product['product_price'],$invoice['currency'])}}
+                                                {{amountFormat($product['product_price'],$resource['currency'])}}
                                             </td>
 
 
-                                            <td>{{amountFormat($product['total_tax'],$invoice['currency'])}} <span
-                                                        class="font-size-xsmall">({{numberFormat($product['product_tax'],$invoice['currency'])}}%)</span>
+                                            <td>{{amountFormat($product['total_tax'],$resource['currency'])}} <span
+                                                        class="font-size-xsmall">({{numberFormat($product['product_tax'],$resource['currency'])}}%)</span>
                                             </td>
 
 
-                                            <td>{{amountFormat($product['total_discount'],$invoice['currency'])}}</td>
+                                            <td>{{amountFormat($product['total_discount'],$resource['currency'])}}</td>
 
                                             <td>
-                                                {{amountFormat($product['product_subtotal'],$invoice['currency'])}}
+                                                {{amountFormat($product['product_subtotal'],$resource['currency'])}}
                                             </td>
                                         </tr>
                                         @if($product['product_des'])
@@ -260,7 +260,7 @@
                                     </tbody>
                                     @endif
 
-                                    @if($invoice['tax_format']=='cgst')
+                                    @if($resource['tax_format']=='cgst')
                                         <tr>
                                             <th>#</th>
                                             <th> {{trans('products.product_des')}}</th>
@@ -273,7 +273,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @foreach($invoice->products as $product)
+                                        @foreach($resource->products as $product)
                                             @php
                                                 if ($fill == true) {
                                                   $flag = ' m_fill';
@@ -294,22 +294,22 @@
                                                     {{numberFormat($product['product_qty'])}} {{$product['unit']}}
                                                 </td>
                                                 <td>
-                                                    {{amountFormat($product['product_price'],$invoice['currency'])}}
+                                                    {{amountFormat($product['product_price'],$resource['currency'])}}
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_tax']/2,$invoice['currency'])}} <span
-                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$invoice['currency'])}}%)</span>
+                                                <td>{{amountFormat($product['total_tax']/2,$resource['currency'])}} <span
+                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$resource['currency'])}}%)</span>
                                                 </td>
-                                                <td>{{amountFormat($product['total_tax']/2,$invoice['currency'])}} <span
-                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$invoice['currency'])}}%)</span>
+                                                <td>{{amountFormat($product['total_tax']/2,$resource['currency'])}} <span
+                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$resource['currency'])}}%)</span>
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_discount'],$invoice['currency'])}}</td>
+                                                <td>{{amountFormat($product['total_discount'],$resource['currency'])}}</td>
 
                                                 <td>
-                                                    {{amountFormat($product['product_subtotal'],$invoice['currency'])}}
+                                                    {{amountFormat($product['product_subtotal'],$resource['currency'])}}
                                                 </td>
                                             </tr>
 
@@ -331,7 +331,7 @@
                                         </tbody>
                                     @endif
 
-                                    @if($invoice['tax_format']=='igst')
+                                    @if($resource['tax_format']=='igst')
                                         <tr>
                                             <th>#</th>
                                             <th> {{trans('products.product_des')}}</th>
@@ -343,7 +343,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @foreach($invoice->products as $product)
+                                        @foreach($resource->products as $product)
                                             @php
                                                 if ($fill == true) {
                                                   $flag = ' m_fill';
@@ -364,19 +364,19 @@
                                                     {{numberFormat($product['product_qty'])}} {{$product['unit']}}
                                                 </td>
                                                 <td>
-                                                    {{amountFormat($product['product_price'],$invoice['currency'])}}
+                                                    {{amountFormat($product['product_price'],$resource['currency'])}}
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_tax'],$invoice['currency'])}} <span
-                                                            class="font-size-xsmall">({{numberFormat($product['product_tax'],$invoice['currency'])}}%)</span>
+                                                <td>{{amountFormat($product['total_tax'],$resource['currency'])}} <span
+                                                            class="font-size-xsmall">({{numberFormat($product['product_tax'],$resource['currency'])}}%)</span>
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_discount'],$invoice['currency'])}}</td>
+                                                <td>{{amountFormat($product['total_discount'],$resource['currency'])}}</td>
 
                                                 <td>
-                                                    {{amountFormat($product['product_subtotal'],$invoice['currency'])}}
+                                                    {{amountFormat($product['product_subtotal'],$resource['currency'])}}
                                                 </td>
                                             </tr>
                                             @if($product['product_des'])
@@ -410,17 +410,17 @@
                                     <div class="col-md-8"><p
                                                 class="lead">{{trans('general.status')}}:
                                             <u><strong
-                                                        id="pstatus">{{trans('payments.'.$invoice['status'])}}</strong></u>
+                                                        id="pstatus">{{trans('payments.'.$resource['status'])}}</strong></u>
                                         </p>
-                                        @if($invoice['pmethod'])
+                                        @if($resource['pmethod'])
                                             <p class="lead">{{trans('general.payment_method')}}: <u><strong
-                                                            id="pmethod">{{$invoice['pmethod']}}</strong></u>
+                                                            id="pmethod">{{$resource['pmethod']}}</strong></u>
                                             </p>
                                         @endif
 
                                         <p class="lead mt-1"><br>{{trans('general.note')}}:</p>
                                         <code>
-                                            {{$invoice['notes']}}
+                                            {{$resource['notes']}}
                                         </code>
                                     </div>
                                 </div>
@@ -433,46 +433,46 @@
                                         <tbody>
                                         <tr>
                                             <td>{{trans('general.subtotal')}}</td>
-                                            <td class="text-xs-right"> {{amountFormat($invoice['subtotal'],$invoice['currency'])}}</td>
+                                            <td class="text-xs-right"> {{amountFormat($resource['subtotal'],$resource['currency'])}}</td>
                                         </tr>
-                                        @if($invoice['tax']>0)
+                                        @if($resource['tax']>0)
                                             <tr>
                                                 <td>{{$general['tax_string_total']}}</td>
-                                                <td class="text-xs-right">{{amountFormat($invoice['tax'],$invoice['currency'])}}</td>
+                                                <td class="text-xs-right">{{amountFormat($resource['tax'],$resource['currency'])}}</td>
                                             </tr>@endif
-                                        @if($invoice['discount']>0)
+                                        @if($resource['discount']>0)
                                             <tr>
                                                 <td>{{trans('general.discount')}}</td>
-                                                <td class="text-xs-right">{{amountFormat($invoice['discount'],$invoice['currency'])}}</td>
+                                                <td class="text-xs-right">{{amountFormat($resource['discount'],$resource['currency'])}}</td>
                                             </tr>@endif
-                                        @if($invoice['shipping']>0)
+                                        @if($resource['shipping']>0)
                                             <tr>
                                                 <td>{{trans('general.shipping')}}</td>
-                                                <td class="text-xs-right">{{amountFormat($invoice['shipping'],$invoice['currency'])}}</td>
+                                                <td class="text-xs-right">{{amountFormat($resource['shipping'],$resource['currency'])}}</td>
                                             </tr>
-                                            @if($invoice['ship_tax']>0)
+                                            @if($resource['ship_tax']>0)
                                                 <tr>
                                                     <td>{{trans('general.shipping_tax')}}
-                                                        ({{trans('general.'.$invoice['ship_tax_type'])}})
+                                                        ({{trans('general.'.$resource['ship_tax_type'])}})
                                                     </td>
-                                                    <td>{{amountFormat($invoice['ship_tax'],$invoice['currency'])}}</td>
+                                                    <td>{{amountFormat($resource['ship_tax'],$resource['currency'])}}</td>
                                                 </tr>@endif
                                         @endif
                                         <tr>
                                             <td class="text-bold-800">{{trans('general.total')}}</td>
-                                            <td class="text-bold-800">{{amountFormat($invoice['total'],$invoice['currency'])}}</td>
+                                            <td class="text-bold-800">{{amountFormat($resource['total'],$resource['currency'])}}</td>
                                         </tr>
                                         @if( $general['status_block'])
                                             <tr>
                                                 <td>{{trans('general.payment_made')}}</td>
                                                 <td class="pink">(-) <span
-                                                            id="payment_made">{{amountFormat($invoice['pamnt'],$invoice['currency'])}}</span>
+                                                            id="payment_made">{{amountFormat($resource['pamnt'],$resource['currency'])}}</span>
                                                 </td>
                                             </tr>
                                             <tr class="bg-grey bg-lighten-4">
                                                 <td class="text-bold-800">{{trans('general.balance_due')}}</td>
                                                 <td class="text-bold-800"
-                                                    id="payment_due"> {{amountFormat($invoice['total']-$invoice['pamnt'],$invoice['currency'])}}</td>
+                                                    id="payment_due"> {{amountFormat($resource['total']-$resource['pamnt'],$resource['currency'])}}</td>
                                             </tr>
                                         @endif
                                         </tbody>
@@ -480,9 +480,9 @@
                                 </div>
                                 <div class="text-center">
                                     <p><strong>{{trans('general.authorized_person')}}</strong></p>
-                                    <img src="{{ Storage::disk('public')->url('app/public/img/signs/' . $invoice->user->signature) }}"
+                                    <img src="{{ Storage::disk('public')->url('app/public/img/signs/' . $resource->user->signature) }}"
                                          alt="signature" class="height-100 m-2"/>
-                                    <h6>({{$invoice->user->first_name}} {{$invoice->user->last_name}})</h6>
+                                    <h6>({{$resource->user->first_name}} {{$resource->user->last_name}})</h6>
                                 </div>
                             </div>
                         </div>
@@ -491,7 +491,7 @@
                     <!-- Invoice Footer -->
 
                     <div id="invoice-footer">
-                        @if(isset($invoice->transactions[0]))
+                        @if(isset($resource->transactions[0]))
                             <p class="lead">{{trans('transactions.transactions')}}
                                 :</p>
                             <table class="table table-striped">
@@ -508,15 +508,15 @@
                                 </tr>
                                 </thead>
                                 <tbody id="activity">
-                                @foreach($invoice->transactions as $transaction)
+                                @foreach($resource->transactions as $transaction)
                                     <tr>
                                         <th scope="row">{{ $loop->iteration }}</th>
                                         <td>
                                             <p class="text-muted">{{$transaction['payment_date']}}</p>
                                         </td>
                                         <td class="">{{$transaction['method']}}</td>
-                                        <td class="text-right">{{amountFormat($transaction['debit'],$invoice['currency'])}}</td>
-                                        <td class="text-right">{{amountFormat($transaction['credit'],$invoice['currency'])}}</td>
+                                        <td class="text-right">{{amountFormat($transaction['debit'],$resource['currency'])}}</td>
+                                        <td class="text-right">{{amountFormat($transaction['credit'],$resource['currency'])}}</td>
                                         <td class="">{{$transaction['note']}}</td>
 
                                     </tr>
@@ -525,14 +525,14 @@
                             </table>
                         @endif
                         <hr>
-                        {!! custom_fields_view($invoice['custom'],$invoice['id'],true,$invoice['ins']) !!}
+                        {!! custom_fields_view($resource['custom'],$resource['id'],true,$resource['ins']) !!}
                         <div class="row">
 
                             <div class="col-md-7 col-sm-12">
 
 
-                                <h5>{{@$invoice->term->title}}</h5>
-                                <p>{!! @$invoice->term->terms !!}}</p>
+                                <h5>{{@$resource->term->title}}</h5>
+                                <p>{!! @$resource->term->terms !!}}</p>
                             </div>
 
                         </div>
@@ -541,9 +541,9 @@
                     </div>
                     <!--/ Invoice Footer -->
 
-                    @if(isset($invoice->attachment))
+                    @if(isset($resource->attachment))
                         <table id="files" class="files table table-striped mt-2">
-                            @foreach($invoice->attachment as $row)
+                            @foreach($resource->attachment as $row)
                                 <tr>
                                     <td>
                                         <a href="{{ Storage::disk('public')->url('app/public/files/' . $row['value']) }}"
@@ -577,7 +577,7 @@
                                     $title = $row['name'];
                                     if ($row->config['surcharge'] > 0) {
                                         $surcharge_t = true;
-                                        $fee = '( ' . amountFormat($invoice['total']-$invoice['pamnt'],$invoice['currency']) . '+' . numberFormat($row->config['surcharge']) . ' %)';
+                                        $fee = '( ' . amountFormat($resource['total']-$resource['pamnt'],$resource['currency']) . '+' . numberFormat($row->config['surcharge']) . ' %)';
                                     } else {
                                         $fee = '';
                                     }
