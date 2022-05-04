@@ -30,8 +30,6 @@ use App\Repositories\Focus\quote\QuoteRepository;
 use App\Http\Requests\Focus\quote\ManageQuoteRequest;
 use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
-use App\Models\customer\Customer;
-use App\Models\hrm\Hrm;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
 use App\Models\items\VerifiedItem;
