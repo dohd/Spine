@@ -155,10 +155,10 @@
 <!-- Tab Menus -->
 <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
     <li class="nav-item bg-gradient-directional-blue">
-        <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Inventory/Stock Items</a>
+        <a class="nav-link" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Inventory/Stock Items</a>
     </li>
     <li class="nav-item bg-danger">
-        <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expenses</a>
+        <a class="nav-link active" id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expenses</a>
     </li>
     <li class="nav-item bg-success">
         <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipments</a>
