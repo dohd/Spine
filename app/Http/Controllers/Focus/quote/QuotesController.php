@@ -178,16 +178,18 @@ class QuotesController extends Controller
      */
     public function destroy(Quote $quote)
     {
-        $this->repository->delete($quote);
+        $res = $this->repository->delete($quote);
 
-        $url = route('biller.quotes.index');
+        $link = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.deleted');
         if ($quote->bank_id) {
-            $url = route('biller.quotes.index', 'page=pi');
+            $link = route('biller.quotes.index', 'page=pi');
             $msg = 'The Proforma Invoice was successfully deleted';
         }
 
-        return new RedirectResponse($url, ['flash_success' => $msg]);
+        if (!$res) return new RedirectResponse($link, ['flash_error' => 'Quote/PI is attached to a project']);
+
+        return new RedirectResponse($link, ['flash_success' => $msg]);
     }
 
 

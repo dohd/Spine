@@ -247,6 +247,7 @@ class QuoteRepository extends BaseRepository
     public function delete($quote)
     {
         $quote->lead->update(['status' => 0, 'reason' => 'new']);
+        if ($quote->project_quote) return false;
         if ($quote->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
