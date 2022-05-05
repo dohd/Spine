@@ -117,8 +117,6 @@ class CustomerRepository extends BaseRepository
                     CustomEntry::insert($fields);
                 }
                 
-                print_log('+++ Customer result  before commit +++', $result->toArray());
-
                 DB::commit();
                 return $result;
             }
