@@ -44,7 +44,11 @@ class RjcsController extends Controller
     public function create()
     {
         $last_rjc =  Rjc::orderBy('tid', 'DESC')->first('tid');
-        $projects =  Project::doesntHave('rjc')->get(['id', 'name', 'tid', 'main_quote_id']);
+        $projects =  Project::doesntHave('rjc')
+            ->whereHas('quotes', function ($q) {
+                $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+            })->get(['id', 'name', 'tid', 'main_quote_id']);
+
         foreach($projects as $project) {
             $lead_tids = [];
             $quote_tids = [];                
