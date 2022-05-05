@@ -134,8 +134,7 @@
         
         $('#grandtax').val(stockTax + expTax + assetTax);
         $('#paidttl').val(stockSubttl + expSubttl + assetSubttl);
-        const grandTtl = [$('#grandtax').val(), $('#paidttl').val()]
-        .reduce((prev, curr) => prev + curr*1, 0);
+        const grandTtl = [$('#grandtax').val(), $('#paidttl').val()].reduce((prev, curr) => prev + curr*1, 0);
         $('#grandttl').val(grandTtl);
     }
 </script>

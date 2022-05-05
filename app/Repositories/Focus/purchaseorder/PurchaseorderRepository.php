@@ -169,6 +169,7 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create_grn($purchaseorder, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $order = $input['order'];
@@ -199,9 +200,9 @@ class PurchaseorderRepository extends BaseRepository
             if ($grn_qty < $order_qty) $purchaseorder->update(['status' => 'Partial']);
             else $purchaseorder->update(['status' => 'Complete']);
         }
-        
+
         // create bill
-        $exclude_keys = ['id', 'purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn'];
+        $exclude_keys = ['id', 'purchaseorder_id', 'stock_grn', 'expense_grn', 'asset_grn', 'items'];
         $bill_inp = array_diff_key($grn->toArray(), array_flip($exclude_keys));
         $po = $grn->purchaseorder;
         $bill_inp = $bill_inp + [
@@ -223,7 +224,7 @@ class PurchaseorderRepository extends BaseRepository
         $bill_items = array();
         foreach ($grn->items as $item) {
             $poitem = $item->purchaseorder_item->toArray();
-            $bill_item = array_diff_key($poitem, array_flip(['id', 'uom', 'purchaseorder_id']));
+            $bill_item = array_diff_key($poitem, array_flip(['id', 'uom', 'purchaseorder_id', 'product']));
             $bill_item = array_replace($bill_item, [
                 'bill_id' => $bill->id,
                 'qty' => $item->qty,
