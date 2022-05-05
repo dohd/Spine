@@ -161,11 +161,10 @@ class SupplierRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function delete(Supplier $supplier)
+    public function delete($supplier)
     {
-        if ($supplier->delete()) {
-            return true;
-        }
+        if ($supplier->delete()) return true;
+        
         throw new GeneralException(trans('exceptions.backend.suppliers.delete_error'));
     }
     /*

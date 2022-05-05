@@ -4,13 +4,15 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Supplier Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.suppliers.partials.suppliers-header-buttons')
+                <div class="media-body media-right text-right">
+                    @include('focus.suppliers.partials.suppliers-header-buttons')
+                </div>
             </div>
         </div>
     </div>

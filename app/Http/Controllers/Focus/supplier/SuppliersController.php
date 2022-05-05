@@ -21,14 +21,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Focus\purchaseorder\CreatePurchaseorderRequest;
 use App\Http\Requests\Focus\supplier\ManageSupplierRequest;
 use App\Http\Requests\Focus\supplier\StoreSupplierRequest;
-use App\Http\Requests\Request;
 use App\Http\Responses\Focus\supplier\CreateResponse;
 use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Models\account\Account;
 use App\Models\bill\Bill;
-use App\Models\purchaseorder\Purchaseorder;
 use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
 use App\Repositories\Focus\supplier\SupplierRepository;
@@ -133,11 +130,10 @@ class SuppliersController extends Controller
      * @param App\Models\supplier\Supplier $supplier
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Supplier $supplier, StoreSupplierRequest $request)
+    public function destroy(Supplier $supplier)
     {
-        //Calling the delete method on repository
         $this->repository->delete($supplier);
-        //returning with successfull message
+
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.deleted')]);
     }
 
