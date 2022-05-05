@@ -187,13 +187,13 @@
     });
     
     function draw_data() {
-        const tableLan = {@lang('datatable.strings')};
+        const language = {@lang('datatable.strings')};
         const dataTable = $('#customerTbl').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLan,
+            language,
             ajax: {
                 url: '{{ route("biller.customers.get") }}',
                 type: 'post'
