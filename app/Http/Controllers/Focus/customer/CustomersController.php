@@ -35,6 +35,7 @@ use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
 use App\Models\invoice\Invoice;
 use App\Models\transaction\Transaction;
+use Redirect;
 
 /**
  * CustomersController
@@ -92,29 +93,22 @@ class CustomersController extends Controller
             'phone' => 'required',
             'email' => 'required',
         ]);
-        //Input received from the request
-        $data = $request->except(['_token', 'ins', 'balance', 'custom_field']);
-        $data2 = $request->only(['custom_field']);
-        if (!$data['password'] || strlen($data['password']) < 6) $data['password'] = rand(111111, 999999);
 
-        //dd($input);
-        $data['ins'] = auth()->user()->ins;
-        $data2['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create(compact('data', 'data2'));
+        // extract input fields
+        $input = $request->except(['_token', 'ins', 'balance', 'custom_field', 'groups']);
+
+        $input['ins'] = auth()->user()->ins;
+        if (!$request->password || strlen($request->password) < 6) 
+            $input['password'] = rand(111111, 999999);
+
+        $result = $this->repository->create($input);
+
         if (!$result) return redirect()->back();
-
-        //return with successfull message
-        if ($request->ajax()) {
-            $result['random_password'] = $data['password'];
-            return response()->json($result);
-        }
-
+        // case ajax request
+        $result['random_password'] = $input['password'];
+        if ($request->ajax()) return response()->json($result);
+            
         return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.created')]);
-
-        // if (isset($data['rel_id']) && $result->id) 
-        //     return new RedirectResponse(route('biller.customers.show', [$data['rel_id']]), ['flash_success' => trans('customers.created_contact') . $pass_u . ' <a href="' . route('biller.customers.show', [$data['rel_id']]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
-        // return new RedirectResponse(route('biller.customers.show', [$result->id]), ['flash_success' => trans('alerts.backend.customers.created') . $pass_u . ' <a href="' . route('biller.customers.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
     }
 
     /**
@@ -164,9 +158,11 @@ class CustomersController extends Controller
     public function destroy(Customer $customer)
     {
         $res = $this->repository->delete($customer);
-        if (!$res) return response()->json(['status' => 'Error', 'message' => 'Customer attached to Ticket']);
+        $link = route('biller.customers.index');
 
-        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.customers.deleted')]);
+        if (!$res) return new RedirectResponse($link, ['flash_error' => 'Customer attached to Ticket']);
+
+        return new RedirectResponse($link, ['flash_success' => trans('alerts.backend.customers.deleted')]);
     }
 
     /**
