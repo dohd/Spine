@@ -4,13 +4,15 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Customer Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.customers.partials.customers-header-buttons')
+                <div class="media-body media-right text-right">
+                    @include('focus.customers.partials.customers-header-buttons')
+                </div>
             </div>
         </div>
     </div>
@@ -23,7 +25,7 @@
                         <div class="card-content">
                             <div class="card-body">
                                 <div class="card-body">
-                                    <ul class="nav nav-tabs nav-top-border no-hover-bg " role="tablist">
+                                    <ul class="nav nav-tabs nav-top-border no-hover-bg" role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Customer Info</a>
                                         </li>

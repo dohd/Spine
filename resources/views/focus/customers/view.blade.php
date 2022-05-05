@@ -4,13 +4,15 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Customer Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.customers.partials.customers-header-buttons')
+                <div class="media-body media-right text-right">
+                    @include('focus.customers.partials.customers-header-buttons')
+                </div>
             </div>
         </div>
     </div>
@@ -22,9 +24,16 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <a href="{{route('biller.customers.edit', [$customer->id])}}" class="btn btn-blue btn-outline-accent-5 btn-sm float-right">
-                                    <i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}
-                                </a>
+                                <div class="btn-group float-right">
+                                    <a href="{{ route('biller.customers.edit', $customer) }}" class="btn btn-blue btn-outline-accent-5 btn-sm">
+                                        <i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}
+                                    </a>&nbsp;
+                                    <button type="button" class="btn btn-danger btn-outline-accent-5 btn-sm" id="delCustomer">
+                                        {{Form::open(['route' => ['biller.customers.destroy', $customer], 'method' => 'DELETE'])}}{{Form::close()}}
+                                        <i class="fa fa-trash"></i> {{trans('buttons.general.crud.delete')}}
+                                    </button>
+                                </div>
+                                
                                 <div class="card-body">
                                     <ul class="nav nav-tabs nav-top-border no-hover-bg " role="tablist">
                                         <li class="nav-item">
@@ -170,8 +179,12 @@
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
     });
-
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+
+    // delete customer
+    $('#delCustomer').click(function() {
+        $(this).children('form').submit();
+    });
     
     function draw_data() {
         const tableLan = {@lang('datatable.strings')};
