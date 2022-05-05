@@ -95,7 +95,7 @@ class CustomersController extends Controller
         ]);
 
         // extract input fields
-        $input = $request->except(['_token', 'ins', 'balance', 'custom_field', 'groups']);
+        $input = $request->except(['_token', 'ins', 'balance']);
 
         $input['ins'] = auth()->user()->ins;
         if (!$request->password || strlen($request->password) < 6) 
@@ -137,15 +137,22 @@ class CustomersController extends Controller
             'phone' => 'required',
             'email' => 'required',
         ]);
-        //Input received from the request
-        $data = $request->except(['_token', 'ins', 'balance', 'custom_field']);
-        $data2 = $request->only(['custom_field']);
-        //Update the model using repository update method
-        $result=$this->repository->update($customer, compact('data', 'data2'));
-        //return with successfull message
-       if($result) return new RedirectResponse(route('biller.customers.show', [$customer->id]), ['flash_success' => trans('alerts.backend.customers.updated') . ' <a href="' . route('biller.customers.show', [$customer->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-        return new RedirectResponse(route('biller.customers.show', [$customer->id]),'');
+        // extract input fields
+        $input = $request->except(['_token', 'ins', 'balance']);
+        
+        $result = $this->repository->update($customer, $input);
 
+        $link = route('biller.customers.show', $customer);
+        $msg = [
+            'flash_success' => trans('alerts.backend.customers.updated') 
+                . ' <a href="' . route('biller.customers.show', [$customer->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' 
+                . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' 
+                . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' 
+                . trans('general.list') . '</span> </a>'
+        ];
+        if (!$result) return new RedirectResponse($link, '');
+
+        return new RedirectResponse($link, $msg);
     }
 
     /**
