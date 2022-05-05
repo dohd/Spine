@@ -8,7 +8,6 @@ use DB;
 use App\Models\customer\Customer;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 use App\Models\branch\Branch;
 
@@ -80,12 +79,16 @@ class CustomerRepository extends BaseRepository
     public function create(array $input)
     {
         DB::beginTransaction();
-
+        
         if (!empty($input['picture'])) 
             $input['picture'] = $this->uploadPicture($input['picture']);
         
         $customer = Customer::where('email', $input['email'])->first('id');
         if ($customer) return session()->flash('flash_error', 'Duplicate Email');
+
+        $groups = isset($input['groups']) ? $input['groups'] : array();
+        $custom_field = isset($input['custom_field']) ? $input['custom_field'] : array();
+        unset($input['groups'], $input['custom_field']);
         $result = Customer::create($input);
 
         $branches = [['name' => 'All Branches'], ['name' => 'Head Office']];
@@ -95,6 +98,24 @@ class CustomerRepository extends BaseRepository
             $branches[$k] = $branch;
         }
         Branch::insert($branches);
+
+        $groups = array_reduce($groups, function ($init, $val) use($result) {
+            $init[] = ['customer_id' => $result->id, 'customer_group_id' => $val];
+            return $init;
+        }, []);
+        if ($groups) CustomerGroupEntry::insert($groups);
+
+        $fields = array();
+        foreach ($custom_field as $k => $val) {
+            $fields[] = [
+                'custom_field_id' => $k,
+                'rid' => $result->id,
+                'module' => 1,
+                'data' => $val,
+                'ins' => $result->ins
+            ];
+        }
+        if ($fields) CustomEntry::insert($fields);
 
         DB::commit();
         if ($result) return $result;
@@ -108,63 +129,53 @@ class CustomerRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Customer $customer, array $input)
+    public function update($customer, array $input)
     {
-
-        if (!empty($input['data']['picture'])) {
-            $this->removePicture($customer, 'picture');
-
-            $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-        }
-        if (empty($input['data']['password'])) {
-
-
-          unset($input['data']['password']);
-        }
+        // dd($input, $customer->id);
         DB::beginTransaction();
-        $groups = @$input['data']['groups'];
 
-        unset($input['data']['groups']);
-          $input['data'] = array_map( 'strip_tags', $input['data']);
+        if (!empty($input['picture'])) {
+            $this->removePicture($customer, 'picture');
+            $input['picture'] = $this->uploadPicture($input['picture']);
+        }
+        if (empty($input['password'])) unset($input['password']);
 
-        try {
-            $customer->update($input['data']);
-
-         } catch (QueryException $e) {
-            $errorCode = $e->errorInfo[1];
-            if ($errorCode == '1062') {
-                session()->flash('flash_error', 'Duplicate Email');
-            }
-               return false;
+        $is_email = Customer::whereNotIn('id', [$customer->id])->where('email', $input['email'])->first('id');
+        if ($is_email) {
+            session()->flash('flash_error', 'Duplicate Email');
+            return false;
         }
 
+        $groups = isset($input['groups']) ? $input['groups'] : array();
+        $custom_field = isset($input['custom_field']) ? $input['custom_field'] : array();
+        unset($input['groups'], $input['custom_field']);
+        $customer->update($input);
 
-            if (isset($groups)) {
-
-                $insert_groups = array();
-                foreach ($groups as $key => $value) {
-                    $insert_groups[] = array('customer_id' => $customer->id, 'customer_group_id' => $value);
-                }
-                CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
-
-                CustomerGroupEntry::insert($insert_groups);
-
-            } else {
-                CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
+        if ($groups)  {
+            $groups = array_reduce($groups, function ($init, $val) use($customer) {
+                $init[] = ['customer_id' => $customer->id, 'customer_group_id' => $val];
+                return $init;
+            }, []);    
+            CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
+            CustomerGroupEntry::insert($groups);
+        }
+        if ($custom_field) {
+            $fields = array();
+            foreach ($custom_field as $k => $val) {
+                $fields[] = [
+                    'custom_field_id' => $k,
+                    'rid' => $customer->id,
+                    'module' => 1,
+                    'data' => $val,
+                    'ins' => $customer->ins
+                ];
+                CustomEntry::where(['custom_field_id' => $k, 'rid' => $customer->id])->delete();
             }
+            CustomEntry::insert($fields);
+        }
 
-
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $customer->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $customer->ins);
-                    CustomEntry::where('custom_field_id', '=', $key)->where('rid', '=', $customer->id)->delete();
-                }
-                CustomEntry::insert($fields);
-            }
-            DB::commit();
-            return true;
-        
-
+        DB::commit();
+        return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.update_error'));
     }
