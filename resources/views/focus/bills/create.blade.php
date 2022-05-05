@@ -62,7 +62,7 @@
                                 </select>
                             </div>  
                             <div class="col-2">
-                                <label for="deposit" class="caption">Deposit (Ksh.)</label>
+                                <label for="deposit" class="caption">Amount (Ksh.)</label>
                                 <div class="input-group">
                                     {{ Form::text('deposit', null, ['class' => 'form-control', 'id' => 'deposit', 'required']) }}
                                 </div>
@@ -127,7 +127,7 @@
 
                         <div class="row mt-1">                            
                             <div class="col-12"> 
-                                {{ Form::submit('Receive Payment', ['class' => 'btn btn-primary btn-lg float-right']) }}                          
+                                {{ Form::submit('Make Payment', ['class' => 'btn btn-primary btn-lg float-right']) }}                          
                             </div>
                         </div>
                     {{ Form::close() }}

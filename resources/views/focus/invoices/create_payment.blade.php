@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Invoice Payment</h4>
         </div>
     </div>
@@ -14,7 +14,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'stoPaymnt']) }}
+                    {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'stoPaymnt']) }}
                         <div class="row mb-1">
                             <div class="col-5">
                                 <label for="customer" class="caption">Search Customer</label>
@@ -51,14 +51,14 @@
                             <div class="col-3">
                                 <label for="payment_mode">Payment Mode</label>
                                 <select name="payment_mode" id="" class="form-control" required>
-                                   <option value="">-- Select Mode --</option>
+                                    <option value="">-- Select Mode --</option>
                                     @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
                                         <option value="{{ $val }}">{{ strtoupper($val) }}</option>
                                     @endforeach
                                 </select>
                             </div>  
                             <div class="col-2">
-                                <label for="deposit" class="caption">Deposit (Ksh.)</label>
+                                <label for="deposit" class="caption">Amount (Ksh.)</label>
                                 <div class="input-group">
                                     {{ Form::text('deposit', null, ['class' => 'form-control', 'id' => 'deposit', 'required']) }}
                                 </div>
@@ -66,7 +66,7 @@
                             <div class="col-2">
                                 <label for="paid_from">Paid From</label>
                                 <select name="account_id" id="" class="form-control" required>
-                                   <option value="">-- Select Bank --</option>
+                                    <option value="">-- Select Bank --</option>
                                     @foreach ($accounts as $row)
                                         <option value="{{ $row->id }}">{{ $row->holder }}</option>
                                     @endforeach
@@ -104,7 +104,7 @@
                                         <div class="row no-gutters mb-1">
                                             <div class="col-6 pl-3 pt-1"><b>Total Bill:</b></div>
                                             <div class="col-6">
-                                                 {{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}
+                                                    {{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}
                                             </div>                          
                                         </div>
                                         <div class="row no-gutters">
