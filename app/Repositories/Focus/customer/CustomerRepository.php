@@ -79,53 +79,25 @@ class CustomerRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        try {
-            if (!empty($input['data']['picture'])) {
-                $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-            }
-    
-            $groups = array();
-            if (isset($input['data']['groups'])) {
-                $groups = $input['data']['groups'];
-            }            
-            unset($input['data']['groups']);
-            
-            DB::beginTransaction();
-            $input['data'] = array_map('strip_tags', $input['data']);    
-            $result = Customer::create($input['data']);
+        DB::beginTransaction();
 
-            // default customer branches            
-            $branches = array(['name' => 'All Branches'], ['name' => 'Head Office']);
-            foreach ($branches as $key => $val) {
-                $branch = array_merge($val, ['customer_id' => $result->id, 'ins' => $input['data']['ins']]);
-                Branch::create($branch);
-            }
+        if (!empty($input['picture'])) 
+            $input['picture'] = $this->uploadPicture($input['picture']);
+        
+        $customer = Customer::where('email', $input['email'])->first('id');
+        if ($customer) return session()->flash('flash_error', 'Duplicate Email');
+        $result = Customer::create($input);
 
-            if ($result->id) {
-                $fields = array();
-                if (isset($groups)) {
-                    $insert_groups = array();
-                    foreach ($groups as $key => $value) {
-                        $insert_groups[] = array('customer_id' => $result->id, 'customer_group_id' => strip_tags($value));
-                    }
-                    CustomerGroupEntry::insert($insert_groups);
-                }    
-                if (isset($input['data2']['custom_field'])) {
-                    foreach ($input['data2']['custom_field'] as $key => $value) {
-                        $fields[] = array('custom_field_id' => $key, 'rid' => $result->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $input['data']['ins']);
-                    }
-                    CustomEntry::insert($fields);
-                }
-                
-                DB::commit();
-                return $result;
-            }
-    
-        } catch (QueryException $e){
-            $errorCode = $e->errorInfo[1];
-            if($errorCode == '1062') session()->flash('flash_error', 'Duplicate Email');
-            return;
+        $branches = [['name' => 'All Branches'], ['name' => 'Head Office']];
+        foreach ($branches as $k => $branch) {
+            $branch['customer_id'] = $result->id;
+            $branch['ins'] = $result->ins;
+            $branches[$k] = $branch;
         }
+        Branch::insert($branches);
+
+        DB::commit();
+        if ($result) return $result;
     }
 
     /**
@@ -241,7 +213,7 @@ class CustomerRepository extends BaseRepository
     public function delete($customer)
     {
         if ($customer->leads()->first()) return;
-        return $customer->delete();
+        if ($customer->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
     }
