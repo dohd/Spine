@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-1">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4>Purchase Order Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.purchaseorders.partials.purchaseorders-header-buttons')
@@ -23,11 +23,11 @@
     @endphp
     <div class="card">
         <h5 class="card-header">
-            <a href="{{ $link }}" class="btn btn-purple" target="_blank">
-                <i class="fa fa-print" aria-hidden="true"></i> Print
+            <a href="{{ route('biller.purchaseorders.create_grn', $po) }}" class="btn btn-primary btn-sm">
+                <i class="fa fa-cubes"></i> Receive Goods
             </a>
-            <a href="{{ route('biller.purchaseorders.create_grn', $po) }}" class="btn btn-primary">
-                <i class="fa fa-cubes"></i> Goods Received Note
+            <a href="{{ $link }}" class="btn btn-purple btn-sm" target="_blank">
+                <i class="fa fa-print" aria-hidden="true"></i> Print
             </a>
         </h5>
         <div class="card-body">            
@@ -52,14 +52,10 @@
                         Asset & Equipments
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link " id="active-tab5" data-toggle="tab" href="#active5" aria-controls="active5" role="tab">
-                        Received Goods
-                    </a>
-                </li>
             </ul>
 
             <div class="tab-content px-1 pt-1">
+                <!-- PO details -->
                 <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
                     <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tbody>  
@@ -90,8 +86,33 @@
                             </tr>                              
                         </tbody>
                     </table>
+                    <h4 class="mt-2"><b>Received Goods</b></h4>
+                    <div class="table-responsive">
+                        <table class="table tfr my_stripe_single text-center" cellspacing="0" width="100%">
+                            <tr class="bg-gradient-directional-blue white">
+                                <th>Product Type</th>
+                                <th>Product Description</th>
+                                <th>Quantity</th>
+                                <th>DNote</th>
+                                <th>Date</th>
+                                
+                            </tr>
+                            <tbody>
+                                @foreach ($grn_items as $item)
+                                    <tr>
+                                        <td>{{ $item->purchaseorder_item->type }}</td>
+                                        <td>{{ $item->purchaseorder_item->description }}</td>
+                                        <td>{{ number_format($item->qty) }}</td>
+                                        <td>{{ $item->dnote }}</td>
+                                        <td>{{ dateFormat($item->date) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>                 
                 </div>
 
+                <!-- Inventory/stock -->
                 <div class="tab-pane" id="active2" aria-labelledby="equipment-maintained" role="tabpanel">
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -119,6 +140,7 @@
                     </table>
                 </div>
 
+                <!-- Expense -->
                 <div class="tab-pane" id="active3" aria-labelledby="other-details" role="tabpanel">
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -127,6 +149,7 @@
                             <th>Price</th>
                             <th>Tax</th>
                             <th>Amount</th>
+                            <th>Project</th>
                         </tr>
                         <tbody>
                             @foreach ($po->products as $item)
@@ -137,13 +160,15 @@
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ gen4tid('Prj-', $item->project->tid) }}; {{ $item->project->name }}</td>
                                     </tr>
                                 @endif
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-
+                
+                <!-- Asset -->
                 <div class="tab-pane" id="active4" aria-labelledby="other-details" role="tabpanel">
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -164,29 +189,6 @@
                                         <td>{{ number_format($item->amount, 2) }}</td>
                                     </tr>
                                 @endif
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="tab-pane" id="active5" aria-labelledby="other-details" role="tabpanel">
-                    <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                        <tr>
-                            <th>Description</th>
-                            <th>Quantity</th>
-                            <th>DNote</th>
-                            <th>Date</th>
-                            <th>Type</th>
-                        </tr>
-                        <tbody>
-                            @foreach ($grn_items as $item)
-                                <tr>
-                                    <td>{{ $item->purchaseorder_item->description }}</td>
-                                    <td>{{ number_format($item->qty) }}</td>
-                                    <td>{{ $item->dnote }}</td>
-                                    <td>{{ dateFormat($item->date) }}</td>
-                                    <td>{{ $item->purchaseorder_item->type }}</td>
-                                </tr>
                             @endforeach
                         </tbody>
                     </table>
