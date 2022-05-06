@@ -191,24 +191,24 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_invoice_payment(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
         foreach ($bill as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1)) {
+            if (in_array($key, ['date', 'due_date'], 1)) 
                 $bill[$key] = date_for_database($val);
-            }
-            if (in_array($key, ['amount_ttl', 'deposit_ttl', 'deposit'], 1)) {
+            if (in_array($key, ['amount_ttl', 'deposit_ttl', 'deposit'], 1)) 
                 $bill[$key] = numberClean($val);
-            }
         }
         $result = PaidInvoice::create($bill);
 
         $bill_items = $input['bill_items'];
         foreach ($bill_items as $k => $item) {
-            $item['paidinvoice_id'] = $result->id;
-            $item['paid'] = numberClean($item['paid']);
-            $bill_items[$k] = $item;
+            $bill_items[$k] = array_replace($item, [
+                'paidinvoice_id' => $result->id,
+                'paid' => numberClean($item['paid'])
+            ]);
         }
         PaidInvoiceItem::insert($bill_items);
 
