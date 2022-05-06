@@ -5,12 +5,12 @@
 @section('content')
 <div>
     <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
                 <h4 class="content-header-title">Bills Management</h4>
             </div>
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right mr-3">
+            <div class="content-header-right col-6">
+                <div class="media width-250 float-right">
                     <div class="media-body media-right text-right">
                         @include('focus.bills.partials.bills-header-buttons')
                     </div>

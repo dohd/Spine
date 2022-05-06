@@ -21,38 +21,39 @@
                 <div class="card">
                     <div class="card-body">
                         {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'GET', 'id' => 'mass_add_form']) }}
-                        <div class="row">                            
-                            <div class="col-3">
-                                <div class="form-group">
-                                    {{ Form::hidden('selected_products', null, ['id' => 'selected_products']) }}
-                                    {{ Form::hidden('customer', null, ['id' => 'customer']) }}
-                                    {{ Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) }}
+                            <div class="row">                            
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        {{ Form::hidden('selected_products', null, ['id' => 'selected_products']) }}
+                                        {{ Form::hidden('customer', null, ['id' => 'customer']) }}
+                                        {{ Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) }}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label><strong>Customer :</strong></label>
+                                        {{ Form::select('customer_id', $customers, null, ['placeholder' => '-- Customers --', 'id'=>'customer_id','class' => 'form-control']) }}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label><strong>LPO :</strong></label>
+                                        {{ Form::select('lpo_number', $lpos, null, ['placeholder' => '-- LPOS --', 'id'=>'lpo_number','class' => 'form-control']) }}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label><strong>Project :</strong></label>
+                                        {{ Form::select('project_id', $projects, null, ['placeholder' => '-- Projects --', 'id'=>'project_id','class' => 'form-control']) }}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <label><strong>Customer :</strong></label>
-                                    {{ Form::select('customer_id', $customers, null, ['placeholder' => '-- Customers --', 'id'=>'customer_id','class' => 'form-control']) }}
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <label><strong>LPO :</strong></label>
-                                    {{ Form::select('lpo_number', $lpos, null, ['placeholder' => '-- LPOS --', 'id'=>'lpo_number','class' => 'form-control']) }}
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <label><strong>Project :</strong></label>
-                                    {{ Form::select('project_id', $projects, null, ['placeholder' => '-- Projects --', 'id'=>'project_id','class' => 'form-control']) }}
-                                </div>
-                            </div>
-                        </div>
                         {{ Form::close() }}
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -92,7 +93,6 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     $('#search').click(function() {
@@ -106,7 +106,7 @@
     });
 
     function draw_data(customer_id = '', lpo_number = '', project_id = '') {
-        const tableLang = { @lang('datatable.strings') };
+        const tableLang = {@lang('datatable.strings')};
         const table = $('#quotes-table').dataTable({
             processing: true,
             serverSide: true,
@@ -198,7 +198,6 @@
         var project_id = $('#project_id').val()
         $('#customer').val(customer_id);
         $('#quotes-table').DataTable().destroy();
-
         return draw_data(customer_id, lpo_number, project_id);
     });
 
@@ -228,11 +227,10 @@
     $(document).on('click', '#add-selected', function(e) {
         e.preventDefault();
         if (!$('#customer_id').val()) return swal('Filter Customer');
-        
-        var selected_rows = getSelectedRows();
+        const selected_rows = getSelectedRows();
         if (!selected_rows.length) {
             $('#selected_products').val('');
-            return swal('No record Selected');
+            return swal('No records Selected');
         }
         $('input#selected_products').val(selected_rows);
         swal({
@@ -241,9 +239,7 @@
             buttons: true,
             dangerMode: true,
             showCancelButton: true,
-        }, function() { 
-            $('form#mass_add_form').submit();
-        }); 
+        }, () => $('form#mass_add_form').submit()); 
     });
 </script>
 @endsection

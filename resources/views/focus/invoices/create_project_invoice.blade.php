@@ -31,9 +31,8 @@
 <script type="text/javascript">
     // Initialize datepicker
     $('.datepicker')
-    .datepicker({ format: "{{config('core.user_date_format')}}"})
+    .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date())
-    .change(function() { $(this).datepicker('hide') });
 
     // On selecting Tax
     $('#tax_id').change(function() {

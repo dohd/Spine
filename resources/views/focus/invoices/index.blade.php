@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title mb-0">Project Invoice Management</h4>
+            <h4 class="content-header-title">Project Invoice Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -65,7 +65,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('after-scripts')
@@ -86,12 +85,11 @@
 
     // Initialize datepicker
     $('.datepicker')
-    .datepicker({ format: "{{ config('core.user_date_format') }}"})
+    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date())
-    .change(function() { $(this).datepicker('hide') });
 
     function draw_data(start_date = '', end_date = '') {
-        const language = { @lang('datatable.strings') };
+        const language = {@lang('datatable.strings')};
         var dataTable = $('#invoiceTbl').dataTable({
             processing: true,
             stateSave: true,
