@@ -128,7 +128,7 @@ class InvoiceRepository extends BaseRepository
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
         $dr_data = [
-            'account_id' => $account->id,
+            'account_id' => $account->id, // should be customer deposit ledger id then account_id should be in ref_ledger_id
             'trans_category_id' => $tr_category->id,
             'debit' => $result->total,
             'tr_date' => date('Y-m-d'),
