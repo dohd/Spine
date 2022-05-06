@@ -11,7 +11,6 @@ use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class PurchaseorderRepository.
@@ -45,6 +44,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $purchase = $input['purchase'];
@@ -53,12 +53,10 @@ class PurchaseRepository extends BaseRepository
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ];
         foreach ($purchase as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1)) {
+            if (in_array($key, ['date', 'due_date'], 1)) 
                 $purchase[$key] = date_for_database($val);
-            }
-            if (in_array($key, $rate_keys, 1)) {
+            if (in_array($key, $rate_keys, 1)) 
                 $purchase[$key] = numberClean($val);
-            }
         }
         $bill = Purchase::create($purchase);
 
