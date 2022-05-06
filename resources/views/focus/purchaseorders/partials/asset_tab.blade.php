@@ -4,6 +4,7 @@
             <tr class="item_header bg-gradient-directional-success white">
                 <th width="30%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
+                <th width="7%" class="text-center">UoM</th>
                 <th width="10%" class="text-center">{{trans('general.rate')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax')}}</th>
@@ -16,6 +17,7 @@
             <tr>
                 <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
+                <td><input type="text" class="form-control uom" name="uom[]" id="uom-0"></td>                    
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
                 <td>
                     <select class="form-control asset_vat" name="itemtax[]" id="assetvat-0">
@@ -39,7 +41,7 @@
             </tr>
             <tr>
                 <td colspan="3"><textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-0"></textarea></td>
-                <td colspan="4"></td>
+                <td colspan="5"></td>
             </tr>
             <!-- end layout -->
             
@@ -51,6 +53,7 @@
                         <tr>
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ (int) $item->qty }}" id="assetqty-{{$i}}"></td>
+                            <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    
                             <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>
                             <td>
                                 <select class="form-control asset_vat" name="itemtax[]" id="assetvat-{{$i}}">
@@ -76,7 +79,7 @@
                             <td colspan="3">
                                 <textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-{{$i}}">{{ $item->description }}</textarea>
                             </td>
-                            <td colspan="4"></td>
+                            <td colspan="5"></td>
                         </tr>
                         @php ($i++)
                     @endif

@@ -93,7 +93,7 @@ class TermsController extends Controller
      * @param EditTermRequestNamespace $request
      * @return \App\Http\Responses\Focus\term\EditResponse
      */
-    public function edit(Term $term, ManageCompanyRequest $request)
+    public function edit(Term $term)
     {
         return new EditResponse($term);
     }

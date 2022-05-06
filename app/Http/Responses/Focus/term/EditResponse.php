@@ -9,14 +9,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\term\Term
      */
-    protected $terms;
+    protected $term;
 
     /**
-     * @param App\Models\term\Term $terms
+     * @param App\Models\term\Term $term
      */
-    public function __construct($terms)
+    public function __construct($term)
     {
-        $this->terms = $terms;
+        $this->term = $term;
     }
 
     /**
@@ -28,8 +28,7 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.terms.edit')->with([
-            'terms' => $this->terms
-        ]);
+        $term = $this->term;
+        return view('focus.terms.edit', compact('term'));
     }
 }
