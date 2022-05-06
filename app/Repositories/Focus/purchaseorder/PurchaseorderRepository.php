@@ -213,8 +213,9 @@ class PurchaseorderRepository extends BaseRepository
             'doc_ref' => $po->doc_ref,
             'po_id' => $po->id,
             'tax' => $po->tax,
-            'note' => $po->note
+            'note' => $po->note,
         ];
+        $bill['tid'] = Bill::max('tid') + 1;
         $bill = Bill::create($bill_inp);
 
         // create bill items
