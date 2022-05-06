@@ -16,7 +16,6 @@ use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class PurchaseorderRepository.
@@ -107,12 +106,10 @@ class PurchaseorderRepository extends BaseRepository
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ];
         foreach ($order as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1)) {
+            if (in_array($key, ['date', 'due_date'], 1)) 
                 $order[$key] = date_for_database($val);
-            }
-            if (in_array($key, $rate_keys, 1)) {
+            if (in_array($key, $rate_keys, 1)) 
                 $order[$key] = numberClean($val);
-            }
         }
         $purchaseorder->update($order);
 
