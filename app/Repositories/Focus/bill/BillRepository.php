@@ -45,16 +45,15 @@ class BillRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
         foreach ($bill as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1)) {
+            if (in_array($key, ['date', 'due_date'], 1)) 
                 $bill[$key] = date_for_database($val);
-            }
-            if (in_array($key, ['amount_ttl', 'deposit_ttl', 'deposit'], 1)) {
+            if (in_array($key, ['amount_ttl', 'deposit_ttl', 'deposit'], 1)) 
                 $bill[$key] = numberClean($val);
-            }
         }
         $result = Paidbill::create($bill);
 

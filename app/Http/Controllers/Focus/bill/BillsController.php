@@ -7,6 +7,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
 use App\Models\bill\Bill;
+use App\Models\bill\Paidbill;
 use App\Repositories\Focus\bill\BillRepository;
 use Illuminate\Http\Request;
 
@@ -44,11 +45,12 @@ class BillsController extends Controller
      */
     public function create()
     {
+        $last_tid = Paidbill::max('tid');
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('name', 'Bank');
         })->get();
 
-        return new ViewResponse('focus.bills.create', compact('accounts'));
+        return new ViewResponse('focus.bills.create', compact('accounts', 'last_tid'));
     }
 
     /**
