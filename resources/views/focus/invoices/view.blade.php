@@ -5,6 +5,17 @@
 @section('content')
 <div class="app-content">
     <div class="content-wrapper">
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
+                <h4 class="content-header-title">Project Invoice Management</h4>
+            </div>
+            <div class="col-6">
+                <div class="btn-group float-right">
+                    @include('focus.invoices.partials.invoices-header-buttons')
+                </div>
+            </div>
+        </div>
+
         <div class="content-body">
             <section class="card">
                 <div id="invoice-template" class="card-body">
@@ -40,29 +51,27 @@
                                 </div>
                             </div>
                             @php
-                            $valid_token = token_validator('','i' . $invoice['id'].$invoice['tid'],true);
-                            $link=route( 'biller.print_bill',[$invoice['id'],1,$valid_token,1]);
-                            $link_download=route( 'biller.print_bill',[$invoice['id'],1,$valid_token,2]);
-                            $link_preview=route( 'biller.view_bill',[$invoice['id'],1,$valid_token,0]);
-                            if($invoice['i_class']>1) {
-                            $title= trans('invoices.subscription');
-                            $inv_no= prefix(6).' # '.$invoice['tid'];
-                            } else if($invoice['i_class']==1) {
-                            $title= trans('invoices.pos');
-                            $inv_no= prefix(10).' # '.$invoice['tid'];
-                            }
-                            else {
-                            $title= trans('invoices.invoice');
-                            $inv_no= prefix(1).' # '.$invoice['tid'];
-                            }
+                                $valid_token = token_validator('','i' . $invoice['id'].$invoice['tid'],true);
+                                $link = route( 'biller.print_bill',[$invoice['id'],1,$valid_token,1]);
+                                $link_download = route( 'biller.print_bill',[$invoice['id'],1,$valid_token,2]);
+                                $link_preview = route( 'biller.view_bill',[$invoice['id'],1,$valid_token,0]);
+                                if ($invoice['i_class'] > 1) {
+                                    $title = trans('invoices.subscription');
+                                    $inv_no = prefix(6).' # '.$invoice['tid'];
+                                } elseif ($invoice['i_class'] == 1) {
+                                    $title = trans('invoices.pos');
+                                    $inv_no = prefix(10).' # '.$invoice['tid'];
+                                } else {
+                                    $title = trans('invoices.invoice');
+                                    $inv_no = prefix(1).' # '.$invoice['tid'];
+                                }
                             @endphp
                             <div class="btn-group ">
-                                <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i> {{trans('general.print')}}
+                                <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-print"></i> {{trans('general.print')}}
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" target="_blank" href="{{$link}}">{{trans('general.print')}}</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" target="_blank" href="{{$link_download}}">{{trans('general.pdf')}}</a>
                                 </div>
                             </div>
                             <a href="{{$link_preview}}" class="btn btn-purple mb-1"><i class="fa fa-globe"></i> {{trans('general.preview')}}
@@ -343,12 +352,12 @@
                                             </tr>
                                             <tr>
                                                 <td>{{trans('general.payment_made')}}</td>
-                                                <td class="pink text-right">(-) <span id="payment_made">{{amountFormat($invoice['pamnt'])}}</span>
+                                                <td class="text-primary text-right">(-) <span id="payment_made">{{ amountFormat($invoice->amountpaid) }}</span>
                                                 </td>
                                             </tr>
                                             <tr class="bg-grey bg-lighten-4">
                                                 <td class="text-bold-800">{{trans('general.balance_due')}}</td>
-                                                <td class="text-bold-800 text-right" id="payment_due"> {{amountFormat($invoice['total']-$invoice['pamnt'])}}</td>
+                                                <td class="text-bold-800 text-right text-danger" id="payment_due"> {{ amountFormat($invoice->total - $invoice->amountpaid) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -505,18 +514,18 @@
             }
         })
         .prop('disabled', !$.support.fileInput)
-        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+        .parent().addClass($.support.fileInput ? void(0) : 'disabled');
 
         $(document).on('click', ".aj_delete", function(e) {
             e.preventDefault();
-            const ancr = $(this);
+            const el = $(this);
             $.ajax({
                 url: $(this).attr('data-url'),
                 type: 'POST',
                 dataType: 'json',
                 success: function(data) {
-                    ancr.closest('tr').remove();
-                    ancr.remove();
+                    el.closest('tr').remove();
+                    el.remove();
                 }
             });
         });
