@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Tickets Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right mr-3">
                 <div class="media-body media-right text-right">
                     @include('focus.leads.partials.leads-header-buttons')
@@ -19,16 +19,12 @@
     
     <div class="card">
         <div class="card-header">
-            {{-- 
-            <button type="button" class="btn btn-success font-weight-bold" data-toggle="modal" data-target="#status-modal">
-                <i class="fa fa-pencil"></i> Status
-            </button>
-            --}}
-
-            <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning"><i class="fa fa-clone" aria-hidden="true"></i> Copy</a>
+            <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning btn-sm">
+                <i class="fa fa-clone" aria-hidden="true"></i> Copy
+            </a>
+            <h5 class="card-title mt-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
         </div>
         <div class="card-body">
-            <h5 class="card-title mb-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
             <table id="leads-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                 <tbody>
                     <tr>
@@ -71,7 +67,6 @@
                         <th>Client Address</th>
                         <td>{{ $lead->customer? $lead->customer->address : $lead->client_address }}</td>
                     </tr>   
-                    <tr><th></th></tr>                                     
                     <tr>
                         <th>Callout Date</th>
                         <td>{{ dateFormat($lead->date_of_request) }}</td>
