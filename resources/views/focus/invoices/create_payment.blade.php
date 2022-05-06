@@ -14,7 +14,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'stoPaymnt']) }}
+                    {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'invoicePay']) }}
                         <div class="row mb-1">
                             <div class="col-5">
                                 <label for="customer" class="caption">Search Customer</label>
@@ -115,7 +115,7 @@
                         </table>
                         <div class="form-group row">                            
                             <div class="col-12"> 
-                                {{ Form::submit('Receive Payment', ['class' => 'btn btn-primary btn-lg float-right mr-3']) }}                          
+                                <button type="button" class="btn btn-primary btn-lg float-right mr-3" id="receivePay">Receive Payment</button>
                             </div>
                         </div>
                     {{ Form::close() }}
@@ -128,7 +128,19 @@
 
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
+{{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    // form submit
+    $('#receivePay').click(function() {
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => $('form#invoicePay').submit());   
+    });
+
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     $('.datepicker')
@@ -175,6 +187,7 @@
 
     // load client invoices
     $('#person').change(function() {
+        $('#deposit').val('');
         $.ajax({
             url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
             success: result => {

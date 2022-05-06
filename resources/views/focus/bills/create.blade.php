@@ -21,7 +21,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.bills.store', 'method' => 'POST']) }}
+                    {{ Form::open(['route' => 'biller.bills.store', 'method' => 'POST', 'id' => 'payBill']) }}
                         <div class="row mb-1">
                             <div class="col-5">
                                 <label for="payer" class="caption">Search Supplier</label>                                       
@@ -32,7 +32,7 @@
                             <div class="col-2">
                                 <label for="reference" class="caption">Transaction ID</label>
                                 <div class="input-group">
-                                    {{ Form::text('tid', 1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
+                                    {{ Form::text('tid', @$last_tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
                                 </div>
                             </div> 
 
@@ -122,7 +122,7 @@
                         </table>
                         <div class="form-group row">                            
                             <div class="col-12"> 
-                                {{ Form::submit('Make Payment', ['class' => 'btn btn-primary btn-lg float-right mr-3']) }}                          
+                                <button type="button" class="btn btn-primary btn-lg float-right mr-3" id="makePay">Make Payment</button>
                             </div>
                         </div>
                     {{ Form::close() }}
@@ -135,7 +135,19 @@
 
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
+{{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    // form submit
+    $('#makePay').click(function() {
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => $('form#payBill').submit());   
+    });
+
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     $('.datepicker')
@@ -184,7 +196,7 @@
     $('#supplierbox').change(function() {
         const supplier_id = $(this).val().split('-')[0];
         $('#supplierid').val(supplier_id);
-        // ajax call
+        $('#deposit').val('');
         $.ajax({
             url: "{{ route('biller.bills.supplier_bills') }}?id=" + supplier_id,
             success: result => {
