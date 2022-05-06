@@ -101,26 +101,21 @@
                                 <tr class="bg-white">
                                     <td colspan="4"></td>
                                     <td colspan="2">
-                                        <div class="row no-gutters mb-1">
-                                            <div class="col-6 pl-3 pt-1"><b>Total Bill:</b></div>
-                                            <div class="col-6">
-                                                    {{ Form::text('amount_ttl', 0, ['class' => 'form-control', 'id' => 'amount_ttl', 'readonly']) }}
-                                            </div>                          
+                                        <div class="form-inline mb-1 float-right">
+                                            <label for="total_bill">Total Bill</label>
+                                            {{ Form::text('amount_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'amount_ttl', 'readonly']) }}
                                         </div>
-                                        <div class="row no-gutters">
-                                            <div class="col-6 pl-3 pt-1"><b>Total Paid:</b></div>
-                                            <div class="col-6">
-                                            {{ Form::text('deposit_ttl', 0, ['class' => 'form-control', 'id' => 'deposit_ttl', 'readonly']) }}
-                                            </div>
-                                        </div>
+                                        <div class="form-inline float-right">
+                                            <label for="total_paid">Total Paid</label>
+                                            {{ Form::text('deposit_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'deposit_ttl', 'readonly']) }}
+                                        </div>                                         
                                     </td>
                                 </tr>
                             </tbody>                
                         </table>
-
-                        <div class="row mt-1">                            
+                        <div class="form-group row">                            
                             <div class="col-12"> 
-                                {{ Form::submit('Receive Payment', ['class' => 'btn btn-primary btn-lg float-right']) }}                          
+                                {{ Form::submit('Receive Payment', ['class' => 'btn btn-primary btn-lg float-right mr-3']) }}                          
                             </div>
                         </div>
                     {{ Form::close() }}
@@ -137,9 +132,8 @@
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     $('.datepicker')
-    .datepicker({format: "{{config('core.user_date_format')}}"})
+    .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date())
-    .change(function () { $(this).datepicker('hide') });
 
     // On searching customer
     $('#person').select2({
@@ -194,6 +188,9 @@
     });
 
     // On deposit change
+    $('#deposit').on('focus', function(e) {
+        if (!$('#person').val()) $(this).blur();
+    });
     $('#deposit').change(function() {
         let amountSum = 0;
         let depoSum = 0;
