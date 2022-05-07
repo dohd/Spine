@@ -50,6 +50,7 @@
                                         </li>                                       
                                     </ul>
                                     <div class="tab-content px-1 pt-1">
+                                        <!-- Customer Info -->
                                         <div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 @php
@@ -68,34 +69,40 @@
                                                 </tbody>
                                             </table>
                                         </div>
-
+                                                    
+                                        <!-- Transactions -->
                                         <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                            
-                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'] as $val)
+                                                        @foreach (['Date', 'Type', 'Note', 'Invoice Amount', 'Amount Paid', 'Balance'] as $val)
                                                             <th>{{ $val }}</th>
                                                         @endforeach
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($transactions as $k => $tr)
+                                                    @php
+                                                        $bal = count($transactions) ? $transactions[0]['debit'] : 0;
+                                                    @endphp
+                                                    @foreach ($transactions as $i => $tr)
+                                                        @php
+                                                            if ($i && $tr->debit > 0) $bal += $tr->debit;
+                                                            elseif ($i && $tr->credit > 0) $bal -= $tr->credit;
+                                                        @endphp
                                                         <tr>
                                                             <td>{{ dateFormat($tr->tr_date) }}</td>
                                                             <td>{{ $tr->tr_type }}</td>
                                                             <td>{{ $tr->note }}</td>                                                           
-                                                            <td>{{ number_format($tr->credit, 2) }}</td>
-                                                            <td>{{ number_format($tr->debit, 2) }}</td>
-                                                            <td>
-                                                                @if ($tr->tr_type == 'RCPT')
-                                                                    {{ number_format($tr->debit - $tr->bill->amountpaid, 2)  }}
-                                                                @endif
-                                                            </td>
+                                                            <td>{{ numberFormat($tr->debit) }}</td>
+                                                            <td>{{ numberFormat($tr->credit) }}</td>
+                                                            <td>{{ numberFormat($bal) }}</td>
                                                         </tr>                                                        
                                                     @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
+
+                                        <!-- Invoices -->
                                         <div class="tab-pane" id="active3" aria-labelledby="link-tab3" role="tabpanel">
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
@@ -111,15 +118,16 @@
                                                             <td>{{ dateFormat($invoice->invoicedate) }}</td>
                                                             <td>{{ $invoice->status }}</td>
                                                             <td>{{ $invoice->notes }}</td>                                                      
-                                                            <td>{{ number_format($invoice->total, 2) }}</td>
-                                                            <td>{{ number_format($invoice->amountpaid, 2) }}</td>
+                                                            <td>{{ numberFormat($invoice->total) }}</td>
+                                                            <td>{{ numberFormat($invoice->amountpaid) }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>                                               
                                             </table>                                            
                                         </div>
+
+                                        <!-- Aging -->
                                         <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
-                                          <!-- aging tab -->
                                         </div>
                                     </div>
                                 </div>
@@ -143,9 +151,10 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="media-body media-middle p-1">
-                            <h5 class="media-heading">{{ $customer->name }} </h5>
+                        <div class="ml-1">
                             <h5 class="info">Customer</h5>
+                            <h5 class="media-heading">{{ $customer->name }}</h5>
+                            <h5>Balance: <span class="text-danger">{{ numberFormat($bal) }}</span></h5>
                         </div>
                     </div>
                     <div class="card-body">
