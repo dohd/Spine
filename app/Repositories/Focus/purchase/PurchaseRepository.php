@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\purchase;
 use App\Models\purchase\Purchase;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
+use App\Models\assetequipment\Assetequipment;
 use App\Models\items\PurchaseItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
@@ -68,9 +69,8 @@ class PurchaseRepository extends BaseRepository
                 'bill_id' => $bill->id
             ];
             foreach ($item as $key => $val) {
-                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
+                if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
-                }
             }
             $purchase_items[$i] = $item;
         }
