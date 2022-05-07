@@ -57,15 +57,16 @@
             <div class="tab-content px-1 pt-1">
                 <!-- PO details -->
                 <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
-                    <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                    <table id="customer-table" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tbody>  
                             @php   
+                                $project = $po->project ? gen4tid('Prj-', $po->project->tid) . '; ' . $po->project->name : '';
                                 $details = [
                                     'Supplier' => $po->supplier->name,
                                     'Transaction ID' => $po->tid,
                                     'Date & Due Date' => dateFormat($po->date) . ' : ' . dateFormat($po->due_date),
                                     'Reference' =>$po->doc_ref_type . ' - ' . $po->doc_ref,
-                                    'Project' => $po->project ? $po->project->name : '',
+                                    'Project' => $project,
                                     'Note' => $po->note,
                                 ];                       
                             @endphp
@@ -128,7 +129,7 @@
                                 @if ($item->type == 'Stock')
                                     <tr>
                                         <td>{{ $item->description }}</td>
-                                        <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->uom }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>                                        
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
@@ -146,6 +147,7 @@
                         <tr>
                             <th>Product Description</th>
                             <th>Quantity</th>
+                            <th>UoM</th>
                             <th>Price</th>
                             <th>Tax</th>
                             <th>Amount</th>
@@ -157,6 +159,7 @@
                                     <tr>
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ $item->uom }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
@@ -174,6 +177,7 @@
                         <tr>
                             <th>Product Description</th>
                             <th>Quantity</th>
+                            <th>UoM</th>
                             <th>Price</th>
                             <th>Tax</th>
                             <th>Amount</th>
@@ -184,6 +188,7 @@
                                     <tr>
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ $item->uom }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
