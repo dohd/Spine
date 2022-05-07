@@ -57,7 +57,7 @@ class PurchasesTableController extends Controller
             ->addIndexColumn()
             ->escapeColumns(['id'])
             ->addColumn('tid', function ($purchase) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchase->id]) . '">' . $purchase->id . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchase->id]) . '">' . gen4tid('P-', $purchase->tid) . '</a>';
             })
             ->addColumn('date', function ($purchase) {
                 return dateFormat($purchase->date);
@@ -65,24 +65,20 @@ class PurchasesTableController extends Controller
             ->addColumn('supplier', function ($purchase) {
                 return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '">
                     <i class="ft-eye"></i></a>';
-
             })
             ->addColumn('reference', function ($purchase) {
                 return $purchase->doc_ref . ' - ' .$purchase->doc_ref_type;
             })
-            ->addColumn('debit', function ($purchase) {
-                return;
-            })
-            ->addColumn('credit', function ($purchase) {
-                return number_format($purchase->grandttl);
+            ->addColumn('amount', function ($purchase) {
+                return number_format($purchase->grandttl, 2);
             })
             ->addColumn('balance', function ($purchase) {
-                $amount = $purchase->paidamount ? $purchase->paidamount : $purchase->grandttl;
-                return number_format($amount);
+                return number_format($purchase->grandttl - $purchase->amountpaid, 2);
             })
             ->addColumn('actions', function ($purchase) {
-                return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
-                    <i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
+                return $purchase->action_buttons;
+                // return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
+                //     <i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
             })
             ->make(true);
     }
