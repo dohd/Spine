@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title mb-0">Direct Purchase Management</h4>
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Direct Purchase Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.purchases.partials.purchases-header-buttons')
@@ -31,8 +31,7 @@
                                         <th>Purchase Date</th>
                                         <th>Reference</th>
                                         <th>Supplier</th>
-                                        <th>Debit</th>
-                                        <th>Credit</th>
+                                        <th>Amount</th>
                                         <th>Balance</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -57,13 +56,13 @@
         }
     });
 
-    const tableLan = {@lang('datatable.strings')};
+    const language = {@lang('datatable.strings')};
     var dataTable = $('#purchases').dataTable({
         processing: true,
         serverSide: true,
         responsive: true,
         stateSave: true,
-        language: tableLan,
+        language,
         ajax: {
             url: "{{ route('biller.purchases.get') }}",
             type: 'post',
@@ -90,12 +89,8 @@
                 name: 'supplier'
             },
             {
-                data: 'debit',
-                name: 'debit'
-            },
-            {
-                data: 'credit',
-                name: 'credit'
+                data: 'amount',
+                name: 'amount'
             },
             {
                 data: 'balance',
@@ -109,7 +104,7 @@
             }
         ],
         order: [
-            [0, "DESC"]
+            [0, "desc"]
         ],
         searchDelay: 500,
         dom: 'Blfrtip',
@@ -140,6 +135,5 @@
             ]
         }
     });
-
 </script>
 @endsection
