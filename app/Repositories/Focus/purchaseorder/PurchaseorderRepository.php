@@ -155,6 +155,7 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function delete($purchaseorder)
     {
+        if ($purchaseorder->bill) $purchaseorder->bill->delete();
         if ($purchaseorder->delete()) return true;            
         
         throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
