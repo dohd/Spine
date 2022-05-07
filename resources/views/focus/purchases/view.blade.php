@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-1">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4>Direct Purchase Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.purchases.partials.purchases-header-buttons')
@@ -43,24 +43,26 @@
             </ul>
 
             <div class="tab-content px-1 pt-1">
+                <!-- Purchase details -->
                 <div class="tab-pane active in" id="active1" aria-labelledby="customer-details" role="tabpanel">
-                    <table id="customer-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                    <table id="customer-table" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tbody>   
                             @php
+                                $project = $purchase->project ? gen4tid('Prj-', $purchase->project->tid) . '; ' . $purchase->project->name : '';
                                 $purchase_details = [
                                     'Supplier' => $purchase->suppliername,
                                     'Tax ID' => $purchase->supplier_taxid,
-                                    'Transaction ID' => $purchase->tid,
+                                    'Transaction ID' => gen4tid('P-', $purchase->tid),
                                     'Order Date & Due Date' => $purchase->date . ' : ' . $purchase->due_date,
                                     'Reference' => $purchase->doc_ref_type . ' - ' . $purchase->doc_ref,
-                                    'Project' => $purchase->project ?: $purchase->project->name,
+                                    'Project' => $project,
                                     'Note' => $purchase->note,
                                 ];
                             @endphp   
                             @foreach ($purchase_details as $key => $val)
                                 <tr>
                                     <th>{{ $key }}</th>
-                                    <td>{{ $value }}</td>
+                                    <td>{{ $val }}</td>
                                 </tr>
                             @endforeach                      
                             <tr>
@@ -76,6 +78,7 @@
                     </table>
                 </div>
 
+                <!-- Inventory / stock -->
                 <div class="tab-pane" id="active2" aria-labelledby="equipment-maintained" role="tabpanel">
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -91,7 +94,7 @@
                                 @if ($item->type == 'Stock')
                                     <tr>
                                         <td>{{ $item->description }}</td>
-                                        <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ (int) $item->itemtax }}%</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
@@ -103,6 +106,7 @@
                     </table>
                 </div>
 
+                <!-- Expense -->
                 <div class="tab-pane" id="active3" aria-labelledby="other-details" role="tabpanel">
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
@@ -112,6 +116,7 @@
                             <th>Tax</th>
                             <th>Tax Rate</th>                            
                             <th>Amount</th>
+                            <th>Project</th>
                         </tr>
                         <tbody>
                             @foreach ($purchase->products as $item)
@@ -123,6 +128,7 @@
                                         <td>{{ (int) $item->itemtax }}%</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}</td>
                                     </tr>
                                 @endif
                             @endforeach
@@ -130,6 +136,7 @@
                     </table>
                 </div>
 
+                <!-- Asset -->
                 <div class="tab-pane" id="active4" aria-labelledby="other-details" role="tabpanel">
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
