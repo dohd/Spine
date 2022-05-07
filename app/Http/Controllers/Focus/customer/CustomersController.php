@@ -183,7 +183,7 @@ class CustomersController extends Controller
     {
         $invoices = Invoice::where('customer_id', $customer->id)->get();
         $transactions = Transaction::whereHas('account', function ($q) { 
-            $q->where('system', 'payable');  
+            $q->where('system', 'receivable');  
         })
         ->where(function ($q) use($customer) {
             $q->whereHas('invoice', function ($q) use($customer) { 
@@ -193,9 +193,8 @@ class CustomersController extends Controller
                 $q->where('customer_id', $customer->id);
             });
         })
-        ->whereIn('tr_type', ['RCPT', 'PMT'])
-        ->get();
-
+        ->whereIn('tr_type', ['RCPT', 'PMT'])->get();
+        
         return new ViewResponse('focus.customers.view', compact('customer', 'transactions', 'invoices'));
     }
 
