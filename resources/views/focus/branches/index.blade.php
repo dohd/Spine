@@ -27,10 +27,10 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Company</th>
-                                            <th>Branch</th>
                                             <th>#Code</th>
-                                            <th>Physical Address</th>
+                                            <th>Branch</th>
+                                            <th>Customer</th>
+                                            <th>Location</th>
                                             <th>Contact Person</th>
                                             <th>Branch Contact</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -78,16 +78,16 @@
                     name: 'id'
                 },
                 {
-                    data: 'customer',
-                    name: 'customer'
+                    data: 'branch_code',
+                    name: 'branch_code'
                 },
                 {
                     data: 'name',
                     name: 'name'
                 },
                 {
-                    data: 'branch_code',
-                    name: 'branch_code'
+                    data: 'customer',
+                    name: 'customer'
                 },
                 {
                     data: 'location',
