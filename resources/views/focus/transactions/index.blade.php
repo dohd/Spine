@@ -1,6 +1,6 @@
-@extends ('core.layouts.app')
+@extends('core.layouts.app')
 
-@section ('title', 'Transactions Management')
+@section('title', 'Transactions Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -17,47 +17,48 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            @php
-                $model_details = array(
-                    'tr_category' => [
-                        $words['name'] => $words['name_data'],
-                        trans('general.description') => $segment['note'],
-                        trans('transactions.debit') => amountFormat($segment->amount->sum('debit')),
-                        trans('transactions.credit') => amountFormat($segment->amount->sum('credit')),
-                    ],
-                    'account' => [
-                        $words['name'] => $words['name_data'],
-                        trans('accounts.number') => $segment['number'],
-                        trans('transactions.debit') => amountFormat($segment->amount->sum('debit')),
-                        trans('transactions.credit') => amountFormat($segment->amount->sum('credit'))
-                    ],
-                    'customer' => [
-                        $words['name'] => $words['name_data'],
-                        trans('customers.email') => $segment['email'],
-                        trans('transactions.debit') => amountFormat($segment->amount->sum('debit')),
-                        trans('transactions.credit') => amountFormat($segment->amount->sum('credit'))
-                    ],
-                );
+    <!-- Account info -->
+    @if ($words)
+        @php
+            $model_details = [
+                'tr_category' => [trans('general.description') => $segment->note],
+                'customer' => [trans('customers.email') => $segment->email],
+                'account' => [
+                    'Account No' => $segment->number, 
+                    'Account Type' => $segment->account_type, 
+                    'Note' => $segment->note
+                ],
+            ];
+            $debit = amountFormat($segment->debit_ttl);
+            $credit = amountFormat($segment->credit_ttl);
+            $model_details = array_map(function ($v) use($words, $debit, $credit) {
+                $v = array_merge([$words['name'] => $words['name_data']], $v, [
+                    'Debit' => $debit,
+                    'Credit' => $credit
+                ]);
+                return $v;                    
+            }, $model_details);
 
-                $rows = array();
-                if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
-                elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
-                elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
-            @endphp
-            <table id="modelsTbl" class="table table-md table-bordered zero-configuration" cellspacing="0" width="100%">
-                <tbody>
-                    @foreach ($rows as $key => $val)
-                        <tr>
-                            <th>{{ $key }}</th>
-                            <td>{!! $val !!} </td>
-                        </tr> 
-                    @endforeach
-                </tbody>
-            </table>
+            $rows = array();
+            if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
+            elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
+            elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
+        @endphp
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                        @foreach ($rows as $key => $val)
+                            <tr>
+                                <th>{{ $key }}</th>
+                                <td>{!! $val !!} </td>
+                            </tr> 
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    @endif
 
     <div class="content-body">
         <div class="row">
@@ -69,12 +70,12 @@
                                 <thead>
                                     <tr>
                                         <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
-                                        <th>Transaction Type</th>
-                                        <th>Supplier</th>                                      
+                                        <th>Type</th>
+                                        <th>Reference</th>                                      
                                         <th>Note</th>
                                         <th>{{ trans('transactions.debit') }}</th>
                                         <th>{{ trans('transactions.credit') }}</th>
-                                        <th>Tr Date</th>
+                                        <th>Date</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -108,9 +109,7 @@
     function draw_data() {
         const rel_id = @json(@$input['rel_id']);
         const rel_type = @json(@$input['rel_type']);
-        const language = {
-            @lang('datatable.strings')
-        };
+        const language = {@lang('datatable.strings')};
         const dataTable = $('#transactionsTbl').dataTable({
             processing: true,
             serverSide: true,
