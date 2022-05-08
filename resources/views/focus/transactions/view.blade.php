@@ -77,12 +77,41 @@
             </div>
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-content">
+            <div class="card-body">
+                <table id="transactionsTbl" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
+                            <th>Type</th>
+                            <th>Reference</th>                                      
+                            <th>Note</th>
+                            <th>{{ trans('transactions.debit') }}</th>
+                            <th>{{ trans('transactions.credit') }}</th>
+                            <th>Date</th>
+                            <th>{{ trans('labels.general.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="100%" class="text-center text-success font-large-1">
+                                <i class="fa fa-spinner spinner"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 @include('focus.transactions.partials.edit-modal')
 @endsection
 
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
+{{ Html::script(mix('js/dataTable.js')) }}
 <script type="text/javascript">
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
@@ -100,5 +129,85 @@
             },  
         }
     });
+
+    const tr_id = "{{ $tr->id }}";
+    const language = {@lang('datatable.strings')};
+    const dataTable = $('#transactionsTbl').dataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        stateSave: true,
+        language,
+        ajax: {
+            url: '{{ route("biller.transactions.get") }}',
+            type: 'post',
+            data: {tr_id},
+        },
+        columns: [{
+                data: 'DT_Row_Index',
+                name: 'id'
+            },
+            {
+                data: 'tr_type',
+                name: 'tr_type'
+            },
+            {
+                data: 'reference',
+                name: 'reference'
+            },
+            {
+                data: 'note',
+                name: 'note'
+            },
+            {
+                data: 'debit',
+                name: 'debit'
+            },
+            {
+                data: 'credit',
+                name: 'credit'
+            },
+            {
+                data: 'tr_date',
+                name: 'tr_date'
+            },
+            {
+                data: 'actions',
+                name: 'actions',
+                searchable: false,
+                sortable: false
+            }
+        ],
+        order: [
+            [0, "desc"]
+        ],
+        searchDelay: 500,
+        dom: 'Blfrtip',
+        buttons: {
+            buttons: [
+                {
+                    extend: 'csv',
+                    footer: true,
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                },
+                {
+                    extend: 'excel',
+                    footer: true,
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                },
+                {
+                    extend: 'print',
+                    footer: true,
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                }
+            ]
+        }
+    });    
 </script>
 @endsection
