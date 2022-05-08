@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\account;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\account\AccountRepository;
@@ -52,21 +52,18 @@ class AccountsTableController extends Controller
     public function __invoke(ManageAccountRequest $request)
     {
         $core = $this->account->getForDataTable();
-        
+
         return Datatables::of($core)
             ->escapeColumns(['id', 'number', 'holder'])
             ->addIndexColumn()
-             ->addColumn('debit', function ($account) {
-                return amountFormat($account->amount->sum('debit'));
+            ->addColumn('debit', function ($account) {
+                return amountFormat($account->debit_ttl);
             })
             ->addColumn('credit', function ($account) {
-                return amountFormat($account->amount->sum('credit'));
+                return amountFormat($account->credit_ttl);
             })
             ->addColumn('account_type', function ($account) {
                 return  $account->account_type;
-            })
-            ->addColumn('created_at', function ($account) {
-                return dateFormat($account->created_at);
             })
             ->addColumn('actions', function ($account) {
                 return $account->action_buttons;
