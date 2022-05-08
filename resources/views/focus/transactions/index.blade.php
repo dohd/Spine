@@ -45,6 +45,7 @@
         @endphp
         <div class="card">
             <div class="card-body">
+                <h5>Ledger Account</h5>
                 <table class="table table-sm table-bordered">
                     <tbody>
                         @foreach ($rows as $key => $val)
