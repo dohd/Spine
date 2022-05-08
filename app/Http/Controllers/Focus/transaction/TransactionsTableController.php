@@ -56,11 +56,9 @@ class TransactionsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('account_id', function ($tr) {
-                return $tr->account->holder;
-            })
             ->addColumn('reference', function ($tr) {
-                return $tr->user_type;
+                $account = $tr->account? $tr->account->holder : '';
+                return $account . ' - ' . $tr->user_type;
             })
             ->addColumn('debit', function ($tr) {
                 return numberFormat($tr->debit);
