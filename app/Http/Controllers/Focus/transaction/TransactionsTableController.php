@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\transaction;
 
 use App\Http\Controllers\Controller;
@@ -50,16 +51,16 @@ class TransactionsTableController extends Controller
      */
     public function __invoke(ManageTransactionRequest $request)
     {
-        //
         $core = $this->transaction->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('account_id', function ($tr) {
                 return $tr->account->holder;
             })
-            ->addColumn('supplier', function ($tr) {
-                return $tr->bill ? $tr->bill->supplier->name : '';
+            ->addColumn('reference', function ($tr) {
+                return $tr->user_type;
             })
             ->addColumn('debit', function ($tr) {
                 return numberFormat($tr->debit);
@@ -72,8 +73,8 @@ class TransactionsTableController extends Controller
             })
             ->addColumn('actions', function ($tr) {
                 return '<a href="' . route('biller.print_payslip', [$tr['id'], 1, 1]) . '" class="btn btn-blue round" data-toggle="tooltip" data-placement="top" title="View">
-                    <i class="fa fa-print"></i> </a>' 
-                    .$tr->action_buttons;
+                    <i class="fa fa-print"></i> </a>'
+                    . $tr->action_buttons;
             })
             ->make(true);
     }
