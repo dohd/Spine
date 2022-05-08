@@ -30,7 +30,7 @@ class AccountRepository extends BaseRepository
    */
   public function getForDataTable()
   {
-    return $this->query()->get(['id', 'number', 'holder', 'balance', 'account_type', 'created_at']);
+    return $this->query()->get(['id', 'number', 'holder', 'balance', 'account_type', 'debit_ttl', 'credit_ttl']);
   }
 
   /**
