@@ -29,12 +29,11 @@
                     'Note' => $segment->note
                 ],
             ];
-            $debit = amountFormat($segment->debit_ttl);
-            $credit = amountFormat($segment->credit_ttl);
-            $model_details = array_map(function ($v) use($words, $debit, $credit) {
+            $totals = [amountFormat($segment->debit_ttl), amountFormat($segment->credit_ttl)];
+            $model_details = array_map(function ($v) use($words, $totals) {
                 $v = array_merge([$words['name'] => $words['name_data']], $v, [
-                    'Debit' => $debit,
-                    'Credit' => $credit
+                    'Debit' => $totals[0],
+                    'Credit' => $totals[1]
                 ]);
                 return $v;                    
             }, $model_details);
@@ -66,7 +65,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="transactionsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="transactionsTbl" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
@@ -130,8 +129,8 @@
                     name: 'tr_type'
                 },
                 {
-                    data: 'supplier',
-                    name: 'supplier'
+                    data: 'reference',
+                    name: 'reference'
                 },
                 {
                     data: 'note',
@@ -163,7 +162,6 @@
             dom: 'Blfrtip',
             buttons: {
                 buttons: [
-
                     {
                         extend: 'csv',
                         footer: true,
