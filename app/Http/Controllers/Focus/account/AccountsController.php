@@ -31,6 +31,7 @@ use App\Http\Requests\Focus\account\ManageAccountRequest;
 use App\Http\Requests\Focus\account\StoreAccountRequest;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
+use Redirect;
 
 /**
  * AccountsController
@@ -157,7 +158,8 @@ class AccountsController extends Controller
      */
     public function show(Account $account, ManageAccountRequest $request)
     {
-        return new ViewResponse('focus.accounts.view', compact('account'));
+        // return new ViewResponse('focus.accounts.view', compact('account'));
+        return new RedirectResponse(route('biller.transactions.index') . '?rel_type=9&rel_id=' . $account->id, '');
     }
 
     /**
