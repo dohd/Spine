@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title mb-0">{{ trans('labels.backend.accounts.management') }}</h4>
+            <h4 class="content-header-title">{{ trans('labels.backend.accounts.management') }}</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -26,12 +26,11 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>{{ trans('accounts.number') }}</th>
-                                        <th>{{ trans('accounts.holder') }}</th>
+                                        <th>#Account No</th>
+                                        <th>Type</th>
+                                        <th>Name</th>
                                         <th>Debit</th>
-                                        <th>Credit</th>
-                                        <th>{{ trans('accounts.account_type') }}</th>
-                                        <th>{{ trans('general.createdat') }}</th>
+                                        <th>Credit</th>                                      
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -82,20 +81,16 @@
                     name: 'holder'
                 },
                 {
+                    data: 'account_type',
+                    name: 'account_type'
+                },
+                {
                     data: 'debit',
                     name: 'debit'
                 },
                 {
                     data: 'credit',
                     name: 'credit'
-                },
-                {
-                    data: 'account_type',
-                    name: 'account_type'
-                },
-                {
-                    data: 'created_at',
-                    name: 'created_at'
                 },
                 {
                     data: 'actions',
