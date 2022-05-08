@@ -28,13 +28,19 @@ class TransactionRepository extends BaseRepository
         $q = $this->query();
 
         $rel_id = request('rel_id', 0);
-        $rel_type = request('rel_type', 0);
-
         if ($rel_id) {
+            $rel_type = request('rel_type', 0);
             switch ($rel_type) {
                 case 2: $q->where('user_id', $rel_id); break;
                 case 9: $q->where('account_id', $rel_id); break;
             }
+        }
+
+        $tr_id = request('tr_id', 0);
+        if ($tr_id) {
+            $tr = Transaction::find($tr_id, ['id', 'note', 'tr_type']);
+            $q->where(['tr_type' => $tr->tr_type, 'note' => $tr->note]);
+            $q->where('id', '!=', $tr_id);
         }
 
         return $q->get([
