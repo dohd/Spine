@@ -677,6 +677,9 @@
                                 </a>
                             </li>
                             @endauth
+                            <li><a class="dropdown-item" href="{{ route('biller.transactions.index') }}" data-toggle="dropdown"> <i class="fa fa-exchange"></i> Transactions
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endauth
@@ -692,14 +695,15 @@
                                 </a>
                             </li>
                             @endauth
-                            
+                            {{--                             
                             <li><a class="dropdown-item" href="{{ route('biller.deptors.index') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Debtor Ledger</a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.creditors.index') }}" data-toggle="dropdown"> <i class="fa fa-credit-card"></i>Creditor Ledger</a>
                             </li>
+                            --}}
                         </ul>
                     </li>
-                    @endauth
+                    @endauth            
                     @permission('creditnote-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Credit Note</a>
                         <ul class="dropdown-menu">
