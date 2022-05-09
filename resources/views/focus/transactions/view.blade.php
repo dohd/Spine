@@ -91,6 +91,7 @@
                             <th>{{ trans('transactions.debit') }}</th>
                             <th>{{ trans('transactions.credit') }}</th>
                             <th>Date</th>
+                            <th>Created At</th>
                             <th>{{ trans('labels.general.actions') }}</th>
                         </tr>
                     </thead>
@@ -170,6 +171,10 @@
             {
                 data: 'tr_date',
                 name: 'tr_date'
+            },
+            {
+                data: 'created_at',
+                name: 'created_at'
             },
             {
                 data: 'actions',

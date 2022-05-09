@@ -22,7 +22,6 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\transaction\TransactionRepository;
 use App\Http\Requests\Focus\transaction\ManageTransactionRequest;
-
 /**
  * Class TransactionsTableController.
  */
@@ -57,8 +56,8 @@ class TransactionsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('reference', function ($tr) {
-                $account = $tr->account? $tr->account->holder : '';
-                return $account . ' - ' . $tr->user_type;
+                if ($tr->account)
+                return $tr->account->holder . ' - ' . $tr->user_type;
             })
             ->addColumn('debit', function ($tr) {
                 return numberFormat($tr->debit);
@@ -68,6 +67,9 @@ class TransactionsTableController extends Controller
             })
             ->addColumn('tr_date', function ($tr) {
                 return dateFormat($tr->tr_date);
+            })
+            ->addColumn('created_at', function ($tr) {
+                return $tr->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($tr) {
                 return '<a href="' . route('biller.print_payslip', [$tr['id'], 1, 1]) . '" class="btn btn-blue round" data-toggle="tooltip" data-placement="top" title="View">

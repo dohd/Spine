@@ -36,6 +36,7 @@ class TransactionRepository extends BaseRepository
             }
         }
 
+        // related transactions
         $tr_id = request('tr_id', 0);
         if ($tr_id) {
             $tr = Transaction::find($tr_id, ['id', 'note', 'tr_type']);
@@ -45,7 +46,7 @@ class TransactionRepository extends BaseRepository
 
         return $q->get([
             'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 
-            'tr_date', 'user_type', 'tr_type', 'tr_ref'
+            'tr_date', 'user_type', 'tr_type', 'tr_ref', 'created_at'
         ]);
     }
 
