@@ -125,8 +125,8 @@ class InvoiceRepository extends BaseRepository
 
     public function post_transaction_project_invoice($result)
     {
-        // debit Customer Income
-        $account = Account::where('system', 'client_income')->first(['id']);
+        // debit Accounts Receivable (Creditors)
+        $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $dr_data = [
@@ -147,10 +147,12 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit Revenue Account
+        // credit Client Income account (intermediary ledger)
+        $account = Account::where('system', 'client_income')->first(['id']);
         unset($dr_data['debit'], $dr_data['is_primary']);
-        $income_cr_data = array_replace($dr_data, [
-            'account_id' => $result->account_id,
+        $inc_cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'ref_ledger_id' => $result->account_id, // revenue ledger id
             'credit' => $result->subtotal,
         ]);
         // credit tax (VAT)
@@ -159,7 +161,7 @@ class InvoiceRepository extends BaseRepository
             'account_id' => $account->id,
             'credit' => $result->tax,
         ]);
-        Transaction::insert([$income_cr_data, $tax_cr_data]);
+        Transaction::insert([$inc_cr_data, $tax_cr_data]);
 
         // update account ledgers debit and credit totals
         aggregate_account_transactions();        
