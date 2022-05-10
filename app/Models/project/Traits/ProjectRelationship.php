@@ -24,6 +24,11 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
+    public function quote()
+    {
+        return $this->belongsTo(Quote::class, 'main_quote_id');
+    }
+
     public function quotes()
     {
         return $this->hasManyThrough(Quote::class, ProjectQuote::class);
