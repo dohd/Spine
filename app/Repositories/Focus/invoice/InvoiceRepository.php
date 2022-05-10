@@ -83,6 +83,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_project_invoice(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
@@ -124,11 +125,13 @@ class InvoiceRepository extends BaseRepository
 
     public function post_transaction_project_invoice($result)
     {
-        // debit accounts receivable
-        $account = Account::where('system', 'receivable')->first(['id']);
+        // debit Customer Income
+        $account = Account::where('system', 'client_income')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $dr_data = [
-            'account_id' => $account->id, // should be customer deposit ledger id then account_id should be in ref_ledger_id
+            'account_id' => $account->id,
+            'ref_ledger_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
             'debit' => $result->total,
             'tr_date' => date('Y-m-d'),
@@ -139,48 +142,24 @@ class InvoiceRepository extends BaseRepository
             'tr_type' => $tr_category->code,
             'tr_ref' => $result->id,
             'user_type' => 'customer',
-            'is_primary' => 1
+            'is_primary' => 1,
+            'tid' => $tid
         ];
         Transaction::create($dr_data);
 
-        // credit income account (bank)
+        // credit Revenue Account
         unset($dr_data['debit'], $dr_data['is_primary']);
         $income_cr_data = array_replace($dr_data, [
             'account_id' => $result->account_id,
             'credit' => $result->subtotal,
         ]);
-        // tax
+        // credit tax (VAT)
         $account = Account::where('system', 'tax')->first(['id']);
         $tax_cr_data = array_replace($dr_data, [
             'account_id' => $account->id,
             'credit' => $result->tax,
         ]);
         Transaction::insert([$income_cr_data, $tax_cr_data]);
-        
-        /** issued stock */
-        $total = 0;
-        foreach ($result->invoice_items as $item) {
-            $issuance = $item->quote->issuance;
-            foreach ($issuance as $iss) {
-                $total += $iss->total;
-            }
-        }
-        if ($total > 0) {
-            // credit wip account
-            $account = Account::where('system', 'wip')->first('id');
-            $wip_cr_data = array_replace($dr_data, [
-                'account_id' => $account->id,
-                'credit' => $total,
-            ]);
-            Transaction::create($wip_cr_data);
-    
-            // debit client account (bank)
-            $wip_dr_data = array_replace($dr_data, [
-                'account_id' => $result->account_id,
-                'debit' => $total,
-            ]);
-            Transaction::create($wip_dr_data);    
-        }
 
         // update account ledgers debit and credit totals
         aggregate_account_transactions();        
