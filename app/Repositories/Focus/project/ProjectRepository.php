@@ -170,35 +170,67 @@ class ProjectRepository extends BaseRepository
             'user_type' => 'customer',
             'note' => $project->end_note,
         ];
+
         $tr_data = array();
-        foreach ($invoices as $val) {
+        foreach ($invoices as $invoice) {
             // debit Customer Income;
             $tr_data[] = array_replace($data, [
                 'account_id' => $inc_account->id,
-                'debit' => $val->subtotal,
+                'debit' => $invoice->subtotal,
                 'is_primary' => 1,
             ]);
             // credit Revenue Account
             $tr_data[] = array_replace($data, [
-                'account_id' => $val->account_id,
-                'credit' => $val->subtotal,
+                'account_id' => $invoice->account_id,
+                'credit' => $invoice->subtotal,
             ]);
-            // credit WIP
-            $tr_data[] = array_replace($data, [
-                'account_id' => $wip_account->id,
-                'credit' => $val->subtotal,
-            ]);
-            // debit COG
-            $tr_data[] = array_replace($data, [
-                'account_id' => $cog_account->id,
-                'debit' => $val->subtotal,
-            ]);
+            // if issued inventory stock
+            $amount = 0;
+            foreach ($invoice->quotes as $quote) {
+                $amount += $quote->issuance->sum('total');
+            }
+            if ($amount > 0) {
+                // credit WIP account
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $wip_account->id,
+                    'credit' => $amount,
+                    'is_primary' => 1,
+                ]);
+                // debit COG
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $cog_account->id,
+                    'debit' => $amount,
+                ]);
+            }           
         } 
+        // if directly purchased items and issued to project
+        $stock_amount = 0;
+        $expense_amount = 0;
+        foreach ($project->purchase_items as $item) {
+            $subttl = $item['amount'] - $item['taxrate'];
+            if ($item['type'] == 'Expense') $expense_amount += $subttl;
+            if ($item['type'] == 'Stock') $stock_amount += $subttl;
+        }
+        // credit WIP account and debit COG
+        $cr_data = array_replace($data, [
+            'account_id' => $wip_account->id,
+            'is_primary' => 1,
+        ]);
+        $dr_data = array_replace($data, ['account_id' => $cog_account->id]);
+        if ($stock_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $stock_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $stock_amount]);
+        }  elseif ($expense_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $expense_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $expense_amount]);
+        }    
+
         $tr_data = array_map(function ($v) {
             if (isset($v['debit'])) $v['credit'] = 0;
             if (isset($v['credit'])) $v['debit'] = 0;
             return $v;
         }, $tr_data);
+
         Transaction::insert($tr_data);
 
         // update account ledgers debit and credit totals
