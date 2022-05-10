@@ -17,10 +17,8 @@ trait ProjectAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return '
-         '.$this->getViewButtonAttribute("project-manage", "biller.projects.show").'
-                '.$this->getEditButtonAttribute("project-edit", "biller.projects.edit").'
-                '.$this->getDeleteButtonAttribute("project-delete", "biller.projects.destroy").'
-                ';
+        return $this->getViewButtonAttribute("project-manage", "biller.projects.show")
+         . ' ' . $this->getEditButtonAttribute("project-edit", "biller.projects.edit");
+        //  . ' ' . $this->getDeleteButtonAttribute("project-delete", "biller.projects.destroy");
     }
 }
