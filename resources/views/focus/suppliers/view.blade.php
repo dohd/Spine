@@ -89,12 +89,12 @@
                                                 </thead>
                                                 <tbody>
                                                     @php
-                                                        $bal = count($transactions) ? $transactions[0]['debit'] : 0;
+                                                        $bal = count($transactions) ? $transactions[0]['credit'] : 0;
                                                     @endphp
                                                     @foreach ($transactions as $i => $tr)
                                                         @php
-                                                            if ($i && $tr->credit > 0) $bal += $tr->credit;
-                                                            elseif ($i && $tr->debit > 0) $bal -= $tr->debit;
+                                                            if ($i && $tr->debit > 0) $bal -= $tr->debit;
+                                                            elseif ($i && $tr->credit > 0) $bal += $tr->credit;
                                                         @endphp
                                                         <tr>
                                                             <td>{{ dateFormat($tr->tr_date) }}</td>
