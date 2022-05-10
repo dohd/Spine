@@ -5,11 +5,15 @@ namespace App\Repositories\Focus\project;
 use App\Models\event\EventRelation;
 use App\Models\project\Project;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
+use App\Models\invoice\Invoice;
 use App\Models\project\Budget;
 use App\Models\project\BudgetItem;
 use App\Models\project\BudgetSkillset;
 use App\Models\project\ProjectQuote;
 use App\Models\quote\Quote;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -43,40 +47,27 @@ class ProjectRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function create(array $data)
+    public function create(array $input)
     {
         DB::beginTransaction();
 
-        $project = $data['project'];
-        $project['ins'] = auth()->user()->ins;
-        $project['status'] = 1;
+        $input = $input['project'];
+        $input_items = $input['project_quotes'];
 
-        $main_quote = $data['project_quotes']['main_quote'];
-        $project['main_quote_id'] = $main_quote;
-        $ref = Project::orderBy('tid', 'desc')->first('tid');
-        if ($ref && $project['tid'] <= $ref->tid) {
-            $project['tid'] = $ref->tid + 1;
-        }
-        $result = Project::create($project);
+        $tid = Project::max('tid');
+        if ($input['tid'] <= $tid) $input['tid'] = $tid + 1;
+        $input['main_quote_id'] = $input_items[0];
+        $result = Project::create($input);
 
-        // project quotes
-        $proj_quotes[] = array('project_id' => $result['id'], 'quote_id' => $main_quote);
-        if (isset($data['project_quotes']['other_quote'])) {
-            $other_quote = $data['project_quotes']['other_quote'];
-            foreach ($other_quote as $value) {
-                $proj_quotes[] = array('project_id' => $result['id'], 'quote_id' => $value);
-            }            
-        }
         // create project quote and update related foreign key
-        foreach($proj_quotes as $value) {
-            $id = ProjectQuote::insertGetId($value);
-            Quote::find($value['quote_id'])->update(['project_quote_id' => $id]);
+        foreach ($input_items as $val) {
+            $obj = ['quote_id' => $val, 'project_id' => $result->id]; 
+            $id = ProjectQuote::insertGetId($obj);
+            Quote::find($obj['quote_id'])->update(['project_quote_id' => $id]);
         }
 
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
+        DB::commit();
+        if ($result) return $result;
 
         throw new GeneralException(trans('exceptions.backend.projects.create_error'));
     }
@@ -94,8 +85,8 @@ class ProjectRepository extends BaseRepository
         DB::beginTransaction();
         // update project
         $quotes = $input['quotes'];
-        $data = array_merge($input['data'], ['main_quote_id' => $quotes['main_quote']]);
-        $result = $project->update($data);
+        $input = array_merge($input['data'], ['main_quote_id' => $quotes['main_quote']]);
+        $result = $project->update($input);
 
         // project quotes
         $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $quotes['main_quote']);
@@ -129,20 +120,89 @@ class ProjectRepository extends BaseRepository
      */
     public function delete($project)
     {
-        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-        if (true) {
-            if ($project->delete()) {
-                $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
-                if (isset($event_rel)) {
-                    $event_rel->event->delete();
-                    $event_rel->delete();
-                }
+        // throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
+    }
 
-                return true;
-            }
-        }
+    /**
+     * Close project
+     */
 
-        throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
+    public function close_project($project, array $input)
+    {
+        // dd($input);
+        DB::beginTransaction();
+
+        $input['end_date'] = date_for_database($input['end_date']);
+        $result = $project->update($input);
+
+        // project invoices
+        $quote_ids = $project->quotes->pluck('id')->toArray();
+        $invoices = Invoice::whereHas('invoice_items', function ($q) use($quote_ids) {
+            $q->whereIn('quote_id', $quote_ids);
+        })->get(['id', 'subtotal', 'account_id']);
+
+        /**accounts */
+        $this->post_transaction($project, $invoices);
+
+        DB::commit();
+        if ($result) return true;
+
+        // throw
+    }
+
+    // 
+    public function post_transaction($project, $invoices)
+    {
+        $inc_account = Account::where('system', 'client_income')->first(['id']);
+        $wip_account = Account::where('system', 'wip')->first(['id']);
+        $cog_account = Account::where('system', 'cog')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'ENDPRJ')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
+        $data = [
+            'tid' => $tid,
+            'tr_date' => date('Y-m-d'),
+            'due_date' => date('Y-m-d'),
+            'user_id' => $project->endedby,
+            'ins' => $project->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $project->id,
+            'is_primary' => 0,
+            'user_type' => 'customer',
+            'note' => $project->end_note,
+        ];
+        $tr_data = array();
+        foreach ($invoices as $val) {
+            // debit Customer Income;
+            $tr_data[] = array_replace($data, [
+                'account_id' => $inc_account->id,
+                'debit' => $val->subtotal,
+                'is_primary' => 1,
+            ]);
+            // credit Revenue Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => $val->account_id,
+                'credit' => $val->subtotal,
+            ]);
+            // credit WIP
+            $tr_data[] = array_replace($data, [
+                'account_id' => $wip_account->id,
+                'credit' => $val->subtotal,
+            ]);
+            // debit COG
+            $tr_data[] = array_replace($data, [
+                'account_id' => $cog_account->id,
+                'debit' => $val->subtotal,
+            ]);
+        } 
+        $tr_data = array_map(function ($v) {
+            if (isset($v['debit'])) $v['credit'] = 0;
+            if (isset($v['credit'])) $v['debit'] = 0;
+            return $v;
+        }, $tr_data);
+        Transaction::insert($tr_data);
+
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();    
     }
 
     /**
