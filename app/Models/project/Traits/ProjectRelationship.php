@@ -7,6 +7,7 @@ use App\Models\customer\Customer;
 use App\Models\event\Event;
 use App\Models\event\EventRelation;
 use App\Models\hrm\Hrm;
+use App\Models\items\PurchaseItem;
 use App\Models\misc\Misc;
 use App\Models\note\Note;
 use App\Models\project\Project;
@@ -24,6 +25,11 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
+    public function purchase_items()
+    {
+        return $this->hasMany(PurchaseItem::class, 'itemproject_id');
+    }
+
     public function quote()
     {
         return $this->belongsTo(Quote::class, 'main_quote_id');
