@@ -1,12 +1,13 @@
-<div>
-    <div class="btn-group">
-        @permission('project-create')
-        <a href="#" class="btn btn-info w-2" id="addt" data-toggle="modal" data-target="#AddProjectModal">
-            <i class="fa fa-plus-circle"></i> Create
-        </a>&nbsp;&nbsp;
-        @endauth
-        <a href="{{ route('biller.quotes.get_verify_quote') }}" class="btn btn-success">
-            <i class="fa fa-list-alt"></i> Verification
-        </a>  
-    </div>
+<div class="btn-group">
+    <a href="{{ route('biller.quotes.get_verify_quote') }}" class="btn btn-success">
+        <i class="fa fa-list-alt"></i> Verification
+    </a> &nbsp;&nbsp;
+    <a href="{{ route('biller.projects.index') }}" class="btn btn-info  btn-lighten-2">
+        <i class="fa fa-list-alt"></i> List
+    </a>
+    @permission('project-create')
+    <a href="#" class="btn btn-pink  btn-lighten-3" id="addt" data-toggle="modal" data-target="#AddProjectModal">
+        <i class="fa fa-plus-circle"></i> Create
+    </a>
+    @endauth
 </div>
