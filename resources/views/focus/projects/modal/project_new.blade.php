@@ -26,7 +26,7 @@
                             <option value="">-- Select Project Type --</option>
                             @foreach($accounts as $account)
                                 <option value="{{ $account['id'] }}">
-                                    {{ $account['code'] }} {{ $account['holder'] }}
+                                    {{ $account['number'] }} {{ $account['holder'] }}
                                 </option>
                             @endforeach
                         </select>
@@ -55,8 +55,8 @@
                         <label for="projectNumber">Project No</label>
                         <div class="input-group">
                             <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                            <input type="text" value="{{ 'Prj-'.sprintf('%04d', $tid + 1) }}"  class="form-control" disabled>
-                            <input type="hidden" name="tid" value="{{ $tid + 1 }}">
+                            <input type="text" value="{{ gen4tid('Prj-', @$last_tid+1) }}"  class="form-control" disabled>
+                            <input type="hidden" name="tid" value="{{ $last_tid+1 }}">
                         </div>
                     </fieldset>
                 </div>
