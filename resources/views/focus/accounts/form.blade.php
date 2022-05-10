@@ -60,7 +60,7 @@
     </div>
     <div class="col-md-6">
         {{ Form::label('date', 'Date') }}
-        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'disabled', 'id' => 'date']) }}
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'readonly', 'id' => 'date']) }}
     </div>
 </div>
 <div class="form-group row">
@@ -93,10 +93,10 @@
         $('#isMultiple').val(opt.attr('isMultiple'));
 
         $('#openBalance').attr('readonly', true);
-        $('#openBalanceDate').attr('disabled', true);
+        $('#date').attr('readonly', false);
         if (opt.attr('isOpenBalance') == 1) {
             $('#openBalance').attr('readonly', false);
-            $('#openBalanceDate').attr('disabled', false);
+            $('#date').attr('readonly', false);
         }
         $.ajax({
             url: "{{ route('biller.accounts.search_next_account_no') }}",
