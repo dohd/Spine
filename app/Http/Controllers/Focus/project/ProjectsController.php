@@ -72,13 +72,10 @@ class ProjectsController extends Controller
      */
     public function index(ManageProjectRequest $request)
     {
-        $mics = Misc::all();
-        $employees = Hrm::all();
-        $accounts = Account::where('account_type', 'Income')->get();
-        $project = Project::orderBy('tid', 'desc')->first('tid');
-        $tid = $project ? $project->tid : 1;
+        $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
+        $last_tid = Project::max('tid');
 
-        return new ViewResponse('focus.projects.index', compact('mics', 'employees', 'accounts', 'tid'));
+        return new ViewResponse('focus.projects.index', compact('accounts', 'last_tid'));
     }
 
 
@@ -91,13 +88,15 @@ class ProjectsController extends Controller
     public function store(CreateProjectRequest $request)
     {
         // extract input fields from request
-        $project = $request->only([
+        $input = $request->only([
             'customer_id', 'branch_id', 'name', 'tid', 'status', 'priority', 'short_desc',
-            'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
+            'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account',
         ]);
-        $project_quotes = $request->only(['main_quote', 'other_quote']);
-        // $rest = $request->only(['tags', 'time_from',  'time_to', 'color',  'employees']);
+        $input_items = array_merge($request->only('main_quote'), $request->only('other_quote'));
 
+        $input['ins'] = auth()->user()->ins;
+
+        $input_items = modify_array($input_items);
         $result = $this->repository->create(compact('project', 'project_quotes'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
@@ -163,19 +162,24 @@ class ProjectsController extends Controller
      */
     public function show(Project $project, ManageProjectRequest $request)
     {
-        // $auth_view = project_view($project->id);
-        if (true) {
-            $employees = Hrm::all();
-            $mics = Misc::all();
-            $features = ConfigMeta::where('feature_id', 9)->first();
+        $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
+        $last_tid = Project::max('tid');
 
-            $user = auth()->user();
-            $project_select = Project::whereHas('users', function ($q) use ($user) {
-                return $q->where('rid', $user->id);
-            })->get();
+        return new ViewResponse('focus.projects.view', compact('project', 'accounts', 'last_tid'));
+    }
 
-            return new ViewResponse('focus.projects.view', compact('project', 'employees', 'mics', 'project_select', 'features'));
-        }
+    /**
+     * Close project
+     */
+    public function close_project(Project $project, Request $request)
+    {
+        $input = $request->only(['end_date', 'end_note']);
+
+        $input['ended_by'] = auth()->user()->id;
+
+        $this->repository->close_project($project, $input);
+
+        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project closed successfully']);
     }
 
     /**
@@ -392,24 +396,6 @@ class ProjectsController extends Controller
             ->make(true);
     }
 
-    public function load(ManageProjectRequest $request)
-    {
-        $project = Project::find($request->project_id);
-        $project->start_date = dateTimeFormat($project['start_date']);
-        $project->view = route('biller.projects.show', [$project->id]);
-
-        $task_back = task_status($project->status);
-        $project->status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ';
-
-        $s = '';
-        foreach (status_list() as $row) {
-            if ($row['id'] == $task_back->id) $s .= '<option value="' . $row['id'] . '" selected>' . $row['name'] . '</option>';
-            else $s .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
-        }
-        $project['status_list'] = $s;
-
-        return response()->json($project);
-    }
 
     /**
      * Project autocomplete search
