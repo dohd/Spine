@@ -158,8 +158,8 @@ class AccountsController extends Controller
      */
     public function show(Account $account, ManageAccountRequest $request)
     {
-        // return new ViewResponse('focus.accounts.view', compact('account'));
-        return new RedirectResponse(route('biller.transactions.index') . '?rel_type=9&rel_id=' . $account->id, '');
+        $params =  ['rel_type' => 9, 'rel_id' => $account->id, 'system' => $account->system];
+        return new RedirectResponse(route('biller.transactions.index', $params), '');
     }
 
     /**
