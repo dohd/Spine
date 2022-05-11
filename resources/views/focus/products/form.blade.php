@@ -69,7 +69,6 @@
             {{ Form::label( 'productcategory_id', trans('products.productcategory_id'),['class' => 'col control-label']) }}
             <div class='col'>
                 <select class="form-control" name="productcategory_id" id="product_cat">
-                    {{browser_log($product_category)}}
                     @foreach($product_category as $item)
                     @if(!$item->c_type)
                     <option value="{{$item->id}}" {{ $item->id === @$products->productcategory_id ? " selected" : "" }}>{{$item->title}}</option>
@@ -373,7 +372,6 @@
     $('[data-toggle="datepicker"]').datepicker({
         autoHide: true,
         format: "{{config('core.user_date_format')}}"
-        
     });
 
     $(document).on('click', ".add_serial", function(e) {
