@@ -65,7 +65,17 @@ class TransactionsController extends Controller
         $rel_type = $request->rel_type;
         $rel_id = $request->rel_id;
 
-        $input = compact('rel_type', 'rel_id');
+        $input = compact('rel_id', 'rel_type');
+        $account_section = $this->account_section($input['rel_id'], $input['rel_type']);
+
+        return new ViewResponse('focus.transactions.index', compact('input') + $account_section);
+    }
+
+    /**
+     * Account Ledger section
+     */
+    public function account_section($rel_id, $rel_type)
+    {
         $segment = (object) array();
         $words = array();
         switch ($rel_type) {
@@ -103,8 +113,7 @@ class TransactionsController extends Controller
                 $words['name_data'] = $segment->holder;
                 break;
         }
-    
-        return new ViewResponse('focus.transactions.index', compact('input', 'segment', 'words'));
+        return compact('words', 'segment');
     }
 
     /**
