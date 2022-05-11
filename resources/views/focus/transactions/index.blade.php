@@ -2,6 +2,35 @@
 
 @section('title', 'Transactions Management')
 
+@if ($words)
+    @php
+        $model_details = [
+            'tr_category' => [trans('general.description') => $segment->note],
+            'customer' => [trans('customers.email') => $segment->email],
+            'account' => [
+                'Account No' => $segment->number, 
+                'Account Type' => $segment->account_type, 
+                'Note' => $segment->note
+            ],
+        ];
+        $totals = [amountFormat($segment->debit_ttl), amountFormat($segment->credit_ttl)];
+        $model_details = array_map(function ($v) use($words, $totals) {
+            $v = array_merge([$words['name'] => $words['name_data']], $v, [
+                'Debit' => $totals[0],
+                'Credit' => $totals[1]
+            ]);
+            return $v;                    
+        }, $model_details);
+
+        $rows = array();
+        if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
+        elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
+        elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
+
+        $is_tax = request('system') == 'tax';
+    @endphp
+@endif
+
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
@@ -19,30 +48,6 @@
 
     <!-- Account info -->
     @if ($words)
-        @php
-            $model_details = [
-                'tr_category' => [trans('general.description') => $segment->note],
-                'customer' => [trans('customers.email') => $segment->email],
-                'account' => [
-                    'Account No' => $segment->number, 
-                    'Account Type' => $segment->account_type, 
-                    'Note' => $segment->note
-                ],
-            ];
-            $totals = [amountFormat($segment->debit_ttl), amountFormat($segment->credit_ttl)];
-            $model_details = array_map(function ($v) use($words, $totals) {
-                $v = array_merge([$words['name'] => $words['name_data']], $v, [
-                    'Debit' => $totals[0],
-                    'Credit' => $totals[1]
-                ]);
-                return $v;                    
-            }, $model_details);
-
-            $rows = array();
-            if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
-            elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
-            elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
-        @endphp
         <div class="card">
             <div class="card-body">
                 <h5>Ledger Account</h5>
@@ -66,13 +71,34 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
+                            <div class="row">
+                                <div class="col-2">{{ trans('general.search_date')}}</div>
+                                <div class="col-2">
+                                    <input type="text" name="start_date" id="start_date" class="form-control form-control-sm datepicker">
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker">
+                                </div>
+                                <div class="col-2">
+                                    <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm">
+                                </div>
+                            </div>
+                            <hr>                            
                             <table id="transactionsTbl" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
                                         <th>Type</th>
-                                        <th>Reference</th>                                      
+                                        @if ($is_tax)
+                                            <th>Cutomer PIN</th>   
+                                        @else
+                                            <th>Reference</th>                                      
+                                        @endif
                                         <th>Note</th>
+                                        @if ($is_tax)
+                                            <th>VAT(%)</th>
+                                            <th>VAT Amount</th>   
+                                        @endif
                                         <th>{{ trans('transactions.debit') }}</th>
                                         <th>{{ trans('transactions.credit') }}</th>
                                         <th>Date</th>
@@ -107,9 +133,27 @@
         }
     });    
 
-    function draw_data() {
-        const rel_id = @json(@$input['rel_id']);
-        const rel_type = @json(@$input['rel_type']);
+    // datepicker
+    $('.datepicker')
+    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
+
+    // datefilter
+    $('#search').click(() => {
+        const start_date = $('#start_date').val();
+        const end_date = $('#end_date').val();
+        $('#transactionsTbl').DataTable().destroy();
+        draw_data(start_date, end_date);
+    });
+
+    function draw_data(start_date='', end_date='') {
+        const system = "{{ request('system') }}"
+        const obj = [];
+        if (system == 'tax') {
+            obj.push({data: 'vat_rate', name: 'vat_rate'});
+            obj.push({data: 'vat_amount', name: 'vat_amount'});
+        }
+        const input = @json(@$input);
         const language = {@lang('datatable.strings')};
         const dataTable = $('#transactionsTbl').dataTable({
             processing: true,
@@ -120,7 +164,7 @@
             ajax: {
                 url: '{{ route("biller.transactions.get") }}',
                 type: 'post',
-                data: {rel_id, rel_type},
+                data: {...input, system, start_date, end_date},
             },
             columns: [{
                     data: 'DT_Row_Index',
@@ -138,6 +182,7 @@
                     data: 'note',
                     name: 'note'
                 },
+                ...obj,
                 {
                     data: 'debit',
                     name: 'debit'
