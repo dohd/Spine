@@ -5,11 +5,11 @@
 @php
     $tr = $transaction;
     $tr_types = [
-        'BILL' => 'BILL', 
-        'PMT' => 'PAYMENT', 
-        'INV' => 'INVOICE', 
+        'bill' => 'BILL', 
+        'pmt' => 'PAYMENT', 
+        'rcpt' => 'INVOICE', 
         'loan' => 'LOAN', 
-        'CHRG' => 'CHARGE',
+        'chrg' => 'CHARGE',
         'stock' => 'STOCK'
     ];
     $tr_type_urls = [
