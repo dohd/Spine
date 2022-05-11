@@ -42,6 +42,27 @@ class TransactionsTableController extends Controller
         $this->transaction = $transaction;
     }
 
+    public function tax_transaction($col='', $tr)
+    {
+        if (request('system') != 'tax') return;
+        switch ($col) {
+            case 'reference':
+                if ($tr->invoice) 
+                    return $tr->invoice->customer->taxid . ' : ' . $tr->invoice->customer->company;
+                if ($tr->bill)
+                    return $tr->bill->supplier->taxid . ' : ' . $tr->bill->supplier->company;
+            case 'tr_type':
+                if ($tr->invoice) return $tr->tr_type .=  ' - Sale';
+                if ($tr->bill) return $tr->tr_type .=  ' - Purchase';
+            case 'vat_rate':
+                if ($tr->invoice) return $tr->invoice->tax_id;
+                if ($tr->bill) return $tr->bill->tax;
+            case 'vat_amount':
+                if ($tr->invoice) return numberFormat($tr->invoice->tax);
+                if ($tr->bill) return numberFormat($tr->bill->grandtax);
+        }
+    }
+
     /**
      * This method return the data of the model
      * @param ManageTransactionRequest $request
@@ -55,9 +76,21 @@ class TransactionsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tr_type', function ($tr) {
+                $result = $this->tax_transaction('tr_type', $tr);
+                if ($result) return $result;
+                return $tr->tr_type;
+            })
             ->addColumn('reference', function ($tr) {
-                if ($tr->account)
+                $result = $this->tax_transaction('reference', $tr);
+                if ($result) return $result;
                 return $tr->account->holder . ' - ' . $tr->user_type;
+            })
+            ->addColumn('vat_rate', function ($tr) {
+                return $this->tax_transaction('vat_rate', $tr);                
+            })
+            ->addColumn('vat_amount', function ($tr) {
+                return $this->tax_transaction('vat_amount', $tr);
             })
             ->addColumn('debit', function ($tr) {
                 return numberFormat($tr->debit);
