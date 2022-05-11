@@ -49,21 +49,22 @@ class ProjectRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        $input = $input['project'];
-        $input_items = $input['project_quotes'];
+        $data = $input['data'];
+        $data_items = $input['data_items'];
 
         $tid = Project::max('tid');
-        if ($input['tid'] <= $tid) $input['tid'] = $tid + 1;
-        $input['main_quote_id'] = $input_items[0];
-        $result = Project::create($input);
+        if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
+        $data['main_quote_id'] = $data_items[0];
+        $result = Project::create($data);
 
         // create project quote and update related foreign key
-        foreach ($input_items as $val) {
+        foreach ($data_items as $val) {
             $obj = ['quote_id' => $val, 'project_id' => $result->id]; 
             $id = ProjectQuote::insertGetId($obj);
-            Quote::find($obj['quote_id'])->update(['project_quote_id' => $id]);
+            Quote::find($val)->update(['project_quote_id' => $id]);
         }
 
         DB::commit();
@@ -82,46 +83,28 @@ class ProjectRepository extends BaseRepository
      */
     public function update($project, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
-        // update project
-        $quotes = $input['quotes'];
-        $input = array_merge($input['data'], ['main_quote_id' => $quotes['main_quote']]);
-        $result = $project->update($input);
 
-        // project quotes
-        $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $quotes['main_quote']);
-        if (isset($input['quotes']['other_quote'])) {
-            $other_quote = $input['quotes']['other_quote'];
-            foreach ($other_quote as $value) {
-                $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $value);
-            }         
-        }
+        $data = $input['data'];
+        $data_items = $input['data_items'];
+        $data['main_quote_id'] = $data_items[0];
+        $result = $project->update($data);
+
         // create or update project quotes
-        foreach($proj_quotes as $value) {
-            $quote = ProjectQuote::firstOrNew($value);
-            $quote->save();
-            Quote::find($value['quote_id'])->update(['project_quote_id' => $quote->id]);
+        ProjectQuote::where('project_id', $project->id)->whereNotIn('quote_id', $data_items)->delete();
+        foreach($data_items as $val) {
+            $item = ProjectQuote::firstOrNew(['project_id' => $project->id, 'quote_id' => $val]);
+            Quote::find($val)->update(['project_quote_id' => $item->id]);
+            $item->save();
         }
 
-        if ($result) {
-            DB::commit();
-            return true;
-        }
+        DB::commit();
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.projects.update_error'));
     }
 
-    /**
-     * For deleting the respective model from storage
-     *
-     * @param Project $project
-     * @return bool
-     * @throws GeneralException
-     */
-    public function delete($project)
-    {
-        // throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
-    }
 
     /**
      * Close project
