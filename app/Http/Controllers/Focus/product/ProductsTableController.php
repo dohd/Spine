@@ -57,11 +57,9 @@ class ProductsTableController extends Controller
     {
         // warehouse products
         if (request('p_rel_id') && request('p_rel_type') == 2) {
-            print_log('+++ W/H product +++');
             $core = $this->product_variation->getForDataTable();
-        } 
-        else $core = $this->product->getForDataTable();
-        
+        }  else $core = $this->product->getForDataTable();
+       
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
