@@ -15,11 +15,11 @@
                     </div>
                     <div class="form-group">
                         <label for="note">Note</label>
-                        <input type="text" class="form-control" name="end_note">
+                        <input type="text" class="form-control" name="end_note" required>
                     </div>
                     <div class="form-group float-right">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        {{ Form::submit('End', ['class' => 'btn btn-danger']) }}
+                        {{ Form::submit('End', ['class' => 'btn btn-danger', 'disabled']) }}
                     </div>
                 {{ Form::close() }}
             </div>
