@@ -44,6 +44,12 @@ class TransactionRepository extends BaseRepository
             $q->where('id', '!=', $tr_id);
         }
 
+        // filter by date
+        $from = request('start_date');
+        $to = request('end_date');
+        if ($from && $to) 
+            $q->whereBetween('tr_date', [date_for_database($from), date_for_database($to)]);
+
         return $q->get([
             'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 
             'tr_date', 'user_type', 'tr_type', 'tr_ref', 'created_at'
