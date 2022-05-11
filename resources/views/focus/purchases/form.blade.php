@@ -131,23 +131,23 @@
                     </select>
                 </div>
             </div>
-
-            <div class="form-group row">
-                <div class="col-sm-12">
-                    <div class="form-group">
-                        <label for="project" class="caption">Projects</label>
-                        <select class="form-control" name="project_id" id="project" data-placeholder="Search Project by Name, Customer, Branch" required>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
+            
             <div class="form-group row">
                 <div class="col-sm-12">
                     <label for="toAddInfo" class="caption">{{trans('general.note')}}*</label>
                     {{ Form::textarea('note', null, ['class' => 'form-control', 'placeholder' => trans('general.note'), 'rows'=>'2', 'required']) }}
                 </div>
             </div>
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="project" class="caption">Project <span class="text-danger">(Inventory Items issued directly to this project)</span></label>
+                        <select class="form-control" name="project_id" id="project" data-placeholder="Search Project by Name, Customer, Branch">
+                        </select>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
