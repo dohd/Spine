@@ -88,16 +88,15 @@ class ProjectsController extends Controller
     public function store(CreateProjectRequest $request)
     {
         // extract input fields from request
-        $input = $request->only([
+        $data = $request->only([
             'customer_id', 'branch_id', 'name', 'tid', 'status', 'priority', 'short_desc',
             'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account',
         ]);
-        $input_items = array_merge($request->only('main_quote'), $request->only('other_quote'));
+        $data_items = array_merge([$request->main_quote], ...array_values($request->only('other_quote')));
 
-        $input['ins'] = auth()->user()->ins;
+        $data['ins'] = auth()->user()->ins;
 
-        $input_items = modify_array($input_items);
-        $result = $this->repository->create(compact('project', 'project_quotes'));
+        $this->repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
     }
@@ -125,16 +124,10 @@ class ProjectsController extends Controller
     public function update(UpdateProjectRequest $request, Project $project)
     {
         // extract input fields from request
-        $data = $request->only([
-            'customer_id', 'branch_id', 'name', 'tid', 'status', 'priority', 'short_desc',
-            'note', 'start_date', 'end_date', 'phase', 'worth', 'project_share', 'sales_account'
-        ]);
-        $quotes = $request->only(['main_quote', 'other_quote']);
+        $data = $request->except(['_token', 'main_quote', 'other_quote']);
+        $data_items = array_merge([$request->main_quote], ...array_values($request->only('other_quote')));
 
-        $data['id'] = $project->id;
-
-        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-        $this->repository->update($project, compact('data', 'quotes'));
+        $this->repository->update($project, compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
     }
