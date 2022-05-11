@@ -189,23 +189,21 @@ class PurchaseRepository extends BaseRepository
         $stock_items = array_filter($purchase_items, function ($v) { return $v['type'] == 'Stock'; });
         if ($stock_items) {
             $tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
-            $data = [
-                'trans_category_id' => $tr_category->id,
-                'debit' => $purchase['stock_subttl'],
-            ];
             // on project issuance
             $proj_stock_items = array_filter($stock_items, function ($v) { return $v['itemproject_id']; });
             if ($proj_stock_items) {
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $wip_account->id,
                     'ref_ledger_id' => $account->id,
-                    ...$data
+                    'trans_category_id' => $tr_category->id,
+                    'debit' => $purchase['stock_subttl'],
                 ]);    
             } else {
                 $account = Account::where('system', 'stock')->first(['id']);
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $account->id,
-                    ...$data
+                    'trans_category_id' => $tr_category->id,
+                    'debit' => $purchase['stock_subttl'],
                 ]);    
             }
         }
@@ -230,6 +228,7 @@ class PurchaseRepository extends BaseRepository
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $asset->account_id,
                     'trans_category_id' => $asset_tr_category->id,
+                    'tr_type' => $asset_tr_category->code,
                     'debit' => $subttl,
                 ]);
             }
