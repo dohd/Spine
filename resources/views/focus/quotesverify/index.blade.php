@@ -94,10 +94,8 @@
     });
 
     $('.datepicker')
-    .datepicker({ format: "{{ config('core.user_date_format') }}" })
-    .datepicker('setDate', new Date())
-    .change(function() { $(this).datepicker('hide') });
-
+    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
 
     function draw_data(start_date = '', end_date = '') {
         const tableLang = { @lang('datatable.strings') };
