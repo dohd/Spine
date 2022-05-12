@@ -84,22 +84,22 @@ class PurchasesController extends Controller
     public function store(StorePurchaseRequest $request)
     {
         // extract input details
-        $purchase = $request->only([
+        $data = $request->only([
             'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
             'tax', 'tid', 'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $purchase_items = $request->only([
+        $data_items = $request->only([
             'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
         ]);
 
-        $purchase['ins'] = auth()->user()->ins;
-        $purchase['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
-        $purchase_items = modify_array($purchase_items);
-        $purchase_items = array_filter($purchase_items, function ($val) { return $val['item_id']; });
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
 
-        $result = $this->repository->create(compact('purchase', 'purchase_items'));
+        $this->repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase posted successfully']);
     }
@@ -126,22 +126,22 @@ class PurchasesController extends Controller
     public function update(StorePurchaseRequest $request, Purchase $purchase)
     {
         // extract input details
-        $bill = $request->only([
+        $data = $request->only([
             'supplier_type', 'supplier_id', 'suppliername', 'supplier_taxid', 'transxn_ref', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 
             'tax', 'project_id', 'note', 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
-        $bill_items = $request->only([
+        $data_items = $request->only([
             'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
         ]);
 
-        $bill['ins'] = auth()->user()->ins;
-        $bill['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
-        $bill_items = modify_array($bill_items);
-        $bill_items = array_filter($bill_items, function ($val) { return $val['item_id']; });
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
 
-        $result = $this->repository->update($purchase, compact('bill', 'bill_items'));
+        $this->repository->update($purchase, compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase updated successfully']);
     }
