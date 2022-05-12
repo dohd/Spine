@@ -187,11 +187,11 @@ class PurchaseRepository extends BaseRepository
         unset($cr_data['credit'], $cr_data['is_primary']);
         // debit Stock Account
         $wip_account = Account::where('system', 'wip')->first(['id']);
-        $isStock = $bill->items()->where('type', 'Stock')->count();
-        if ($isStock) {
+        $is_stock = $bill->items()->where('type', 'Stock')->count();
+        if ($is_stock) {
             $tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
-            $isForProject = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
-            if ($isForProject) {
+            $is_for_Project = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
+            if ($is_for_Project) {
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $wip_account->id,
                     'ref_ledger_id' => $account->id,
