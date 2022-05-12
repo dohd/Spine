@@ -63,8 +63,10 @@ class PurchasesTableController extends Controller
                 return dateFormat($purchase->date);
             })
             ->addColumn('supplier', function ($purchase) {
-                return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '">
-                    <i class="ft-eye"></i></a>';
+                $name = $purchase->suppliername ? $purchase->suppliername :  $purchase->supplier->name;
+                $link = route('biller.suppliers.show', [$purchase->supplier->id]);
+
+                return $name . ' <a class="font-weight-bold" href="' . $link . '"><i class="ft-eye"></i></a>';
             })
             ->addColumn('reference', function ($purchase) {
                 return $purchase->doc_ref . ' - ' .$purchase->doc_ref_type;
