@@ -120,7 +120,13 @@
                     </select>
                 </div>
             </div>
-
+            
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <label for="toAddInfo" class="caption">{{trans('general.note')}}*</label>
+                    {{ Form::textarea('note', null, ['class' => 'form-control', 'placeholder' => trans('general.note'), 'rows'=>'2', 'required']) }}
+                </div>
+            </div>
             <div class="form-group row">
                 <div class="col-sm-12">
                     <div class="form-group">
@@ -128,13 +134,6 @@
                         <select class="form-control" name="project_id" id="project" data-placeholder="Search Project by Name, Customer, Branch" required>
                         </select>
                     </div>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <div class="col-sm-12">
-                    <label for="toAddInfo" class="caption">{{trans('general.note')}}*</label>
-                    {{ Form::textarea('note', null, ['class' => 'form-control', 'placeholder' => trans('general.note'), 'rows'=>'2', 'required']) }}
                 </div>
             </div>
         </div>
@@ -150,7 +149,7 @@
         <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expenses</a>
     </li>
     <li class="nav-item bg-success">
-        <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipments</a>
+        <a class="nav-link" id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipments</a>
     </li>
 </ul>
 <div class="tab-content px-1 pt-1">
