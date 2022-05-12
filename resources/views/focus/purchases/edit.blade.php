@@ -113,7 +113,7 @@
         $('#projectexptext-0').val(projectText);
         $('#projectexpval-0').val($(this).val());
     });
-    const projectName = "{{ $purchase->project->name }}";
+    const projectName = "{{ $purchase->project? $purchase->project->name : '' }}";
     const projectId = "{{ $purchase->project_id }}";
     $('#project').append(new Option(projectName, projectId, true, true)).change();
 
