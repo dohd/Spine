@@ -1,4 +1,4 @@
-<div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
+<div class="tab-pane active" id="active2" aria-labelledby="link-tab2" role="tabpanel">
     <table class="table-responsive tfr my_stripe" id="expTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-danger white">

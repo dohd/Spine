@@ -1,4 +1,4 @@
-<div class="tab-pane" id="active3" aria-labelledby="link-tab3" role="tabpanel">
+<div class="tab-pane fade in" id="active3" aria-labelledby="link-tab3" role="tabpanel">
     <table class="table-responsive tfr my_stripe" id="assetTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-success white">

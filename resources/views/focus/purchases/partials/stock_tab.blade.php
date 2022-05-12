@@ -1,4 +1,4 @@
-<div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
+<div class="tab-pane fade in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
     <table class="table-responsive tfr my_stripe" id="stockTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
