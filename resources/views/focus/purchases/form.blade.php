@@ -17,7 +17,7 @@
                 <div class="col-7">
                     <label for="payer" class="caption">Search Supplier</label>                                       
                     <select class="form-control" id="supplierbox" data-placeholder="Search Supplier" disabled></select>
-                    <input type="hidden" name="supplier_id" value="{{ @$purchase->supplier_id }}" id="supplierid">
+                    <input type="hidden" name="supplier_id" value="{{ @$purchase->supplier_id || 1 }}" id="supplierid">
                 </div>
             </div>
             

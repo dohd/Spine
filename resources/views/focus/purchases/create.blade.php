@@ -57,6 +57,7 @@
         $('#supplierbox').html('').attr('disabled', true);
         $('#taxid').val('').attr('readonly', false);
         $('#supplier').val('').attr('readonly', false);
+        $('#supplierid').val(1);
         if ($(this).val() == 'supplier') {
             $('#supplierbox').attr('disabled', false);
             $('#taxid').attr('readonly', true);
