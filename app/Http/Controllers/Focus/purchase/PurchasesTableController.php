@@ -64,7 +64,7 @@ class PurchasesTableController extends Controller
             })
             ->addColumn('supplier', function ($purchase) {
                 $name = $purchase->suppliername ? $purchase->suppliername :  $purchase->supplier->name;
-                $link = route('biller.suppliers.show', [$purchase->supplier->id]);
+                $link = route('biller.suppliers.show', [$purchase->supplier_id]);
 
                 return $name . ' <a class="font-weight-bold" href="' . $link . '"><i class="ft-eye"></i></a>';
             })
