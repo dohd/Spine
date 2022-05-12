@@ -2,11 +2,18 @@
 
 namespace App\Models\purchase\Traits;
 
+use App\Models\items\PurchaseItem;
+
 /**
  * Class PurchaseorderRelationship
  */
 trait PurchaseRelationship
 {
+    public function items()
+    {
+        return $this->hasMany(PurchaseItem::class, 'bill_id');
+    }
+
     public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer', 'payer_id', 'id')->withoutGlobalScopes();
