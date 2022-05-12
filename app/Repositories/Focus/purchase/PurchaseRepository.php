@@ -48,42 +48,42 @@ class PurchaseRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $purchase = $input['purchase'];
+        $data = $input['data'];
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ];
-        foreach ($purchase as $key => $val) {
+        foreach ($data as $key => $val) {
             if (in_array($key, ['date', 'due_date'], 1)) 
-                $purchase[$key] = date_for_database($val);
+                $data[$key] = date_for_database($val);
             if (in_array($key, $rate_keys, 1)) 
-                $purchase[$key] = numberClean($val);
+                $data[$key] = numberClean($val);
         }
-        $bill = Purchase::create($purchase);
+        $result = Purchase::create($data);
 
-        $purchase_items = $input['purchase_items'];
-        foreach ($purchase_items as $i => $item) {
+        $data_items = $input['data_items'];
+        foreach ($data_items as $i => $item) {
             $item = $item + [
-                'ins' => $bill->ins,
-                'user_id' => $bill->user_id,
-                'bill_id' => $bill->id
+                'ins' => $result->ins,
+                'user_id' => $result->user_id,
+                'bill_id' => $result->id
             ];
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
             }
             // direct project stock issuance
-            if ($bill->project_id && $item['type'] == 'Stock')
-                $item['itemproject_id'] = $bill->project_id;
-            $purchase_items[$i] = $item;
+            if ($result->project_id && $item['type'] == 'Stock')
+                $item['itemproject_id'] = $result->project_id;
+            $data_items[$i] = $item;
         }
-        PurchaseItem::insert($purchase_items);
+        PurchaseItem::insert($data_items);
 
         // accounting
-        $this->post_transaction($purchase, $purchase_items, $bill);
+        $this->post_transaction($result);
 
         DB::commit();
-        if ($bill) return true;        
+        if ($result) return true;        
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
@@ -98,24 +98,25 @@ class PurchaseRepository extends BaseRepository
      */
     public function update(Purchase $purchase, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        $bill = $input['bill'];
+        $data = $input['data'];
         $rate_keys = [
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ];
-        foreach ($bill as $key => $val) {
+        foreach ($data as $key => $val) {
             if (in_array($key, ['date', 'due_date'], 1)) 
-                $bill[$key] = date_for_database($val);
+                $data[$key] = date_for_database($val);
             if (in_array($key, $rate_keys, 1)) 
-                $bill[$key] = numberClean($val);
+                $data[$key] = numberClean($val);
         }
-        $purchase->update($bill);
+        $purchase->update($data);
 
         $purchase->products()->delete();
-        $purchase_items = $input['bill_items'];
-        foreach ($purchase_items as $i => $item) {
+        $data_items = $input['data_items'];
+        foreach ($data_items as $i => $item) {
             $item = $item + [
                 'ins' => $purchase->ins,
                 'user_id' => $purchase->user_id,
@@ -128,13 +129,13 @@ class PurchaseRepository extends BaseRepository
             // direct project stock issuance
             if ($purchase->project_id && $item['type'] == 'Stock')
                 $item['itemproject_id'] = $purchase->project_id;
-            $purchase_items[$i] = $item;
+            $data_items[$i] = $item;
         }
-        PurchaseItem::insert($purchase_items);
+        PurchaseItem::insert($data_items);
 
         // accounts
         Transaction::where('tr_ref', $purchase->id)->delete();
-        $this->post_transaction($bill, $purchase_items, $purchase);
+        $this->post_transaction($purchase);
 
         DB::commit();
         if ($purchase) return true;
@@ -157,7 +158,7 @@ class PurchaseRepository extends BaseRepository
     }
 
     // Account transaction
-    protected function post_transaction(array $purchase, array $purchase_items, $bill) 
+    protected function post_transaction($bill) 
     {
         // credit Accounts Payable (Creditors)
         $account = Account::where('system', 'payable')->first(['id']);
@@ -167,12 +168,12 @@ class PurchaseRepository extends BaseRepository
             'account_id' => $account->id,
             'tid' => $tid,
             'trans_category_id' => $tr_category->id,
-            'credit' => $purchase['grandttl'],
+            'credit' => $bill['grandttl'],
             'tr_date' => date('Y-m-d'),
-            'due_date' => $purchase['due_date'],
-            'user_id' => $purchase['user_id'],
-            'note' => $purchase['note'],
-            'ins' => $purchase['ins'],
+            'due_date' => $bill['due_date'],
+            'user_id' => $bill['user_id'],
+            'note' => $bill['note'],
+            'ins' => $bill['ins'],
             'tr_type' => $tr_category->code,
             'tr_ref' => $bill->id,
             'user_type' => 'supplier',
@@ -186,29 +187,28 @@ class PurchaseRepository extends BaseRepository
         unset($cr_data['credit'], $cr_data['is_primary']);
         // debit Stock Account
         $wip_account = Account::where('system', 'wip')->first(['id']);
-        $stock_items = array_filter($purchase_items, function ($v) { return $v['type'] == 'Stock'; });
-        if ($stock_items) {
+        $isStock = $bill->items()->where('type', 'Stock')->count();
+        if ($isStock) {
             $tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
-            // on project issuance
-            $proj_stock_items = array_filter($stock_items, function ($v) { return $v['itemproject_id']; });
-            if ($proj_stock_items) {
+            $isForProject = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
+            if ($isForProject) {
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $wip_account->id,
                     'ref_ledger_id' => $account->id,
                     'trans_category_id' => $tr_category->id,
-                    'debit' => $purchase['stock_subttl'],
+                    'debit' => $bill['stock_subttl'],
                 ]);    
             } else {
                 $account = Account::where('system', 'stock')->first(['id']);
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $account->id,
                     'trans_category_id' => $tr_category->id,
-                    'debit' => $purchase['stock_subttl'],
+                    'debit' => $bill['stock_subttl'],
                 ]);    
             }
         }
         $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
-        foreach ($purchase_items as $item) {
+        foreach ($bill->items as $item) {
             $subttl = $item['amount'] - $item['taxrate'];
             // debit Expense Account
             if ($item['type'] == 'Expense') {
@@ -219,7 +219,8 @@ class PurchaseRepository extends BaseRepository
                     $cr_data['ref_ledger_id'] = $item['item_id'];
                 }
                 $dr_data[] = array_replace($cr_data, [
-                    compact('account_id'), 'debit' => $subttl,
+                    'account_id' => $account_id,
+                    'debit' => $subttl,
                 ]);
             }
             //  debit Asset Account
@@ -237,7 +238,7 @@ class PurchaseRepository extends BaseRepository
         $account = Account::where('system', 'tax')->first(['id']);
         $dr_data[] = array_replace($cr_data, [
             'account_id' => $account->id, 
-            'debit' => $purchase['grandtax'],
+            'debit' => $bill['grandtax'],
         ]);
         Transaction::insert($dr_data); 
         
