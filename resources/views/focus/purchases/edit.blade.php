@@ -54,22 +54,9 @@
 
     // default datepicker values
     $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format')}}"})
-    .change(function() { $(this).datepicker('hide') });
+    .datepicker({format: "{{ config('core.user_date_format')}}", autoHide: true})
     $('#date').datepicker('setDate', new Date("{{ $purchase->date }}"));
     $('#due_date').datepicker('setDate', new Date("{{ $purchase->due_date }}"));
-
-    // On clicking supplier_type
-    $("input[type='radio']").change(function() {
-        $('#supplierbox').html('').attr('disabled', true);
-        $('#taxid').val('').attr('readonly', false);
-        $('#supplier').val('').attr('readonly', false);
-        if ($(this).val() == 'supplier') {
-            $('#supplierbox').attr('disabled', false);
-            $('#taxid').attr('readonly', true);
-            $('#supplier').attr('readonly', true);
-        }
-    });
 
     // On clicking supplier_type
     $("input[type='radio']").change(function() {
@@ -91,9 +78,9 @@
         $('#supplierid').val(id);
         $('#supplier').val(name);
     });
-    const supplierText = "{{ $purchase->supplier->name }} : ";
-    const supplierVal = "{{ $purchase->supplier_id }}-{{ $purchase->supplier->taxid }}";
-    $('#supplierbox').append(new Option(supplierText, supplierVal, true, true)).change();
+    const supplierText = "{{ $purchase->suppliername? $purchase->suppliername : $purchase->supplier->name }} : ";
+    const supplierVal = "{{ $purchase->supplier_id }}-{{ $purchase->supplier_taxid? $purchase->supplier_taxid : $purchase->supplier->taxid }}";
+    if (supplierType == 'supplier') $('#supplierbox').append(new Option(supplierText, supplierVal, true, true)).change();
 
 
     // load suppliers
