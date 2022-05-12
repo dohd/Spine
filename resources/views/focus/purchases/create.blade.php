@@ -249,7 +249,7 @@
             $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectexptext-'+i).val(projectText);
-            $('#projectexpval-'+i).val($(this).val());
+            $('#projectexpval-'+i).val($("#project option:selected").val());
             taxRule('expvat-'+i, $('#tax').val());
         }
         if ($(this).is('.remove')) {
