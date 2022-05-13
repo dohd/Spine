@@ -5,6 +5,7 @@ namespace App\Models\transaction\Traits;
 use App\Models\bill\Bill;
 use App\Models\bill\Paidbill;
 use App\Models\charge\Charge;
+use App\Models\creditnote\CreditNote;
 use App\Models\hrm\Hrm;
 use App\Models\invoice\PaidInvoice;
 use App\Models\issuance\Issuance;
@@ -17,6 +18,16 @@ use App\Models\withholding\Withholding;
  */
 trait TransactionRelationship
 {
+    public function debitnote()
+    {
+        return $this->belongsTo(CreditNote::class, 'tr_ref')->where('is_debit', 1);
+    }
+
+    public function creditnote()
+    {
+        return $this->belongsTo(CreditNote::class, 'tr_ref');
+    }
+
     public function withholding()
     {
         return $this->belongsTo(Withholding::class, 'tr_ref');
