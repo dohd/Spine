@@ -49,6 +49,7 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $order = $input['order'];
@@ -235,7 +236,7 @@ class PurchaseorderRepository extends BaseRepository
         BillItem::insert($bill_items);
 
         // accounting
-        $this->post_transaction($bill_inp, $bill_items, $bill);
+        $this->post_transaction($bill);
 
         DB::commit();
         if ($grn) return true;
@@ -244,34 +245,35 @@ class PurchaseorderRepository extends BaseRepository
     /**
      * Post Account Transaction
      */
-    protected function post_transaction($order, $order_items, $bill) 
+    protected function post_transaction($order) 
     {
-        /** credit accounts payable */ 
+        // credit Accounts Payable (Debtors) 
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $cr_data = [
+            'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $order['grandttl'],
             'tr_date' => date('Y-m-d'),
             'due_date' => $order['due_date'],
             'user_id' => $order['user_id'],
-            'note' => $bill->note,
+            'note' => $order->note,
             'ins' => $order['ins'],
             'tr_type' => $tr_category->code,
-            'tr_ref' => $bill->id,
+            'tr_ref' => $order->id,
             'user_type' => 'supplier',
             'is_primary' => 1
         ];
         $tr = Transaction::create($cr_data);
-        $bill->update(['tr_ref' => $tr->id]);
+        $order->update(['tr_ref' => $tr->id]);
 
-        /** debit */
         $dr_data = array();
+        // debit stock account
         unset($cr_data['credit'], $cr_data['is_primary']);
-        // stock
-        $stock_items = array_filter($order_items, function ($item) { return $item['type'] == 'Stock'; });
-        if ($stock_items) {
+        $is_stock = $order->items()->where('type', 'Stock')->count();
+        if ($is_stock) {
             $account = Account::where('system', 'stock')->first(['id']);
             $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
             $dr_data[] = array_replace($cr_data, [
@@ -280,9 +282,9 @@ class PurchaseorderRepository extends BaseRepository
                 'debit' => $order['stock_subttl'],
             ]);    
         }
-        // expense and asset
+        // debit expense and asset account
         $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
-        foreach ($order_items as $item) {
+        foreach ($order->items as $item) {
             $subttl = $item['amount'] - $item['taxrate'];
             if ($item['type'] == 'Expense') {
                 $dr_data[] = array_replace($cr_data, [
@@ -299,14 +301,13 @@ class PurchaseorderRepository extends BaseRepository
                 ]);
             }
         }
-        // tax
+        // debit tax
         $account = Account::where('system', 'tax')->first(['id']);
         $dr_data[] = array_replace($cr_data, [
             'account_id' => $account->id, 
             'debit' => $order['grandtax'],
         ]);
         Transaction::insert($dr_data); 
-        
         // update account ledgers debit and credit totals
         aggregate_account_transactions();
     }
