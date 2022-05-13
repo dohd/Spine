@@ -93,7 +93,7 @@ class PurchaseordersController extends Controller
         $order['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
         $order_items = modify_array($order_items);
-        $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
+        $order_items = array_filter($order_items, function ($v) { return $v['item_id']; });
 
         $result = $this->repository->create(compact('order', 'order_items'));
 
