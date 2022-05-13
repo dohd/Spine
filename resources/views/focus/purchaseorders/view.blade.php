@@ -163,7 +163,11 @@
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
-                                        <td>{{ gen4tid('Prj-', $item->project->tid) }}; {{ $item->project->name }}</td>
+                                        <td>
+                                            @isset($item->project->tid)
+                                                {{ gen4tid('Prj-', $item->project->tid) }}; {{ $item->project->name }}
+                                            @endisset
+                                        </td>
                                     </tr>
                                 @endif
                             @endforeach
