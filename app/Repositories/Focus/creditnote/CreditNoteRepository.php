@@ -48,16 +48,20 @@ class CreditNoteRepository extends BaseRepository
 
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['subtotal', 'tax', 'total'], 1)) {
+            if (in_array($key, ['subtotal', 'tax', 'total'], 1)) 
                 $input[$key] = numberClean($val);
-            }
         }
         $result = CreditNote::create($input);
 
+        // decrement or increment invoice amount paid and update status
+        $invoice = $result->invoice;
+        if ($result->is_debit) $invoice->decrement('amountpaid', $result->total);
+        else $invoice->increment('amountpaid', $result->total);
+        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+        if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        
         /** accounts  */
         $this->post_transaction($result);
-        // update account ledgers debit and credit totals
-        aggregate_account_transactions();
 
         DB::commit();
         if ($result) return $result;
@@ -78,57 +82,63 @@ class CreditNoteRepository extends BaseRepository
         // 
     }
 
-    static function post_transaction($creditnote)
+    static function post_transaction($result)
     {
         $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'INV')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'tr_ref' => $result->id,
             'tr_date' => date('Y-m-d'),
-            'trans_category_id' => $tr_category->id,
-            'tr_type' => $tr_category->code,
-            'due_date' => $creditnote->date,
-            'user_id' => $creditnote->user_id,
-            'note' => $creditnote->note,
-            'ins' => $creditnote->ins,
-            'tr_ref' => $creditnote->id,
+            'due_date' => $result->date,
+            'user_id' => $result->user_id,
+            'note' => $result->note,
+            'ins' => $result->ins,
+            'user_type' => 'customer',
             'is_primary' => 1
         ];
 
-        // debit note,
-        if ($creditnote->is_debit) {
-            // credit income
+        // credit note
+        if (!$result->is_debit) {
+            // credit Receivable Account (Creditors)
+            $tr_category = Transactioncategory::where('code', 'cnote')->first(['id', 'code']);
             $cr_data = array_replace($data, [
-                'account_id' => Invoice::find($creditnote->invoice_id)->account_id,
-                'debit' => $creditnote->subtotal,
-                'user_type' => 'dnote',
+                'credit' => $result->total,
+                'trans_category_id' => $tr_category->id,
+                'tr_type' => $tr_category->code,    
             ]);
             Transaction::create($cr_data);
 
-            // debit accounts receivable
+            // debit Revenue Account
+            unset($cr_data['credit'], $cr_data['is_primary']);
+            $dr_data = array_replace($cr_data, [
+                'account_id' => Invoice::find($result->invoice_id)->account_id,
+                'debit' => $result->subtotal,
+            ]);
+            Transaction::create($dr_data);
+        }        
+        // debit note,
+        if ($result->is_debit) {
+            // credit Revenue Account
+            $tr_category = Transactioncategory::where('code', 'dnote')->first(['id', 'code']);
+            $cr_data = array_replace($data, [
+                'account_id' => Invoice::find($result->invoice_id)->account_id,
+                'debit' => $result->subtotal,
+                'trans_category_id' => $tr_category->id,
+                'tr_type' => $tr_category->code,    
+            ]);
+            Transaction::create($cr_data);
+
+            // debit Receivable Account (Creditors)
             unset($cr_data['debit'], $cr_data['is_primary']);
             $dr_data = array_replace($cr_data, [
                 'account_id' => $account->id,
-                'credit' => $creditnote->total,
+                'credit' => $result->total,
             ]);
             Transaction::create($dr_data);
         } 
-        // credit note
-        else {
-            // credit accounts receivable
-            $cr_data = $data + [
-                'account_id' => $account->id,
-                'credit' => $creditnote->total,
-                'user_type' => 'cnote',
-            ];
-            Transaction::create($cr_data);
-
-            // debit accounts income 
-            unset($cr_data['credit'], $cr_data['is_primary']);
-            $dr_data = array_replace($cr_data, [
-                'account_id' => Invoice::find($creditnote->invoice_id)->account_id,
-                'debit' => $creditnote->subtotal,
-            ]);
-            Transaction::create($dr_data);
-        }
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
     }
 }
