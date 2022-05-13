@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\Focus\withholding;
 
-use App\Models\transaction\Transaction;
+use App\Models\withholding\Withholding;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -16,10 +16,8 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-         // $customers=Customer::all();
-       $last_id=Transaction::orderBy('id', 'desc')->first();
-           $sales=Transaction::where('is_bill', 2)->where('transaction_type', 'sales')->orderBy('invoice_id', 'asc')->get();
-        return view('focus.withholdings.create')->with(array('last_id'=>$last_id, 'sales'=>$sales))->with(bill_helper(3,9));
-    
+        $last_tid = Withholding::max('tid');
+        
+        return view('focus.withholdings.create', compact('last_tid'));
     }
 }
