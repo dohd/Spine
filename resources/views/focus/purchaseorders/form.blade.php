@@ -131,7 +131,7 @@
                 <div class="col-sm-12">
                     <div class="form-group">
                         <label for="project" class="caption">Projects</label>
-                        <select class="form-control" name="project_id" id="project" data-placeholder="Search Project by Name, Customer, Branch" required>
+                        <select class="form-control" name="project_id" id="project" data-placeholder="Search Project by Name, Customer, Branch">
                         </select>
                     </div>
                 </div>
