@@ -10,12 +10,18 @@ use App\Models\invoice\PaidInvoice;
 use App\Models\issuance\Issuance;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
+use App\Models\withholding\Withholding;
 
 /**
  * Class TransactionRelationship
  */
 trait TransactionRelationship
 {
+    public function withholding()
+    {
+        return $this->belongsTo(Withholding::class, 'tr_ref');
+    }
+
     public function issuance()
     {
         return $this->belongsTo(Issuance::class, 'tr_ref');
