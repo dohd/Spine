@@ -191,8 +191,12 @@ class CustomersController extends Controller
                 $q->where('customer_id', $customer->id);
             })->orwhereHas('withholding', function ($q) use($customer) {
                 $q->where('customer_id', $customer->id);
+            })->orwhereHas('creditnote', function ($q) use($customer) {
+                $q->where('customer_id', $customer->id);
+            })->orwhereHas('debitnote', function ($q) use($customer) {
+                $q->where('customer_id', $customer->id);
             });
-        })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding'])->get();
+        })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding', 'cnote', 'dnote'])->get();
         
         return new ViewResponse('focus.customers.view', compact('customer', 'transactions', 'invoices'));
     }
