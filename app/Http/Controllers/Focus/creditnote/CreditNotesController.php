@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Focus\creditnote;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\creditnote\CreditNote;
 use App\Repositories\Focus\creditnote\CreditNoteRepository;
 use Illuminate\Http\Request;
-use PayPal\Api\Credit;
 
 class CreditNotesController extends Controller
 {
@@ -45,13 +45,10 @@ class CreditNotesController extends Controller
     public function create()
     {
         $is_debit = request('is_debit');
-
-        $last_cn = CreditNote::where('is_debit', 0)->orderBy('id', 'DESC')->first(['tid']);
-        if ($is_debit == 1) {
-            $last_cn = CreditNote::where('is_debit', 1)->orderBy('id', 'DESC')->first(['tid']);
-        }
-
-        return new ViewResponse('focus.creditnotes.create', compact('last_cn', 'is_debit'));
+        $last_tid = CreditNote::max('tid');
+        if ($is_debit == 1) $last_tid = CreditNote::where('is_debit', 1)->max('tid');
+            
+        return new ViewResponse('focus.creditnotes.create', compact('last_tid', 'is_debit'));
     }
 
     /**
@@ -65,14 +62,12 @@ class CreditNotesController extends Controller
         // extract input fields
         $data = $request->except('_token', 'tax_id');
 
-        $data = $data + [
-            'ins' => auth()->user()->ins,
-            'user_id' => auth()->user()->id,
-        ];
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
-        $result = $this->repository->create($data);
+        $this->repository->create($data);
 
-        return new ViewResponse('focus.creditnotes.index', ['flash_success' => 'Credit Note created successfully']);
+        return new RedirectResponse(route('biller.creditnotes.index'), ['flash_success' => 'Credit Note created successfully']);
     }
 
     /**
