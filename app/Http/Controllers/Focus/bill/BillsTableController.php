@@ -68,8 +68,7 @@ class BillsTableController extends Controller
                 return $bill->status . ':';
             })
             ->addColumn('supplier', function ($bill) {
-                if ($bill->supplier_id) return $bill->supplier->name;
-                return $bill->supllier_name;
+                return $bill->suppliername ? $bill->suppliername : $bill->supplier->name;
             })
             ->addColumn('document', function ($bill) {
                 if ($bill->po_id) return $bill->purchaseorder->doc_ref_type . ' - ' . $bill->purchaseorder->doc_ref;
