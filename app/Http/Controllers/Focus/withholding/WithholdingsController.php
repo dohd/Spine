@@ -17,9 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\withholding;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use App\Models\withholding\Witholding;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -81,42 +78,23 @@ class WithholdingsController extends Controller
      */
     public function store(StoreWithholdingRequest $request)
     {
-
-        $request->validate([
-            'amount' => 'required',
-            'account_id' => 'required',
-            'debited_account_id' => 'required',
-            'refer_no' => 'required',
+        // extract request fields
+        $data = $request->only([
+            'customer_id', 'tid', 'date', 'due_date', 'certificate', 'amount', 'amount_ttl', 'deposit_ttl', 'doc_ref'
         ]);
+        $data_items = $request->only(['invoice_id', 'paid']);
 
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
-      $credit = $request->only(['tid', 'account_id', 'note']);
-      $debit= $request->only(['tid', 'refer_no', 'transaction_type', 'note']);
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['paid']; });
 
+        $this->repository->create(compact('data', 'data_items'));
 
-
-      $credit['ins'] = auth()->user()->ins;
-      $credit['user_id'] = auth()->user()->id;
-      $credit['credit'] = numberClean($request->input('amount'));
-      $credit['transaction_date'] = date_for_database($request->input('transaction_date'));
-     
-      
-
-      $debit['ins'] = auth()->user()->ins;
-      $debit['user_id'] = auth()->user()->id;
-      $debit['account_id'] = numberClean($request->input('debited_account_id'));
-      $debit['debit'] = numberClean($request->input('amount'));
-      $debit['transaction_date'] = date_for_database($request->input('transaction_date'));
-      $debit['due_date'] = date_for_database($request->input('due_date'));
-
-
-      $result = $this->repository->create(compact('credit','debit'));
+        return trans('alerts.backend.withholdings.created');
 
        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.created')]);
-
-     
- 
-
     }
 
     /**
