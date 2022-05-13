@@ -184,16 +184,15 @@ class CustomersController extends Controller
         $invoices = Invoice::where('customer_id', $customer->id)->get();
         $transactions = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
-        })
-        ->where(function ($q) use($customer) {
+        })->where(function ($q) use($customer) {
             $q->whereHas('invoice', function ($q) use($customer) { 
                 $q->where('customer_id', $customer->id); 
-            })
-            ->orwhereHas('paidinvoice', function ($q) use($customer) {
+            })->orwhereHas('paidinvoice', function ($q) use($customer) {
+                $q->where('customer_id', $customer->id);
+            })->orwhereHas('withholding', function ($q) use($customer) {
                 $q->where('customer_id', $customer->id);
             });
-        })
-        ->whereIn('tr_type', ['RCPT', 'PMT'])->get();
+        })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding'])->get();
         
         return new ViewResponse('focus.customers.view', compact('customer', 'transactions', 'invoices'));
     }
