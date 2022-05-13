@@ -157,8 +157,7 @@ class SuppliersController extends Controller
                 $q->where('supplier_id', $supplier->id);
             });
         })
-        ->whereIn('tr_type', ['BILL', 'PMT'])
-        ->get();
+        ->whereIn('tr_type', ['bill', 'pmt'])->get();
 
         $bills = Bill::where('supplier_id', $supplier->id)->where('po_id', '>', 0)->get();
 
