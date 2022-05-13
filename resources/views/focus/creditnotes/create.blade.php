@@ -36,7 +36,7 @@
                         </div>
                         <div class="form-group col-2">
                             <div><label for="tid">Note No.</label></div>
-                            {{ Form::text('tid', @$last_cn->tid+1, ['class' => 'form-control', 'readonly']) }}
+                            {{ Form::text('tid', @$last_tid+1, ['class' => 'form-control', 'readonly']) }}
                         </div>
                         <div class="form-group col-2">
                             <div><label for="date">Date</label></div>
