@@ -36,7 +36,6 @@
                 <input type="hidden" class="expamountr" name="amount[]">
                 <input type="hidden" name="type[]" value="Expense">
                 <input type="hidden" name="id[]" value="0">
-                <input type="hidden" name="uom[]">
             </tr>
             <tr>
                 <td colspan="3">
@@ -76,7 +75,6 @@
                             <input type="hidden" class="expamountr" name="amount[]" value="{{ (float) $item->amount }}">
                             <input type="hidden" name="type[]" value="Expense">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
-                            <input type="hidden" name="uom[]">
                         </tr>
                         <tr>
                             <td colspan="3">
