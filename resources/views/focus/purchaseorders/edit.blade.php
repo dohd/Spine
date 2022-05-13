@@ -52,8 +52,7 @@
 
     // default datepicker values
     $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format')}}"})
-    .change(function() { $(this).datepicker('hide') });
+    .datepicker({format: "{{ config('core.user_date_format')}}", autoHide: true})
     $('#date').datepicker('setDate', new Date("{{ $po->date }}"));
     $('#due_date').datepicker('setDate', new Date("{{ $po->due_date }}"));
 
@@ -65,8 +64,8 @@
         $('#supplierid').val(id);
         $('#supplier').val(name);
     });
-    const supplierText = "{{ $po->supplier->name }} : ";
-    const supplierVal = "{{ $po->supplier_id }}-{{ $po->supplier->taxid }}";
+    const supplierText = "{{ $po->supplier? $po->supplier->name : '' }} : ";
+    const supplierVal = "{{ $po->supplier_id }}-{{ $po->supplier? $po->supplier->taxid : '' }}";
     $('#supplierbox').append(new Option(supplierText, supplierVal, true, true)).change();
 
 
@@ -100,9 +99,9 @@
         $('#projectexptext-0').val(projectText);
         $('#projectexpval-0').val($(this).val());
     });
-    const projectName = "{{ $po->project->name }}";
+    const projectName = "{{ $po->project? $po->project->name : '' }}";
     const projectId = "{{ $po->project_id }}";
-    $('#project').append(new Option(projectName, projectId, true, true)).change();
+    if (projectId) $('#project').append(new Option(projectName, projectId, true, true)).change();
 
     // Update transaction table
     const sumLine = (...values) => values.reduce((prev, curr) => prev + curr.replace(/,/g, '')*1, 0);
