@@ -24,7 +24,7 @@
                 <div class="row">
                     <div class="form-group col-2">
                         <label for="lpo_no">LPO Number</label>
-                        <input type="text" class="form-control" name="lpo_no" value="PO-{{ sprintf('%04d', $po->tid) }}" disabled>
+                        <input type="text" class="form-control" name="lpo_no" value="{{ gen4tid('PO-', $po->tid) }}" disabled>
                     </div>
                     <div class="form-group col-3">                                        
                         <label for="supplier">Supplier</label>
@@ -32,7 +32,7 @@
                     </div>
                     <div class="form-group col-7">
                         <label for="project">Project</label>
-                        <input type="text" class="form-control" name="project" value="{{ $po->project->name }}" disabled>
+                        <input type="text" class="form-control" name="project" value="{{ $po->project? $po->project->name : '' }}" disabled>
                     </div>
                 </div>
                 <div class="row">                    
