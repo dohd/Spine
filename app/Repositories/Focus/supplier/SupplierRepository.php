@@ -120,9 +120,9 @@ class SupplierRepository extends BaseRepository
                     //credit supplier and debit expense
                     $pri_account = Account::where('system', 'payable')->first();
                     $seco_account = Account::where('system', 'uncategorized_expense')->first();
-                    $pri_tr = Transactioncategory::where('code', 'BILL')->first();
+                    $pri_tr = Transactioncategory::where('code', 'bill')->first();
                     $date = date('Y-m-d');
-                    $tr_ref = 'BILL';
+                    $tr_ref = 'bill';
                     $memo = 'Account Opening Balance';
                     double_entry($tid, $pri_account->id, $seco_account->id, $opening_balance, 'cr', $pri_tr->id, 'supplier', $result->id, $date, date_for_database($input['opening_balance_date']), $tr_ref, $memo, $ins);
                 }

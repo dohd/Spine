@@ -248,7 +248,7 @@ class PurchaseorderRepository extends BaseRepository
     {
         /** credit accounts payable */ 
         $account = Account::where('system', 'payable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,

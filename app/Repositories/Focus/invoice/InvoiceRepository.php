@@ -19,7 +19,6 @@ use App\Models\transaction\TransactionHistory;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use App\Models\purchase\Purchase;
 use App\Models\quote\Quote;
 use App\Models\transactioncategory\Transactioncategory;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
@@ -127,7 +126,7 @@ class InvoiceRepository extends BaseRepository
     {
         // debit Accounts Receivable (Creditors)
         $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'RCPT')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'rcpt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $dr_data = [
             'account_id' => $account->id,
