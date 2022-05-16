@@ -46,7 +46,10 @@
                                             <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Invoices</a>
                                         </li> 
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Aging</a>
+                                            <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Statement on Invoice</a>
+                                        </li> 
+                                        <li class="nav-item">
+                                            <a class="nav-link " id="active-tab5" data-toggle="tab" href="#active5" aria-controls="active5" role="tab">Aging</a>
                                         </li>                                       
                                     </ul>
                                     <div class="tab-content px-1 pt-1">
@@ -126,8 +129,74 @@
                                             </table>                                            
                                         </div>
 
-                                        <!-- Aging -->
+                                        <!-- Statement on Invoice  -->
                                         <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
+                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>                                            
+                                                        @foreach (['Date', 'Type', 'Note', 'Invoice Amount', 'Amount Paid', 'Balance'] as $val)
+                                                            <th>{{ $val }}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    
+                                                    @php
+                                                        // sequence of invoices and related payments
+                                                        $statements = array();
+                                                        foreach ($transactions as $tr_one) {
+                                                            if ($tr_one->tr_type == 'rcpt') {
+                                                                $statements[] = $tr_one;
+                                                                $invoice_id = $tr_one->invoice->id;
+                                                                $customer_id = $tr_one->invoice->customer_id;
+                                                                foreach ($transactions as $tr_two) {
+                                                                    $types = ['pmt', 'withholding', 'cnote', 'dnote'];
+                                                                    if (in_array($tr_two->tr_type, $types, 1)) {
+                                                                        if ($tr_two->paidinvoice) {
+                                                                            foreach ($tr_two->paidinvoice->items as $item) {
+                                                                                if ($item->invoice_id == $invoice_id) {
+                                                                                    $statements[] = $tr_two;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }                                                                        
+                                                                        if ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id)
+                                                                            $statements[] = $tr_two;
+                                                                        if ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id)
+                                                                            $statements[] = $tr_two;
+                                                                        if ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id)
+                                                                            $statements[] = $tr_two;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @foreach ($statements as $i => $tr)
+                                                        <tr>
+                                                            <td>{{ dateFormat($tr->tr_date) }}</td>
+                                                            <td>{{ $tr->tr_type }}</td>
+                                                            <td>{{ $tr->note }}</td>                                                           
+                                                            <td>{{ numberFormat($tr->debit) }}</td>
+                                                            <td>{{ numberFormat($tr->credit) }}</td>
+                                                            <td>
+                                                                @if ($tr->tr_type == 'rcpt')
+                                                                    @php
+                                                                        $bal = 0;
+                                                                        browserlog($tr->debit, $tr->invoice->amountpaid);
+                                                                        $diff = $tr->debit  - $tr->invoice->amountpaid;
+                                                                        if ($diff > 0) $bal = $diff;
+                                                                        echo numberFormat($bal);
+                                                                    @endphp
+                                                                @endif
+                                                            </td>
+                                                        </tr>                                                        
+                                                    @endforeach
+                                                </tbody>                                                 
+                                            </table>                                            
+                                        </div>
+
+                                        <!-- Aging -->
+                                        <div class="tab-pane" id="active5" aria-labelledby="link-tab5" role="tabpanel">
                                             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                    
