@@ -44,11 +44,11 @@
                                             <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Transactions</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Bill Statement</a>
-                                        </li>
-                                        <li class="nav-item">
                                             <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Purchase Orders</a>
                                         </li>   
+                                        <li class="nav-item">
+                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Statement on Bill</a>
+                                        </li>
                                         <li class="nav-item">
                                             <a class="nav-link " id="active-tab5" data-toggle="tab" href="#active5" aria-controls="active5" role="tab">Aging</a>
                                         </li>                                        
@@ -112,7 +112,7 @@
                                             </table>
                                         </div>
 
-                                        <!-- Bill statement -->
+                                        <!-- Statement on Bill  -->
                                         <div class="tab-pane" id="active3" aria-labelledby="link-tab3" role="tabpanel">
                                             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
@@ -135,6 +135,7 @@
                                                                         foreach ($tr_two->paidbill->items as $item) {
                                                                             if ($item->bill_id == $bill_id) {
                                                                                 $statements[] = $tr_two;
+                                                                                break;
                                                                             }
                                                                         }
                                                                     }
