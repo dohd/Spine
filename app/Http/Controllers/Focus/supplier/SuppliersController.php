@@ -146,20 +146,16 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
+        $bills = Bill::where('supplier_id', $supplier->id)->get();
         $transactions = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'payable');  
-        })
-        ->where(function ($q) use($supplier) {
+        })->where(function ($q) use($supplier) {
             $q->whereHas('bill', function ($q) use($supplier) { 
                 $q->where('supplier_id', $supplier->id); 
-            })
-            ->orwhereHas('paidbill', function ($q) use($supplier) {
+            })->orwhereHas('paidbill', function ($q) use($supplier) {
                 $q->where('supplier_id', $supplier->id);
             });
-        })
-        ->whereIn('tr_type', ['bill', 'pmt'])->get();
-
-        $bills = Bill::where('supplier_id', $supplier->id)->where('po_id', '>', 0)->get();
+        })->whereIn('tr_type', ['bill', 'pmt'])->get();
 
         return new ViewResponse('focus.suppliers.view', compact('supplier', 'transactions', 'bills'));
     }
