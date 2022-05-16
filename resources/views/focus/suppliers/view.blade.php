@@ -44,10 +44,13 @@
                                             <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Transactions</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Purchase Orders</a>
+                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Bill Statement</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Purchase Orders</a>
                                         </li>   
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Aging</a>
+                                            <a class="nav-link " id="active-tab5" data-toggle="tab" href="#active5" aria-controls="active5" role="tab">Aging</a>
                                         </li>                                        
                                     </ul>
                                     <div class="tab-content px-1 pt-1">
@@ -89,12 +92,12 @@
                                                 </thead>
                                                 <tbody>
                                                     @php
-                                                        $bal = count($transactions) ? $transactions[0]['credit'] : 0;
+                                                        $tr_bal = count($transactions) ? $transactions[0]['credit'] : 0;
                                                     @endphp
                                                     @foreach ($transactions as $i => $tr)
                                                         @php
-                                                            if ($i && $tr->debit > 0) $bal -= $tr->debit;
-                                                            elseif ($i && $tr->credit > 0) $bal += $tr->credit;
+                                                            if ($i && $tr->debit > 0) $tr_bal -= $tr->debit;
+                                                            elseif ($i && $tr->credit > 0) $tr_bal += $tr->credit;
                                                         @endphp
                                                         <tr>
                                                             <td>{{ dateFormat($tr->tr_date) }}</td>
@@ -102,15 +105,68 @@
                                                             <td>{{ $tr->note }}</td>                                                           
                                                             <td>{{ numberFormat($tr->credit) }}</td>
                                                             <td>{{ numberFormat($tr->debit) }}</td>
-                                                            <td>{{ numberFormat($bal) }}</td>
+                                                            <td>{{ numberFormat($tr_bal) }}</td>
                                                         </tr>                                                        
                                                     @endforeach
                                                 </tbody>                                                
                                             </table>
                                         </div>
 
-                                        <!-- PO -->
+                                        <!-- Bill statement -->
                                         <div class="tab-pane" id="active3" aria-labelledby="link-tab3" role="tabpanel">
+                                            <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>                                                        
+                                                        @foreach (['Date', 'Type', 'Note', 'Bill Amount', 'Paid Amount', 'Balance'] as $val)
+                                                            <th>{{ $val }}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @php
+                                                        // sequence of bill and related payments
+                                                        $statements = array();
+                                                        foreach ($transactions as $tr_one) {
+                                                            if ($tr_one->tr_type == 'bill') {
+                                                                $statements[] = $tr_one;
+                                                                $bill_id = $tr_one->bill->id;
+                                                                foreach ($transactions as $tr_two) {
+                                                                    if ($tr_two->tr_type == 'pmt') {
+                                                                        foreach ($tr_two->paidbill->items as $item) {
+                                                                            if ($item->bill_id == $bill_id) {
+                                                                                $statements[] = $tr_two;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @foreach ($statements as $i => $tr)
+                                                        <tr>
+                                                            <td>{{ dateFormat($tr->tr_date) }}</td>
+                                                            <td>{{ $tr->tr_type }}</td>
+                                                            <td>{{ $tr->note }}</td>                                                           
+                                                            <td>{{ numberFormat($tr->credit) }}</td>
+                                                            <td>{{ numberFormat($tr->debit) }}</td>
+                                                            <td>
+                                                                @if ($tr->tr_type == 'bill')
+                                                                    @php
+                                                                        $bal = 0;
+                                                                        $diff = $tr->credit  - $tr->bill->amountpaid;
+                                                                        if ($diff > 0) $bal = $diff;
+                                                                        echo numberFormat($bal);
+                                                                    @endphp
+                                                                @endif
+                                                            </td>
+                                                        </tr>                                                        
+                                                    @endforeach
+                                                </tbody>                                                
+                                            </table>
+                                        </div>
+
+                                        <!-- Purchase order -->
+                                        <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
                                             <table class="table table-bordered zero-configuration" cellspacing="0" width="100%">
                                                 <thead>
                                                     <tr>                                                    
@@ -121,20 +177,67 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($bills as $bill)
-                                                        <tr>
-                                                            <td>{{ dateFormat($bill->date) }}</td>
-                                                            <td>{{ $bill->doc_ref_type }} - {{ $bill->doc_ref }}</td>
-                                                            <td>{{ $bill->note }}</td>                                                      
-                                                            <td>{{ numberFormat($bill->grandttl) }}</td>
-                                                            <td>{{ numberFormat($bill->amountpaid) }}</td>
-                                                        </tr>
+                                                        @if ($bill->po_id)
+                                                            <tr>
+                                                                <td>{{ dateFormat($bill->date) }}</td>
+                                                                <td>{{ $bill->doc_ref_type }} - {{ $bill->doc_ref }}</td>
+                                                                <td>{{ $bill->note }}</td>                                                      
+                                                                <td>{{ numberFormat($bill->grandttl) }}</td>
+                                                                <td>{{ numberFormat($bill->amountpaid) }}</td>
+                                                            </tr>
+                                                        @endif
                                                     @endforeach
                                                 </tbody>
                                             </table>                        
                                         </div>
 
                                         <!-- aging tab -->
-                                        <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
+                                        <div class="tab-pane" id="active5" aria-labelledby="link-tab5" role="tabpanel">
+                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>                                                    
+                                                        @foreach ([30, 60, 90, 120] as $val)
+                                                            <th>{{ $val }} Days</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @php
+                                                        // grouped date intervals ranging now to 120 days prior
+                                                        $groups = array();
+                                                        for ($i = 0; $i < 4; $i++) {
+                                                            $from = date('Y-m-d');
+                                                            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
+                                                            if ($i) {
+                                                                $prev = $groups[$i-1][1];
+                                                                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
+                                                                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
+                                                            }
+                                                            $groups[] = [$from, $to];
+                                                        }
+
+                                                        // bill balances for each interval
+                                                        $balance_cluster = array_fill(0, 4, 0);
+                                                        foreach ($bills as $bill) {
+                                                            foreach ($groups as $i => $dates) {
+                                                                $start  = new DateTime($dates[0]);
+                                                                $end = new DateTime($dates[1]);
+                                                                $due = new DateTime($bill->due_date);
+                                                                if ($start >= $due && $end <= $due) {
+                                                                    $diff = $bill->grandttl - $bill->amountpaid;
+                                                                    $balance_cluster[$i] += $diff;
+                                                                    $break;
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    <tr>
+                                                        @for ($i = 0; $i < 4; $i++) 
+                                                            <td>{{ numberFormat($balance_cluster[$i]) }}</td>
+                                                        @endfor
+                                                    </tr>
+                                                </tbody>                                               
+                                            </table>                                         
                                         </div>
                                     </div>
                                 </div>
@@ -161,7 +264,7 @@
                         <div class="ml-1">
                             <h5 class="info">{{ trans('suppliers.supplier') }}</h5>
                             <h5 class="media-heading">{{ $supplier->name }}</h5>
-                            <h5>Balance: <span class="text-danger">{{ numberFormat($bal) }}</span></h5>
+                            <h5>Balance: <span class="text-danger">{{ numberFormat($tr_bal) }}</span></h5>
                         </div>
                     </div>
                     <div class="card-body">
