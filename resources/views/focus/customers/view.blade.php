@@ -128,6 +128,51 @@
 
                                         <!-- Aging -->
                                         <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
+                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>                                                    
+                                                        @foreach ([30, 60, 90, 120] as $val)
+                                                            <th>{{ $val }} Days</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @php
+                                                        // grouped date intervals ranging now to 120 days prior
+                                                        $groups = array();
+                                                        for ($i = 0; $i < 4; $i++) {
+                                                            $from = date('Y-m-d');
+                                                            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
+                                                            if ($i) {
+                                                                $prev = $groups[$i-1][1];
+                                                                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
+                                                                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
+                                                            }
+                                                            $groups[] = [$from, $to];
+                                                        }
+
+                                                        // invoice balances for each interval
+                                                        $balance_cluster = array_fill(0, 4, 0);
+                                                        foreach ($invoices as $invoice) {
+                                                            foreach ($groups as $i => $dates) {
+                                                                $start  = new DateTime($dates[0]);
+                                                                $end = new DateTime($dates[1]);
+                                                                $due = new DateTime($invoice->invoiceduedate);
+                                                                if ($start >= $due && $end <= $due) {
+                                                                    $diff = $invoice->total - $invoice->amountpaid;
+                                                                    $balance_cluster[$i] += $diff;
+                                                                    $break;
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    <tr>
+                                                        @for ($i = 0; $i < 4; $i++) 
+                                                            <td>{{ numberFormat($balance_cluster[$i]) }}</td>
+                                                        @endfor
+                                                    </tr>
+                                                </tbody>                                               
+                                            </table>  
                                         </div>
                                     </div>
                                 </div>
