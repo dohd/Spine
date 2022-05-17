@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\creditnote;
+namespace App\Models\creditnote\Traits;
 
 use App\Models\bill\Bill;
 use App\Models\customer\Customer;

@@ -2,11 +2,14 @@
 
 namespace App\Models\creditnote;
 
+use App\Models\creditnote\Traits\CreditNoteAttribute;
+use App\Models\creditnote\Traits\CreditNoteRelationship;
+use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class CreditNote extends Model
 {
-    use CreditNoteRelationship;
+    use ModelTrait, CreditNoteAttribute, CreditNoteRelationship;
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
