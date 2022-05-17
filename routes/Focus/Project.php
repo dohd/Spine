@@ -5,7 +5,6 @@
  *
  */
 Route::group(['namespace' => 'project', 'middleware' => 'project'], function () {
-  Route::post('projects/close_project/{project}', 'ProjectsController@close_project')->name('projects.close_project');
   Route::post('projects/update_status', 'ProjectsController@update_status')->name('projects.update_status');
   Route::post('projects/store_meta', 'ProjectsController@store_meta')->name('projects.store_meta');
   Route::post('projects/delete_meta', 'ProjectsController@delete_meta')->name('projects.delete_meta');

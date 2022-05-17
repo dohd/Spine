@@ -162,20 +162,6 @@ class ProjectsController extends Controller
     }
 
     /**
-     * Close project
-     */
-    public function close_project(Project $project, Request $request)
-    {
-        $input = $request->only(['end_date', 'end_note']);
-
-        $input['ended_by'] = auth()->user()->id;
-
-        $this->repository->close_project($project, $input);
-
-        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project closed successfully']);
-    }
-
-    /**
      * show form to create resource
      * 
      * @param App\Models\quote\Quote quote

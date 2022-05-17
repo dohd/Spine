@@ -18,11 +18,7 @@
     </div>
     
     <div class="card">
-        <div class="card-header">
-            <a href="javascript:" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#closeProject">
-                </i> End Project
-            </a>
-        </div>
+        <div class="card-header"></div>
         <div class="card-body">
             <table id="projectTbl" class="table table-lg table-bordered">
                 <tbody>
@@ -48,7 +44,6 @@
         </div>
     </div>
 </div>
-@include('focus.projects.modal.close-project')
 @include('focus.projects.modal.project_new')
 @endsection
 
