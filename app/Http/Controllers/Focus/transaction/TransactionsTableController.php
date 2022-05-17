@@ -52,8 +52,8 @@ class TransactionsTableController extends Controller
                 if ($tr->bill)
                     return $tr->bill->supplier->taxid . ' : ' . $tr->bill->supplier->company;
             case 'tr_type':
-                if ($tr->invoice) return $tr->tr_type .=  ' - Sale';
-                if ($tr->bill) return $tr->tr_type .=  ' - Purchase';
+                if ($tr->invoice) return 'Sale';
+                if ($tr->bill) return 'Purchase';
             case 'vat_rate':
                 if ($tr->invoice) return $tr->invoice->tax_id;
                 if ($tr->bill) return $tr->bill->tax;
@@ -79,11 +79,13 @@ class TransactionsTableController extends Controller
             ->addColumn('tr_type', function ($tr) {
                 $result = $this->tax_transaction('tr_type', $tr);
                 if ($result) return $result;
+                
                 return $tr->tr_type;
             })
             ->addColumn('reference', function ($tr) {
                 $result = $this->tax_transaction('reference', $tr);
                 if ($result) return $result;
+
                 return $tr->account->holder . ' - ' . $tr->user_type;
             })
             ->addColumn('vat_rate', function ($tr) {
