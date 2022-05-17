@@ -122,8 +122,13 @@ class CreditNotesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(CreditNote $creditnote)
     {
-        //
+        $this->repository->delete($creditnote);
+
+        $msg = 'Credit Note deleted successfully';
+        if ($creditnote->is_debit) $msg = 'Debit Note deleted successfully';
+
+        return new RedirectResponse(route('biller.creditnotes.index'), ['flash_success' => $msg]);
     }
 }
