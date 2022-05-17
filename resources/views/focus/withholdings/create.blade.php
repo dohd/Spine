@@ -8,6 +8,13 @@
         <div class="content-header-left col-6">
             <h4 class="content-header-title">Withholdings  Management</h4>
         </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.withholdings.partials.withholdings-header-buttons')
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="content-body">
