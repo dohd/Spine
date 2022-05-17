@@ -30,7 +30,7 @@ class CreditNoteRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = CreditNote::query();
-        $q->where('is_debit', request('is_debit'));
+        $q->where('is_debit', request('is_debit', 0));
 
         return $q->get();
     }
@@ -69,6 +69,40 @@ class CreditNoteRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
+    // 
+    public function update($creditnote, array $input)
+    {
+        // dd($input, $creditnote->id);
+        DB::beginTransaction();
+
+        foreach ($input as $key => $val) {
+            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['subtotal', 'tax', 'total'], 1)) 
+                $input[$key] = numberClean($val);
+        }
+        // decrement or increment invoice amount paid and update status
+        $invoice = $creditnote->invoice;
+        if ($creditnote->total > $input['total']) {
+            $diff = $creditnote->total - $input['total'];
+            $invoice->increment('amountpaid', $diff);
+        } elseif ($creditnote->total < $input['total']) {
+            $diff = $input['total'] - $creditnote->total;
+            $invoice->decrement('amountpaid', $diff);
+        }
+        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+        if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+
+        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
+        $result = $creditnote->update($input);
+
+        /** accounts  */
+        $this->post_transaction($creditnote);        
+
+        DB::commit();
+        if ($result) return $result;
+
+        throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
+    }
 
     /**
      * For deleting the respective model from storage

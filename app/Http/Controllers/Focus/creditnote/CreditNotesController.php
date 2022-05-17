@@ -87,9 +87,10 @@ class CreditNotesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(CreditNote $creditnote)
     {
-        //
+        $is_debit = $creditnote->is_debit;
+        return new ViewResponse('focus.creditnotes.edit', compact('creditnote', 'is_debit'));
     }
 
     /**
@@ -99,9 +100,20 @@ class CreditNotesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CreditNote $creditnote, Request $request)
     {
-        //
+        // extract input fields
+        $data = $request->except('_token', 'tax_id');
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        $this->repository->update($creditnote, $data);
+
+        $msg = 'Credit Note updated successfully';
+        if ($creditnote->is_debit) $msg = 'Debit Note updated successfully';
+
+        return new RedirectResponse(route('biller.creditnotes.index'), ['flash_success' => $msg]);
     }
 
     /**
