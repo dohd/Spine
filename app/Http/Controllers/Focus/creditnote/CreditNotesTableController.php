@@ -51,31 +51,24 @@ class CreditNotesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($creditnote) {
-                $tid = 'CN-'.sprintf('%04d', $creditnote->tid);
-                return $tid;
+                return gen4tid('CN-', $creditnote->tid);
             })
             ->addColumn('customer', function ($creditnote) {
                 if ($creditnote->customer)
                     return $creditnote->customer->name;
             })
-            ->addColumn('supplier', function ($creditnote) {
-                if ($creditnote->supplier)
-                    return $creditnote->supplier->name;
-            })
             ->addColumn('invoice_no', function ($creditnote) {
-                if ($creditnote->supplier_id) {
-                    $tid = $creditnote->bill->doc_ref_type . '-' . $creditnote->bill->doc_ref;
-                    return '<a class="font-weight-bold" href="' . route('biller.bills.show', $creditnote->bill_id) . '">' . $tid . '</a>';
-                }
-
-                $tid = 'INV-'.sprintf('%04d', $creditnote->invoice->tid);
-                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', $creditnote->invoice) . '">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', $creditnote->invoice) . '">' 
+                    . gen4tid('INV-', $creditnote->invoice->tid) . '</a>';
             })
             ->addColumn('amount', function ($creditnote) {
                 return number_format($creditnote->total, 2);
             })
             ->addColumn('date', function ($creditnote) {
                 return dateFormat($creditnote->date);
+            })
+            ->addColumn('actions', function ($creditnote) {
+                return $creditnote->action_buttons;
             })
             ->make(true);
     }
