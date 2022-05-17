@@ -3,32 +3,25 @@
 @section ('title', 'Transactions Management')
 
 @php
+    // transaction links to parent resources
     $tr = $transaction;
     $tr_types = [
+        'pmt' => 'PAYMENT',
         'bill' => 'BILL', 
-        'pmt' => 'PAYMENT', 
         'rcpt' => 'INVOICE', 
         'loan' => 'LOAN', 
         'chrg' => 'CHARGE',
-        'stock' => 'STOCK'
+        'stock' => 'STOCK',
+        'withholding' => 'WITHHOLDING'
     ];
     $tr_type_urls = [
-        'BILL' => $tr->bill ? route('biller.bills.show', $tr->bill->id) : '#',
         'PAYMENT' => route('biller.show_transaction_payment', $tr->id),
+        'BILL' => $tr->bill ? route('biller.bills.show', $tr->bill->id) : '#',
         'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice->id) : '#',
         'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan->id) : '#',
         'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge->id) : '#',
         'STOCK' => $tr->issuance ? route('biller.issuance.show', $tr->issuance->id) : '#',
-    ];
-    $tr_details = [
-        'Account' => $tr->account->holder,
-        'Category' => $tr->category->name,
-        'Type' => $tr_types[$tr->tr_type],
-        'Debit' => amountFormat($tr['debit']),
-        'Credit' => amountFormat($tr['credit']),
-        'Date' => dateFormat($tr['tr_date']),
-        trans('general.employee') => $tr->user->first_name . ' ' . $tr->user->last_name,
-        trans('general.note') => $tr->note,                                    
+        'WITHHOLDING' => $tr->withholding ? route('biller.withholdings.show', $tr->withholding->id) : '#',
     ];
 @endphp
 
@@ -56,11 +49,24 @@
             </div>
             <div class="card-body">
                 <table class="table table-bordered table-sm">
+                    @php
+                        $tr_detail_type = isset($tr_types[$tr->tr_type]) ? $tr_types[$tr->tr_type] : '';
+                        $tr_details = [
+                            'Account' => $tr->account->holder,
+                            'Category' => $tr->category->name,
+                            'Type' => $tr_detail_type,
+                            'Debit' => amountFormat($tr['debit']),
+                            'Credit' => amountFormat($tr['credit']),
+                            'Date' => dateFormat($tr['tr_date']),
+                            trans('general.employee') => $tr->user->first_name . ' ' . $tr->user->last_name,
+                            trans('general.note') => $tr->note,                                    
+                        ];
+                    @endphp
                     @foreach ($tr_details as $key => $value)
                         <tr>
                             <th>{{ $key }}</th>
                             <td>
-                                @if ($key == 'Type')                                                
+                                @if ($key == 'Type' && $tr_detail_type)                                                
                                     <a href="{{ $tr_type_urls[$value] }}">{{ $value }}</a>
                                 @else
                                     {{ $value }} &nbsp;&nbsp;
