@@ -9,7 +9,7 @@
             <h4 class="content-header-title">{{ $is_debit ? 'Debit Notes Management' : 'Credit Notes Management' }}</h4>
         </div>
         <div class="content-header-right col-6">
-            <div class="media width-250 float-right mr-3">
+            <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.creditnotes.partials.creditnotes-header-buttons')
                 </div>
@@ -22,65 +22,7 @@
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.creditnotes.store', 'method' => 'POST']) }}
-                    <div class="row">
-                        <div class="form-group col-3">
-                            <label for="customer">Seach Customer</label>
-                            <select name="customer_id" id="customer" class="form-control" data-placeholder="Seach Customer" required>
-                            </select>                          
-                        </div>
-                        <div class="form-group col-3">
-                            <label for="invoice">Customer Invoice</label>
-                            <select name="invoice_id" id="invoice" class="form-control" required>
-                                <option value="">-- Select Invoice --</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-2">
-                            <div><label for="tid">Note No.</label></div>
-                            {{ Form::text('tid', @$last_tid+1, ['class' => 'form-control', 'readonly']) }}
-                        </div>
-                        <div class="form-group col-2">
-                            <div><label for="date">Date</label></div>
-                            {{ Form::text('date', null, ['class' => 'form-control datepicker']) }}
-                        </div>
-                        <div class="form-group col-2">
-                            <label for="tax">Tax</label>
-                            <select name="tax_id" id="tax_id" class="form-control round">
-                                @foreach ([16, 8, 0] as $val)
-                                    <option value="{{ $val }}">
-                                        {{ $val ? $val . '% VAT' : 'Off' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-12">
-                            <div><label for="note">Note</label></div>
-                            {{ Form::text('note', null, ['class' => 'form-control']) }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 form-group">
-                            <div><label for="amount">Amount</label></div>
-                            {{ Form::text('subtotal', null, ['class' => 'form-control', 'id' => 'subtotal']) }}
-                        </div>  
-                        <div class="col-2 form-group">
-                            <div><label for="tax">Tax Amount</label></div>
-                            {{ Form::text('tax', null, ['class' => 'form-control', 'id' => 'tax', 'readonly']) }}
-                        </div>  
-                        <div class="col-2 form-group">
-                            <div><label for="total">Total Amount</label></div>
-                            {{ Form::text('total', null, ['class' => 'form-control', 'id' => 'total', 'readonly']) }}
-                        </div> 
-                    </div>
-                    <div class="row">
-                        <div class="col-2 ml-auto">
-                            {{ Form::submit('Generate', ['class' => 'btn btn-success block btn-lg']) }}
-                        </div>
-                    </div>
-                    @if ($is_debit)
-                        <input type="hidden" name="is_debit" value="1">
-                    @endif
+                        @include('focus.creditnotes.form')
                     {{ Form::close() }}
                 </div>
             </div>
