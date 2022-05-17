@@ -26,7 +26,6 @@ use App\Http\Responses\Focus\equipmentcategory\CreateResponse;
 use App\Http\Responses\Focus\equipmentcategory\EditResponse;
 use App\Repositories\Focus\equipmentcategory\EquipmentCategoryRepository;
 use App\Http\Requests\Focus\equipmentcategory\ManageEquipmentCategoryRequest;
-use App\Http\Requests\Focus\equipmentcategory\StoreEquipmentCategoryRequest;
 
 
 /**
@@ -57,10 +56,6 @@ class EquipmentCategoriesController extends Controller
      */
     public function index(ManageEquipmentCategoryRequest $request)
     {
-
-        // $core = $this->branch->getForDataTable();
-        // dd($core );
-
         return new ViewResponse('focus.equipmentcategories.index');
     }
 
@@ -72,7 +67,6 @@ class EquipmentCategoriesController extends Controller
      */
     public function create(ManageEquipmentCategoryRequest $request)
     {
-
         return new CreateResponse('focus.equipmentcategories.create');
     }
 
@@ -86,15 +80,13 @@ class EquipmentCategoriesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-           
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
          
         $id = $this->repository->create($input);
-        //return with successfull message
+
         return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Region  Successfully Created' . ' <a href="' . route('biller.equipmentcategories.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipmentcategories.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipmentcategories.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
     }
 
@@ -107,8 +99,7 @@ class EquipmentCategoriesController extends Controller
      */
     public function edit(EquipmentCategory $equipmentcategory, ManageEquipmentCategoryRequest $request)
     {
-        //dd(0);
-        return new EditResponse($region);
+        return new EditResponse($equipmentcategory);
     }
 
     /**
@@ -121,9 +112,8 @@ class EquipmentCategoriesController extends Controller
 
      public function branch_load(Request $request)
     {
-        $q = $request->get('id');
-        $result = Branch::all()->where('rel_id', '=', $q);
-        return json_encode($result);
+        $result = Branch::where('rel_id', $request->id)->get();
+        return response()->json($result);
     }
 
 
@@ -135,9 +125,9 @@ class EquipmentCategoriesController extends Controller
         ]);
         //Input received from the request
         $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
-        //Update the model using repository update method
-        $this->repository->update($branch, $input);
-        //return with successfull message
+
+        $this->repository->update($equipmentcategory, $input);
+
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Updated'  . ' <a href="' . route('biller.branches.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
 
     }
@@ -151,11 +141,8 @@ class EquipmentCategoriesController extends Controller
      */
     public function destroy(EquipmentCategory $equipmentcategory, ManageEquipmentCategoryRequest $request)
     {
+        $this->repository->delete($equipmentcategory);
 
-        //dd($branch);
-        //Calling the delete method on repository
-        $this->repository->delete($branch);
-        //returning with successfull message
         return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Equipment Category Successfully Deleted']);
     }
 
@@ -168,9 +155,8 @@ class EquipmentCategoriesController extends Controller
      */
     public function show(EquipmentCategory $equipmentcategory, ManageEquipmentCategoryRequest $request)
     {
+        $misc = array('name' => '', 'color' => '', 'section' => '');
 
-        //returning with successfull message
-        return new ViewResponse('focus.equipmentcategories.view', compact('branch'));
+        return new ViewResponse('focus.equipmentcategories.view', compact('misc'));
     }
-
 }
