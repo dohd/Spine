@@ -253,13 +253,6 @@ class QuoteRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
     }
 
-    // Delete Quote product
-    public function delete_product($id)
-    {        
-        if (QuoteItem::destroy($id)) return true;
-
-        throw new GeneralException(trans('Error deleting product'));
-    }
 
     /**
      * Verify Budgeted Project Quote
@@ -282,12 +275,10 @@ class QuoteRepository extends BaseRepository
                 'id' => $item['item_id'],
                 'quote_id' => $quote_id,
             ]);
-
             foreach($item as $key => $val) {
                 if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
                     $quote_item[$key] = numberClean($val);
-                } 
-                else $quote_item[$key] = $val;            
+                } else $quote_item[$key] = $val;  
             }
             unset($quote_item['item_id']);
             if (!$quote_item['id']) unset($quote_item['id']);
@@ -305,13 +296,11 @@ class QuoteRepository extends BaseRepository
                 'id' => $item['jcitem_id'],
                 'quote_id' => $quote_id,
             ]);
-
             foreach($item as $key => $value) {
                 if ($key == 'date') 
                     $job_card[$key] = date_for_database($value);
                 else $job_card[$key] = $value;
             }
-
             unset($job_card['jcitem_id']);                
             if (!$job_card['id']) unset($job_card['id']);
             $job_card->save();
@@ -348,5 +337,96 @@ class QuoteRepository extends BaseRepository
         if (VerifiedJc::destroy($id)) return true;
 
         throw new GeneralException(trans('Error deleting verified job card'));
+    }
+
+    /**
+     * Close quote or pi
+     */
+    public function close_quote($quote, array $input)
+    {
+        DB::beginTransaction();
+
+        $result = $quote->update(['close_by' => $input['user_id']]);
+        $invoice = $quote->invoice_item->invoice;
+        $no_quotes = $invoice->quotes->count();
+        $no_closed_quotes = $invoice->quotes()->where('closed_by', '>', 0)->count();
+
+        /**accounts */
+        if ($no_quotes == $no_closed_quotes) 
+            $this->post_transaction($invoice);
+            
+        DB::commit();
+        if ($result) return true;
+    }
+
+    public function post_transaction($invoice)
+    {
+        $tr_data = array();
+        $tr_category = Transactioncategory::where('code', 'ENDPRJ')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
+        $data = [
+            'tid' => $tid,
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $invoice->invoiceduedate,
+            'user_id' => $invoice->user_id,
+            'ins' => $invoice->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $invoice->id,
+            'is_primary' => 0,
+            'user_type' => 'customer',
+            'note' => $invoice->notes,
+        ];
+
+        // debit Customer Income;
+        $inc_account = Account::where('system', 'client_income')->first(['id']);
+        $tr_data[] = array_replace($data, [
+            'account_id' => $inc_account->id,
+            'debit' => $invoice->subtotal,
+            'is_primary' => 1,
+        ]);
+        // credit Revenue Account
+        $tr_data[] = array_replace($data, [
+            'account_id' => $invoice->account_id,
+            'credit' => $invoice->subtotal,
+        ]);
+
+        // issued items
+        $store_inventory_amount = 0;
+        $dirpurch_inventory_amount = 0;
+        $dirpurch_expense_amount = 0;
+        foreach ($invoice->quotes as $quote) {
+            $store_inventory_amount += $quote->issuance->sum('total');
+            if (isset($quote->project_quote->project)) {
+                foreach ($quote->project_quote->project->purchase_items as $item) {
+                    $subttl = $item['amount'] - $item['taxrate'];
+                    if ($item['type'] == 'Expense') $dirpurch_expense_amount += $subttl;
+                    if ($item['type'] == 'Stock') $dirpurch_inventory_amount += $subttl;
+                }
+            }
+        }
+        // credit WIP account and debit COG
+        $wip_account = Account::where('system', 'wip')->first(['id']);
+        $cog_account = Account::where('system', 'cog')->first(['id']);
+        $cr_data = array_replace($data, ['account_id' => $wip_account->id, 'is_primary' => 1]);
+        $dr_data = array_replace($data, ['account_id' => $cog_account->id]);
+        if ($dirpurch_inventory_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_inventory_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_inventory_amount]);
+        }  elseif ($dirpurch_expense_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_expense_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_expense_amount]);
+        } elseif ($store_inventory_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $store_inventory_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $store_inventory_amount]);
+        }
+
+        $tr_data = array_map(function ($v) {
+            if (isset($v['debit'])) $v['credit'] = 0;
+            if (isset($v['credit'])) $v['debit'] = 0;
+            return $v;
+        }, $tr_data);
+        Transaction::insert($tr_data);
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();       
     }
 }

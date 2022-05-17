@@ -211,6 +211,22 @@ class QuotesController extends Controller
     }
 
     /**
+     * Close quote
+     */
+    public function close_quote(Quote $quote)
+    {
+        $data['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+        
+        $this->repository->close_quote($quote, $data);
+
+        $resource = $quote->bank_id ? 'Proforma Invoice' : 'Quote';
+        
+        return redirect()->back()->with(['flash_success' => $resource . ' closed successfully']);
+
+    }
+
+    /**
      *  Fetch verify quotes
      */
     public function get_verify_quote(ManageQuoteRequest $request)
