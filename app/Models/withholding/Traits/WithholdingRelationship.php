@@ -21,6 +21,6 @@ trait WithholdingRelationship
 
     public function customer()
     {
-        return $this->belongsTo('App\Models\customer\Customer', 'payer_id', 'id');
+        return $this->belongsTo('App\Models\customer\Customer');
     }
 }
