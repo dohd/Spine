@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\equipmentcategory;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\equipmentcategory\EquipmentCategory;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProductcategoryRepository.
@@ -27,14 +24,7 @@ class EquipmentCategoryRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        
-       $q=$this->query();
-      // $q->when(!request('rel_type'), function ($q) {
-           // return $q->where('c_type', '=',request('rel_type',0));
-        //});
-       //$q->when(request('rel_type'), function ($q) {
-           // return $q->where('rel_id', '=',request('rel_id',0));
-       // });
+        $q = $this->query();
 
         return $q->get();
     }
@@ -50,9 +40,9 @@ class EquipmentCategoryRepository extends BaseRepository
     {
         //$input['installation_date'] = datetime_for_database($input['installation_date']);
         //$input['next_maintenance_date'] = datetime_for_database($input['next_maintenance_date']);
-        $input = array_map( 'strip_tags', $input);
-       $c=EquipmentCategory::create($input);
-       if ($c->id) return $c->id;
+        $input = array_map('strip_tags', $input);
+        $c = EquipmentCategory::create($input);
+        if ($c->id) return $c->id;
         throw new GeneralException('Error Creating EquipmentCategory');
     }
 
@@ -66,8 +56,8 @@ class EquipmentCategoryRepository extends BaseRepository
      */
     public function update(EquipmentCategory $equipmentcategory, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($equipment->update($input))
+        $input = array_map('strip_tags', $input);
+        if ($equipment->update($input))
             return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
