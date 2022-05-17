@@ -57,8 +57,10 @@ class CreditNoteRepository extends BaseRepository
         $invoice = $result->invoice;
         if ($result->is_debit) $invoice->decrement('amountpaid', $result->total);
         else $invoice->increment('amountpaid', $result->total);
-        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
-        if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        if ($invoice->total == $invoice->amountpaid) 
+            $invoice->update(['status' => 'paid']);
+        if ($invoice->total > $invoice->amountpaid) 
+            $invoice->update(['status' => 'partial']);
         
         /** accounts  */
         $this->post_transaction($result);
@@ -82,15 +84,29 @@ class CreditNoteRepository extends BaseRepository
         }
         // decrement or increment invoice amount paid and update status
         $invoice = $creditnote->invoice;
-        if ($creditnote->total > $input['total']) {
-            $diff = $creditnote->total - $input['total'];
-            $invoice->increment('amountpaid', $diff);
-        } elseif ($creditnote->total < $input['total']) {
-            $diff = $input['total'] - $creditnote->total;
-            $invoice->decrement('amountpaid', $diff);
+        if (!$creditnote->is_debit) {
+            // credit note
+            if ($creditnote->total > $input['total']) {
+                $diff = $creditnote->total - $input['total'];
+                $invoice->increment('amountpaid', $diff);
+            } elseif ($creditnote->total < $input['total']) {
+                $diff = $input['total'] - $creditnote->total;
+                $invoice->decrement('amountpaid', $diff);
+            }
+        } else {
+            // debit note
+            if ($creditnote->total > $input['total']) {
+                $diff = $creditnote->total - $input['total'];
+                $invoice->decrement('amountpaid', $diff);
+            } elseif ($creditnote->total < $input['total']) {
+                $diff = $input['total'] - $creditnote->total;
+                $invoice->increment('amountpaid', $diff);
+            }
         }
-        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
-        if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        if ($invoice->total == $invoice->amountpaid) 
+            $invoice->update(['status' => 'paid']);
+        if ($invoice->total > $invoice->amountpaid) 
+            $invoice->update(['status' => 'partial']);
 
         Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
         $result = $creditnote->update($input);
@@ -113,7 +129,22 @@ class CreditNoteRepository extends BaseRepository
      */
     public function delete($creditnote)
     {
-        // 
+        DB::transaction();
+
+        $invoice = $creditnote->invoice;
+        if (!$creditnote->is_debit) $invoice->decrement('amountpaid', $creditnote->total);
+        else $invoice->increment('amountpaid', $creditnote->total);
+
+        if ($invoice->total == $invoice->amountpaid) 
+            $invoice->update(['status' => 'paid']);
+        if ($invoice->total > $invoice->amountpaid) 
+            $invoice->update(['status' => 'partial']);
+
+        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
+        $result = $creditnote->delete();
+        
+        DB::commit();
+        if ($result) return true;
     }
 
     static function post_transaction($result)
