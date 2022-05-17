@@ -25,7 +25,7 @@ use App\Http\Responses\Focus\withholding\EditResponse;
 use App\Repositories\Focus\withholding\WithholdingRepository;
 use App\Http\Requests\Focus\withholding\ManageWithholdingRequest;
 use App\Http\Requests\Focus\withholding\StoreWithholdingRequest;
-
+use App\Models\withholding\Withholding;
 
 /**
  * BanksController
@@ -55,8 +55,7 @@ class WithholdingsController extends Controller
      */
     public function index(ManageWithholdingRequest $request)
     {
-       $words = array();
-         return new ViewResponse('focus.withholdings.index', compact('words'));
+        return new ViewResponse('focus.withholdings.index');
     }
 
     /**
@@ -80,7 +79,8 @@ class WithholdingsController extends Controller
     {
         // extract request fields
         $data = $request->only([
-            'customer_id', 'tid', 'date', 'due_date', 'certificate', 'amount', 'amount_ttl', 'deposit_ttl', 'doc_ref'
+            'customer_id', 'tid', 'date', 'due_date', 'certificate', 'amount', 'amount_ttl', 
+            'deposit_ttl', 'doc_ref'
         ]);
         $data_items = $request->only(['invoice_id', 'paid']);
 
@@ -91,8 +91,6 @@ class WithholdingsController extends Controller
         $data_items = array_filter($data_items, function ($v) { return $v['paid']; });
 
         $this->repository->create(compact('data', 'data_items'));
-
-        return trans('alerts.backend.withholdings.created');
 
        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.created')]);
     }
@@ -118,16 +116,11 @@ class WithholdingsController extends Controller
      */
     public function update(StoreWithholdingRequest $request, Withholding $withholding)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'bank' => 'required|string',
-            'number' => 'required'
-        ]);
-        //Input received from the request
+        //extract input fields
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($witholding, $input);
-        //return with successfull message
+
+        $this->repository->update($withholding, $input);
+
         return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.updated')]);
     }
 
@@ -138,11 +131,10 @@ class WithholdingsController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Withholding $withholding, StoreWithholdingRequest  $request)
+    public function destroy(Withholding $withholding)
     {
-        //Calling the delete method on repository
         $this->repository->delete($withholding);
-        //returning with successfull message
+
         return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.witholdings.deleted')]);
     }
 
@@ -153,11 +145,8 @@ class WithholdingsController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Withholding $withholding, ManageWithholdingRequest $request)
+    public function show(Withholding $withholding)
     {
-
-        //returning with successfull message
-        return new ViewResponse('focus.withholdings.view', compact('charge'));
+        return new ViewResponse('focus.withholdings.view', compact('withholding'));
     }
-
 }
