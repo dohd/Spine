@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\equipmentcategory;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\equipmentcategory\EquipmentCategoryRepository;
@@ -52,27 +52,16 @@ class EquipmentCategoriesTableController extends Controller
      */
     public function __invoke(ManageEquipmentCategoryRequest $request)
     {
-    
-
         $core = $this->equipmentcategory->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-              
             ->addColumn('name', function ($equipmentcategory) {
                 return '<a class="font-weight-bold" href="' . route('biller.equipmentcategories.index') . '?rel_type=' . $equipmentcategory->id . '&rel_id=' . $equipmentcategory->id . '">' . $equipmentcategory->name . '</a>';
             })
-        
-            // ->addColumn('location', function ($branch) {
-                    //return $branch->location;
-              //  })
-         
-            ->addColumn('created_at', function ($equipmentcategory) {
-                return dateFormat($region->created_at);
-            })
             ->addColumn('actions', function ($equipmentcategory) {
                 return $equipmentcategory->action_buttons;
-               // return '<a class="btn btn-purple round" href="' . route('biller.branches.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '" title="List"><i class="fa fa-list"></i></a>' . $branch->action_buttons;
             })
             ->make(true);
     }
