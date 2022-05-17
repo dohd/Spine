@@ -117,7 +117,6 @@ class WithholdingRepository extends BaseRepository
             'debit' => $result->deposit_ttl
         ]);
         Transaction::create($dr_data);
-
         // update account ledgers debit and credit totals
         aggregate_account_transactions();            
     }
@@ -130,7 +129,7 @@ class WithholdingRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Withholding $charge, array $input)
+    public function update($withholding, array $input)
     {
         throw new GeneralException(trans('exceptions.backend.withholdings.update_error'));
     }
@@ -142,7 +141,7 @@ class WithholdingRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Withholding $withholding)
+    public function delete($withholding)
     {
         throw new GeneralException(trans('exceptions.backend.withholdings.delete_error'));
     }
