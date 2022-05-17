@@ -37,11 +37,11 @@
                 <div id="invoice-template" class="card-body">                    
                     @include('focus.quotes.partials.view_menu')
                     @php
-                        $approved_verified = ($quote->verified === "Yes" && $quote->status === 'approved');
-                        $text = ($quote->verified === "Yes") ? 'This ' . $quote_type . ' is verified' : '';
+                        $approved_verified = ($quote->verified == "Yes" && $quote->status == 'approved');
+                        $text = $quote->verified == "Yes" ? 'This ' . $quote_type . ' is verified' : '';
                         if ($approved_verified) $text = 'This ' . $quote_type . ' is approved and verified';
                     @endphp
-                    @if ($quote->verified === "Yes")
+                    @if ($quote->verified == "Yes")
                         <div class="badge text-center white d-block m-1">
                             <span class="{{ $approved_verified ? 'bg-primary' : 'bg-success' }} round p-1">
                                 <b>{{ $text }}</b>
@@ -50,7 +50,7 @@
                     @endif                    
 
                     <div id="invoice-customer-details" class="row pt-2">                        
-                        <div class="col-md-6 col-sm-12 text-center text-md-left">
+                        <div class="col-6 text-center text-md-left">
                             @php
                                 $clientname = $quote->lead->client_name;
                                 $branch = 'Head Office';
@@ -260,52 +260,52 @@
 @endphp
 @include("focus.modal.quote_status_model")
 @include("focus.modal.lpo_model")
-@include('focus.modal.sms_model', array('category'=>4))
-@include('focus.modal.email_model', array('category'=>4))
+@include('focus.modal.sms_model', ['category' => 4])
+@include('focus.modal.email_model', ['category' => 4])
 @endsection
 
 @section('extra-scripts')
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
-
+{{ Html::script(mix('js/dataTable.js')) }}
 <script type="text/javascript">
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
-    });
-
     // initialize editor
     editor();
 
-    // check if previous page was pi page and add 'page=pi' querystring to current page
-    if (document.referrer.includes('page=pi')) {
-        const queryString = location.search;
-        if (!queryString.includes('page=pi')) {
-            location.href = location.href + queryString;
-        }
-    }
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
+    });
     
     // initialize datepicker
     $('.datepicker')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
+    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
 
-    // On delete Quote
-    $('.quote-delete').click(function(e) {
-        if (confirm('Are you sure to delete this item ?')) {
-            $(this).children('form').submit();
-        }
-    });
-
-    // On cancel Quote
-    $('.quote-cancel').click(function(e) {
+    // on delete Quote
+    $('.quote-delete').click(function() {
         $(this).children('form').submit();
+    });
+    // on cancel Quote
+    $('.quote-cancel').click(function() {
+        $(this).children('form').submit();
+    });
+    // On close quote
+    $('#closeQuote').click(function() { 
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => $('#closeQuote').children().submit());
     });
 
     // On Approve Quote
     $('.quote-approve').click(function(e) {
         const customerId = @json($quote->customer_id);
-        if (customerId) return;
-        $(this).attr('href', '#');
-        $('.approve-alert').removeClass('d-none');
+        if (!customerId) {
+            $(this).attr('href', '#');
+            $('.approve-alert').removeClass('d-none');
+        }
     });
 
     // On Add LPO modal
@@ -327,7 +327,6 @@
     // On showing Approval Model
     $('#pop_model_1').on('shown.bs.modal', function() { 
         $form = $(this).find('#form-approve');
-
         // On clicking Mark As select dropdown
         $form.find('select[name=status]').click(function() {
             $form.find('label[for=approved-by]').text('Approved By');
