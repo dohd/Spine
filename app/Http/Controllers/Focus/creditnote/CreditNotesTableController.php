@@ -58,8 +58,9 @@ class CreditNotesTableController extends Controller
                     return $creditnote->customer->name;
             })
             ->addColumn('invoice_no', function ($creditnote) {
-                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', $creditnote->invoice) . '">' 
-                    . gen4tid('INV-', $creditnote->invoice->tid) . '</a>';
+                if ($creditnote->invoice)
+                    return '<a class="font-weight-bold" href="' . route('biller.invoices.show', $creditnote->invoice) . '">' 
+                        . gen4tid('INV-', $creditnote->invoice->tid) . '</a>';
             })
             ->addColumn('amount', function ($creditnote) {
                 return number_format($creditnote->total, 2);
