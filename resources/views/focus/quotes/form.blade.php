@@ -66,8 +66,8 @@
                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                     @php
                         $label = $is_pi ? 'PI-' : 'QT-';
-                        $tid = sprintf('%04d', $lastquote->tid);
-                        if (!isset($words['edit_mode'])) $tid = sprintf('%04d', $lastquote->tid+1);
+                        $tid = gen4tid('', $lastquote->tid);
+                        if (!isset($words['edit_mode'])) $tid = gen4tid('', $lastquote->tid+1);;
                         $label .= $tid;
                     @endphp
                     {{ Form::text('tid', $label, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
@@ -78,14 +78,14 @@
 
         <div class="form-group row">
             <div class="col-6">
-                <label for="attention" >Attention</label>
+                <label for="attention">Attention</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                     {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention', 'required']) }}
                 </div>
             </div>
             <div class="col-6">                
-                <label for="prepared_by" > Prepared By</label>
+                <label for="prepared_by">Prepared By</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                     {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepaired By', 'id'=>'prepared_by', 'required']) }}
@@ -113,7 +113,7 @@
                 </div>
             </div>
             <div class="col-4">
-                <label for="invoicedate" >Quote {{trans('general.date')}}</label>
+                <label for="date">{{trans('general.date')}}</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                     {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date']) }}
@@ -156,7 +156,7 @@
         </div>
         <div class="form-group row">
             <div class="col-4">
-                <label for="source" >Quotation Terms <span class="text-danger">*</span></label>
+                <label for="terms">Terms <span class="text-danger">*</span></label>
                 <select id="term_id" name="term_id" class="form-control" required>
                     <option value="">-- Select Term --</option>
                     @foreach($terms as $term)
