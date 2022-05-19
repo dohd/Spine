@@ -64,11 +64,12 @@ class TransactionsController extends Controller
         // extract request fields
         $rel_type = $request->rel_type;
         $rel_id = $request->rel_id;
+        $is_tax = $request->system == 'tax';
 
         $input = compact('rel_id', 'rel_type');
         $account_section = $this->account_section($input['rel_id'], $input['rel_type']);
 
-        return new ViewResponse('focus.transactions.index', compact('input') + $account_section);
+        return new ViewResponse('focus.transactions.index', array_merge($account_section, compact('input', 'is_tax')));
     }
 
     /**
