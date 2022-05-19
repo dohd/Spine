@@ -2,25 +2,21 @@
 
 namespace App\Models\supplier\Traits;
 
-use App\Models\transaction\Transaction;
+use App\Models\bill\Bill;
+use App\Models\purchaseorder\Purchaseorder;
 
 /**
  * Class SupplierRelationship
  */
 trait SupplierRelationship
 {
-  public function invoices()
+    public function purchase_orders()
     {
-        return $this->hasMany('App\Models\purchaseorder\Purchaseorder');
+        return $this->hasMany(Purchaseorder::class);
     }
 
-       public function amount()
-        {
-             return $this->hasMany(Transaction::class,'tr_user_id');
-        }
-
-            public function transactions()
+    public function bills()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','tr_user_id')->where('relation_id','=',9)->orWhere('relation_id','=',22)->withoutGlobalScopes();
+        return $this->hasMany(Bill::class);
     }
 }
