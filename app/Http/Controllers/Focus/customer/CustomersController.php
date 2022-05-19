@@ -35,6 +35,7 @@ use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
 use App\Models\invoice\Invoice;
 use App\Models\transaction\Transaction;
+use DateTime;
 use Redirect;
 
 /**
@@ -181,24 +182,37 @@ class CustomersController extends Controller
      */
     public function show(Customer $customer, ManageCustomerRequest $request)
     {
-        $invoices = Invoice::where('customer_id', $customer->id)->get();
-        $transactions = Transaction::whereHas('account', function ($q) { 
-            $q->where('system', 'receivable');  
-        })->where(function ($q) use($customer) {
-            $q->whereHas('invoice', function ($q) use($customer) { 
-                $q->where('customer_id', $customer->id); 
-            })->orwhereHas('paidinvoice', function ($q) use($customer) {
-                $q->where('customer_id', $customer->id);
-            })->orwhereHas('withholding', function ($q) use($customer) {
-                $q->where('customer_id', $customer->id);
-            })->orwhereHas('creditnote', function ($q) use($customer) {
-                $q->where('customer_id', $customer->id);
-            })->orwhereHas('debitnote', function ($q) use($customer) {
-                $q->where('customer_id', $customer->id);
-            });
-        })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding', 'cnote', 'dnote'])->get();
+        $transactions = $this->repository->getTransactionsForDataTable($customer->id);
+        $account_balance = $transactions->sum('debit') - $transactions->sum('credit');
+
+        // invoice balances for each date interval
+        $invoices = $this->repository->getInvoicesForDataTable($customer->id);
+        $aging_cluster = array_fill(0, 4, 0);
+        $intervals = array();
+        for ($i = 0; $i < 4; $i++) {
+            $from = date('Y-m-d');
+            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
+            if ($i > 0) {
+                $prev = $intervals[$i-1][1];
+                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
+                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
+            }
+            $intervals[] = [$from, $to];
+        }
+        foreach ($invoices as $invoice) {
+            foreach ($intervals as $i => $dates) {
+                $start  = new DateTime($dates[0]);
+                $end = new DateTime($dates[1]);
+                $due = new DateTime($invoice->invoiceduedate);
+                if ($start >= $due && $end <= $due) {
+                    $diff = $invoice->total - $invoice->amountpaid;
+                    $aging_cluster[$i] += $diff;
+                    break;
+                }
+            }
+        }
         
-        return new ViewResponse('focus.customers.view', compact('customer', 'transactions', 'invoices'));
+        return new ViewResponse('focus.customers.view', compact('customer', 'account_balance', 'aging_cluster'));
     }
 
     public function send_bill(CommunicationRequest $request)
