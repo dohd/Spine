@@ -83,7 +83,7 @@ class CustomersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            return dateFormat($tr->note);
+            return $tr->note;
         })
         ->addColumn('invoice_amount', function ($tr) {
             return numberFormat($tr->debit);
@@ -150,7 +150,7 @@ class CustomersTableController extends Controller
         ->addColumn('invoice_balance', function ($tr) {
             if ($tr->tr_type == 'rcpt') $this->balance = $tr->debit;
             $this->balance -= $tr->credit;
-            
+
             return numberFormat($this->balance);
         })
         ->make(true);
