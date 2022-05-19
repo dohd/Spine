@@ -15,14 +15,13 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\customer;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Class CustomersTableController.
@@ -34,6 +33,7 @@ class CustomersTableController extends Controller
      * @var CustomerRepository
      */
     protected $customer;
+    protected $balance = 0;
 
     /**
      * contructor to initialize repository object
@@ -52,45 +52,107 @@ class CustomersTableController extends Controller
      */
     public function __invoke(ManageCustomerRequest $request)
     {
-        //
+        if (request('is_transaction')) 
+            return $this->invoke_transaction();
+        if (request('is_invoice')) 
+            return $this->invoke_invoice();
+        if (request('is_statement')) 
+            return $this->invoke_statement();
+
         $core = $this->customer->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('image', function ($customer) {
-                return '<div class="">
-<input type="checkbox" name="cust[]" class="custom-checkbox" value="' . $customer->id . '">
-                                               
-                                                <label><img class="media-object img-lg "
-                                                                      src="' . Storage::disk('public')->url('app/public/img/customer/' . $customer->picture) . '"
-                                                                      alt="Client Image"></label>
-                                            </div>';
-            })
             ->addColumn('name', function ($customer) {
-                $d = '';
-                if (request('due_filter')) {
-                    $sum = $customer->invoices->whereIn('status', array('due', 'partial'));
-                    $due = $sum->sum('total') - $sum->sum('pamnt');
-                    $d = '<span class="badge badge-danger">' . amountFormat($due) . '</span>';
-                }
-                return '<a class="font-weight-bold" href="' . route('biller.customers.show', [$customer->id]) . '">' . $customer->name . '</a>' . $d;
-            })
-            ->addColumn('group', function ($customer) {
-                $g = '';
-                foreach ($customer->group as $row) {
-                    $g .= '<a class="badge bg-purple" href="' . route('biller.customers.index') . '?rel_type=0&rel_id=' . $row->group_data->id . '"><i class="fa fa-anchor"></i> ' . $row->group_data->title . '</a> ';
-                }
-                return $g;
-            }
-            )
-            ->addColumn('created_at', function ($customer) {
-                $c = '';
-                if ($customer->active) $c = 'checked';
-                return '<div class="customer_active icheckbox_flat-aero ' . $c . '" data-cid="' . $customer->id . '" data-active="' . $customer->active . '"></div>';
-            })
-            ->addColumn('actions', function ($customer) {
-                return $customer->action_buttons;
+                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $customer->name . '</a>';
             })
             ->make(true);
+    }
+
+    public function invoke_transaction()
+    {
+        $core = $this->customer->getTransactionsForDataTable();
+
+        return Datatables::of($core)
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('date', function ($tr) {
+            return dateFormat($tr->tr_date);
+        })
+        ->addColumn('type', function ($tr) {
+            return $tr->tr_type;
+        })
+        ->addColumn('note', function ($tr) {
+            return dateFormat($tr->note);
+        })
+        ->addColumn('invoice_amount', function ($tr) {
+            return numberFormat($tr->debit);
+        })
+        ->addColumn('amount_paid', function ($tr) {
+            return numberFormat($tr->credit);
+        })
+        ->addColumn('account_balance', function ($tr) {
+            if ($tr->debit > 0) $this->balance += $tr->debit;
+            elseif ($tr->credit > 0) $this->balance -= $tr->credit;
+
+            return numberFormat($this->balance);
+        })
+        ->make(true);
+    }
+
+    public function invoke_invoice()
+    {
+        $core = $this->customer->getInvoicesForDataTable();
+
+        return Datatables::of($core)
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('date', function ($invoice) {
+            return dateFormat($invoice->invoicedate);
+        })
+        ->addColumn('status', function ($invoice) {
+            return $invoice->status;
+        })
+        ->addColumn('note', function ($invoice) {
+            return $invoice->notes;
+        })
+        ->addColumn('amount', function ($invoice) {
+            return numberFormat($invoice->total);
+        })
+        ->addColumn('paid', function ($invoice) {
+            return numberFormat($invoice->amountpaid);
+        })
+        ->make(true);
+    }
+
+    public function invoke_statement()
+    {
+        $core = $this->customer->getStatementsForDataTable();
+
+        return Datatables::of($core)
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('date', function ($tr) {
+            return dateFormat($tr->tr_date);
+        })
+        ->addColumn('type', function ($tr) {
+            return $tr->tr_type;
+        })
+        ->addColumn('note', function ($tr) {
+            return dateFormat($tr->note);
+        })
+        ->addColumn('invoice_amount', function ($tr) {
+            return numberFormat($tr->debit);
+        })
+        ->addColumn('amount_paid', function ($tr) {
+            return numberFormat($tr->credit);
+        })
+        ->addColumn('invoice_balance', function ($tr) {
+            if ($tr->tr_type == 'rcpt') $this->balance = $tr->debit;
+            $this->balance -= $tr->credit;
+            
+            return numberFormat($this->balance);
+        })
+        ->make(true);
     }
 }
