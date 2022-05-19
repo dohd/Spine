@@ -10,6 +10,9 @@ use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Models\branch\Branch;
+use App\Models\invoice\Invoice;
+use App\Models\transaction\Transaction;
+use Doctrine\DBAL\Driver\PDOSqlsrv\Statement;
 
 /**
  * Class CustomerRepository.
@@ -65,6 +68,70 @@ class CustomerRepository extends BaseRepository
             });
         }
         return $q->get(['id','name','company','email','address','picture','active','created_at']);
+    }
+
+    public function getInvoicesForDataTable($customer_id = 0)
+    {
+        $id = $customer_id ?: request('customer_id');
+        return Invoice::where('customer_id', $id)->get();
+    }
+
+    public function getTransactionsForDataTable($customer_id = 0)
+    {
+        $id = $customer_id ?: request('customer_id');
+        $q = Transaction::whereHas('account', function ($q) { 
+            $q->where('system', 'receivable');  
+        })->where(function ($q) use($id) {
+            $q->whereHas('invoice', function ($q) use($id) { 
+                $q->where('customer_id', $id); 
+            })->orwhereHas('paidinvoice', function ($q) use($id) {
+                $q->where('customer_id', $id);
+            })->orwhereHas('withholding', function ($q) use($id) {
+                $q->where('customer_id', $id);
+            })->orwhereHas('creditnote', function ($q) use($id) {
+                $q->where('customer_id', $id);
+            })->orwhereHas('debitnote', function ($q) use($id) {
+                $q->where('customer_id', $id);
+            });
+        })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding', 'cnote', 'dnote']);
+
+        return $q->get();
+    }
+
+    public function getStatementsForDataTable($customer_id = 0)
+    {
+        $id = $customer_id ?: request('customer_id');
+        // sequence of invoices and related payments
+        $statements = array();
+        $transactions = $this->getTransactionsForDataTable($id);
+        foreach ($transactions as $tr_one) {
+            if ($tr_one->tr_type == 'rcpt') {
+                $statements[] = $tr_one;
+                $invoice_id = $tr_one->invoice->id;
+                $customer_id = $tr_one->invoice->customer_id;
+                foreach ($transactions as $tr_two) {
+                    $types = ['pmt', 'withholding', 'cnote', 'dnote'];
+                    if (in_array($tr_two->tr_type, $types, 1)) {
+                        if ($tr_two->paidinvoice) {
+                            foreach ($tr_two->paidinvoice->items as $item) {
+                                if ($item->invoice_id == $invoice_id) {
+                                    $statements[] = $tr_two;
+                                    break;
+                                }
+                            }
+                        }                                                                        
+                        if ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id)
+                            $statements[] = $tr_two;
+                        if ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id)
+                            $statements[] = $tr_two;
+                        if ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id)
+                            $statements[] = $tr_two;
+                    }
+                }
+            }
+        }
+        
+        return $statements;
     }
 
 
