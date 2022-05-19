@@ -143,15 +143,15 @@ class SupplierRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Supplier $supplier, array $input)
+    public function update($supplier, array $input)
     {
         if (!empty($input['picture'])) {
             $this->removePicture($supplier, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
         }
         $input = array_map('strip_tags', $input);
-        if ($supplier->update($input))
-            return true;
+        if ($supplier->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.suppliers.update_error'));
     }
     /**
@@ -163,6 +163,8 @@ class SupplierRepository extends BaseRepository
      */
     public function delete($supplier)
     {
+        if ($supplier->purchase_orders->count() || $supplier->bills->count())
+            return false;
         if ($supplier->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.suppliers.delete_error'));
