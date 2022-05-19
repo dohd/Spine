@@ -26,8 +26,6 @@
         if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
         elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
         elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
-
-        $is_tax = request('system') == 'tax';
     @endphp
 @endif
 
