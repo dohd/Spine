@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\branch\Branch;
 use App\Models\invoice\Invoice;
 use App\Models\transaction\Transaction;
-use Doctrine\DBAL\Driver\PDOSqlsrv\Statement;
 
 /**
  * Class CustomerRepository.
@@ -95,18 +94,57 @@ class CustomerRepository extends BaseRepository
             });
         })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding', 'cnote', 'dnote']);
 
+        // on date filter
+        $start_date = request('start_date');
+        $end_date = request('end_date');
+        if ($start_date && $end_date && request('is_transaction')) {
+            $start_date = date_for_database($start_date);
+            $end_date = date_for_database($end_date);
+            $prior_date = date('Y-m-d', strtotime($start_date . ' - 1 day'));
+            $q1 = clone $q;
+            $q2 = clone $q;
+
+            $params = ['id', 'tr_date', 'tr_type', 'note', 'debit', 'credit'];
+            $bf_transactions = $q1->where('tr_date', '<', $start_date)->get($params);
+            $diff = $bf_transactions->sum('debit') - $bf_transactions->sum('credit');
+            $record = (object) array(
+                'id' => 0,
+                'tr_date' => $prior_date,
+                'tr_type' => 'brought_foward',
+                'note' => 'Balance brought foward as of '. dateFormat($start_date),
+                'debit' => $diff > 0 ? $diff : 0,
+                'credit' => $diff < 0 ? $diff : 0,
+            );
+            $collection = collect([$record]);
+            $transactions = $q2->whereBetween('tr_date', [$start_date, $end_date])->get($params);
+            $transactions = $collection->merge($transactions);
+
+            return $transactions;
+        }
+
         return $q->get();
     }
 
     public function getStatementsForDataTable($customer_id = 0)
     {
         $id = $customer_id ?: request('customer_id');
-        // sequence of invoices and related payments
-        $statements = array();
         $transactions = $this->getTransactionsForDataTable($id);
+
+        // on date filter
+        $start_date = request('start_date');
+        $end_date = request('end_date');
+        if ($start_date && $end_date) {
+            $transactions = $transactions->whereBetween('tr_date', [
+                date_for_database($start_date), 
+                date_for_database($end_date)
+            ]);
+        }
+
+        // sequence of invoices and related payments
+        $statements = collect();
         foreach ($transactions as $tr_one) {
             if ($tr_one->tr_type == 'rcpt') {
-                $statements[] = $tr_one;
+                $statements->add($tr_one);
                 $invoice_id = $tr_one->invoice->id;
                 $customer_id = $tr_one->invoice->customer_id;
                 foreach ($transactions as $tr_two) {
@@ -115,22 +153,22 @@ class CustomerRepository extends BaseRepository
                         if ($tr_two->paidinvoice) {
                             foreach ($tr_two->paidinvoice->items as $item) {
                                 if ($item->invoice_id == $invoice_id) {
-                                    $statements[] = $tr_two;
+                                    $statements->add($tr_two);
                                     break;
                                 }
                             }
                         }                                                                        
                         if ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id)
-                            $statements[] = $tr_two;
+                           $statements->add($tr_two);
                         if ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id)
-                            $statements[] = $tr_two;
+                           $statements->add($tr_two);
                         if ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id)
-                            $statements[] = $tr_two;
+                           $statements->add($tr_two);
                     }
                 }
             }
         }
-        
+
         return $statements;
     }
 
