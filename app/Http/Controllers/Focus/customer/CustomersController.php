@@ -186,7 +186,6 @@ class CustomersController extends Controller
         $account_balance = $transactions->sum('debit') - $transactions->sum('credit');
 
         // invoice balances for each date interval
-        $invoices = $this->repository->getInvoicesForDataTable($customer->id);
         $aging_cluster = array_fill(0, 4, 0);
         $intervals = array();
         for ($i = 0; $i < 4; $i++) {
@@ -199,6 +198,7 @@ class CustomersController extends Controller
             }
             $intervals[] = [$from, $to];
         }
+        $invoices = $this->repository->getInvoicesForDataTable($customer->id);
         foreach ($invoices as $invoice) {
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
