@@ -3,7 +3,6 @@
 namespace App\Repositories\Focus\supplier;
 
 use DB;
-use Carbon\Carbon;
 use App\Models\supplier\Supplier;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
@@ -12,7 +11,6 @@ use App\Models\billitem\BillItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -52,9 +50,98 @@ class SupplierRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()
-            ->get();
+        return $this->query()->get();
+            
     }
+
+    public function getPurchaseorderBillsForDataTable($supplier_id = 0)
+    {
+        $id = $supplier_id ?: request('supplier_id');
+        return Bill::where('supplier_id', $id)->where('po_id', '>', 0)->get();
+    }
+
+    public function getTransactionsForDataTable($supplier_id = 0)
+    {
+        $id = $supplier_id ?: request('supplier_id');
+        $q = Transaction::whereHas('account', function ($q) { 
+            $q->where('system', 'payable');  
+        })->where(function ($q) use($id) {
+            $q->whereHas('bill', function ($q) use($id) { 
+                $q->where('supplier_id', $id); 
+            })->orwhereHas('paidbill', function ($q) use($id) {
+                $q->where('supplier_id', $id);
+            });
+        })->whereIn('tr_type', ['bill', 'pmt']);
+        
+        // on date filter
+        $start_date = request('start_date');
+        $end_date = request('end_date');
+        if ($start_date && $end_date && request('is_transaction')) {
+            $start_date = date_for_database($start_date);
+            $end_date = date_for_database($end_date);
+            $prior_date = date('Y-m-d', strtotime($start_date . ' - 1 day'));
+            $q1 = clone $q;
+            $q2 = clone $q;
+
+            $params = ['id', 'tr_date', 'tr_type', 'note', 'debit', 'credit'];
+            $bf_transactions = $q1->where('tr_date', '<', $start_date)->get($params);
+            $diff = $bf_transactions->sum('credit') - $bf_transactions->sum('debit');
+            $record = (object) array(
+                'id' => 0,
+                'tr_date' => $prior_date,
+                'tr_type' => '',
+                'note' => 'Balance brought foward as of '. dateFormat($start_date),
+                'debit' => $diff < 0 ? $diff : 0,
+                'credit' => $diff > 0 ? $diff : 0,
+            );
+            $collection = collect([$record]);
+            $transactions = $q2->whereBetween('tr_date', [$start_date, $end_date])->get($params);
+            if ($diff > 0) $transactions = $collection->merge($transactions);
+            
+            return $transactions;
+        }
+
+        return $q->get();
+    }
+
+    public function getStatementsForDataTable($supplier_id = 0)
+    {
+        $id = $supplier_id ?: request('supplier_id');
+        $transactions = $this->getTransactionsForDataTable($id);
+
+        // on date filter
+        $start_date = request('start_date');
+        $end_date = request('end_date');
+        if ($start_date && $end_date) {
+            $transactions = $transactions->whereBetween('tr_date', [
+                date_for_database($start_date), 
+                date_for_database($end_date)
+            ]);
+        }
+
+        // sequence of bill and related payments
+        $statements = collect();
+        foreach ($transactions as $tr_one) {
+            if ($tr_one->tr_type == 'bill') {
+                $statements->add($tr_one);
+                $bill_id = $tr_one->bill->id;
+                foreach ($transactions as $tr_two) {
+                    if ($tr_two->tr_type == 'pmt') {
+                        foreach ($tr_two->paidbill->items as $item) {
+                            if ($item->bill_id == $bill_id) {
+                                $statements->add($tr_two);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $statements;
+    }
+
+
     /**
      * For Creating the respective model in storage
      *
