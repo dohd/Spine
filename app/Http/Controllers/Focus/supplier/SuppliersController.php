@@ -25,10 +25,9 @@ use App\Http\Responses\Focus\supplier\CreateResponse;
 use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Models\bill\Bill;
 use App\Models\supplier\Supplier;
-use App\Models\transaction\Transaction;
 use App\Repositories\Focus\supplier\SupplierRepository;
+use DateTime;
 
 /**
  * SuppliersController
@@ -149,18 +148,37 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
-        $bills = Bill::where('supplier_id', $supplier->id)->get();
-        $transactions = Transaction::whereHas('account', function ($q) { 
-            $q->where('system', 'payable');  
-        })->where(function ($q) use($supplier) {
-            $q->whereHas('bill', function ($q) use($supplier) { 
-                $q->where('supplier_id', $supplier->id); 
-            })->orwhereHas('paidbill', function ($q) use($supplier) {
-                $q->where('supplier_id', $supplier->id);
-            });
-        })->whereIn('tr_type', ['bill', 'pmt'])->get();
+        $transactions = $this->repository->getTransactionsForDataTable($supplier->id);
+        $account_balance = $transactions->sum('credit') - $transactions->sum('debit');
 
-        return new ViewResponse('focus.suppliers.view', compact('supplier', 'transactions', 'bills'));
+        // bill balance for each date interval
+        $aging_cluster = array_fill(0, 4, 0);
+        $intervals = array();
+        for ($i = 0; $i < 4; $i++) {
+            $from = date('Y-m-d');
+            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
+            if ($i > 0) {
+                $prev = $intervals[$i-1][1];
+                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
+                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
+            }
+            $intervals[] = [$from, $to];
+        }
+        $bills = $this->repository->getPurchaseorderBillsForDataTable($supplier->id);
+        foreach ($bills as $bill) {
+            foreach ($intervals as $i => $dates) {
+                $start  = new DateTime($dates[0]);
+                $end = new DateTime($dates[1]);
+                $due = new DateTime($bill->due_date);
+                if ($start >= $due && $end <= $due) {
+                    $diff = $bill->grandttl - $bill->amountpaid;
+                    $aging_cluster[$i] += $diff;
+                    break;
+                }
+            }
+        }
+
+        return new ViewResponse('focus.suppliers.view', compact('supplier', 'account_balance', 'aging_cluster'));
     }
 
     public function search(CreatePurchaseorderRequest $request)
