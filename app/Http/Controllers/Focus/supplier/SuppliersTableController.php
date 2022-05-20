@@ -17,9 +17,7 @@
  */
 namespace App\Http\Controllers\Focus\supplier;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\supplier\SupplierRepository;
 use App\Http\Requests\Focus\supplier\ManageSupplierRequest;
@@ -34,6 +32,7 @@ class SuppliersTableController extends Controller
      * @var SupplierRepository
      */
     protected $supplier;
+    protected $balance = 0;
 
     /**
      * contructor to initialize repository object
@@ -52,6 +51,13 @@ class SuppliersTableController extends Controller
      */
     public function __invoke(ManageSupplierRequest $request)
     {
+        if (request('is_transaction')) 
+            return $this->invoke_transaction();
+        if (request('is_bill')) 
+            return $this->invoke_bill();
+        if (request('is_statement')) 
+            return $this->invoke_statement();
+
         $core = $this->supplier->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
@@ -59,14 +65,89 @@ class SuppliersTableController extends Controller
             ->addColumn('name', function ($supplier) {
                 return '<a class="font-weight-bold" href="' . route('biller.suppliers.show', [$supplier->id]) . '">' . $supplier->company . '</a>';
             })
-            ->addColumn('created_at', function ($supplier) {
-                $c = '';
-                if ($supplier->active) $c = 'checked';
-                return '<div class="customer_active icheckbox_flat-aero ' . $c . '" data-cid="' . $supplier->id . '" data-active="' . $supplier->active . '"></div>';
-            })
-            ->addColumn('actions', function ($supplier) {
-                return $supplier->action_buttons;
-            })
             ->make(true);
+    }
+
+    public function invoke_transaction()
+    {
+        $core = $this->supplier->getTransactionsForDataTable();
+        return Datatables::of($core)
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('date', function ($tr) {
+            return dateFormat($tr->tr_date);
+        })
+        ->addColumn('type', function ($tr) {
+            return $tr->tr_type;
+        })
+        ->addColumn('note', function ($tr) {
+            return $tr->note;
+        })
+        ->addColumn('bill_amount', function ($tr) {
+            return numberFormat($tr->credit);
+        })
+        ->addColumn('amount_paid', function ($tr) {
+            return numberFormat($tr->debit);
+        })
+        ->addColumn('balance', function ($tr) {
+            if ($tr->debit > 0) $this->balance -= $tr->debit;
+            elseif ($tr->credit > 0) $this->balance += $tr->credit;
+
+            return numberFormat($this->balance);
+        })
+        ->make(true);
+    }
+
+    public function invoke_bill()
+    {
+        $core = $this->supplier->getPurchaseorderBillsForDataTable();
+        return Datatables::of($core)
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('date', function ($bill) {
+            return dateFormat($bill->date);
+        })
+        ->addColumn('reference', function ($bill) {
+            return $bill->doc_ref_type . ' - ' . $bill->doc_ref;
+        })
+        ->addColumn('note', function ($bill) {
+            return $bill->note;
+        })
+        ->addColumn('amount', function ($bill) {
+            return numberFormat($bill->grandttl);
+        })
+        ->addColumn('paid', function ($bill) {
+            return numberFormat($bill->amountpaid);
+        })
+        ->make(true);
+    }
+
+    public function invoke_statement()
+    {
+        $core = $this->supplier->getStatementsForDataTable();
+        return Datatables::of($core)
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('date', function ($tr) {
+            return dateFormat($tr->tr_date);
+        })
+        ->addColumn('type', function ($tr) {
+            return $tr->tr_type;
+        })
+        ->addColumn('note', function ($tr) {
+            return dateFormat($tr->note);
+        })
+        ->addColumn('bill_amount', function ($tr) {
+            return numberFormat($tr->credit);
+        })
+        ->addColumn('amount_paid', function ($tr) {
+            return numberFormat($tr->debit);
+        })
+        ->addColumn('balance', function ($tr) {
+            if ($tr->credit > 0) $this->balance += $tr->credit;
+            elseif ($tr->debit > 0) $this->balance -= $tr->debit;
+            return numberFormat($this->balance);
+        })
+        ->make(true);
     }
 }
