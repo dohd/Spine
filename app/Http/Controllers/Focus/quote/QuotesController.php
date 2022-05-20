@@ -270,9 +270,9 @@ class QuotesController extends Controller
 
         $result = $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
 
-        $tid = '';
-        if ($result->bank_id) $tid .= 'PI-'.sprintf('%04d', $result->tid);
-        else $tid .= 'QT-'.sprintf('%04d', $result->tid);
+        $tid = $result->tid;
+        if ($result->bank_id) $tid = gen4tid('PI-', $tid);
+        else $tid = gen4tid('QT-', $tid);
 
         return new RedirectResponse(route('biller.quotes.get_verify_quote'), ['flash_success' => $tid . ' verified successfully']);
     }
