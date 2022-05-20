@@ -297,8 +297,7 @@ class QuoteRepository extends BaseRepository
                 'quote_id' => $quote_id,
             ]);
             foreach($item as $key => $value) {
-                if ($key == 'date') 
-                    $job_card[$key] = date_for_database($value);
+                if ($key == 'date') $job_card[$key] = date_for_database($value);
                 else $job_card[$key] = $value;
             }
             unset($job_card['jcitem_id']);                
