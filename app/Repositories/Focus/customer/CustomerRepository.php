@@ -110,14 +110,14 @@ class CustomerRepository extends BaseRepository
             $record = (object) array(
                 'id' => 0,
                 'tr_date' => $prior_date,
-                'tr_type' => 'brought_foward',
+                'tr_type' => '',
                 'note' => 'Balance brought foward as of '. dateFormat($start_date),
                 'debit' => $diff > 0 ? $diff : 0,
                 'credit' => $diff < 0 ? $diff : 0,
             );
             $collection = collect([$record]);
             $transactions = $q2->whereBetween('tr_date', [$start_date, $end_date])->get($params);
-            $transactions = $collection->merge($transactions);
+            if ($diff > 0) $transactions = $collection->merge($transactions);
 
             return $transactions;
         }
