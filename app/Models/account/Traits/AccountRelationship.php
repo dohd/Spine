@@ -17,11 +17,6 @@ trait AccountRelationship
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'account_id')->withoutGlobalScopes();
-    }
-
-    public function amount()
-    {
-        return $this->hasMany(Transaction::class, 'account_id');
+        return $this->hasMany(Transaction::class);
     }
 }
