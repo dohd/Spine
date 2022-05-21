@@ -135,7 +135,7 @@ class SuppliersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            return dateFormat($tr->note);
+            return $tr->note;
         })
         ->addColumn('bill_amount', function ($tr) {
             return numberFormat($tr->credit);
