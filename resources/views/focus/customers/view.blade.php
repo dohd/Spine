@@ -112,49 +112,40 @@
             type: 'post',
             data: {customer_id: "{{ $customer->id }}" }
         },
+        columns: [{ data: 'name', name: 'name'}],
         order: [[0, "desc"]],
         searchDelay: 500,
-        dom: 'frt',
+        dom: 'Blfrtip',
+        buttons: ['excel', 'csv', 'pdf']
     };
 
     function drawCustomerData() {
-        const dataTable = $('#customerTbl').DataTable({
-            ...dTableConfig,
-            columns: ['name'].map(v => ({data: v, name: v})),
-        });
+        const config = JSON.parse(JSON.stringify(dTableConfig));
+        config.dom = 'frt';
+        const dataTable = $('#customerTbl').DataTable(config);
     }
     function drawTransactionData(start_date='', end_date='') {
         const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.ajax.data.start_date = start_date;
-        config.ajax.data.end_date = end_date;
-        config.ajax.data.is_transaction = 1;
+        config.ajax.data = {...config.ajax.data, start_date, end_date, is_transaction: 1};
         config.order[0][1] = 'asc';
         const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'account_balance'];
-        const dataTable = $('#transTbl').DataTable({
-            ...config,
-            columns: cols.map(v => ({data: v, name: v})),
-        });
+        config.columns = cols.map(v => ({data: v, name: v}));
+        const dataTable = $('#transTbl').DataTable(config);
     }
     function drawInvoiceData() {
         const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.ajax.data.is_invoice = 1;
+        config.ajax.data = {...config.ajax.data, is_invoice: 1};
         const cols = ['date', 'status', 'note', 'amount', 'paid'];
-        const dataTable = $('#invoiceTbl').DataTable({
-            ...config,
-            columns: cols.map(v => ({data: v, name: v})),
-        });
+        config.columns = cols.map(v => ({data: v, name: v}));
+        const dataTable = $('#invoiceTbl').DataTable(config);
     }
     function drawStatementData(start_date='', end_date='') {
         const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.ajax.data.start_date = start_date;
-        config.ajax.data.end_date = end_date;
-        config.ajax.data.is_statement = 1;
+        config.ajax.data = {...config.ajax.data, start_date, end_date, is_statement: 1};
         config.order[0][1] = 'asc';
         const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'invoice_balance'];
-        const dataTable = $('#stmentTbl').DataTable({
-            ...config,
-            columns: cols.map(v => ({data: v, name: v})),
-        });
+        config.columns = cols.map(v => ({data: v, name: v}));
+        const dataTable = $('#stmentTbl').DataTable(config);
     }
 </script>
 @endsection

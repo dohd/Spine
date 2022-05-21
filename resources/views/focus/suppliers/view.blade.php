@@ -115,10 +115,13 @@
         columns: [{ data: 'name', name: 'name'}],
         order: [[0, "desc"]],
         searchDelay: 500,
-        dom: 'frt',
+        dom: 'Blfrtip',
+        buttons: ['excel', 'csv', 'pdf']
     }
     function drawSupplierData() {
-        const dataTable = $('#supplierTbl').DataTable(dTableConfig);
+        const config = JSON.parse(JSON.stringify(dTableConfig));
+        config.dom = 'frt';
+        const dataTable = $('#supplierTbl').DataTable(config);
     }
     function drawTransactionData(start_date='', end_date='') {
         const config = JSON.parse(JSON.stringify(dTableConfig));
