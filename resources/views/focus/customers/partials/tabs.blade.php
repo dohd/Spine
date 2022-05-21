@@ -51,7 +51,7 @@
         <table id="transTbl" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
             <thead>
                 <tr>                                            
-                    @foreach (['Date', 'Type', 'Note', 'Invoice Amount', 'Amount Paid', 'Account Balance'] as $val)
+                    @foreach (['#', 'Date', 'Type', 'Note', 'Invoice Amount', 'Amount Paid', 'Account Balance'] as $val)
                         <th>{{ $val }}</th>
                     @endforeach
                 </tr>
@@ -85,7 +85,7 @@
         <table id="invoiceTbl" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
             <thead>
                 <tr>                                                    
-                    @foreach (['Date', 'Status', 'Note', 'Amount', 'Paid'] as $val)
+                    @foreach (['#', 'Date', 'Status', 'Note', 'Amount', 'Paid'] as $val)
                         <th>{{ $val }}</th>
                     @endforeach
                 </tr>
@@ -112,7 +112,7 @@
         <table id="stmentTbl" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
             <thead>
                 <tr>                                            
-                    @foreach (['Date', 'Type', 'Note', 'Invoice Amount', 'Amount Paid', 'Invoice Balance'] as $val)
+                    @foreach (['#', 'Date', 'Type', 'Note', 'Invoice Amount', 'Amount Paid', 'Invoice Balance'] as $val)
                         <th>{{ $val }}</th>
                     @endforeach
                 </tr>

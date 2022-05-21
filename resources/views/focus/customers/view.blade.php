@@ -118,7 +118,7 @@
         dom: 'Blfrtip',
         buttons: ['excel', 'csv', 'pdf']
     };
-
+    const indexCol = [{name: 'id', data: 'DT_Row_Index'}];
     function drawCustomerData() {
         const config = JSON.parse(JSON.stringify(dTableConfig));
         config.dom = 'frt';
@@ -129,14 +129,14 @@
         config.ajax.data = {...config.ajax.data, start_date, end_date, is_transaction: 1};
         config.order[0][1] = 'asc';
         const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'account_balance'];
-        config.columns = cols.map(v => ({data: v, name: v}));
+        config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
         const dataTable = $('#transTbl').DataTable(config);
     }
     function drawInvoiceData() {
         const config = JSON.parse(JSON.stringify(dTableConfig));
         config.ajax.data = {...config.ajax.data, is_invoice: 1};
         const cols = ['date', 'status', 'note', 'amount', 'paid'];
-        config.columns = cols.map(v => ({data: v, name: v}));
+        config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
         const dataTable = $('#invoiceTbl').DataTable(config);
     }
     function drawStatementData(start_date='', end_date='') {
@@ -144,7 +144,7 @@
         config.ajax.data = {...config.ajax.data, start_date, end_date, is_statement: 1};
         config.order[0][1] = 'asc';
         const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'invoice_balance'];
-        config.columns = cols.map(v => ({data: v, name: v}));
+        config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
         const dataTable = $('#stmentTbl').DataTable(config);
     }
 </script>
