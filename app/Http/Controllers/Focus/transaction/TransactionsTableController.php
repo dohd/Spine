@@ -85,8 +85,7 @@ class TransactionsTableController extends Controller
             ->addColumn('reference', function ($tr) {
                 $result = $this->tax_transaction('reference', $tr);
                 if ($result) return $result;
-
-                return $tr->account->holder . ' - ' . $tr->user_type;
+                if ($tr->account) return $tr->account->holder . ' - ' . $tr->user_type;
             })
             ->addColumn('vat_rate', function ($tr) {
                 return $this->tax_transaction('vat_rate', $tr);                
