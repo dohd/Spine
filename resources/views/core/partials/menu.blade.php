@@ -733,12 +733,12 @@
                     </li>
                     @endauth
                     @permission('account-manage')
-                    <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance',['v']) }}"><i class="fa fa-balance-scale"></i> Trial Balance
+                    <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance', 'v') }}"><i class="fa fa-balance-scale"></i> Trial Balance
                         </a>
                     </li>
                     @endauth
                     @permission('account-manage')
-                    <li><a class="dropdown-item " href="{{ route('biller.accounts.balance_sheet',['v']) }}"><i class="fa fa-book"></i> {{ trans('accounts.balance_sheet') }}
+                    <li><a class="dropdown-item " href="{{ route('biller.accounts.balance_sheet', 'v') }}"><i class="fa fa-book"></i> {{ trans('accounts.balance_sheet') }}
                         </a>
                     </li>
                     @endauth
