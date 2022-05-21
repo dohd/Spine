@@ -31,7 +31,6 @@ use App\Http\Requests\Focus\account\ManageAccountRequest;
 use App\Http\Requests\Focus\account\StoreAccountRequest;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
-use Redirect;
 
 /**
  * AccountsController
@@ -205,25 +204,11 @@ class AccountsController extends Controller
 
     public function trial_balance(Request $request)
     {
-        $bg_styles = array('bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 'bg-gradient-x-success', 'bg-gradient-x-warning');
-        $account = Account::orderBy('number', 'asc')->get();
-        $account_types = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 17)->first('value1');
-        $account_types = json_decode($account_types->value1, true);
-        if ($request->type == 'v') {
-            return new ViewResponse('focus.accounts.trial_balance', compact('account', 'bg_styles', 'account_types'));
-        } else {
-
-            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-        }
+        $accounts = Account::whereHas('transactions', function($q) {
+            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+        })->orderBy('number', 'asc')->get();
+            
+        return new ViewResponse('focus.accounts.trial_balance', compact('accounts'));
     }
 
     /**
