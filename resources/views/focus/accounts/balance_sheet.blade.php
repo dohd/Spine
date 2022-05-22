@@ -7,12 +7,11 @@
         <div class="content-header-left col-6">
             <h3> 
                 {{trans('accounts.balance_sheet')}} 
-                <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}">
+                <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
                     <i class="fa fa-print"></i> {{ trans('general.print') }}
                 </a>
             </h3>
         </div>
-
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
@@ -45,20 +44,26 @@
                                     <tbody>
                                         @php
                                             $gross_balance = 0;
-                                            $j = 1;
+                                            $j = 0;
                                         @endphp
                                         @foreach ($accounts as $account)
                                             @if ($account->account_type == $type)
+                                                @php
+                                                    $balance = 0;
+                                                    $debit = $account->transactions->sum('debit');
+                                                    $credit = $account->transactions->sum('credit');
+                                                    if ($type == 'Asset') $balance = $debit - $credit;
+                                                    elseif ($type == 'Liability') $balance = $credit - $debit;
+                                                    else $balance = $debit;
+                                                    $gross_balance += $balance;
+                                                    $j++;
+                                                @endphp
                                                 <tr>
                                                     <td>{{ $j }}</td>
                                                     <td>{{ $account->number }}</td>
                                                     <td>{{ $account->holder }}</td>
-                                                    <td>{{ $account->balance }}</td>
+                                                    <td>{{ numberFormat($balance) }}</td>
                                                 </tr>
-                                                @php
-                                                    $gross_balance += $account->balance;
-                                                    $j++;
-                                                @endphp
                                             @endif
                                         @endforeach
                                         <tr>
@@ -71,8 +76,7 @@
                                             $balance_cluster[] = compact('type', 'gross_balance');
                                         @endphp
                                     </tbody>
-                                </table> 
-                                
+                                </table>                                
                             @else
                                 <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }}</h5>
                                 <table class="table table-striped table-sm">
@@ -86,7 +90,7 @@
                                         @foreach($balance_cluster as $cluster)
                                             <tr>
                                                 <td>{{ $cluster['type'] }}</td>
-                                                <td>{{ amountFormat($cluster['gross_balance']) }}</td>
+                                                <td><h5>{{ amountFormat($cluster['gross_balance']) }}</h5></td>
                                             </tr>
                                         @endforeach
                                     </tbody>
