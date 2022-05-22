@@ -1,5 +1,5 @@
 @extends ('core.layouts.app')
-@section ('title', trans('accounts.balance_sheet').' | ' . trans('labels.backend.accounts.management'))
+@section ('title', 'Trial Balance | ' . trans('labels.backend.accounts.management'))
 
 @section('content')
 <div class="content-wrapper">
@@ -26,10 +26,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-content print_me">
-                        <h5 class="title bg-gradient-x-info  p-1 white">
-                            Trial Balance
-                        </h5>
-                        <p>&nbsp;</p>
+                        <div class="title bg-gradient-x-info p-1 white"></div>
                         <table class="table">
                             <thead>
                                 <tr>
@@ -60,20 +57,15 @@
                                         <td>{{ numberFormat($credit) }}</td>
                                     </tr> 
                                 @endforeach
-                            </tbody>
-                            <tfoot>
                                 <tr>
                                     @for ($i = 0; $i < 3; $i++)
-                                        <th></th>
-                                    @endfor                                       
-                                    <th>
-                                        <h3 class="text-xl-left">{{ amountFormat($debit_total) }}</h3>
-                                    </th>
-                                    <th>
-                                        <h3 class="text-xl-left">{{ amountFormat($credit_total) }}</h3>
-                                    </th>
+                                        <td></td>
+                                    @endfor 
+                                    @foreach ([$debit_total, $credit_total] as $val)
+                                        <td><h3 class="text-xl-left">{{ amountFormat($val) }}</h3></td>
+                                    @endforeach                                       
                                 </tr>
-                            </tfoot>
+                            </tbody>
                         </table>
                     </div>
                 </div>
