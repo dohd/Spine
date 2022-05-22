@@ -180,7 +180,9 @@ class AccountsController extends Controller
 
     public function balance_sheet(Request $request)
     {
-        $accounts = Account::all();
+        $accounts = Account::whereHas('transactions', function ($q) {
+            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+        })->get();
         $bg_styles = [
             'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
             'bg-gradient-x-success', 'bg-gradient-x-warning'
@@ -188,7 +190,7 @@ class AccountsController extends Controller
 
         if ($request->type == 'p') {
             $account = $accounts;
-            $account_types = ['Assets', 'Equity', 'Expenses', 'Liability', 'Income'];
+            $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
             $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
             $pdf = new \Mpdf\Mpdf(config('pdf'));
             $pdf->WriteHTML($html);
