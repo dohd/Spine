@@ -91,7 +91,7 @@ class SuppliersTableController extends Controller
         })
         ->addColumn('balance', function ($tr) {
             if ($tr->credit > 0) $this->balance += $tr->credit;
-            if ($tr->debit > 0) $this->balance -= $tr->debit;
+            elseif ($tr->debit > 0) $this->balance -= $tr->debit;
 
             return numberFormat($this->balance);
         })
@@ -145,7 +145,7 @@ class SuppliersTableController extends Controller
         })
         ->addColumn('balance', function ($tr) {
             if ($tr->credit > 0) $this->balance += $tr->credit;
-            if ($tr->debit > 0) $this->balance -= $tr->debit;
+            elseif ($tr->debit > 0) $this->balance -= $tr->debit;
             
             return numberFormat($this->balance);
         })
