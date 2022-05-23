@@ -134,7 +134,7 @@ class SupplierRepository extends BaseRepository
                                 break;
                             }
                         }
-                        if ($tr_exists) break;
+                        if ($tr_exists) continue;
                         $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
                         if ($is_paidbill) {
                             $statements->add($tr_two);
@@ -144,8 +144,9 @@ class SupplierRepository extends BaseRepository
                 }
             }
         }
+        $statements = $statements->sortBy('id');
 
-        return $statements->sortBy('id');
+        return $statements;
     }
 
 
