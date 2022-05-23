@@ -92,7 +92,7 @@ class BillRepository extends BaseRepository
     public function post_transaction($bill)
     {
         // credit supplier
-        $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $bill['account_id'],
             'trans_category_id' => $tr_category->id,

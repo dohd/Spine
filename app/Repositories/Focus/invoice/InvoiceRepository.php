@@ -218,7 +218,7 @@ class InvoiceRepository extends BaseRepository
     {
         // credit accounts receivable
         $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'PMT')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
