@@ -36,19 +36,18 @@ class TransactionRepository extends BaseRepository
             }
         }
 
-        // related transactions
-        $tr_id = request('tr_id', 0);
-        if ($tr_id) {
-            $tr = Transaction::find($tr_id, ['id', 'note', 'tr_type']);
-            $q->where(['tr_type' => $tr->tr_type, 'note' => $tr->note]);
-            $q->where('id', '!=', $tr_id);
+        // filter by date
+        if (request('start_date') && request('end_date')) {
+            $q->whereBetween('tr_date', [
+                date_for_database(request('start_date')), 
+                date_for_database(request('end_date'))
+            ]);
         }
 
-        // filter by date
-        $from = request('start_date');
-        $to = request('end_date');
-        if ($from && $to) 
-            $q->whereBetween('tr_date', [date_for_database($from), date_for_database($to)]);
+        // fetch related double-entry transactions
+        if (request('tr_id', 0)) {
+            $q->where('tid', request('tr_tid', 0))->where('id', '!=', request('tr_id', 0));
+        }
 
         return $q->get([
             'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 

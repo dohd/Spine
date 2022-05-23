@@ -137,7 +137,6 @@
         }
     });
 
-    const tr_id = "{{ $tr->id }}";
     const language = {@lang('datatable.strings')};
     const dataTable = $('#transactionsTbl').dataTable({
         processing: true,
@@ -148,7 +147,7 @@
         ajax: {
             url: '{{ route("biller.transactions.get") }}',
             type: 'post',
-            data: {tr_id},
+            data: {tr_tid: "{{ $tr->tid }}", tr_id: "{{ $tr->id }}"},
         },
         columns: [{
                 data: 'DT_Row_Index',
