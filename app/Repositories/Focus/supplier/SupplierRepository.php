@@ -145,7 +145,7 @@ class SupplierRepository extends BaseRepository
             }
         }
 
-        return $statements;
+        return $statements->sortBy('id');
     }
 
 
