@@ -71,7 +71,6 @@ class SuppliersTableController extends Controller
     public function invoke_transaction()
     {
         $core = $this->supplier->getTransactionsForDataTable();
-        $this->balance = 0;
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
@@ -128,7 +127,6 @@ class SuppliersTableController extends Controller
     public function invoke_statement()
     {
         $core = $this->supplier->getStatementsForDataTable();
-        $this->balance = 0;
 
         return Datatables::of($core)
         ->escapeColumns(['id'])

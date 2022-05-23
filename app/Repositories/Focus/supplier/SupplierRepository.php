@@ -127,6 +127,14 @@ class SupplierRepository extends BaseRepository
                 $bill_id = $tr_one->bill->id;
                 foreach ($transactions as $tr_two) {
                     if ($tr_two->tr_type == 'pmt') {
+                        $tr_exists = false;
+                        foreach ($statements as $tr_three) {
+                            if ($tr_three->id == $tr_two->id) {
+                                $tr_exists = true;
+                                break;
+                            }
+                        }
+                        if ($tr_exists) break;
                         $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
                         if ($is_paidbill) {
                             $statements->add($tr_two);
