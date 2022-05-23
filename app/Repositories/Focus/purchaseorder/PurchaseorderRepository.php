@@ -275,15 +275,12 @@ class PurchaseorderRepository extends BaseRepository
         $is_stock = $order->items()->where('type', 'Stock')->count();
         if ($is_stock) {
             $account = Account::where('system', 'stock')->first(['id']);
-            $stock_tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
             $dr_data[] = array_replace($cr_data, [
                 'account_id' => $account->id,
-                'trans_category_id' => $stock_tr_category->id,
                 'debit' => $order['stock_subttl'],
             ]);    
         }
         // debit expense and asset account
-        $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
         foreach ($order->items as $item) {
             $subttl = $item['amount'] - $item['taxrate'];
             if ($item['type'] == 'Expense') {
@@ -296,7 +293,6 @@ class PurchaseorderRepository extends BaseRepository
                 $asset = Assetequipment::find($item['item_id']);
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $asset->account_id,
-                    'trans_category_id' => $asset_tr_category->id,
                     'debit' => $subttl,
                 ]);
             }

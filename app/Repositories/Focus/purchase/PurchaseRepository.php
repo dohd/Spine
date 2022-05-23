@@ -162,7 +162,7 @@ class PurchaseRepository extends BaseRepository
     {
         // credit Accounts Payable (Creditors)
         $account = Account::where('system', 'payable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'BILL')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $cr_data = [
             'account_id' => $account->id,
@@ -189,7 +189,6 @@ class PurchaseRepository extends BaseRepository
         $wip_account = Account::where('system', 'wip')->first(['id']);
         $is_stock = $bill->items()->where('type', 'Stock')->count();
         if ($is_stock) {
-            $tr_category = Transactioncategory::where('code', 'stock')->first(['id']);
             $is_for_Project = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
             if ($is_for_Project) {
                 $dr_data[] = array_replace($cr_data, [
@@ -202,12 +201,10 @@ class PurchaseRepository extends BaseRepository
                 $account = Account::where('system', 'stock')->first(['id']);
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $account->id,
-                    'trans_category_id' => $tr_category->id,
                     'debit' => $bill['stock_subttl'],
                 ]);    
             }
         }
-        $asset_tr_category = Transactioncategory::where('code', 'p_asset')->first(['id']);
         foreach ($bill->items as $item) {
             $subttl = $item['amount'] - $item['taxrate'];
             // debit Expense Account
@@ -228,8 +225,6 @@ class PurchaseRepository extends BaseRepository
                 $asset = Assetequipment::find($item['item_id']);
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $asset->account_id,
-                    'trans_category_id' => $asset_tr_category->id,
-                    'tr_type' => $asset_tr_category->code,
                     'debit' => $subttl,
                 ]);
             }
