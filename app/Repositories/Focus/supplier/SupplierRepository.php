@@ -136,10 +136,7 @@ class SupplierRepository extends BaseRepository
                         }
                         if ($tr_exists) continue;
                         $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
-                        if ($is_paidbill) {
-                            $statements->add($tr_two);
-                            break;
-                        }
+                        if ($is_paidbill) $statements->add($tr_two);
                     }
                 }
             }
