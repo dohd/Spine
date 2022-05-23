@@ -2,7 +2,7 @@
     'page' => 'class = "horizontal-layout horizontal-menu content-detached-left-sidebar app-contacts" data-open = "click" data-menu = "horizontal-menu" data-col = "content-detached-left-sidebar"'
 ])
 
-@section('title', trans('labels.backend.suppliers.management') . ' | ' . trans('labels.backend.customers.create'))
+@section('title', trans('labels.backend.suppliers.management'))
 
 @section('content')
 <div class="content-wrapper">
