@@ -11,10 +11,12 @@
         <div class="input-group">
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
             @php
-                $label = 'Inv-';
-                $tid = isset($last_inv) ? $last_inv->tid+1 : '';
-                if (isset($invoice)) $tid = $invoice->tid;
-                $label .= sprintf('%04d', $tid);
+                $label = gen4tid('Inv-', $last_tid+1);
+                $tid = $last_tid+1; 
+                if (isset($invoice)){
+                    $label = gen4tid('Inv-', $invoice->tid);
+                    $tid = $invoice->tid;
+                }
             @endphp
             {{ Form::text('tid', $label, ['class' => 'form-control round', 'disabled']) }}
             <input type="hidden" name="tid" value={{ $tid }}>
