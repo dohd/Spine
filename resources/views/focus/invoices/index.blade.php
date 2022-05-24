@@ -100,10 +100,7 @@
             ajax: {
                 url: "{{ route('biller.invoices.get') }}",
                 type: 'post',
-                data: {
-                    start_date,
-                    end_date,
-                },
+                data: {start_date, end_date},
             },
             columns: [{
                     data: 'DT_Row_Index',
