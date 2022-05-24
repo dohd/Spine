@@ -890,6 +890,7 @@ function double_entry(
     }
     Transaction::create($dr_data);
     Transaction::create($cr_data);
+    aggregate_account_transactions();
 
     return true;
 }
