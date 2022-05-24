@@ -216,7 +216,7 @@ class InvoiceRepository extends BaseRepository
 
     public function post_transaction_invoice_payment($bill)
     {
-        // credit accounts receivable
+        // credit Accounts Receivable (Creditors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $cr_data = [
@@ -235,7 +235,7 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit accounts income
+        // debit Revenue Acount (Income)
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $bill['account_id'],
@@ -450,7 +450,17 @@ class InvoiceRepository extends BaseRepository
      */
     public function delete($invoice)
     {
-        if ($invoice->invoice_items()->delete() && $invoice->delete()) return true;
+        DB::beginTransaction();
+
+        foreach ($invoice->invoice_items as $item) {
+            $item->quote->update(['invoiced' => 'No']);
+        }
+        $invoice->transactions()->delete();
+        aggregate_account_transactions();
+
+        $result = $invoice->delete();
+        DB::commit();
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
     }
