@@ -107,24 +107,9 @@ class InvoicesController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        $feature = feature(11);
-        $alert = json_decode($feature->value2, true);
-        if ($alert['del_invoice']) {
-            $mail = [
-                'mail_to' => [$feature->value1],
-                'customer_name' => $invoice->customer->name,
-                'subject' => trans('meta.delete_invoice_alert') . ' #' . $invoice->tid,
-            ];
-            $mail['text'] = trans('invoices.invoice') . ' #' . $invoice->tid . '<br>' . trans('invoices.invoice_date') . ' : ' . dateFormat($invoice->invoicedate) 
-                . '<br>' . trans('general.amount') . ' : ' . amountFormat($invoice->total) 
-                . '<br>' . trans('general.employee') . ' : ' . $invoice->user->first_name . ' ' . $invoice->user->last_name;
-
-            business_alerts($mail);
-        }
-
         $this->repository->delete($invoice);
-
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.deleted')));
+        
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => trans('alerts.backend.invoices.deleted')]);
     }
 
     /**
