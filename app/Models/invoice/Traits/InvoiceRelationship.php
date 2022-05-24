@@ -38,7 +38,7 @@ trait InvoiceRelationship
 
     public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref');
+        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref')->where('tr_type', 'rcpt');
     }
 
     public function attachment()
