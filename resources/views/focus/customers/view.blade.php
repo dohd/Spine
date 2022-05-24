@@ -145,6 +145,7 @@
         config.order[0][1] = 'asc';
         const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'invoice_balance'];
         config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
+        config.bSort = false;
         const dataTable = $('#stmentTbl').DataTable(config);
     }
 </script>
