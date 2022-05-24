@@ -831,7 +831,7 @@ function modify_array(array $input)
 // aggregate transaction credits and debits
 function aggregate_account_transactions()
 {
-    $tr_totals = Transaction::select(DB::raw('account_id AS id, SUM(credit) AS credit_ttl, SUM(debit) AS debit_ttl'))
+    $tr_totals = Transaction::select(DB::raw('account_id AS id, SUM(debit) AS debit, SUM(credit) AS credit'))
         ->groupBy('account_id')
         ->get()->toArray();
     Batch::update(new Account, $tr_totals, 'id');
@@ -855,38 +855,41 @@ function accounts_numbering($account)
     }
 }
 // double transaction entry
-function double_entry($tid,$pr_count_id,$sec_count_id,$amount,$dr_pri,$pri_tr_id,$user_type,$user_id,$date,$duedate,$tr_ref,$memo,$ins)
+function double_entry(
+    $tid, $pr_account_id, $sec_account_id, $opening_balance, $entry_type, $trans_category_id, $user_type, 
+    $user_id, $tr_date, $duedate, $tr_type, $note, $ins
+)
 {
     $data = [
         'tid' => $tid,
-        'trans_category_id' => $pri_tr_id,
-        'transaction_date' =>$date,
+        'trans_category_id' => $trans_category_id,
+        'tr_date' => $tr_date,
         'due_date' => $duedate,
         'user_type' => $user_type,
-        'tr_user_id' => $user_id,
-        'tr_ref' => $tr_ref,
-        'note' => $memo,
-        'user_id' => auth()->user()->id,
+        'user_id' => $user_id,
+        'tr_type' => $tr_type,
+        'note' => $note,
         'ins' => $ins,
     ];
     $dr_data = $data + [
-        'account_id' => $pr_count_id,
+        'account_id' => $pr_account_id,
+        'debit' => $opening_balance,
+        'tr_ref' => $pr_account_id,
         'is_primary' => 1,
-        'debit' => $amount,
     ];
     $cr_data = $data + [
-        'account_id' => $sec_count_id,
+        'account_id' => $sec_account_id,
+        'credit' => $opening_balance,
+        'tr_ref' => $sec_account_id,
         'is_primary' => 0,
-        'credit' => $amount,
-
     ];
-    
-    if ($dr_pri == 'cr') {    
+    if ($entry_type == 'cr') {    
         unset($dr_data['debit'], $cr_data['credit']);
-        $dr_data['credit'] = $amount;
-        $cr_data['debit'] = $amount;
+        $dr_data['credit'] = $opening_balance;
+        $cr_data['debit'] = $opening_balance;
     }
     Transaction::create($dr_data);
     Transaction::create($cr_data);
+
     return true;
 }
