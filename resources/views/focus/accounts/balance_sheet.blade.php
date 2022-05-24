@@ -54,6 +54,7 @@
                                                     $credit = $account->transactions->sum('credit');
                                                     if ($type == 'Asset') $balance = $debit - $credit;
                                                     elseif ($type == 'Liability') $balance = $credit - $debit;
+                                                    else $balance = $credit;
                                                     $gross_balance += $balance;
                                                     $j++;
                                                 @endphp
