@@ -36,7 +36,6 @@ use App\Repositories\Focus\invoice\InvoiceRepository;
 use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
 use App\Http\Requests\Focus\invoice\CreateInvoiceRequest;
 use App\Http\Requests\Focus\invoice\EditInvoiceRequest;
-use App\Http\Requests\Focus\invoice\DeleteInvoiceRequest;
 use App\Http\Responses\RedirectResponse;
 use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
@@ -182,15 +181,15 @@ class InvoicesController extends Controller
 
         $quotes = Quote::whereIn('id', $quote_ids)->get();
         $customer = Customer::find($customer_id);
-        $banks = Bank::all();
-        $last_inv = Invoice::orderBy('tid', 'desc')->first('tid');
         $accounts = Account::whereHas('accountType', function ($query) {
             $query->whereIn('name', ['Income', 'Other Income']);
         })->with(['accountType' => function ($query) {
             $query->select('id', 'name');
         }])->get();
-                
-        return new ViewResponse('focus.invoices.create_project_invoice', compact('quotes', 'customer', 'last_inv', 'banks', 'accounts'));
+        $banks = Bank::all();
+        $last_tid = Invoice::max('tid');
+
+        return new ViewResponse('focus.invoices.create_project_invoice', compact('quotes', 'customer', 'last_tid', 'banks', 'accounts'));
     }
 
     /**
