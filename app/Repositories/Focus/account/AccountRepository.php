@@ -30,7 +30,7 @@ class AccountRepository extends BaseRepository
    */
   public function getForDataTable()
   {
-    return $this->query()->get(['id', 'number', 'holder', 'balance', 'account_type', 'debit_ttl', 'credit_ttl']);
+    return $this->query()->get();
   }
 
   /**
@@ -59,10 +59,10 @@ class AccountRepository extends BaseRepository
       $seco_account = Account::where('system', 'share_capital')->first();
       $tid = Transaction::max('tid') + 1;
       $date = date('Y-m-d');
-      $memo = 'Account Opening Balance';
+      $note = 'Account Opening Balance';
       $data = [
         'date' => $date,
-        'note' => $memo,
+        'note' => $note,
         'user_id' => auth()->user()->id,
         'ins' => $result->ins,
       ];
@@ -70,8 +70,7 @@ class AccountRepository extends BaseRepository
       // debit bank and credit Equity Share Capital
       $system = $account_type->system;
       if ($system == 'bank') {
-        $pri_tr = Transactioncategory::where('code', 'DEP')->first();
-        $tr_ref = 'DEP';
+        $pri_tr = Transactioncategory::where('code', 'dep')->first(['id', 'code']);
         $data = $data + [
           'account_id' => $result->id,
           'amount' => $result->opening_balance,
@@ -81,9 +80,10 @@ class AccountRepository extends BaseRepository
         $deposit = Deposit::create($data);
 
         $args = [
-          $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id, '0', '0', 
-          $date, $result->opening_balance_date, $tr_ref, $memo, $result->ins
+          $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id, 
+          'employee', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         ];
+        // dd($args);
         if ($deposit) double_entry(...$args);
       }
       
@@ -94,13 +94,12 @@ class AccountRepository extends BaseRepository
         'other_current_liability', 'long_term_liability', 'equity'
       ];
       if (in_array($system, $systems, 1)) {
-        $pri_tr = Transactioncategory::where('code', 'GENJRNL')->first();  
-        $tr_ref = 'GENJRNL';
+        $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);  
         $open_bal = $result->opening_balance;
         $data = $data + [
           'tid' => Journal::max('tid') + 1, 
-          'debit_ttl' => $open_bal,
-          'credit_ttl' =>  $open_bal
+          'debit' => $open_bal,
+          'credit' =>  $open_bal
         ];
         $journal = Journal::create($data);
         $item_data = [
@@ -114,11 +113,11 @@ class AccountRepository extends BaseRepository
         $item_data['credit'] = $open_bal;
         JournalItem::create($item_data);
 
-        $dr_pri = 'dr';
-        if (in_array($system, array_splice($systems, 3, 3), 1)) $dr_pri = 'cr';
+        $entry_type = 'dr';
+        if (in_array($system, array_splice($systems, 3, 3), 1)) $entry_type = 'cr';
         $args = [
-          $tid, $result->id, $seco_account->id, $result->opening_balance, $dr_pri, $pri_tr->id, '0', '0', 
-          $date, $result->opening_balance_date, $tr_ref, $memo, $result->ins
+          $tid, $result->id, $seco_account->id, $result->opening_balance, $entry_type, $pri_tr->id, 
+          'employee', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         ];
         if ($journal) double_entry(...$args);
       }
@@ -154,7 +153,10 @@ class AccountRepository extends BaseRepository
    */
   public function delete($account)
   {
-    if ($account->delete())  return true;
+    if ($account->delete()) {
+      aggregate_account_transactions();
+      return true;
+    }
 
     throw new GeneralException(trans('exceptions.backend.accounts.delete_error'));
   }
