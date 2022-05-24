@@ -153,8 +153,8 @@
                     name: 'lpo_number'
                 },
                 {
-                    data: 'tid',
-                    name: 'tid'
+                    data: 'project_tid',
+                    name: 'project_tid'
                 },
                 {
                     data: 'lead_tid',

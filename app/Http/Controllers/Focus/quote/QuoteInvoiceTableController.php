@@ -81,7 +81,7 @@ class QuoteInvoiceTableController extends Controller
             ->addColumn('verified_total', function ($quote) {
                 return number_format($quote->verified_total, 2);
             })
-            ->addColumn('tid', function($quote) {
+            ->addColumn('project_tid', function($quote) {
                 if ($quote->project_quote_id) 
                     return 'Prj-'.sprintf('%04d', $quote->project_quote->project->tid);
             })
