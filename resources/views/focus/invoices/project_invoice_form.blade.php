@@ -11,8 +11,8 @@
         <div class="input-group">
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
             @php
-                $label = gen4tid('Inv-', $last_tid+1);
-                $tid = $last_tid+1; 
+                $label = gen4tid('Inv-', @$last_tid+1);
+                $tid = @$last_tid+1; 
                 if (isset($invoice)){
                     $label = gen4tid('Inv-', $invoice->tid);
                     $tid = $invoice->tid;
