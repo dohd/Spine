@@ -74,7 +74,6 @@ class JournalRepository extends BaseRepository
     public function delete($journal)
     {
         if ($journal->delete()) {
-            // update account ledgers debit and credit totals
             aggregate_account_transactions(); 
             return true;
         }
