@@ -6,18 +6,12 @@ use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
 use App\Models\items\InvoiceItem;
-use App\Models\quote\Quote;
 
 /**
  * Class InvoiceRelationship
  */
 trait InvoiceRelationship
 {
-    public function quotes()
-    {
-        return $this->hasManyThrough(Quote::class, InvoiceItem::class, 'invoice_id', 'quote_id');
-    }
-
     public function invoice_items()
     {
         return $this->hasMany(InvoiceItem::class);
