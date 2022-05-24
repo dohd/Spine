@@ -14,8 +14,8 @@ class AddDebitCreditColumnsToAccountsTable extends Migration
     public function up()
     {
         Schema::table('accounts', function (Blueprint $table) {
-            $table->decimal('credit_ttl', 16, 4)->default(0.0000);
-            $table->decimal('debit_ttl', 16, 4)->default(0.0000);
+            $table->decimal('debit', 16, 4)->default(0);
+            $table->decimal('credit', 16, 4)->default(0);
         });
     }
 

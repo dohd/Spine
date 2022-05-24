@@ -13,7 +13,7 @@
                 'Note' => $segment->note
             ],
         ];
-        $totals = [amountFormat($segment->debit_ttl), amountFormat($segment->credit_ttl)];
+        $totals = [amountFormat($segment->debit), amountFormat($segment->credit)];
         $model_details = array_map(function ($v) use($words, $totals) {
             $v = array_merge([$words['name'] => $words['name_data']], $v, [
                 'Debit' => $totals[0],
