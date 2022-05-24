@@ -49,11 +49,9 @@ class AccountRepository extends BaseRepository
     $input['opening_balance_date'] = date_for_database($input['date']);
     unset($input['date'], $input['is_multiple']);
     // increment account number
-    $account = Account::where('account_type_id', $input['account_type_id'])
-      ->where('number', '>', 1)->orderBy('number', 'DESC')->first();
-    if ($account && $input['number'] <= $account->number) {
-      $input['number'] = $account->number + 1;
-    }
+    $number = Account::where('account_type_id', $input['account_type_id'])
+      ->where('number', '>', 1)->max('number');
+    if ($input['number'] <= $number) $input['number'] = $number + 1;
     $result = Account::create($input);
 
     if ($result->opening_balance > 0) {
@@ -111,6 +109,7 @@ class AccountRepository extends BaseRepository
           'debit' => $open_bal, 
         ];
         JournalItem::create($item_data);
+        
         unset($item_data['debit']);
         $item_data['credit'] = $open_bal;
         JournalItem::create($item_data);
