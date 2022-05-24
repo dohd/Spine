@@ -49,34 +49,7 @@ class ChargeRepository extends BaseRepository
         $result = Charge::create($input);
 
         /** accounts */
-        // credit accounts income (bank)
-        $tr_category = Transactioncategory::where('code', 'CHRG')->first(['id', 'code']);
-        $cr_data = [
-            'account_id' => $result->bank_id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $result['amount'],
-            'tr_date' => date('Y-m-d'),
-            'due_date' => $result['date'],
-            'user_id' => $result['user_id'],
-            'ins' => $result['ins'],
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $result['id'],
-            'user_type' => 'customer',
-            'is_primary' => 1,
-            'note' => $result['note'],
-        ];
-        Transaction::create($cr_data);
-
-        // debit accounts expense (bank charge)
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $result['expense_id'],
-            'debit' => $result['amount'],
-        ]);
-        Transaction::create($dr_data);
-        
-        // update account ledgers debit and credit totals
-        aggregate_account_transactions();
+        $this->post_transaction($result);
         
         DB::commit();
         if ($result) return $result;
@@ -97,7 +70,6 @@ class ChargeRepository extends BaseRepository
         $input = array_map( 'strip_tags', $input);
     	if ($charge->update($input)) return true;
             
-
         throw new GeneralException(trans('exceptions.backend.charges.update_error'));
     }
 
@@ -113,5 +85,37 @@ class ChargeRepository extends BaseRepository
         if ($charge->delete()) return true;       
         
         throw new GeneralException(trans('exceptions.backend.charges.delete_error'));
+    }
+
+    public function post_transaction($result)
+    {
+        // credit bank
+        $tr_category = Transactioncategory::where('code', 'CHRG')->first(['id', 'code']);
+        $cr_data = [
+            'account_id' => $result->bank_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $result['amount'],
+            'tr_date' => date('Y-m-d'),
+            'due_date' => $result['date'],
+            'user_id' => $result['user_id'],
+            'ins' => $result['ins'],
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result['id'],
+            'user_type' => 'customer',
+            'is_primary' => 1,
+            'note' => $result['note'],
+        ];
+        Transaction::create($cr_data);
+
+        // debit expense account (bank charge)
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $result['expense_id'],
+            'debit' => $result['amount'],
+        ]);
+        Transaction::create($dr_data);
+        
+        // update account ledgers debit and credit totals
+        aggregate_account_transactions();
     }
 }
