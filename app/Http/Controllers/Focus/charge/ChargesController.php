@@ -91,7 +91,7 @@ class ChargesController extends Controller
 
         $this->repository->create($data);
 
-        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.charges.created')]);
+        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully created']);
     }
 
     /**
@@ -125,7 +125,7 @@ class ChargesController extends Controller
         //Update the model using repository update method
         $this->repository->update($charge, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.charges.updated')]);
+        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully updated']);
     }
 
     /**
@@ -140,7 +140,7 @@ class ChargesController extends Controller
         //Calling the delete method on repository
         $this->repository->delete($charge);
         //returning with successfull message
-        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.charges.deleted')]);
+        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully deleted']);
     }
 
     /**
