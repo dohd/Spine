@@ -27,10 +27,10 @@
                 @php
                     $balance_cluster = array();
                 @endphp
-                @foreach(['Asset', 'Equity', 'Expense', 'Income', 'Liability', 'Summary'] as $i => $type)
+                @foreach(['Asset', 'Equity', 'Liability', 'Summary'] as $i => $type)
                     <div class="card">
                         <div class="card-content print_me">
-                            @if ($i < 5)
+                            @if ($i < 3)
                                 <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }} {{trans('accounts.accounts')}}</h5>
                                 <table class="table table-sm">
                                     <thead>
@@ -54,7 +54,6 @@
                                                     $credit = $account->transactions->sum('credit');
                                                     if ($type == 'Asset') $balance = $debit - $credit;
                                                     elseif ($type == 'Liability') $balance = $credit - $debit;
-                                                    else $balance = $debit;
                                                     $gross_balance += $balance;
                                                     $j++;
                                                 @endphp
@@ -78,7 +77,7 @@
                                     </tbody>
                                 </table>                                
                             @else
-                                <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }}</h5>
+                                <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }} (Asset = Equity + Liability)</h5>
                                 <table class="table table-striped table-sm">
                                     <thead>
                                         <tr>
@@ -90,7 +89,7 @@
                                         @foreach($balance_cluster as $cluster)
                                             <tr>
                                                 <td>{{ $cluster['type'] }}</td>
-                                                <td><h5>{{ amountFormat($cluster['gross_balance']) }}</h5></td>
+                                                <td>{{ amountFormat($cluster['gross_balance']) }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
