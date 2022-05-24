@@ -150,13 +150,18 @@ class CustomerRepository extends BaseRepository
                 foreach ($transactions as $tr_two) {
                     $types = ['pmt', 'withholding', 'cnote', 'dnote'];
                     if (in_array($tr_two->tr_type, $types, 1)) {
-                        if ($tr_two->paidinvoice) {
-                            foreach ($tr_two->paidinvoice->items as $item) {
-                                if ($item->invoice_id == $invoice_id) {
-                                    $statements->add($tr_two);
-                                    break;
-                                }
+                        $tr_exists = false;
+                        foreach ($statements as $tr_three) {
+                            if ($tr_three->id == $tr_two->id) {
+                                $tr_exists = true;
+                                break;
                             }
+                        }
+                        if ($tr_exists) continue;
+                        
+                        if ($tr_two->paidinvoice) {
+                            $is_paidinvoice = $tr_two->paidinvoice->items->where('invoice_id', $invoice_id)->count();
+                            if ($is_paidinvoice) $statements->add($tr_two);
                         }                                                                        
                         if ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id)
                            $statements->add($tr_two);
