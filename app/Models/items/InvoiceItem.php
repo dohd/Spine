@@ -7,26 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvoiceItem extends Model
 {
-     use InvoiceItemRelationship {
-            // CustomfieldAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+    use InvoiceItemRelationship;
+
     protected $table = 'invoice_items';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -55,9 +50,9 @@ class InvoiceItem extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
