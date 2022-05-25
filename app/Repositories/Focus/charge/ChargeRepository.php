@@ -90,7 +90,7 @@ class ChargeRepository extends BaseRepository
     public function post_transaction($result)
     {
         // credit bank
-        $tr_category = Transactioncategory::where('code', 'CHRG')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'chrg')->first(['id', 'code']);
         $cr_data = [
             'account_id' => $result->bank_id,
             'trans_category_id' => $tr_category->id,
@@ -114,8 +114,6 @@ class ChargeRepository extends BaseRepository
             'debit' => $result['amount'],
         ]);
         Transaction::create($dr_data);
-        
-        // update account ledgers debit and credit totals
         aggregate_account_transactions();
     }
 }
