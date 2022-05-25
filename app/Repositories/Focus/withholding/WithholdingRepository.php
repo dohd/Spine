@@ -106,10 +106,12 @@ class WithholdingRepository extends BaseRepository
 
         // debit Withholding
         $account = Account::query();
-        if ($result->certificate == 'vat') 
-            $account = $account->where('system', 'withholding_vat')->first();
-        elseif ($result->certificate == 'income') 
-            $account = $account->where('system', 'withholding_inc')->first();
+        $account->when($result->certificate == 'vat', function ($q) {
+            return $q->where('system', 'withholding_vat')->first();
+        });
+        $account->when($result->certificate == 'income', function ($q) {
+            return $q->where('system', 'withholding_inc')->first();
+        });
 
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
@@ -117,7 +119,6 @@ class WithholdingRepository extends BaseRepository
             'debit' => $result->deposit_ttl
         ]);
         Transaction::create($dr_data);
-        // update account ledgers debit and credit totals
         aggregate_account_transactions();            
     }
 
@@ -143,6 +144,24 @@ class WithholdingRepository extends BaseRepository
      */
     public function delete($withholding)
     {
+        DB::beginTransaction();
+        // decrement invoice amount paid and update status
+        foreach ($withholding->items as $item) {
+            if ($item->invoice) {
+                $invoice = $item->invoice;
+                $invoice->decrement('amountpaid', $item->paid);
+                if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+                elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
+            }
+        }
+        
+        Transaction::where(['tr_ref' => $withholding->id, 'tr_type' => 'withholding'])->delete();
+        $result = $withholding->delete();
+ 
+        DB::commit();
+        if ($result) return true;
+
         throw new GeneralException(trans('exceptions.backend.withholdings.delete_error'));
     }
 }

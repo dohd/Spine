@@ -17,8 +17,8 @@ trait WithholdingAttribute
      */
      public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("transaction-manage", "biller.withholdings.show");
+        return $this->getViewButtonAttribute("transaction-manage", "biller.withholdings.show")
         //  .' '.$this->getEditButtonAttribute("transaction-data", "biller.charges.edit")
-        //  .' '.$this->getDeleteButtonAttribute("transaction-data", "biller.charges.destroy");
+         .' '.$this->getDeleteButtonAttribute("transaction-data", "biller.withholdings.destroy");
     }
 }
