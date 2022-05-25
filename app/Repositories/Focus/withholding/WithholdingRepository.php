@@ -83,7 +83,7 @@ class WithholdingRepository extends BaseRepository
     // 
     public function post_transaction($result)
     {
-        // credit Accounts Receivable (Creditors)
+        // credit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'withholding')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;

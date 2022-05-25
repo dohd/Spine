@@ -166,7 +166,7 @@ class CreditNoteRepository extends BaseRepository
 
         // credit note
         if (!$result->is_debit) {
-            // credit Receivable Account (Creditors)
+            // credit Receivable Account (Debtors)
             $tr_category = Transactioncategory::where('code', 'cnote')->first(['id', 'code']);
             $cr_data = array_replace($data, [
                 'credit' => $result->total,

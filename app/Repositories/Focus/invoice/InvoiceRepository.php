@@ -124,7 +124,7 @@ class InvoiceRepository extends BaseRepository
 
     public function post_transaction_project_invoice($result)
     {
-        // debit Accounts Receivable (Creditors)
+        // debit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'rcpt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;

@@ -247,7 +247,7 @@ class PurchaseorderRepository extends BaseRepository
      */
     protected function post_transaction($order) 
     {
-        // credit Accounts Payable (Debtors) 
+        // credit Accounts Payable (Creditors) 
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
