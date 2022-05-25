@@ -65,9 +65,16 @@ class CreditNotesController extends Controller
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
 
-        $this->repository->create($data);
+        $result = $this->repository->create($data);
 
-        return new RedirectResponse(route('biller.creditnotes.index'), ['flash_success' => 'Credit Note created successfully']);
+        $msg = 'Credit Note created successfully';
+        $route = route('biller.creditnotes.index');
+        if ($result['is_debit']) {
+            $msg = 'Debit Note created successfully';
+            $route = route('biller.creditnotes.index', 'is_debit=1');
+        }
+
+        return new RedirectResponse($route, ['flash_success' => $msg]);
     }
 
     /**
@@ -90,6 +97,12 @@ class CreditNotesController extends Controller
     public function edit(CreditNote $creditnote)
     {
         $is_debit = $creditnote->is_debit;
+        foreach ($creditnote as $key => $val) {
+            if (in_array($key, ['subtotal', 'tax', 'total'], 1)) {
+                $creditnote[$key] = numberFormat($val);
+            }
+        }
+        
         return new ViewResponse('focus.creditnotes.edit', compact('creditnote', 'is_debit'));
     }
 
@@ -111,9 +124,13 @@ class CreditNotesController extends Controller
         $this->repository->update($creditnote, $data);
 
         $msg = 'Credit Note updated successfully';
-        if ($creditnote->is_debit) $msg = 'Debit Note updated successfully';
+        $route = route('biller.creditnotes.index');
+        if ($creditnote['is_debit']) {
+            $msg = 'Debit Note updated successfully';
+            $route = route('biller.creditnotes.index', 'is_debit=1');
+        }
 
-        return new RedirectResponse(route('biller.creditnotes.index'), ['flash_success' => $msg]);
+        return new RedirectResponse($route, ['flash_success' => $msg]);
     }
 
     /**
@@ -126,9 +143,13 @@ class CreditNotesController extends Controller
     {
         $this->repository->delete($creditnote);
 
-        $msg = 'Credit Note deleted successfully';
-        if ($creditnote->is_debit) $msg = 'Debit Note deleted successfully';
+        $msg = 'Credit Note updated successfully';
+        $route = route('biller.creditnotes.index');
+        if ($creditnote['is_debit']) {
+            $msg = 'Debit Note updated successfully';
+            $route = route('biller.creditnotes.index', 'is_debit=1');
+        }
 
-        return new RedirectResponse(route('biller.creditnotes.index'), ['flash_success' => $msg]);
+        return new RedirectResponse($route, ['flash_success' => $msg]);
     }
 }
