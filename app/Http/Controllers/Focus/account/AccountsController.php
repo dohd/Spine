@@ -178,6 +178,33 @@ class AccountsController extends Controller
         return response()->json($accounts);
     }
 
+    public function profit_and_loss(Request $request)
+    {
+        $accounts = Account::whereHas('transactions', function ($q) {
+            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+        })->get();
+        $bg_styles = [
+            'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger',
+        ];
+
+        if ($request->type == 'p') {
+            $account = $accounts;
+            $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
+            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
+            $pdf = new \Mpdf\Mpdf(config('pdf'));
+            $pdf->WriteHTML($html);
+            $headers = array(
+                "Content-type" => "application/pdf",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
+        }
+
+        return new ViewResponse('focus.accounts.profit_&_loss', compact('accounts', 'bg_styles'));
+    }
+
     public function balance_sheet(Request $request)
     {
         $accounts = Account::whereHas('transactions', function ($q) {
@@ -185,7 +212,6 @@ class AccountsController extends Controller
         })->get();
         $bg_styles = [
             'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
-            'bg-gradient-x-success', 'bg-gradient-x-warning'
         ];
 
         if ($request->type == 'p') {
@@ -212,7 +238,22 @@ class AccountsController extends Controller
         $accounts = Account::whereHas('transactions', function($q) {
             $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
         })->orderBy('number', 'asc')->get();
-            
+
+        if ($request->type == 'p') {
+            $account = $accounts;
+            $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
+            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
+            $pdf = new \Mpdf\Mpdf(config('pdf'));
+            $pdf->WriteHTML($html);
+            $headers = array(
+                "Content-type" => "application/pdf",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            );
+            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
+        }
+
         return new ViewResponse('focus.accounts.trial_balance', compact('accounts'));
     }
 
