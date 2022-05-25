@@ -7,10 +7,15 @@ use App\Models\items\VerifiedItem;
 
 use App\Models\quote\Quote;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
+use App\Models\invoice\Invoice;
+use App\Models\items\InvoiceItem;
 use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
 use App\Models\project\BudgetSkillset;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 
@@ -345,23 +350,33 @@ class QuoteRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        $result = $quote->update(['close_by' => $input['user_id']]);
-        $invoice = $quote->invoice_item->invoice;
-        $no_quotes = $invoice->quotes->count();
-        $no_closed_quotes = $invoice->quotes()->where('closed_by', '>', 0)->count();
+        $result = $quote->update(['closed_by' => $input['user_id']]);
+        
+        $id = $quote->id;
+        $invoice = Invoice::whereHas('products', function($q) use($id) {
+            $q->where('quote_id', $id);
+        })->first();
+
+        $quote_ids = $invoice->products()->pluck('quote_id')->toArray();
+        $no_quotes = Quote::whereIn('id', $quote_ids)->count();
+        $no_closed_quotes = Quote::whereIn('id', $quote_ids)->where('closed_by', '>', 0)->count();
 
         /**accounts */
-        if ($no_quotes == $no_closed_quotes) 
-            $this->post_transaction($invoice);
+        if ($no_quotes == $no_closed_quotes) {
+            $quotes = Quote::whereIn('id', $quote_ids)->get();
+            $this->post_transaction($invoice, $quotes);
+        }
+            
             
         DB::commit();
         if ($result) return true;
     }
 
-    public function post_transaction($invoice)
+    // transaction
+    public function post_transaction($invoice, $quotes)
     {
         $tr_data = array();
-        $tr_category = Transactioncategory::where('code', 'ENDPRJ')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'endprj')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $data = [
             'tid' => $tid,
@@ -393,7 +408,7 @@ class QuoteRepository extends BaseRepository
         $store_inventory_amount = 0;
         $dirpurch_inventory_amount = 0;
         $dirpurch_expense_amount = 0;
-        foreach ($invoice->quotes as $quote) {
+        foreach ($quotes as $quote) {
             $store_inventory_amount += $quote->issuance->sum('total');
             if (isset($quote->project_quote->project)) {
                 foreach ($quote->project_quote->project->purchase_items as $item) {
@@ -420,12 +435,11 @@ class QuoteRepository extends BaseRepository
         }
 
         $tr_data = array_map(function ($v) {
-            if (isset($v['debit'])) $v['credit'] = 0;
-            if (isset($v['credit'])) $v['debit'] = 0;
+            if (isset($v['debit']) && $v['debit'] > 0) $v['credit'] = 0;
+            elseif (isset($v['credit']) && $v['credit'] > 0) $v['debit'] = 0;
             return $v;
         }, $tr_data);
         Transaction::insert($tr_data);
-        // update account ledgers debit and credit totals
         aggregate_account_transactions();       
     }
 }
