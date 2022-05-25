@@ -5,6 +5,7 @@
  *
  */
 Route::group(['namespace' => 'account'], function () {
+    Route::get('accounts/profit_and_loss/{type}', 'AccountsController@profit_and_loss')->name('accounts.profit_and_loss');
     Route::get('accounts/balancesheet/{type}', 'AccountsController@balance_sheet')->name('accounts.balance_sheet');
     Route::get('accounts/trialbalance/{type}', 'AccountsController@trial_balance')->name('accounts.trial_balance');
     Route::resource('accounts', 'AccountsController');
