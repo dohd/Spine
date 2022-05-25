@@ -84,7 +84,7 @@ class JournalRepository extends BaseRepository
 
     public function post_transaction($result)
     {
-        $tr_category = Transactioncategory::where('code', 'GENJRNL')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $data = [
             'trans_category_id' => $tr_category->id,
             'tr_date' => date('Y-m-d'),
@@ -98,8 +98,8 @@ class JournalRepository extends BaseRepository
             'note' => $result['note'],
         ];
 
-        $credits = array();
         $debits = array();
+        $credits = array();
         foreach ($result->items as $item) {
             if ($item->credit > 0) {
                 $credits[] = $data + [
@@ -113,10 +113,10 @@ class JournalRepository extends BaseRepository
                 ];
             }
         }
-        Transaction::insert($credits);
-        Transaction::insert($debits);
-        
-        // update account ledgers debit and credit totals
+
+        foreach ([$debits, $credits] as $tr) {
+            Transaction::insert($tr);
+        }
         aggregate_account_transactions();    
     }
 }
