@@ -12,11 +12,6 @@ use App\Models\items\InvoiceItem;
  */
 trait InvoiceRelationship
 {
-    public function invoice_items()
-    {
-        return $this->hasMany(InvoiceItem::class);
-    }
-
     public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
