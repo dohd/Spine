@@ -742,6 +742,11 @@
                         </a>
                     </li>
                     @endauth
+                    @permission('account-manage')
+                    <li><a class="dropdown-item " href="{{ route('biller.accounts.profit_and_loss', 'v') }}"><i class="fa fa-book"></i> Profit & Loss
+                        </a>
+                    </li>
+                    @endauth
                 </ul>
             </li> @endif
             @if(access()->allow('project-manage') || access()->allow('task-manage'))
