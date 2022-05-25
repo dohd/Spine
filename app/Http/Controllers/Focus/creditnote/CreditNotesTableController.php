@@ -51,7 +51,8 @@ class CreditNotesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($creditnote) {
-                return gen4tid('CN-', $creditnote->tid);
+                $prefix = $creditnote->is_debit ? 'DN-': 'CN-';
+                return gen4tid($prefix, $creditnote->tid);
             })
             ->addColumn('customer', function ($creditnote) {
                 if ($creditnote->customer)
