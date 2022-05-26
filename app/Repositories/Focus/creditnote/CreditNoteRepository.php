@@ -159,49 +159,52 @@ class CreditNoteRepository extends BaseRepository
             'note' => $result->note,
             'ins' => $result->ins,
             'user_type' => 'customer',
-            'is_primary' => 1
         ];
 
+        $tr_data = array();
         // credit note
         if (!$result->is_debit) {
             // credit Receivable Account (Debtors)
             $tr_category = Transactioncategory::where('code', 'cnote')->first(['id', 'code']);
-            $cr_data = array_replace($data, [
+            $tr_data[] = array_replace($data, [
                 'credit' => $result->total,
+                'trans_category_id' => $tr_category->id,
+                'tr_type' => $tr_category->code,   
+                'is_primary' => 1 
+            ]);
+            // debit Revenue Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => Invoice::find($result->invoice_id)->account_id,
+                'debit' => $result->subtotal,
                 'trans_category_id' => $tr_category->id,
                 'tr_type' => $tr_category->code,    
             ]);
-            Transaction::create($cr_data);
-
-            // debit Revenue Account
-            unset($cr_data['credit'], $cr_data['is_primary']);
-            $dr_data = array_replace($cr_data, [
-                'account_id' => Invoice::find($result->invoice_id)->account_id,
-                'debit' => $result->subtotal,
-            ]);
-            Transaction::create($dr_data);
         }        
         // debit note,
         if ($result->is_debit) {
             // credit Revenue Account
             $tr_category = Transactioncategory::where('code', 'dnote')->first(['id', 'code']);
-            $cr_data = array_replace($data, [
+            $tr_data[] = array_replace($data, [
                 'account_id' => Invoice::find($result->invoice_id)->account_id,
                 'debit' => $result->subtotal,
                 'trans_category_id' => $tr_category->id,
                 'tr_type' => $tr_category->code,    
+                'is_primary' => 1 
             ]);
-            Transaction::create($cr_data);
-
             // debit Receivable Account (Creditors)
-            unset($cr_data['debit'], $cr_data['is_primary']);
-            $dr_data = array_replace($cr_data, [
-                'account_id' => $account->id,
+            $tr_data[] = array_replace($data, [
                 'credit' => $result->total,
+                'trans_category_id' => $tr_category->id,
+                'tr_type' => $tr_category->code,    
             ]);
-            Transaction::create($dr_data);
         } 
-        // update account ledgers debit and credit totals
+        // double entry
+        foreach ($tr_data as $i => $tr) {
+            if (isset($tr['credit']) && $tr['credit'] > 0) $tr['debit'] = 0;
+            if (isset($tr['debit']) && $tr['debit'] > 0) $tr['credit'] = 0;
+            $tr_data[$i] = $tr;
+        }
+        Transaction::insert($tr_data);
         aggregate_account_transactions();
     }
 }
