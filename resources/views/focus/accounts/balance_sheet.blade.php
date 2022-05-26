@@ -5,12 +5,28 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h3> 
-                {{trans('accounts.balance_sheet')}} 
-                <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
-                    <i class="fa fa-print"></i> {{ trans('general.print') }}
-                </a>
-            </h3>
+            <div class="row">
+                <div class="col-4">
+                    <h3> 
+                        {{trans('accounts.balance_sheet')}} 
+                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
+                            <i class="fa fa-print"></i> {{ trans('general.print') }}
+                        </a>
+                    </h3>
+                </div>
+                <div class="col-8">
+                    <div class="row no-gutters">
+                        <div class="col-4 text-right mr-1"><h5>Balance as At</h5></div>
+                        <div class="col-3 mr-1"><input type="text" id="end_date" class="form-control form-control-sm datepicker end_date"></div>
+                        <div class="col-4">
+                            <a href="{{ route('biller.accounts.balance_sheet', 'v') }}" class="btn btn-info btn-sm search" id="search4">Search</a>
+                            <a href="{{ route('biller.accounts.balance_sheet', 'v') }}" class="btn btn-success btn-sm refresh" id="refresh">
+                                <i class="fa fa-refresh" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -124,4 +140,23 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('after-scripts')
+<script>
+    // datepicker
+    $('.datepicker')
+    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
+    const date = @json(($date));
+    if (date) $('.datepicker').datepicker('setDate', new Date(date));
+
+
+    // filter by date
+    $('#end_date').change(function() {
+        const url = "{{ route('biller.accounts.balance_sheet', 'v') }}" + '?end_date=' + $('#end_date').val();
+        $('#search4').attr('href', url);
+    });
+    
+</script>
 @endsection
