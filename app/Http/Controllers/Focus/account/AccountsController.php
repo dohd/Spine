@@ -209,7 +209,7 @@ class AccountsController extends Controller
     {
         $accounts = Account::whereHas('transactions', function ($q) {
             $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-        })->get();
+        })->whereIn('account_type', ['Asset', 'Equity', 'Liability'])->get();
         $bg_styles = [
             'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
         ];
@@ -229,7 +229,23 @@ class AccountsController extends Controller
             return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
         }
 
-        return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles'));
+        // compute profit and loss
+        $net_profit = 0;
+        $net_accounts = Account::whereHas('transactions', function ($q) {
+            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+        })->whereIn('account_type', ['Income', 'Expense'])->get();
+        foreach ($net_accounts as $account) {
+            $is_revenue = $account->account_type == 'Income';
+            $is_cog = $account->system == 'cog';
+            $is_dir_expense = $account->account_type == 'Expense' && $account->system != 'cog';
+            $debit = $account->transactions->sum('debit');
+            $credit = $account->transactions->sum('credit');
+            if ($is_revenue) $net_profit += $credit;
+            elseif ($is_cog) $net_profit -= $debit;
+            elseif ($is_dir_expense) $net_profit -= $debit;
+        }
+
+        return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles', 'net_profit'));
     }
 
 
