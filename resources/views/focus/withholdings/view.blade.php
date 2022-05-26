@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">WithHolding Tax  Management</h4>
+            <h4 class="content-header-title">WithHolding Tax Management</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -51,11 +51,13 @@
                 </thead>
                 <tbody>
                     @foreach($withholding->items as $item)
-                        <tr>
-                            <td>{{ dateFormat($item->invoice->invoicedate) }}</td>
-                            <td>{{ $item->invoice->notes }}</td>
-                            <td>{{ numberFormat($item->paid) }}</td>
-                        </tr>
+                        @if ($item->invoice)
+                            <tr>
+                                <td>{{ dateFormat($item->invoice->invoicedate) }}</td>
+                                <td>{{ $item->invoice->notes }}</td>
+                                <td>{{ numberFormat($item->paid) }}</td>
+                            </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
