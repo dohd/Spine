@@ -54,6 +54,7 @@ class AccountRepository extends BaseRepository
     if ($input['number'] <= $number) $input['number'] = $number + 1;
     $result = Account::create($input);
 
+    // case of opening balance
     if ($result->opening_balance > 0) {
       $account_type = AccountType::find($result->account_type_id);
       $seco_account = Account::where('system', 'share_capital')->first();
@@ -83,7 +84,6 @@ class AccountRepository extends BaseRepository
           $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id, 
           'employee', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         ];
-        // dd($args);
         if ($deposit) double_entry(...$args);
       }
       
@@ -98,20 +98,20 @@ class AccountRepository extends BaseRepository
         $open_bal = $result->opening_balance;
         $data = $data + [
           'tid' => Journal::max('tid') + 1, 
-          'debit' => $open_bal,
-          'credit' =>  $open_bal
+          'debit_ttl' => $open_bal,
+          'credit_ttl' =>  $open_bal
         ];
         $journal = Journal::create($data);
-        $item_data = [
-          'journal_id' => $journal->id, 
-          'account_id' => $result->id, 
-          'debit' => $open_bal, 
-        ];
-        JournalItem::create($item_data);
-        
-        unset($item_data['debit']);
-        $item_data['credit'] = $open_bal;
-        JournalItem::create($item_data);
+
+        for ($i = 0; $i < 2; $i++) {
+          $item_data = [
+            'journal_id' => $journal->id, 
+            'account_id' => $result->id, 
+          ];  
+          if (!$i) $item_data['debit'] = $open_bal;
+          else $item_data['credit'] = $open_bal;
+          JournalItem::create($item_data);
+        }
 
         $entry_type = 'dr';
         if (in_array($system, array_splice($systems, 3, 3), 1)) $entry_type = 'cr';
