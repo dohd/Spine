@@ -98,25 +98,23 @@ class JournalRepository extends BaseRepository
             'note' => $result['note'],
         ];
 
-        $debits = array();
-        $credits = array();
+        $tr_data = array();
         foreach ($result->items as $item) {
             if ($item->credit > 0) {
-                $credits[] = $data + [
+                $tr_data[] = $data + [
                     'account_id' => $item->account_id,
-                    'credit' => $item->credit
+                    'credit' => $item->credit,
+                    'debit' => 0
                 ];
-            } else if ($item->debit > 0) {
-                $debits[] = $data + [
+            } elseif ($item->debit > 0) {
+                $tr_data[] = $data + [
                     'account_id' => $item->account_id,
-                    'debit' => $item->debit
+                    'debit' => $item->debit,
+                    'credit' => 0
                 ];
             }
         }
-
-        foreach ([$debits, $credits] as $tr) {
-            Transaction::insert($tr);
-        }
+        Transaction::insert($tr_data);
         aggregate_account_transactions();    
     }
 }
