@@ -58,27 +58,48 @@
                                                     $gross_balance += $balance;
                                                     $j++;
                                                 @endphp
-                                                <tr>
-                                                    <td>{{ $j }}</td>
-                                                    <td>{{ $account->number }}</td>
-                                                    <td>{{ $account->holder }}</td>
-                                                    <td>{{ numberFormat($balance) }}</td>
-                                                </tr>
+                                                @if ($balance && $i == 1)
+                                                    <!-- Equity -->
+                                                    <tr>
+                                                        <td>{{ $j }}</td>
+                                                        <td>{{ $account->number }}</td>
+                                                        <td>{{ $account->holder }}</td>
+                                                        <td>{{ numberFormat($balance) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td><i>Net Profit</i></td>
+                                                        <td>{{ numberFormat($net_profit) }}</td>
+                                                    </tr>
+                                                    @php
+                                                        $gross_balance += $net_profit;
+                                                    @endphp
+                                                @elseif ($balance)
+                                                    <!-- Asset or Liability -->
+                                                    <tr>
+                                                        <td>{{ $j }}</td>
+                                                        <td>{{ $account->number }}</td>
+                                                        <td>{{ $account->holder }}</td>
+                                                        <td>{{ numberFormat($balance) }}</td>
+                                                    </tr>
+                                                @endif
                                             @endif
                                         @endforeach
+                                        @php
+                                            $balance_cluster[] = compact('type', 'gross_balance');
+                                        @endphp
                                         <tr>
                                             @for ($k = 0; $k < 3; $k++)
                                                 <td></td>
                                             @endfor
                                             <td><h3 class="text-xl-left">{{ amountFormat($gross_balance) }}</h3></td>
                                         </tr>
-                                        @php
-                                            $balance_cluster[] = compact('type', 'gross_balance');
-                                        @endphp
                                     </tbody>
                                 </table>                                
                             @else
-                                <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }} (Asset = Equity + Liability)</h5>
+                                <!-- summary -->
+                                <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }} || Asset = Equity  + (Revenue - Expense) + Liability</h5>
                                 <table class="table table-striped table-sm">
                                     <thead>
                                         <tr>
