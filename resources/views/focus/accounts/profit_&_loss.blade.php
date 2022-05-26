@@ -115,7 +115,7 @@
                                             </tr>
                                             <tr>
                                                 <td>Direct Expense</td>
-                                                <td><h5>-{{ amountFormat($balance_cluster[2]['gross_balance']) }}</h5></td>
+                                                <td><h5>- {{ amountFormat($balance_cluster[2]['gross_balance']) }}</h5></td>
                                             </tr>
                                             <tr style="border-top: 2px solid grey;">
                                                 <td><i>Net Profit</i></td>
