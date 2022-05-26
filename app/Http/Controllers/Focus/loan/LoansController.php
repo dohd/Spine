@@ -67,7 +67,10 @@ class LoansController extends Controller
     public function create()
     {
         $last_loan = Loan::orderBy('id', 'desc')->first(['tid']);
-        $accounts = Account::whereIn('account_type_id', [2, 7])->get(['id', 'holder', 'account_type_id']);
+        // loan account and account receivables
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->whereIn('id', [2, 7]);
+        })->get(['id', 'holder', 'account_type_id']);
 
         return new ViewResponse('focus.loans.create', compact('last_loan', 'accounts'));
     }
