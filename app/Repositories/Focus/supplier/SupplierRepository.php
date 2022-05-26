@@ -121,26 +121,32 @@ class SupplierRepository extends BaseRepository
 
         // sequence of bill and related payments
         $statements = collect();
-        foreach ($transactions as $tr_one) {
-            if ($tr_one->tr_type == 'bill') {
-                $statements->add($tr_one);
+        $index_visited = array();
+        foreach ($transactions as $i => $tr_one) {
+            if ($tr_one->tr_type == 'pmt') {
+                // add bill
                 $bill_id = $tr_one->bill->id;
-                foreach ($transactions as $tr_two) {
-                    if ($tr_two->tr_type == 'pmt') {
-                        $tr_exists = false;
-                        foreach ($statements as $tr_three) {
-                            if ($tr_three->id == $tr_two->id) {
-                                $tr_exists = true;
-                                break;
-                            }
-                        }
-                        if ($tr_exists) continue;
+                foreach ($transactions as $j => $tr_two) {
+                    if ($tr_two->tr_type == 'bill') {
                         $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
-                        if ($is_paidbill) $statements->add($tr_two);
+                        if ($is_paidbill)  {
+                            $statements->add($tr_two);
+                            $index_visited[] = $j;
+                        }
                     }
                 }
+                // add payment
+                $statements->add($tr_one);
+                $index_visited[] = $i;
             }
         }
+        // add remainder transactions
+        if ($index_visited) {
+            foreach ($transactions as $i => $tr) {
+                if (in_array($i, $index_visited, 1)) continue;
+                $statements->add($tr);
+            }
+        } else $statements = $transactions;
 
         return $statements;
     }

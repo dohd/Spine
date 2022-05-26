@@ -142,37 +142,48 @@ class CustomerRepository extends BaseRepository
 
         // sequence of invoices and related payments
         $statements = collect();
-        foreach ($transactions as $tr_one) {
-            if ($tr_one->tr_type == 'rcpt') {
+        $index_visited = array();
+        foreach ($transactions as $i => $tr_one) {
+            if ($tr_one->tr_type == 'pmt') {
+                // add invoice, withholding, cnote, dnote
                 $statements->add($tr_one);
                 $invoice_id = $tr_one->invoice->id;
                 $customer_id = $tr_one->invoice->customer_id;
-                foreach ($transactions as $tr_two) {
-                    $types = ['pmt', 'withholding', 'cnote', 'dnote'];
-                    if (in_array($tr_two->tr_type, $types, 1)) {
-                        $tr_exists = false;
-                        foreach ($statements as $tr_three) {
-                            if ($tr_three->id == $tr_two->id) {
-                                $tr_exists = true;
-                                break;
-                            }
-                        }
-                        if ($tr_exists) continue;
-                        
+                foreach ($transactions as $j => $tr_two) {
+                    $types = ['rcpt', 'withholding', 'cnote', 'dnote'];
+                    if (in_array($tr_two->tr_type, $types, 1)) { 
+                        $exists = false;                       
                         if ($tr_two->paidinvoice) {
                             $is_paidinvoice = $tr_two->paidinvoice->items->where('invoice_id', $invoice_id)->count();
-                            if ($is_paidinvoice) $statements->add($tr_two);
-                        }                                                                        
-                        if ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id)
-                           $statements->add($tr_two);
-                        if ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id)
-                           $statements->add($tr_two);
-                        if ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id)
-                           $statements->add($tr_two);
+                            if ($is_paidinvoice) $exists = true; 
+                        } elseif ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id) {
+                            $exists = true; 
+                        } elseif ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id) {
+                            $exists = true; 
+                        } elseif ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id) {
+                            $exists = false;
+                            // add payment
+                            $statements->add($tr_one);
+                            $index_visited[] = $i;
+                            // add withholding
+                            $statements->add($tr_two);
+                            $index_visited[] = $j;
+                        }                                                                 
+                        if ($exists) {
+                            $statements->add($tr_two);
+                            $index_visited[] = $j;
+                        }
                     }
                 }
             }
         }
+        // add remainder transactions
+        if ($index_visited) {
+            foreach ($transactions as $i => $tr) {
+                if (in_array($i, $index_visited, 1)) continue;
+                $statements->add($tr);
+            }
+        } else $statements = $transactions;
 
         return $statements;
     }
