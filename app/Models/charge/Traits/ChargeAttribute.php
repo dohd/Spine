@@ -15,12 +15,10 @@ trait ChargeAttribute
      * Action Button Attribute to show in grid
      * @return string
      */
-     public function getActionButtonsAttribute()
+    public function getActionButtonsAttribute()
     {
-        return '
-         '.$this->getViewButtonAttribute("transaction-manage", "biller.charges.show").'
-                '.$this->getEditButtonAttribute("transaction-data", "biller.charges.edit").'
-                '.$this->getDeleteButtonAttribute("transaction-data", "biller.charges.destroy").'
-                ';
+        return $this->getViewButtonAttribute("transaction-manage", "biller.charges.show")
+            . ' ' . $this->getEditButtonAttribute("transaction-data", "biller.charges.edit")
+            . ' ' . $this->getDeleteButtonAttribute("transaction-data", "biller.charges.destroy");
     }
 }
