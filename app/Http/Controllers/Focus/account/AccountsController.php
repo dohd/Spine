@@ -207,12 +207,35 @@ class AccountsController extends Controller
 
     public function balance_sheet(Request $request)
     {
-        $accounts = Account::whereHas('transactions', function ($q) {
-            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-        })->whereIn('account_type', ['Asset', 'Equity', 'Liability'])->get();
+        $q = Account::query();
+        $q1 = clone $q;
+        $date = date_for_database(request('end_date'));
+        if (request('end_date')) {
+            // balance sheet
+            $q->whereHas('transactions', function ($q) use($date) {
+                $q->where('debit', '>', 0)->where('tr_date', '<=', $date)
+                ->orWhere('credit', '>', 0)->where('tr_date', '<=', $date);
+            })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            // net ptofit
+            $q1->whereHas('transactions', function ($q) use($date) {
+                $q->where('debit', '>', 0)->where('tr_date', '<=', $date)
+                ->orWhere('credit', '>', 0)->where('tr_date', '<=', $date);
+            })->whereIn('account_type', ['Income', 'Expense']);
+        } else {
+            // balance sheet
+            $q->whereHas('transactions', function ($q) {
+                $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+            })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            // net ptofit
+            $q1->whereHas('transactions', function ($q) {
+                $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+            })->whereIn('account_type', ['Income', 'Expense']);
+        }
+
         $bg_styles = [
             'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
         ];
+        $accounts = $q->get();
 
         if ($request->type == 'p') {
             $account = $accounts;
@@ -231,9 +254,7 @@ class AccountsController extends Controller
 
         // compute profit and loss
         $net_profit = 0;
-        $net_accounts = Account::whereHas('transactions', function ($q) {
-            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-        })->whereIn('account_type', ['Income', 'Expense'])->get();
+        $net_accounts = $q1->get();
         foreach ($net_accounts as $account) {
             $is_revenue = $account->account_type == 'Income';
             $is_cog = $account->system == 'cog';
@@ -245,16 +266,26 @@ class AccountsController extends Controller
             elseif ($is_dir_expense) $net_profit -= $debit;
         }
 
-        return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles', 'net_profit'));
+        return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles', 'net_profit', 'date'));
     }
 
 
     public function trial_balance(Request $request)
     {
-        $accounts = Account::whereHas('transactions', function($q) {
-            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-        })->orderBy('number', 'asc')->get();
-
+        $q = Account::query();
+        $date = date_for_database(request('end_date'));
+        if (request('end_date')) {
+            $q->whereHas('transactions', function($q) use($date) {
+                $q->where('debit', '>', 0)->where('tr_date', '<=', $date)
+                ->orWhere('credit', '>', 0)->where('tr_date', '<=', $date);
+            });
+        } else {
+            $q->whereHas('transactions', function($q) {
+                $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+            });
+        }
+        
+        $accounts = $q->orderBy('number', 'asc')->get();
         if ($request->type == 'p') {
             $account = $accounts;
             $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
@@ -270,7 +301,7 @@ class AccountsController extends Controller
             return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
         }
 
-        return new ViewResponse('focus.accounts.trial_balance', compact('accounts'));
+        return new ViewResponse('focus.accounts.trial_balance', compact('accounts', 'date'));
     }
 
     /**
