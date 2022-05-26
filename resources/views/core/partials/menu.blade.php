@@ -598,13 +598,13 @@
                         </ul>
                     </li>
                     @permission('transaction-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Charges Management
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Account Charges
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.charges.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Charges
+                            <li><a class="dropdown-item" href="{{ route('biller.charges.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Account Charges
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.charges.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Charges
+                            <li><a class="dropdown-item" href="{{ route('biller.charges.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Account Charges
                                 </a>
                             </li>
                         </ul>
