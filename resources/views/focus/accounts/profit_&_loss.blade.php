@@ -4,15 +4,28 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
-        <div class="content-header-left col-6">
-            <h3> 
-                Profit & Loss
-                <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
-                    <i class="fa fa-print"></i> {{ trans('general.print') }}
-                </a>
-            </h3>
+        <div class="content-header-left col-9">
+            <div class="row">
+                <div class="col-3">
+                    <h3> 
+                        Profit & Loss
+                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
+                            <i class="fa fa-print"></i> {{ trans('general.print') }}
+                        </a>
+                    </h3>
+                </div>
+                <div class="col-9">
+                    <h5 class="col-5 d-inline">P&L Between</h5>
+                    <input type="text" id="start_date" class="d-inline col-2 mr-1 form-control form-control-sm datepicker start_date">
+                    <input type="text" id="end_date" class="d-inline col-2 mr-1 form-control form-control-sm datepicker end_date">
+                    <a href="{{ route('biller.accounts.profit_and_loss', 'v') }}" class="btn btn-info btn-sm search" id="search4">Search</a>
+                    <a href="{{ route('biller.accounts.profit_and_loss', 'v') }}" class="btn btn-success btn-sm refresh" id="refresh">
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="content-header-right col-6">
+        <div class="content-header-right col-3">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.accounts.partials.accounts-header-buttons')
@@ -131,4 +144,25 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('after-scripts')
+<script>
+    // datepicker
+    $('.datepicker')
+    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
+    const dates = @json(($dates));
+    if (!Array.isArray(dates)) {
+        $('#start_date').datepicker('setDate', new Date(dates.start_date));
+        $('#end_date').datepicker('setDate', new Date(dates.end_date));
+    } 
+
+    // filter by date
+    $(document).on('change', 'input', function() {
+        const queryStr = '?start_date=' + $('#start_date').val() + '&end_date=' + $('#end_date').val();
+        const url = "{{ route('biller.accounts.profit_and_loss', 'v') }}" + queryStr;
+        $('#search4').attr('href', url);
+    });
+</script>
 @endsection
