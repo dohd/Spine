@@ -178,78 +178,46 @@ class AccountsController extends Controller
         return response()->json($accounts);
     }
 
+
     public function profit_and_loss(Request $request)
     {
-        $accounts = Account::whereHas('transactions', function ($q) {
-            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-        })->get();
+        $dates = $request->only('start_date', 'end_date');
+        $dates = array_map(function ($v) { return date_for_database($v); }, $dates);
+
+        $q = Account::query();
+        if ($dates) {
+            $q->whereHas('transactions', function ($q) use($dates) {
+                $q->whereBetween('tr_date', $dates);
+            });
+        } else $q->whereHas('transactions');
+
+        $accounts = $q->get();
+        if ($request->type == 'p')             
+            return $this->print_document('profit_and_loss', $accounts, $dates, 0);
+
         $bg_styles = [
             'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger',
         ];
-
-        if ($request->type == 'p') {
-            $account = $accounts;
-            $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
-            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-        }
-
-        return new ViewResponse('focus.accounts.profit_&_loss', compact('accounts', 'bg_styles'));
+            
+        return new ViewResponse('focus.accounts.profit_&_loss', compact('accounts', 'bg_styles', 'dates'));
     }
 
     public function balance_sheet(Request $request)
     {
+        $date = date_for_database(request('end_date'));
+
         $q = Account::query();
         $q1 = clone $q;
-        $date = date_for_database(request('end_date'));
         if (request('end_date')) {
-            // balance sheet
             $q->whereHas('transactions', function ($q) use($date) {
-                $q->where('debit', '>', 0)->where('tr_date', '<=', $date)
-                ->orWhere('credit', '>', 0)->where('tr_date', '<=', $date);
+                $q->where('tr_date', '<=', $date);
             })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
-            // net ptofit
             $q1->whereHas('transactions', function ($q) use($date) {
-                $q->where('debit', '>', 0)->where('tr_date', '<=', $date)
-                ->orWhere('credit', '>', 0)->where('tr_date', '<=', $date);
+                $q->where('tr_date', '<=', $date);
             })->whereIn('account_type', ['Income', 'Expense']);
         } else {
-            // balance sheet
-            $q->whereHas('transactions', function ($q) {
-                $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-            })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
-            // net ptofit
-            $q1->whereHas('transactions', function ($q) {
-                $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-            })->whereIn('account_type', ['Income', 'Expense']);
-        }
-
-        $bg_styles = [
-            'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
-        ];
-        $accounts = $q->get();
-
-        if ($request->type == 'p') {
-            $account = $accounts;
-            $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
-            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
+            $q->whereHas('transactions')->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            $q1->whereHas('transactions')->whereIn('account_type', ['Income', 'Expense']);
         }
 
         // compute profit and loss
@@ -266,6 +234,14 @@ class AccountsController extends Controller
             elseif ($is_dir_expense) $net_profit -= $debit;
         }
 
+        $accounts = $q->get();
+        if ($request->type == 'p')             
+            return $this->print_document('balance_sheet', $accounts, array(0, $date), $net_profit);
+
+        $bg_styles = [
+            'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
+        ];
+    
         return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles', 'net_profit', 'date'));
     }
 
@@ -276,30 +252,13 @@ class AccountsController extends Controller
         $date = date_for_database(request('end_date'));
         if (request('end_date')) {
             $q->whereHas('transactions', function($q) use($date) {
-                $q->where('debit', '>', 0)->where('tr_date', '<=', $date)
-                ->orWhere('credit', '>', 0)->where('tr_date', '<=', $date);
+                $q->where('tr_date', '<=', $date);
             });
-        } else {
-            $q->whereHas('transactions', function($q) {
-                $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-            });
-        }
+        } else $q->whereHas('transactions');
         
         $accounts = $q->orderBy('number', 'asc')->get();
-        if ($request->type == 'p') {
-            $account = $accounts;
-            $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
-            $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf'));
-            $pdf->WriteHTML($html);
-            $headers = array(
-                "Content-type" => "application/pdf",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
-            );
-            return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
-        }
+        if ($request->type == 'p')
+            return $this->print_document('trial_balance', $accounts, [0, $date], 0);
 
         return new ViewResponse('focus.accounts.trial_balance', compact('accounts', 'date'));
     }
@@ -316,5 +275,24 @@ class AccountsController extends Controller
         if ($account > 0) $netx_account = $account + 1;
             
         return response()->json(['account_number' => $netx_account]);
+    }
+
+    /**
+     * Print docume
+     */
+    public function print_document(string $name, $accounts, array $dates, int $net_profit)
+    {
+        $account = $accounts;
+        $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
+        $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+        return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
     }
 }
