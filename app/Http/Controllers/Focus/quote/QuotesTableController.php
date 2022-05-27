@@ -82,17 +82,19 @@ class QuotesTableController extends Controller
                 $statuses = array('approved', 'client_approved', 'cancelled', 'pending');
                 $backgrds = array('bg-primary', 'bg-success', 'bg-danger', 'bg-secondary');
                 $backgrd = $backgrds[array_search($quote->status, $statuses)];
-
-                $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : 'Null:';
+                $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : 'NULL:';
 
                 return '<span class="badge ' . $backgrd . '">' . $quote->status . ':</span><br>'. $lpo;
             })
             ->addColumn('verified', function ($quote) {
                 $tid = 'NIL:';
-                $inv_item = $quote->invoice_items()->first();                
-                if ($inv_item  && $inv_item->invoice) 
-                    $tid = 'Inv-'.sprintf('%04d', $inv_item->invoice->tid);
-
+                if (isset($quote->invoice_product->invoice)) {
+                    $tid = gen4tid('Inv-', $quote->invoice_product->invoice->tid);
+                    $proj_no = gen4tid('Prj-', $quote->project_quote->project->tid);
+                    if ($quote->closed_by) $tid .= ' closed-' . $proj_no;
+                    else $tid .= ' open-' . $proj_no;
+                }
+                
                 return $quote->verified . ':; <br>' . $tid;
             })
             ->addColumn('actions', function ($quote) {

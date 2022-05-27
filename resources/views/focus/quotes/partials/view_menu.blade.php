@@ -61,7 +61,8 @@
             --}}
         </div>
         @if ($quote->invoiced == 'Yes')
-            <button type="button" class="btn btn-danger btn-sm float-right" id="closeQuote"><i class="fa fa-times-circle-o"></i> Close
+            <button type="button" class="btn btn-danger btn-sm float-right" id="closeQuote" {{ $quote->closed_by ? 'disabled' : '' }}>
+                <i class="fa fa-times-circle-o"></i> Close
                 {{ Form::open(['route' => ['biller.quotes.close_quote', $quote], 'method' => 'POST']) }} {{ Form::close() }}               
             </button>
         @endif
