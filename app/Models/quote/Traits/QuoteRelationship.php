@@ -6,7 +6,6 @@ use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\issuance\Issuance;
-use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\lead\Lead;
@@ -32,14 +31,9 @@ trait QuoteRelationship
         return $this->hasMany(BudgetSkillset::class);
     }
 
-    public function invoice_item()
+    public function invoice_product()
     {
-        return $this->hasOne(InvoiceItem::class);
-    }
-
-    public function invoice_items()
-    {
-        return $this->hasMany(InvoiceItem::class);
+        return $this->hasOne('App\Models\items\InvoiceItem')->withoutGlobalScopes();
     }
 
     public function budget()
