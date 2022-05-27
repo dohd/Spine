@@ -67,13 +67,25 @@
                         @foreach ([30, 60, 90, 120] as $val)
                             <th>{{ $val }} Days</th>
                         @endforeach
+                        <th>Total</th>
+                        <th style="border-top: 1px solid white; border-bottom: 1px solid white;"></th>
+                        <th>On Account</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
+                        @php
+                            $total = 0;
+                        @endphp
                         @for ($i = 0; $i < count($aging_cluster); $i++) 
                             <td>{{ numberFormat($aging_cluster[$i]) }}</td>
+                            @php
+                                $total += $aging_cluster[$i];
+                            @endphp
                         @endfor
+                        <td>{{ numberFormat($total) }}</td>
+                        <td style="border-top: 1px solid white; border-bottom: 1px solid white;"></td>
+                        <td>0.00</td>
                     </tr>
                 </tbody>                     
             </table>  

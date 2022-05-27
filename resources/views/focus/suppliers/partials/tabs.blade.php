@@ -69,17 +69,25 @@
             <h5>Aging</h5>
             <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                 <thead>
-                    <tr>                                                    
+                    <tr>    
                         @foreach ([30, 60, 90, 120] as $val)
                             <th>{{ $val }} Days</th>
                         @endforeach
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
+                        @php
+                            $total = 0;
+                        @endphp   
                         @for ($i = 0; $i < count($aging_cluster); $i++) 
                             <td>{{ numberFormat($aging_cluster[$i]) }}</td>
+                            @php
+                                $total += $aging_cluster[$i];
+                            @endphp
                         @endfor
+                        <td>{{ numberFormat($total) }}</td>
                     </tr>
                 </tbody>                                               
             </table>                                         
