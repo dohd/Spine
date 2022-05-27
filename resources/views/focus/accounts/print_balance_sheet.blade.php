@@ -1,135 +1,165 @@
-<!doctype html>
 <html>
-<head>
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Print Balance Sheet</title>
-
+    <head>
+        <title>Balance Sheet</title>
+    </head>
     <style>
-        body {
-            font-size: 10pt;
-            font-family: Helvetica;
-        }
+		body {
+			font-family: "Times New Roman", Times, serif;
+			font-size: 10pt;
+		}
+        h5 {
+			font-size: 1em;
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: bold;
+            margin-bottom: .7em;
+		}
+		p {
+			margin: 0pt;
+		}
+		table.items {
+			border: 0.1mm solid #000000;
+		}
+		table {
+			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
+			font-size: 10pt;
+		}
+		td {
+			vertical-align: top;
+		}
+		.items td {
+			border-left: 0.1mm solid #000000;
+			border-right: 0.1mm solid #000000;
+		}
+		table thead th {
+			background-color: #BAD2FA;
+			text-align: center;
+			border: 0.1mm solid #000000;
+			font-weight: normal;
+		}
+		        
+        .dotted td {
+			border-bottom: dotted 1px black;
+		}
+		.dottedt th {
+			border-bottom: dotted 1px black;
+		}
 
-
-        table td {
-            padding: 8pt;
-        }
-
-        .general {
-            border: 1px solid;
-            border-color: #ccc;
-
-        }
-
-        .general th {
-            border: 1px solid;
-            border-color: #ccc;
-            padding: 5px;
-        }
-
-        .general td {
-            border: 1px solid;
-            border-color: #ccc;
-            padding: 5px;
-        }
-
-
-    </style>
+		.footer {
+			font-size: 9pt; 
+			text-align: center; 
+		}
+		.table-items {
+			font-size: 10pt; 
+			border-collapse: collapse;
+			height: 700px;
+			width: 100%;
+		}
+	</style>
 </head>
-<body style=""><h2 style="text-align: center">
-    {{trans('accounts.balance_sheet')}}
-</h2>
-<div style="text-align: center">{{trans('general.generated_on')}} : {{dateFormat(date('Y-m-d'))}}</div>
-<h3>{{(config('core.cname'))}}</h3> {{(config('core.address'))}},<br>
-{{(config('core.city'))}}, {{(config('core.region'))}}<br>
-{{(config('core.cname'))}} - {{(config('core.postbox'))}}<br>
-{{trans('general.phone')}}{{(config('core.cname'))}}: {{(config('core.phone'))}}<br>
-{{trans('general.email')}}: {{(config('core.email'))}}<br>
-@if(config('core.taxid'))
-    {{trans('general.tax_id')}}: {{config('core.taxid')}}<br>
-@endif
+<body>
+	<htmlpagefooter name="myfooter">
+		<div class="footer">Page {PAGENO} of {nb}</div>
+	</htmlpagefooter>
+	<sethtmlpagefooter name="myfooter" value="on" />
 
-<hr>
-@php
-    $gross_ac=array();
-@endphp
-@foreach($account_types as $key => $t_row)
-    <h3 class="title">
-        {{$t_row}} {{trans('accounts.accounts')}}
-    </h3>
+    <div style="text-align: center; line-height: 0">
+        <h1>Lean Ventures</h1>
+        <h2>Balance Sheet as at {{ $dates[1]? dateFormat($dates[1]) : date('d-m-Y') }}</h2>
+    </div>
 
-    <table class="general" width="100%">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>{{trans('accounts.holder')}}</th>
-            <th>{{trans('accounts.account')}}</th>
-            <th>{{trans('accounts.balance')}}</th>
-        </tr>
-        </thead>
-        <tbody>
-        @php $i = 1;
-                    $gross = 0;
-                    foreach ($account as $row) {
-                        if ($row['account_type'] == $t_row) {
-                            $aid = $row['id'];
-                            $acn = $row['number'];
-                            $holder = $row['holder'];
-                            $balance = $row['balance'];
-                            $qty = $row['created_at'];
-                            echo "<tr>
-                    <td>$i</td>
-                    <td>$holder</td>
-                    <td>$acn</td>
-
-                    <td>" . amountFormat($balance) . "</td>
-                    </tr>";
-                            $i++;
-                            $gross += $balance;
-                        }
-
-                    }   $gross_ac[]=array('name'=>$t_row,'balance'=>$gross);
-        @endphp
-        </tbody>
-        <tfoot>
-        <tr>
-            <th></th>
-            <th></th>
-
-            <th></th>
-
-            <th>
-                <h3 class="text-xl-left"><?php echo amountFormat($gross); ?></h3>
-            </th>
-        </tr>
-        </tfoot>
-    </table>
-@endforeach
-
-<br>
-<h3> {{trans('general.summary')}} </h3><br>
-<table class="general" width="100%">
-    <thead>
-    <tr>
-        <th>{{trans('accounts.account_type')}}</th>
-        <th>{{trans('accounts.balance')}}</th>
-    </tr>
-    </thead>
-    <tbody>
-
-    @foreach($gross_ac as $g_row)
-        <tr>
-            <td>{{$g_row['name']}}</td>
-            <td>{{amountFormat($g_row['balance'])}}</td>
-
-        </tr>
-
+    @php
+        $balance_cluster = array();
+    @endphp
+    @foreach(['Asset', 'Equity', 'Liability', 'Summary'] as $i => $type)
+        @if ($i < 3)
+            <h5>{{ $type }} {{trans('accounts.accounts')}}</h5>
+            <table class="table table-items" cellpadding=8>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Account No</th>
+                        <th>Account</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        $gross_balance = 0;
+                        $j = 0;
+                    @endphp
+                    @foreach ($accounts as $account)
+                        @if ($account->account_type == $type)
+                            @php
+                                $balance = 0;
+                                $debit = $account->transactions->sum('debit');
+                                $credit = $account->transactions->sum('credit');
+                                if ($type == 'Asset') $balance = $debit - $credit;
+                                elseif ($type == 'Liability') $balance = $credit - $debit;
+                                else $balance = $credit;
+                                $gross_balance += $balance;
+                                $j++;
+                            @endphp
+                            @if ($balance && $i == 1)
+                                <!-- Equity -->
+                                <tr class="dotted">
+                                    <td>{{ $j }}</td>
+                                    <td>{{ $account->number }}</td>
+                                    <td>{{ $account->holder }}</td>
+                                    <td style="text-align: center;">{{ numberFormat($balance) }}</td>
+                                </tr>
+                                <tr class="dotted">
+                                    <td></td>
+                                    <td></td>
+                                    <td><i>Net Profit</i></td>
+                                    <td style="text-align: center;">{{ numberFormat($net_profit) }}</td>
+                                </tr>
+                                @php
+                                    $gross_balance += $net_profit;
+                                @endphp
+                            @elseif ($balance)
+                                <!-- Asset or Liability -->
+                                <tr class="dotted">
+                                    <td>{{ $j }}</td>
+                                    <td>{{ $account->number }}</td>
+                                    <td>{{ $account->holder }}</td>
+                                    <td style="text-align: center;">{{ numberFormat($balance) }}</td>
+                                </tr>
+                            @endif
+                        @endif
+                    @endforeach
+                    @php
+                        $balance_cluster[] = compact('type', 'gross_balance');
+                    @endphp
+                    <tr class="dotted">
+                        @for ($k = 0; $k < 3; $k++)
+                            <td></td>
+                        @endfor
+                        <td style="text-align: center;"><h3 class="text-xl-left">{{ amountFormat($gross_balance) }}</h3></td>
+                    </tr>
+                </tbody>
+            </table>                                
+        @else
+            <!-- summary -->
+            <h5>{{ $type }} || Asset = Equity  + (Revenue - Expense) + Liability</h5>
+            <table class="table table-items" cellpadding=8>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{trans('accounts.account_type')}}</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($balance_cluster as $k => $cluster)
+                        <tr class="dotted">
+                            <td>{{ $k+1 }}</td>
+                            <td>{{ $cluster['type'] }}</td>
+                            <td style="text-align: center;">{{ amountFormat($cluster['gross_balance']) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>    
+        @endif                           
     @endforeach
-    </tbody>
-    <tfoot>
-
-    </tfoot>
-</table>
-
 </body>
+</html>
