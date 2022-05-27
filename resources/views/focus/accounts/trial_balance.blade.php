@@ -9,7 +9,7 @@
                 <div class="col-4">
                     <h3>
                         Trial Balance
-                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}">
+                        <a href="{{ route('biller.accounts.trial_balance', 'p') }}" class="btn btn-success btn-sm" target="_blank" id="print">
                             <i class="fa fa-print"></i> {{ trans('general.print') }}
                         </a>
                     </h3>
@@ -69,8 +69,8 @@
                                         <td>{{ $i+1 }}</td>
                                         <td>{{ $account->number }}</td>
                                         <td>{{ $account->holder }}</td>
-                                        <td>{{ numberFormat($debit) }}</td>
-                                        <td>{{ numberFormat($credit) }}</td>
+                                        <td>{{ $debit > 0? numberFormat($debit) : '' }}</td>
+                                        <td>{{ $credit > 0 ? numberFormat($credit) : '' }}</td>
                                     </tr> 
                                 @endforeach
                                 <tr>
@@ -98,13 +98,18 @@
     .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
     const date = @json(($date));
-    if (date) $('.datepicker').datepicker('setDate', new Date(date));
+    if (date) {
+        $('.datepicker').datepicker('setDate', new Date(date));
+        const queryStr = '?end_date=' + $('#end_date').val();
+        const printUrl = "{{ route('biller.accounts.trial_balance', 'p') }}" + queryStr;
+        $('#print').attr('href', printUrl);
+    }
 
     // filter by date
     $('#end_date').change(function() {
-        const url = "{{ route('biller.accounts.trial_balance', 'v') }}" + '?end_date=' + $('#end_date').val();
-        $('#search4').attr('href', url);
+        const queryStr = '?end_date=' + $('#end_date').val();
+        const viewUrl = "{{ route('biller.accounts.trial_balance', 'v') }}" + queryStr;
+        $('#search4').attr('href', viewUrl);
     });
-    
 </script>
 @endsection
