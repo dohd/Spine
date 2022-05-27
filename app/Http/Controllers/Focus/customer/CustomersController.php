@@ -203,7 +203,7 @@ class CustomersController extends Controller
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
                 $end = new DateTime($dates[1]);
-                $due = new DateTime($invoice->invoiceduedate);
+                $due = new DateTime($invoice->invoicedate);
                 if ($start >= $due && $end <= $due) {
                     $diff = $invoice->total - $invoice->amountpaid;
                     $aging_cluster[$i] += $diff;
