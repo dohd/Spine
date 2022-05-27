@@ -9,7 +9,7 @@
                 <div class="col-3">
                     <h3> 
                         Profit & Loss
-                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
+                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.profit_and_loss', 'p') }}" target="_blank" id="print">
                             <i class="fa fa-print"></i> {{ trans('general.print') }}
                         </a>
                     </h3>
@@ -156,6 +156,9 @@
     if (!Array.isArray(dates)) {
         $('#start_date').datepicker('setDate', new Date(dates.start_date));
         $('#end_date').datepicker('setDate', new Date(dates.end_date));
+        const queryStr = '?start_date=' + $('#start_date').val() + '&end_date=' + $('#end_date').val();
+        const printUrl = "{{ route('biller.accounts.profit_and_loss', 'p') }}" + queryStr;
+        $('#print').attr('href', printUrl);
     } 
 
     // filter by date
