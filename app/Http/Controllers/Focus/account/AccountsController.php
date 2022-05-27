@@ -282,9 +282,9 @@ class AccountsController extends Controller
      */
     public function print_document(string $name, $accounts, array $dates, int $net_profit)
     {
-        $account = $accounts;
         $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
-        $html = view('focus.accounts.print_balance_sheet', compact('account', 'account_types'))->render();
+        $params = compact('accounts', 'account_types', 'dates', 'net_profit');
+        $html = view('focus.accounts.print_' . $name, $params)->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
         $headers = array(
@@ -293,6 +293,6 @@ class AccountsController extends Controller
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         );
-        return Response::stream($pdf->Output('balance_sheet.pdf', 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name . '.pdf', 'I'), 200, $headers);
     }
 }
