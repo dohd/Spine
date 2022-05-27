@@ -169,7 +169,7 @@ class SuppliersController extends Controller
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
                 $end = new DateTime($dates[1]);
-                $due = new DateTime($bill->due_date);
+                $due = new DateTime($bill->date);
                 if ($start >= $due && $end <= $due) {
                     $diff = $bill->grandttl - $bill->amountpaid;
                     $aging_cluster[$i] += $diff;
