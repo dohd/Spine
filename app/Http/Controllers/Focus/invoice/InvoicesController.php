@@ -42,6 +42,7 @@ use App\Models\quote\Quote;
 use App\Models\project\Project;
 use App\Models\bank\Bank;
 use App\Models\lpo\Lpo;
+use App\Models\term\Term;
 use Bitly;
 
 /**
@@ -173,8 +174,11 @@ class InvoicesController extends Controller
         }])->get();
         $banks = Bank::all();
         $last_tid = Invoice::max('tid');
+        // invoice type
+        $terms = Term::where('type', 1)->get();
 
-        return new ViewResponse('focus.invoices.create_project_invoice', compact('quotes', 'customer', 'last_tid', 'banks', 'accounts'));
+        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms');
+        return new ViewResponse('focus.invoices.create_project_invoice', $params);
     }
 
     /**

@@ -297,7 +297,9 @@
 				@endif
 			</tr>
 			<tr>
-				<td colspan="5"></td>
+				<td colspan="5">
+					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
+				</td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>
 			</tr>

@@ -80,26 +80,35 @@
 
     <div class="col-3">
         <label for="income_category" class="caption">Income Category*</label>
-        <div class="input-group">
-            <select class="form-control" name="account_id" {{ isset($invoice) ? 'disabled' : '' }} required>
-                <option value="">-- Select Category --</option>                                        
-                @foreach ($accounts as $row)
-                    @if ($row->accountType->name == 'Income')
-                        <optgroup label="{{ $row->accountType->name }}">
-                            <option value="{{ $row->id }}" {{ $row->id == @$invoice->account_id ? 'selected' : '' }}>
-                                {{ $row->holder }}
-                            </option>
-                        </optgroup>
-                    @else
-                        <optgroup label="{{ $row->accountType->name }}">
-                            <option value="{{ $row->id }}" {{ $row->id == @$invoice->account_id ? 'selected' : '' }}>
-                                {{ $row->holder }}
-                            </option>
-                        </optgroup>
-                    @endif
-                @endforeach                                        
-            </select>
-        </div>
+        <select class="form-control" name="account_id" {{ isset($invoice) ? 'disabled' : '' }} required>
+            <option value="">-- Select Category --</option>                                        
+            @foreach ($accounts as $row)
+                @if ($row->accountType->name == 'Income')
+                    <optgroup label="{{ $row->accountType->name }}">
+                        <option value="{{ $row->id }}" {{ $row->id == @$invoice->account_id ? 'selected' : '' }}>
+                            {{ $row->holder }}
+                        </option>
+                    </optgroup>
+                @else
+                    <optgroup label="{{ $row->accountType->name }}">
+                        <option value="{{ $row->id }}" {{ $row->id == @$invoice->account_id ? 'selected' : '' }}>
+                            {{ $row->holder }}
+                        </option>
+                    </optgroup>
+                @endif
+            @endforeach                                        
+        </select>
+    </div>
+
+    <div class="col-3">
+        <label for="terms">Terms</label>
+        <select name="term_id" class="form-control">
+            @foreach ($terms as $term)
+            <option value="{{ $term->id }}" {{ $term->id == @$invoice->term_id ? 'selected' : ''}}>
+                {{ $term->title }}
+            </option>
+            @endforeach
+        </select>
     </div>
 </div>
 
