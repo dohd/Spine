@@ -57,7 +57,7 @@ class SupplierRepository extends BaseRepository
     public function getPurchaseorderBillsForDataTable($supplier_id = 0)
     {
         $id = $supplier_id ?: request('supplier_id');
-        return Bill::where('supplier_id', $id)->where('po_id', '>', 0)->get();
+        return Bill::where('supplier_id', $id)->get();
     }
 
     public function getTransactionsForDataTable($supplier_id = 0)
