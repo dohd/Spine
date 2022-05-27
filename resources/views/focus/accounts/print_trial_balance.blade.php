@@ -42,7 +42,7 @@
 			font-size: 9pt; 
 			text-align: center; 
 		}
-		.items-table {
+		.table-items {
 			font-size: 10pt; 
 			border-collapse: collapse;
 			height: 700px;
@@ -61,7 +61,7 @@
         <h2>Trial Balance as at {{ $dates[1]? dateFormat($dates[1]) : date('d-m-Y') }}</h2>
     </div>
 
-    <table class="table items-table" cellpadding=8>
+    <table class="table table-items" cellpadding=8>
         <thead>
             <tr>
                 <th>#</th>
