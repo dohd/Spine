@@ -313,7 +313,10 @@
 				@endif
 			</tr>
 			<tr>
-				<td colspan="4"><em>Prepared By : </em><b>{{ $resource->prepared_by }}</b></td>
+				<td colspan="4">
+					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
+					<em>Prepared By : </em><b>{{ $resource->prepared_by }}</b>
+				</td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>
 			</tr>
