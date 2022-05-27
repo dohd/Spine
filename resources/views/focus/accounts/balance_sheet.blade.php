@@ -9,7 +9,7 @@
                 <div class="col-4">
                     <h3> 
                         {{trans('accounts.balance_sheet')}} 
-                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank">
+                        <a class="btn btn-success btn-sm" href="{{ route('biller.accounts.balance_sheet', 'p') }}" target="_blank" id="print">
                             <i class="fa fa-print"></i> {{ trans('general.print') }}
                         </a>
                     </h3>
@@ -149,14 +149,18 @@
     .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
     const date = @json(($date));
-    if (date) $('.datepicker').datepicker('setDate', new Date(date));
-
+    if (date) {
+        $('.datepicker').datepicker('setDate', new Date(date));
+        const queryStr = '?end_date=' + $('#end_date').val();
+        const printUrl = "{{ route('biller.accounts.balance_sheet', 'p') }}" + queryStr;
+        $('#print').attr('href', printUrl);
+    }
 
     // filter by date
     $('#end_date').change(function() {
-        const url = "{{ route('biller.accounts.balance_sheet', 'v') }}" + '?end_date=' + $('#end_date').val();
-        $('#search4').attr('href', url);
+        const queryStr = '?end_date=' + $('#end_date').val();
+        const viewUrl = "{{ route('biller.accounts.balance_sheet', 'v') }}" + queryStr;
+        $('#search4').attr('href', viewUrl);
     });
-    
 </script>
 @endsection
