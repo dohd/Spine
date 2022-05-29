@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\spvariations;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\spvariations\SpVariableRepository;
@@ -51,8 +51,8 @@ class SpVariablesControllerTableController extends Controller
      */
     public function __invoke(ManageSpVariableRequest $request)
     {
-        //
         $core = $this->spvariation->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -60,15 +60,15 @@ class SpVariablesControllerTableController extends Controller
                 return $spvariation->product->name;
             })
             ->addColumn('item_code', function ($spvariation) {
-                return $spvariation->product_variation->code;
+                if (isset($spvariation->product_variation->code))
+                    return $spvariation->product_variation->code;
             })
             ->addColumn('selling_price', function ($spvariation) {
                 return amountFormat($spvariation->selling_price);
             })
             ->addColumn('created_at', function ($spvariation) {
-                return dateFormat($spvariation->created_at);
+                return $spvariation->created_at->format('d-m-Y');
             })
-           
             ->make(true);
     }
 }
