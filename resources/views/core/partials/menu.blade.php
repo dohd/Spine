@@ -441,7 +441,7 @@
                                 </a>
                             </li>
                             @permission('product-create')
-                            <li><a class="dropdown-item" href="{{ route('biller.products.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Price Group
+                            <li><a class="dropdown-item" href="{{ route('biller.pricegroups.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Price Group
                                 </a>
                             </li>
                             @endauth
