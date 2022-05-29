@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\pricegroup;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\pricegroup\PricegroupRepository;
@@ -51,24 +51,25 @@ class PricegroupsTableController extends Controller
      */
     public function __invoke(ManagePricegroupRequest $request)
     {
-        //
         $core = $this->pricegroup->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($pricegroup) {
                 return '<a class="font-weight-bold" href="' . route('biller.spvariations.index') . '?rel_id=' . $pricegroup->id . '">' . $pricegroup->name . '</a>';
             })->addColumn('total', function ($pricegroup) {
-                  return numberFormat($pricegroup->products->sum('items'));
+                return numberFormat($pricegroup->products->sum('items'));
             })
             ->addColumn('worth', function ($pricegroup) {
-                 return numberFormat($pricegroup->products->sum('total_value'));
+                return numberFormat($pricegroup->products->sum('total_value'));
             })
             ->addColumn('created_at', function ($pricegroup) {
-                return dateFormat($pricegoup->created_at);
+                return $pricegroup->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($pricegroup) {
-                return '<a class="btn btn-purple round" href="' . route('biller.spvariations.index') . '?rel_id=' . $pricegroup->id . '" title="List"><i class="fa fa-list"></i></a>' . $pricegroup->action_buttons;
+                return '<a class="btn btn-purple round" href="' . route('biller.spvariations.index') . '?rel_id=' . $pricegroup->id . '" title="List"><i class="fa fa-list"></i></a>' 
+                    . $pricegroup->action_buttons;
             })
             ->make(true);
     }
