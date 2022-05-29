@@ -184,7 +184,7 @@
                 $.ajax({
                     url: "{{ route('biller.products.quote_product_search') }}",
                     method: 'POST',
-                    data: 'keyword=' + request.term,
+                    data: {keyword: request.term, pricegroup_id: $('#pricegroup_id').val()},
                     success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
                 });
             },

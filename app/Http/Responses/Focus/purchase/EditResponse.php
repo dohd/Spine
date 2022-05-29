@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\purchase;
 
 use App\Models\additional\Additional;
+use App\Models\pricegroup\Pricegroup;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -31,7 +32,8 @@ class EditResponse implements Responsable
     {
         $purchase = $this->purchase;
         $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
 
-        return view('focus.purchases.edit', compact('purchase', 'additionals'));
+        return view('focus.purchases.edit', compact('purchase', 'additionals', 'pricegroups'));
     }
 }

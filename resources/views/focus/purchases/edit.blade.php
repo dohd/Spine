@@ -409,8 +409,7 @@
                     url,
                     dataType: "json",
                     method: "POST",
-                    data: 'keyword=' + request.term,                        
-                    success: function(data) {
+                    data: {keyword: request.term, pricegroup_id: $('#pricegroup_id').val()},                    success: function(data) {
                         response(data.map(v => ({
                             label: v.name,
                             value: v.name,

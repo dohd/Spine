@@ -37,6 +37,8 @@ use App\Http\Requests\Focus\product\ManageProductRequest;
 use App\Http\Requests\Focus\product\CreateProductRequest;
 use App\Http\Requests\Focus\product\EditProductRequest;
 use App\Http\Requests\Focus\product\DeleteProductRequest;
+use App\Models\pricegroup\Pricegroup;
+use App\Models\pricelist\PriceList;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 
@@ -380,20 +382,21 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        $k = request('keyword', '');
-
         $product_variations = ProductVariation::where('qty', '>', 0)
-        ->whereHas('product', function ($q) use ($k) {
-            $q->where('name', 'LIKE', '%'. $k .'%');
-        })
-        ->with(['warehouse' => function($q) {
+        ->whereHas('product', function ($q) {
+            $q->where('name', 'LIKE', '%'. request('keyword') .'%');
+        })->with(['warehouse' => function($q) {
             $q->select(['id', 'title']);
-        }])
-        ->limit(6)->get();
+        }])->limit(6)->get();
+        
+        $pricegroup = Pricegroup::find($request->pricegroup_id);
+        $pricelist = array();
+        if ($pricegroup) 
+            $pricelist = PriceList::where(['ref_id' => $pricegroup->ref_id, 'is_client' => $pricegroup->is_client])->get();
 
         $output = array();
         foreach ($product_variations as $row) {
-            $output[] = [
+            $product = [
                 'id' => $row->id, 
                 'product_id' => $row->product_id,
                 'name' => $row->name, 
@@ -405,7 +408,16 @@ class ProductsController extends Controller
                 'qty' => $row->qty, 
                 'image' => $row->image,
                 'warehouse' => $row->warehouse
-            ];
+            ];  
+            if (count($pricelist)) {
+                foreach ($pricelist as $item) {
+                    if ($item->product_id == $row->product_id) {
+                        $product['name'] = $item->name;
+                        $product['price'] = numberFormat($item->price);
+                        $output[] =  $product;
+                    }
+                }
+            }  else $output[] =  $product;
         }
 
         return response()->json($output);

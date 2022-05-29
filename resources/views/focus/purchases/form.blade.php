@@ -38,6 +38,18 @@
             </div>
 
             <div class="form-group row">
+                <div class="col-4">
+                    <label for="pricing" >Pricing</label>                    
+                    <select id="pricegroup_id" name="pricegroup_id" class="form-control">
+                        <option value="0" selected>Default </option>
+                        @foreach($pricegroups as $group)
+                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                        @endforeach
+                    </select>                    
+                </div>
+            </div>
+
+            <div class="form-group row">
                 <table class="table-responsive tfr" id="transxnTbl">
                     <thead>
                         <tr class="item_header bg-gradient-directional-blue white">
@@ -147,7 +159,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

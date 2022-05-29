@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\purchaseorder;
 
 use App\Models\additional\Additional;
+use App\Models\pricegroup\Pricegroup;
 use App\Models\purchaseorder\Purchaseorder;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -19,7 +20,8 @@ class CreateResponse implements Responsable
     {
         $last_tid = Purchaseorder::max('tid');
         $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
 
-        return view('focus.purchaseorders.create', compact('last_tid', 'additionals'));
+        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups'));
     }
 }
