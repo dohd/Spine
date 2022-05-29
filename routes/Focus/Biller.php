@@ -226,6 +226,12 @@ Route::group(['namespace' => 'pricegroup'], function () {
     //For Datatable
     Route::post('pricegroups/get', 'PricegroupsTableController')->name('pricegroups.get');
 });
+Route::group(['namespace' => 'pricelist'], function () {
+    Route::resource('pricelists', 'PriceListsController');
+    //For Datatable
+    Route::post('pricelists/get', 'PriceListTableController')->name('pricelists.get');
+});
+
 
 
 Route::group(['namespace' => 'productcategory'], function () {

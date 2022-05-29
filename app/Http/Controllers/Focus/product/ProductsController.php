@@ -395,6 +395,7 @@ class ProductsController extends Controller
         foreach ($product_variations as $row) {
             $output[] = [
                 'id' => $row->id, 
+                'product_id' => $row->product_id,
                 'name' => $row->name, 
                 'purchase_price' => numberFormat($row->purchase_price), 
                 'price' => numberFormat($row->price), 

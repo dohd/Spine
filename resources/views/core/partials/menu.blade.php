@@ -448,6 +448,20 @@
                         </ul>
                     </li>
                     @endauth
+                    @permission('product-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Selling Price List </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.pricelists.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Price List Management
+                                </a>
+                            </li>
+                            @permission('product-create')
+                            <li><a class="dropdown-item" href="{{ route('biller.pricelists.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Price List
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth                    
                     @permission('productcategory-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> {{ trans('labels.backend.productcategories.management') }}
                         </a>
