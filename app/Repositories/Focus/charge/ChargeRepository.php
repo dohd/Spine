@@ -8,6 +8,8 @@ use App\Exceptions\GeneralException;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use net\authorize\api\contract\v1\TransactionSummaryType;
+
 /**
  * Class ChargeRepository.
  */
@@ -67,9 +69,17 @@ class ChargeRepository extends BaseRepository
      */
     public function update(Charge $charge, array $input)
     {
+        DB::beginTransaction();
+
         $input = array_map( 'strip_tags', $input);
-    	if ($charge->update($input)) return true;
-            
+        $result = $charge->update($input);
+
+        Transaction::where(['tr_ref' => $charge->id, 'tr_type' => 'chrg'])->delete();
+        $this->post_transaction($charge);
+
+        DB::commit();
+        if ($result) return true;
+
         throw new GeneralException(trans('exceptions.backend.charges.update_error'));
     }
 
@@ -82,8 +92,14 @@ class ChargeRepository extends BaseRepository
      */
     public function delete(Charge $charge)
     {
-        if ($charge->delete()) return true;       
-        
+        DB::beginTransaction();
+
+        Transaction::where(['tr_ref' => $charge->id, 'tr_type' => 'chrg'])->delete();
+        $result = $charge->delete();
+
+        DB::commit();
+        if ($result) return true;       
+
         throw new GeneralException(trans('exceptions.backend.charges.delete_error'));
     }
 
@@ -91,7 +107,9 @@ class ChargeRepository extends BaseRepository
     {
         // credit bank
         $tr_category = Transactioncategory::where('code', 'chrg')->first(['id', 'code']);
+        $tid = Transaction::max('tid');
         $cr_data = [
+            'tid' => $tid +1,
             'account_id' => $result->bank_id,
             'trans_category_id' => $tr_category->id,
             'credit' => $result['amount'],
