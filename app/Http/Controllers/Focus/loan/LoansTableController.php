@@ -69,9 +69,9 @@ class LoansTableController extends Controller
                 return $loan->is_approved ? 'Approved' : 'Pending';
             })
             ->addColumn('actions', function ($loan) {
-                return '<a href="' . route('biller.loans.show', $loan) . '" class="btn btn-primary round"><i class="fa fa-eye"></i></a> ' 
-                    .' <a href="' . route('biller.loans.approve_loan', $loan) . '" type="button" class="btn btn-success round" data-toggle="tooltip" title="Approve" data-placement="top">
-                        <i class="fa fa-check"></i></a>';
+                return '<button type="button"  data-url="'. route('biller.loans.approve_loan', $loan) .'" class="btn btn-success round approve" data-toggle="tooltip" title="Approve" data-placement="top"> 
+                        <i class="fa fa-check"></i></button>'
+                    .' '.$loan->action_buttons;
             })
             ->make(true);
     }

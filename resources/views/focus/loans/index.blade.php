@@ -16,6 +16,7 @@
             </div>
         </div>
     </div>
+
     <div class="content-body">
         <div class="row">
             <div class="col-12">
@@ -43,6 +44,7 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            <form id="approveLoan"></form>
                         </div>
                     </div>
                 </div>
@@ -61,9 +63,19 @@
         }
     });
 
-    const language = {
-        @lang('datatable.strings')
-    };
+    // Approve Loan
+    $('#loansTbl').on('click', '.approve', function() {
+        $('#approveForm').attr('action', $(this).attr('data-url'));
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => $('#approveLoan').submit());
+    });
+
+    const language = {@lang('datatable.strings') };
     const dataTable = $('#loansTbl').dataTable({
         processing: true,
         serverSide: true,
@@ -113,32 +125,7 @@
         ],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'excel',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                }
-            ]
-        }
+        buttons: ['csv', 'excel', 'print'],
     });
 </script>
 @endsection
