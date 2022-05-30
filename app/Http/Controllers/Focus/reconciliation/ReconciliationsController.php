@@ -45,17 +45,13 @@ class ReconciliationsController extends Controller
      */
     public function create()
     {
+        $last_tid = Reconciliation::max('tid');
         // banks
-        $accounts = Account::where(['account_type_id' => 6])
-        ->whereIn('id', function ($q) {
-            $q->select('account_id')->distinct()->from('transactions')->where('reconciliation_id', 0);
-        })
-        ->get(['id', 'holder']);
-
-        $reconciliation = Reconciliation::orderBy('id', 'DESC')->first();
-        // $reconciliation = null;
-
-        return new ViewResponse('focus.reconciliations.create', compact('accounts', 'reconciliation'));
+        $accounts = Account::where(['account_type_id' => 6])->whereHas('transactions', function ($q) {
+            $q->where('reconciliation_id', 0);
+        })->get();
+        
+        return new ViewResponse('focus.reconciliations.create', compact('accounts', 'last_tid'));
     }
 
     /**
@@ -67,12 +63,14 @@ class ReconciliationsController extends Controller
     public function store(Request $request)
     {
         //ectract input fields
-        $data = $request->only(['account_id', 'tid', 'start_date', 'end_date', 'system_amount', 'open_amount', 'close_amount',]);
+        $data = $request->only(['account_id', 'tid', 'start_date', 'end_date', 'system_amount', 'open_amount', 'close_amount']);
+        $data_items = $request->only('id', 'is_reconciled');
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
+        $data_items = modify_array($data_items);
 
-        $this->repository->create($data);
+        $this->repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.reconciliations.index'), ['flash_success' => 'Bank reconcilliaton successfully completed']);
     }
@@ -89,29 +87,6 @@ class ReconciliationsController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
@@ -123,12 +98,25 @@ class ReconciliationsController extends Controller
     }
 
     /**
-     * Ledger Transactions
+     * Ledger account transactions
      */
     public function ledger_transactions()
     {
-        $tranxs = Transaction::where('account_id', request('id'))->get();
+        // all transaction types except deposit (opening balance) 
+        $transactions = Transaction::where('account_id', request('id'))
+            ->where('reconciliation_id', 0)
+            ->where('tr_type', '!=', 'dep')->get();
 
-        return response()->json($tranxs);
+        return response()->json($transactions);
+    }
+
+    /**
+     * Last Account reconciliatiom
+     */
+    public function last_reconciliation()
+    {
+        $reconciliation =  Reconciliation::where('account_id', request('id'))->orderBy('id', 'Desc')->first();
+
+        return response()->json($reconciliation);
     }
 }
