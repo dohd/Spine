@@ -41,16 +41,21 @@ class ReconciliationRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        foreach ($input as $key => $val) {
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
             if (in_array($key, ['start_date', 'end_date'], 1)) 
-                $input[$key] = date_for_database($val);
+                $data[$key] = date_for_database($val);
             if (in_array($key, ['system_amount', 'open_amount', 'close_amount'], 1)) 
-                $input[$key] = numberClean($val);
+                $data[$key] = numberClean($val);
         }
-        $result = Reconciliation::create($input);
+        $result = Reconciliation::create($data);
         // update reconciled transactions
-        Transaction::where('account_id', $result->account_id)->update(['reconciliation_id' => $result->id]);
-
+        foreach ($input['data_items'] as $tr) {
+            if ($tr['is_reconciled']) {
+                Transaction::find($tr['id'])->update(['reconciliation_id' => $result->id]);
+            }
+        }
+        
         DB::commit();
         if ($result) return $result;
 
