@@ -30,7 +30,8 @@
                                         <th>Note</th>
                                         <th>Amount</th>
                                         <th>Reference</th>
-                                        <th>Payment Date</th>   
+                                        <th>Payment Date</th>  
+                                        <th>Action</th> 
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -96,38 +97,19 @@
                 data: 'date',
                 name: 'date'
             },
+            {
+                data: 'actions',
+                name: 'actions',
+                searchable: false,
+                sortable: false
+            }
         ],
         order: [
             [0, "desc"]
         ],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'excel',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                }
-            ]
-        }
+        buttons: ['csv', 'excel', 'print']
     });
 </script>
 @endsection

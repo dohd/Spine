@@ -82,8 +82,16 @@ class ReconciliationRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Reconciliation $teconcilliation)
+    public function delete(Reconciliation $reconciliation)
     {
+        DB::beginTransaction();
+
+        Transaction::where('reconciliation_id', $reconciliation->id)->update(['reconciliation_id' => 0]);
+        $result = $reconciliation->delete();
+
+        DB::commit();
+        if ($result) return true;
+        
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }
