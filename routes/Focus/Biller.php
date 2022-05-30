@@ -174,6 +174,7 @@ Route::group(['namespace' => 'journal'], function () {
 });
 
 Route::group(['namespace' => 'reconciliation'], function () {
+    Route::get('reconciliations/last_reconciliation', 'ReconciliationsController@last_reconciliation')->name('reconciliations.last_reconciliation');
     Route::get('reconciliations/ledger_transactions', 'ReconciliationsController@ledger_transactions')->name('reconciliations.ledger_transactions');
     Route::resource('reconciliations', 'ReconciliationsController');
     //For Datatable
