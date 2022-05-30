@@ -105,13 +105,14 @@ class WithholdingRepository extends BaseRepository
         Transaction::create($cr_data);
 
         // debit Withholding
-        $account = Account::query();
-        $account->when($result->certificate == 'vat', function ($q) {
-            return $q->where('system', 'withholding_vat')->first();
+        $q = Account::query();
+        $q->when($result->certificate == 'vat', function ($q) {
+            $q->where('system', 'withholding_vat');
         });
-        $account->when($result->certificate == 'income', function ($q) {
-            return $q->where('system', 'withholding_inc')->first();
+        $q->when($result->certificate == 'income', function ($q) {
+            $q->where('system', 'withholding_inc');
         });
+        $account = $q->first();
 
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
