@@ -2,16 +2,14 @@
 
 namespace App\Models\loan;
 
+use App\Models\loan\Traits\LoanAttribute;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\loan\Traits\LoanRelationship;
 
 class Loan extends Model
 {
-    use ModelTrait,
-    	LoanRelationship {
-        // CustomerAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+    use ModelTrait, LoanRelationship, LoanAttribute;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -28,17 +26,13 @@ class Loan extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,15 +61,9 @@ class Loan extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
-
-      
-
-    
-
-
 }
