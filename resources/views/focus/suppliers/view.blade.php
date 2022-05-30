@@ -30,7 +30,7 @@
                                     <a href="{{ route('biller.suppliers.edit', $supplier) }}" class="btn btn-blue btn-outline-accent-5 btn-sm">
                                         <i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}
                                     </a>&nbsp;
-                                    <button type="button" class="btn btn-danger btn-outline-accent-5 btn-sm" id="delCustomer">
+                                    <button type="button" class="btn btn-danger btn-outline-accent-5 btn-sm" id="delSupplier">
                                         {{Form::open(['route' => ['biller.suppliers.destroy', $supplier], 'method' => 'DELETE'])}}{{Form::close()}}
                                         <i class="fa fa-trash"></i> {{trans('buttons.general.crud.delete')}}
                                     </button>
@@ -59,8 +59,15 @@
     });
 
     // delete supplier
-    $('#delCustomer').click(function() {
-        $(this).children('form').submit();
+    $('#delSupplier').click(function() {
+        const form = $(this).children('form');
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => form.submit());
     });
 
     // datepicker

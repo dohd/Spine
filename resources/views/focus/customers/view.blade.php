@@ -59,7 +59,14 @@
 
     // delete customer
     $('#delCustomer').click(function() {
-        $(this).children('form').submit();
+        const form = $(this).children('form');
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => form.submit());
     });
 
     // datepicker
