@@ -33,18 +33,25 @@
 
 @section('after-scripts')
 <script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        }
+    });
+
     $('.datepicker')
     .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date())
+    .datepicker('setDate', new Date());
 
-    // on form submit
+    // submit form
     $('#reconciliation').submit(function(e) {
         $('#startDate').attr('disabled', false);
         const systemBal = $('#systemBal').val().replace(/,/g, '');
         const closeBal = $('#closeBal').val().replace(/,/g, '');
-        if (systemBal == closeBal * 1) return;
-        e.preventDefault();
-        alert('System balance must be equivalent to Closing balance !');
+        if (systemBal != closeBal * 1) {
+            e.preventDefault();
+            alert('System balance must be equivalent to Closing balance !');
+        } 
     });
 
     // transaction row
@@ -57,13 +64,15 @@
                 <td class="text-center debit"><b>${parseFloat(v.debit).toLocaleString()}</b></td>
                 <td class="text-center credit"><b>${parseFloat(v.credit).toLocaleString()}</b></td>
                 <td class="text-center"><input class="form-check-input check" type="checkbox"></td>
-                <input type="hidden" name="transaction_id[]" value="${v.id}">
+                <input type="hidden" name="id[]" value="${v.id}">
+                <input type="hidden" name="is_reconciled[]" value="0" class="is_reconciled">
             </tr>
         `;
     }
 
-    // load account ledger transactions
+    // on selecting bank
     $('#bank').change(function() {
+        // fetch transactions
         $.ajax({
             url: "{{ route('biller.reconciliations.ledger_transactions') }}?id=" + $(this).val(),
             success: data => {
@@ -71,43 +80,57 @@
                 data.forEach(v => $('#tranxTbl tbody').append(tranxRow(v)));
             }
         });
+        // set system account and opening balance
+        const balance = $(this).children('option:selected').attr('openingBalance')
+        $('#systemBal').val(parseFloat(balance).toLocaleString());
+        $('#openBal').val(parseFloat(balance).toLocaleString());
+        $.ajax({
+            url: "{{ route('biller.reconciliations.last_reconciliation') }}?id=" + $(this).val(),
+            success: data => {
+                $('#startDate').attr('disabled', false);
+                $('#openBal').attr('readonly', false);
+                if (data.hasOwnProperty('id')) {
+                    $('#startDate').datepicker('setDate', new Date(data.end_date)).attr('disabled', true);
+                    $('#systemBal').val(parseFloat(data.system_amount).toLocaleString());
+                    $('#openBal').val(parseFloat(data.close_amount).toLocaleString()).attr('readonly', true);
+                }
+            }
+        });
     });
-
-    // On next reconciliation
-    const obj = @json($reconciliation);
-    if (obj && obj.tid > 0) {
-        $('#startDate').datepicker('setDate', new Date(obj.end_date)).attr('disabled', 'true');
-        $('#systemBal').val(parseFloat(obj.system_amount).toLocaleString());
-        $('#openBal').val(parseFloat(obj.close_amount).toLocaleString()).attr('readonly', true);
-    }
 
     // on checking a checkbox
-    let balance = 0;
-    let debitTtl = 0;
-    let creditTtl = 0;
     $('#tranxTbl').on('change', '.check', function() {
         const row = $(this).parents('tr');
-        credit = row.find('.credit').text().replace(/,/g, '') * 1;
-        debit = row.find('.debit').text().replace(/,/g, '') * 1;
+        const credit = row.find('.credit').text().replace(/,/g, '')*1;
+        const debit = row.find('.debit').text().replace(/,/g, '')*1;
+        let balance = $('#systemBal').val().replace(/,/g, '')*1;
         if ($(this).is(':checked')) {
-            creditTtl += credit;
-            debitTtl += debit;
-            if (credit) balance += credit;
-            else if (debit) balance -= debit;
+            if (credit > 0) balance -= credit;
+            else if (debit > 0) balance += debit;
+            row.find('.is_reconciled').val(1);
         } else {
-            creditTtl -= credit;
-            debitTtl -= debit;
-            if (credit) balance -= credit;
-            else if (debit) balance += debit;
+            if (credit > 0) balance += credit;
+            else if (debit > 0) balance -= debit;
+            row.find('.is_reconciled').val(0);
         }
-        $('#debitTtl').val(debitTtl.toLocaleString());
-        $('#creditTtl').val(creditTtl.toLocaleString());
-        if (!obj) $('#systemBal').val(balance.toLocaleString()); 
-        else {
-            const prev = parseFloat(obj.system_amount);
-            $('#systemBal').val((prev + balance).toLocaleString());  
-        }
+        $('#systemBal').val(parseFloat(balance.toFixed(2)).toLocaleString());
+        calcTotals();
     });
+
+    function calcTotals() {
+        let debitBal = 0;
+        let creditBal = 0;
+        $('#tranxTbl tbody tr').each(function() {
+            const debit = $(this).find('.debit').text().replace(/,/g, '')*1;
+            const credit = $(this).find('.credit').text().replace(/,/g, '')*1;
+            if ($(this).find(':checkbox').is(':checked')){
+                debitBal += debit;
+                creditBal += credit;
+            }
+        });
+        $('#debitTtl').val(parseFloat(debitBal.toFixed(2)).toLocaleString());
+        $('#creditTtl').val(parseFloat(creditBal.toFixed(2)).toLocaleString());
+    }
 
     // check all transactions
     $('.checkall').change(function() {
