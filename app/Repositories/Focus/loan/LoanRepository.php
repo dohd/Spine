@@ -4,7 +4,6 @@ namespace App\Repositories\Focus\loan;
 
 use DB;
 use App\Exceptions\GeneralException;
-use App\Models\account\Account;
 use App\Models\items\PaidloanItem;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
@@ -57,6 +56,20 @@ class LoanRepository extends BaseRepository
         if ($result) return $result;
 
         throw new GeneralException(trans('exceptions.backend.customers.create_error'));
+    }
+
+    /**
+     *  Remove resource from storage
+     */
+    public function delete($loan)
+    {
+        DB::beginTransaction();
+
+        Transactions::where(['tr_ref' => $loan->id, 'tr_type' => 'loan'])->delete();
+        $result = $loan->delete();
+
+        DB::commit();
+        if ($result) return true;
     }
 
     /**

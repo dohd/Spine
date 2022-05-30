@@ -112,6 +112,20 @@ class LoansController extends Controller
     }
 
     /**
+     * Remove the specified resource from storage.
+     *
+     * @param App\Models\Loan $loan
+     * @return \App\Http\Responses\RedirectResponse
+     */
+    public function destroy(Loan $loan)
+    {
+        $this->repository->delete($loan);
+        
+        return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan deleted successfully']);
+    }
+
+
+    /**
      * Approve Loan
      */
     public function approve_loan(Loan $loan)
