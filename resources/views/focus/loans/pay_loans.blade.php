@@ -135,7 +135,7 @@
 
                         <div class="row mt-1">                            
                             <div class="col-12"> 
-                                {{ Form::submit('Receive Payment', ['class' => 'btn btn-primary btn-lg float-right']) }}                          
+                                <button type="button" class="btn btn-primary btn-lg float-right" id="payLoan">Make Payment</button>                       
                             </div>
                         </div>
                     {{ Form::close() }}
@@ -148,12 +148,24 @@
 
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
+{{ Html::script(mix('js/dataTable.js')) }}
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     $('.datepicker')
     .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date())
+    .datepicker('setDate', new Date());
+
+    // submit form
+    $('#payLoan').click(function() {
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => $('form').submit());
+    });
 
     // Load lenders
     $('#lender').select2({
