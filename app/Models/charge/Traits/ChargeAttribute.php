@@ -17,8 +17,9 @@ trait ChargeAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("transaction-manage", "biller.charges.show")
-            . ' ' . $this->getEditButtonAttribute("transaction-data", "biller.charges.edit")
-            . ' ' . $this->getDeleteButtonAttribute("transaction-data", "biller.charges.destroy");
+        return 
+        // $this->getViewButtonAttribute("transaction-manage", "biller.charges.show")
+            // . ' ' . $this->getEditButtonAttribute("transaction-data", "biller.charges.edit")
+            $this->getDeleteButtonAttribute("transaction-data", "biller.charges.destroy");
     }
 }

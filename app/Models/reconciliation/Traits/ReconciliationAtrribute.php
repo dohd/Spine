@@ -14,6 +14,7 @@ trait ReconciliationAtrribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.reconciliations.show");
+        return $this->getViewButtonAttribute("project-manage", "biller.reconciliations.show")
+            . ' ' . $this->getDeleteButtonAttribute("project-manage", "biller.reconciliations.destroy");
     }
 }
