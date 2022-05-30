@@ -92,7 +92,7 @@ class WithholdingsController extends Controller
 
         $this->repository->create(compact('data', 'data_items'));
 
-       return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.created')]);
+       return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding certificate created successfully']);
     }
 
     /**
@@ -121,7 +121,7 @@ class WithholdingsController extends Controller
 
         $this->repository->update($withholding, $input);
 
-        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.updated')]);
+        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding certificate updated successfully']);
     }
 
     /**
@@ -135,7 +135,7 @@ class WithholdingsController extends Controller
     {
         $this->repository->delete($withholding);
 
-        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.witholdings.deleted')]);
+        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding certificate deleted successfully']);
     }
 
     /**
