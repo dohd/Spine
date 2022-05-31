@@ -24,7 +24,7 @@ class Pricegroup extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'selling_price_groups';
+    protected $table = 'price_groups';
 
     /**
      * Mass Assignable fields of model
