@@ -1,12 +1,12 @@
 <div class="form-group row">
     <div class="col-6">
-        <label for="client">Client</label>
-        <select name="ref_id" id="client" class="form-control" data-placeholder="Choose client" required></select>
-        <input type="hidden" name="is_client" value="1" id="is_client">
-    </div>
-    <div class="col-6">
-        <label for="supplier">Supplier</label>
-        <select name="ref_id" id="supplier" class="form-control" data-placeholder="Choose supplier" required></select>
+        <label for="pricegroup">Price Group</label>
+        <select name="pricegroup_id" id="pricegroup" class="form-control"required>
+            <option value="">-- Select Price Group --</option>
+            @foreach($pricegroups as $group)
+                <option value="{{ $group->id }}">{{ $group->name }}</option>
+            @endforeach
+        </select>
     </div>
 </div>
 <div class="table-responsive">
@@ -37,6 +37,6 @@
         </button>
     </div>
     <div class="col-12">
-        {{ Form::submit('Submit', ['class' => 'btn btn-primary btn-lg float-right']) }}
+        {{ Form::submit('Save', ['class' => 'btn btn-primary btn-lg float-right']) }}
     </div>
 </div>

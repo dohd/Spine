@@ -22,30 +22,20 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-content">
-                        <div class="card-body">
+                        <div class="card-header">
                             <div class="row">
-                                <div class="col-4">
-                                    <label for="client">Client</label>
-                                    <select name="ref_id" id="client" class="form-control" data-placeholder="Choose client"></select>
-                                </div>
-                                <div class="col-4">
-                                    <label for="supplier">Supplier</label>
-                                    <select name="ref_id" id="supplier" class="form-control" data-placeholder="Choose supplier"></select>
-                                </div>
-                                <div class="col-4">
-                                    <button type="button" class="btn btn-primary" style="margin-top: 2em;" id="load">Load</button>
+                                <div class="col-6">
+                                    <select name="pricegroup_id" id="pricegroup" class="form-control"required>
+                                        <option value="">-- Select Price Group --</option>
+                                        @foreach($pricegroups as $group)
+                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-content">
                         <div class="card-body">
+                            
                             <table id="listTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
@@ -77,56 +67,17 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
-    const select2Config = (url, callback) => ({
-        ajax: {
-            url,
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({ search: term }),
-            processResults: data  => callback(data),
-        }
-    });
-
-    // fetch customers
-    const clientUrl = "{{ route('biller.customers.select') }}";
-    function clientCb(data) {
-        return {
-            results: data.map(v => ({ 
-                id: v.id, 
-                text: `${v.name} - ${v.company}`,
-            }))
-        }
-    };
-    $("#client").select2(select2Config(clientUrl, clientCb));
-
-    // fetch suppliers
-    const suppliertUrl = "{{ route('biller.suppliers.select') }}";
-    function supplierCb(data) {
-        return {
-            results: data.map(v => ({ 
-                id: v.id, 
-                text: v.name + ' - ' + v.email 
-            }))
-        }
-    };
-    $("#supplier").select2(select2Config(suppliertUrl, supplierCb));
-
-    // filter and load
-    $(document).on('change', '#client, #supplier', function() {
-        if ($(this).is('#client')) $('#supplier').attr('disabled', true);
-        if ($(this).is('#supplier')) $('#client').attr('disabled', true);
-    });
-    $('#load').click(function() {
-        const referenceId = $('#client').val() || $('#supplier').val();
-        const isClient = $('#client').val() ? 1 : 0;
+    
+    // on selecting pricegroup
+    $('#pricegroup').change(function() {
+        if (!$(this).val()) return;
         $('#listTbl tbody tr').remove();
         $('#listTbl').DataTable().destroy();   
-        draw_data(referenceId, isClient);
+        draw_data($(this).val());
     });
 
     // dataTable
-    function draw_data(ref_id = 0, is_client = 0) {
+    function draw_data(pricegroup_id = 0) {
         const language = { @lang("datatable.strings") };
         const dataTable = $('#listTbl').dataTable({
             processing: true,
@@ -136,7 +87,7 @@
             ajax: {
                 url: '{{ route("biller.pricelists.get") }}',
                 type: 'post',
-                data: {ref_id, is_client}
+                data: {pricegroup_id}
             },
             columns: [
                 {

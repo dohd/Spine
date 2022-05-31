@@ -391,9 +391,8 @@ class ProductsController extends Controller
         
         $pricegroup = Pricegroup::find($request->pricegroup_id);
         $pricelist = array();
-        if ($pricegroup) 
-            $pricelist = PriceList::where(['ref_id' => $pricegroup->ref_id, 'is_client' => $pricegroup->is_client])->get();
-
+        if ($pricegroup) $pricelist = PriceList::where('pricegroup_id', $pricegroup->id)->get();
+            
         $output = array();
         foreach ($product_variations as $row) {
             $product = [
@@ -413,7 +412,9 @@ class ProductsController extends Controller
                 foreach ($pricelist as $item) {
                     if ($item->product_id == $row->product_id) {
                         $product['name'] = $item->name;
-                        $product['price'] = numberFormat($item->price);
+                        if ($pricegroup->is_client) {
+                            $product['price'] = numberFormat($item->price);
+                        } else $product['purchase_price'] = numberFormat($item->price);
                         $output[] =  $product;
                     }
                 }

@@ -25,7 +25,7 @@ class PriceListRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->where(['ref_id' => request('ref_id'), 'is_client' => request('is_client')])->get();
+        return $this->query()->where('pricegroup_id', request('pricegroup_id'))->get();
     }
 
     /**
@@ -48,7 +48,7 @@ class PriceListRepository extends BaseRepository
             $v['price'] = numberClean($v['price']);
             $item = PriceList::firstOrNew([
                 'product_id' => $v['product_id'],
-                'ref_id' => $v['ref_id'],
+                'pricegroup_id' => $v['pricegroup_id'],
             ]);
             foreach($v as $key => $val) {
                 $item[$key] = $val;

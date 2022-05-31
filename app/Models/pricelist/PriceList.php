@@ -11,7 +11,7 @@ class PriceList extends Model
 {
     use ModelTrait, PriceListRelationship, PriceListAttribute;
 
-    protected $table = 'selling_prices';
+    protected $table = 'price_lists';
 
     /**
      * Mass Assignable fields of model
