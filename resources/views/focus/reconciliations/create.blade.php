@@ -86,12 +86,13 @@
         $.ajax({
             url: "{{ route('biller.reconciliations.last_reconciliation') }}?id=" + $(this).val(),
             success: data => {
-                $('#startDate').attr('disabled', false);
+                $('#systemBal').val('0.00');
                 $('#openBal').attr('readonly', false);
+                $('#startDate').datepicker('setDate', new Date()).attr('disabled', false);
                 if (data.hasOwnProperty('id')) {
-                    $('#startDate').datepicker('setDate', new Date(data.end_date)).attr('disabled', true);
                     $('#systemBal').val(parseFloat(data.system_amount).toLocaleString());
                     $('#openBal').val(parseFloat(data.close_amount).toLocaleString()).attr('readonly', true);
+                    $('#startDate').datepicker('setDate', new Date(data.end_date)).attr('disabled', true);
                 }
             }
         });
