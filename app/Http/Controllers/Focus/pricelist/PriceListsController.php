@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\pricelist;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\pricegroup\Pricegroup;
 use App\Models\pricelist\PriceList;
 use App\Repositories\Focus\pricelist\PriceListRepository;
 use Illuminate\Http\Request;
@@ -33,7 +34,9 @@ class PriceListsController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.pricelists.index');
+        $pricegroups = Pricegroup::all();
+
+        return new ViewResponse('focus.pricelists.index', compact('pricegroups'));
     }
 
     /**
@@ -43,7 +46,9 @@ class PriceListsController extends Controller
      */
     public function create()
     {
-        return new ViewResponse('focus.pricelists.create');
+        $pricegroups = Pricegroup::all();
+
+        return new ViewResponse('focus.pricelists.create', compact('pricegroups'));
     }
 
     /**
@@ -55,7 +60,7 @@ class PriceListsController extends Controller
     public function store(Request $request)
     {
         // extract request input
-        $data = $request->only('ref_id', 'is_client');
+        $data = $request->only('pricegroup_id');
         $data_items = $request->only('product_id', 'name', 'price');
 
         $data['ins'] = auth()->user()->ins;
