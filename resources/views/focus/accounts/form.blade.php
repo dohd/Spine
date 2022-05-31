@@ -33,7 +33,9 @@
         <select name="is_manual_journal" class="form-control" required id="is_manual_journal" required>
             <option value="">-- Select --</option>
             @foreach (['No', 'Yes'] as $k => $val) 
-                <option value="{{ $k }}">{{ $val }}</option>
+                <option value="{{ $k }}" {{ $k == @$account->is_manual_journal ? 'selected' : '' }}>
+                    {{ $val }}
+                </option>
             @endforeach
         </select>
     </div>
@@ -44,7 +46,9 @@
         <select name="is_parent" class="form-control" id="is_parent" required>
             <option value="">-- Select --</option>
             @foreach (['No', 'Yes'] as $k => $val) 
-                <option value="{{ $k }}">{{ $val }}</option>
+                <option value="{{ $k }}" {{ $k == @$account->is_parent ? 'selected' : '' }}>
+                    {{ $val }}
+                </option>
             @endforeach
         </select>       
     </div>
@@ -56,7 +60,7 @@
 <div class="form-group row">
     <div class="col-md-6">        
         {{ Form::label('opening_balance', 'Opening Balance') }}           
-        {{ Form::text('opening_balance', '0.00', ['class' => 'form-control', 'readonly', 'id' => 'openBalance']) }}
+        {{ Form::text('opening_balance', numberFormat(@$account->opening_balance), ['class' => 'form-control', 'readonly', 'id' => 'openBalance']) }}
     </div>
     <div class="col-md-6">
         {{ Form::label('date', 'Date') }}
@@ -77,15 +81,13 @@
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
     });
+
     // initialize datepicker
-    $('.datepicker').datepicker({
-        format: "{{ config('core.user_date_format') }}",
-        autoHide: true
-    }).datepicker('setDate', new Date());
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
     const date = @json(@$account->opening_balance_date);
     if (date) $('#date').datepicker('setDate', new Date(date)); 
         
-
     // on selecting account type
     $('#accType').change(function() {
         const opt = $('#accType option:selected');
@@ -106,11 +108,13 @@
             success: data => $('#account_number').val(data.account_number),            
         });
     });
+
     // on open balance change
     $("#openBalance").change(function() {
         const val = $(this).val().replace(/,/g, '');
         $(this).val((val*1).toLocaleString());
     });
+
     // on account sub-category change
     $('#is_parent').on('change', function() {
         $('#category_id').prop('disabled', true);
