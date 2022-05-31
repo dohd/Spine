@@ -79,11 +79,14 @@ class IssuanceTableController extends Controller
             ->addColumn('actions', function ($quote) {
                 $check_button = '<a href="'. route('biller.issuance.create', 'id='.$quote->id) .'" class="btn btn-success round" data-toggle="tooltip" data-placement="bottom" title="Issue">
                     <i class="fa fa-check"></i></a>';
-
-                if (count($quote->issuance)) {
+                if ($quote->issuance->count()) {
                     $this->issuance->id = $quote->issuance->first()->id;
+                    // if project closed, return view button
+                    if ($quote->closed_by) return $this->issuance->action_buttons;
+                    // return check button and view button
                     return $check_button . $this->issuance->action_buttons;
                 }
+                // no issuance, return check button
                 return $check_button;
             })
             ->make(true);
