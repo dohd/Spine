@@ -89,7 +89,7 @@ class AccountsController extends Controller
             'is_manual_journal'=> 'required',
             'account_type' => 'required',
         ]);
-        // restrict duplicate account receivable and payable
+        // constraint for duplicate accounts of specific account-type e.g receivable and payable
         if (!$request->is_multiple) 
             throw ValidationException::withMessages(['account_type' => 'Duplicate account type is not allowed']);
 

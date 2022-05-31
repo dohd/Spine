@@ -139,6 +139,10 @@ class AccountRepository extends BaseRepository
    */
   public function update($account, array $input)
   {
+    $input['opening_balance'] = numberClean($input['opening_balance']);
+    $input['opening_balance_date'] = date_for_database($input['date']);
+    unset($input['date'], $input['is_multiple']);
+
     if ($account->update($input)) return true;
 
     throw new GeneralException(trans('exceptions.backend.accounts.update_error'));
