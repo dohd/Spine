@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Reconciliation Management')
+@section('title', 'Create | Reconciliation Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -80,9 +80,8 @@
                 data.forEach(v => $('#tranxTbl tbody').append(tranxRow(v)));
             }
         });
-        // set system account and opening balance
+        // set opening balance
         const balance = $(this).children('option:selected').attr('openingBalance')
-        $('#systemBal').val(parseFloat(balance).toLocaleString());
         $('#openBal').val(parseFloat(balance).toLocaleString());
         $.ajax({
             url: "{{ route('biller.reconciliations.last_reconciliation') }}?id=" + $(this).val(),
@@ -98,7 +97,7 @@
         });
     });
 
-    // on checking a checkbox
+    // on checking a checkbox update system account balance
     $('#tranxTbl').on('change', '.check', function() {
         const row = $(this).parents('tr');
         const credit = row.find('.credit').text().replace(/,/g, '')*1;
@@ -117,6 +116,22 @@
         calcTotals();
     });
 
+    // check or uncheck all transactions
+    $('.checkall').change(function() {
+        if ($(this).is(':checked')) {
+            return $('#tranxTbl tbody tr').each(function() {
+                const checkbox = $(this).find(':checkbox');
+                if (!checkbox.is(':checked')) checkbox.prop('checked', true).change();
+            });
+        } 
+        $('#tranxTbl tbody tr').each(function() {
+            $('#tranxTbl tbody tr').each(function() {
+                const checkbox = $(this).find(':checkbox');
+                if (checkbox.is(':checked')) checkbox.prop('checked', false).change();
+            });
+        });
+    });
+
     function calcTotals() {
         let debitBal = 0;
         let creditBal = 0;
@@ -131,11 +146,5 @@
         $('#debitTtl').val(parseFloat(debitBal.toFixed(2)).toLocaleString());
         $('#creditTtl').val(parseFloat(creditBal.toFixed(2)).toLocaleString());
     }
-
-    // check all transactions
-    $('.checkall').change(function() {
-        if ($(this).is(':checked')) $('.check').prop('checked', true).change();
-        else $('.check').prop('checked', false).change();
-    });
 </script>
 @endsection
