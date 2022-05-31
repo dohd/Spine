@@ -106,9 +106,8 @@ class ReconciliationsController extends Controller
     {
         // all transaction types except deposit (opening balance) 
         $transactions = Transaction::where('account_id', request('id'))
-            ->where('reconciliation_id', 0)
-            ->where('tr_type', '!=', 'dep')->get();
-
+            ->where('reconciliation_id', 0)->get();
+            
         return response()->json($transactions);
     }
 
