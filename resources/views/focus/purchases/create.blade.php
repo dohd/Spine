@@ -220,8 +220,8 @@
         const {data} = ui.item;
         const i = stockRowId;
         $('#stockitemid-'+i).val(data.id);
-        const price = parseFloat(data.purchase_price).toLocaleString();
-        $('#price-'+i).val(price).change();
+        const price = data.purchase_price.replace(/,/g, '');
+        $('#price-'+i).val((price*1).toLocaleString()).change();
         $('#stockdescr-'+i).val(data.name);
     }
 
@@ -392,7 +392,7 @@
                     dataType: "json",
                     method: "POST",
                     data: {keyword: request.term, pricegroup_id: $('#pricegroup_id').val()},
-                    success: function(data) {
+                    success: data => {
                         response(data.map(v => ({
                             label: v.name,
                             value: v.name,
