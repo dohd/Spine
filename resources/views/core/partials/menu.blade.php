@@ -435,9 +435,9 @@
                     </li>
                     @endauth
                     @permission('product-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Selling Price Group </a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Price Group Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.pricegroups.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Price Group Management
+                            <li><a class="dropdown-item" href="{{ route('biller.pricegroups.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Price Group 
                                 </a>
                             </li>
                             @permission('product-create')
@@ -449,9 +449,9 @@
                     </li>
                     @endauth
                     @permission('product-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Selling Price List </a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Price List Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.pricelists.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Price List Management
+                            <li><a class="dropdown-item" href="{{ route('biller.pricelists.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Price List 
                                 </a>
                             </li>
                             @permission('product-create')
