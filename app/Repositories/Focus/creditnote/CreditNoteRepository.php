@@ -44,6 +44,7 @@ class CreditNoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         foreach ($input as $key => $val) {
@@ -106,11 +107,11 @@ class CreditNoteRepository extends BaseRepository
         if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
         elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
         elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
-
-        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
+        
         $result = $creditnote->update($input);
 
         /** accounts  */
+        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
         $this->post_transaction($creditnote);        
 
         DB::commit();
@@ -163,8 +164,27 @@ class CreditNoteRepository extends BaseRepository
         ];
 
         $tr_data = array();
-        // credit note
-        if (!$result->is_debit) {
+        // debit note, else credit note
+        if ($result->is_debit) {
+            // debit Receivable Account (Creditors)
+            $tr_category = Transactioncategory::where('code', 'dnote')->first(['id', 'code']);
+            $data = $data + ['trans_category_id' => $tr_category->id, 'tr_type' => $tr_category->code];
+            $tr_data[] = array_replace($data, [
+                'debit' => $result->total,
+                'is_primary' => 1,
+            ]);
+            // credit Revenue Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => Invoice::find($result->invoice_id)->account_id,
+                'credit' => $result->subtotal,
+            ]);
+            // credit tax (VAT)
+            $account = Account::where('system', 'tax')->first(['id']);
+            $tr_data[] = array_replace($data, [
+                'account_id' => $account->id,
+                'credit' => $result->tax,
+            ]);
+        } else {
             // credit Receivable Account (Debtors)
             $tr_category = Transactioncategory::where('code', 'cnote')->first(['id', 'code']);
             $data = $data + ['trans_category_id' => $tr_category->id, 'tr_type' => $tr_category->code];
@@ -183,28 +203,7 @@ class CreditNoteRepository extends BaseRepository
                 'account_id' => $account->id,
                 'debit' => $result->tax,
             ]);
-        }        
-        // debit note,
-        if ($result->is_debit) {
-            // debit Revenue Account
-            $tr_category = Transactioncategory::where('code', 'dnote')->first(['id', 'code']);
-            $data = $data + ['trans_category_id' => $tr_category->id, 'tr_type' => $tr_category->code];
-            $tr_data[] = array_replace($data, [
-                'account_id' => Invoice::find($result->invoice_id)->account_id,
-                'debit' => $result->subtotal,
-                'is_primary' => 1 
-            ]);
-            // credit Receivable Account (Creditors)
-            $tr_data[] = array_replace($data, [
-                'credit' => $result->total,
-            ]);
-            // credit tax (VAT)
-            $account = Account::where('system', 'tax')->first(['id']);
-            $tr_data[] = array_replace($data, [
-                'account_id' => $account->id,
-                'credit' => $result->tax,
-            ]);
-        } 
+        }
         foreach ($tr_data as $i => $tr) {
             if (isset($tr['credit']) && $tr['credit'] > 0) $tr['debit'] = 0;
             if (isset($tr['debit']) && $tr['debit'] > 0) $tr['credit'] = 0;
