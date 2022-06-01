@@ -850,6 +850,18 @@
                         </ul>
                     </li>
                     @endauth
+                    @permission('project-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file-text-o"></i> Contract Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.contracts.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Contracts
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.contracts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Contract
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endauth
                 </ul>
             </li>
             @endif

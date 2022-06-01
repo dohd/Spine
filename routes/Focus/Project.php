@@ -24,6 +24,12 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::delete('projects/budget_delete_skillset/{id}', 'ProjectsController@delete_budget_skillset')->name('projects.delete_budget_skillset');
 });
 
+Route::group(['namespace' => 'contract'], function () {
+  Route::resource('contracts', 'ContractsController');
+  //For Datatable
+  Route::post('contracts/get', 'ContractsTableController')->name('contracts.get');
+});
+
 Route::group(['namespace' => 'project'], function () {
   Route::resource('projects', 'ProjectsController');
   Route::post('projects/search', 'ProjectsController@search')->name('projects.search');
