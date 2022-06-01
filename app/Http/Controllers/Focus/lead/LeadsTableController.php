@@ -55,17 +55,16 @@ class LeadsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('reference', function ($lead) {
-                return 'Tkt-'.sprintf('%04d', $lead->reference);
+                return gen4tid('Tkt-', $lead->reference);
             })
             ->addColumn('client_name', function ($lead) {
                 $customer = isset($lead->customer) ?  $lead->customer->company : '';
                 $branch = isset($lead->branch) ? $lead->branch->name : '';
                 if ($customer && $branch) return $customer . ' - ' .$branch;
-               
                 return $lead->client_name;
             })
             ->addColumn('created_at', function ($lead) {
-                return dateFormat($lead->created_at);
+                return $lead->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
