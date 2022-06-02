@@ -225,8 +225,10 @@ class InvoicesController extends Controller
         })->with(['accountType' => function ($query) {
             $query->select('id', 'name');
         }])->get();
+        // invoice type
+        $terms = Term::where('type', 1)->get();
 
-        return new ViewResponse('focus.invoices.edit_project_invoice', compact('invoice', 'banks', 'accounts'));
+        return new ViewResponse('focus.invoices.edit_project_invoice', compact('invoice', 'banks', 'accounts', 'terms'));
     }
 
     /**
