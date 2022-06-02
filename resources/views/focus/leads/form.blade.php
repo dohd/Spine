@@ -155,9 +155,12 @@
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 
 <script type="text/javascript">
-    // instatiate html-editor
-    editor();
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
+    // Initialize datepicker
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})    
+    $('#date_of_request').datepicker('setDate', new Date());
+    
     // On selecting client type radio
     $('.clientstatus').change(function() {
         if ($(this).val() === 'new') {
@@ -177,13 +180,6 @@
             $('#client_address').attr('readonly', true).val('');
         }
     });
-
-    // Initialize datepicker
-    $('.datepicker').datepicker({ format: "{{config('core.user_date_format')}}"})    
-    $('#date_of_request').datepicker('setDate', new Date());
-
-    // set ajax headers
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
     /**
      * Edit Lead form script
@@ -249,13 +245,8 @@
             ajax: {
                 url: "{{ route('biller.branches.branch_load') }}",
                 quietMillis: 50,
-                data: function(params) { 
-                    return {
-                        search: params.term, 
-                        customer_id: $("#person").val()
-                    }
-                },
-                processResults: function(data) {
+                data: ({term}) => ({search: term, customer_id: $("#person").val()}),                                
+                processResults: (data) => {
                     return { results: data.map(v => ({ text: v.name, id: v.id })) };
                 },
             }
