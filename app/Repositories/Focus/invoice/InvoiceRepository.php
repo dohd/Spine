@@ -452,7 +452,7 @@ class InvoiceRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        foreach ($invoice->invoice_items as $item) {
+        foreach ($invoice->products as $item) {
             $item->quote->update(['invoiced' => 'No']);
         }
         $invoice->transactions()->delete();
