@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\contract;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
+use App\Models\equipment\Equipment;
 use Illuminate\Http\Request;
 
 class ContractsController extends Controller
@@ -84,5 +85,40 @@ class ContractsController extends Controller
         //
     }
 
-    
+    /**
+     * Customer equipments
+     */
+    public function customer_equipment()
+    {
+        $equipments = Equipment::where('customer_id', request('id'))->with(['branch' => function($q) {
+            $q->get(['id', 'name']);
+        }])->limit(10)->get()->toArray();
+        // filter columns
+        foreach ($equipments as $i => $item) {
+            $val = [];
+            foreach ($item as $k => $v) {
+                if (in_array($k, ['id', 'unique_id', 'branch', 'location', 'make_type'], 1))
+                $val[$k] = $v;
+            }
+            $equipments[$i] = $val;
+        }
+
+        return response()->json($equipments);
+    }
+
+    /**
+     * Task Schedules
+     */
+    public function task_schedule_index()
+    {
+        return new ViewResponse('focus.contracts.task_schedule_index');
+    }
+
+    /**
+     * Load Task Schedule Machines
+     */
+    public function create_schedule_equipment()
+    {
+        return new ViewResponse('focus.contracts.create_schedule_equipment');
+    }
 }

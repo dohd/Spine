@@ -25,6 +25,9 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
 });
 
 Route::group(['namespace' => 'contract'], function () {
+  Route::post('contracts/customer_equipment', 'ContractsController@customer_equipment')->name('contracts.customer_equipment');
+  Route::get('contracts/create_schedule_equipment', 'ContractsController@create_schedule_equipment')->name('contracts.create_schedule_equipment');
+  Route::get('contracts/task_schedule_index', 'ContractsController@task_schedule_index')->name('contracts.task_schedule_index');
   Route::resource('contracts', 'ContractsController');
   //For Datatable
   Route::post('contracts/get', 'ContractsTableController')->name('contracts.get');
