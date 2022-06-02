@@ -89,12 +89,6 @@
                             {{ $row->holder }}
                         </option>
                     </optgroup>
-                @else
-                    <optgroup label="{{ $row->accountType->name }}">
-                        <option value="{{ $row->id }}" {{ $row->id == @$invoice->account_id ? 'selected' : '' }}>
-                            {{ $row->holder }}
-                        </option>
-                    </optgroup>
                 @endif
             @endforeach                                        
         </select>
@@ -172,8 +166,8 @@
                     <input type="hidden" name="project_id[]" value="{{ $project_id }}" id="projectid-{{ $k }}">
                 </tr>
             @endforeach
-        @else
-            @foreach ($invoice->invoice_items as $k => $item)
+        @else        
+            @foreach ($invoice->products as $k => $item)
                 <tr>
                     <td>{{ $k+1 }}</td>                                            
                     <td><textarea class="form-control" name="reference[]" id="reference-{{ $k }}" rows="5">{{ $item->reference }}</textarea></td>
