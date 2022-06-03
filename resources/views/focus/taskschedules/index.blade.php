@@ -10,7 +10,7 @@
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.contracts.partials.task-schedule-header-buttons')
+                @include('focus.taskschedules.partials.taskschedule-header-buttons')
             </div>
         </div>
     </div>
@@ -21,7 +21,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="contractTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="scheduleTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -50,10 +50,56 @@
 @endsection
 
 @section('after-scripts')
+{{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+$.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
-
+    function draw_data() {
+        const language = { @lang("datatable.strings") };
+        const dataTable = $('#scheduleTbl').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            language,
+            ajax: {
+                url: '{{ route("biller.taskschedules.get") }}',
+                type: 'POST',
+            },
+            columns: [
+                {
+                    data: 'DT_Row_Index',
+                    name: 'id'
+                },
+                {
+                    data: 'contract_tid',
+                    name: 'contract_tid'
+                },
+                {
+                    data: 'title',
+                    name: 'title'
+                },
+                {
+                    data: 'start_date',
+                    name: 'start_date'
+                },
+                {
+                    data: 'end_date',
+                    name: 'end_date'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    searchable: false,
+                    sortable: false
+                }
+            ],
+            order: [[0, "desc"]],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons:  [ 'csv', 'excel', 'print'],
+        });
+    }        
 </script>
 @endsection

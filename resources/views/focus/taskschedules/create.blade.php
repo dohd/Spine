@@ -10,7 +10,7 @@
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.contracts.partials.task-schedule-header-buttons')
+                @include('focus.taskschedules.partials.taskschedule-header-buttons')
             </div>
         </div>
     </div>
@@ -21,7 +21,9 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <!--  -->
+                            {{ Form::open(['route' => 'biller.taskschedules.store']) }}
+                                @include('focus.taskschedules.form')
+                            {{ Form::close() }}
                         </div>
                     </div>
                 </div>

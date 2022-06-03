@@ -859,7 +859,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.contracts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Contract
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.contracts.task_schedule_index') }}" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Manage Task Schedules
+                            <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Manage Task Schedules
                                 </a>
                             </li>
                         </ul>
