@@ -28,7 +28,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Contract No</th>
-                                        <th>Name</th>
+                                        <th>Title</th>
                                         <th>Customer</th>
                                         <th>Amount</th>
                                         <th>Start Date</th>
@@ -54,10 +54,64 @@
 @endsection
 
 @section('after-scripts')
+{{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
-
+    function draw_data() {
+        const language = { @lang("datatable.strings") };
+        const dataTable = $('#contractTbl').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            language,
+            ajax: {
+                url: '{{ route("biller.contracts.get") }}',
+                type: 'POST',
+            },
+            columns: [
+                {
+                    data: 'DT_Row_Index',
+                    name: 'id'
+                },
+                {
+                    data: 'tid',
+                    name: 'tid'
+                },
+                {
+                    data: 'title',
+                    name: 'title'
+                },
+                {
+                    data: 'customer',
+                    name: 'customer'
+                },
+                {
+                    data: 'amount',
+                    name: 'amount'
+                },
+                {
+                    data: 'start_date',
+                    name: 'start_date'
+                },
+                {
+                    data: 'end_date',
+                    name: 'end_date'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    searchable: false,
+                    sortable: false
+                }
+            ],
+            order: [[0, "desc"]],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons:  [ 'csv', 'excel', 'print'],
+        });
+    }    
 </script>
 @endsection

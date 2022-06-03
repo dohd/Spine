@@ -3,12 +3,30 @@
 namespace App\Http\Controllers\Focus\contract;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\contract\Contract;
 use App\Models\equipment\Equipment;
+use App\Repositories\Focus\contract\ContractRepository;
 use Illuminate\Http\Request;
 
 class ContractsController extends Controller
 {
+    /**
+     * variable to store the repository object
+     * @var ContractRepository
+     */
+    protected $repository;
+
+    /**
+     * contructor to initialize repository object
+     * @param ContractRepository $repository ;
+     */
+    public function __construct(ContractRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -26,7 +44,9 @@ class ContractsController extends Controller
      */
     public function create()
     {
-        return new ViewResponse('focus.contracts.create');
+        $last_tid = Contract::max('tid');
+
+        return new ViewResponse('focus.contracts.create', compact('last_tid'));
     }
 
     /**
@@ -37,7 +57,21 @@ class ContractsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // extract input fields
+        $contract_data = $request->only([
+            'tid', 'customer_id', 'title', 'start_date', 'end_date', 'amount', 'period', 'schedule_period', 'note'
+        ]);
+        $schedule_data = $request->only('s_title', 's_start_date', 's_end_date');
+        $equipment_data = $request->only('equipment_id');
+
+        $contract_data['ins'] = auth()->user()->ins;
+        $contract_data['user_id'] = auth()->user()->id;
+        $schedule_data = modify_array($schedule_data);
+        $equipment_data = modify_array($equipment_data);
+
+        $this->repository->create(compact('contract_data', 'schedule_data', 'equipment_data'));
+
+        return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract created successfully']);
     }
 
     /**
@@ -86,6 +120,17 @@ class ContractsController extends Controller
     }
 
     /**
+     * Contract task schedules
+     */
+    public function task_schedules()
+    {
+        $contract = Contract::find(request('id'));
+        $schedules = $contract ? $contract->task_schedules : array();
+
+        return response()->json($schedules);
+    }
+
+    /**
      * Customer equipments
      */
     public function customer_equipment()
@@ -107,18 +152,29 @@ class ContractsController extends Controller
     }
 
     /**
-     * Task Schedules
+     * Contract equipments
      */
-    public function task_schedule_index()
+    public function contract_equipment()
     {
-        return new ViewResponse('focus.contracts.task_schedule_index');
-    }
+        $equipments = Equipment::whereIn('id', function ($q) {
+            $q->select('equipment_id')->from('contract_equipments')->where([
+                'contract_id' => request('id'), 
+                'schedule_id' => 0
+            ]);
+        })
+        ->with(['branch' => function($q) {
+            $q->get(['id', 'name']);
+        }])->limit(10)->get()->toArray();
+        // filter columns
+        foreach ($equipments as $i => $item) {
+            $val = [];
+            foreach ($item as $k => $v) {
+                if (in_array($k, ['id', 'unique_id', 'branch', 'location', 'make_type'], 1))
+                $val[$k] = $v;
+            }
+            $equipments[$i] = $val;
+        }
 
-    /**
-     * Load Task Schedule Machines
-     */
-    public function create_schedule_equipment()
-    {
-        return new ViewResponse('focus.contracts.create_schedule_equipment');
-    }
+        return response()->json($equipments);
+    }    
 }

@@ -55,7 +55,7 @@ class ContractsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($contract) {
-                return gen4tid('', $contract->tid);
+                return $contract->tid;
             })
             ->addColumn('customer', function ($contract) {        
                 if ($contract->customer) 

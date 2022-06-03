@@ -39,7 +39,7 @@
 <div class="form-group row">
     <div class="col-6">
         <label for="description">Description</label>
-        {{ Form::textarea('description', null, ['class' => 'form-control', 'rows' => '3', 'required']) }}
+        {{ Form::textarea('note', null, ['class' => 'form-control', 'rows' => '3', 'required']) }}
     </div>
 </div>
 
@@ -80,7 +80,7 @@
     </div>    
 </div>
 
-<legend>Contract Equipments</legend><hr>
+<legend>Equipments</legend><hr>
 <div class="table-responsive mb-1">
     <table id="equipmentTbl" class="table">
         <thead>
@@ -103,7 +103,7 @@
                         <i class="fa fa-trash fa-lg text-danger"></i>
                     </button>
                 </td>
-                <input type="hidden" name="id[]" value="#id">
+                <input type="hidden" name="equipment_id[]" value="#id">
             </tr>
         </tbody>
     </table>
@@ -134,7 +134,7 @@
         const equipments = $('#equipmentTbl tbody tr').length;
         if (schedules < 1 || equipments < 1) {
             e.preventDefault();
-            alert('Include at least one schedule task or machine!');
+            alert('Include at least one schedule task or equipment!');
         }
     });
 
@@ -199,7 +199,6 @@
             type: 'POST',
             data: {id: $(this).val()},
             success: data => {
-                // console.log(data);
                 $('#equipmentTbl tbody tr').remove();
                 data.forEach(obj => {
                     let html = equipRow.replace('d-none', '');
@@ -215,11 +214,11 @@
         })
     });
     
-    // add schedule row
+    // add equipmentTbl row
     $('#addEquipment').click(function() {
         $('#equipmentTbl tbody').append('<tr>' + scheduleRow + '</tr>');
     });
-    // remove schedule row
+    // remove equipmentTbl row
     $('#equipmentTbl').on('click', '.remove', function() {
         $(this).parents('tr').remove();
     });

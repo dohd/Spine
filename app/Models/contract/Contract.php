@@ -2,11 +2,16 @@
 
 namespace App\Models\contract;
 
+use App\Models\contract\Traits\ContractAttribute;
+use App\Models\contract\Traits\ContractRelationship;
+use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Contract extends Model
 {
-    use ModelTrait;
+    use ModelTrait, ContractAttribute, ContractRelationship;
+
+    // public $autoincrement = false;
 
     /**
      * The database table used by the model.
@@ -19,7 +24,7 @@ class Contract extends Model
      * @var array
      */
     protected $fillable = [];
-
+        
     /**
      * Default values for model fields
      * @var array
