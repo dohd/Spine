@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
+use App\Models\equipment\Equipment;
+use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\taskschedule\TaskScheduleRepository;
 use Illuminate\Http\Request;
 
@@ -74,9 +76,18 @@ class TaskSchedulesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(TaskSchedule $taskschedule)
     {
-        //
+        $schedule_id = $taskschedule->id;
+        $equipments = Equipment::whereIn('id', function ($q) use($schedule_id) {
+            $q->select('equipment_id')->from('contract_equipments')->where([
+                'schedule_id' => $schedule_id
+            ]);
+        })->with(['branch' => function($q) {
+            $q->get(['id', 'name']);
+        }])->limit(10)->get();
+        
+        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'equipments'));
     }
 
     /**

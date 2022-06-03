@@ -3,13 +3,13 @@
 namespace App\Models\task_schedule;
 
 use App\Models\ModelTrait;
-use App\Models\project\Traits\TaskRelationship;
 use App\Models\task_schedule\Traits\TaskScheduleAttribute;
+use App\Models\task_schedule\Traits\TaskScheduleRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class TaskSchedule extends Model
 {
-    use ModelTrait, TaskScheduleAttribute, TaskRelationship;
+    use ModelTrait, TaskScheduleAttribute, TaskScheduleRelationship;
     /**
      * The database table used by the model.
      * @var string

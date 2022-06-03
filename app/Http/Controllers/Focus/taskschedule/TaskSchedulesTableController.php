@@ -54,8 +54,8 @@ class TaskSchedulesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('contract_tid', function ($schedule) {        
-                if ($schedule->schedule)
-                return $schedule->schedule->title;
+                if ($schedule->contract)
+                return $schedule->contract->tid . ' - ' . $schedule->contract->title;
             })
             ->addColumn('schedule', function ($schedule) {
                 return $schedule->title;
