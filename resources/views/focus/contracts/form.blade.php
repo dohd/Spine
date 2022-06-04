@@ -1,4 +1,4 @@
-<legend>Contract Properties</legend>
+<legend>Contract Details</legend>
 <hr>
 <div class="form-group row">
     <div class="col-2">
@@ -80,7 +80,7 @@
     </div>    
 </div>
 
-<legend>Equipments</legend><hr>
+<legend>Customer Equipments</legend><hr>
 <div class="table-responsive mb-1">
     <table id="equipmentTbl" class="table">
         <thead>
@@ -115,7 +115,7 @@
         </button>
     </div>
     <div class="col-11">
-        {{ Form::submit('Generate', ['class' => 'btn btn-primary float-right btn-lg']) }}
+        {{ Form::submit('Create', ['class' => 'btn btn-primary float-right btn-lg']) }}
     </div>
 </div>
 
@@ -125,8 +125,12 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
-    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})    
-    .datepicker('setDate', new Date());
+    function renderDatepicker() {
+        return $('.datepicker')
+            .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})    
+            .datepicker('setDate', new Date());
+    }
+    renderDatepicker();
 
     // form submit
     $('form').submit(function(e) {
@@ -157,7 +161,7 @@
         }
     });    
 
-    // auto generate schedules
+    // auto generate default schedules
     let rowId = 0;
     const scheduleRow = $('#scheduleTbl tbody tr').html();
     $('form').on('change', '#periodYr, #periodMn', function() {
@@ -171,8 +175,7 @@
             rowId++;
             let html = scheduleRow.replace(/-0/g, '-'+rowId);
             $('#scheduleTbl tbody').append('<tr>' + html + '</tr>');
-            $('#startdate-'+rowId).datepicker('setDate', new Date());
-            $('#enddate-'+rowId).datepicker('setDate', new Date());
+            renderDatepicker();
         });
     });
     $('#periodYr').change();
@@ -181,8 +184,7 @@
         rowId++;
         let html = scheduleRow.replace(/-0/g, '-'+rowId);
         $('#scheduleTbl tbody').append('<tr>' + html + '</tr>');
-        $('#startdate-'+rowId).datepicker('setDate', new Date());
-        $('#enddate-'+rowId).datepicker('setDate', new Date());
+        renderDatepicker();
     });
     // remove schedule row
     $('#scheduleTbl').on('click', '.remove', function() {
@@ -190,7 +192,7 @@
         rowId--;
     });
 
-    // load machines on customer select
+    // on customer select load equipments
     const equipRow =  $('#equipmentTbl tbody tr').html();
     const elements = ['#id', '#unique_id', '#make_type', '#branch', '#location'];
     $('#customer').change(function() {
