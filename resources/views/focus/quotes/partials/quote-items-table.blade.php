@@ -3,7 +3,7 @@
         <tr class="item_header bg-gradient-directional-blue white">
                 <th width="7%" class="text-center">Numbering</th>
                 <th width="20%" class="text-center">{{ trans('general.item_name') }}</th>
-                <th width="7%" class="text-center">UOM</th>
+                <th width="7%" class="text-center">UoM</th>
                 <th width="7%" class="text-center">Est. Qty</th>
                 <th width="10%" class="text-center">Est. Buy Price</th>
                 <th width="7%" class="text-center">Qty</th>
@@ -79,6 +79,7 @@
         @if (isset($quote))
             @foreach ($quote->products as $k => $item)
                 @if ($item->a_type == 1)
+                    <!-- product -->
                     <tr>
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-p{{$k}}" required></td>
                         <td>
@@ -109,6 +110,7 @@
                         <input type="hidden" name="id[]" value="{{ $item->id }}">
                     </tr>
                 @else
+                    <!-- group title  -->
                     <tr>
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-t{{$k}}" required></td>
                         <td colspan="8">
