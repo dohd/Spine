@@ -862,6 +862,9 @@
                             <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Manage Task Schedules
                                 </a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Manage Contract Services
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endauth

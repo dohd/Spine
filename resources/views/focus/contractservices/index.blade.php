@@ -1,16 +1,16 @@
 @extends('core.layouts.app')
 
-@section('title', 'Task Schedule Management')
+@section('title', 'Contract Service Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Task Schedule Management</h4>
+            <h4 class="content-header-title">Contract Service Management</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.taskschedules.partials.taskschedule-header-buttons')
+                @include('focus.contractservices.partials.contractservices-header-buttons')
             </div>
         </div>
     </div>
@@ -21,14 +21,15 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="scheduleTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="serviceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Contract</th>
-                                        <th>Title</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
+                                        <th>Jobcard</th>
+                                        <th>Note</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -50,7 +51,7 @@
 @endsection
 
 @section('after-scripts')
-{{ Html::script(mix('js/dataTable.js')) }}
+{{-- Html::script(mix('js/dataTable.js')) --}}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
 $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
@@ -58,7 +59,7 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
     function draw_data() {
         const language = { @lang("datatable.strings") };
-        const dataTable = $('#scheduleTbl').dataTable({
+        const dataTable = $('#serviceTbl').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
@@ -73,20 +74,24 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     name: 'id'
                 },
                 {
-                    data: 'contract_tid',
-                    name: 'contract_tid'
+                    data: 'contract',
+                    name: 'contract'
                 },
                 {
-                    data: 'title',
-                    name: 'title'
+                    data: 'jobcard',
+                    name: 'jobcard'
                 },
                 {
-                    data: 'start_date',
-                    name: 'start_date'
+                    data: 'note',
+                    name: 'note'
                 },
                 {
-                    data: 'end_date',
-                    name: 'end_date'
+                    data: 'amount',
+                    name: 'amount'
+                },
+                {
+                    data: 'date',
+                    name: 'date'
                 },
                 {
                     data: 'actions',

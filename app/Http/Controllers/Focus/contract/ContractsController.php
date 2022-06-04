@@ -120,6 +120,16 @@ class ContractsController extends Controller
     }
 
     /**
+     * Customer Contracts
+     */
+    public function customer_contracts()
+    {
+        $contracts = Contract::where('customer_id', request('id'))->get(['id', 'title', 'customer_id']);
+
+        return response()->json($contracts);
+    }
+
+    /**
      * Contract task schedules
      */
     public function task_schedules()

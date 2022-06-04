@@ -1,21 +1,17 @@
 <?php
 
-namespace App\Models\contract;
+namespace App\Models\contractservice;
 
-use App\Models\contract\Traits\ContractAttribute;
-use App\Models\contract\Traits\ContractRelationship;
-use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Contract extends Model
+class ContractService extends Model
 {
-    use ModelTrait, ContractAttribute, ContractRelationship;
 
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'contracts';
+    protected $table = 'contract_services';
 
     /**
      * Mass Assignable fields of model
@@ -60,5 +56,5 @@ class Contract extends Model
         static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
         });
-    }
+    }    
 }
