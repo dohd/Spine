@@ -15,7 +15,7 @@ trait ContractRelationship
 
     public function contract_equipments()
     {
-        return $this->hasMany(ContractEquipment::class);
+        return $this->hasMany(ContractEquipment::class)->where('schedule_id', 0);
     }
 
     public function customer()
