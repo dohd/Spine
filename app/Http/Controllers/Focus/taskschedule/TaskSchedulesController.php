@@ -58,7 +58,6 @@ class TaskSchedulesController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         // extract request input
         $data = $request->only('contract_id', 'schedule_id');
         $data_items = $request->only('equipment_id');
@@ -96,9 +95,9 @@ class TaskSchedulesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(TaskSchedule $taskschedule)
     {
-        //
+        return new ViewResponse('focus.taskschedules.edit', compact('taskschedule'));        
     }
 
     /**
@@ -108,9 +107,16 @@ class TaskSchedulesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, TaskSchedule $taskschedule)
     {
-        //
+        $data = $request->only('title', 'start_date', 'end_date');
+        $data_items = $request->only('id');
+
+        $data_items = modify_array($data_items);
+
+        $this->repository->update($taskschedule, compact('data', 'data_items'));
+
+        return new RedirectResponse(route('biller.taskschedules.index'), ['flash_success' => 'Task Schedule updated successfully']);        
     }
 
     /**
@@ -119,8 +125,13 @@ class TaskSchedulesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(TaskSchedule $taskSchedule)
     {
-        //
+        $result = $this->repository->delete($taskSchedule);
+
+        $msg = ['flash_success' => 'Task Schedule deleted successfully'];
+        if (!$result) $msg = ['flash_error' => 'Task Schedule has loaded equipments!'];
+
+        return new RedirectResponse(route('biller.taskschedules.index'), $msg);
     }
 }
