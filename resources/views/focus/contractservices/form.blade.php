@@ -103,11 +103,15 @@
                 },
             }
         });
+
+    });
+
+    $('#branch').change(function() {
         // fetch contracts
         $.ajax({
             url: "{{ route('biller.contracts.customer_contracts') }}",
             type: 'POST',
-            data: {id: customer_id},
+            data: {id: $('#customer').val(), branch_id: $(this).val()},
             success: data => {
                 console.log(data);
                 $('#contract option').remove();
@@ -117,7 +121,6 @@
                 })
             }
         });
-
     });
   
 
