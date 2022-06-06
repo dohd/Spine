@@ -88,8 +88,63 @@ class ContractRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Contract $contract, array $data)
+    public function update($contract, array $input)
     {
+        // dd($input);
+        DB::beginTransaction();
+
+        $c_data = $input['contract_data'];
+        foreach ($c_data as $k => $val) {
+            if (in_array($k, ['amount', 'start_date', 'end_date'])) {
+                if ($k == 'amount') $c_data[$k] = numberClean($val);
+                else $c_data[$k] = date_for_database($val);
+            }
+        }
+        $result = $contract->update($c_data);
+
+        $s_data = $input['schedule_data'];        
+        // delete omitted items
+        $s_ids = array_map(function ($v) { return $v['s_id']; }, $s_data);
+        $contract->task_schedules()->whereNotIn('id', $s_ids)->where('status', 'pending')->delete();
+        // create or update item
+        foreach ($s_data as $v) {
+            $v = [
+                'contract_id' => $contract->id,
+                'id' => $v['s_id'],
+                'title' => $v['s_title'],
+                'start_date' => date_for_database($v['s_start_date']),
+                'end_date' => date_for_database($v['s_end_date'])
+            ];
+            $item = TaskSchedule::firstOrNew(['id' => $v['id']]);
+            foreach ($v as $key => $val) {
+                $item[$key] = $val;
+            }
+            if (!$item->id) unset($item->id);
+            $item->save();
+        }
+
+        $eq_data = $input['equipment_data'];
+        // delete omitted items
+        $eq_ids = array_map(function ($v) { return $v['contracteq_id']; }, $eq_data);
+        $contract->contract_equipments()->whereNotIn('id', $eq_ids)->delete();
+        // create or update item
+        foreach ($eq_data as $v) {
+            $v = [
+                'contract_id' => $contract->id, 
+                'id' => $v['contracteq_id'],
+                'equipment_id' => $v['equipment_id']
+            ];
+            $item = ContractEquipment::firstOrNew(['id' => $v['id']]);
+            foreach ($v as $key => $val) {
+                $item[$key] = $val;
+            }
+            if (!$item->id) unset($item->id);
+            $item->save();
+        }
+
+        DB::commit();
+        if ($result) return $result;
+
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
