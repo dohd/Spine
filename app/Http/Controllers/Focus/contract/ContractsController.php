@@ -91,9 +91,9 @@ class ContractsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Contract $contract)
     {
-        //
+        return new ViewResponse('focus.contracts.edit', compact('contract'));
     }
 
     /**
@@ -103,9 +103,23 @@ class ContractsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Contract $contract)
     {
-        //
+        // extract input fields
+        $contract_data = $request->only([
+            'tid', 'customer_id', 'title', 'start_date', 'end_date', 'amount', 'period', 'schedule_period', 'note'
+        ]);
+        $schedule_data = $request->only('s_id', 's_title', 's_start_date', 's_end_date');
+        $equipment_data = $request->only('contracteq_id', 'equipment_id');
+
+        $contract_data['ins'] = auth()->user()->ins;
+        $contract_data['user_id'] = auth()->user()->id;
+        $schedule_data = modify_array($schedule_data);
+        $equipment_data = modify_array($equipment_data);
+
+        $this->repository->update($contract, compact('contract_data', 'schedule_data', 'equipment_data'));
+
+        return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract edited successfully']);
     }
 
     /**
