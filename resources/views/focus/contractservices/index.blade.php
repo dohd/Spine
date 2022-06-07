@@ -26,10 +26,9 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Contract</th>
-                                        <th>Jobcard</th>
+                                        <th>Task Schedule</th>
                                         <th>Note</th>
-                                        <th>Amount</th>
-                                        <th>Date</th>
+                                        <th>Amount</th>                                        
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -51,7 +50,7 @@
 @endsection
 
 @section('after-scripts')
-{{-- Html::script(mix('js/dataTable.js')) --}}
+{{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
 $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
@@ -65,7 +64,7 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
             responsive: true,
             language,
             ajax: {
-                url: '{{ route("biller.taskschedules.get") }}',
+                url: '{{ route("biller.contractservices.get") }}',
                 type: 'POST',
             },
             columns: [
@@ -78,8 +77,8 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     name: 'contract'
                 },
                 {
-                    data: 'jobcard',
-                    name: 'jobcard'
+                    data: 'schedule',
+                    name: 'schedule'
                 },
                 {
                     data: 'note',
@@ -88,10 +87,6 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                 {
                     data: 'amount',
                     name: 'amount'
-                },
-                {
-                    data: 'date',
-                    name: 'date'
                 },
                 {
                     data: 'actions',
