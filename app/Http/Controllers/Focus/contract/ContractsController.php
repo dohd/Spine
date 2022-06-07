@@ -185,16 +185,16 @@ class ContractsController extends Controller
                 'contract_id' => request('id'), 
                 'schedule_id' => 0
             ]);
-        })
-        ->with(['branch' => function($q) {
+        })->with(['branch' => function($q) {
             $q->get(['id', 'name']);
         }])->limit(10)->get()->toArray();
+        
         // filter columns
+        $cols = ['id', 'unique_id', 'branch', 'location', 'make_type', 'service_rate'];
         foreach ($equipments as $i => $item) {
             $val = [];
             foreach ($item as $k => $v) {
-                if (in_array($k, ['id', 'unique_id', 'branch', 'location', 'make_type'], 1))
-                $val[$k] = $v;
+                if (in_array($k, $cols, 1)) $val[$k] = $v;
             }
             $equipments[$i] = $val;
         }
