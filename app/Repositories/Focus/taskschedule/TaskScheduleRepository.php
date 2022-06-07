@@ -5,6 +5,8 @@ namespace App\Repositories\Focus\taskschedule;
 use App\Exceptions\GeneralException;
 use App\Models\contract\Contract;
 use App\Models\contract_equipment\ContractEquipment;
+use App\Models\contractservice\ContractService;
+use App\Models\items\ServiceItem;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\BaseRepository;
 use DB;
@@ -43,6 +45,7 @@ class TaskScheduleRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
+        // existing equipments id
         $eq_ids = ContractEquipment::where([
             'contract_id' => $data['contract_id'], 
             'schedule_id' => $data['schedule_id']
@@ -51,16 +54,33 @@ class TaskScheduleRepository extends BaseRepository
         // load unique equipments
         $data_items = array();
         foreach ($input['data_items'] as $item) {
-            $item = $data + $item;
-            if (!in_array($item['equipment_id'], $eq_ids)) 
-                $data_items[] = $item;
+            $item = $data + ['equipment_id' => $item['equipment_id']];
+            if (!in_array($item['equipment_id'], $eq_ids)) $data_items[] = $item;
         }
         $result = ContractEquipment::insert($data_items);
 
-        // update schedule status to loaded
         $schedule = TaskSchedule::find($data['schedule_id']);
+        // update schedule status to loaded
         if ($schedule->status == 'pending') $schedule->update(['status' => 'loaded']);
-        
+        // generate service
+        $service_amount = array_reduce($input['data_items'], function($init, $item) {
+            return $init + floatval($item['service_rate']);
+        }, 0);
+        $service_data = $data + [
+            'note' => $schedule->title . ' - ' . $schedule->contract->title,
+            'amount' => $service_amount,
+            'ins' => auth()->user()->ins,
+            'user_id' => auth()->user()->id
+        ];
+        $service = ContractService::create($service_data);
+
+        // generate serviced equipments
+        $service_id = $service->id;
+        $items_data = array_map(function ($v) use($service_id) {
+            return ['service_id' => $service_id] + $v;
+        }, $input['data_items']);
+        ServiceItem::insert($items_data);
+
         DB::commit();
         if ($result) return $result;
 
