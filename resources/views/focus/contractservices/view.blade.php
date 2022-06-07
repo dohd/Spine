@@ -28,7 +28,7 @@
                                     $details = [
                                         'Contract' => $contractservice->contract->title,
                                         'Task Schedule' => $contractservice->task_schedule->title,
-                                        'Note' => $contractservice->note,
+                                        'Service Name' => $contractservice->name,
                                         'Amount' => numberFormat($contractservice->amount),
                                     ];
                                 @endphp
@@ -53,6 +53,7 @@
                                             <th>Last Service Date</th>
                                             <th>Next Service Date</th>
                                             <th>Status</th>
+                                            <th>Note</th>
                                         </tr>
                                     </thead>
                                     <tbody>                                            
@@ -68,6 +69,7 @@
                                                 <td>{{ $row->last_service_date?  dateFormat($row->last_service_date) : '' }}</td>
                                                 <td>{{ $row->next_service_date?  dateFormat($row->next_service_date) : '' }}</td>
                                                 <td>{{ $row->status }}</td>
+                                                <td>{{ $row->note }}</td>
                                             </tr>                                                        
                                         @endforeach                                                    
                                     </tbody>

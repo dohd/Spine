@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
 use App\Models\contractservice\ContractService;
+use App\Models\task_schedule\TaskSchedule;
 use Illuminate\Http\Request;
 
 class ContractServicesController extends Controller
@@ -95,8 +96,8 @@ class ContractServicesController extends Controller
     {
         $q = request('term');
 
-        $services = ContractService::where('note', 'LIKE', '%'. $q .'%')->limit(10)
-            ->get(['id', 'note as name', 'amount as price'])->toArray();
+        $services = ContractService::where('name', 'LIKE', '%'. $q .'%')->limit(10)
+            ->get(['id', 'name', 'amount as price'])->toArray();
             
         $services = array_map(function ($v) {
             $v['unit'] = 'Pc';

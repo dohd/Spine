@@ -53,16 +53,8 @@ class ContractServicesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('contract', function ($contractservice) {        
-                if ($contractservice->contract)
-                return $contractservice->contract->tid . ' - ' . $contractservice->contract->title;
-            })
-            ->addColumn('schedule', function ($contractservice) {
-                if ($contractservice->task_schedule)
-                return $contractservice->task_schedule->title;
-            })
-            ->addColumn('note', function ($contractservice) {
-                return $contractservice->note;
+            ->addColumn('name', function ($contractservice) {
+                return $contractservice->name;
             })
             ->addColumn('amount', function ($contractservice) {
                 return numberFormat($contractservice->amount);

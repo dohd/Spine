@@ -10,7 +10,9 @@
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.contractservices.partials.contractservices-header-buttons')
+                <div class="media-body media-right text-right">
+                    @include('focus.contractservices.partials.contractservices-header-buttons')
+                </div>    
             </div>
         </div>
     </div>
@@ -25,9 +27,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Contract</th>
-                                        <th>Task Schedule</th>
-                                        <th>Note</th>
+                                        <th>Service Name</th>
                                         <th>Amount</th>                                        
                                         <th>Action</th>
                                     </tr>
@@ -73,16 +73,8 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     name: 'id'
                 },
                 {
-                    data: 'contract',
-                    name: 'contract'
-                },
-                {
-                    data: 'schedule',
-                    name: 'schedule'
-                },
-                {
-                    data: 'note',
-                    name: 'note'
+                    data: 'name',
+                    name: 'name'
                 },
                 {
                     data: 'amount',
