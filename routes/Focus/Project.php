@@ -31,6 +31,7 @@ Route::group(['namespace' => 'taskschedule'], function () {
 });
 
 Route::group(['namespace' => 'contractservice'], function () {
+  Route::post('contractservices/service_product_search', 'ContractServicesController@service_product_search')->name('contractservices.service_product_search');
   Route::resource('contractservices', 'ContractServicesController');
   //For Datatable
   Route::post('contractservices/get', 'ContractServicesTableController')->name('contractservices.get');
