@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\contractservice;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
+use App\Models\contractservice\ContractService;
 use Illuminate\Http\Request;
 
 class ContractServicesController extends Controller
@@ -26,9 +27,7 @@ class ContractServicesController extends Controller
      */
     public function create()
     {
-        $contracts = Contract::all();
-
-        return new ViewResponse('focus.contractservices.create', compact('contracts'));
+        // 
     }
 
     /**
@@ -48,9 +47,9 @@ class ContractServicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(ContractService $contractservice)
     {
-        //
+        return new ViewResponse('focus.contractservices.view', compact('contractservice'));
     }
 
     /**
@@ -59,9 +58,11 @@ class ContractServicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(ContractService $contractservice)
     {
-        //
+        $contracts = Contract::all();
+
+        return new ViewResponse('focus.contractservices.edit', compact('contractservice', 'contracts'));
     }
 
     /**
