@@ -49,7 +49,6 @@
 
     // on contract select
     const equipRow =  $('#equipmentTbl tbody tr').html();
-    const elements = ['#id', '#unique_id', '#make_type', '#branch', '#location'];
     $('#contract').change(function() {
         // load task schedules
         $.ajax({
@@ -71,7 +70,9 @@
             type: 'POST',
             data: {id: $(this).val()},
             success: data => {
+                // console.log(data);
                 $('#equipmentTbl tbody tr').remove();
+                const elements = ['#id', '#unique_id', '#make_type', '#branch', '#location', '#service_rate'];
                 data.forEach(obj => {
                     let html = equipRow.replace('d-none', '');
                     elements.forEach(el => {

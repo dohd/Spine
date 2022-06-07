@@ -39,6 +39,7 @@
                     </button>
                 </td>
                 <input type="hidden" name="equipment_id[]" value="#id">
+                <input type="hidden" name="service_rate[]" value="#service_rate">
             </tr>
         </tbody>
     </table>

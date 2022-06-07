@@ -60,7 +60,7 @@ class TaskSchedulesController extends Controller
     {
         // extract request input
         $data = $request->only('contract_id', 'schedule_id');
-        $data_items = $request->only('equipment_id');
+        $data_items = $request->only('equipment_id', 'service_rate');
 
         $data_items = modify_array($data_items);
 
