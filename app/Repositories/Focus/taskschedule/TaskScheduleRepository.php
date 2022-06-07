@@ -67,17 +67,36 @@ class TaskScheduleRepository extends BaseRepository
             return $init + floatval($item['service_rate']);
         }, 0);
         $service_data = $data + [
-            'note' => $schedule->title . ' - ' . $schedule->contract->title,
+            'name' => $schedule->title . ' - ' . $schedule->contract->title,
             'amount' => $service_amount,
             'ins' => auth()->user()->ins,
             'user_id' => auth()->user()->id
         ];
         $service = ContractService::create($service_data);
 
+        // generate equipment service 
+        $service_date = [];
+        $schedules = TaskSchedule::where('contract_id', $schedule->contract_id)->get(['id', 'start_date', 'end_date']);
+        foreach ($schedules as $i => $item) {
+            if ($item['id'] == $service->schedule_id) {
+                if ($i > 0) {
+                    $service_date = [
+                        $schedules[$i - 1]['end_date'], 
+                        $schedules[$i]['start_date']
+                    ];
+                } 
+                else $service_date = [null, $schedules[$i]['start_date']]; 
+            }
+        }
+
         // generate serviced equipments
         $service_id = $service->id;
-        $items_data = array_map(function ($v) use($service_id) {
-            return ['service_id' => $service_id] + $v;
+        $items_data = array_map(function ($v) use($service_id, $service_date) {
+            return $v + [
+                'service_id' => $service_id,
+                'last_service_date' => $service_date[0],
+                'next_service_date' => $service_date[1],
+            ];
         }, $input['data_items']);
         ServiceItem::insert($items_data);
 
@@ -109,6 +128,10 @@ class TaskScheduleRepository extends BaseRepository
         $data_items = $input['data_items'];
         $eq_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $taskschedule->taskschedule_equipments()->whereNotIn('id', $eq_ids)->delete();
+
+        // update service note
+        $service = $taskschedule->contractservice;
+        if ($service) $service->update(['name' => $taskschedule->title . ' - ' . $taskschedule->contract->title]);
 
         DB::commit();
         if ($result) return $result;
