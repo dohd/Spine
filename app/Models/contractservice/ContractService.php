@@ -2,11 +2,15 @@
 
 namespace App\Models\contractservice;
 
+use App\Models\contractservice\Traits\ContractServiceAtrribute;
+use App\Models\contractservice\Traits\ContractServiceRelationship;
+use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ContractService extends Model
 {
-
+    use  ModelTrait, ContractServiceAtrribute, ContractServiceRelationship;
+    
     /**
      * The database table used by the model.
      * @var string
