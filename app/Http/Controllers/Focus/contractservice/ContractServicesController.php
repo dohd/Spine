@@ -87,4 +87,23 @@ class ContractServicesController extends Controller
     {
         //
     }
+
+    /**
+     * Service poduct search
+     */
+    public function service_product_search()
+    {
+        $q = request('term');
+
+        $services = ContractService::where('note', 'LIKE', '%'. $q .'%')->limit(10)
+            ->get(['id', 'note as name', 'amount as price'])->toArray();
+            
+        $services = array_map(function ($v) {
+            $v['unit'] = 'Pc';
+            $v['purchase_price'] = '0.00';
+            return $v;
+        }, $services);
+
+        return response()->json($services);
+    }
 }
