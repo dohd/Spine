@@ -3,22 +3,20 @@
 namespace App\Http\Responses\Focus\equipment;
 
 use Illuminate\Contracts\Support\Responsable;
-use App\Models\customer\Customer;
-use App\Models\branch\Branch;
 
 class EditResponse implements Responsable
 {
     /**
      * @var App\Models\productcategory\Productcategory
      */
-    protected $equipments;
+    protected $equipment;
 
     /**
      * @param App\Models\productcategory\Productcategory $productcategories
      */
-    public function __construct($equipments)
+    public function __construct($equipment)
     {
-        $this->equipments = $equipments;
+        $this->equipment = $equipment;
     }
 
     /**
@@ -30,10 +28,6 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $customers=Customer::all();
-        $branches=Branch::all();
-        return view('focus.equipments.edit')->with([
-            'equipments' => $this->equipments,'customers'=>$customers,'branches'=>$branches
-        ]);
+        return view('focus.equipments.edit', ['equipment' => $this->equipment]);
     }
 }

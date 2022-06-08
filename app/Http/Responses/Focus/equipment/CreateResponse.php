@@ -16,8 +16,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-          $equipment=Equipment::all();
-          $last_id=Equipment::orderBy('id', 'desc')->first();
-        return view('focus.equipments.create',compact('equipment','last_id'));
+        $last_tid = Equipment::max('tid');
+        return view('focus.equipments.create', compact('last_tid'));
     }
 }
