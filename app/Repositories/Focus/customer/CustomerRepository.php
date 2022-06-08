@@ -147,9 +147,10 @@ class CustomerRepository extends BaseRepository
             if ($tr_one->tr_type == 'rcpt') {
                 // add invoice, 
                 $statements->add($tr_one);
+                $index_visited[] = $i;
                 $invoice_id = $tr_one->invoice->id;
                 $customer_id = $tr_one->invoice->customer_id;
-                // add payment withholding, cnote, dnote
+                // add payment, withholding, cnote, dnote
                 foreach ($transactions as $j => $tr_two) {
                     $types = ['pmt', 'withholding', 'cnote', 'dnote'];
                     if (in_array($tr_two->tr_type, $types, 1)) { 
@@ -162,13 +163,7 @@ class CustomerRepository extends BaseRepository
                         } elseif ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id) {
                             $exists = true; 
                         } elseif ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id) {
-                            $exists = false;
-                            // add payment
-                            $statements->add($tr_one);
-                            $index_visited[] = $i;
-                            // add withholding
-                            $statements->add($tr_two);
-                            $index_visited[] = $j;
+                            $exists = true;
                         }                                                                 
                         if ($exists) {
                             $statements->add($tr_two);
