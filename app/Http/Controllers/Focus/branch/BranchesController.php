@@ -114,7 +114,7 @@ class BranchesController extends Controller
     /**
      *  Load customer branches for select options *  
      */
-    public function branch_load(Request $request)
+    public function select(Request $request)
     {
         $q = $request->search;
         $customer_id = $request->customer_id;

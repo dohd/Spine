@@ -243,7 +243,8 @@
     $("#person").change(function() {
         $("#branch_id").html('').select2({
             ajax: {
-                url: "{{ route('biller.branches.branch_load') }}",
+                url: "{{ route('biller.branches.select') }}",
+                type: 'POST',
                 quietMillis: 50,
                 data: ({term}) => ({search: term, customer_id: $("#person").val()}),                                
                 processResults: (data) => {

@@ -145,14 +145,10 @@
             $branch.html('').select2({
                 dropdownParent: $modal,
                 ajax: {
-                    url: "{{ route('biller.branches.branch_load') }}",
+                    url: "{{ route('biller.branches.select') }}",
+                    type: 'POST',
                     quietMillis: 50,
-                    data: function(params) {
-                        return {
-                            search: params.term,
-                            customer_id: $person.val()
-                        };
-                    },
+                    data: ({term}) => ({search: term, customer_id: $person.val()}),
                     processResults: function(data) {
                         return {
                             results: $.map(data, function(item) {

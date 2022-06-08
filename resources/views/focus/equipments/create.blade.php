@@ -93,7 +93,7 @@
             });
             $("#branch").select2({
                 ajax: {
-                    url: '{{route('biller.branches.branch_load')}}?id=' + tips,
+                    url: "{{ route('biller.branches.select') }}?id=" + tips,
                     dataType: 'json',
                     type: 'POST',
                     quietMillis: 50,
