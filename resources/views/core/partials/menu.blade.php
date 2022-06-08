@@ -790,6 +790,7 @@
                         </ul>
                     </li>
                     @endauth
+                    {{-- 
                     @permission('misc-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Region</a>
                         <ul class="dropdown-menu">
@@ -814,6 +815,7 @@
                         </ul>
                     </li>
                     @endauth
+                    --}}
                     @permission('project-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Equipment Category</a>
                         <ul class="dropdown-menu">
@@ -838,6 +840,7 @@
                         </ul>
                     </li>
                     @endauth
+                    {{-- 
                     @permission('project-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Job Schedule & Maintenance </a>
                         <ul class="dropdown-menu">
@@ -850,6 +853,7 @@
                         </ul>
                     </li>
                     @endauth
+                    --}}
                     @permission('project-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file-text-o"></i> Contract Management</a>
                         <ul class="dropdown-menu">
@@ -859,13 +863,15 @@
                             <li><a class="dropdown-item" href="{{ route('biller.contracts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Contract
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Manage Task Schedules
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Manage Contract Services
-                                </a>
-                            </li>
                         </ul>
+                    </li>
+                    @endauth
+                    @permission('project-manage')
+                    <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Task Schedule Management
+                        </a>
+                    </li>
+                    <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Contract Service Management
+                        </a>
                     </li>
                     @endauth
                 </ul>
