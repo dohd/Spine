@@ -174,11 +174,9 @@ class EquipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(odu $odu, ManageOduRequest $request)
+    public function show(Equipment $equipment)
     {
-
-        //returning with successfull message
-        return new ViewResponse('focus.odus.view', compact('odu'));
+        return new ViewResponse('focus.equipments.view', compact('equipment'));
     }
 
     /**
