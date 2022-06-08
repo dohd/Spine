@@ -3,46 +3,47 @@
 namespace App\Models\equipment\Traits;
 
 /**
- * Class OrderRelationship
+ * Class EquipmentRelationship
  */
 trait EquipmentRelationship
 {
-       public function customer()
+    public function customer()
     {
-        return $this->hasOne('App\Models\customer\Customer','id','customer_id')->withoutGlobalScopes();
-    }
-      public function region()
-    {
-        return $this->hasOne('App\Models\region\Region','id','region_id')->withoutGlobalScopes();
-    }
-      public function project_section()
-    {
-        return $this->hasOne('App\Models\section\Section','id','section_id')->withoutGlobalScopes();
+        return $this->belongsTo('App\Models\customer\Customer');
     }
 
-     
-
-      public function category()
+    public function region()
     {
-        return $this->hasOne('App\Models\equipmentcategory\EquipmentCategory','id','equipment_category_id')->withoutGlobalScopes();
+        return $this->hasOne('App\Models\region\Region', 'id', 'region_id')->withoutGlobalScopes();
+    }
+    public function project_section()
+    {
+        return $this->hasOne('App\Models\section\Section', 'id', 'section_id')->withoutGlobalScopes();
     }
 
-       public function branch()
+
+
+    public function category()
     {
-        return $this->hasOne('App\Models\branch\Branch','id','branch_id')->withoutGlobalScopes();
+        return $this->hasOne('App\Models\equipmentcategory\EquipmentCategory', 'id', 'equipment_category_id')->withoutGlobalScopes();
     }
 
-     public function indoor()
+    public function branch()
     {
-        return $this->hasOne('App\Models\equipment\Equipment','id','rel_id')->withoutGlobalScopes();
+        return $this->belongsTo('App\Models\branch\Branch');
+    }
+
+    public function indoor()
+    {
+        return $this->hasOne('App\Models\equipment\Equipment', 'id', 'rel_id')->withoutGlobalScopes();
     }
 
     public function supplier()
     {
-        return $this->hasOne('App\Models\supplier\Supplier','id','customer_id')->withoutGlobalScopes();
+        return $this->hasOne('App\Models\supplier\Supplier', 'id', 'customer_id')->withoutGlobalScopes();
     }
 
-     public function products()
+    public function products()
     {
         return $this->hasMany('App\Models\items\OrderItem')->withoutGlobalScopes();
     }
@@ -55,14 +56,13 @@ trait EquipmentRelationship
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
-     public function transactions()
+    public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','bill_id')->where('relation_id','=',5)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 5)->withoutGlobalScopes();
     }
 
     public function attachment()
     {
-        return $this->hasMany('App\Models\items\MetaEntry','rel_id')->where('rel_type','=',5)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\items\MetaEntry', 'rel_id')->where('rel_type', '=', 5)->withoutGlobalScopes();
     }
-
 }
