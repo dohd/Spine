@@ -144,13 +144,14 @@ class CustomerRepository extends BaseRepository
         $statements = collect();
         $index_visited = array();
         foreach ($transactions as $i => $tr_one) {
-            if ($tr_one->tr_type == 'pmt') {
-                // add invoice, withholding, cnote, dnote
+            if ($tr_one->tr_type == 'rcpt') {
+                // add invoice, 
                 $statements->add($tr_one);
                 $invoice_id = $tr_one->invoice->id;
                 $customer_id = $tr_one->invoice->customer_id;
+                // add payment withholding, cnote, dnote
                 foreach ($transactions as $j => $tr_two) {
-                    $types = ['rcpt', 'withholding', 'cnote', 'dnote'];
+                    $types = ['pmt', 'withholding', 'cnote', 'dnote'];
                     if (in_array($tr_two->tr_type, $types, 1)) { 
                         $exists = false;                       
                         if ($tr_two->paidinvoice) {
