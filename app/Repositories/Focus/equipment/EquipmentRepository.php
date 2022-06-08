@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\equipment;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\equipment\Equipment;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProductcategoryRepository.
@@ -27,20 +24,16 @@ class EquipmentRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        
-       $q=$this->query();
-      $q->when(request('region_id'), function ($q) {
-            return $q->where('region_id', '=',request('region_id',0));
-        });
-       $q->when(request('branch_id'), function ($q) {
-            return $q->where('branch_id', '=',request('branch_id',0));
-       });
-        $q->when(request('section_id'), function ($q) {
-            return $q->where('section_id', '=',request('section_id',0));
-       });
-         $q->when(request('rel_id'), function ($q) {
-            return $q->where('customer_id', '=',request('rel_id',0));
-       });
+        $q = $this->query();
+
+        if (request('customer_id') && request('branch_id')) {
+            $q->where([
+                'customer_id' => request('customer_id'),
+                'branch_id' => request('branch_id')
+            ]);
+        } else if (request('customer_id')) {
+            $q->where('customer_id', request('customer_id'));
+        }
 
         return $q->get();
     }
@@ -56,9 +49,9 @@ class EquipmentRepository extends BaseRepository
     {
         $input['installation_date'] = datetime_for_database($input['installation_date']);
         $input['next_maintenance_date'] = datetime_for_database($input['next_maintenance_date']);
-        $input = array_map( 'strip_tags', $input);
-       $c=Equipment::create($input);
-       if ($c->id) return $c->id;
+        $input = array_map('strip_tags', $input);
+        $c = Equipment::create($input);
+        if ($c->id) return $c->id;
         throw new GeneralException('Error Creating Equipment');
     }
 
@@ -72,8 +65,8 @@ class EquipmentRepository extends BaseRepository
      */
     public function update(Equipment $equipment, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($equipment->update($input))
+        $input = array_map('strip_tags', $input);
+        if ($equipment->update($input))
             return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
