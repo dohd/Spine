@@ -3,14 +3,30 @@
 namespace App\Http\Controllers\Focus\contractservice;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
 use App\Models\contractservice\ContractService;
-use App\Models\task_schedule\TaskSchedule;
+use App\Repositories\Focus\contractservice\ContractServiceRepository;
 use Illuminate\Http\Request;
 
 class ContractServicesController extends Controller
 {
+    /**
+     * variable to store the repository object
+     * @var ContractServiceRepository
+     */
+    protected $repository;
+
+    /**
+     * contructor to initialize repository object
+     * @param ContractServiceRepository $repository ;
+     */
+    public function __construct(ContractServiceRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -73,9 +89,16 @@ class ContractServicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, ContractService $contractservice)
     {
-        //
+        // extract request input
+        $data_items = $request->only('id', 'jobcard_no', 'jobcard_date', 'status', 'note');
+
+        $data_items = modify_array($data_items);
+
+        $this->repository->update($contractservice, $data_items);
+
+        return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Service updated successfully']);
     }
 
     /**
