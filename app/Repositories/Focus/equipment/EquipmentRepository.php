@@ -31,10 +31,10 @@ class EquipmentRepository extends BaseRepository
                 'customer_id' => request('customer_id'),
                 'branch_id' => request('branch_id')
             ]);
-        } else if (request('customer_id')) {
+        } elseif (request('customer_id')) {
             $q->where('customer_id', request('customer_id'));
-        }
-
+        } else return $q->limit(100)->get();
+            
         return $q->get();
     }
 
@@ -47,11 +47,11 @@ class EquipmentRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        $input['installation_date'] = datetime_for_database($input['installation_date']);
-        $input['next_maintenance_date'] = datetime_for_database($input['next_maintenance_date']);
-        $input = array_map('strip_tags', $input);
-        $c = Equipment::create($input);
-        if ($c->id) return $c->id;
+        // dd($input);
+        $input['service_rate'] = numberClean($input['service_rate']);
+        $result = Equipment::create($input);
+        if ($result) return $result;
+
         throw new GeneralException('Error Creating Equipment');
     }
 
@@ -65,10 +65,10 @@ class EquipmentRepository extends BaseRepository
      */
     public function update(Equipment $equipment, array $input)
     {
-        $input = array_map('strip_tags', $input);
-        if ($equipment->update($input))
-            return true;
-
+        // dd($input);
+        $input['service_rate'] = numberClean($input['service_rate']);
+        if ($equipment->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
@@ -79,12 +79,10 @@ class EquipmentRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Equipment $equipment)
+    public function delete($equipment)
     {
-        if ($equipment->delete()) {
-            return true;
-        }
-
+        if ($equipment->delete()) return true;
+            
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }
