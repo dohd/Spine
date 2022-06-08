@@ -62,44 +62,47 @@ class TaskScheduleRepository extends BaseRepository
         $schedule = TaskSchedule::find($data['schedule_id']);
         // update schedule status to loaded
         if ($schedule->status == 'pending') $schedule->update(['status' => 'loaded']);
+
         // generate service
-        $service_amount = array_reduce($input['data_items'], function($init, $item) {
-            return $init + floatval($item['service_rate']);
-        }, 0);
-        $service_data = $data + [
-            'name' => $schedule->title . ' - ' . $schedule->contract->title,
-            'amount' => $service_amount,
-            'ins' => auth()->user()->ins,
-            'user_id' => auth()->user()->id
-        ];
-        $service = ContractService::create($service_data);
-
-        // generate equipment service 
-        $service_date = [];
-        $schedules = TaskSchedule::where('contract_id', $schedule->contract_id)->get(['id', 'start_date', 'end_date']);
-        foreach ($schedules as $i => $item) {
-            if ($item['id'] == $service->schedule_id) {
-                if ($i > 0) {
-                    $service_date = [
-                        $schedules[$i - 1]['end_date'], 
-                        $schedules[$i]['start_date']
-                    ];
-                } 
-                else $service_date = [null, $schedules[$i]['start_date']]; 
-            }
-        }
-
-        // generate serviced equipments
-        $service_id = $service->id;
-        $items_data = array_map(function ($v) use($service_id, $service_date) {
-            return $v + [
-                'service_id' => $service_id,
-                'last_service_date' => $service_date[0],
-                'next_service_date' => $service_date[1],
+        if ($data_items) {
+            $service_amount = array_reduce($input['data_items'], function($init, $item) {
+                return $init + floatval($item['service_rate']);
+            }, 0);
+            $service_data = $data + [
+                'name' => $schedule->title . ' - ' . $schedule->contract->title,
+                'amount' => $service_amount,
+                'ins' => auth()->user()->ins,
+                'user_id' => auth()->user()->id
             ];
-        }, $input['data_items']);
-        ServiceItem::insert($items_data);
+            $service = ContractService::create($service_data);
 
+            // generate service date 
+            $service_date = [];
+            $schedules = TaskSchedule::where('contract_id', $schedule->contract_id)->get(['id', 'start_date', 'end_date']);
+            foreach ($schedules as $i => $item) {
+                if ($item['id'] == $service->schedule_id) {
+                    if ($i > 0) {
+                        $service_date = [
+                            $schedules[$i - 1]['end_date'], 
+                            $schedules[$i]['start_date']
+                        ];
+                    } 
+                    else $service_date = [null, $schedules[$i]['start_date']]; 
+                }
+            }
+
+            // generate service equipments
+            $service_id = $service->id;
+            $items_data = array_map(function ($v) use($service_id, $service_date) {
+                return $v + [
+                    'service_id' => $service_id,
+                    'last_service_date' => $service_date[0],
+                    'next_service_date' => $service_date[1],
+                ];
+            }, $input['data_items']);
+            ServiceItem::insert($items_data);
+        }
+        
         DB::commit();
         if ($result) return $result;
 
@@ -129,7 +132,7 @@ class TaskScheduleRepository extends BaseRepository
         $eq_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $taskschedule->taskschedule_equipments()->whereNotIn('id', $eq_ids)->delete();
 
-        // update service note
+        // update service name
         $service = $taskschedule->contractservice;
         if ($service) $service->update(['name' => $taskschedule->title . ' - ' . $taskschedule->contract->title]);
 
