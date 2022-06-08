@@ -30,7 +30,6 @@
                                         'Unique ID' => $equipment->unique_id,
                                         'Serial No' => $equipment->equip_serial,
                                         'Unit Type' => $equipment->unit_type,
-                                        'Related Indoor Unit' => '',
                                         'Manufacturer' => $equipment->manufacturer,
                                         'Model / Model Number' => $equipment->model,
                                         'Capacity' => number_format($equipment->capacity),

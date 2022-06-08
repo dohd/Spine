@@ -38,12 +38,11 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="#equipTbl" class="table table-striped table-bordered zero-configuration" width="100%" cellpadding="0">
+                            <table id="equipTbl" class="table table-striped table-bordered zero-configuration" width="100%" cellpadding="0">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Tag ID</th>
-                                        <th>Client</th>
                                         <th>Serial</th>
                                         <th>Manufacturer</th>
                                         <th>Model</th>
@@ -52,12 +51,12 @@
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody>                                    
                                     <tr>
                                         <td colspan="100%" class="text-center text-success font-large-1">
                                             <i class="fa fa-spinner spinner"></i>
                                         </td>
-                                    </tr>
+                                    </tr>                                    
                                 </tbody>
                             </table>
                         </div>
@@ -74,6 +73,7 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     // select2 config
     function select2Config(url, callback, extraData) {
@@ -97,25 +97,20 @@
     const branchCb = data => ({ results: data.map(v => ({id: v.id, text: v.name})) });
     $('#branch').select2();
 
-    // on chnage customer and branch 
+    // on change customer and branch 
     $(document).on('change', '#customer, #branch', function() {
         if ($(this).is('#customer')) {
             const customer_id = $(this).val();
             $('#branch').select2(select2Config(branchUrl, branchCb, {customer_id}));
         }
+
+        $('#equipTbl tbody tr:first').remove();
         $('#equipTbl').DataTable().destroy();
         draw_data($('#customer').val(), $('#branch').val());
     });
 
     function draw_data(customer_id='', branch_id='') {
-        console.log(customer_id, branch_id);
-        // $.ajax({
-        //     url: '{{ route("biller.equipments.get") }}',
-        //         type: 'post',
-        //         data: {customer_id, branch_id},
-        //     success: data => console.log(data)
-        // })
-        const language = { @lang('datatable.strings') };
+        const language = {@lang('datatable.strings')};
         const dataTable = $('#equipTbl').dataTable({
             processing: true,
             serverSide: true,
@@ -129,7 +124,6 @@
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
                 {data: 'unique_id', name: 'unique_id'},
-                {data: 'customer', name: 'customer'},
                 {data: 'equip_serial', name: 'equip_serial'},
                 {data: 'manufacturer', name: 'manufacturer'},
                 {data: 'model', name: 'model'},
