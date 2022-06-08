@@ -50,8 +50,8 @@
                                             <th>Location</th>
                                             <th>Jobcard</th>
                                             <th>Jobcard Date</th>
-                                            <th>Last Service Date</th>
-                                            <th>Next Service Date</th>
+                                            <th>Last Service</th>
+                                            <th>Next Service</th>
                                             <th>Status</th>
                                             <th>Note</th>
                                         </tr>
@@ -68,7 +68,7 @@
                                                 <td>{{ $row->jobcard_date?  dateFormat($row->jobcard_date) : '' }}</td>
                                                 <td>{{ $row->last_service_date?  dateFormat($row->last_service_date) : '' }}</td>
                                                 <td>{{ $row->next_service_date?  dateFormat($row->next_service_date) : '' }}</td>
-                                                <td>{{ $row->status }}</td>
+                                                <td>{{ ucfirst($row->status) }}</td>
                                                 <td>{{ $row->note }}</td>
                                             </tr>                                                        
                                         @endforeach                                                    
