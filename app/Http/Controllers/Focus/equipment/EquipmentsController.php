@@ -73,7 +73,6 @@ class EquipmentsController extends Controller
      */
     public function create(StoreEquipmentRequest $request)
     {
-
         return new CreateResponse('focus.equipments.create');
     }
 
@@ -91,14 +90,14 @@ class EquipmentsController extends Controller
             'unit_type' => 'required',
 
         ]);
-        //Input received from the request
+        // extract request input
         $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
 
-        $id = $this->repository->create($input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Odu  Successfully Created' . ' <a href="' . route('biller.equipments.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        $input['ins'] = auth()->user()->ins;
+
+        $this->repository->create($input);
+
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment created successfully']);
     }
 
     /**
@@ -108,9 +107,8 @@ class EquipmentsController extends Controller
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(Equipment $equipment, StoreEquipmentRequest $request)
+    public function edit(Equipment $equipment)
     {
-        //dd($equipment);
         return new EditResponse($equipment);
     }
 
@@ -138,16 +136,12 @@ class EquipmentsController extends Controller
 
     public function update(StoreEquipmentRequest $request, Equipment $equipment)
     {
-        $request->validate([
-            'name' => 'required',
-            'location' => 'required'
-        ]);
-        //Input received from the request
-        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
-        //Update the model using repository update method
+        // extract request input
+        $input = $request->except(['_token', 'ins']);
+
         $this->repository->update($equipment, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipments  Successfully Updated'  . ' <a href="' . route('biller.equipments.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipments  Successfully Updated']);
     }
 
     /**
@@ -157,14 +151,12 @@ class EquipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Odu $odu, StoreOduRequest $request)
+    public function destroy(Equipment $equipment)
     {
 
-        //dd($branch);
-        //Calling the delete method on repository
-        $this->repository->delete($odu);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.odus.index'), ['flash_success' => 'ODU Successfully Deleted']);
+        $this->repository->delete($equipment);
+
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment deleted successfully']);
     }
 
     /**
