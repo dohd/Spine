@@ -127,7 +127,7 @@ class SupplierRepository extends BaseRepository
                 // add bill
                 $bill_id = $tr_one->bill->id;
                 foreach ($transactions as $j => $tr_two) {
-                    if ($tr_two->tr_type == 'bill') {
+                    if ($tr_two->tr_type == 'bill' && $tr_two->paidbill) {
                         $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
                         if ($is_paidbill)  {
                             $statements->add($tr_two);
