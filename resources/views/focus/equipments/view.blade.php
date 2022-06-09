@@ -25,17 +25,17 @@
                             <table class="table table-bordered table-sm">
                                 @php
                                     $details = [ 
+                                        'System ID' => gen4tid('E-', $equipment->tid),
                                         'Customer' => $equipment->customer? $equipment->customer->company : '',    
                                         'Branch' => $equipment->branch? $equipment->branch->name : '',
                                         'Unique ID' => $equipment->unique_id,
                                         'Serial No' => $equipment->equip_serial,
                                         'Unit Type' => $equipment->unit_type,
-                                        'Manufacturer' => $equipment->manufacturer,
+                                        'Make' => $equipment->manufacturer,
                                         'Model / Model Number' => $equipment->model,
                                         'Capacity' => number_format($equipment->capacity),
                                         'Gas Type' => $equipment->machine_gas,
                                         'Equipment Location' => $equipment->location,
-                                        'Regular Maintenance Duration (days)' => $equipment->main_duration,
                                         'Maintanance Rate (VAT Exc)' => numberFormat($equipment->service_rate)
                                     ];
                                 @endphp
