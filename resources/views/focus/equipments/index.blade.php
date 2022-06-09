@@ -42,12 +42,13 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>System ID</th>
                                         <th>Tag ID</th>
-                                        <th>Serial</th>
-                                        <th>Manufacturer</th>
-                                        <th>Model</th>
-                                        <th>Location</th>
+                                        <th>Branch</th>
                                         <th>Type</th>
+                                        <th>Size</th>
+                                        <th>Make</th>
+                                        <th>Location</th>                                        
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -123,12 +124,13 @@
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
+                {data: 'tid', name: 'tid'},
                 {data: 'unique_id', name: 'unique_id'},
-                {data: 'equip_serial', name: 'equip_serial'},
-                {data: 'manufacturer', name: 'manufacturer'},
-                {data: 'model', name: 'model'},
-                {data: 'location', name: 'location'},
+                {data: 'branch', name: 'branch'},
                 {data: 'unit_type', name: 'unit_type'},
+                {data: 'capacity', name: 'capacity'},
+                {data: 'manufacturer', name: 'manufacturer'},
+                {data: 'location', name: 'location'},
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             order: [[0, "asc"]],
