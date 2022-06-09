@@ -3,10 +3,10 @@
         <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Supplier Info</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Transactions</a>
+        <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Statement on Account</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Purchase Orders</a>
+        <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Bill</a>
     </li>   
     <li class="nav-item">
         <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Statement on Bill</a>
@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <!-- Purchase order -->
+    <!-- Bills -->
     <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
         <table id="billTbl" class="table table-bordered zero-configuration" cellspacing="0" width="100%">
             <thead>

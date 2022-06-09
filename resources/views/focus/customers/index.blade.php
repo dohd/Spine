@@ -30,13 +30,13 @@
                                             <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Customer Info</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Transactions</a>
+                                            <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Statement on Account</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Invoices</a>
+                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Invoice</a>
                                         </li> 
                                         <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Aging</a>
+                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Statement on Invoice</a>
                                         </li>                                       
                                     </ul>
                                     <div class="tab-content px-1 pt-1">
