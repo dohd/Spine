@@ -54,24 +54,31 @@ class SupplierRepository extends BaseRepository
             
     }
 
-    public function getPurchaseorderBillsForDataTable($supplier_id = 0)
+    public function getBillsForDataTable($supplier_id = 0)
     {
         $id = $supplier_id ?: request('supplier_id');
+
         return Bill::where('supplier_id', $id)->get();
     }
-
+    
     public function getTransactionsForDataTable($supplier_id = 0)
     {
-        $id = $supplier_id ?: request('supplier_id');
+        $id = $supplier_id ?: request('supplier_id');  
+
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'payable');  
         })->where(function ($q) use($id) {
             $q->whereHas('bill', function ($q) use($id) { 
                 $q->where('supplier_id', $id); 
-            })->orwhereHas('paidbill', function ($q) use($id) {
-                $q->where('supplier_id', $id);
             });
-        })->whereIn('tr_type', ['bill', 'pmt']);
+        })->where('tr_type', 'bill')
+        ->orWhere(function ($q) use($id) {
+            $q->whereHas('paidbill', function ($q) use($id) { 
+                $q->where('supplier_id', $id); 
+            });
+        })->whereHas('account', function ($q) { 
+            $q->where('system', 'payable');  
+        })->where('tr_type', 'pmt');
         
         // on date filter
         $start_date = request('start_date');
@@ -107,6 +114,7 @@ class SupplierRepository extends BaseRepository
     public function getStatementsForDataTable($supplier_id = 0)
     {
         $id = $supplier_id ?: request('supplier_id');
+
         $transactions = $this->getTransactionsForDataTable($id);
 
         // on date filter
@@ -123,11 +131,14 @@ class SupplierRepository extends BaseRepository
         $statements = collect();
         $index_visited = array();
         foreach ($transactions as $i => $tr_one) {
-            if ($tr_one->tr_type == 'pmt') {
-                // add bill
+            // add bill
+            if ($tr_one->tr_type == 'bill') {
                 $bill_id = $tr_one->bill->id;
+                $statements->add($tr_one);
+                $index_visited[] = $i;
+                // add payment
                 foreach ($transactions as $j => $tr_two) {
-                    if ($tr_two->tr_type == 'bill' && $tr_two->paidbill) {
+                    if ($tr_two->tr_type == 'pmt' && $tr_two->paidbill) {
                         $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
                         if ($is_paidbill)  {
                             $statements->add($tr_two);
@@ -135,14 +146,14 @@ class SupplierRepository extends BaseRepository
                         }
                     }
                 }
-                // add payment
-                $statements->add($tr_one);
-                $index_visited[] = $i;
+                
+
             }
         }
-        // add remainder transactions
+        // add remaining transactions
         if ($index_visited) {
             foreach ($transactions as $i => $tr) {
+                // check if already added and skip
                 if (in_array($i, $index_visited, 1)) continue;
                 $statements->add($tr);
             }
