@@ -22,7 +22,6 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\equipment\EquipmentRepository;
 use App\Http\Requests\Focus\equipment\ManageEquipmentRequest;
-use App\Models\projectequipment\Projectequipment;
 
 /**
  * Class BranchTableController.
@@ -58,14 +57,15 @@ class EquipmentsTableController extends Controller
     return Datatables::of($core)
       ->escapeColumns(['id'])
       ->addIndexColumn()
-      ->addColumn('unit_type', function ($equipment) {
-        return $equipment->unit_type;
+      ->addColumn('tid', function ($equipment) {
+        return gen4tid('E-', $equipment->tid);
       })
-      ->addColumn('last_maint_date', function ($equipment) {
-        return dateFormat($equipment->last_maint_date);
+      ->addColumn('branch', function ($equipment) {
+        if ($equipment->branch)
+        return $equipment->branch->name;
       })
-      ->addColumn('name', function ($equipment) {
-        return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=' . $equipment->id . '&rel_id=' . $equipment->id . '">' . $equipment->name . '</a>';
+      ->addColumn('capacity', function ($equipment) {
+        return numberFormat($equipment->capacity);
       })
       ->addColumn('actions', function ($equipment) {
         return $equipment->action_buttons;
