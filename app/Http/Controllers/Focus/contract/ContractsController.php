@@ -157,11 +157,21 @@ class ContractsController extends Controller
     /**
      * Customer equipments
      */
-    public function customer_equipment()
+    public function customer_equipment(Request $request)
     {
-        $equipments = Equipment::where('customer_id', request('id'))->with(['branch' => function($q) {
+        $customer_id = $request->id;
+        $branch_id = $request->branch_id;
+
+        $q = Equipment::query();
+        if ($customer_id && $branch_id) {
+            $q->where(['customer_id' => $customer_id, 'branch_id' => $branch_id]);
+        } elseif ($customer_id) {
+            $q->where(['customer_id' => $customer_id]);
+        }
+        $equipments = $q->with(['branch' => function($q) {
             $q->get(['id', 'name']);
         }])->limit(10)->get()->toArray();
+
         // filter columns
         foreach ($equipments as $i => $item) {
             $val = [];
