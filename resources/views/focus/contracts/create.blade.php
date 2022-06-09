@@ -42,6 +42,16 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
+    // form submit
+    $('form').submit(function(e) {
+        const schedules = $('#scheduleTbl tbody tr').length;
+        const equipments = $('#equipmentTbl .equipId:not(:disabled)').length
+        if (schedules < 1 || equipments < 1) {
+            e.preventDefault();
+            alert('Include at least one task schedule and one equipment!');
+        }
+    });
+
     function renderDatepicker() {
         return $('.datepicker')
             .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true}) 
@@ -49,34 +59,27 @@
     }
     renderDatepicker();
 
-    // form submit
-    $('form').submit(function(e) {
-        const schedules = $('#scheduleTbl tbody tr').length;
-        const equipments = $('#equipmentTbl tbody tr').length;
-        if (schedules < 1 || equipments < 1) {
-            e.preventDefault();
-            alert('Include at least one schedule task or equipment!');
+    // select2 config
+    function select2Config(url, callback, extraData) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, ...extraData}),
+                quietMillis: 50,
+                processResults: callback
+            }
         }
-    });
+    }
 
-    // customer select config
-    $("#customer").select2({
-        ajax: {
-            url: "{{ route('biller.customers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({ search: term }),
-            processResults: data => {
-                return {
-                    results: data.map(v => ({ 
-                        id: v.id, 
-                        text: `${v.name} - ${v.company}`,
-                    }))
-                };
-            },
-        }
-    });    
+    const customerUrl = "{{ route('biller.customers.select') }}";
+    const customerCb = data => ({ results: data.map(v => ({id: v.id, text: v.name + ' - ' + v.company})) });
+    $('#customer').select2(select2Config(customerUrl, customerCb));
+
+    const branchUrl = "{{ route('biller.branches.select') }}";
+    const branchCb = data => ({ results: data.map(v => ({id: v.id, text: v.name})) });
+    $('#branch').select2();
 
     // auto generate default schedules
     let rowId = 0;
@@ -112,37 +115,61 @@
         rowId--;
     });
 
-    // on customer select load equipments
+    // on change customer or branch load equipments
     const equipRow =  $('#equipmentTbl tbody tr').html();
-    const elements = ['#id', '#unique_id', '#make_type', '#branch', '#location'];
-    $('#customer').change(function() {
-        $.ajax({
-            url: "{{ route('biller.contracts.customer_equipment')  }}",
-            type: 'POST',
-            data: {id: $(this).val()},
-            success: data => {
-                $('#equipmentTbl tbody tr').remove();
-                data.forEach(obj => {
-                    let html = equipRow.replace('d-none', '');
-                    elements.forEach(el => {
-                        for (let p in obj) {
-                            if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);
-                            else if ('#'+p == el) html = html.replace(el, obj[p]? obj[p] : '');
-                        }
-                    });
-                    $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');
-                })
+    $('form').on('change', '#customer, #branch', function() {
+        if ($(this).is('#customer')) {
+            const customer_id = $(this).val();
+            $('#branch').select2(select2Config(branchUrl, branchCb, {customer_id}));
+            $.ajax({
+                url: "{{ route('biller.contracts.customer_equipment')  }}",
+                type: 'POST',
+                data: {id: customer_id},
+                success: data => {
+                    $('#equipmentTbl tbody tr').remove();
+                    data.forEach(fillTable);
+                }
+            });
+        } else {
+            const customer_id = $('#customer').val();
+            const branch_id = $(this).val();
+            $.ajax({
+                url: "{{ route('biller.contracts.customer_equipment')  }}?branch_id=" + branch_id,
+                type: 'POST',
+                data: {id: customer_id},
+                success: data => {
+                    $('#equipmentTbl tbody tr').remove();
+                    data.forEach(fillTable);
+                }
+            });
+        }
+    });
+    function fillTable(obj) {
+        let elements = ['#id', '#unique_id', '#make_type', '#branch', '#location'];
+        let html = equipRow.replace('d-none', '');
+        elements.forEach(el => {
+            for (let p in obj) {
+                if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);
+                else if ('#'+p == el) html = html.replace(el, obj[p]? obj[p] : '');
             }
-        })
-    });
+        });
+        $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');
+    }
     
-    // add equipmentTbl row
-    $('#addEquipment').click(function() {
-        $('#equipmentTbl tbody').append('<tr>' + scheduleRow + '</tr>');
-    });
-    // remove equipmentTbl row
-    $('#equipmentTbl').on('click', '.remove', function() {
-        $(this).parents('tr').remove();
+    // on change row checkbox
+    $('#equipmentTbl').on('change', '.select', function() {
+        const select = $(this).is(':checked');
+        const equipId = $(this).parents('tr').find('.equipId');
+        if (select) equipId.attr('disabled', false);
+        else equipId.attr('disabled', true);
+    })
+    // on change action checkbox
+    $('#selectAll').change(function() {
+        const selectAll = $(this).is(':checked');
+        $('#equipmentTbl tbody tr').each(function() {
+            if (selectAll) $(this).find('.select').prop('checked', true).change();
+            else $(this).find('.select').prop('checked', false).change();
+        });
     });
 </script>
 @endsection
