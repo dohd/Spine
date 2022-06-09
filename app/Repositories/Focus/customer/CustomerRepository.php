@@ -78,6 +78,7 @@ class CustomerRepository extends BaseRepository
     public function getTransactionsForDataTable($customer_id = 0)
     {
         $id = $customer_id ?: request('customer_id');
+        
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })->where(function ($q) use($id) {
@@ -140,7 +141,7 @@ class CustomerRepository extends BaseRepository
             ]);
         }
 
-        // sequence of invoices and related payments
+        // sequence invoice and related payments
         $statements = collect();
         $index_visited = array();
         foreach ($transactions as $i => $tr_one) {
@@ -150,7 +151,7 @@ class CustomerRepository extends BaseRepository
                 $index_visited[] = $i;
                 $invoice_id = $tr_one->invoice->id;
                 $customer_id = $tr_one->invoice->customer_id;
-                // add payment, withholding, cnote, dnote
+                // add related payment, withholding, cnote, dnote
                 foreach ($transactions as $j => $tr_two) {
                     $types = ['pmt', 'withholding', 'cnote', 'dnote'];
                     if (in_array($tr_two->tr_type, $types, 1)) { 
@@ -173,9 +174,10 @@ class CustomerRepository extends BaseRepository
                 }
             }
         }
-        // add remainder transactions
+        // add remaining transactions
         if ($index_visited) {
             foreach ($transactions as $i => $tr) {
+                // check if already added and skip
                 if (in_array($i, $index_visited, 1)) continue;
                 $statements->add($tr);
             }
