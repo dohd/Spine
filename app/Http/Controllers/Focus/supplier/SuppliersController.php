@@ -164,7 +164,7 @@ class SuppliersController extends Controller
             }
             $intervals[] = [$from, $to];
         }
-        $bills = $this->repository->getPurchaseorderBillsForDataTable($supplier->id);
+        $bills = $this->repository->getBillsForDataTable($supplier->id);
         foreach ($bills as $bill) {
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
