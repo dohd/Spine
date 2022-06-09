@@ -82,6 +82,8 @@ class SuppliersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
+            if ($tr->bill && $tr->tr_type == 'bill')
+                return gen4tid('Bill-', $tr->bill->tid) . ' - ' . $tr->bill->note;
             return $tr->note;
         })
         ->addColumn('bill_amount', function ($tr) {
@@ -101,7 +103,7 @@ class SuppliersTableController extends Controller
 
     public function invoke_bill()
     {
-        $core = $this->supplier->getPurchaseorderBillsForDataTable();
+        $core = $this->supplier->getBillsForDataTable();
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
@@ -113,7 +115,7 @@ class SuppliersTableController extends Controller
             return $bill->doc_ref_type . ' - ' . $bill->doc_ref;
         })
         ->addColumn('note', function ($bill) {
-            return $bill->note;
+            return gen4tid('Bill-', $bill->tid) . ' - ' .$bill->note;
         })
         ->addColumn('amount', function ($bill) {
             return numberFormat($bill->grandttl);
@@ -138,6 +140,8 @@ class SuppliersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
+            if ($tr->bill && $tr->tr_type == 'bill')
+                return gen4tid('Bill-', $tr->bill->tid) . ' - ' . $tr->bill->note;
             return $tr->note;
         })
         ->addColumn('bill_amount', function ($tr) {
