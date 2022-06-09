@@ -83,6 +83,8 @@ class CustomersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
+            if ($tr->invoice && $tr->tr_type == 'rcpt')
+                return gen4tid('Inv-', $tr->invoice->tid) . ' - ' . $tr->invoice->notes;
             return $tr->note;
         })
         ->addColumn('invoice_amount', function ($tr) {
@@ -114,7 +116,7 @@ class CustomersTableController extends Controller
             return $invoice->status;
         })
         ->addColumn('note', function ($invoice) {
-            return $invoice->notes;
+            return gen4tid('Inv-', $invoice->tid) . ' - ' . $invoice->notes;
         })
         ->addColumn('amount', function ($invoice) {
             return numberFormat($invoice->total);
@@ -139,7 +141,9 @@ class CustomersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            return dateFormat($tr->note);
+            if ($tr->invoice && $tr->tr_type == 'rcpt')
+                return gen4tid('Inv-', $tr->invoice->tid) . ' - ' . $tr->invoice->notes;
+            return $tr->note;
         })
         ->addColumn('invoice_amount', function ($tr) {
             return numberFormat($tr->debit);
