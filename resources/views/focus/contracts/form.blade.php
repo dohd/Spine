@@ -65,7 +65,7 @@
                 <tbody>
                     <!-- schedule row template -->
                     <tr>
-                        <td><input type="text" name="s_title[]" class="form-control" id="title-0"></td>
+                        <td><input type="text" name="s_title[]" class="form-control" id="title-0" required></td>
                         <td><input type="text" name="s_start_date[]" class="form-control datepicker" id="startdate-0"></td>
                         <td><input type="text" name="s_end_date[]" class="form-control datepicker" id="enddate-0"></td>
                         <td>
@@ -105,6 +105,12 @@
 </div>
 
 <legend>Customer Equipments</legend><hr>
+<div class="form-inline mb-2">
+    <label for="branch" class="mr-1">Filter</label>
+    <div class="col-2">
+        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose branch"></select>
+    </div>    
+</div>
 <div class="table-responsive mb-1">
     <table id="equipmentTbl" class="table">
         <thead>
@@ -113,7 +119,12 @@
                 <th>Type</th>
                 <th>Branch</th>
                 <th>Location</th>
-                <th>Action</th>
+                <th>                    
+                    Action
+                    <div class="d-inline ml-2">
+                        <input type="checkbox" class="form-check-input" id="selectAll">
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -124,11 +135,11 @@
                 <td>#branch</td>
                 <td>#location</td>
                 <td>
-                    <button type="button" class="btn btn-outline-light btn-sm remove">
-                        <i class="fa fa-trash fa-lg text-danger"></i>
-                    </button>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input select">
+                    </div>
                 </td>
-                <input type="hidden" name="equipment_id[]" value="#id">
+                <input type="hidden" name="equipment_id[]" value="#id" class="equipId" disabled>
             </tr>
             <!-- edit equipment -->
             @isset($contract)
