@@ -38,6 +38,9 @@ Route::group(['namespace' => 'contractservice'], function () {
 });
 
 Route::group(['namespace' => 'contract'], function () {
+  Route::get('contracts/create_add_equipment', 'ContractsController@create_add_equipment')->name('contracts.create_add_equipment');
+  Route::post('contracts/store_add_equipment', 'ContractsController@store_add_equipment')->name('contracts.store_add_equipment');
+  
   Route::post('contracts/customer_contracts', 'ContractsController@customer_contracts')->name('contracts.customer_contracts');
   Route::post('contracts/task_schedules', 'ContractsController@task_schedules')->name('contracts.task_schedules');
   Route::post('contracts/contract_equipment', 'ContractsController@contract_equipment')->name('contracts.contract_equipment');
