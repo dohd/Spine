@@ -26,11 +26,12 @@
                             <table id="contractTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Contract No</th>
+                                        <th>#</th>                                        
                                         <th>Title</th>
                                         <th>Customer</th>
                                         <th>Amount</th>
+                                        <th>Schedule</th>
+                                        <th>Equipment</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Action</th>
@@ -77,10 +78,6 @@
                     name: 'id'
                 },
                 {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
                     data: 'title',
                     name: 'title'
                 },
@@ -91,6 +88,14 @@
                 {
                     data: 'amount',
                     name: 'amount'
+                },
+                {
+                    data: 'schedule',
+                    name: 'schedule'
+                },
+                {
+                    data: 'equipment',
+                    name: 'equipment'
                 },
                 {
                     data: 'start_date',
