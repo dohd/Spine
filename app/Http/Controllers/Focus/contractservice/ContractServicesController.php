@@ -92,7 +92,7 @@ class ContractServicesController extends Controller
     public function update(Request $request, ContractService $contractservice)
     {
         // extract request input
-        $data_items = $request->only('id', 'jobcard_no', 'jobcard_date', 'status', 'note');
+        $data_items = $request->only('id', 'jobcard_no', 'jobcard_date', 'status', 'note', 'is_charged', 'technician');
 
         $data_items = modify_array($data_items);
 
