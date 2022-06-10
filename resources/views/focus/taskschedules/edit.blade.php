@@ -46,7 +46,12 @@
                                                 <th>Type</th>
                                                 <th>Branch</th>
                                                 <th>Location</th>
-                                                <th>Action</th>
+                                                <th>                    
+                                                    Action
+                                                    <div class="d-inline ml-2">
+                                                        <input type="checkbox" class="form-check-input" id="selectAll">
+                                                    </div>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>                                                                                    
@@ -58,11 +63,11 @@
                                                     <td>{{ $row->equipment->branch->name }}</td>
                                                     <td>{{ $row->equipment->location }}</td>
                                                     <td>
-                                                        <button type="button" class="btn btn-outline-light btn-sm remove">
-                                                            <i class="fa fa-trash fa-lg text-danger"></i>
-                                                        </button>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input ml-1 select">
+                                                        </div>
                                                     </td>
-                                                    <input type="hidden" name="id[]" value="{{ $row->id }}">
+                                                    <input type="hidden" class="equipId" name="id[]" value="{{ $row->id }}" disabled>
                                                 </tr>                                                        
                                             @endforeach                                                    
                                         </tbody>
@@ -94,10 +99,21 @@
     $('#start_date').datepicker('setDate', new Date(schedule.start_date));
     $('#end_date').datepicker('setDate', new Date(schedule.end_date));     
     
-    // remove equipmentTbl row
-    $('#equipmentTbl').on('click', '.remove', function() {
-        $(this).parents('tr').remove();
+    // on change row checkbox
+    $('#equipmentTbl').on('change', '.select', function() {
+        const select = $(this).is(':checked');
+        const equipId = $(this).parents('tr').find('.equipId');
+        if (select) equipId.attr('disabled', false);
+        else equipId.attr('disabled', true);
+    })
+    // on change action checkbox
+    $('#selectAll').change(function() {
+        const selectAll = $(this).is(':checked');
+        $('#equipmentTbl tbody tr').each(function() {
+            if (selectAll) $(this).find('.select').prop('checked', true).change();
+            else $(this).find('.select').prop('checked', false).change();
+        });
     });
-
+    $('#selectAll').attr('checked', true).change();
 </script>
 @endsection
