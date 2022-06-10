@@ -863,12 +863,22 @@
                             <li><a class="dropdown-item" href="{{ route('biller.contracts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Contract
                                 </a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.contracts.create_add_equipment') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Add Contract Equipment
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endauth
                     @permission('project-manage')
-                    <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Task Schedule Management
-                        </a>
+                    <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Task Schedule Management </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Task Schedule 
+                                </a>                                
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.taskschedules.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Load Equipment
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Contract Service Management
                         </a>
