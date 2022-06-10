@@ -60,6 +60,16 @@ class TaskSchedulesTableController extends Controller
             ->addColumn('schedule', function ($schedule) {
                 return $schedule->title;
             })
+            ->addColumn('loaded', function ($schedule) {
+                return $schedule->taskschedule_equipments->count();
+            })
+            ->addColumn('service_rate', function ($schedule) {
+                $total = 0;
+                foreach ($schedule->taskschedule_equipments as $row) {
+                    if ($row->equipment) $total += $row->equipment->service_rate;
+                }
+                return numberFormat($total);
+            })
             ->addColumn('start_date', function ($schedule) {
                 return dateFormat($schedule->start_date);
             })

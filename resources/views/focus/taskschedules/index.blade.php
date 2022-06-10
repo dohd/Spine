@@ -27,6 +27,8 @@
                                         <th>#</th>
                                         <th>Contract</th>
                                         <th>Title</th>
+                                        <th>Loaded</th>
+                                        <th>Service Rate</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Action</th>
@@ -79,6 +81,14 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                 {
                     data: 'title',
                     name: 'title'
+                },
+                {
+                    data: 'loaded',
+                    name: 'loaded'
+                },
+                {
+                    data: 'service_rate',
+                    name: 'service_rate'
                 },
                 {
                     data: 'start_date',

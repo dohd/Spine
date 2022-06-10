@@ -27,6 +27,7 @@
                                     'Schedule Title' => $taskschedule->title,
                                     'Start Date' => dateFormat($taskschedule->start_date),
                                     'End Date' => dateFormat($taskschedule->end_date),
+                                    'Service Rate' => numberFormat($equipments->sum('service_rate'))
                                 ];
                             @endphp
                             <table class="table table-bordered table-sm mb-2">
@@ -48,10 +49,10 @@
                                             <th>Type</th>
                                             <th>Branch</th>
                                             <th>Location</th>
+                                            <th>Service Rate</th>
                                         </tr>
                                     </thead>
-                                    <tbody>   
-                                                                                 
+                                    <tbody>                                                                                 
                                         @foreach ($equipments as $i => $row)                                            
                                             <tr>
                                                 <td>{{ $i+1 }}</td>
@@ -59,6 +60,7 @@
                                                 <td>{{ $row->make_type }}</td>
                                                 <td>{{ $row->branch->name }}</td>
                                                 <td>{{ $row->location }}</td>
+                                                <td>{{ numberFormat($row->service_rate) }}</td>
                                             </tr>                                                        
                                         @endforeach                                                    
                                     </tbody>
