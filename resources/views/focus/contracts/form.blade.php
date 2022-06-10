@@ -163,11 +163,6 @@
     </table>
 </div>
 <div class="form-group row">
-    <div class="col-12">
-        <button class="btn btn-success btn-sm ml-2 d-none" type="button" id="addEquipment">
-            <i class="fa fa-plus-square" aria-hidden="true"></i> Add Row
-        </button>
-    </div>
     <div class="col-11">
         {{ Form::submit(@$contract ? 'Update' : 'Create', ['class' => 'btn btn-primary float-right btn-lg']) }}
     </div>
