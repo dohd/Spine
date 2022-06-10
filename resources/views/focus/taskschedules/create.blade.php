@@ -40,7 +40,7 @@
 
     // form submit
     $('form').submit(function(e) {
-        const equipments = $('#equipmentTbl tbody tr').length;
+        const equipments = $('#equipmentTbl .equipId:not(:disabled)').length;
         if (equipments < 1) {
             e.preventDefault();
             alert('Include at least one equipment!');
@@ -63,37 +63,65 @@
                 });
             }
         })
-
         // load equipments
         $.ajax({
             url: "{{ route('biller.contracts.contract_equipment')  }}",
             type: 'POST',
             data: {id: $(this).val()},
             success: data => {
-                // console.log(data);
                 $('#equipmentTbl tbody tr').remove();
-                const elements = ['#id', '#unique_id', '#make_type', '#branch', '#location', '#service_rate'];
-                data.forEach(obj => {
-                    let html = equipRow.replace('d-none', '');
-                    elements.forEach(el => {
-                        for (let p in obj) {
-                            if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);
-                            else if ('#'+p == el) html = html.replace(el, obj[p]? obj[p] : '');
-                        }
-                    });
-                    $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');
-                })
+                data.forEach(fillTable);
             }
         })
     });
+    function fillTable(obj) {
+        let html = equipRow.replace('d-none', '');
+        let elements = ['#id', '#unique_id', '#make_type', '#branch', '#location', '#service_rate'];
+        elements.forEach(el => {
+            for (let p in obj) {
+                if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);
+                else if ('#'+p == el && p == 'service_rate') {
+                    html = html.replace(el, parseFloat(obj.service_rate).toLocaleString())
+                    .replace(el, obj.service_rate);
+                } 
+                else if ('#'+p == el) html = html.replace(el, obj[p]? obj[p] : '');                
+            }
+        });
+        $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');
+    }
+
+    // on change row checkbox
+    $('#equipmentTbl').on('change', '.select', function() {
+        const select = $(this).is(':checked');
+        const equipId = $(this).parents('tr').find('.equipId');
+        const rate = $(this).parents('tr').find('.rate');
+        if (select) {
+            equipId.attr('disabled', false);
+            rate.attr('disabled', false);
+        } else {
+            equipId.attr('disabled', true);
+            rate.attr('disabled', true);
+        }  
+        calcTotal();
+    })
+
+    // on change action checkbox
+    $('#selectAll').change(function() {
+        const selectAll = $(this).is(':checked');
+        $('#equipmentTbl tbody tr').each(function() {
+            if (selectAll) $(this).find('.select').prop('checked', true).change();
+            else $(this).find('.select').prop('checked', false).change();
+        });
+    });
     
-    // add schedule row
-    $('#addEquipment').click(function() {
-        $('#equipmentTbl tbody').append('<tr>' + scheduleRow + '</tr>');
-    });
-    // remove schedule row
-    $('#equipmentTbl').on('click', '.remove', function() {
-        $(this).parents('tr').remove();
-    });
+    // compute total rate
+    function calcTotal() {
+        let totalRate = 0;
+        $('#equipmentTbl tbody tr').each(function() {
+            const rate = $(this).find('.rate:not(:disabled)');
+            if (rate.val()) totalRate += parseFloat(rate.val());
+        });
+        $('#totalRate').val(parseFloat(totalRate.toFixed(2)).toLocaleString());
+    }
 </script>
 @endsection

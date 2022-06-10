@@ -24,7 +24,13 @@
                 <th>Type</th>
                 <th>Branch</th>
                 <th>Location</th>
-                <th>Action</th>
+                <th>Rate</th>
+                <th>                    
+                    Action
+                    <div class="d-inline ml-2">
+                        <input type="checkbox" class="form-check-input" id="selectAll">
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -33,24 +39,26 @@
                 <td>#make_type</td>
                 <td>#branch</td>
                 <td>#location</td>
+                <td>#service_rate</td>
                 <td>
-                    <button class="btn btn-outline-light btn-sm remove">
-                        <i class="fa fa-trash fa-lg text-danger"></i>
-                    </button>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input select">
+                    </div>
                 </td>
-                <input type="hidden" name="equipment_id[]" value="#id">
-                <input type="hidden" name="service_rate[]" value="#service_rate">
+                <input type="hidden" name="equipment_id[]" value="#id" class="equipId" disabled>
+                <input type="hidden" name="service_rate[]" value="#service_rate" class="rate" disabled>
             </tr>
         </tbody>
     </table>
 </div>
 <div class="form-group row">
-    <div class="col-12">
-        <button class="btn btn-success btn-sm ml-2 d-none" type="button" id="addEquipment">
-            <i class="fa fa-plus-square" aria-hidden="true"></i> Add Row
-        </button>
+    <div class="col-2 ml-auto">
+        <label for="rate">Total Serive Rate</label>
+        <input type="text" name="" class="form-control" id="totalRate" disabled>
     </div>
-    <div class="col-11">
-        {{ Form::submit('Load', ['class' => 'btn btn-primary float-right btn-lg']) }}
+</div>
+<div class="form-group row">
+    <div class="col-2 ml-auto">
+        {{ Form::submit('Load Equipments', ['class' => 'btn btn-primary btn-lg']) }}
     </div>
 </div>
