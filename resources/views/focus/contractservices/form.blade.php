@@ -4,12 +4,9 @@
             <tr class="bg-gradient-directional-blue white">
                 <th>System ID</th>
                 <th>Location</th>
-
                 <th>Description</th>                                           
-                                                                                    
                 <th>Jobcard No</th>
                 <th>Jobcard Date</th>
-
                 <th width="10%">Status</th>
                 <th>Amount</th>
                 <th>
