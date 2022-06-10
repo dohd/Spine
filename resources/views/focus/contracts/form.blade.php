@@ -136,7 +136,7 @@
                 <td>#location</td>
                 <td>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input select">
+                        <input type="checkbox" class="form-check-input ml-1 select">
                     </div>
                 </td>
                 <input type="hidden" name="equipment_id[]" value="#id" class="equipId" disabled>
@@ -150,12 +150,12 @@
                         <td>{{ $row->equipment->branch->name }}</td>
                         <td>{{ $row->equipment->location }}</td>
                         <td>
-                            <button type="button" class="btn btn-outline-light btn-sm remove">
-                                <i class="fa fa-trash fa-lg text-danger"></i>
-                            </button>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input ml-1 select">
+                            </div>
                         </td>
-                        <input type="hidden" name="equipment_id[]" value="{{ $row->equipment_id }}">
-                        <input type="hidden" name="contracteq_id[]" value="{{ $row->id }}">
+                        <input type="hidden" class="equipId" name="equipment_id[]" value="{{ $row->equipment_id }}" disabled>
+                        <input type="hidden" class="contEquipId" name="contracteq_id[]" value="{{ $row->id }}" disabled>
                     </tr>
                 @endforeach
             @endisset

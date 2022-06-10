@@ -41,13 +41,17 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
+    const contract = @json($contract);
+    $('#start_date').datepicker('setDate', new Date(contract.start_date));
+    $('#end_date').datepicker('setDate', new Date(contract.end_date));    
+
     // form submit
     $('form').submit(function(e) {
         const schedules = $('#scheduleTbl tbody tr').length;
-        const equipments = $('#equipmentTbl tbody tr').length;
+        const equipments = $('#equipmentTbl .equipId:not(:disabled)').length
         if (schedules < 1 || equipments < 1) {
             e.preventDefault();
-            alert('Include at least one schedule task or equipment!');
+            alert('Include at least one task schedule and one equipment!');
         }
     });
 
@@ -57,29 +61,27 @@
     }
     renderDatepicker();
 
-    // customer select config
-    $("#customer").select2({
-        ajax: {
-            url: "{{ route('biller.customers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({ search: term }),
-            processResults: data => {
-                return {
-                    results: data.map(v => ({ 
-                        id: v.id, 
-                        text: `${v.name} - ${v.company}`,
-                    }))
-                };
-            },
+    // select2 config
+    function select2Config(url, callback, extraData) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, ...extraData}),
+                quietMillis: 50,
+                processResults: callback
+            }
         }
-    });        
+    }
 
-    const contract = @json($contract);
+    const customerUrl = "{{ route('biller.customers.select') }}";
+    const customerCb = data => ({ results: data.map(v => ({id: v.id, text: v.name + ' - ' + v.company})) });
+    $('#customer').select2(select2Config(customerUrl, customerCb));
 
-    $('#start_date').datepicker('setDate', new Date(contract.start_date));
-    $('#end_date').datepicker('setDate', new Date(contract.end_date));
+    const branchUrl = "{{ route('biller.branches.select') }}";
+    const branchCb = data => ({ results: data.map(v => ({id: v.id, text: v.name})) });
+    $('#branch').select2();    
     
     // add schedule row
     const scheduleRow = $('#scheduleTbl tbody tr:first').html();
@@ -98,17 +100,70 @@
         $(this).parents('tr').remove();
     });
 
-    // remove equipmentTbl row
+    // on change customer or branch load equipments
+    const equipRow =  $('#equipmentTbl tbody tr').html();
     $('#equipmentTbl tbody tr:first').remove();
-    $('#equipmentTbl').on('click', '.remove', function() {
-        const row = $(this).parents('tr');
-        swal({
-            title: 'Are You  Sure?',
-            icon: "warning",
-            buttons: true,
-            dangerMode: true,
-            showCancelButton: true,
-        }, () => row.remove());          
+    $('form').on('change', '#customer, #branch', function() {
+        if ($(this).is('#customer')) {
+            const customer_id = $(this).val();
+            $('#branch').select2(select2Config(branchUrl, branchCb, {customer_id}));
+            $.ajax({
+                url: "{{ route('biller.contracts.customer_equipment')  }}",
+                type: 'POST',
+                data: {id: customer_id},
+                success: data => {
+                    $('#equipmentTbl tbody tr').remove();
+                    data.forEach(fillTable);
+                }
+            });
+        } else {
+            const customer_id = $('#customer').val();
+            const branch_id = $(this).val();
+            $.ajax({
+                url: "{{ route('biller.contracts.customer_equipment')  }}?branch_id=" + branch_id,
+                type: 'POST',
+                data: {id: customer_id},
+                success: data => {
+                    $('#equipmentTbl tbody tr').remove();
+                    data.forEach(fillTable);
+                }
+            });
+        }
+        $('#selectAll').prop('checked', false).change();
     });
+    function fillTable(obj) {
+        let elements = ['#id', '#unique_id', '#make_type', '#branch', '#location'];
+        let html = equipRow.replace('d-none', '');
+        elements.forEach(el => {
+            for (let p in obj) {
+                if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);
+                else if ('#'+p == el) html = html.replace(el, obj[p]? obj[p] : '');
+            }
+        });
+        $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');
+    }
+    
+    // on change row checkbox
+    $('#equipmentTbl').on('change', '.select', function() {
+        const select = $(this).is(':checked');
+        const equipId = $(this).parents('tr').find('.equipId');
+        const contEquipId = $(this).parents('tr').find('.contEquipId');
+        if (select) {
+            equipId.attr('disabled', false);
+            contEquipId.attr('disabled', false);
+        } else {
+            equipId.attr('disabled', true);
+            contEquipId.attr('disabled', true);
+        }        
+    })
+    // on change action checkbox
+    $('#selectAll').change(function() {
+        const selectAll = $(this).is(':checked');
+        $('#equipmentTbl tbody tr').each(function() {
+            if (selectAll) $(this).find('.select').prop('checked', true).change();
+            else $(this).find('.select').prop('checked', false).change();
+        });
+    });
+    $('#selectAll').prop('checked', true).change();
 </script>
 @endsection
