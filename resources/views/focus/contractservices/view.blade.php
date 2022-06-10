@@ -39,36 +39,46 @@
                                     </tr>
                                 @endforeach
                             </table>
-                            <div class="table-reponsive">
+                            <div class="table-reponsive" style="overflow-x: scroll;">
                                 <table class="table">
                                     <thead>
                                         <tr class="bg-gradient-directional-blue white">
-                                            <th>#</th>
-                                            <th>Serial No</th>
-                                            <th>Type</th>
-                                            <th>Branch</th>
+                                            <th>System ID</th>
                                             <th>Location</th>
-                                            <th>Jobcard</th>
+                                            <th>Description</th>                                           
+                                            <th>Jobcard No</th>
                                             <th>Jobcard Date</th>
-                                            <th>Last Service</th>
-                                            <th>Next Service</th>
-                                            <th>Status</th>
-                                            <th>Note</th>
+                                            <th width="10%">Status</th>
+                                            <th>Amount</th>
+                                            <th>Charge</th>                                            
+                                            <th>Technician</th>
+                                            <th width="12%">Note</th>
                                         </tr>
                                     </thead>
                                     <tbody>                                            
                                         @foreach ($contractservice->items as $i => $row)                                            
-                                            <tr>
-                                                <td>{{ $i+1 }}</td>
-                                                <td>{{ $row->equipment->unique_id }}</td>
-                                                <td>{{ $row->equipment->make_type }}</td>
-                                                <td>{{ $row->equipment->branch->name }}</td>
-                                                <td>{{ $row->equipment->location }}</td>
+                                            <tr>                                                
+                                                <td>{{ gen4tid('E-', $row->equipment->tid) }}</td>
+                                                <td>{{ $row->equipment->location }}</td>  
+                                                <td>
+                                                    @php
+                                                        $descr = array_intersect_key(
+                                                            $row->equipment->toArray(), 
+                                                            array_flip(['make_type', 'equip_serial', 'unique_id', 'capacity', 'machine_gas'])
+                                                        );
+                                                        echo implode('; ', array_values($descr));
+                                                    @endphp                                                                                          
+                                                </td>                                                
                                                 <td>{{ $row->jobcard_no }}</td>
                                                 <td>{{ $row->jobcard_date?  dateFormat($row->jobcard_date) : '' }}</td>
-                                                <td>{{ $row->last_service_date?  dateFormat($row->last_service_date) : '' }}</td>
-                                                <td>{{ $row->next_service_date?  dateFormat($row->next_service_date) : '' }}</td>
                                                 <td>{{ ucfirst($row->status) }}</td>
+                                                <td>{{ numberFormat($row->equipment->service_rate) }}</td>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input ml-1"  {{ $row->is_charged ? 'checked' : '' }} onClick="return false;">
+                                                    </div>
+                                                </td>  
+                                                <td>{{ $row->technician }}</td>
                                                 <td>{{ $row->note }}</td>
                                             </tr>                                                        
                                         @endforeach                                                    
