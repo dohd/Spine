@@ -123,14 +123,24 @@ class ContractsController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Load Additional Equipments
      */
-    public function destroy($id)
+    public function create_add_equipment()
     {
-        //
+        return new ViewResponse('focus.contracts.create_add_equipment');
+    }
+
+    public function store_add_equipment(Request $request)
+    {
+        // extract request input 
+        $data = $request->only('contract_id', 'schedule_id');
+        $data_items = $request->only('equipment_id');
+
+        $data_items = modify_array($data_items);
+
+        $this->repository->add_equipment(compact('data', 'data_items'));
+
+        return new ViewResponse('focus.contracts.index', ['flash_success' => 'Contract Equipment added successfully']);
     }
 
     /**

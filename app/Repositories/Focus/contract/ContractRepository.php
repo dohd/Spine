@@ -149,6 +149,40 @@ class ContractRepository extends BaseRepository
     }
 
     /**
+     * Add Contract Equipment
+     */
+    public function add_equipment(array $input)
+    {
+        // dd($input);
+        $data = $input['data'];
+
+        // existing equipments id
+        $eq_ids = array();
+        if (isset($data['contract_id']) && isset($data['schedule_id'])) {
+            $eq_ids = ContractEquipment::where([
+                'contract_id' => $data['contract_id'], 
+                'schedule_id' => $data['schedule_id']
+            ])->pluck('equipment_id')->toArray();
+        } elseif (isset($data['contract_id'])) {
+            $eq_ids = ContractEquipment::where([
+                'contract_id' => $data['contract_id'], 
+                'schedule_id' => 0
+            ])->pluck('equipment_id')->toArray();
+        }
+
+        // load unique equipments
+        $data_items = array();
+        foreach ($input['data_items'] as $item) {
+            $item = $data + ['equipment_id' => $item['equipment_id']];
+            if (!in_array($item['equipment_id'], $eq_ids)) $data_items[] = $item;
+        }
+        $result = ContractEquipment::insert($data_items);
+        if ($result) return $result;
+
+        throw new GeneralException('Error Creating Contract');
+    }
+
+    /**
      * For deleting the respective model from storage
      *
      * @param Productcategory $productcategory
