@@ -29,7 +29,7 @@
                                         'Contract' => $contractservice->contract->title,
                                         'Task Schedule' => $contractservice->task_schedule->title,
                                         'Service Name' => $contractservice->name,
-                                        'Amount' => numberFormat($contractservice->amount),
+                                        'Service Rate' => numberFormat($contractservice->amount),
                                     ];
                                 @endphp
                                 @foreach ($details as $key => $val)
@@ -40,50 +40,7 @@
                                 @endforeach
                             </table>
                             {{ Form::open(['route' => ['biller.contractservices.update', $contractservice], 'method' => 'PATCH']) }}
-                                <div class="table-reponsive">
-                                    <table id="equipTbl" class="table">
-                                        <thead>
-                                            <tr class="bg-gradient-directional-blue white">
-                                                <th>#</th>
-                                                <th>Serial No</th>
-                                                <th>Type</th>
-                                                
-                                                <th>Location</th>
-                                                <th>Jobcard No</th>
-                                                <th>Jobcard Date</th>
-
-                                                <th>Status</th>
-                                                <th>Note</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>                                            
-                                            @foreach ($contractservice->items as $i => $row)                                            
-                                                <tr>
-                                                    <td>{{ $i+1 }}</td>
-                                                    <td>{{ $row->equipment->unique_id }}</td>
-                                                    <td>{{ $row->equipment->make_type }}</td>
-                                                    <td>{{ $row->equipment->location }}</td>
-                                                    <td><input type="text" class="form-control" name="jobcard_no[]" value="{{ $row->jobcard_no }}" id=""></td>
-                                                    <td><input type="text" class="form-control datepicker" name="jobcard_date[]" id="jobcardDate-{{ $i }}"></td>
-                                                    <td>
-                                                        <select name="status[]" class="form-control" id="">
-                                                            @foreach (['working', 'faulty', 'cannibalised', 'decommissioned'] as $val)
-                                                                <option value="{{ $val }}" {{ $val == $row->status? 'selected' : '' }}>{{ ucfirst($val) }}</option>
-                                                            @endforeach
-                                                        </select>                                                   
-                                                    </td>
-                                                    <td><input type="text" class="form-control" name="note[]" value="{{ $row->note }}" id=""></td>
-                                                    <input type="hidden" name="id[]" value="{{ $row->id }}">
-                                                </tr>                                                        
-                                            @endforeach                                                    
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-2 ml-auto">
-                                        {{ Form::submit('Update', ['class' => 'btn btn-primary btn-lg']) }}
-                                    </div>
-                                </div>
+                                @include('focus.contractservices.form')
                             {{ Form::close() }}
                         </div>
                     </div>
@@ -99,13 +56,47 @@
     // initialize datepicker
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
+    
+    // on change row checkbox
+    $('#equipmentTbl').on('change', '.select', function() {
+        const select = $(this).is(':checked');
+        const charged = $(this).parents('tr').find('.charged');
+        const rate = $(this).parents('tr').find('.rate');
+        if (select) {
+            charged.val(1);
+            rate.attr('disabled', false);
+        } else {
+            charged.val(0);
+            rate.attr('disabled', true);
+        }  
+        calcTotal();
+    })
 
+    // on change action checkbox
+    $('#selectAll').change(function() {
+        const selectAll = $(this).is(':checked');
+        $('#equipmentTbl tbody tr').each(function() {
+            if (selectAll) $(this).find('.select').prop('checked', true).change();
+            else $(this).find('.select').prop('checked', false).change();
+        });
+    });
+    
+    // compute total rate
+    function calcTotal() {
+        let totalRate = 0;
+        $('#equipmentTbl tbody tr').each(function() {
+            const rate = $(this).find('.rate:not(:disabled)');
+            if (rate.val()) totalRate += parseFloat(rate.val());
+        });
+        $('#totalRate').val(parseFloat(totalRate.toFixed(2)).toLocaleString());
+    }    
+
+    // update jobcard date and checked rows
     const serviceItems = @json($contractservice->items);
     serviceItems.forEach((v, i) => {
         if (v.jobcard_date) $('#jobcardDate-'+i).datepicker('setDate', new Date(v.jobcard_date));
         else $('#jobcardDate-'+i).val(null);
-    });
-    
-    
+        if (v.is_charged == 1) $('#chargeCheck-'+i).prop('checked', true).change();
+    });    
 </script>
 @endsection
