@@ -132,13 +132,16 @@ class ContractsController extends Controller
 
     public function store_add_equipment(Request $request)
     {
-        // extract request input 
-        $data = $request->only('contract_id', 'schedule_id');
+        // extract request input
+        $contract_id = $request->contract_id;
         $data_items = $request->only('equipment_id');
 
         $data_items = modify_array($data_items);
+        $data_items = array_map(function ($v) use($contract_id) {
+            return $v + compact('contract_id');
+        }, $data_items);
 
-        $this->repository->add_equipment(compact('data', 'data_items'));
+        $this->repository->add_equipment($data_items);
 
         return new ViewResponse('focus.contracts.index', ['flash_success' => 'Contract Equipment added successfully']);
     }
