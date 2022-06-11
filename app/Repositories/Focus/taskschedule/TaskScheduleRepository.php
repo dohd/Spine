@@ -3,7 +3,6 @@
 namespace App\Repositories\Focus\taskschedule;
 
 use App\Exceptions\GeneralException;
-use App\Models\contract\Contract;
 use App\Models\contract_equipment\ContractEquipment;
 use App\Models\contractservice\ContractService;
 use App\Models\items\ServiceItem;
