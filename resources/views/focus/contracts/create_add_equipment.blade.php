@@ -34,29 +34,22 @@
                                                 </option>
                                             @endisset
                                         </select>
-                                    </div>                                  
-                                    <div class="col-6">
-                                        <label for="branch">Branch</label>
-                                        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose branch"></select>
-                                    </div>                                      
-                                </div>
-
-                                <div class="form-group row">
+                                    </div>      
                                     <div class="col-6">
                                         <label for="contract">Contract</label>
                                         <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract" required>
                                             <option value="">-- Select Contract --</option>                                        
                                         </select>
-                                    </div>   
-                                    <div class="col-6">
-                                        <label for="schedule">Task Schedule</label>
-                                        <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Task Schedule">
-                                            <option value="">-- Select Schedule --</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                    </div>                               
+                                </div>                               
 
-                                <legend>Customer Equipments</legend><hr>                                
+                                <legend>Customer Equipments</legend><hr>    
+                                <div class="form-group form-inline">
+                                    <label for="branch">Branch</label>
+                                    <div class="col-2">
+                                        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose branch"></select>
+                                    </div>
+                                </div>                               
                                 <div class="table-responsive mb-1">
                                     <table id="equipmentTbl" class="table">
                                         <thead>
@@ -163,7 +156,6 @@
                 data: {id: customer_id},
                 success: data => {
                     $('#contract option:not(:eq(0))').remove();
-                    $('#schedule option:not(:eq(0))').remove();
                     data.forEach(v => $('#contract').append(new Option(v.title, v.id)));
                 }
             });
@@ -193,23 +185,6 @@
         });
         $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');
     }
-
-    // on change contract
-    $('#contract').change(function() {
-        // load task schedules
-        $.ajax({
-            url: "{{ route('biller.contracts.task_schedules')  }}",
-            type: 'POST',
-            data: {id: $(this).val()},
-            success: data => {
-               $('#schedule option').remove();
-               $('#schedule').append(new Option('-- Select Schedule --', ''));
-                data.forEach(v => {                    
-                    $('#schedule').append(new Option(v.title, v.id));
-                });
-            }
-        })
-    });    
 
     // on change row checkbox
     $('#equipmentTbl').on('change', '.select', function() {
