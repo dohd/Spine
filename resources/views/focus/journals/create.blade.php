@@ -56,15 +56,15 @@
     function select2Config() {
         return {
             ajax: {
-            url: "{{ route('biller.journals.journal_accounts') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({keyword: term}),
+                url: "{{ route('biller.journals.journal_accounts') }}",
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({keyword: term}),
                 processResults: data => {
-                    const results = data
-                        .map(v => ({id: v.id, text: v.holder + ' - ' + v.account_type.category}))
-                        .filter(v => !accountIds.includes(v.id));
+                    const results = data.map(v => ({id: v.id, text: v.holder + ' - ' + v.account_type?.category}))
+                    .filter(v => !accountIds.includes(v.id));
+
                     return {results}; 
                 },
             }
