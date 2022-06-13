@@ -135,7 +135,7 @@
         if ($('#deposit_ttl').val() == 0 && $('#allocated').val() == 1) {
             e.preventDefault();
             alert('Allocate payment amount on at least one invoice!');
-        } else if ($('#deposit_ttl').val() == 0) {
+        } else if ($('#deposit').val() == 0) {
             e.preventDefault();
             alert('Enter payment amount!');
         }
@@ -168,14 +168,30 @@
         calcTotal();
     });
 
-    // on change allocation type
-    $('#allocated').change(function() {
-        // on account
-        if ($(this).val() == 0) {
-            $('#invoiceTbl tbody tr').each(function() {
-                $(this).find('.paid').val('').change();
-            });
-        }
+    // On deposit change
+    $('#deposit').on('focus', function(e) {
+        if (!$('#person').val()) $(this).blur();
+    });
+    $('#deposit').change(function() {
+        if ($('#allocated').val() == 0) return;
+        let amountSum = 0;
+        let depoSum = 0;
+        let depo = $(this).val().replace(/,/g, '') * 1;
+        $(this).val(parseFloat(depo).toLocaleString());
+        const rows = $('#invoiceTbl tbody tr').length;
+        $('#invoiceTbl tbody tr').each(function() {
+            if ($(this).index() == rows-1) return;
+            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
+            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
+            else $(this).find('.paid').val(0);
+            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
+            depo -= amount;
+            amountSum += amount;
+            depoSum += paid;
+        });
+        $('#amount_ttl').val(amountSum.toLocaleString());
+        $('#deposit_ttl').val(depoSum.toLocaleString());
     });    
 
     // invoice row
@@ -219,13 +235,14 @@
                 ['#paymentMode', '#allocated', '#account'].forEach(v => $(v).attr('disabled', false).val(''));
                 ['#deposit', '#reference'].forEach(v => $(v).attr('readonly', false).val('').change());
                 $('#date').datepicker('setDate', new Date()).attr('disabled', false);
+                ['#deposit_ttl', '#amount_ttl'].forEach(v => $(v).val(0));
                 if (data.hasOwnProperty('id')) {
                     const amount = data.deposit.replace(/,/g, '') * 1;
                     $('#deposit').val(parseFloat(amount.toFixed(2)).toLocaleString())
                     .attr('readonly', true).change();
                     $('#paymentMode').val(data.payment_mode).attr('disabled', true);
                     $('#reference').val(data.reference).attr('readonly', true);
-                    $('#allocated').val(1).attr('disabled', true);
+                    $('#allocated').val(1).attr('disabled', true).change();
                     $('#account').val(data.account.id).attr('disabled', true);
                     $('#date').datepicker('setDate', new Date(data.date)).attr('disabled', true);
                     $('#paymentId').val(data.id);
@@ -234,31 +251,17 @@
         });
     });
 
-    // On deposit change
-    $('#deposit').on('focus', function(e) {
-        if (!$('#person').val()) $(this).blur();
-    });
-    $('#deposit').change(function() {
-        let amountSum = 0;
-        let depoSum = 0;
-        let depo = $(this).val().replace(/,/g, '') * 1;
-        $(this).val(parseFloat(depo).toLocaleString());
-        const rows = $('#invoiceTbl tbody tr').length;
-        $('#invoiceTbl tbody tr').each(function() {
-            if ($(this).index() == rows-1) return;
-            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
-            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
-            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
-            else $(this).find('.paid').val(0);
-            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
-            depo -= amount;
-            amountSum += amount;
-            depoSum += paid;
-        });
-        $('#amount_ttl').val(amountSum.toLocaleString());
-        $('#deposit_ttl').val(depoSum.toLocaleString());
+    // on change allocation type
+    $('#allocated').change(function() {
+        // on account
+        if ($(this).val() == 0) {
+            $('#invoiceTbl tbody tr').each(function() {
+                $(this).find('.paid').val('').change();
+            });
+        } else $('#deposit').change();
     });
 
+    // comput totals
     function calcTotal() {
         let amountSum = 0;
         let depoSum = 0;
@@ -267,7 +270,6 @@
             if ($(this).index() == rows-1) return;
             const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
             const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
-
             amountSum += amount;
             depoSum += paid;
         });
