@@ -19,7 +19,6 @@
 namespace App\Http\Controllers\Focus\account;
 
 use App\Models\account\Account;
-use App\Models\Company\ConfigMeta;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
