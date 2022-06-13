@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
 use App\Models\bank\Bank;
+use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use Bitly;
@@ -261,11 +262,12 @@ class InvoicesController extends Controller
      */
     public function create_payment(Request $request)
     {
+        $tid = PaidInvoice::max('tid');
         $accounts = Account::whereHas('accountType', function ($q) {
-            $q->where('name', 'Bank');
+            $q->where('system', 'bank');
         })->get();
 
-        return new ViewResponse('focus.invoices.create_payment', compact('accounts'));
+        return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid'));
     }
 
     /**
@@ -276,7 +278,7 @@ class InvoicesController extends Controller
         // extract request input
         $bill = $request->only([
             'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl',
-            'due_date', 'payment_mode', 'doc_ref_type', 'doc_ref'
+            'payment_mode', 'reference', 'is_allocated', 'payment_id'
         ]);
         $bill_items = $request->only(['invoice_id', 'paid']); 
 
@@ -289,7 +291,7 @@ class InvoicesController extends Controller
 
         $result = $this->repository->create_invoice_payment(compact('bill', 'bill_items'));
 
-        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoices Payment successfully recieved']);
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice payment received successfully']);
     }
 
     /**
@@ -301,6 +303,19 @@ class InvoicesController extends Controller
             ->whereIn('status', ['due', 'partial'])->get();
 
         return response()->json($invoices);
+    }
+
+    /**
+     * Fetch unallocated payment
+     */
+    public function unallocated_payment(Request $request)
+    {
+        $pmt = PaidInvoice::where(['customer_id' => $request->customer_id, 'is_allocated' => 0])
+            ->with(['account' => function ($q) {
+                $q->select(['id', 'holder']);
+            }])->first();
+
+        return response()->json($pmt);
     }
 
 

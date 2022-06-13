@@ -33,10 +33,8 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
-use App\Models\invoice\Invoice;
-use App\Models\transaction\Transaction;
+use App\Models\invoice\PaidInvoice;
 use DateTime;
-use Redirect;
 
 /**
  * CustomersController
@@ -182,6 +180,7 @@ class CustomersController extends Controller
      */
     public function show(Customer $customer, ManageCustomerRequest $request)
     {
+        // account balance
         $transactions = $this->repository->getTransactionsForDataTable($customer->id);
         $account_balance = $transactions->sum('debit') - $transactions->sum('credit');
 
@@ -211,8 +210,11 @@ class CustomersController extends Controller
                 }
             }
         }
+
+        // unallocated payment
+        $unallocated_pmt = PaidInvoice::where(['customer_id' => $customer->id, 'is_allocated' => 0])->first();
         
-        return new ViewResponse('focus.customers.view', compact('customer', 'account_balance', 'aging_cluster'));
+        return new ViewResponse('focus.customers.view', compact('customer', 'account_balance', 'aging_cluster', 'unallocated_pmt'));
     }
 
     public function send_bill(CommunicationRequest $request)
