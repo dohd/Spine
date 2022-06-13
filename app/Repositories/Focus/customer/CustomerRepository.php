@@ -78,23 +78,33 @@ class CustomerRepository extends BaseRepository
     public function getTransactionsForDataTable($customer_id = 0)
     {
         $id = $customer_id ?: request('customer_id');
-        
+         
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
-        })->where(function ($q) use($id) {
-            $q->whereHas('invoice', function ($q) use($id) { 
-                $q->where('customer_id', $id); 
-            })->orwhereHas('paidinvoice', function ($q) use($id) {
-                $q->where('customer_id', $id);
-            })->orwhereHas('withholding', function ($q) use($id) {
-                $q->where('customer_id', $id);
-            })->orwhereHas('creditnote', function ($q) use($id) {
-                $q->where('customer_id', $id);
-            })->orwhereHas('debitnote', function ($q) use($id) {
-                $q->where('customer_id', $id);
-            });
-        })->whereIn('tr_type', ['rcpt', 'pmt', 'withholding', 'cnote', 'dnote']);
-
+        })->where('tr_type', 'rcpt')->whereHas('invoice', function ($q) use($id) { 
+            $q->where('customer_id', $id); 
+        })
+        ->orWhereHas('account', function ($q) { 
+            $q->where('system', 'receivable');  
+        })->where('tr_type', 'pmt')->whereHas('paidinvoice', function ($q) use($id) {
+            $q->where('customer_id', $id);
+        })
+        ->orWhereHas('account', function ($q) { 
+            $q->where('system', 'receivable');  
+        })->where('tr_type', 'withholding')->whereHas('withholding', function ($q) use($id) {
+            $q->where('customer_id', $id);
+        })
+        ->orWhereHas('account', function ($q) { 
+            $q->where('system', 'receivable');  
+        })->where('tr_type', 'cnote')->whereHas('creditnote', function ($q) use($id) {
+            $q->where('customer_id', $id);
+        })
+        ->orWhereHas('account', function ($q) { 
+            $q->where('system', 'receivable');  
+        })->where('tr_type', 'dnote')->whereHas('debitnote', function ($q) use($id) {
+            $q->where('customer_id', $id);
+        });
+            
         // on date filter
         $start_date = request('start_date');
         $end_date = request('end_date');
