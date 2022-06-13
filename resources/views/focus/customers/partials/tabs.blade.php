@@ -67,16 +67,18 @@
                         @foreach ([30, 60, 90, 120] as $val)
                             <th>{{ $val }} Days</th>
                         @endforeach
-                        <th>Total</th>
+                        <th>Aging Total</th>
                         <th style="border-top: 1px solid white; border-bottom: 1px solid white;"></th>
                         <th>On Account</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        @php
-                            $total = 0;
-                        @endphp
+                    @php
+                        $on_account = $unallocated_pmt? $unallocated_pmt->deposit_ttl : 0;
+                        $total = 0;
+                    @endphp
+                    <tr>                        
                         @for ($i = 0; $i < count($aging_cluster); $i++) 
                             <td>{{ numberFormat($aging_cluster[$i]) }}</td>
                             @php
@@ -85,7 +87,8 @@
                         @endfor
                         <td>{{ numberFormat($total) }}</td>
                         <td style="border-top: 1px solid white; border-bottom: 1px solid white;"></td>
-                        <td>0.00</td>
+                        <td>{{ numberFormat($on_account) }}</td>
+                        <td>{{ numberFormat($total - $on_account) }}</td>
                     </tr>
                 </tbody>                     
             </table>  
