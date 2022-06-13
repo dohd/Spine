@@ -15,7 +15,7 @@
                 </option>
             @endforeach
         </select>
-        <input type="hidden" name="account_type_id" id="accTypeId">
+        <input type="hidden" name="account_type_id" id="accTypeId" value="{{ @$account->account_type_id }}">
         <input type="hidden" name="is_multiple" id="isMultiple">
     </div>
     <div class="col-md-6">
