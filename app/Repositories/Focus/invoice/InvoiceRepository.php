@@ -154,6 +154,7 @@ class InvoiceRepository extends BaseRepository
             'ref_ledger_id' => $result->account_id, // revenue ledger id
             'credit' => $result->subtotal,
         ]);
+
         // credit tax (VAT)
         $account = Account::where('system', 'tax')->first(['id']);
         $tax_cr_data = array_replace($dr_data, [
@@ -176,39 +177,53 @@ class InvoiceRepository extends BaseRepository
 
         $bill = $input['bill'];
         foreach ($bill as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1)) 
-                $bill[$key] = date_for_database($val);
+            if ($key == 'date') $bill[$key] = date_for_database($val);
             if (in_array($key, ['amount_ttl', 'deposit_ttl', 'deposit'], 1)) 
                 $bill[$key] = numberClean($val);
         }
-        $result = PaidInvoice::create($bill);
 
-        $bill_items = $input['bill_items'];
-        foreach ($bill_items as $k => $item) {
-            $bill_items[$k] = array_replace($item, [
-                'paidinvoice_id' => $result->id,
-                'paid' => numberClean($item['paid'])
-            ]);
+        // create payment or allocate previous payment
+        $result = null;
+        $payment_id = $bill['payment_id'];
+        if ($payment_id) {
+            $data = array_intersect_key($bill, array_flip(['deposit_ttl', 'is_allocated']));
+            $result = PaidInvoice::find($payment_id);
+            $result->update($data);
+        } else {
+            unset($bill['payment_id']);
+            if (!$bill['is_allocated']) $bill['deposit_ttl'] = $bill['deposit'];
+            $result = PaidInvoice::create($bill);
         }
-        PaidInvoiceItem::insert($bill_items);
+        
+        $bill_items = $input['bill_items'];
+        if ($bill_items) {
+            foreach ($bill_items as $k => $item) {
+                $bill_items[$k] = array_replace($item, [
+                    'paidinvoice_id' => $result->id,
+                    'paid' => numberClean($item['paid'])
+                ]);
+            }
+            PaidInvoiceItem::insert($bill_items);
 
-        // update paid amount in invoices
-        $invoice_ids = $result->items()->pluck('invoice_id')->toArray();
-        $paid_invoices = PaidInvoiceItem::whereIn('invoice_id', $invoice_ids)
-            ->select(DB::raw('invoice_id as id, SUM(paid) as amountpaid'))
-            ->groupBy('invoice_id')
-            ->get()->toArray();
-        Batch::update(new Invoice, $paid_invoices, 'id');
+            // update paid amount in invoices
+            $invoice_ids = $result->items()->pluck('invoice_id')->toArray();
+            $paid_invoices = PaidInvoiceItem::whereIn('invoice_id', $invoice_ids)
+                ->select(DB::raw('invoice_id as id, SUM(paid) as amountpaid'))
+                ->groupBy('invoice_id')
+                ->get()->toArray();
+            Batch::update(new Invoice, $paid_invoices, 'id');
 
-        // update payment status in invoices
-        foreach ($result->items as $item) {            
-            $invoice = $item->invoice;
-            if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-            if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            // update payment status in invoices
+            foreach ($result->items as $item) {            
+                $invoice = $item->invoice;
+                if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+                if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            }
         }
         
         /** accounting */
-        $this->post_transaction_invoice_payment($result);
+        $result['note'] = $result->payment_mode . ' - ' . $result->reference;
+        if (!$payment_id) $this->post_transaction_invoice_payment($result);
 
         DB::commit();
         if ($result) return true;
@@ -216,26 +231,28 @@ class InvoiceRepository extends BaseRepository
 
     public function post_transaction_invoice_payment($bill)
     {
-        // credit Accounts Receivable (Creditors)
+        // credit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $cr_data = [
+            'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $bill['deposit_ttl'],
             'tr_date' => date('Y-m-d'),
-            'due_date' => $bill['due_date'],
+            'due_date' => date('Y-m-d'),
             'user_id' => $bill['user_id'],
             'ins' => $bill['ins'],
             'tr_type' => $tr_category->code,
             'tr_ref' => $bill['id'],
             'user_type' => 'customer',
             'is_primary' => 1,
-            'note' => $bill['doc_ref_type'] . ' - ' . $bill['doc_ref'],
+            'note' => $bill['note'],
         ];
         Transaction::create($cr_data);
 
-        // debit Revenue Acount (Income)
+        // debit Bank Account 
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $bill['account_id'],
