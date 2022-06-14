@@ -263,9 +263,10 @@ class InvoicesController extends Controller
     public function create_payment(Request $request)
     {
         $tid = PaidInvoice::max('tid');
+        // bank and advanced pmt accounts (type_id: 6, type_id: 10)
         $accounts = Account::whereHas('accountType', function ($q) {
-            $q->where('system', 'bank');
-        })->get();
+            $q->whereIn('system', ['bank', 'other_current_liability']);
+        })->get(['id', 'account_type_id', 'holder', 'debit', 'credit']);
 
         return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid'));
     }
@@ -278,7 +279,7 @@ class InvoicesController extends Controller
         // extract request input
         $bill = $request->only([
             'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl',
-            'payment_mode', 'reference', 'is_allocated', 'payment_id'
+            'payment_mode', 'reference', 'is_allocated', 'advance_account_id'
         ]);
         $bill_items = $request->only(['invoice_id', 'paid']); 
 
