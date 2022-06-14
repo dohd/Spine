@@ -122,6 +122,7 @@ class InvoiceRepository extends BaseRepository
         throw new GeneralException('Error Creating Invoice');
     }
 
+    // invoice transacton
     public function post_transaction_project_invoice($result)
     {
         // debit Accounts Receivable (Debtors)
@@ -182,21 +183,26 @@ class InvoiceRepository extends BaseRepository
                 $bill[$key] = numberClean($val);
         }
 
-        // create payment or allocate previous payment
         $result = null;
-        $payment_id = $bill['payment_id'];
-        if ($payment_id) {
-            $data = array_intersect_key($bill, array_flip(['deposit_ttl', 'is_allocated']));
-            $result = PaidInvoice::find($payment_id);
-            $result->update($data);
-        } else {
-            unset($bill['payment_id']);
-            if (!$bill['is_allocated']) $bill['deposit_ttl'] = $bill['deposit'];
-            $result = PaidInvoice::create($bill);
-        }
-        
-        $bill_items = $input['bill_items'];
-        if ($bill_items) {
+        $is_allocated = $bill['is_allocated'];
+        // payment per invoice
+        if ($is_allocated) {
+            if ($bill['account_id']) {
+                // direct payment
+                unset($bill['is_allocated']);
+                $result = PaidInvoice::create($bill);
+            } elseif ($bill['advance_account_id']) {
+                // payment from advance account
+                $result = PaidInvoice::where([
+                    'customer_id' => $bill['customer_id'], 
+                    'advance_account_id' => $bill['advance_account_id'],
+                ])->orderBy('id', 'DESC')->first();
+                $result['account_id'] = null;
+                $result['deposit_ttl'] = $bill['deposit_ttl'];
+            }
+            $result['note'] = $result->payment_mode . ' - ' . $result->reference;
+
+            $bill_items = $input['bill_items'];
             foreach ($bill_items as $k => $item) {
                 $bill_items[$k] = array_replace($item, [
                     'paidinvoice_id' => $result->id,
@@ -204,7 +210,7 @@ class InvoiceRepository extends BaseRepository
                 ]);
             }
             PaidInvoiceItem::insert($bill_items);
-
+    
             // update paid amount in invoices
             $invoice_ids = $result->items()->pluck('invoice_id')->toArray();
             $paid_invoices = PaidInvoiceItem::whereIn('invoice_id', $invoice_ids)
@@ -212,58 +218,114 @@ class InvoiceRepository extends BaseRepository
                 ->groupBy('invoice_id')
                 ->get()->toArray();
             Batch::update(new Invoice, $paid_invoices, 'id');
-
+    
             // update payment status in invoices
             foreach ($result->items as $item) {            
                 $invoice = $item->invoice;
                 if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
                 if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
             }
+        } else {
+            // payment on account
+            $bill['deposit_ttl'] = $bill['deposit'];
+            $result = PaidInvoice::create($bill);
         }
-        
+        $result['is_allocated'] = $is_allocated;
+
         /** accounting */
-        $result['note'] = $result->payment_mode . ' - ' . $result->reference;
-        if (!$payment_id) $this->post_transaction_invoice_payment($result);
+        $this->post_transaction_invoice_payment($result);
 
         DB::commit();
         if ($result) return true;
     }
 
-    public function post_transaction_invoice_payment($bill)
+    // payment transaction
+    public function post_transaction_invoice_payment($result)
     {
-        // credit Accounts Receivable (Debtors)
-        $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
+        $tr_category_adv = Transactioncategory::where('code', 'adv_pmt')->first(['id', 'code']);
+        $tr_category_pmt = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
-        $cr_data = [
+        $data = [
             'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $bill['deposit_ttl'],
             'tr_date' => date('Y-m-d'),
             'due_date' => date('Y-m-d'),
-            'user_id' => $bill['user_id'],
-            'ins' => $bill['ins'],
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $bill['id'],
+            'user_id' => $result->user_id,
+            'ins' => $result->ins,
+            'tr_ref' => $result->id,
             'user_type' => 'customer',
-            'is_primary' => 1,
-            'note' => $bill['note'],
+            'note' => $result->note,
+            'is_primary' => 0,
         ];
-        Transaction::create($cr_data);
 
-        // debit Bank Account 
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $bill['account_id'],
-            'debit' => $bill['deposit_ttl'],
-        ]);
-        Transaction::create($dr_data);
+        $tr_data = array();
+        if ($result->is_allocated) {
+            // payment per invoice
+            $account = Account::where('system', 'receivable')->first(['id']);
+            if ($result->account_id) {
+                // debit Bank Account
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $result->account_id,
+                    'debit' => $result->deposit_ttl,
+                    'is_primary' => 1,
+                    'trans_category_id' => $tr_category_pmt->id,
+                    'tr_type' => $tr_category_pmt->code,
+                ]);
+                // credit Accounts Receivable (Debtors)
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $account->id,
+                    'credit' => $result->deposit_ttl,
+                    'trans_category_id' => $tr_category_pmt->id,
+                    'tr_type' => $tr_category_pmt->code,
+                ]);
+            } elseif ($result->advance_account_id) {
+                // debit Advance Payment Account
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $result->advance_account_id,
+                    'debit' => $result->deposit_ttl,
+                    'is_primary' => 1,
+                    'trans_category_id' => $tr_category_adv->id,
+                    'tr_type' => $tr_category_adv->code,
+                ]);
+                // credit Accounts Receivable (Debtors)
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $account->id,
+                    'credit' => $result->deposit_ttl,
+                    'trans_category_id' => $tr_category_pmt->id,
+                    'tr_type' => $tr_category_pmt->code,
+                ]);
+            }
+        } else {
+            // payment on account
+            // debit Bank Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => $result->account_id,
+                'debit' => $result->deposit_ttl,
+                'is_primary' => 1,
+                'trans_category_id' => $tr_category_pmt->id,
+                'tr_type' => $tr_category_pmt->code,
+            ]);
+            // credit Advance payment Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => $result->advance_account_id,
+                'credit' => $result->deposit_ttl,
+                'trans_category_id' => $tr_category_adv->id,
+                'tr_type' => $tr_category_adv->code,
+            ]);
+        }
+        $tr_data = array_map(function ($v) {
+            if (isset($v['debit']) && $v['debit'] > 0) $v['credit'] = 0;
+            if (isset($v['credit']) && $v['credit'] > 0) $v['debit'] = 0;
+            return $v;
+        }, $tr_data);
+        Transaction::insert($tr_data);
         
         // update account ledgers debit and credit totals
         aggregate_account_transactions();
     }
 
+    /**
+     * Update Project Invoice
+     */
     public function update_project_invoice($invoice, array $input)
     {
         DB::beginTransaction();
@@ -473,6 +535,7 @@ class InvoiceRepository extends BaseRepository
             $item->quote->update(['invoiced' => 'No']);
         }
         $invoice->transactions()->delete();
+        
         aggregate_account_transactions();
 
         $result = $invoice->delete();
