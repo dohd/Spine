@@ -33,7 +33,7 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
-use App\Models\invoice\PaidInvoice;
+use App\Models\transaction\Transaction;
 use DateTime;
 
 /**
@@ -211,10 +211,13 @@ class CustomersController extends Controller
             }
         }
 
-        // unallocated payment
-        $unallocated_pmt = PaidInvoice::where(['customer_id' => $customer->id, 'is_allocated' => 0])->first();
+        // advance payment transactions
+        $customer_id = $customer->id;
+        $advance_pmts = Transaction::whereIn('tr_ref', function ($q) use($customer_id) {
+            $q->select('id')->from('paid_invoices')->where('customer_id', $customer_id);
+        })->where('tr_type', 'adv_pmt')->get(['id', 'tr_ref', 'tr_type', 'credit', 'debit']);
         
-        return new ViewResponse('focus.customers.view', compact('customer', 'account_balance', 'aging_cluster', 'unallocated_pmt'));
+        return new ViewResponse('focus.customers.view', compact('customer', 'account_balance', 'aging_cluster', 'advance_pmts'));
     }
 
     public function send_bill(CommunicationRequest $request)

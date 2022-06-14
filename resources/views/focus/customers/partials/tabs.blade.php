@@ -75,7 +75,7 @@
                 </thead>
                 <tbody>
                     @php
-                        $on_account = $unallocated_pmt? $unallocated_pmt->deposit_ttl : 0;
+                        $on_account = $advance_pmts->sum('credit') - $advance_pmts->sum('debit');
                         $total = 0;
                     @endphp
                     <tr>                        
