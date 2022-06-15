@@ -102,14 +102,14 @@
             <tr class="bg-white">
                 <td colspan="4"></td>
                 <td colspan="2">
-                    <div class="form-inline mb-1 float-right">
-                        <label for="total_bill">Total Amount</label>
-                        {{ Form::text('amount_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'amount_ttl', 'readonly']) }}
-                    </div>
                     <div class="form-inline float-right">
                         <label for="total_paid">Total Allocated</label>
                         {{ Form::text('deposit_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'deposit_ttl', 'readonly']) }}
                     </div>                                         
+                    <div class="form-inline mb-1 float-right">
+                        <label for="total_bill">Total Amount</label>
+                        {{ Form::text('amount_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'amount_ttl', 'readonly']) }}
+                    </div>
                 </td>
             </tr>
         </tbody>                
