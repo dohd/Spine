@@ -259,9 +259,10 @@
     // add skill row
     let skillId = 0;
     const skillHtml = $('#skillTbl tbody tr:first').html();
+    $('#skillTbl tbody tr:first').remove();
     $('#addRow').click(function() {
         skillId++;
-        const html = skillHtml.replace(/-0/g, '-'+skillId);
+        const html = skillHtml.replace(/-0/g, '-'+skillId).replace('d-none', '');
         $('#skillTbl tbody').append('<tr>'+html+'</tr>');
     });
 
