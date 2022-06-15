@@ -131,13 +131,10 @@ class QuoteRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }   
         // increament tid
-        if (isset($data['bank_id'])) 
-            $last_qt = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
-        else $last_qt = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
-
-        if ($last_qt && $data['tid'] <= $last_qt->tid) {
-            $data['tid'] = $last_qt->tid + 1;
-        } 
+        if (isset($data['bank_id'])) $last_tid = Quote::where('bank_id', '>', 0)->max('tid');
+        else $last_tid = Quote::where('bank_id', 0)->max('tid');
+        if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
+            
         // close lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         $result = Quote::create($data);
