@@ -129,11 +129,11 @@
                 {data: 'branch', name: 'branch'},
                 {data: 'unit_type', name: 'unit_type'},
                 {data: 'capacity', name: 'capacity'},
-                {data: 'manufacturer', name: 'manufacturer'},
+                {data: 'make_type', name: 'make_type'},
                 {data: 'location', name: 'location'},
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
-            order: [[0, "asc"]],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: ['csv', 'excel', 'print'],

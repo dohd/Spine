@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\equipment;
 
+use App\Models\equipmentcategory\EquipmentCategory;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -28,6 +29,8 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.equipments.edit', ['equipment' => $this->equipment]);
+        $categories = EquipmentCategory::all();
+
+        return view('focus.equipments.edit', ['equipment' => $this->equipment] + compact('categories'));
     }
 }

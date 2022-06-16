@@ -49,6 +49,7 @@ class EquipmentRepository extends BaseRepository
     {
         // dd($input);
         $input['service_rate'] = numberClean($input['service_rate']);
+
         $result = Equipment::create($input);
         if ($result) return $result;
 
@@ -67,6 +68,7 @@ class EquipmentRepository extends BaseRepository
     {
         // dd($input);
         $input['service_rate'] = numberClean($input['service_rate']);
+        
         if ($equipment->update($input)) return true;
             
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));

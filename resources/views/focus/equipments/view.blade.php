@@ -31,11 +31,13 @@
                                         'Unique ID' => $equipment->unique_id,
                                         'Serial No' => $equipment->equip_serial,
                                         'Unit Type' => $equipment->unit_type,
-                                        'Make' => $equipment->manufacturer,
+                                        'Make' => $equipment->make_type,
                                         'Model / Model Number' => $equipment->model,
                                         'Capacity' => number_format($equipment->capacity),
                                         'Gas Type' => $equipment->machine_gas,
                                         'Equipment Location' => $equipment->location,
+                                        'Equipment Building' => $equipment->building,
+                                        'Building Floor' => $equipment->floor,
                                         'Maintanance Rate (VAT Exc)' => numberFormat($equipment->service_rate)
                                     ];
                                 @endphp

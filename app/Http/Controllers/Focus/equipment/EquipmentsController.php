@@ -85,10 +85,9 @@ class EquipmentsController extends Controller
     public function store(StoreEquipmentRequest $request)
     {
         $request->validate([
-            'manufacturer' => 'required',
+            'make_type' => 'required',
             'location' => 'required',
             'unit_type' => 'required',
-
         ]);
         // extract request input
         $input = $request->except(['_token', 'ins']);
@@ -141,7 +140,7 @@ class EquipmentsController extends Controller
 
         $this->repository->update($equipment, $input);
 
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipments  Successfully Updated']);
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment  Successfully Updated']);
     }
 
     /**
@@ -156,7 +155,7 @@ class EquipmentsController extends Controller
 
         $this->repository->delete($equipment);
 
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment deleted successfully']);
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment Deleted Successfully']);
     }
 
     /**

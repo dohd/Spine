@@ -48,14 +48,9 @@
         }
     });
 
-
-    $('[data-toggle="datepicker"]').datepicker({
-        autoHide: true,
-        format: "{{ config('core.user_date_format')}}"
-    }).datepicker('setDate', new Date());
-
+    // customer config
     $("#person").select2({
-        tags: [],
+        // tags: [],
         ajax: {
             url: "{{ route('biller.customers.select') }}",
             dataType: 'json',
@@ -75,47 +70,18 @@
         }
     });
 
-
+    // on chnage customer
+    $("#branch").select2();
     $("#person").on('change', function () {
-        $("#branch").val('').trigger('change');
-        var tips = $('#person :selected').val();
-
+        $("#branch option").remove();
         $("#branch").select2({
             ajax: {
-                url: "{{ route('biller.branches.select') }}?customer_id=" + tips,
+                url: "{{ route('biller.branches.select') }}",
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
-                params: {'cat_id': tips},
-                data: product => ({product}), 
-                processResults: function (data) {
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.name,
-                                id: item.id
-                            }
-                        })
-                    };
-                },
-            }
-        });
-    });
-
-
-    $("#unit_type").on('change', function () {
-        $("#indoor").val('').trigger('change');
-        var tips = $('#unit_type :selected').val();
-
-        $("#indoor").select2({
-            ajax: {
-                url: "{{ route('biller.equipments.equipment_load') }}?id=" + tips,
-                dataType: 'json',
-                type: 'POST',
-                quietMillis: 50,
-                params: {'cat_id': tips},
-                data: product => ({product}),
-                processResults: function (data) {
+                data: {customer_id: $(this).val()}, 
+                processResults: (data) => {
                     return {
                         results: $.map(data, function (item) {
                             return {
