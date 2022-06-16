@@ -1,12 +1,17 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Invoice Payment | Receive')
+@section('title', 'Receive Payment | Invoice Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Invoice Payment</h4>
+            <h4 class="content-header-title">Invoice Payment Management</h4>
+        </div>
+        <div class="col-6">
+            <div class="btn-group float-right">
+                @include('focus.invoices.partials.payments-header-buttons')
+            </div>
         </div>
     </div>
 
@@ -15,7 +20,7 @@
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.invoices.store_payment', 'method' => 'POST', 'id' => 'invoicePay']) }}
-                        @include('focus.invoices.create_payment_form')
+                        @include('focus.invoices.payment_form')
                     {{ Form::close() }}
                 </div>
             </div>
@@ -33,13 +38,13 @@
     $('form').submit(function(e) {
         // enable disabled attributes
         ['#paymentMode', '#allocated', '#account', '#date'].forEach(v => $(v).attr('disabled', false));
-        // if allocated amount is 0
-        if ($('#deposit_ttl').val() == 0) {
+        // 
+        if ($('#deposit').val() == 0) {
             e.preventDefault();
-            // allocation type is per invoice
-            if ($('#allocated').val() == 1) 
-                return alert('Allocate payment amount on at least one invoice!');
-            alert('Enter payment amount!');
+            return alert('Enter payment amount!');
+        } else if ($('#allocated').val() == 1 && $('#deposit_ttl').val() == 0) {
+            e.preventDefault();
+            return alert('Allocate payment amount on at least one invoice!');
         }
     });
 
@@ -149,16 +154,16 @@
     // on change allocation source
     $('#source').change(function() {
         // advance payment
-        if ($(this).val() == 1) {
+        if ($(this).val() == 'advance') {
             $('#deposit').attr('readonly', true);
-            $('#paymentMode').attr('disabled', true);
-            $('#reference').attr('readonly', true);
-            $('#date').attr('disabled', true);
+            // $('#paymentMode').attr('disabled', true);
+            // $('#reference').attr('readonly', true);
+            // $('#date').attr('disabled', true);
             $('#account').attr('disabled', true);
             $('#advanced').attr('disabled', false);
         } else {
-            ['#paymentMode', '#date', '#account'].forEach(v => $(v).attr('disabled', false));
-            ['#deposit','#reference'].forEach(v => $(v).attr('readonly', false));
+            ['#account'].forEach(v => $(v).attr('disabled', false));
+            ['#deposit'].forEach(v => $(v).attr('readonly', false));
             $('#advanced').attr('disabled', true);
         }
     });
