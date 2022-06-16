@@ -588,16 +588,8 @@
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.project_invoice') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Project Invoice
                                 </a>
                             </li>
-                            {{-- 
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Standard Invoice
-                                </a>
-                            </li>
-                            
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}?md=pos" data-toggle="dropdown"><i class="ft-zap"></i> {{ trans('labels.backend.invoices.pos_management') }}
-                                </a>
-                            </li>
-                            --}}
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create_payment') }}"><i class="fa fa-money"></i> Invoice Payment</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create_payment') }}"><i class="fa fa-money"></i> Receive Payment</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index_payment') }}"><i class="ft-file-text"></i> Manage Payments</a></li>
                         </ul>
                     </li>
                     @endauth
@@ -769,6 +761,7 @@
             @if(access()->allow('project-manage') || access()->allow('task-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-briefcase"></i><span>{{trans('features.project_tasks')}}</span></a>
                 <ul class="dropdown-menu">
+                    {{--
                     @permission('task-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item" href="{{ route('biller.tasks.index') }}"><i class="icon-directions"></i> {{ trans('labels.backend.tasks.management') }}</a>
                     </li>
@@ -790,7 +783,7 @@
                         </ul>
                     </li>
                     @endauth
-                    {{-- 
+                     
                     @permission('misc-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Region</a>
                         <ul class="dropdown-menu">
