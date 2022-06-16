@@ -52,7 +52,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="8" class="text-center text-success font-large-1">
+                                        <td colspan="100%" class="text-center text-success font-large-1">
                                             <i class="fa fa-spinner spinner"></i>
                                         </td>
                                     </tr>
