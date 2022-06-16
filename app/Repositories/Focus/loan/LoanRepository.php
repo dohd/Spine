@@ -65,7 +65,7 @@ class LoanRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        Transactions::where(['tr_ref' => $loan->id, 'tr_type' => 'loan'])->delete();
+        $loan->transactions()->delete();
         $result = $loan->delete();
 
         DB::commit();
@@ -82,9 +82,11 @@ class LoanRepository extends BaseRepository
         $loan->update(['is_approved' => 1]);
 
         /** accounts  */
-        // credit  loan account (liability)
+        // credit loan account (liability)
         $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $cr_data = [
+            'tid' => $tid,
             'account_id' => $loan->lender_id,
             'trans_category_id' => $tr_category->id,
             'credit' => $loan['amount'],
@@ -100,7 +102,7 @@ class LoanRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit income account (bank)
+        // debit bank
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $loan->bank_id,
@@ -116,7 +118,7 @@ class LoanRepository extends BaseRepository
     }
 
     /**
-     * pay loans
+     * Pay Loan
      */
     public function store_loans(array $input)
     {
@@ -127,6 +129,7 @@ class LoanRepository extends BaseRepository
         $data['date'] = date_for_database($data['date']);
         $data['amount'] = numberClean($data['amount']);
         $result = Paidloan::create($data);
+        $result['note'] = $result['payment_mode'] . ' - ' . $result['ref'];
 
         $data_items = $input['data_items'];
         foreach ($data_items as $k => $item) {
@@ -163,9 +166,11 @@ class LoanRepository extends BaseRepository
 
     public function post_transaction($result)
     {
-        // credit account income (bank)
+        // credit bank
         $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $cr_data = [
+            'tid' => $tid,
             'account_id' => $result['bank_id'],
             'trans_category_id' => $tr_category->id,
             'credit' => $result['amount'],
@@ -177,7 +182,7 @@ class LoanRepository extends BaseRepository
             'tr_ref' => $result['id'],
             'user_type' => 'employee',
             'is_primary' => 1,
-            'note' => $result['payment_mode'] . ' - ' . $result['ref'],
+            'note' => $result['note'],
         ];
         Transaction::create($cr_data);
 
