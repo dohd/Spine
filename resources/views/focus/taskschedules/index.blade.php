@@ -27,7 +27,7 @@
                                         <th>#</th>
                                         <th>Contract</th>
                                         <th>Title</th>
-                                        <th>Loaded</th>
+                                        <th>Units Loaded</th>
                                         <th>Service Rate</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
