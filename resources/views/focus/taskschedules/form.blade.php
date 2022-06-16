@@ -4,7 +4,9 @@
         <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract" required>
             <option value="">-- Select Contract --</option>
             @foreach ($contracts as $row)
-                <option value="{{ $row->id }}">{{ $row->tid }} - {{ $row->title }}</option>
+                <option value="{{ $row->id }}">
+                    {{ $row->tid }} - {{ $row->title }} - {{ $row->customer? $row->customer->company : '' }}
+                </option>
             @endforeach
         </select>
     </div>
