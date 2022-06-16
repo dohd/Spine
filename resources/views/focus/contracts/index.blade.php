@@ -31,7 +31,7 @@
                                         <th>Customer</th>
                                         <th>Amount</th>
                                         <th>Schedule</th>
-                                        <th>Equipment</th>
+                                        <th>No of Units</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Action</th>
