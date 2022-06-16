@@ -50,7 +50,6 @@
 
     // customer config
     $("#person").select2({
-        // tags: [],
         ajax: {
             url: "{{ route('biller.customers.select') }}",
             dataType: 'json',
@@ -81,14 +80,12 @@
                 type: 'POST',
                 quietMillis: 50,
                 data: {customer_id: $(this).val()}, 
-                processResults: (data) => {
+                processResults: data => {
                     return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.name,
-                                id: item.id
-                            }
-                        })
+                        results: data.filter(v => v.name != 'All Branches').map(v => ({
+                            text: v.name,
+                            id: v.id
+                        }))                        
                     };
                 },
             }
