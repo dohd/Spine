@@ -5,9 +5,15 @@ namespace App\Models\invoice\Traits;
 use App\Models\account\Account;
 use App\Models\customer\Customer;
 use App\Models\items\PaidInvoiceItem;
+use App\Models\transaction\Transaction;
 
 trait PaidInvoiceRelationship
 {
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'tr_ref')->whereIn('tr_type', ['pmt', 'adv_pmt']);
+    }
+
     public function account()
     {
         return $this->belongsTo(Account::class);
