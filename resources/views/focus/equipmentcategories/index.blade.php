@@ -11,7 +11,7 @@
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    @include('focus.miscs.partials.miscs-header-buttons')
+                    @include('focus.equipmentcategories.partials.equipmentcategories-header-buttons')
                 </div>
             </div>
         </div>

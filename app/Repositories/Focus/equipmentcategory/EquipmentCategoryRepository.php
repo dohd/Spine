@@ -38,11 +38,11 @@ class EquipmentCategoryRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        //$input['installation_date'] = datetime_for_database($input['installation_date']);
-        //$input['next_maintenance_date'] = datetime_for_database($input['next_maintenance_date']);
         $input = array_map('strip_tags', $input);
         $c = EquipmentCategory::create($input);
+        
         if ($c->id) return $c->id;
+
         throw new GeneralException('Error Creating EquipmentCategory');
     }
 
@@ -56,10 +56,9 @@ class EquipmentCategoryRepository extends BaseRepository
      */
     public function update(EquipmentCategory $equipmentcategory, array $input)
     {
-        $input = array_map('strip_tags', $input);
-        if ($equipment->update($input))
-            return true;
-
+        // dd($input);
+        if ($equipmentcategory->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
@@ -72,10 +71,8 @@ class EquipmentCategoryRepository extends BaseRepository
      */
     public function delete(EquipmentCategory $equipmentcategory)
     {
-        if ($equipment->delete()) {
-            return true;
-        }
-
+        if ($equipmentcategory->delete()) return true;
+            
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }

@@ -121,15 +121,13 @@ class EquipmentCategoriesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'location' => 'required'
         ]);
         //Input received from the request
-        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
+        $input = $request->only(['name']);
 
         $this->repository->update($equipmentcategory, $input);
 
-        return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Updated'  . ' <a href="' . route('biller.branches.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-
+        return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Equipment category updated successfully']);
     }
 
     /**
@@ -139,11 +137,11 @@ class EquipmentCategoriesController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(EquipmentCategory $equipmentcategory, ManageEquipmentCategoryRequest $request)
+    public function destroy(EquipmentCategory $equipmentcategory)
     {
         $this->repository->delete($equipmentcategory);
 
-        return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Equipment Category Successfully Deleted']);
+        return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Equipment category deleted successfully']);
     }
 
     /**
@@ -153,10 +151,8 @@ class EquipmentCategoriesController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(EquipmentCategory $equipmentcategory, ManageEquipmentCategoryRequest $request)
+    public function show(EquipmentCategory $equipmentcategory)
     {
-        $misc = array('name' => '', 'color' => '', 'section' => '');
-
-        return new ViewResponse('focus.equipmentcategories.view', compact('misc'));
+        return new ViewResponse('focus.equipmentcategories.view', compact('equipmentcategory'));
     }
 }

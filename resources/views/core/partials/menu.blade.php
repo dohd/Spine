@@ -822,12 +822,12 @@
                     </li>
                     @endauth
                     @permission('project-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Equipments</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Equipment</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.equipments.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Equipments
+                            <li><a class="dropdown-item" href="{{ route('biller.equipments.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Equipment
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.equipments.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Equipments
+                            <li><a class="dropdown-item" href="{{ route('biller.equipments.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Equipment
                                 </a>
                             </li>
                         </ul>
