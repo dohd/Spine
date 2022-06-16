@@ -95,10 +95,15 @@
     $('#customer').select2(select2Config(customerUrl, customerCb));
 
     const branchUrl = "{{ route('biller.branches.select') }}";
-    const branchCb = data => ({ results: data.map(v => ({id: v.id, text: v.name})) });
-    $('#branch').select2();
+    const branchCb = data => ({ 
+        results: data.filter(v => v.name != 'All Branches').map(v => ({
+            text: v.name,
+            id: v.id
+        }))
+    });
 
     // on change customer and branch 
+    $('#branch').select2();
     $(document).on('change', '#customer, #branch', function() {
         if ($(this).is('#customer')) {
             const customer_id = $(this).val();

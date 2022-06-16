@@ -76,7 +76,7 @@
     $('#customer').select2(select2Config(customerUrl, customerCb));
 
     const branchUrl = "{{ route('biller.branches.select') }}";
-    const branchCb = data => ({ results: data.map(v => ({id: v.id, text: v.name})) });
+    const branchCb = data => ({ results: data.filter(v => v.name != 'All Branches').map(v => ({id: v.id, text: v.name})) });
     $('#branch').select2();
 
     // auto generate default schedules
