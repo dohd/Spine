@@ -93,7 +93,9 @@ class BillRepository extends BaseRepository
     {
         // credit supplier
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $cr_data = [
+            'tid' => $tid,
             'account_id' => $bill['account_id'],
             'trans_category_id' => $tr_category->id,
             'credit' => $bill['deposit_ttl'],

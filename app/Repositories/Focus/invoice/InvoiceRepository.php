@@ -120,6 +120,7 @@ class InvoiceRepository extends BaseRepository
         $tr_category = Transactioncategory::where('code', 'rcpt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $dr_data = [
+            'tid' => $tid,
             'account_id' => $account->id,
             'ref_ledger_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
@@ -133,7 +134,6 @@ class InvoiceRepository extends BaseRepository
             'tr_ref' => $result->id,
             'user_type' => 'customer',
             'is_primary' => 1,
-            'tid' => $tid
         ];
         Transaction::create($dr_data);
 

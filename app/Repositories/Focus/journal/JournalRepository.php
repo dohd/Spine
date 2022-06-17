@@ -85,7 +85,9 @@ class JournalRepository extends BaseRepository
     public function post_transaction($result)
     {
         $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $data = [
+            'tid' => $tid,
             'trans_category_id' => $tr_category->id,
             'tr_date' => date('Y-m-d'),
             'due_date' => $result['date'],

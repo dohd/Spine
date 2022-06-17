@@ -165,8 +165,8 @@ class PurchaseRepository extends BaseRepository
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $cr_data = [
-            'account_id' => $account->id,
             'tid' => $tid,
+            'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $bill['grandttl'],
             'tr_date' => date('Y-m-d'),
