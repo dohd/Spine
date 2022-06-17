@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\taskschedule;
 use App\Exceptions\GeneralException;
 use App\Models\contract_equipment\ContractEquipment;
 use App\Models\contractservice\ContractService;
+use App\Models\equipment\Equipment;
 use App\Models\items\ServiceItem;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\BaseRepository;
@@ -60,36 +61,32 @@ class TaskScheduleRepository extends BaseRepository
 
         $schedule = TaskSchedule::find($data['schedule_id']);
         // update schedule status to loaded
-        if ($schedule->status == 'pending') $schedule->update(['status' => 'loaded']);
+        if ($data_items && $schedule->status == 'pending') 
+            $schedule->update(['status' => 'loaded']);
 
         // generate service
         if ($data_items) {
             $service_amount = array_reduce($input['data_items'], function($init, $item) {
                 return $init + floatval($item['service_rate']);
             }, 0);
-            $service_data = $data + [
-                'name' => $schedule->title . ' - ' . $schedule->contract->title,
-                'amount' => $service_amount,
-                'ins' => auth()->user()->ins,
-                'user_id' => auth()->user()->id
-            ];
-            $service = ContractService::create($service_data);
 
-            // generate service date 
-            $service_date = [];
-            $schedules = TaskSchedule::where('contract_id', $schedule->contract_id)->get(['id', 'start_date', 'end_date']);
-            foreach ($schedules as $i => $item) {
-                if ($item['id'] == $service->schedule_id) {
-                    if ($i > 0) {
-                        $service_date = [
-                            $schedules[$i - 1]['end_date'], 
-                            $schedules[$i]['start_date']
-                        ];
-                    } 
-                    else $service_date = [null, $schedules[$i]['start_date']]; 
-                }
+            // update existing service equipments
+            $service = ContractService::where('schedule_id', $schedule->id)->first();
+            if ($service) {
+                $service->increment('amount', $service_amount);
+            } else {
+                // create new service
+                $service_data = $data + [
+                    'name' => $schedule->title . ' - ' . $schedule->contract->title,
+                    'amount' => $service_amount,
+                    'ins' => auth()->user()->ins,
+                    'user_id' => auth()->user()->id
+                ];
+                $service = ContractService::create($service_data);
             }
 
+            // generate service date 
+            $service_date = $this->gen_service_date($schedule, $service);
             // generate service equipments
             $service_id = $service->id;
             $items_data = array_map(function ($v) use($service_id, $service_date) {
@@ -131,7 +128,7 @@ class TaskScheduleRepository extends BaseRepository
         $eq_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $taskschedule->taskschedule_equipments()->whereNotIn('id', $eq_ids)->delete();
 
-        // update service name
+        // update service 
         $service = $taskschedule->contractservice;
         if ($service) $service->update(['name' => $taskschedule->title . ' - ' . $taskschedule->contract->title]);
 
@@ -139,6 +136,25 @@ class TaskScheduleRepository extends BaseRepository
         if ($result) return $result;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
+    }
+
+    public function gen_service_date($schedule, $service)
+    {
+        $service_date = array();
+        $schedules = TaskSchedule::where('contract_id', $schedule->contract_id)->get(['id', 'start_date', 'end_date']);
+        foreach ($schedules as $i => $item) {
+            if ($item['id'] == $service->schedule_id) {
+                if ($i > 0) {
+                    $service_date = [
+                        $schedules[$i - 1]['end_date'], 
+                        $schedules[$i]['start_date']
+                    ];
+                } 
+                else $service_date = [null, $schedules[$i]['start_date']]; 
+            }
+        }
+
+        return $service_date;
     }
 
     /**
@@ -149,11 +165,20 @@ class TaskScheduleRepository extends BaseRepository
      * @return bool
      */
     public function delete($taskschedule)
-    {   
-        $is_equipment = $taskschedule->taskschedule_equipments->count();
-        if ($is_equipment) return false;
+    {
+        DB::beginTransaction();
 
-        if ($taskschedule->delete()) return true;
+        $service = $taskschedule->contractservice;
+        if ($service) {
+            if ($service->items->where('jobcard_no', '>', 0)->count()) return false;
+            $service->items()->delete();
+            $service->delete();
+        }
+        $taskschedule->taskschedule_equipments()->delete();
+        $result = $taskschedule->delete();
+
+        DB::commit();
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
