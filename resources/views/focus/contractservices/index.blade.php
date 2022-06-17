@@ -28,6 +28,8 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Service Name</th>
+                                        <th>Unit</th>
+                                        <th>Serviced Unit</th>
                                         <th>Amount</th>                                        
                                         <th>Action</th>
                                     </tr>
@@ -75,6 +77,14 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                 {
                     data: 'name',
                     name: 'name'
+                },
+                {
+                    data: 'unit',
+                    name: 'unit'
+                },
+                {
+                    data: 'serviced_unit',
+                    name: 'serviced_unit'
                 },
                 {
                     data: 'amount',
