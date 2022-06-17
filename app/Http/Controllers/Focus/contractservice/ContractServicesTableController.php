@@ -59,6 +59,12 @@ class ContractServicesTableController extends Controller
             ->addColumn('amount', function ($contractservice) {
                 return numberFormat($contractservice->amount);
             })
+            ->addColumn('unit', function ($contractservice) {
+                return $contractservice->items()->count();
+            })
+            ->addColumn('serviced_unit', function ($contractservice) {
+                return $contractservice->items->where('jobcard_no', '>', 0)->count();
+            })
             ->addColumn('actions', function ($contractservice) {
                 return $contractservice->action_buttons;
             })
