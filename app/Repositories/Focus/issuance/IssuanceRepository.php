@@ -54,14 +54,19 @@ class IssuanceRepository extends BaseRepository
         $result = Issuance::create($data);
 
         $data_items = $input['data_items'];
-        $budget_items = $result->quote->budget->items;
-        $status = '';
-        foreach ($data_items as $k => $item) {
-            $item = $item + ['issuance_id' => $result->id];
-            $product = ProductVariation::find($item['product_id']);
-            if ($product && $item['qty'] >= $product->qty) {
+        if ($data_items) {
+            $status = '';
+            $budget_items = $result->quote->budget->items;
+            foreach ($data_items as $k => $item) {
+                $item = $item + ['issuance_id' => $result->id];
+                $product = ProductVariation::find($item['product_id']);
+                if (!$product) {
+                    $item['qty'] = 0;
+                    $data_items[$k] = $item;
+                    continue;
+                }
                 // reduce stock
-                $item['qty'] = $product->qty;
+                if ($item['qty'] > $product->qty) $item['qty'] = $product->qty;
                 $product->decrement('qty', $item['qty']);
                 // increase budget_item issue_qty
                 foreach ($budget_items as $b_item) {
@@ -69,18 +74,19 @@ class IssuanceRepository extends BaseRepository
                         $b_item->increment('issue_qty', $item['qty']);
                 }
                 $status = 'partial';
-            } 
-            else $item['qty'] = 0;
-            $data_items[$k] = $item;
+                $data_items[$k] = $item;
+            }
+            // filter items with quantity
+            $data_items = array_filter($data_items, function ($v) { return $v['qty'] > 0; });
+            if (!$data_items) return false;
+
+            // update quote issuance status and save issued items
+            if ($status) $result->quote->update(['issuance_status' => $status]);
+            IssuanceItem::insert($data_items);
+        
+            /** accounts */
+            $this->post_transaction($result);
         }
-        $data_items = array_filter($data_items, function ($v) { return $v['qty'] > 0; });
-        if (!$data_items) return false;
-        
-        if ($status) $result->quote->update(['issuance_status' => $status]);
-        IssuanceItem::insert($data_items);
-        
-        /** accounts */
-        $this->post_transaction($result);
 
         DB::commit();
         if ($result) return $result;
@@ -88,12 +94,15 @@ class IssuanceRepository extends BaseRepository
         throw new GeneralException('Error Creating Lead');
     }
 
+    // transaction
     public function post_transaction($result)
     {
         // credit stock/inventory account
         $account = Account::where('system', 'stock')->first('id');
         $tr_category = Transactioncategory::where('code', 'stock')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
         $cr_data = [
+            'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $result['total'],
