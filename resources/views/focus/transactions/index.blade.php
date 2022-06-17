@@ -85,7 +85,8 @@
                             <table id="transactionsTbl" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>{{ trans('labels.backend.transactions.table.id') }}</th>  
+                                        <th>#</th> 
+                                        <th>TID</th>
                                         <th>Type</th>
                                         @if ($is_tax)
                                             <th>Cutomer PIN</th>   
@@ -167,6 +168,10 @@
             columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
+                },
+                {
+                    data: 'tid',
+                    name: 'tid'
                 },
                 {
                     data: 'tr_type',

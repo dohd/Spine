@@ -76,6 +76,9 @@ class TransactionsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function ($tr) {
+                return 'Tr-' . $tr->tid;                
+            })
             ->addColumn('tr_type', function ($tr) {
                 $result = $this->tax_transaction('tr_type', $tr);
                 if ($result) return $result;
