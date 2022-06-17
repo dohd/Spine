@@ -30,10 +30,13 @@
                                     <i class="fa fa-pencil"></i>
                                 </a>
                             </h5>
-                            <div class="table-responsive mt-1"> 
+                            
+                            <div class="table-responsive mt-4"> 
+                                <h4>Issuance Instances</h4>
                                 <table id="issuaceTbl" class="tfr my_stripe_single text-center" width="60%">
                                     <thead>
                                         <tr class="bg-gradient-directional-blue white">
+                                            <th>#</th>
                                             <th>Date</th>
                                             <th>Note</th>
                                             <th>Amount (Ksh.)</th>
@@ -41,23 +44,26 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($issuance->quote->issuance as $item)
+                                        @foreach ($issuance->quote->issuance as $i => $item)
                                             <tr>
+                                                <td>{{ $i+1 }}</td>
                                                 <td>{{ dateFormat($item->date) }}</td>
                                                 <td><a href="javascript: getItems({{ $item->id }}); void(0);">
                                                     {{ $item->note }}</a>
                                                 </td>
-                                                <td>{{ number_format($item->total, 2) }}</td>
-                                                <td>{{ $item->ref }}</td>
+                                                <td>{{ numberFormat($item->total) }}</td>
+                                                <td>{{ $item->tool_ref }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="table-responsive mt-1">
+
+                            <div class="table-responsive mt-4">
                                 <table id="itemTbl" class="table table-xs text-center">
                                     <thead>
                                         <tr class="bg-gradient-directional-blue white">
+                                            <th>#</th>
                                             <th>Product Name</th>
                                             <th>Issued Qty</th>
                                             <th>Requisition</th>
@@ -65,8 +71,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>  
-                                        @foreach ($issuance_items as $item)
+                                        @foreach ($issuance_items as $i => $item)
                                             <tr>
+                                                <td>{{ $i+1 }}</td>
                                                 <td>{{ $item->product->name }}</td>
                                                 <td>{{ $item->qty }}</td>
                                                 <td>{{ $item->ref }}</td>
@@ -90,14 +97,11 @@
 <script type="text/javascript">
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
-    $('#issuaceTbl').on('click', 'note', function() {
-        console.log('note')
-        const row = $(this).parents('tr');
-    });
-
-    function itemRow(v) {
+    // item row
+    function itemRow(v, i) {
         return `
             <tr>
+                <td>${i+1}</td>
                 <td>${v.product.name}</td>
                 <td>${v.qty}</td>
                 <td>${v.ref}</td>
@@ -110,7 +114,7 @@
             url: "{{ route('biller.issuance.get_items') }}?id=" + id,
             success: data => {
                 $('#itemTbl tbody tr').remove();
-                data.forEach(v => $('#itemTbl tbody').append(itemRow(v)));
+                data.forEach((v, i) => $('#itemTbl tbody').append(itemRow(v, i)));
             }
         });
     }
