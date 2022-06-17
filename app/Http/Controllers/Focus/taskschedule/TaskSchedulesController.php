@@ -125,12 +125,12 @@ class TaskSchedulesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(TaskSchedule $taskSchedule)
+    public function destroy(TaskSchedule $taskschedule)
     {
-        $result = $this->repository->delete($taskSchedule);
+        $result = $this->repository->delete($taskschedule);
 
         $msg = ['flash_success' => 'Task Schedule deleted successfully'];
-        if (!$result) $msg = ['flash_error' => 'Task Schedule has loaded equipments!'];
+        if (!$result) $msg = ['flash_error' => 'Task Schedule has a service report!'];
 
         return new RedirectResponse(route('biller.taskschedules.index'), $msg);
     }
