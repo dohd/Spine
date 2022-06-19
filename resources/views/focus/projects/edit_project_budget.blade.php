@@ -1,6 +1,6 @@
 @extends('core.layouts.app')
 
-@section('title', 'Project Budget | Edit')
+@section('title', 'Edit | Project Budget')
 
 @section('content')
 <div class="content-wrapper">
@@ -9,11 +9,12 @@
             <strong>Budget Limit Exceeded!</strong> You should check on your list items.
         </div>
     </div>
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12">
+
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Project Budget Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     <div class="btn-group">
@@ -44,17 +45,10 @@
                 <input type="hidden" name="quote_id" value="{{ $quote->id }}">
                 <div class="form-group row">
                     <div class="col-12">
-                        <h3 class="title">
-                            {{ $quote->bank_id ? 'Ammend Budgeted Proforma Invoice' : 'Ammend Budgeted Quote' }}
-                        </h3>                                        
+                        <h3 class="title">Ammend Budget</h3> 
                     </div>
                 </div>
-                <div class="form-group row">
-                    <div class="col-12">
-                        <label for="subject" class="caption">Subject / Title</label>
-                        {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
-                    </div>
-                </div>
+                
                 <div class="row">
                     <div class="col-12 cmp-pnl">
                         <div id="customerpanel" class="inner-cmp-pnl">                        
@@ -75,7 +69,7 @@
                                 <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                     <div class="input-group">
                                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'disabled']) }}
+                                        {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date', 'disabled']) }}
                                     </div>
                                 </div>                                                                
                                 <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
@@ -87,7 +81,14 @@
                             </div> 
                         </div>
                     </div>
-                </div>                    
+                </div>   
+                
+                <div class="form-group row">
+                    <div class="col-12">
+                        <label for="subject" class="caption">Subject / Title</label>
+                        {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                    </div>
+                </div>
 
                 <div>                            
                     <table id="budget-item" class="table-responsive tfr my_stripe_single mb-1">
@@ -173,21 +174,21 @@
 
 @section('extra-scripts')
 <script>
-    // ajax setup
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
     // initialize html editor
     editor();
 
     // set default values
-    const subtotal = @json($quote->subtotal);
+    const quote = @json($quote);
+    const subtotal = quote.subtotal;
     $('#quote-total').val(parseFloat(subtotal).toLocaleString());
     
     // initialize Quote Date datepicker
-    $('.datepicker')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
-
+    $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
+    if (quote.date) $('#date').datepicker('setDate', new Date(quote.date));
+    else $('#date').val('');
+        
     // skill row html
     function skillRow(n) {
         return `
