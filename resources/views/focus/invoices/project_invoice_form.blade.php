@@ -40,7 +40,7 @@
     <div class="col-2">
         <label for="tid" class="caption">Select {{ trans('general.tax') }}*</label>
         <div class="input-group">
-            <select class="form-control round" name='tax_id' id="tax_id" {{ isset($invoice) ? 'disabled' : '' }}>
+            <select class="form-control round" name='tax_id' id="tax_id">
                 @foreach ([16, 8, 0] as $val)
                     <option value="{{ $val }}" {{ $val == 16 ? 'selected' : '' }}>
                         {{ $val ? $val.'% VAT' : 'Off' }}
@@ -55,7 +55,7 @@
     <div class="col-3"> 
         <label for="refer_no" class="caption">Bank Account*</label>                                   
         <div class="input-group">
-            <select class="form-control required" name="bank_id" id="bank_id" {{ isset($invoice) ? 'disabled' : '' }} required>
+            <select class="form-control required" name="bank_id" id="bank_id" required>
                 <option value="">-- Select Bank --</option>
                 @foreach ($banks as $bank)
                     <option value="{{ $bank->id }}" {{ $bank->id == @$invoice->bank_id ? 'selected' : '' }}>
@@ -80,7 +80,7 @@
 
     <div class="col-3">
         <label for="income_category" class="caption">Income Category*</label>
-        <select class="form-control" name="account_id" {{ isset($invoice) ? 'disabled' : '' }} required>
+        <select class="form-control" name="account_id" required>
             <option value="">-- Select Category --</option>                                        
             @foreach ($accounts as $row)
                 @if ($row->accountType->name == 'Income')
@@ -201,7 +201,7 @@
                     <input type="text" class="form-control col-7 mb-1 ml-1" name="total" id="total" readonly>
                 </div>                                    
                 <div class="form-inline">
-                    {{ Form::submit('Generate Invoice', ['class' => 'btn btn-primary btn-lg ml-auto mr-1']) }}                          
+                    {{ Form::submit(@$invoice? 'Update Invoice' : 'Generate Invoice', ['class' => 'btn btn-primary btn-lg ml-auto mr-1']) }}                          
                 </div>
             </td>
         </tr>
