@@ -8,7 +8,7 @@
         <select id="person" name="customer_id" class="form-control round required select-box" data-placeholder="{{trans('customers.customer')}}">
             @isset ($equipment)
                 <option value="{{ $equipment->customer_id }}" selected>
-                    {{ $equipment->customer->name }} - {{ $equipment->customer->company }}
+                    {{ $equipment->customer? $equipment->customer->name . ' - ' . $equipment->customer->company : ''}}
                 </option>
             @endisset
         </select>
@@ -18,7 +18,7 @@
         <select id="branch" name="branch_id" class="form-control   select-box" data-placeholder="Branch">
             @isset ($equipment)
                 <option value="{{ $equipment->branch_id }}" selected>
-                    {{ $equipment->branch->name }}
+                    {{ $equipment->branch? $equipment->branch->name : '' }}
                 </option>
             @endisset
         </select>
@@ -65,7 +65,7 @@
     </div>
     <div class='col-md-4'>
         {{ Form::label('capacity', 'Capacity:',['class' => 'col-12 control-label']) }}
-        {{ Form::text('capacity', null, ['class' => 'col form-control ', 'placeholder' => 'Capacity', 'required']) }}
+        {{ Form::number('capacity', null, ['class' => 'col form-control ', 'placeholder' => 'Capacity', 'required']) }}
     </div>
 </div>
 

@@ -33,7 +33,7 @@
                                         'Unit Type' => $equipment->unit_type,
                                         'Make' => $equipment->make_type,
                                         'Model / Model Number' => $equipment->model,
-                                        'Capacity' => number_format($equipment->capacity),
+                                        'Capacity' => numberFormat($equipment->capacity),
                                         'Gas Type' => $equipment->machine_gas,
                                         'Equipment Location' => $equipment->location,
                                         'Equipment Building' => $equipment->building,
