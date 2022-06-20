@@ -76,28 +76,28 @@ class AccountRepository extends BaseRepository
           'account_id' => $result->id,
           'amount' => $result->opening_balance,
           'transaction_ref' => $tid,
-          'from_account_id' => $seco_account->id 
+          'from_account_id' => $seco_account->id
         ];
         $deposit = Deposit::create($data);
 
         $args = [
-          $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id, 
+          $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id,
           'employee', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         ];
         if ($deposit) double_entry(...$args);
       }
-      
+
       // debit asset and credit Equity Share Capital
       // credit liability and debit Equity Share Capital
       $systems = [
-        'fixed_asset', 'other_current_asset', 'other_asset', 
+        'fixed_asset', 'other_current_asset', 'other_asset',
         'other_current_liability', 'long_term_liability', 'equity'
       ];
       if (in_array($system, $systems, 1)) {
-        $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);  
+        $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $open_bal = $result->opening_balance;
         $data = $data + [
-          'tid' => Journal::max('tid') + 1, 
+          'tid' => Journal::max('tid') + 1,
           'debit_ttl' => $open_bal,
           'credit_ttl' =>  $open_bal
         ];
@@ -105,9 +105,9 @@ class AccountRepository extends BaseRepository
 
         for ($i = 0; $i < 2; $i++) {
           $item_data = [
-            'journal_id' => $journal->id, 
-            'account_id' => $result->id, 
-          ];  
+            'journal_id' => $journal->id,
+            'account_id' => $result->id,
+          ];
           if (!$i) $item_data['debit'] = $open_bal;
           else $item_data['credit'] = $open_bal;
           JournalItem::create($item_data);
@@ -116,7 +116,7 @@ class AccountRepository extends BaseRepository
         $entry_type = 'dr';
         if (in_array($system, array_splice($systems, 3, 3), 1)) $entry_type = 'cr';
         $args = [
-          $tid, $result->id, $seco_account->id, $result->opening_balance, $entry_type, $pri_tr->id, 
+          $tid, $result->id, $seco_account->id, $result->opening_balance, $entry_type, $pri_tr->id,
           'employee', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         ];
         if ($journal) double_entry(...$args);
@@ -157,7 +157,7 @@ class AccountRepository extends BaseRepository
    */
   public function delete($account)
   {
-    if ($account->delete()) {
+    if (!$account->system && $account->delete()) {
       aggregate_account_transactions();
       return true;
     }
