@@ -27,8 +27,8 @@
                                     <tr>
                                         <th>#</th>
                                         <th>#Account No</th>
-                                        <th>Type</th>
                                         <th>Name</th>
+                                        <th>Type</th>
                                         <th>Debit</th>
                                         <th>Credit</th>                                      
                                         <th>{{ trans('labels.general.actions') }}</th>
