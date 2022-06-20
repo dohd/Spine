@@ -112,6 +112,43 @@ class InvoiceRepository extends BaseRepository
         throw new GeneralException('Error Creating Invoice');
     }
 
+    /**
+     * Update Project Invoice
+     */
+    public function update_project_invoice($invoice, array $input)
+    {
+        // dd($input);
+        DB::beginTransaction();
+
+        $bill = $input['bill'];
+        foreach ($bill as $key => $val) {
+            if ($key == 'invoicedate') $bill[$key] = date_for_database($val);
+            if (in_array($key, ['total', 'subtotal', 'tax'], 1)) 
+                $bill[$key] = numberClean($val);
+        }
+        $duedate = $bill['invoicedate'] . ' + ' . $bill['validity'] . ' days';
+        $bill['invoiceduedate'] = date_for_database($duedate);
+        $invoice->update($bill);
+
+        $bill_items = $input['bill_items'];
+        $bill_items = array_map(function ($v) { 
+            return [
+                'id' => $v['id'],
+                'reference' => $v['reference'], 
+                'description' => $v['description']
+            ];
+        }, $bill_items);
+        Batch::update(new InvoiceItem, $bill_items, 'id');
+
+        /**accounting */
+        $invoice->transactions()->delete();
+        $this->post_transaction_project_invoice($invoice);
+
+        DB::commit();
+        if ($bill) return true;        
+    }
+
+
     // invoice transacton
     public function post_transaction_project_invoice($result)
     {
@@ -395,37 +432,6 @@ class InvoiceRepository extends BaseRepository
         aggregate_account_transactions();
     }
 
-    /**
-     * Update Project Invoice
-     */
-    public function update_project_invoice($invoice, array $input)
-    {
-        DB::beginTransaction();
-
-        $bill = $input['bill'];
-        $date = date_for_database($bill['invoicedate']);
-        $duedate = $date . ' + ' . $bill['validity'] . ' days';
-        $invoice->update([
-            'invoicedate' => $date,
-            'invoiceduedate' => date_for_database($duedate),
-            'notes' => $bill['notes'],
-        ]);
-
-        $bill_items = $input['bill_items'];
-        $bill_items = array_reduce($bill_items, function ($init, $item) {
-            $init[] = [
-                'id' => $item['id'],
-                'reference' => $item['reference'], 
-                'description' => $item['description']
-            ];
-            return $init;
-        }, []);
-        Batch::update(new InvoiceItem, $bill_items, 'id');
-
-        DB::commit();
-        if ($bill) return true;        
-    }
-
 
     private function update_dual(Model $table, array $values, string $index = null, $index2 = null)
     {
@@ -604,9 +610,11 @@ class InvoiceRepository extends BaseRepository
         // dd($invoice);
         DB::beginTransaction();
 
-        foreach ($invoice->products as $item) {
+        $invoice_products = $invoice->products;
+        foreach ($invoice_products as $item) {
             $item->quote->update(['invoiced' => 'No']);
         }
+        $invoice_products->delete();
         $invoice->transactions()->delete();
         aggregate_account_transactions();
         $result = $invoice->delete();
