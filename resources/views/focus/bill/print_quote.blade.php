@@ -244,7 +244,7 @@
 						<td>{{ $product->product_name }}</td>
 						<td class="align-c">{{ number_format($product->product_qty, 1) }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
-						@if ($resource->print_type == 'inclusive')
+						@if ($resource->print_type == 'exclusive')
 							<td class="align-r">{{ number_format($product->product_subtotal, 2) }}</td>
 							<td class="align-r">{{ number_format($product->product_qty * $product->product_subtotal, 2) }}</td>
 						@else
