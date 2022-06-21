@@ -10,12 +10,15 @@
 
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label( 'account_type', 'Account Type',['class' => 'col control-label']) }}
+            {{ Form::label('account_type', 'Account Type', ['class' => 'col control-label']) }}
             <div class='col'>
-                <select class="form-control required" name="account_type" id="account_type">
+                <select class="form-control required" name="account_type" id="account_type" required>
                     <option value="">-- Select Account Type --</option>
-                    <option value="Assets">Assets</option>
-                    <option value="Expenses">Expenses</option>
+                    @foreach (['Asset', 'Equipment'] as $val)
+                        <option value="{{ $val }}" {{ $val == @$assetequipment->account_type? 'selected' : '' }}>
+                            {{ $val }}
+                        </option>
+                    @endforeach                                       
                 </select>
             </div>
         </div>
@@ -23,10 +26,14 @@
 
     <div class="col-md-4">
         <div class="form-group">
-            {{ Form::label( 'sub_cat_id', 'Ledger Account',['class' => 'col control-label']) }}
+            {{ Form::label('ledger_account', 'Ledger Account', ['class' => 'col control-label']) }}
             <div class='col'>
-                <select class="form-control" name="account_id" id="account_id" required>
-                    <option value="">-- Select Ledger Account Type --</option>                    
+                <select class="form-control" name="account_id" id="account_id" data-placeholder="Choose Ledger Account" required>
+                    @isset ($assetequipment) 
+                        <option value="{{ $assetequipment->account_id }}" selected>
+                            {{ $assetequipment->account? $assetequipment->account->holder : '' }}
+                        </option>
+                    @endisset
                 </select>
             </div>
         </div>
@@ -36,12 +43,15 @@
 <div class="row">
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label('condtition', 'Condition Type',['class' => 'col control-label']) }}
+            {{ Form::label('condition', 'Condition Type',['class' => 'col control-label']) }}
             <div class='col'>
-                <select class="form-control" name="condtition">
+                <select class="form-control" name="condition">
                     <option value="">-- Select Condition Type --</option>
-                    <option value="New">New</option>
-                    <option value="Used">Used</option>
+                    @foreach (['new', 'used'] as $val)
+                        <option value="{{ $val }}" {{ $val == @$assetequipment->condition? 'selected' : '' }}>
+                            {{ ucfirst($val) }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
         </div>
@@ -50,7 +60,7 @@
         <div class='form-group'>
             {{ Form::label( 'name', 'Item Name',['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Item Name*','required'=>'required']) }}
+                {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Item Name*', 'required']) }}
             </div>
         </div>
     </div>
@@ -67,7 +77,7 @@
 <div class="row">
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label( 'vendor', 'Vendor',['class' => 'col control-label']) }}
+            {{ Form::label('vendor', 'Vendor',['class' => 'col control-label']) }}
             <div class='col'>
                 {{ Form::text('vendor', null, ['class' => 'form-control box-size', 'placeholder' => 'Vendor']) }}
             </div>
@@ -76,18 +86,18 @@
 
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label( 'cost', 'Cost Price',['class' => 'col control-label']) }}
+            {{ Form::label( 'cost', 'Cost Price', ['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::number('cost', null, ['class' => 'form-control box-size', 'step' => '0.01', 'onkeypress'=>"return isNumber(event)"]) }}
+                {{ Form::number('cost', null, ['class' => 'form-control box-size', 'step' => '0.01']) }}
             </div>
         </div>
     </div>
 
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label( 'qty', ' Quantity In Stock',['class' => 'col control-label']) }}
+            {{ Form::label('qty', 'Quantity In Stock', ['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::number('qty', null, ['class' => 'form-control box-size', 'onkeypress'=>"return isNumber(event)"]) }}
+                {{ Form::number('qty', null, ['class' => 'form-control box-size', 'step' => '0.01']) }}
             </div>
         </div>
     </div>
@@ -97,7 +107,7 @@
 <div class="row">
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label( 'location', 'Location',['class' => 'col control-label']) }}
+            {{ Form::label( 'location', 'Location', ['class' => 'col control-label']) }}
             <div class='col'>
                 {{ Form::text('location', null, ['class' => 'form-control box-size', 'placeholder' => 'Location']) }}
             </div>
@@ -110,8 +120,11 @@
             <div class='col'>
                 <select class="form-control" name="warranty">
                     <option value="">-- Select Warranty --</option>
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
+                    @foreach (['no', 'yes'] as $val)
+                        <option value="{{ $val }}" {{ $val == @$assetequipment->warranty? 'selected' : '' }}>
+                            {{ ucfirst($val) }}
+                        </option>
+                    @endforeach                  
                 </select>
             </div>
         </div>

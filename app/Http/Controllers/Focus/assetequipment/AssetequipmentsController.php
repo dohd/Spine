@@ -89,14 +89,14 @@ class AssetequipmentsController extends Controller
             'account_id' => 'required',
             'account_type' => 'required'
         ]);
-        //Input received from the request
+        // extract request input
         $input = $request->except(['_token', 'ins']);
+
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
 
         $this->repository->create($input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset & Equipment Successfully Created']);
+
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Created']);
     }
 
     /**
@@ -106,9 +106,8 @@ class AssetequipmentsController extends Controller
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(Assetequipment $assetequipment, StoreAssetequipmentRequest $request)
+    public function edit(Assetequipment $assetequipment)
     {
-        //dd(0);
         return new EditResponse($assetequipment);
     }
 
@@ -119,10 +118,6 @@ class AssetequipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-
-
-
-
     public function update(StoreAssetequipmentRequest $request, Assetequipment $assetequipment)
     {
         $request->validate([
@@ -130,12 +125,12 @@ class AssetequipmentsController extends Controller
             'account_id' => 'required',
             'account_type' => 'required'
         ]);
-        //Input received from the request
-        $input = $request->only(['name', 'account_type', 'account_id', 'condtition', 'vendor', 'location', 'serial', 'warranty', 'warranty_expiry_date', 'cost', 'qty', 'purchase_date']);
-        //Update the model using repository update method
+        // extract request input
+        $input = $request->except(['_token', 'ins']);
+
         $this->repository->update($assetequipment, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Record  Successfully Updated'  . ' <a href="' . route('biller.assetequipments.show', [$assetequipment->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Updated']);
     }
 
     /**
@@ -145,14 +140,11 @@ class AssetequipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Assetequipment $assetequipment, StoreAssetequipmentRequest $request)
+    public function destroy(Assetequipment $assetequipment)
     {
-
-        //dd($branch);
-        //Calling the delete method on repository
         $this->repository->delete($assetequipment);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Record Successfully Deleted']);
+
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Deleted']);
     }
 
     /**
@@ -164,8 +156,6 @@ class AssetequipmentsController extends Controller
      */
     public function show(Assetequipment $assetequipment, ManageAssetequipmentRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.assetequipments.view', compact('assetequipment'));
     }
 

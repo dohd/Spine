@@ -26,12 +26,6 @@ class AssetequipmentRepository extends BaseRepository
     {
         
        $q=$this->query();
-      // $q->when(!request('rel_type'), function ($q) {
-           // return $q->where('c_type', '=',request('rel_type',0));
-        //});
-       //$q->when(request('rel_type'), function ($q) {
-           // return $q->where('rel_id', '=',request('rel_id',0));
-       // });
 
         return $q->get();
     }
@@ -45,17 +39,17 @@ class AssetequipmentRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // format values
+        // dd($input);
         foreach ($input as $key => $value) {
-            if (array_search($key, ['purchase_date', 'warranty_expiry_date'])) {
-                $input[$key] = date_for_database($value);
-            } elseif (array_search($key, ['cost', 'qty'])) {
-                $input[$key] = (float) $value;
+            if (in_array($key, ['purchase_date', 'warranty_expiry_date'], 1)) {
+                if ($value) $input[$key] = date_for_database($value);
             }
+            if (in_array($key, ['cost', 'qty'], 1))
+                $input[$key] = numberClean($value);
         }
 
-        $eqmnt = Assetequipment::create($input);        
-        if ($eqmnt->id) return $eqmnt->id;
+        $result = Assetequipment::create($input);        
+        if ($result) return $result;
 
         throw new GeneralException('Error Creating Assetequipment');
     }
@@ -70,14 +64,16 @@ class AssetequipmentRepository extends BaseRepository
      */
     public function update(Assetequipment $assetequipment, array $input)
     {
-        $input['purchase_date'] = date_for_database($input['purchase_date']);
-        $input['warranty_expiry_date'] = date_for_database($input['warranty_expiry_date']);
-        $input['cost'] = numberClean($input['cost']);
-        $input['qty'] = numberClean($input['qty']);
-        $input = array_map( 'strip_tags', $input);
-    	if ($assetequipment->update($input))
-            return true;
-
+        // dd($input);
+        foreach ($input as $key => $value) {
+            if (in_array($key, ['purchase_date', 'warranty_expiry_date'], 1)) {
+                if ($value) $input[$key] = date_for_database($value);
+            }
+            if (in_array($key, ['cost', 'qty'], 1))
+                $input[$key] = numberClean($value);
+        }
+    	if ($assetequipment->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.assetequipments.update_error'));
     }
 
@@ -88,11 +84,9 @@ class AssetequipmentRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Assetequipment $assetequipment)
+    public function delete($assetequipment)
     {
-        if ($assetequipment->delete()) {
-            return true;
-        }
+        if ($assetequipment->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.assetequipments.delete_error'));
     }

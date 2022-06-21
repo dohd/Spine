@@ -10,14 +10,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\assetequipment\Assetequipment
      */
-    protected $assetequipments;
+    protected $assetequipment;
 
     /**
-     * @param App\Models\assetequipment\Assetequipment $assetequipments
+     * @param App\Models\assetequipment\Assetequipment $assetequipment
      */
-    public function __construct($assetequipments)
+    public function __construct($assetequipment)
     {
-        $this->assetequipments = $assetequipments;
+        $this->assetequipment = $assetequipment;
     }
 
     /**
@@ -29,10 +29,10 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-         $accounts=Account::all();
-          
-        return view('focus.assetequipments.edit')->with([
-            'assetequipments' => $this->assetequipments,'accounts'=>$accounts
-        ]);
+        $assetequipment = $this->assetequipment;
+        $assetequipment->cost = number_format($assetequipment->cost, 2, '.', '');
+        $assetequipment->qty = number_format($assetequipment->qty, 1, '.', '');
+
+        return view('focus.assetequipments.edit', compact('assetequipment'));
     }
 }
