@@ -230,13 +230,15 @@ class PurchaseRepository extends BaseRepository
             }
         }
         // debit tax (VAT)
-        $account = Account::where('system', 'tax')->first(['id']);
-        $dr_data[] = array_replace($cr_data, [
-            'account_id' => $account->id, 
-            'debit' => $bill['grandtax'],
-        ]);
-        Transaction::insert($dr_data); 
+        if ($bill['grandtax'] > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $dr_data[] = array_replace($cr_data, [
+                'account_id' => $account->id, 
+                'debit' => $bill['grandtax'],
+            ]);
+        }
         
+        Transaction::insert($dr_data); 
         // update account ledgers debit and credit totals
         aggregate_account_transactions();
     }

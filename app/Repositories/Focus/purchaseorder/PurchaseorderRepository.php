@@ -298,11 +298,13 @@ class PurchaseorderRepository extends BaseRepository
             }
         }
         // debit tax
-        $account = Account::where('system', 'tax')->first(['id']);
-        $dr_data[] = array_replace($cr_data, [
-            'account_id' => $account->id, 
-            'debit' => $order['grandtax'],
-        ]);
+        if ($order['grandtax'] > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $dr_data[] = array_replace($cr_data, [
+                'account_id' => $account->id, 
+                'debit' => $order['grandtax'],
+            ]);
+        }
         Transaction::insert($dr_data); 
         // update account ledgers debit and credit totals
         aggregate_account_transactions();
