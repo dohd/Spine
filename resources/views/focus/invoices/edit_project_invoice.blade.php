@@ -30,11 +30,14 @@
 @section('extra-scripts')
 {{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
 <script type="text/javascript">
+    // default values
+    const invoice = @json($invoice);
+
     // Initialize datepicker
-    $('.datepicker')
-    .datepicker({ format: "{{config('core.user_date_format')}}"})
-    .datepicker('setDate', new Date())
-    .change(function() { $(this).datepicker('hide') });
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    .datepicker('setDate', new Date());
+    if (invoice.invoicedate) 
+        $('#invoicedate').datepicker('setDate', new Date(invoice.invoicedate));
 
     // On selecting Tax
     $('#tax_id').change(function() {
