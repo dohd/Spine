@@ -188,7 +188,8 @@ class QuoteRepository extends BaseRepository
             $quote->lead->update(['status' => 0, 'reason' => 'new']);
             Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         }
-        $quote->update($data);
+        unset($data['tid']);
+        $result = $quote->update($data);
 
         $data_items = $input['data_items'];
         $item_ids = array_reduce($data_items, function ($init, $item) {
@@ -204,9 +205,9 @@ class QuoteRepository extends BaseRepository
                 'quote_id' => $item['quote_id'],
             ]);
             foreach ($item as $key => $val) {
-                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price'], 1))
+                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price'], 1)) {
                     $quote_item[$key] = numberClean($val);
-                else $quote_item[$key] = $val;
+                } else $quote_item[$key] = $val;                   
             }
             if (!$quote_item['id']) unset($quote_item['id']);
             $quote_item->save();
@@ -234,7 +235,7 @@ class QuoteRepository extends BaseRepository
         }
 
         DB::commit();
-        if ($quote) return $quote;      
+        if ($result) return $quote;      
                
         throw new GeneralException('Error Updating Quote');
     }
