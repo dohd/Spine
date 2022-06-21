@@ -27,13 +27,13 @@
 
     <div class="card">
         <div class="card-body">
-        @if ($is_pi && !$task)
-            {{ Form::model($quote, ['route' => ['biller.quotes.store', $quote], 'method' => 'POST']) }}
-        @else
-            {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'method' => 'PATCH']) }}
-        @endif
-            @include('focus.quotes.form')
-        {{ Form::close() }}
+            @if ($task)
+                {{ Form::model($quote, ['route' => ['biller.quotes.store', $quote], 'method' => 'post']) }}
+            @else
+                {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'method' => 'patch']) }}
+            @endif
+                @include('focus.quotes.form')
+            {{ Form::close() }}
         </div>
     </div> 
 </div>
