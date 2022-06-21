@@ -79,18 +79,25 @@ class SuppliersController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create($input);
-        //return with successfull message
+        // extract request input
+        // $input = $request->except(['_token', 'ins']);
+        $data = $request->only([
+            'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
+            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token'
+        ]);
+        $account_data = $request->only(['account_name', 'account_no', 'opening_balance', 'opening_balance_date']);
+        $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
+
+        $data['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->create(compact('data', 'account_data', 'payment_data'));
+
         if ($request->ajax()) {
             $result['random_password'] = null;
-            echo json_encode($result);
-        } else {
-            return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.created')]);
-        }
+            return response()->json($result);
+        } 
+
+        return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.created')]);
     }
 
     /**
