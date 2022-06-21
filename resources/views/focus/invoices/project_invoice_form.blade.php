@@ -83,13 +83,13 @@
         <select class="form-control" name="account_id" required>
             <option value="">-- Select Category --</option>                                        
             @foreach ($accounts as $row)
-                @if ($row->accountType->name == 'Income')
-                    <optgroup label="{{ $row->accountType->name }}">
+                <optgroup label="{{ $row->accountType->name }}">
+                    @if ($row->accountType->name == 'Income')                    
                         <option value="{{ $row->id }}" {{ $row->id == @$invoice->account_id ? 'selected' : '' }}>
                             {{ $row->holder }}
-                        </option>
-                    </optgroup>
-                @endif
+                        </option>                    
+                    @endif
+                </optgroup>
             @endforeach                                        
         </select>
     </div>
