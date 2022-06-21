@@ -172,77 +172,86 @@ class SupplierRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        if (!empty($input['picture'])) {
-            $input['picture'] = $this->uploadPicture($input['picture']);
-        }
-        $opening_balance = numberClean($input['opening_balance']);
-        if ($opening_balance > 0) {
-            $input['opening_balance'] =  $opening_balance;
-            $input['opening_balance_date'] = date_for_database($input['opening_balance_date']);
-        }
-        $supplier_no = Supplier::max('supplier_no');
-        $input['supplier_no'] = $supplier_no + 1;
-        $input = array_map('strip_tags', $input);
+        // dd($input);
         DB::beginTransaction();
-        try {
-            $result = Supplier::create($input);
-            if ($result) {
-                //check if opening balance exist
-                if ($opening_balance > 0) {
-                    //maxtransaction
-                    $tid = Transaction::max('tid');
-                    $tid = $tid + 1;
-                    $ins = auth()->user()->ins;
-                    $duetate = date_for_database($input['opening_balance_date']);
-                    $date = date('Y-m-d');
-                    $memo = 'Account Opening Balance';
-                    //Create a bill
-                    $bills = array(
-                        'transaction_ref' => $tid,
-                        'date' => $date,
-                        'due_date' => $duetate,
-                        'supplier_type' => 'supplier',
-                        'supplier_id' => $result->id,
-                        'expense_subtotal_amount' => $opening_balance,
-                        'expense_grandtotal_amount' => $opening_balance,
-                        'grand_total_amount' => $opening_balance,
-                        'note' => $memo,
-                        'ins' => $ins,
-                        'user_id' => auth()->user()->id,
-                    );
-                    $bill_save = Bill::create($bills);
-                    if ($bill_save) {
-                        //bill items
-                        $bill_items = array(
-                            'bills_id' => $bill_save->id,
-                            'description' => $memo,
-                            'qty' => 1,
-                            'rate' => $opening_balance,
-                            'amount' => $opening_balance,
-                            'item_type' => 'Expense',
-                            'ins' => $ins,
-                            'user_id' => auth()->user()->id,
-                        );
-                        BillItem::create($bill_items);
-                    }
-                    //credit supplier and debit expense
-                    $pri_account = Account::where('system', 'payable')->first();
-                    $seco_account = Account::where('system', 'uncategorized_expense')->first();
-                    $pri_tr = Transactioncategory::where('code', 'bill')->first();
-                    $date = date('Y-m-d');
-                    $tr_ref = 'bill';
-                    $memo = 'Account Opening Balance';
-                    double_entry($tid, $pri_account->id, $seco_account->id, $opening_balance, 'cr', $pri_tr->id, 'supplier', $result->id, $date, date_for_database($input['opening_balance_date']), $tr_ref, $memo, $ins);
-                }
-                DB::commit();
-                return $result;
-            }
-            //end
-        } catch (\Illuminate\Database\QueryException $e) {
-            DB::rollback();
-            throw new GeneralException(trans('exceptions.backend.accounts.create_error'));
+
+        $data = $input['data'];
+        if (!empty($data['picture'])) 
+            $data['picture'] = $this->uploadPicture($data['picture']);
+
+        $result = Supplier::create($data);
+
+        $account_data = $input['account_data'];
+        $open_balance = numberClean($account_data['opening_balance']);
+        $open_balance_date = date_for_database($account_data['opening_balance_date']);
+        if ($open_balance > 0) {
+            $bill_data = [
+                'tid' => Bill::max('tid') + 1,
+                'date' => date('Y-m-d'),
+                'due_date' => date('Y-m-d'),
+                'supplier_type' => 'supplier',
+                'supplier_id' => $result->id,
+                'supplier_taxid' => $result->taxid,
+                'expense_subttl' => $open_balance,
+                'expense_grandttl' => $open_balance,
+                'grandttl' => $open_balance,
+                'note' => 'Account Opening Balance',
+                'ins' => $result->ins,
+                'user_id' => auth()->user()->id,
+            ];
+            $bill = Bill::create($bill_data);
+
+            $bill_item_data = [
+                'bill_id' => $bill->id,
+                'description' => 'Account Opening Balance',
+                'qty' => 1,
+                'rate' => $open_balance,
+                'amount' => $open_balance,
+                'type' => 'Expense',
+                'ins' => $bill->ins,
+                'user_id' => $bill->user_id,
+            ];
+            BillItem::create($bill_item_data);
+
+            /**accounting */
+            $this->post_transaction($bill, $open_balance, $open_balance_date);
         }
+
+        DB::commit();
+        if ($result) return $result;
     }
+
+    // transaction
+    public function post_transaction($bill, $open_balance, $open_balance_date)
+    {
+        // credit Accounts  Payable (Creditor)
+        $account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
+        $cr_data = [
+            'tid' => Transaction::max('tid') + 1,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $open_balance,
+            'tr_date' => $open_balance_date,
+            'due_date' => date('Y-m-d'),
+            'user_id' => $bill->user_id,
+            'note' => $bill->note,
+            'ins' => $bill->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $bill->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+        ];
+        Transaction::create($cr_data);
+        // debit Opening Balance (Expense)
+        $account = Account::where('system', 'open_balance')->where('account_type_id', 4)->first(['id']);
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, ['account_id' => $account->id, 'debit' => $open_balance]);
+        Transaction::create($dr_data);
+        // 
+        aggregate_account_transactions();
+    }
+
     /**
      * For updating the respective Model in storage
      *
