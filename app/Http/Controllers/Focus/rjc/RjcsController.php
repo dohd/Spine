@@ -46,7 +46,7 @@ class RjcsController extends Controller
         $last_rjc =  Rjc::orderBy('tid', 'DESC')->first('tid');
         $projects =  Project::doesntHave('rjc')
             ->whereHas('quotes', function ($q) {
-                $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+                $q->where('verified', 'Yes')->whereIn('invoiced', ['Yes', 'No']);
             })->get(['id', 'name', 'tid', 'main_quote_id']);
 
         foreach($projects as $project) {
