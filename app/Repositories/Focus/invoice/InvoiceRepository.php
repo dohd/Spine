@@ -309,6 +309,7 @@ class InvoiceRepository extends BaseRepository
             // update payment status in invoices
             foreach ($result->items as $item) {            
                 $invoice = $item->invoice;
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
                 if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
                 if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
             }
@@ -333,6 +334,14 @@ class InvoiceRepository extends BaseRepository
         DB::beginTransaction();
 
         $payment = PaidInvoice::find($id);
+        foreach ($payment->items as $item) {
+            $invoice = $item->invoice;
+            if ($invoice) $item->invoice->decrement('amountpaid', $item->paid);
+            // update status
+            if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
+            if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+            if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+        }
         $payment->items()->delete();
         $payment->transactions()->delete();
         aggregate_account_transactions();
@@ -352,7 +361,7 @@ class InvoiceRepository extends BaseRepository
         $tid = Transaction::max('tid') + 1;
         $data = [
             'tid' => $tid,
-            'tr_date' => date('Y-m-d'),
+            'tr_date' => $result->date,
             'due_date' => date('Y-m-d'),
             'user_id' => $result->user_id,
             'ins' => $result->ins,
