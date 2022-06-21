@@ -201,11 +201,12 @@
         </div>
         <div class="col-2">
             <label for="revision" >Revision</label>
-            <select class="form-control" name='revision' id="rev" required>
+            <select class="form-control" name='revision' id="rev">
+                <option value="">-- Select Revision --</option>
                 @foreach ($revisions as $val)
-                <option value="_r{{ $val }}" {{ @$quote->revision == '_r'.$val ? 'selected' : '' }}>
-                    R{{ $val }}
-                </option>
+                    <option value="_r{{ $val }}" {{ @$quote->revision == '_r'.$val ? 'selected' : '' }}>
+                        R{{ $val }}
+                    </option>
                 @endforeach                                            
             </select>
         </div>
