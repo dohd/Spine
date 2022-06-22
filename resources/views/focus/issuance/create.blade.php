@@ -59,11 +59,11 @@
         let total = 0;
         let subtotal = 0;
         $('#stockTbl tbody tr').each(function() {
-            const qty = $(this).find('.qty').val()
+            const qty = $(this).find('.qty').val();
             if (qty > 0) {
                 const price = $(this).find('.price').val();
                 const amountInc = $(this).find('.amount').val();
-                subtotal += price * 1;
+                subtotal += price * qty;
                 total += amountInc * qty;
             }
         });

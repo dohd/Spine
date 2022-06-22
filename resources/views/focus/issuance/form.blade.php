@@ -103,7 +103,7 @@
 
 <div class="form-group row">
     <div class="col-12">
-        {{ Form::submit('Issue Stock', ['class' => 'btn btn-success btn-lg float-right mr-1']) }}
+        {{ Form::submit('Issue Item', ['class' => 'btn btn-success btn-lg float-right mr-1']) }}
         <input type="hidden" name="quote_id" value="{{ $quote->id }}">
     </div>
 </div>
