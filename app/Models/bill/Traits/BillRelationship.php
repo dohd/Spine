@@ -54,6 +54,6 @@ trait BillRelationship
 
     public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 0)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref')->where('tr_type', 'bill');
     }
 }
