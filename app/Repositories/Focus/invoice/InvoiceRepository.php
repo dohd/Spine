@@ -76,13 +76,13 @@ class InvoiceRepository extends BaseRepository
         DB::beginTransaction();
 
         $bill = $input['bill'];
+        $duedate = $bill['invoicedate'] . ' + ' . $bill['validity'] . ' days';
+        $bill['invoiceduedate'] = date_for_database($duedate);
         foreach ($bill as $key => $val) {
             if ($key == 'invoicedate') $bill[$key] = date_for_database($val);
             if (in_array($key, ['total', 'subtotal', 'tax'], 1)) 
                 $bill[$key] = numberClean($val);
         }
-        $duedate = $bill['invoicedate'] . ' + ' . $bill['validity'] . ' days';
-        $bill['invoiceduedate'] = date_for_database($duedate);
         // increament tid
         $last_inv = Invoice::orderBy('id', 'DESC')->first('tid');
         if ($last_inv && $bill['tid'] <= $last_inv->tid) {
@@ -92,9 +92,10 @@ class InvoiceRepository extends BaseRepository
         
         $bill_items = $input['bill_items'];
         foreach ($bill_items as $k => $item) {
-            $item['invoice_id'] = $result->id;
-            $item['product_price'] = numberClean($item['product_price']);
-            $bill_items[$k] = $item;
+            $bill_items[$k] = array_replace($item, [
+                'invoice_id' => $result->id,
+                'product_price' => numberClean($item['product_price']),
+            ]);
         }
         InvoiceItem::insert($bill_items);
 
@@ -608,7 +609,7 @@ class InvoiceRepository extends BaseRepository
     }
 
     /**
-     * For deleting the respective model from storage
+     * Delete Project Invoice
      *
      * @param Invoice $invoice
      * @return bool
@@ -619,11 +620,10 @@ class InvoiceRepository extends BaseRepository
         // dd($invoice);
         DB::beginTransaction();
 
-        $invoice_products = $invoice->products;
-        foreach ($invoice_products as $item) {
-            $item->quote->update(['invoiced' => 'No']);
+        foreach ($invoice->products as $item) {
+            if ($item->quote) $item->quote->update(['invoiced' => 'No']);
         }
-        $invoice_products->delete();
+        $invoice->products()->delete();
         $invoice->transactions()->delete();
         aggregate_account_transactions();
         $result = $invoice->delete();
