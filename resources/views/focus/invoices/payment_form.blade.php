@@ -101,10 +101,12 @@
         <thead>
             <tr class="bg-gradient-directional-blue white">
                 <th>Due Date</th>
-                <th>Invoice Number</th>
+                <th>Invoice No</th>
                 <th>Note</th>
                 <th>Status</th>
-                <th>Amount (VAT Inc)</th>
+                <th>Amount</th>
+                <th>Balance</th>
+                <th>Paid</th>
                 <th>Allocate (Ksh.)</th>
             </tr>
         </thead>
@@ -120,6 +122,8 @@
                             <td>{{ gen4tid('Inv-', $invoice->tid) }}</td>
                             <td>{{ $invoice->notes }}</td>
                             <td>{{ $invoice->status }}</td>
+                            <td>{{ numberFormat($invoice->total) }}</td>
+                            <td>{{ numberFormat($invoice->total - $invoice->amountpaid + $row->paid) }}</td>
                             <td class="amount"><b>{{ numberFormat($invoice->amountpaid - $row->paid) }}<b></td>
                             <td><input type="text" class="form-control paid" name="paid[]" value="{{ numberFormat($row->paid) }}"></td>
                             <input type="hidden" name="id[]" value="{{ $row->id }}">
@@ -128,15 +132,15 @@
                 @endforeach
             @endisset                             
             <tr class="bg-white">
-                <td colspan="4"></td>
+                <td colspan="6"></td>
                 <td colspan="2">
-                    <div class="form-inline float-right">
+                    <div class="col-6 float-right">
                         <label for="total_paid">Total Allocated</label>
-                        {{ Form::text('deposit_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'deposit_ttl', 'readonly']) }}
+                        {{ Form::text('deposit_ttl', 0, ['class' => 'form-control ml-1', 'id' => 'deposit_ttl', 'readonly']) }}
                     </div>                                         
-                    <div class="form-inline mb-1 float-right">
-                        <label for="total_bill">Total Amount</label>
-                        {{ Form::text('amount_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'amount_ttl', 'readonly']) }}
+                    <div class="col-6 float-right">
+                        <label for="total_bill">Total Balance</label>
+                        {{ Form::text('amount_ttl', 0, ['class' => 'form-control ml-1', 'id' => 'amount_ttl', 'readonly']) }}
                     </div>
                 </td>
             </tr>
