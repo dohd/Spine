@@ -59,16 +59,16 @@
     });
 
     // default
+    const payment = @json($payment);
     $('#person').attr('disabled', true);
-    
     calcTotal();
 
     // datepicker
-    $('.datepicker')
-    .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date());
+    if (payment.date) $('#date').datepicker('setDate', new Date(payment.date)); 
 
-    // 
+    // select 2 config
     $('#person').select2({
         ajax: {
             url: "{{ route('biller.customers.select') }}",
@@ -84,9 +84,9 @@
 
     // On adding paid values
     $('#invoiceTbl').on('change', '.paid', function() {
-        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
+        const balance = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
         const paid = $(this).val().replace(/,/g, '') * 1;
-        if (paid > amount) $(this).val(amount.toLocaleString());
+        if (balance > 0 && balance < paid) $(this).val(balance.toLocaleString());
         calcTotal();
     });
 
@@ -117,14 +117,18 @@
 
     // invoice row
     function invoiceRow(v, i) {
-        const amount = parseFloat(v.total - v.amountpaid).toLocaleString();
+        const amount = parseFloat(v.total).toLocaleString();
+        const paid = parseFloat(v.amountpaid).toLocaleString();
+        const balance = parseFloat(v.total - v.amountpaid).toLocaleString();
         return `
             <tr>
                 <td class="text-center">${new Date(v.invoiceduedate).toDateString()}</td>
                 <td>${v.tid}</td>
                 <td class="text-center">${v.notes}</td>
                 <td>${v.status}</td>
-                <td class="amount"><b>${amount}</b></td>
+                <td>${amount}</td>
+                <td>${paid}</td>
+                <td class="text-center amount"><b>${balance}</b></td>
                 <td><input type="text" class="form-control paid" name="paid[]"></td>
                 <input type="hidden" name="invoice_id[]" value="${v.id}">
             </tr>
