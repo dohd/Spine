@@ -310,8 +310,8 @@ class InvoiceRepository extends BaseRepository
             foreach ($result->items as $item) {            
                 $invoice = $item->invoice;
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
-                if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
             }
         }
         
@@ -339,8 +339,8 @@ class InvoiceRepository extends BaseRepository
             if ($invoice) $item->invoice->decrement('amountpaid', $item->paid);
             // update status
             if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
-            if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-            if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+            elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
         }
         $payment->items()->delete();
         $payment->transactions()->delete();
