@@ -17,7 +17,7 @@
         <input type="text" name="date" class="form-control datepicker">
     </div>
     <div class="col-3">
-        <label for="tool_ref">Tool Requisition</label>
+        <label for="tool_ref">Tool Requisition No</label>
         <input type="text" class="form-control" name="tool_ref">
     </div>
     <div class="col-5">
@@ -36,7 +36,7 @@
                 <th>Approved Qty</th>
                 <th>Issued Qty</th>
                 <th width="10%">Qty</th>
-                <th width="10%">Requisition</th>
+                <th width="10%">Requisition No</th>
                 <th>Warehouse</th>
             </tr>
         </thead>
