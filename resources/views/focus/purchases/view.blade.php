@@ -50,9 +50,9 @@
                             @php
                                 $project = $purchase->project ? gen4tid('Prj-', $purchase->project->tid) . '; ' . $purchase->project->name : '';
                                 $purchase_details = [
-                                    'Supplier' => $purchase->suppliername,
+                                    'System ID' => gen4tid('DP-', $purchase->tid),
+                                    'Supplier' => ($purchase->suppliername? $purchase->suppliername : $purchase->supplier)? $purchase->supplier->name : '',
                                     'Tax ID' => $purchase->supplier_taxid,
-                                    'Transaction ID' => gen4tid('P-', $purchase->tid),
                                     'Order Date & Due Date' => $purchase->date . ' : ' . $purchase->due_date,
                                     'Reference' => $purchase->doc_ref_type . ' - ' . $purchase->doc_ref,
                                     'Project' => $project,
