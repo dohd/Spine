@@ -8,30 +8,29 @@
 @section ('title', ' Diagnosis Job Card | ' . $part_title)
 
 @section('content')
-<div class="">
-    <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Djc Report Management</h4>
-            </div>
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right">
-                    <div class="media-body media-right text-right">
-                        @include('focus.djcs.partials.djcs-header-buttons')
-                    </div>
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Djc Report Management</h4>
+        </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.djcs.partials.djcs-header-buttons')
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="content-body">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        @if ($query_str == 'page=copy')
-                            {{ Form::model($djc, ['route' => ['biller.djcs.store', $djc], 'method' => 'POST']) }}
-                        @else
-                            {{ Form::model($djc, ['route' => ['biller.djcs.update', $djc], 'method' => 'PATCH']) }}
-                        @endif
+    <div class="content-body">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    @if ($query_str == 'page=copy')
+                        {{ Form::model($djc, ['route' => ['biller.djcs.store', $djc], 'method' => 'POST', 'files' => true]) }}
+                    @else
+                        {{ Form::model($djc, ['route' => ['biller.djcs.update', $djc], 'method' => 'PATCH', 'files' => true]) }}
+                    @endif
                         <div class="row">
                             <div class="col-sm-6 cmp-pnl">
                                 <div id="customerpanel" class="inner-cmp-pnl">
@@ -121,6 +120,34 @@
                                             {{ Form::text('technician', null, ['class' => 'form-control round required', 'placeholder' => 'Technician','autocomplete'=>'false','id'=>'prepaired_by','required' => 'required']) }}
                                         </div>
                                     </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-3"><label for="client_name" class="caption"> Image 1 </label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                                {!! Form::file('image_one', array('class'=>'input', 'id'=>'image_one' )) !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 2</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                                {!! Form::file('image_two', array('class'=>'input', 'id'=>'image_two' )) !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 3</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                                {!! Form::file('image_three', array('class'=>'input', 'id'=>'image_three' )) !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3"><label for="client_email" class="caption"> Image 4</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                                                {!! Form::file('image_four', array('class'=>'input', 'id'=>'image_four' )) !!}
+                                            </div>
+                                        </div>                                    
+                                    </div>
+
                                     <div class="form-group row">
                                         <div class="col-sm-3"><label for="caption" class="caption"> Caption 1 </label>
                                             <div class="input-group">
@@ -153,6 +180,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-sm-6 cmp-pnl">
                                 <div class="inner-cmp-pnl">
                                     <div class="form-group row">
@@ -220,8 +248,7 @@
                                 </div>
                             </div>
                         </div>
-                        {{ Form::close() }}
-                    </div>
+                    {{ Form::close() }}
                 </div>
             </div>
         </div>
