@@ -6,6 +6,7 @@ use DB;
 use App\Models\items\DjcItem;
 use App\Models\djc\Djc;
 use App\Exceptions\GeneralException;
+use App\Models\lead\Lead;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,39 +62,33 @@ class DjcRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        DB::beginTransaction();
-
+        // dd($input);
         $data = $input['data'];
-        $data['report_date'] = date_for_database($data['report_date']);
-        $data['jobcard_date'] = date_for_database($data['jobcard_date']);
-        // increament tid
-        $ref =  Djc::orderBy('tid', 'desc')->first('tid');
-        if (isset($ref) && $data['tid'] <= $ref->tid) {
-            $data['tid'] = $ref->tid + 1;
-        }        
-        // upload files
         foreach($data as $key => $value) {
-            if ($key == 'image_one' || $key == 'image_two' || $key == 'image_three' || $key == 'image_four') {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
                 if ($value) $data[$key] = $this->uploadFile($value);
             }
+            if (in_array($key, ['report_date', 'jobcard_date'], 1))
+                $data[$key] = date_for_database($value);
         }
+
+        DB::beginTransaction();
+        // close ticket
+        Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+        // increament tid
+        $last_tid =  Djc::max('tid');
+        if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
         $result = Djc::create($data);
 
-        // djc items
-        $item_count = count($input['data_item']['tag_number']);
-        $data_items = $this->items_array(
-            $item_count, 
-            $input['data_item'],
-            ['djc_id' => $result['id'], 'ins' => $result['ins']]
-        );
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return $v + ['djc_id' => $result->id, 'ins' => $result->ins];
+        }, $data_items);
         DjcItem::insert($data_items);
 
-        // bulk insert djc items
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
-
+        DB::commit();
+        if ($result)  return $result;
+           
         throw new GeneralException('Error Creating Djc');
     }
 
@@ -105,45 +100,46 @@ class DjcRepository extends BaseRepository
      * @throws GeneralException
      * @return object
      */
-    public function update(array $input)
+    public function update($djc, array $input)
     {
+        // dd($input);
+        $data = $input['data'];
+        foreach($data as $key => $value) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
+                if ($value) $data[$key] = $this->uploadFile($value);
+            }
+            if (in_array($key, ['report_date', 'jobcard_date'], 1))
+                $data[$key] = date_for_database($value);
+        }
         DB::beginTransaction();
 
-        // djc input data
-        $data = $input['data'];
-        $data['report_date'] = date_for_database($data['report_date']);
-        $data['jobcard_date'] = date_for_database($data['jobcard_date']);
-        
-        $result = Djc::where('id', $data['id'])->update($data);
+        // if different lead, open previous lead
+        if ($djc->lead && $djc->lead_id != $data['lead_id']) 
+            if ($djc->lead->status) $djc->lead->update(['status' => 0]);
+        // close lead
+        Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
 
-        // djc items
-        $item_count = count($input['data_item']['tag_number']);
-        $data_items = $this->items_array(
-            $item_count, 
-            $input['data_item'],
-            ['djc_id' => $data['id'], 'ins' => $data['ins']]
-        );
-
+        $result = $djc->update($data);
         // update or create new djc_item
+        $data_items = $input['data_items'];
         foreach($data_items as $item) {
+            $item['ins'] = $djc->ins;
             $djc_item = DjcItem::firstOrNew([
                 'id' => $item['item_id'],
-                'djc_id' => $item['djc_id'],
+                'djc_id' => $djc->id,
             ]);
             // assign properties to the item
             foreach($item as $key => $value) {
                 $djc_item[$key] = $value;
             }
             // remove stale attributes and save
-            if ($djc_item['id'] == 0) unset($djc_item['id']);
             unset($djc_item['item_id']);
+            if (!$djc_item['id']) unset($djc_item['id']);
             $djc_item->save();
         }
 
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
+        DB::commit();
+        if ($result)  return $result;
 
         throw new GeneralException('Error Updating Djc');
     }

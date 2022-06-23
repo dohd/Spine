@@ -90,13 +90,16 @@ class DjcsController extends Controller
             'technician' => 'required',
             'subject' => 'required'
         ]);
-
+        // extract request input
         $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_item = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+
         $data['ins'] = auth()->user()->ins;
 
+        $data_items = modify_array($data_items);
+
         //Create the model using repository create method
-        $result = $this->repository->create(compact('data', 'data_item'));
+        $result = $this->repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created']);
     }
@@ -130,17 +133,17 @@ class DjcsController extends Controller
             'technician' => 'required',
             'subject' => 'required'
         ]);
-        
+        // extract request input
         $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_item = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data_items = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
         
         $data['ins'] = auth()->user()->ins;
         $data['id'] = $djc->id;
 
-        // Update using repository update method
-        $this->repository->update(compact('data', 'data_item'));
+        $data_items = modify_array($data_items);
 
-        //return with successfull message
+        $this->repository->update($djc, compact('data', 'data_items'));
+
         return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated']);
     }
 
