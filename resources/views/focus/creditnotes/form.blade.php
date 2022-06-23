@@ -22,7 +22,7 @@
     </div>
     <div class="col-2">
         <div><label for="date">Date</label></div>
-        {{ Form::text('date', null, ['class' => 'form-control datepicker']) }}
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
     </div>
 </div>
 <div class="form-group row">

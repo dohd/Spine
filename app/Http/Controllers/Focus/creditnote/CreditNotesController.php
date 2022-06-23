@@ -8,6 +8,7 @@ use App\Http\Responses\ViewResponse;
 use App\Models\creditnote\CreditNote;
 use App\Repositories\Focus\creditnote\CreditNoteRepository;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CreditNotesController extends Controller
 {
@@ -152,4 +153,22 @@ class CreditNotesController extends Controller
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
     }
+
+    /**
+     * Print Credit Note
+     */
+    public function print_creditnote(CreditNote $creditnote)
+    {
+        $html = view('focus.creditnotes.print_creditnote', ['resource' => $creditnote])->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        return Response::stream($pdf->Output('creditnote.pdf', 'I'), 200, $headers);
+    }    
 }

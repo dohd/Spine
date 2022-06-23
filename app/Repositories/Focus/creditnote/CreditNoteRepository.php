@@ -104,6 +104,7 @@ class CreditNoteRepository extends BaseRepository
                 $invoice->increment('amountpaid', $diff);
             }
         }
+        // update invoice status
         if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
         elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
         elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
@@ -120,33 +121,8 @@ class CreditNoteRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
-    /**
-     * For deleting the respective model from storage
-     *
-     * @param CreditNote $creditnote
-     * @throws GeneralException
-     * @return bool
-     */
-    public function delete($creditnote)
-    {
-        DB::beginTransaction();
-
-        $invoice = $creditnote->invoice;
-        if ($creditnote->is_debit) $invoice->increment('amountpaid', $creditnote->total);
-        else $invoice->decrement('amountpaid', $creditnote->total);
-
-        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);    
-        elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-        elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
-            
-        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
-        $result = $creditnote->delete();
-        
-        DB::commit();
-        if ($result) return true;
-    }
-
-    static function post_transaction($result)
+    // transactions
+    public function post_transaction($result)
     {
         $account = Account::where('system', 'receivable')->first(['id']);
         $tid = Transaction::max('tid') + 1;
@@ -212,4 +188,30 @@ class CreditNoteRepository extends BaseRepository
         Transaction::insert($tr_data);
         aggregate_account_transactions();
     }
+
+    /**
+     * For deleting the respective model from storage
+     *
+     * @param CreditNote $creditnote
+     * @throws GeneralException
+     * @return bool
+     */
+    public function delete($creditnote)
+    {
+        DB::beginTransaction();
+
+        $invoice = $creditnote->invoice;
+        if ($creditnote->is_debit) $invoice->increment('amountpaid', $creditnote->total);
+        else $invoice->decrement('amountpaid', $creditnote->total);
+
+        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);    
+        elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
+            
+        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
+        $result = $creditnote->delete();
+        
+        DB::commit();
+        if ($result) return true;
+    }    
 }

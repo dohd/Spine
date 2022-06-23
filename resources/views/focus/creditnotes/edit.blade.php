@@ -36,10 +36,13 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
-    $('.datepicker')
-    .datepicker({format: "{{config('core.user_date_format')}}"})
-    .datepicker('setDate', new Date())
-    .change(function () { $(this).datepicker('hide') });
+    // default values
+    const creditnote = @json($creditnote);
+
+    // datepicker
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    .datepicker('setDate', new Date());
+    if (creditnote.date) $('#date').datepicker('setDate', new Date(creditnote.date));
 
     // Load customers
     $('#customer').select2({

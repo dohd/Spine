@@ -70,7 +70,11 @@ class CreditNotesTableController extends Controller
                 return dateFormat($creditnote->date);
             })
             ->addColumn('actions', function ($creditnote) {
-                return $creditnote->action_buttons;
+                $valid_token = token_validator('', 'd' . $creditnote->id, true);
+                $link = route('biller.creditnotes.print_creditnote', $creditnote);
+
+                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
+                    . $creditnote->action_buttons;
             })
             ->make(true);
     }
