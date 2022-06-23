@@ -80,16 +80,26 @@
                 @php
                     $debit = $account->transactions->sum('debit');
                     $credit = $account->transactions->sum('credit');
-                    $debit_total += $debit;
-                    $credit_total += $credit;
+                    $debit_balance = 0;
+                    $credit_balance = 0;
+                    if (in_array($account->account_type, ['Asset', 'Expense'], 1))
+                        $debit_balance = $debit - $credit;
+                    if (in_array($account->account_type, ['Income', 'Liability', 'Equity'], 1))
+                        $credit_balance = $credit - $debit; 
+                    if ($debit_balance > 0 || $credit_balance > 0) {
+                        $debit_total += $debit_balance;
+                        $credit_total += $credit_balance;    
+                    }   
                 @endphp
-                <tr class="dotted">
-                    <td>{{ $i+1 }}</td>
-                    <td>{{ $account->number }}</td>
-                    <td>{{ $account->holder }}</td>
-                    <td style="text-align: center;">{{ $debit > 0 ? numberFormat($debit) : '' }}</td>
-                    <td style="text-align: center;">{{ $credit > 0 ? numberFormat($credit) : '' }}</td>
-                </tr> 
+                @if ($debit_balance > 0 || $credit_balance > 0)
+                    <tr class="dotted">
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $account->number }}</td>
+                        <td>{{ $account->holder }}</td>
+                        <td style="text-align: center;">{{ $debit_balance > 0 ? numberFormat($debit_balance) : '' }}</td>
+                        <td style="text-align: center;">{{ $credit_balance > 0 ? numberFormat($credit_balance) : '' }}</td>
+                    </tr> 
+                @endif
             @endforeach
             <tr class="dotted">
                 @for ($i = 0; $i < 3; $i++)
