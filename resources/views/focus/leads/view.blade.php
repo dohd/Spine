@@ -19,9 +19,15 @@
     
     <div class="card">
         <div class="card-header">
-            <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning btn-sm">
-                <i class="fa fa-clone" aria-hidden="true"></i> Copy
-            </a>
+            <div class="button-group">
+                <a href="#" class="btn btn-info btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                    <i class="fa fa-pencil" aria-hidden="true"></i> Status
+                </a>
+                <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning btn-sm mr-1">
+                    <i class="fa fa-clone" aria-hidden="true"></i> Copy
+                </a>                
+            </div>
+            
             <h5 class="card-title mt-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
         </div>
         <div class="card-body">
@@ -92,4 +98,5 @@
         </div>
     </div>
 </div>
+@include('focus.leads.partials.status_modal')
 @endsection

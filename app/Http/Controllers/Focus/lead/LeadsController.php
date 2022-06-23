@@ -187,15 +187,16 @@ class LeadsController extends Controller
         return $lead;        
     }
 
-    // update Lead status
-    public function update_status(Request $request, $id)
+    /**
+     * Update Lead Open Status
+     */
+    public function update_status(Lead $lead, Request $request)
     {
-        $status = $request->post('status');
-        $reason = $request->post('reason');
+        // dd($lead);
+        $status = $request->status;
+        $reason = $request->reason;
+        $lead->update(compact('status', 'reason'));
 
-        Lead::find($id)->update(compact('status', 'reason'));
-
-        // reload the same page
         return redirect()->back();
     }
 }

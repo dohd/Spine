@@ -145,10 +145,11 @@ Route::group(['namespace' => 'jobschedule'], function () {
     //For Datatable
     Route::post('jobschedules/get', 'JobschedulesTableController')->name('jobschedules.get');
 });
+
 Route::group(['namespace' => 'lead'], function () {
-    Route::resource('leads', 'LeadsController');
+    Route::patch('leads/update_status/{lead}', 'LeadsController@update_status')->name('leads.update_status');
     Route::post('leads/lead_search', 'LeadsController@lead_search')->name('leads.lead_search');
-    Route::post('leads/{id}/update_status', 'LeadsController@update_status')->name('leads.update_status');
+    Route::resource('leads', 'LeadsController');
 
     //For Datatable
     Route::post('leads/get', 'LeadsTableController')->name('leads.get');
@@ -373,6 +374,7 @@ Route::group(['namespace' => 'withholding'], function () {
 });
 
 Route::group(['namespace' => 'creditnote'], function () {
+    Route::get('creditnotes/print_creditnote/{creditnote}', 'CreditNotesController@print_creditnote')->name('creditnotes.print_creditnote');
     Route::resource('creditnotes', 'CreditNotesController');
     // for DataTable
     Route::post('creditnotes/get', 'CreditNotesTableController')->name('creditnotes.get');
