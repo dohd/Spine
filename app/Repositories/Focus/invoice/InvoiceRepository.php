@@ -175,7 +175,7 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit Client Income account (intermediary ledger)
+        // credit Customer Income (intermediary ledger account)
         $account = Account::where('system', 'client_income')->first(['id']);
         unset($dr_data['debit'], $dr_data['is_primary']);
         $inc_cr_data = array_replace($dr_data, [
