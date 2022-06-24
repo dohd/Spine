@@ -382,15 +382,14 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        $product_variations = ProductVariation::where('qty', '>', 0)
-        ->whereHas('product', function ($q) {
+        $product_variations = ProductVariation::whereHas('product', function ($q) {
             $q->where('name', 'LIKE', '%'. request('keyword') .'%');
         })->with(['warehouse' => function($q) {
             $q->select(['id', 'title']);
         }])->limit(6)->get();
         
-        $pricegroup = Pricegroup::find($request->pricegroup_id);
         $pricelist = array();
+        $pricegroup = Pricegroup::find($request->pricegroup_id);
         if ($pricegroup) $pricelist = PriceList::where('pricegroup_id', $pricegroup->id)->get();
             
         $output = array();
