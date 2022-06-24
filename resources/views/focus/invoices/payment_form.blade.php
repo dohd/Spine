@@ -128,7 +128,7 @@
                             <td>{{ $invoice->notes }}</td>
                             <td>{{ $invoice->status }}</td>
                             <td>{{ numberFormat($invoice->total) }}</td>
-                            <td>{{ numberFormat($invoice->total - $invoice->amountpaid + $row->paid) }}</td>
+                            <td>{{ numberFormat($invoice->total - $invoice->amountpaid) }}</td>
                             <td class="amount"><b>{{ numberFormat($invoice->amountpaid - $row->paid) }}<b></td>
                             <td><input type="text" class="form-control paid" name="paid[]" value="{{ numberFormat($row->paid) }}"></td>
                             <input type="hidden" name="id[]" value="{{ $row->id }}">
