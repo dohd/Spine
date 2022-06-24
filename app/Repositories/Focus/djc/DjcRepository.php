@@ -82,7 +82,12 @@ class DjcRepository extends BaseRepository
 
         $data_items = $input['data_items'];
         $data_items = array_map(function ($v) use($result) {
-            return $v + ['djc_id' => $result->id, 'ins' => $result->ins];
+            return array_replace($v, [
+                'djc_id' => $result->id, 
+                'ins' => $result->ins,
+                'last_service_date' => date_for_database($v['last_service_date']),
+                'next_service_date' => date_for_database($v['next_service_date'])
+            ]);
         }, $data_items);
         DjcItem::insert($data_items);
 
@@ -123,7 +128,12 @@ class DjcRepository extends BaseRepository
         // update or create new djc_item
         $data_items = $input['data_items'];
         foreach($data_items as $item) {
-            $item['ins'] = $djc->ins;
+            $item = array_replace($item, [
+                'ins' => $djc->ins,
+                'last_service_date' => date_for_database($item['last_service_date']),
+                'next_service_date' => date_for_database($item['next_service_date'])
+            ]);
+            
             $djc_item = DjcItem::firstOrNew([
                 'id' => $item['item_id'],
                 'djc_id' => $djc->id,
