@@ -69,9 +69,7 @@ class DjcsController extends Controller
     public function create(ManageDjcRequest $request)
     {
         $last_djc =  Djc::orderBy('tid', 'DESC')->first('tid');
-        $leads = Lead::whereHas('quotes', function ($q) {
-            $q->where(['status' => 'pending', 'verified' => 'No', 'invoiced' => 'No']);
-        })->orderBy('id', 'DESC')->get();
+        $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
             
         return new CreateResponse('focus.djcs.create', compact('leads','last_djc'));
     }
@@ -112,7 +110,9 @@ class DjcsController extends Controller
      */
     public function edit(Djc $djc)
     {
-        $leads = Lead::all();
+        $leads = Lead::where('status', 0)
+            ->orderBy('id', 'DESC')->get()
+            ->merge(collect([$djc->lead]));
         $items = $djc->items()->orderBy('row_index', 'ASC')->get();
 
         return new EditResponse('focus.djcs.edit', compact('djc', 'leads', 'items'));
