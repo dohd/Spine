@@ -9,7 +9,6 @@ use App\Models\quote\Quote;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\invoice\Invoice;
-use App\Models\items\InvoiceItem;
 use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
@@ -389,7 +388,7 @@ class QuoteRepository extends BaseRepository
             'note' => $invoice->notes,
         ];
 
-        // debit Customer Income;
+        // debit Customer Income
         $inc_account = Account::where('system', 'client_income')->first(['id']);
         $tr_data[] = array_replace($data, [
             'account_id' => $inc_account->id,
@@ -401,6 +400,35 @@ class QuoteRepository extends BaseRepository
             'account_id' => $invoice->account_id,
             'credit' => $invoice->subtotal,
         ]);
+
+        // check if invoice has creditnote or debitnote
+        if ($invoice->creditnotes->count()) {
+            $subtotal = $invoice->creditnotes->sum('subtotal');
+            // credit Customer Income
+            $tr_data[] = array_replace($data, [
+                'account_id' => $inc_account->id,
+                'credit' => $subtotal,
+                'is_primary' => 1,
+            ]);
+            // debit Revenue Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => $invoice->account_id,
+                'debit' => $subtotal,
+            ]);
+        } elseif ($invoice->debitnotes->count()) {
+            $subtotal = $invoice->debitnotes->sum('subtotal');
+            // debit Customer Income
+            $tr_data[] = array_replace($data, [
+                'account_id' => $inc_account->id,
+                'debit' => $subtotal,
+                'is_primary' => 1,
+            ]);
+            // credit Revenue Account
+            $tr_data[] = array_replace($data, [
+                'account_id' => $invoice->account_id,
+                'credit' => $subtotal,
+            ]);
+        }
 
         // issued items
         $store_inventory_amount = 0;
