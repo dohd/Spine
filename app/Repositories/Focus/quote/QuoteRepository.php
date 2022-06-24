@@ -381,6 +381,7 @@ class QuoteRepository extends BaseRepository
             'due_date' => $invoice->invoiceduedate,
             'user_id' => $invoice->user_id,
             'ins' => $invoice->ins,
+            'trans_category_id' => $tr_category->id,
             'tr_type' => $tr_category->code,
             'tr_ref' => $invoice->id,
             'is_primary' => 0,
