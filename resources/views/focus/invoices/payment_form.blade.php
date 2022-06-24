@@ -105,8 +105,13 @@
                 <th>Note</th>
                 <th>Status</th>
                 <th>Amount</th>
-                <th>Balance</th>
-                <th>Paid</th>
+                @if (strpos(request()->url(), 'create'))
+                    <th>Paid</th>
+                    <th>Balance</th>
+                @else
+                    <th>Balance</th>
+                    <th>Paid</th>
+                @endif
                 <th>Allocate (Ksh.)</th>
             </tr>
         </thead>
