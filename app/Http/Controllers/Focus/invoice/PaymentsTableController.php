@@ -54,7 +54,15 @@ class PaymentsTableController extends Controller
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
-            ->addIndexColumn()            
+            ->addIndexColumn()    
+            ->addColumn('customer', function ($payment) {
+                if ($payment->customer)
+                return $payment->customer->company;
+            })
+            ->addColumn('account', function ($payment) {
+                if ($payment->account)
+                return $payment->account->holder;
+            })        
             ->addColumn('date', function ($payment) {
                 return dateFormat($payment->date);
             })
