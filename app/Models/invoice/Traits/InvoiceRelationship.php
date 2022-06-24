@@ -2,6 +2,7 @@
 
 namespace App\Models\invoice\Traits;
 
+use App\Models\creditnote\CreditNote;
 use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
@@ -11,6 +12,16 @@ use App\Models\customer\Customer;
  */
 trait InvoiceRelationship
 {
+    public function creditnotes()
+    {
+        return $this->hasMany(CreditNote::class)->where('is_debit', 0);
+    }
+
+    public function debitnotes()
+    {
+        return $this->hasMany(CreditNote::class)->where('is_debit', 1);
+    }
+
     public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer')->withoutGlobalScopes();
