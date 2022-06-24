@@ -1,7 +1,7 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="tid">{{ $is_debit? 'Debit' : 'Credit' }} Note No.</label>
-        {{ Form::text('tid', @$last_tid+1, ['class' => 'form-control', 'readonly']) }}
+        {{ Form::text('tid', @$creditnote->tid? $creditnote->tid: @$last_tid+1, ['class' => 'form-control', 'readonly']) }}
     </div>
     <div class="col-4">
         <label for="customer">Seach Customer</label>
