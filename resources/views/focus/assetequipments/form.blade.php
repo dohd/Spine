@@ -14,8 +14,8 @@
             <div class='col'>
                 <select class="form-control required" name="account_type" id="account_type" required>
                     <option value="">-- Select Account Type --</option>
-                    @foreach (['Asset', 'Equipment'] as $val)
-                        <option value="{{ $val }}" {{ $val == @$assetequipment->account_type? 'selected' : '' }}>
+                    @foreach (['Asset' => 'Asset', 'Expense' => 'Stockable Expense e.g PPE'] as $key => $val)
+                        <option value="{{ $key }}" {{ $key == @$assetequipment->account_type? 'selected' : '' }}>
                             {{ $val }}
                         </option>
                     @endforeach                                       
@@ -77,34 +77,22 @@
 <div class="row">
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label('vendor', 'Vendor',['class' => 'col control-label']) }}
+            {{ Form::label('manufacturer', 'Manufacturer',['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::text('vendor', null, ['class' => 'form-control box-size', 'placeholder' => 'Vendor']) }}
+                {{ Form::text('manufacturer', null, ['class' => 'form-control box-size', 'placeholder' => 'Vendor']) }}
             </div>
         </div>
     </div>
 
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label( 'cost', 'Cost Price', ['class' => 'col control-label']) }}
+            {{ Form::label('model', 'Model', ['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::number('cost', null, ['class' => 'form-control box-size', 'step' => '0.01']) }}
+                {{ Form::text('model', null, ['class' => 'form-control box-size']) }}
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class='form-group'>
-            {{ Form::label('qty', 'Quantity In Stock', ['class' => 'col control-label']) }}
-            <div class='col'>
-                {{ Form::number('qty', null, ['class' => 'form-control box-size', 'step' => '0.01']) }}
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="row">
     <div class="col-md-4">
         <div class='form-group'>
             {{ Form::label( 'location', 'Location', ['class' => 'col control-label']) }}
@@ -113,7 +101,10 @@
             </div>
         </div>
     </div>
+</div>
 
+
+<div class="row">
     <div class="col-md-4">
         <div class='form-group'>
             {{ Form::label('warranty', 'Under Warranty', ['class' => 'col control-label']) }}

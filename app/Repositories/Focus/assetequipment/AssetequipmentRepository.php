@@ -25,7 +25,7 @@ class AssetequipmentRepository extends BaseRepository
     public function getForDataTable()
     {
         
-       $q=$this->query();
+       $q = $this->query();
 
         return $q->get();
     }
@@ -44,8 +44,6 @@ class AssetequipmentRepository extends BaseRepository
             if (in_array($key, ['purchase_date', 'warranty_expiry_date'], 1)) {
                 if ($value) $input[$key] = date_for_database($value);
             }
-            if (in_array($key, ['cost', 'qty'], 1))
-                $input[$key] = numberClean($value);
         }
 
         $result = Assetequipment::create($input);        
@@ -69,8 +67,6 @@ class AssetequipmentRepository extends BaseRepository
             if (in_array($key, ['purchase_date', 'warranty_expiry_date'], 1)) {
                 if ($value) $input[$key] = date_for_database($value);
             }
-            if (in_array($key, ['cost', 'qty'], 1))
-                $input[$key] = numberClean($value);
         }
     	if ($assetequipment->update($input)) return true;
             

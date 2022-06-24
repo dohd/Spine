@@ -60,12 +60,6 @@ class AssetequipmentsTableController extends Controller
             ->addColumn('name', function ($assetequipment) {
                 return $assetequipment->name;
             })
-            ->addColumn('cost', function ($assetequipment) {
-                return numberFormat($assetequipment->cost);
-            })
-            ->addColumn('qty', function ($assetequipment) {
-                return number_format($assetequipment->qty, 1);
-            })
             ->addColumn('account_name', function ($assetequipment) {
                 if ($assetequipment->account) 
                 return $assetequipment->account->holder;

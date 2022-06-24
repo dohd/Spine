@@ -29,9 +29,9 @@
                                         <th>#</th>
                                         <th>Item Name</th>
                                         <th>Serial</th>
-                                        <th>Account Name</th>
-                                        <th>Cost Price</th>
-                                        <th>Qty</th>
+                                        <th>Ledger Account</th>
+                                        <th>Location</th>
+                                        <th>Warranty</th>
                                         <th>{{ trans('general.createdat') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -87,12 +87,12 @@
                     name: 'account_name'
                 },
                 {
-                    data: 'cost',
-                    name: 'cost'
+                    data: 'location',
+                    name: 'location'
                 },
                 {
-                    data: 'qty',
-                    name: 'qty'
+                    data: 'warranty',
+                    name: 'warranty'
                 },
                 {
                     data: 'created_at',
@@ -110,32 +110,7 @@
             ],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print'],
         });
     }
 </script>

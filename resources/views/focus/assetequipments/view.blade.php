@@ -27,11 +27,10 @@
                         $details = [
                             'Name' => $record->name,
                             'Account Name' => $record->account? $record->account->holder : '',
-                            'Cost' => numberFormat($record->cost),
-                            'Quantity' => number_format($record->qty, 1),
                             'Purchase Date' => dateFormat($record->purchase_date),
                             'Condition' => $record->condition,
-                            'Vendor' => $record->vendor,
+                            'Manufacturer' => $record->manufacturer,
+                            'Model' => $record->model,
                             'Location' => $record->location,
                             'Serial No' => $record->serial,
                             'Warranty' => $record->warranty,
