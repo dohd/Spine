@@ -45,12 +45,7 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="4" class="text-center text-success font-large-1">
-                                            <i class="fa fa-spinner spinner"></i>
-                                        </td>
-                                    </tr>
+                                <tbody>                                    
                                 </tbody>
                             </table>
                         </div>
@@ -71,7 +66,6 @@
     // on selecting pricegroup
     $('#pricegroup').change(function() {
         if (!$(this).val()) return;
-        $('#listTbl tbody tr').remove();
         $('#listTbl').DataTable().destroy();   
         draw_data($(this).val());
     });
