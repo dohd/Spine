@@ -112,7 +112,8 @@ class CreditNoteRepository extends BaseRepository
         $result = $creditnote->update($input);
 
         /** accounts  */
-        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
+        if ($creditnote->is_debit) $creditnote->debitnote_transactions()->delete();
+        else $creditnote->creditnote_transactions()->delete();
         $this->post_transaction($creditnote);        
 
         DB::commit();
@@ -200,15 +201,19 @@ class CreditNoteRepository extends BaseRepository
     {
         DB::beginTransaction();
 
+        // update invoice amountpaid
         $invoice = $creditnote->invoice;
         if ($creditnote->is_debit) $invoice->increment('amountpaid', $creditnote->total);
         else $invoice->decrement('amountpaid', $creditnote->total);
-
-        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);    
+        // update invoicce status
+        if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+        elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);    
         elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-        elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
-            
-        Transaction::where(['tr_ref' => $creditnote->id, 'note' => $creditnote->note])->delete();
+        
+        // delete respective transactions
+        if ($creditnote->is_debit) $creditnote->debitnote_transactions()->delete();
+        else $creditnote->creditnote_transactions()->delete();
+        aggregate_account_transactions();
         $result = $creditnote->delete();
         
         DB::commit();
