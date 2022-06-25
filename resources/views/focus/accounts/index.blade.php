@@ -64,6 +64,7 @@
             processing: true,
             serverSide: true,
             responsive: true,
+            stateSave: true,
             ajax: {
                 url: "{{ route('biller.accounts.get') }}",
                 type: 'post'
@@ -104,34 +105,8 @@
             ],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print'],
         });
-
     }
 </script>
 @endsection
