@@ -89,8 +89,8 @@
                         <td><input type="number" class="form-control estqty" name="estimate_qty[]" value="{{ number_format($item->estimate_qty, 1) }}" id="estqty-p{{$k}}" step="0.1" required></td>  
                         <td><input type="text" class="form-control buyprice" name="buy_price[]" value="{{ number_format($item->buy_price, 2) }}" id="buyprice-p{{$k}}" required></td>          
                         <td><input type="number" class="form-control qty" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required></td>
-                        <td><input type="text" class="form-control rate" name="product_subtotal[]" value="{{ number_format($item->product_price, 2) }}" id="rate-p{{$k}}" required></td>
-                        <td><input type="text" class="form-control price" name="product_price[]" value="{{ number_format($item->product_subtotal, 2) }}" id="price-p{{$k}}" readonly></td>
+                        <td><input type="text" class="form-control rate" name="product_subtotal[]" value="{{ number_format($item->product_subtotal, 2) }}" id="rate-p{{$k}}" required></td>
+                        <td><input type="text" class="form-control price" name="product_price[]" value="{{ number_format($item->product_price, 2) }}" id="price-p{{$k}}" readonly></td>
                         <td class='amount text-center' id="amount-p{{$k}}"><b>0</b></td>
                         <td class="text-center">
                             <div class="dropdown">
