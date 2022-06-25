@@ -100,10 +100,10 @@
                                         <tr>
                                             <th>#</th>
                                             <th>{{trans('products.product_des')}}</th>
-                                            <th class="text-right">{{trans('products.price')}}</th>
-                                            <th class="text-right">{{trans('products.qty')}}</th>
+                                            <th class="text-right">{{trans('products.qty')}}</th>                                          
+                                            <th class="text-right">Product Rate</th>
                                             <th class="text-right">{{trans('general.tax')}}</th>
-                                            <th class="text-right">{{trans('general.subtotal')}}</th>
+                                            <th class="text-right">Product Price</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -115,10 +115,10 @@
                                                         <p>{{$item['product_name']}}</p>
                                                         <p class="text-muted"> {!!$item['product_des'] !!} </p>
                                                     </td>
-                                                    <td class="text-right">{{amountFormat($item['product_price'])}}</td>
                                                     <td class="text-right">{{ (int) $item['product_qty'] }} {{$item['unit']}}</td>
+                                                    <td class="text-right">{{amountFormat($item['product_price'])}}</td>
                                                     <td class="text-right">
-                                                        {{ amountFormat(($item->product_price - $item->product_subtotal) * $item->product_qty) }}
+                                                        {{ amountFormat(($item->product_subtotal - $item->product_price) * $item->product_qty) }}
                                                         <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                     </td>
                                                     <td class="text-right">{{ amountFormat(intval($item->product_qty) * $item->product_subtotal) }}</td>
