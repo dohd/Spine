@@ -277,7 +277,7 @@ class AccountsController extends Controller
     }
 
     /**
-     * Print docume
+     * Print document
      */
     public function print_document(string $name, $accounts, array $dates, int $net_profit)
     {
