@@ -162,7 +162,9 @@
     });
 
     // on tax change
+    let initTaxChange = 0;
     $('#tax_id').change(function() {
+        initTaxChange++;
         $('#quoteTbl tbody tr').each(function() {
             const qty = $(this).find('.qty').val() * 1;
             if (qty > 0) {
@@ -170,7 +172,7 @@
                 let price = rate * ($('#tax_id').val()/100 + 1);
                 price = parseFloat(price.toFixed(2)).toLocaleString();
 
-                $(this).find('.price').val(price);
+                if (initTaxChange > 1) $(this).find('.price').val(price);                
                 $(this).find('.rate').change();
             }
         });
