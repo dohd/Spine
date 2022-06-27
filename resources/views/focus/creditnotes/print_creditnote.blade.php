@@ -9,19 +9,15 @@
 		p {
 			margin: 0pt;
 		}
-		table.items {
-			border: 0.1mm solid #000000;
-		}
 		table {
 			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			font-size: 10pt;
 		}
+		table.items {
+			border: 0.1mm solid #000000;
+		}
 		td {
 			vertical-align: top;
-		}
-		.items td {
-			border-left: 0.1mm solid #000000;
-			border-right: 0.1mm solid #000000;
 		}
 		table thead th {
 			background-color: #BAD2FA;
@@ -29,16 +25,9 @@
 			border: 0.1mm solid #000000;
 			font-weight: normal;
 		}
-		.items td.totals {
-			text-align: right;
-			border: 0.1mm solid #000000;
-		}
-		.items td.totalsss {
-			text-align: right;
-		}
-		.items td.mytotals {
-			text-align: left;
-			border: 0.1mm solid #000000;
+		.items td {
+			border-left: 0.1mm solid #000000;
+			border-right: 0.1mm solid #000000;
 		}
 		.items td.mytotalss {
 			text-align: left;
@@ -50,7 +39,7 @@
 			text-align: center;
 		}
 		.dotted td {
-			border-bottom: dotted 1px black;
+			border-bottom: none;
 		}
 		.dottedt th {
 			border-bottom: dotted 1px black;
@@ -113,15 +102,17 @@
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
 				<b>Client Name : </b>{{ $resource->customer->company }}<br>
+				<b>Client Tax Pin : </b>{{ $resource->customer->taxid }}<br>
 				<b>Address : </b>{{ $resource->customer->address }}<br>
 				<b>Email : </b>{{ $resource->customer->email }}<br>
 				<b>Cell : </b> {{ $resource->customer->phone }}<br>
 			<td width="5%">&nbsp;</td>
 			<td width="45%" style="border: 0.1mm solid #888888;">
 				<span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
-				<b>Credit Note No : </b> {{ gen4tid('CN-', $resource->tid) }}<br>
-				<b>Invoice No : </b>{{ $resource->invoice->tid }}<br>
+				<b>Credit Note No : </b> {{ gen4tid('CN-', $resource->tid) }}<br><br>
 				<b>Date : </b>{{ dateFormat($resource->date, 'd-M-Y') }}<br>
+				<b>KRA Pin :</b> P051516705D<br>
+				<b>Invoice No : </b>{{ gen4tid('Inv-', $resource->invoice->tid) }}<br>
 			</td>
 		</tr>
 	</table><br>
@@ -161,7 +152,7 @@
             </tr>
             <tr class="dotted">
                 <td colspan="4"></td>
-                <td class="totalss" style="border-bottom: solid 1px black;">Tax: </td>
+                <td class="totalss" style="border-bottom: solid 1px black;">Tax 16%: </td>
                 <td class="totalss" style="border-bottom: solid 1px black;">{{ numberFormat($resource->tax) }}</td>
             </tr>
             <tr class="dotted">
