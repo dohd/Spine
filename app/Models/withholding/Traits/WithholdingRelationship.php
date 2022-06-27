@@ -3,12 +3,18 @@
 namespace App\Models\withholding\Traits;
 
 use App\Models\items\WithholdingItem;
+use App\Models\transaction\Transaction;
 
 /**
  * Class WithholdingRelationship
  */
 trait WithholdingRelationship
 {
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'withholding');
+    }
+
     public function items()
     {
         return $this->hasMany(WithholdingItem::class, 'withholding_id');
