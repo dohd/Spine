@@ -633,13 +633,13 @@
                     @endauth
                     --}}
                     @permission('transaction-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-minus"></i>WithHoding Tax
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file"></i>Withhoding Certificate
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.withholdings.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage WithHolding Tax
+                            <li><a class="dropdown-item" href="{{ route('biller.withholdings.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Withholding Certificates
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.withholdings.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create WithHolding Tax
+                            <li><a class="dropdown-item" href="{{ route('biller.withholdings.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Withholding Certificate
                                 </a>
                             </li>
                         </ul>
