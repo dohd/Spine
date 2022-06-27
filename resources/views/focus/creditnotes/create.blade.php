@@ -36,11 +36,9 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
-    $('.datepicker')
-    .datepicker({format: "{{config('core.user_date_format')}}"})
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date())
-    .change(function () { $(this).datepicker('hide') });
-
+    
     // Load customers
     $('#customer').select2({
         ajax: {
@@ -62,28 +60,44 @@
             success: result => {
                 $('#invoice option:not(:eq(0))').remove();
                 result.forEach((v, i) => {
-                    $('#invoice').append(new Option(v.notes, v.id));
+                    const txt = 'Inv-' + v.tid + ' ' + v.notes;
+                    $('#invoice').append(new Option(txt, v.id));
                 });
             }
         });
     });
 
     // On amount change
-    $('#subtotal').change(function() {
+    $('#amount').change(function() {
         const amount = $(this).val().replace(/,/g, '') * 1;
-        const total = amount * ($('#tax_id').val() / 100 + 1);
         $(this).val(parseFloat(amount.toFixed(2)).toLocaleString());
-        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        $('#tax').val(parseFloat((total-amount).toFixed(2)).toLocaleString());
+        calcTotals();
+    });
+    // On Tax change
+    $('#tax_id').change(function() {
+        calcTotals();
+    });
+    // on VAT on Amount Change
+    $('#is_tax_exc').change(function() {
+        calcTotals();
     });
 
-    // On Tax chnage
-    $('#tax_id').change(function() {
-        const amount = $('#subtotal').val().replace(/,/g, '') * 1;
-        const total = amount * ($(this).val() / 100 + 1);
-        $('#subtotal').val(parseFloat(amount.toFixed(2)).toLocaleString());
+    function calcTotals() {
+        const amount = $('#amount').val().replace(/,/g, '') * 1;
+        const tax = $('#tax_id').val()/100;
+        const isTaxExc = $('#is_tax_exc').val();
+        let subtotal = 0;
+        let total = 0;
+        if (isTaxExc == 1) {
+            subtotal = amount;
+            total = amount * (1 + tax);
+        } else {
+            subtotal = amount / (1 + tax);
+            total = amount;
+        }
+        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
         $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        $('#tax').val(parseFloat((total-amount).toFixed(2)).toLocaleString());
-    });
+        $('#tax').val(parseFloat((total - subtotal).toFixed(2)).toLocaleString());
+    }
 </script>
 @endsection

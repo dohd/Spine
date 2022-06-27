@@ -26,7 +26,11 @@
     </div>
 </div>
 <div class="form-group row">
-    <div class="col-3">
+    <div class="col-10">
+        <div><label for="note">Note</label></div>
+        {{ Form::text('note', null, ['class' => 'form-control', 'required']) }}
+    </div>    
+    <div class="col-2">
         <label for="tax">Tax</label>
         <select name="tax_id" id="tax_id" class="form-control">
             @foreach ([16, 8, 0] as $val)
@@ -36,28 +40,45 @@
             @endforeach
         </select>
     </div>
-    <div class="col-3">
-        <div><label for="amount">Amount</label></div>
-        {{ Form::text('subtotal', null, ['class' => 'form-control', 'id' => 'subtotal']) }}
+</div>
+<div class="form-group row">
+    
+    <div class="col-2">
+        <label for="amount">Amount</label>
+        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount']) }}
     </div>  
-    <div class="col-3">
-        <div><label for="tax">Tax Amount</label></div>
+    <div class="col-2">
+        <label for="is_tax_exc">VAT on Amount</label>
+        <select name="is_tax_exc" class="form-control" id="is_tax_exc">
+            @foreach ([ 1 => 'Exclusive', 0 => 'Inclusive'] as $k => $val)
+                <option value="{{ $k }}" {{ @$creditnote && $k == @$creditnote->is_tax_exc? 'selected' : '' }}>
+                    {{ $val }}
+                </option>
+            @endforeach
+        </select>
+    </div>  
+</div>
+<div class="form-group row">
+    <div class="col-3 ml-auto">
+        <label for="subtotal">Subtotal</label>
+        {{ Form::text('subtotal', null, ['class' => 'form-control', 'id' => 'subtotal', 'readonly']) }}
+    </div>  
+</div>
+<div class="form-group row">
+    <div class="col-3 ml-auto">
+        <label for="tax">Tax</label>
         {{ Form::text('tax', null, ['class' => 'form-control', 'id' => 'tax', 'readonly']) }}
     </div>  
-    <div class="col-3">
-        <div><label for="total">Total Amount</label></div>
+</div>
+<div class="form-group row">
+    <div class="col-3 ml-auto">
+        <label for="total">Grand Total</label>
         {{ Form::text('total', null, ['class' => 'form-control', 'id' => 'total', 'readonly']) }}
     </div> 
 </div>
 <div class="form-group row">
-    <div class="col-12">
-        <div><label for="note">Note</label></div>
-        {{ Form::text('note', null, ['class' => 'form-control', 'required']) }}
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-2 ml-auto">
-        {{ Form::submit(@$creditnote? 'Update' : 'Generate', ['class' => 'btn btn-primary btn-lg']) }}
+    <div class="col-3 ml-auto">
+        {{ Form::submit('Generate', ['class' => 'btn btn-primary btn-lg']) }}
     </div>
 </div>
 <input type="hidden" name="is_debit" value="{{ $is_debit ? 1 : 0 }}">
