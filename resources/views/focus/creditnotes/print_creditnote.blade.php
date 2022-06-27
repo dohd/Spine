@@ -138,7 +138,7 @@
                 <td class="mytotalss" style="text-align: right;">{{ numberFormat($resource->subtotal) }}</td>                
             </tr>
             <!-- dynamic empty rows -->
-			@for ($i = 0; $i < 30; $i++)
+			@for ($i = 0; $i < 15; $i++)
 				<tr>
 					@for($j = 0; $j < 6; $j++) 
 						<td></td>
