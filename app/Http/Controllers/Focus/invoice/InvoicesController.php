@@ -383,6 +383,24 @@ class InvoicesController extends Controller
         return response()->json($pmt);
     }
 
+    /**
+     * Print payment
+     */
+    public function print_payment(PaidInvoice $paidinvoice)
+    {
+        $html = view('focus.invoices.print_payment', ['resource' => $paidinvoice])->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        return Response::stream($pdf->Output('payment.pdf', 'I'), 200, $headers);
+    }        
+
 
     
     public function print_document(Invoice $invoice, ManageInvoiceRequest $request)

@@ -16,6 +16,7 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::post('invoices/unallocated_payment', 'InvoicesController@unallocated_payment')->name('invoices.unallocated_payment');
 
     // payment
+    Route::get('invoices/print_payment/{paidinvoice}', 'InvoicesController@print_payment')->name('invoices.print_payment');
     Route::get('invoices/index_payment', 'InvoicesController@index_payment')->name('invoices.index_payment');
     Route::get('invoices/create_payment', 'InvoicesController@create_payment')->name('invoices.create_payment');
     Route::post('invoices/store_payment', 'InvoicesController@store_payment')->name('invoices.store_payment');
