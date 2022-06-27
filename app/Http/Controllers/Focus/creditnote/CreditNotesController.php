@@ -61,7 +61,7 @@ class CreditNotesController extends Controller
     public function store(Request $request)
     {
         // extract input fields
-        $data = $request->except('_token', 'tax_id');
+        $data = $request->except('_token', 'tax_id', 'amount');
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
@@ -117,7 +117,7 @@ class CreditNotesController extends Controller
     public function update(CreditNote $creditnote, Request $request)
     {
         // extract input fields
-        $data = $request->except('_token', 'tax_id');
+        $data = $request->except('_token', 'tax_id', 'amount');
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
