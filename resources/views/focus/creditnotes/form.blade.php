@@ -4,7 +4,7 @@
         {{ Form::text('tid', @$creditnote->tid? $creditnote->tid: @$last_tid+1, ['class' => 'form-control', 'readonly']) }}
     </div>
     <div class="col-4">
-        <label for="customer">Seach Customer</label>
+        <label for="customer">Search Customer</label>
         <select name="customer_id" id="customer" class="form-control" data-placeholder="Seach Customer" required>
             @isset($creditnote)
                 <option value="{{ $creditnote->customer_id }}">{{ $creditnote->customer->company }}</option>
