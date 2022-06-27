@@ -67,8 +67,9 @@ class WithholdingRepository extends BaseRepository
         foreach ($result->items as $item) {
             $invoice = $item->invoice;
             $invoice->increment('amountpaid', $item->paid);
-            if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
-            if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+            if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+            elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+            elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
         }
 
         /**accounting */
@@ -92,10 +93,10 @@ class WithholdingRepository extends BaseRepository
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $result->deposit_ttl,
-            'tr_date' => date('Y-m-d'),
+            'tr_date' => $result->due_date,
             'due_date' => $result->due_date,
             'user_id' => $result->user_id,
-            'note' => $result->certificate . ' - '. $result->doc_ref,
+            'note' => $result->note,
             'ins' => $result->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $result->id,
@@ -109,7 +110,7 @@ class WithholdingRepository extends BaseRepository
         $q->when($result->certificate == 'vat', function ($q) {
             $q->where('system', 'withholding_vat');
         });
-        $q->when($result->certificate == 'income', function ($q) {
+        $q->when($result->certificate == 'tax', function ($q) {
             $q->where('system', 'withholding_inc');
         });
         $account = $q->first();
@@ -146,6 +147,7 @@ class WithholdingRepository extends BaseRepository
     public function delete($withholding)
     {
         DB::beginTransaction();
+        
         // decrement invoice amount paid and update status
         foreach ($withholding->items as $item) {
             if ($item->invoice) {
@@ -156,8 +158,9 @@ class WithholdingRepository extends BaseRepository
                 elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
             }
         }
-        
-        Transaction::where(['tr_ref' => $withholding->id, 'tr_type' => 'withholding'])->delete();
+        $withholding->items()->delete();
+        $withholding->transactions()->delete();
+        aggregate_account_transactions();
         $result = $withholding->delete();
  
         DB::commit();
