@@ -141,7 +141,7 @@ class CreditNoteRepository extends BaseRepository
         ];
 
         $tr_data = array();
-        // check if debitnote or creditnote
+        // if debitnote, else creditnote
         if ($result->is_debit) {
             // debit Receivable Account (Creditors)
             $tr_category = Transactioncategory::where('code', 'dnote')->first(['id', 'code']);
@@ -150,18 +150,20 @@ class CreditNoteRepository extends BaseRepository
                 'debit' => $result->total,
                 'is_primary' => 1,
             ]);
-            // credit Revenue Account
+
+            // credit Customer Income (intermediary ledger account)
+            // $account = Account::where('system', 'client_income')->first(['id']);
             // $tr_data[] = array_replace($data, [
-            //     'account_id' => Invoice::find($result->invoice_id)->account_id,
+            //     'account_id' => $account->id,
             //     'credit' => $result->subtotal,
             // ]);
 
-            // credit Customer Income (intermediary ledger account)
-            $account = Account::where('system', 'client_income')->first(['id']);
+            // credit Revenue Account (Income)
             $tr_data[] = array_replace($data, [
-                'account_id' => $account->id,
+                'account_id' => Invoice::find($result->invoice_id)->account_id,
                 'credit' => $result->subtotal,
             ]);
+
             // credit tax (VAT)
             $account = Account::where('system', 'tax')->first(['id']);
             $tr_data[] = array_replace($data, [
@@ -176,18 +178,20 @@ class CreditNoteRepository extends BaseRepository
                 'credit' => $result->total,
                 'is_primary' => 1 
             ]);
-            // debit Revenue Account
+
+            // debit Customer Income (intermediary ledger account)
+            // $account = Account::where('system', 'client_income')->first(['id']);
             // $tr_data[] = array_replace($data, [
-            //     'account_id' => Invoice::find($result->invoice_id)->account_id,
+            //     'account_id' => $account->id,
             //     'debit' => $result->subtotal,
             // ]);
 
-            // debit Customer Income (intermediary ledger account)
-            $account = Account::where('system', 'client_income')->first(['id']);
+            // debit Revenue Account (Income)
             $tr_data[] = array_replace($data, [
-                'account_id' => $account->id,
+                'account_id' => Invoice::find($result->invoice_id)->account_id,
                 'debit' => $result->subtotal,
             ]);
+
             // debit tax (VAT)
             $account = Account::where('system', 'tax')->first(['id']);
             $tr_data[] = array_replace($data, [
