@@ -87,7 +87,8 @@
                             <th>Rate</th>
                             <th>Tax</th>
                             <th>Tax Rate</th>
-                            <th>Amount</th>
+                            <th>Amount ({{ $purchase->is_tax_exc? 'VAT Exc' : 'VAT Inc' }})</th>
+                            <th>Project</th>
                         </tr>
                         <tbody>
                             @foreach ($purchase->products as $item)
@@ -95,10 +96,15 @@
                                     <tr>
                                         <td>{{ $item->description }}</td>
                                         <td>{{ number_format($item->qty, 1) }}</td>
-                                        <td>{{ number_format($item->rate, 2) }}</td>
+                                        <td>{{ numberFormat($item->rate) }}</td>
                                         <td>{{ (int) $item->itemtax }}%</td>
-                                        <td>{{ number_format($item->taxrate, 2) }}</td>
-                                        <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ numberFormat($item->taxrate) }}</td>
+                                        <td>{{ numberFormat($item->amount) }}</td>
+                                        <td>
+                                            @if($item->project)
+                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endif
                             @endforeach
@@ -115,7 +121,7 @@
                             <th>Rate</th>
                             <th>Tax</th>
                             <th>Tax Rate</th>                            
-                            <th>Amount</th>
+                            <th>Amount ({{ $purchase->is_tax_exc? 'VAT Exc' : 'VAT Inc' }})</th>
                             <th>Project</th>
                         </tr>
                         <tbody>
@@ -124,14 +130,14 @@
                                     <tr>
                                         <td>{{ $item->description }}</td>
                                         <td>{{ (int) $item->qty }}</td>
-                                        <td>{{ number_format($item->rate, 2) }}</td>
+                                        <td>{{ numberFormat($item->rate) }}</td>
                                         <td>{{ (int) $item->itemtax }}%</td>
-                                        <td>{{ number_format($item->taxrate, 2) }}</td>
-                                        <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ numberFormat($item->taxrate) }}</td>
+                                        <td>{{ numberFormat($item->amount) }}</td>
                                         <td>
-                                            @isset($item->project->tid)
+                                            @if($item->project)
                                                 {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
-                                            @endisset
+                                            @endif
                                         </td>
                                     </tr>
                                 @endif
@@ -149,7 +155,8 @@
                             <th>Rate</th>
                             <th>Tax</th>
                             <th>Tax Rate</th>                            
-                            <th>Amount</th>
+                            <th>Amount ({{ $purchase->is_tax_exc? 'VAT Exc' : 'VAT Inc' }})</th>
+                            <th>Project</th>
                         </tr>
                         <tbody>
                             @foreach ($purchase->products as $item)
@@ -161,6 +168,11 @@
                                         <td>{{ (int) $item->itemtax }}%</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
                                         <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>
+                                            @if($item->project)
+                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endif
                             @endforeach
