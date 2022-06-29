@@ -183,7 +183,7 @@ class AssetequipmentsController extends Controller
             ->orWhereHas('account', function ($query) use ($q) {
                 $query->where('holder', 'LIKE', '%'.$q.'%');
             })
-            ->limit(6)->get(['id', 'name', 'account_id', 'account_type', 'cost']);
+            ->limit(6)->get(['id', 'name', 'account_id', 'account_type']);
 
         return response()->json($equipments);
     }
