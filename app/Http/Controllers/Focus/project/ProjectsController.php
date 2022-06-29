@@ -197,11 +197,17 @@ class ProjectsController extends Controller
     public function store_project_budget(Request $request)
     {
         // extract request input
-        $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
-        $budget_items = $request->only('numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 'new_qty', 'price');
-        $budget_skillset = $request->only('skill', 'charge', 'hours', 'no_technician');
+        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
+        $data_items = $request->only(
+            'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 
+            'new_qty', 'price'
+        );
+        $data_skillset = $request->only('skill', 'charge', 'hours', 'no_technician');
 
-        $this->repository->store_budget(compact('budget', 'budget_items', 'budget_skillset'));
+        $data_items = modify_array($data_items);
+        $data_skillset = modify_array($data_skillset);
+
+        $this->repository->store_budget(compact('data', 'data_items', 'data_skillset'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Budget created successfully']);
     }
@@ -213,13 +219,18 @@ class ProjectsController extends Controller
      */
     public function update_project_budget(Request $request, Budget $budget)
     {
-        $db_budget = $budget;
         // extract request input
-        $budget = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
-        $budget_items = $request->only('item_id', 'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 'new_qty', 'price');
-        $budget_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
+        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
+        $data_items = $request->only(
+            'item_id', 'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 
+            'new_qty', 'price'
+        );
+        $data_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
 
-        $this->repository->update_budget($db_budget, compact('budget', 'budget_items', 'budget_skillset'));
+        $data_items = modify_array($data_items);
+        $data_skillset = modify_array($data_skillset);
+
+        $this->repository->update_budget($budget, compact('data', 'data_items', 'data_skillset'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project Budget updated successfully']);
     }
