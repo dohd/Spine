@@ -167,16 +167,24 @@ class AccountsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        $q = $request->post('keyword');
+        $k = $request->keyword;
+        
+        if ($request->type == 'Expense') {
+            $accounts = Account::where('account_type', 'Expense')
+                ->where('holder', 'LIKE', '%' . $k . '%')
+                ->orWhere('account_type', 'Expense')
+                ->where('number', 'LIKE', '%' . $k . '%')
+                ->limit(6)->get(['id', 'holder AS name', 'number']);
 
-        $accounts = Account::where('holder', 'LIKE', '%' . $q . '%')
-            ->where('account_type', 'Expense')
-            ->orWhere('number', 'LIKE', '%' . $q . '%')
+            return response()->json($accounts);
+        }
+
+        $accounts = Account::where('holder', 'LIKE', '%' . $k . '%')
+            ->orWhere('number', 'LIKE', '%' . $k . '%')
             ->limit(6)->get(['id', 'holder AS name', 'number']);
 
         return response()->json($accounts);
     }
-
 
     public function profit_and_loss(Request $request)
     {
