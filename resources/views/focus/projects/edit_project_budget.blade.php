@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
-            <strong>Budget Limit Exceeded!</strong> You should check on your list items.
+            <strong>Profit Margin Not Met!</strong> Check line item rates.
         </div>
     </div>
 
@@ -52,8 +52,16 @@
                 <div class="row">
                     <div class="col-12 cmp-pnl">
                         <div id="customerpanel" class="inner-cmp-pnl">                        
-                            <div class="form-group row">                                  
-                                <div class="col-4">
+                            <div class="form-group row">  
+                                <div class="col-5">
+                                    <label for="customer" class="caption">Customer</label>                                       
+                                    {{ Form::text('customer', $quote->customer? $quote->customer->company : '', ['class' => 'form-control', 'disabled']) }}
+                                </div> 
+                                <div class="col-3">
+                                    <label for="branch" class="caption">Branch</label>                                       
+                                    {{ Form::text('branch', $quote->branch? $quote->branch->name : '', ['class' => 'form-control', 'disabled']) }}
+                                </div>                                 
+                                <div class="col-2">
                                     <label for="invoiceno" class="caption">                                        
                                         {{ $quote->bank_id ? '#PI Serial No' : '#QT Serial No' }}
                                     </label>
@@ -66,28 +74,30 @@
                                         {{ Form::text('tid', $tid, ['class' => 'form-control round', 'disabled']) }}
                                     </div>
                                 </div>
-                                <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                                <div class="col-2"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
                                     <div class="input-group">
                                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                                         {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date', 'disabled']) }}
                                     </div>
                                 </div>                                                                
-                                <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
-                                    </div>
-                                </div> 
+                                
                             </div> 
                         </div>
                     </div>
                 </div>   
                 
                 <div class="form-group row">
-                    <div class="col-12">
+                    <div class="col-10">
                         <label for="subject" class="caption">Subject / Title</label>
                         {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
                     </div>
+                    <div class="col-2">
+                        <label for="client_ref" class="caption">Client Reference / Callout ID</label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
+                        </div>
+                    </div> 
                 </div>
 
                 <div>                            

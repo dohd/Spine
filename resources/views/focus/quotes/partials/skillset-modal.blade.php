@@ -14,8 +14,8 @@
                             <tr class="bg-gradient-directional-blue white" style="">
                                 <th width="20%" class="text-center">Skill Type</th>
                                 <th width="15%" class="text-center">Charge</th>
-                                <th width="15%" class="text-center">Time/hr</th>
-                                <th width="15%" class="text-center">Technicians</th> 
+                                <th width="15%" class="text-center">Working Hrs</th>
+                                <th width="15%" class="text-center">No. Technicians</th> 
                                 <th width="15%" class="text-center">Amount</th>
                                 <th width="10%" class="text-center">Action</th>
                             </tr>

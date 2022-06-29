@@ -6,27 +6,29 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
-            <strong>Budget Limit Exceeded!</strong> You should check on your list items.
+            <strong>Profit Margin Not Met!</strong> Check line item rates.
         </div>
     </div>
 
     <div class="content-header row mb-1">
-        <div class="content-header-left">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Project Budget</h4>
         </div>
-        <div class="content-header-right">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    <a href="{{ route('biller.projects.index') }}" class="btn btn-primary">
-                        <i class="ft-list"></i> Projects
-                    </a>
-                    @php
-                        $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-                        $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
-                    @endphp
-                    <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
-                        <i class="fa fa-print"></i> Technician
-                    </a> 
+                    <div class="btn-group">
+                        <a href="{{ route('biller.projects.index') }}" class="btn btn-primary">
+                            <i class="ft-list"></i> Projects
+                        </a>&nbsp;
+                        @php
+                            $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
+                            $quote_url = route('biller.print_budget_quote', [$quote->id, 4, $valid_token, 1]);
+                        @endphp
+                        <a href="{{ $quote_url }}" class="btn btn-secondary" target="_blank">
+                            <i class="fa fa-print"></i> Technician
+                        </a> 
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -36,132 +38,136 @@
         <div class="card">
             <div class="card-body">                
                 {{ Form::model($quote, ['route' => ['biller.projects.store_project_budget'], 'method' => 'POST' ]) }}
-                <input type="hidden" name="quote_id" value="{{ $quote->id }}">
-                <div class="form-group row">
-                    <div class="col-12">
-                        <h3 class="title">
-                            {{ $quote->bank_id ? 'Proforma Invoice' : 'Quote' }}
-                        </h3>                                        
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-12 cmp-pnl">
-                        <div id="customerpanel" class="inner-cmp-pnl">                        
-                            <div class="form-group row">                                  
-                                <div class="col-4">
-                                    <label for="invoiceno" class="caption">
-                                        @php
-                                            $serial_no = trans('general.serial_no')
-                                        @endphp
-                                        {{ $quote->bank_id ? '#PI' . $serial_no : '#QT' . $serial_no }}
-                                    </label>
-                                    <div class="input-group">
-                                        <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                                        @php
-                                            $tid = sprintf('%04d', $quote->tid);
-                                            $tid = $quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;                                             
-                                        @endphp
-                                        {{ Form::text('tid', $tid, ['class' => 'form-control round', 'disabled']) }}
-                                    </div>
-                                </div>
-                                <div class="col-4"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date', 'disabled']) }}
-                                    </div>
-                                </div>                                                                
-                                <div class="col-4"><label for="client_ref" class="caption">Client Reference / Callout ID</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
-                                    </div>
-                                </div> 
-                            </div> 
+                    <input type="hidden" name="quote_id" value="{{ $quote->id }}">
+                    <div class="form-group row">
+                        <div class="col-12">
+                            <h3 class="title">Create Budget</h3>  
                         </div>
                     </div>
-                </div>        
-                
-                <div class="form-group row">
-                    <div class="col-12">
-                        <label for="subject" class="caption">Subject / Title</label>
-                        {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                    
+                    <div class="row">
+                        <div class="col-12 cmp-pnl">
+                            <div id="customerpanel" class="inner-cmp-pnl">                        
+                                <div class="form-group row"> 
+                                    <div class="col-5">
+                                        <label for="customer" class="caption">Customer</label>                                       
+                                        {{ Form::text('customer', $quote->customer? $quote->customer->company : '', ['class' => 'form-control', 'disabled']) }}
+                                    </div> 
+                                    <div class="col-3">
+                                        <label for="branch" class="caption">Branch</label>                                       
+                                        {{ Form::text('branch', $quote->branch? $quote->branch->name : '', ['class' => 'form-control', 'disabled']) }}
+                                    </div> 
+                                    <div class="col-2">
+                                        <label for="invoiceno" class="caption">
+                                            @php
+                                                $serial_no = trans('general.serial_no')
+                                            @endphp
+                                            {{ $quote->bank_id ? '#PI' . $serial_no : '#QT' . $serial_no }}
+                                        </label>
+                                        <div class="input-group">
+                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                                            @php
+                                                $tid = sprintf('%04d', $quote->tid);
+                                                $tid = $quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;                                             
+                                            @endphp
+                                            {{ Form::text('tid', $tid, ['class' => 'form-control round', 'disabled']) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-2"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                                            {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date', 'disabled']) }}
+                                        </div>
+                                    </div>                                                               
+                                </div> 
+                            </div>
+                        </div>
+                    </div>        
+                    
+                    <div class="form-group row">
+                        <div class="col-10">
+                            <label for="subject" class="caption">Subject / Title</label>
+                            {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                        </div>
+                        <div class="col-2">
+                            <label for="client_ref" class="caption">Client Reference / Callout ID</label>                                       
+                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
+                        </div> 
                     </div>
-                </div>
 
-                <div>                            
-                    <table id="quote-item" class="table-responsive tfr my_stripe_single mb-1">
-                        <thead>
-                            <tr class="item_header bg-gradient-directional-blue white">
-                                <th width="6%" class="text-center">#</th>
-                                <th width="38%" class="text-center">Name</th>
-                                <th width="8%" class="text-center">Quoted Qty</th>                                
-                                <th width="7%" class="text-center">UOM</th>
-                                <th width="8%" class="text-center">Approve Qty</th>     
-                                <th width="12%" class="text-center">Buy Price (VAT Exc)</th>
-                                <th width="12%" class="text-center">Amount</th>
-                                <th width="7%" class="text-center">Action</th>                             
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                    <div class="row mb-1">
-                        <div class="col-12 payment-method last-item-row sub_c">
-                            <button type="button" class="btn btn-success" id="add-product">
-                                <i class="fa fa-plus-square"></i> Add Item
-                            </button>
-                        </div>                            
-                    </div>
-                    <div class="row mb-1">
-                        <div class="col-8">
-                            <table id="skill-item" class="table-responsive tfr my_stripe_single">
-                                <thead>
-                                    <tr class="item_header bg-gradient-directional-blue white">
-                                        <th class="text-center">#</th>
-                                        <th width="20%" class="text-center">Skill Type</th>
-                                        <th width="15%" class="text-center">Charge</th>
-                                        <th width="15%" class="text-center">Working Hrs</th>
-                                        <th width="15%" class="text-center">No. Technicians</th> 
-                                        <th width="15%" class="text-center">Amount</th>
-                                        <th width="10%" class="text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                            <button type="button" class="btn btn-success mt-1" id="add-skill">
-                                <i class="fa fa-plus-square"></i> Add Skill
-                            </button>
-                            <div class="form-group float-right mt-1">
-                                <div><label for="budget-total">Total Amount</label></div>
-                                <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
-                            </div>
-                        </div>  
-                        <div class="col-4">
-                            <div class="form-group">
-                                <div><label for="tool">Tools Required & Notes</label></div>
-                                <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">
-                                </textarea>   
-                            </div>                        
-                            <div class="form-group">
-                                <div>
-                                    <label for="quote-total">Total Quote</label>
-                                    <span class="text-danger">(VAT Exc)</span>
-                                </div>
-                                <input type="text" class="form-control" id="quote-total" name="quote_total" readonly>
-                            </div>
-                            <div class="form-group">
-                                <div>
-                                    <label for="budget-total">Total Budget</label>&nbsp;
-                                    <span class="text-primary font-weight-bold">
-                                        (Profit: &nbsp;<span class="text-dark profit">0</span>)
-                                    </span>
-                                </div>
-                                <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
+                    <div>                            
+                        <table id="quote-item" class="table-responsive tfr my_stripe_single mb-1">
+                            <thead>
+                                <tr class="item_header bg-gradient-directional-blue white">
+                                    <th width="6%" class="text-center">#</th>
+                                    <th width="38%" class="text-center">Name</th>
+                                    <th width="8%" class="text-center">Quoted Qty</th>                                
+                                    <th width="7%" class="text-center">UOM</th>
+                                    <th width="8%" class="text-center">Approve Qty</th>     
+                                    <th width="12%" class="text-center">Buy Price (VAT Exc)</th>
+                                    <th width="12%" class="text-center">Amount</th>
+                                    <th width="7%" class="text-center">Action</th>                             
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="row mb-1">
+                            <div class="col-12 payment-method last-item-row sub_c">
+                                <button type="button" class="btn btn-success" id="add-product">
+                                    <i class="fa fa-plus-square"></i> Add Item
+                                </button>
                             </div>                            
-                            {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
-                        </div>                              
+                        </div>
+                        <div class="row mb-1">
+                            <div class="col-8">
+                                <table id="skill-item" class="table-responsive tfr my_stripe_single">
+                                    <thead>
+                                        <tr class="item_header bg-gradient-directional-blue white">
+                                            <th class="text-center">#</th>
+                                            <th width="20%" class="text-center">Skill Type</th>
+                                            <th width="15%" class="text-center">Charge</th>
+                                            <th width="15%" class="text-center">Working Hrs</th>
+                                            <th width="15%" class="text-center">No. Technicians</th> 
+                                            <th width="15%" class="text-center">Amount</th>
+                                            <th width="10%" class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                <button type="button" class="btn btn-success mt-1" id="add-skill">
+                                    <i class="fa fa-plus-square"></i> Add Skill
+                                </button>
+                                <div class="form-group float-right mt-1">
+                                    <div><label for="budget-total">Total Amount</label></div>
+                                    <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
+                                </div>
+                            </div>  
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <div><label for="tool">Tools Required & Notes</label></div>
+                                    <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor">
+                                    </textarea>   
+                                </div>                        
+                                <div class="form-group">
+                                    <div>
+                                        <label for="quote-total">Total Quote</label>
+                                        <span class="text-danger">(VAT Exc)</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="quote-total" name="quote_total" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="budget-total">Total Budget</label>&nbsp;
+                                        <span class="text-primary font-weight-bold">
+                                            (Profit: &nbsp;<span class="text-dark profit">0</span>)
+                                        </span>
+                                    </div>
+                                    <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
+                                </div>                            
+                                {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
+                            </div>                              
+                        </div>
                     </div>
-                </div>
                 {{ Form::close() }}
             </div>             
         </div>
@@ -289,7 +295,20 @@
 
     // default skill row
     let skillIndx = 0;
-    $('#skill-item tbody').append(skillRow(0));
+    const skillItems = @json($quote->skill_items);
+    if (skillItems.length) {
+        skillItems.forEach(v => {
+            let i = skillIndx;
+            $('#skill-item tbody').append(skillRow(i));
+            $('#skill-'+i).val(v.skill);
+            $('#charge-'+i).val(v.charge);
+            $('#hours-'+i).val(v.hours);
+            $('#notech-'+i).val(v.no_technician);
+            skillIndx++;
+        });
+        $('#charge-0').change();
+    } else $('#skill-item tbody').append(skillRow(0));
+    // on adding skill
     $('#add-skill').click(function() {
         skillIndx++;
         $('#skill-item tbody').append(skillRow(skillIndx));
@@ -318,7 +337,6 @@
         } else if (price) {
             $(this).parent().next().next().children().text(amountStr);
         }
-
         calcBudget();
     });
 
@@ -326,8 +344,8 @@
     let productIndx = 0;
     const quoteItems = @json($quote->products()->orderByRow()->get());    
     quoteItems.forEach(v => {
-        const i = productIndx;
-        // check type if item type is product else assign title
+        let i = productIndx;
+        // if a_type is 1 then product, else title
         if (v.a_type === 1) {
             $('#quote-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
@@ -338,7 +356,8 @@
             $('#itemname-'+i).val(v.product_name);
             $('#unit-'+i).val(v.unit);                
             $('#amount-'+i).val(parseFloat(v.product_qty));
-            $('#newqty-'+i).val(parseFloat(v.product_qty));
+            $('#newqty-'+i).val(parseFloat(v.estimate_qty));
+            $('#price-'+i).val(parseFloat(v.buy_price));
         } else {
             $('#quote-item tbody').append(titleRow(i));
             // set default values
@@ -347,6 +366,7 @@
         }
         productIndx++;
     });
+    $('#price-0').change();
 
     // add product row
     $('#add-product').click(function() {
@@ -361,7 +381,6 @@
         if ($(this).is('.up')) $row.insertBefore($row.prev());
         if ($(this).is('.down')) $row.insertAfter($row.next());        
         if ($(this).is('.removeItem')) $(this).closest('tr').remove();
-
         calcBudget();
     });
 
