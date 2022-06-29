@@ -196,9 +196,8 @@ class InvoiceRepository extends BaseRepository
             'account_id' => $account->id,
             'credit' => $result->tax,
         ]);
-        Transaction::insert([$inc_cr_data, $tax_cr_data]);
 
-        // update account ledgers debit and credit totals
+        Transaction::insert([$inc_cr_data, $tax_cr_data]);
         aggregate_account_transactions();        
     }
 
@@ -343,11 +342,13 @@ class InvoiceRepository extends BaseRepository
         $payment = PaidInvoice::find($id);
         foreach ($payment->items as $item) {
             $invoice = $item->invoice;
-            if ($invoice) $item->invoice->decrement('amountpaid', $item->paid);
-            // update status
-            if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-            elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-            elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            if ($invoice) {
+                $item->invoice->decrement('amountpaid', $item->paid);
+                // update status
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            }            
         }
         $payment->items()->delete();
         $payment->transactions()->delete();
