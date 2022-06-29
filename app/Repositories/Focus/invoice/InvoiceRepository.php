@@ -160,10 +160,9 @@ class InvoiceRepository extends BaseRepository
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
-            'ref_ledger_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
             'debit' => $result->total,
-            'tr_date' => date('Y-m-d'),
+            'tr_date' => $result->invoicedate,
             'due_date' => $result->invoiceduedate,
             'user_id' => $result->user_id,
             'note' => $result->notes,
@@ -196,8 +195,66 @@ class InvoiceRepository extends BaseRepository
             'account_id' => $account->id,
             'credit' => $result->tax,
         ]);
-
         Transaction::insert([$inc_cr_data, $tax_cr_data]);
+
+        // WIP and COG Accounts
+        $tr_data = [];
+        // invoice related quotes and pi
+        $quotes = Quote::whereIn('id', function ($q) use($result) {
+            $q->select('quote_id')->from('invoice_items')->where('invoice_id', $result->id);
+        })->get();
+        $quotes->update(['closed_by' => $result['user_id']]);
+        
+        // stock issued from store to project
+        $store_inventory_amount = 0;
+        // direct purchase items issued directly to project
+        $dirpurch_inventory_amount = 0;
+        $dirpurch_expense_amount = 0;
+        $dirpurch_asset_amount = 0;
+        foreach ($quotes as $quote) {
+            $store_inventory_amount += $quote->issuance->sum('total');
+            if (isset($quote->project_quote->project)) {
+                foreach ($quote->project_quote->project->purchase_items as $item) {
+                    $subttl = $item['amount'] - $item['taxrate'];
+                    // project items
+                    if ($item['itemproject_id']) {
+                        if ($item['type'] == 'Expense') $dirpurch_expense_amount += $subttl;
+                        elseif ($item['type'] == 'Stock') $dirpurch_inventory_amount += $subttl;
+                        elseif ($item['type'] == 'Asset') $dirpurch_asset_amount += $subttl;
+                    }
+                    
+                }
+            }
+        }
+
+        // credit WIP account and debit COG
+        $wip_account = Account::where('system', 'wip')->first(['id']);
+        $cog_account = Account::where('system', 'cog')->first(['id']);
+        $cr_data = array_replace($dr_data, ['account_id' => $wip_account->id]);
+        $dr_data = array_replace($dr_data, ['account_id' => $cog_account->id, 'is_primary' => 0]);
+        if ($dirpurch_inventory_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_inventory_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_inventory_amount]);
+        }
+        if ($dirpurch_expense_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_expense_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_expense_amount]);
+        }
+        if ($dirpurch_asset_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_asset_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_asset_amount]);
+        }
+        if ($store_inventory_amount > 0) {
+            $tr_data[] = array_replace($cr_data, ['credit' => $store_inventory_amount]);
+            $tr_data[] = array_replace($dr_data, ['debit' => $store_inventory_amount]);
+        }
+
+        $tr_data = array_map(function ($v) {
+            if (isset($v['debit']) && $v['debit'] > 0) $v['credit'] = 0;
+            elseif (isset($v['credit']) && $v['credit'] > 0) $v['debit'] = 0;
+            return $v;
+        }, $tr_data);
+        Transaction::insert($tr_data);        
         aggregate_account_transactions();        
     }
 
