@@ -63,19 +63,15 @@ class PurchaseRepository extends BaseRepository
 
         $data_items = $input['data_items'];
         foreach ($data_items as $i => $item) {
-            $item = $item + [
-                'ins' => $result->ins,
-                'user_id' => $result->user_id,
-                'bill_id' => $result->id
-            ];
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
             }
-            // direct project stock issuance
-            if ($result->project_id && $item['type'] == 'Stock')
-                $item['itemproject_id'] = $result->project_id;
-            $data_items[$i] = $item;
+            $data_items[$i] = array_replace($item, [
+                'ins' => $result->ins,
+                'user_id' => $result->user_id,
+                'bill_id' => $result->id
+            ]);
         }
         PurchaseItem::insert($data_items);
 
@@ -96,7 +92,7 @@ class PurchaseRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Purchase $purchase, array $input)
+    public function update($purchase, array $input)
     {
         // dd($input);
         DB::beginTransaction();
@@ -114,27 +110,25 @@ class PurchaseRepository extends BaseRepository
         }
         $purchase->update($data);
 
-        $purchase->products()->delete();
         $data_items = $input['data_items'];
-        foreach ($data_items as $i => $item) {
+        foreach ($data_items as $item) {
             $item = $item + [
                 'ins' => $purchase->ins,
                 'user_id' => $purchase->user_id,
                 'bill_id' => $purchase->id
-            ];
+            ];            
+            $new_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
+                $new_item[$key] = $item[$key];
             }
-            // direct project stock issuance
-            if ($purchase->project_id && $item['type'] == 'Stock')
-                $item['itemproject_id'] = $purchase->project_id;
-            $data_items[$i] = $item;
+            if (!$new_item->id) unset($new_item['id']);
+            $new_item->save();
         }
-        PurchaseItem::insert($data_items);
 
-        // accounts
-        Transaction::where('tr_ref', $purchase->id)->delete();
+        /** accounts */
+        $purchase->transactions()->delete();
         $this->post_transaction($purchase);
 
         DB::commit();
@@ -152,7 +146,15 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
-        if ($purchase->delete()) return true;
+        DB::begin();
+
+        $purchase->transactions()->delete();
+        aggregate_account_transactions();
+        $purchase->products()->delete();
+        $result = $purchase->delete();
+
+        DB::commit();
+        if ($result) return true;            
             
         throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
     }
@@ -168,33 +170,31 @@ class PurchaseRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $bill['grandttl'],
-            'tr_date' => date('Y-m-d'),
-            'due_date' => $bill['due_date'],
-            'user_id' => $bill['user_id'],
-            'note' => $bill['note'],
-            'ins' => $bill['ins'],
+            'credit' => $bill->grandttl,
+            'tr_date' => $bill->date,
+            'due_date' => $bill->due_date,
+            'user_id' => $bill->user_id,
+            'note' => $bill->note,
+            'ins' => $bill->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $bill->id,
             'user_type' => 'supplier',
             'is_primary' => 1,
-            'ref_ledger_id' => 0,
         ];
-        $tr = Transaction::create($cr_data);
-        $bill->update(['tr_ref' => $tr->id]);
+        Transaction::create($cr_data);
 
         $dr_data = array();
         unset($cr_data['credit'], $cr_data['is_primary']);
-        // debit Stock Account
+
+        // debit Stock
         $wip_account = Account::where('system', 'wip')->first(['id']);
-        $is_stock = $bill->items()->where('type', 'Stock')->count();
-        if ($is_stock) {
-            $is_for_Project = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
-            if ($is_for_Project) {
+        $stock_exists = $bill->items()->where('type', 'Stock')->count();
+        if ($stock_exists) {
+            // if project stock, WIP account else Stock account
+            $is_project_stock = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
+            if ($is_project_stock) {
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $wip_account->id,
-                    'ref_ledger_id' => $account->id,
-                    'trans_category_id' => $tr_category->id,
                     'debit' => $bill['stock_subttl'],
                 ]);    
             } else {
@@ -205,30 +205,35 @@ class PurchaseRepository extends BaseRepository
                 ]);    
             }
         }
+
+        // debit Expense and Asset account
         foreach ($bill->items as $item) {
             $subttl = $item['amount'] - $item['taxrate'];
-            // debit Expense Account
+            // debit Expense 
             if ($item['type'] == 'Expense') {
                 $account_id = $item['item_id'];
-                // on project expense
-                if ($item['itemproject_id']) {
+                // if project expense, use WIP account
+                if ($item['itemproject_id']) 
                     $account_id = $wip_account->id;
-                    $cr_data['ref_ledger_id'] = $item['item_id'];
-                }
+                    
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $account_id,
                     'debit' => $subttl,
                 ]);
             }
-            //  debit Asset Account
+            //  debit Asset 
             if ($item['type'] == 'Asset') {
-                $asset = Assetequipment::find($item['item_id']);
+                $account_id = Assetequipment::find($item['item_id'])->account_id;
+                // if project asset, use WIP account
+                if ($item['itemproject_id']) 
+                    $account_id = $wip_account->id;
                 $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $asset->account_id,
+                    'account_id' => $account_id,
                     'debit' => $subttl,
                 ]);
             }
         }
+
         // debit tax (VAT)
         if ($bill['grandtax'] > 0) {
             $account = Account::where('system', 'tax')->first(['id']);
@@ -239,7 +244,6 @@ class PurchaseRepository extends BaseRepository
         }
         
         Transaction::insert($dr_data); 
-        // update account ledgers debit and credit totals
         aggregate_account_transactions();
     }
 }
