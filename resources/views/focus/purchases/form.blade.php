@@ -39,7 +39,7 @@
 
             <div class="form-group row">
                 <div class="col-4">
-                    <label for="pricing" >Pricing</label>                    
+                    <label for="pricing">Pricing</label>                    
                     <select id="pricegroup_id" name="pricegroup_id" class="form-control">
                         <option value="0" selected>Default </option>
                         @foreach($pricegroups as $group)
@@ -47,13 +47,34 @@
                         @endforeach
                     </select>                    
                 </div>
+                <div class="col-3">
+                    <label for="taxFormat" class="caption">Tax</label>
+                    <select class="form-control" name="tax" id="tax">
+                        @foreach ($additionals as $tax)
+                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
+                                {{ $tax->name }} 
+                            </option>
+                        @endforeach                                                    
+                    </select>
+                </div>
+                <div class="col-5">
+                    <div><label for="vat_on_amount">Tax on Amount</label></div>
+                    <div class="d-inline form-check mr-1">
+                        <input type="radio" class="form-check-input bg-primary is_tax_exc" name="is_tax_exc" value="1" id="tax_exc" checked>
+                        <label for="exclusive">Exclusive</label>
+                    </div>
+                    <div class="d-inline form-check">
+                        <input type="radio" class="form-check-input bg-purple is_tax_exc" name="is_tax_exc" value="0" id="tax_inc">
+                        <label for="inclusive">Inclusive</label>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group row">
                 <table class="table-responsive tfr" id="transxnTbl">
                     <thead>
                         <tr class="item_header bg-gradient-directional-blue white">
-                            @foreach (['Item', 'Inventory Item', 'Expenses', 'Asset & Equipments', 'Total'] as $val)
+                            @foreach (['Item', 'Inventory / Stock', 'Expense', 'Asset & Equipment', 'Total'] as $val)
                                 <th width="20%" class="text-center">{{ $val }}</th>
                             @endforeach                                                  
                         </tr>
@@ -132,28 +153,18 @@
                         {{ Form::text('doc_ref', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference'), 'required']) }}
                     </div>
                 </div>
-                <div class="col-sm-4">
-                    <label for="taxFormat" class="caption">{{trans('general.tax')}}*</label>
-                    <select class="form-control" name="tax" id="tax">
-                        @foreach ($additionals as $tax)
-                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
-                                {{ $tax->name }} 
-                            </option>
-                        @endforeach                                                    
-                    </select>
-                </div>
             </div>
             
             <div class="form-group row">
-                <div class="col-sm-12">
+                <div class="col-12">
                     <label for="toAddInfo" class="caption">{{trans('general.note')}}*</label>
                     {{ Form::textarea('note', null, ['class' => 'form-control', 'placeholder' => trans('general.note'), 'rows'=>'2', 'required']) }}
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-sm-12">
+                <div class="col-12">
                     <div class="form-group">
-                        <label for="project" class="caption">Project <span class="text-danger">(Inventory Items issued directly to this project)</span></label>
+                        <label for="project" class="caption">Project</label>
                         <select class="form-control" name="project_id" id="project" data-placeholder="Search Project by Name, Customer, Branch">
                         </select>
                     </div>
@@ -166,20 +177,20 @@
 <!-- Tab Menus -->
 <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
     <li class="nav-item bg-gradient-directional-blue">
-        <a class="nav-link" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Inventory/Stock Items</a>
+        <a class="nav-link" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Inventory / Stock</a>
     </li>
     <li class="nav-item bg-danger">
-        <a class="nav-link active" id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expenses</a>
+        <a class="nav-link active" id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expense</a>
     </li>
     <li class="nav-item bg-success">
-        <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipments</a>
+        <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipment</a>
     </li>
 </ul>
 <div class="tab-content px-1 pt-1">
-    <!-- tab1 -->
+    <!-- stock tab -->
     @include('focus.purchases.partials.stock_tab')
-    <!-- tab2 -->
+    <!-- expense tab -->
     @include('focus.purchases.partials.expense_tab')
-    <!-- tab3 -->
+    <!-- asset tab -->
     @include('focus.purchases.partials.asset_tab')
 </div>

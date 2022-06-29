@@ -32,14 +32,18 @@
                 <input type="hidden" id="assetitemid-0" name="item_id[]">
                 <input type="hidden" class="assettaxr" name="taxrate[]">
                 <input type="hidden" class="assetamountr" name="amount[]">
-                <input type="hidden" class="assetitemprojectid" name="itemproject_id[]" value="0">
                 <input type="hidden" name="type[]" value="Asset">
                 <input type="hidden" name="id[]" value="0">
                 <input type="hidden" name="uom[]">
             </tr>
             <tr>
-                <td colspan="3"><textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-0"></textarea></td>
-                <td colspan="4"></td>
+                <td colspan="3">
+                    <textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-0"></textarea>
+                </td>
+                <td colspan="4">
+                    <input type="text" class="form-control projectasset" id="projectassettext-0" placeholder="Search Project By Name">
+                    <input type="hidden" name="itemproject_id[]" id="projectassetval-0">
+                </td>
             </tr>
             <!-- end layout -->
             
@@ -67,7 +71,6 @@
                             <input type="hidden" id="assetitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="assettaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="assetamountr" name="amount[]" value="{{ (float) $item->amount }}">
-                            <input type="hidden" class="assetitemprojectid" name="itemproject_id[]" value="0">
                             <input type="hidden" name="type[]" value="Asset">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                             <input type="hidden" name="uom[]">
@@ -76,7 +79,10 @@
                             <td colspan="3">
                                 <textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-{{$i}}">{{ $item->description }}</textarea>
                             </td>
-                            <td colspan="4"></td>
+                            <td colspan="4">
+                                <input type="text" class="form-control projectasset" value="{{ $item->project ? $item->project->name : '' }}" id="projectassettext-{{$i}}" placeholder="Search Project By Name">
+                                <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectassetval-{{$i}}">
+                            </td>
                         </tr>
                         @php ($i++)
                     @endif
@@ -98,7 +104,7 @@
             </tr>
             <tr class="bg-white">
                 <td colspan="5" align="right">
-                    <b>{{trans('general.grand_total')}} ({{config('currency.symbol')}})</b>
+                    <b>Asset & Equipment Total ({{config('currency.symbol')}})</b>
                 </td>
                 <td align="left" colspan="2">
                     <input type="text" class="form-control" name="asset_grandttl" value="0.00" id="asset_grandttl" readonly>

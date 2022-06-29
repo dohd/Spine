@@ -32,15 +32,17 @@
                 <input type="hidden" id="stockitemid-0" name="item_id[]">
                 <input type="hidden" class="stocktaxr" name="taxrate[]">
                 <input type="hidden" class="stockamountr" name="amount[]">
-                <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
                 <input type="hidden" name="type[]" value="Stock">
                 <input type="hidden" name="id[]" value="0">
             </tr>
             <tr>
-                <td colspan="2">
+                <td colspan="3">
                     <textarea id="stockdescr-0" class="form-control descr" name="description[]" placeholder="Product Description"></textarea>
                 </td>
-                <td colspan="6"></td>
+                <td colspan="4">
+                    <input type="text" class="form-control projectstock" id="projectstocktext-0" placeholder="Search Project By Name">
+                    <input type="hidden" name="itemproject_id[]" id="projectstockval-0">
+                </td>
             </tr>
             <!-- end layout -->
 
@@ -68,15 +70,17 @@
                             <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="stocktaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="stockamountr" name="amount[]" value="{{ (float) $item->amount }}">
-                            <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
                             <input type="hidden" name="type[]" value="Stock">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
                         <tr>
-                            <td colspan=2>
+                            <td colspan=3>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
                             </td>
-                            <td colspan=5></td>
+                            <td colspan="4">
+                                <input type="text" class="form-control projectstock" value="{{ $item->project ? $item->project->name : '' }}" id="projectstocktext-0" placeholder="Search Project By Name">
+                                <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectstockval-{{$i}}">
+                            </td>
                         </tr>
                         @php ($i++)
                     @endif

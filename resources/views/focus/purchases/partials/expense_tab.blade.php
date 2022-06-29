@@ -41,7 +41,7 @@
                     <textarea id="expdescr-0" class="form-control descr" name="description[]" placeholder="Enter Description"></textarea>
                 </td>
                 <td colspan="4">
-                    <input type="text" class="form-control projectexp" id="projectexptext-0" placeholder="Enter Project">
+                    <input type="text" class="form-control projectexp" id="projectexptext-0" placeholder="Search Project By Name">
                     <input type="hidden" name="itemproject_id[]" id="projectexpval-0">
                 </td>
             </tr>
@@ -103,7 +103,7 @@
                 <td align="left" colspan="2">{{config('currency.symbol')}} <span id="exprow_taxttl" class="lightMode">0</span></td>
             </tr>
             <tr class="bg-white">
-                <td colspan="5" align="right"><b>{{trans('general.grand_total')}} ({{config('currency.symbol')}})</b></td>
+                <td colspan="5" align="right"><b>Expense Total ({{config('currency.symbol')}})</b></td>
                 <td align="left" colspan="2">
                     <input type="text" class="form-control" name="expense_grandttl" value="0.00" id="exp_grandttl" readonly>
                     <input type="hidden" name="expense_subttl" value="0.00" id="exp_subttl">
