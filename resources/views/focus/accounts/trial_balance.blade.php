@@ -64,17 +64,25 @@
                                         $credit = $account->transactions->sum('credit');
                                         $debit_balance = 0;
                                         $credit_balance = 0;
-                                        if (in_array($account->account_type, ['Asset', 'Expense'], 1))
-                                            $debit_balance = $debit - $credit;
-                                        if (in_array($account->account_type, ['Income', 'Liability', 'Equity'], 1))
-                                            $credit_balance = $credit - $debit; 
-                                        if ($debit_balance > 0 || $credit_balance > 0) {
-                                            $debit_total += $debit_balance;
-                                            $credit_total += $credit_balance;    
-                                        }                                                                        
+                                        if (in_array($account->account_type, ['Asset', 'Expense'], 1)) {
+                                            $debit_balance = round($debit - $credit, 4);
+                                            if ($debit_balance < 0) {
+                                                $credit_balance = $debit_balance * - 1;
+                                                $debit_balance = 0;
+                                            }
+                                        }                                            
+                                        if (in_array($account->account_type, ['Income', 'Liability', 'Equity'], 1)) {
+                                            $credit_balance = round($credit - $debit, 4); 
+                                            if ($credit_balance < 0) {
+                                                $debit_balance = $credit_balance * - 1;
+                                                $credit_balance = 0;
+                                            }
+                                        }
+                                        $debit_total += $debit_balance;
+                                        $credit_total += $credit_balance;                                   
                                     @endphp
                                     @if ($debit_balance > 0 || $credit_balance > 0)
-                                        <tr>
+                                        <tr>                                        
                                             <td>{{ $i+1 }}</td>
                                             <td>{{ $account->number }}</td>
                                             <td>{{ $account->holder }}</td>
