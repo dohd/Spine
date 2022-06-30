@@ -106,7 +106,7 @@ class IssuanceRepository extends BaseRepository
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
             'credit' => $result['total'],
-            'tr_date' => date('Y-m-d'),
+            'tr_date' => $result['date'],
             'due_date' => $result['date'],
             'user_id' => $result['user_id'],
             'ins' => $result['ins'],
