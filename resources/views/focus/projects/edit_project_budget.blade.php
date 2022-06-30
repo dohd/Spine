@@ -325,13 +325,6 @@
     // Remove skill row
     $('#skill-item').on('click', '.removeItem', function() {
         const $row = $(this).closest('tr');
-        const itemId = $row.children('input[name="skillitem_id[]"]').val();
-        if (itemId > 0) {
-            $.ajax({
-                url: baseurl + `/projects/budget_delete_skillset/${itemId}`,
-                method: 'DELETE'
-            });
-        }
         $row.remove();
         calcBudget();
     });
@@ -418,17 +411,7 @@
         const $row = $(this).parents("tr:first");
         if ($(this).is('.up')) $row.insertBefore($row.prev());
         if ($(this).is('.down')) $row.insertAfter($row.next());        
-        if ($(this).is('.removeItem')) {
-            const itemId = $('#itemid-'+$row.index());
-            if (itemId > 0) {
-                $.ajax({
-                    url: baseurl + `projects/budget_delete_item/${itemId}`,
-                    method: 'DELETE'
-                });
-            }
-            $row.remove();
-        }
-        
+        if ($(this).is('.removeItem')) $row.remove();
         calcBudget();
     });
 
@@ -455,8 +438,8 @@
                 const {data} = ui.item;
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
-                $('#unit-'+i).val(data.unit);                
-
+                $('#unit-'+i).val(data.unit);   
+                $('#newqty-'+i).val(1);   
                 const price = parseFloat(data.purchase_price.replace(/,/g, ''));
                 $('#price-'+i).val(price.toLocaleString()).trigger('change');
             }
