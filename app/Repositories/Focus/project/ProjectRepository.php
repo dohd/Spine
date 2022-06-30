@@ -88,6 +88,7 @@ class ProjectRepository extends BaseRepository
 
         $data = $input['data'];
         $data_items = $input['data_items'];
+        
         $data['main_quote_id'] = $data_items[0];
         $result = $project->update($data);
 
@@ -117,9 +118,8 @@ class ProjectRepository extends BaseRepository
         $data = $input['data'];
         $keys = array('quote_total', 'budget_total', 'labour_total');
         foreach ($data as $key => $val) {
-            if (in_array($key, $keys, 1)) {
-                $input['budget'][$key] = numberClean($val);
-            }
+            if (in_array($key, $keys, 1)) 
+                $data[$key] = numberClean($val);
         }                
         $result = Budget::create($data);
 
@@ -159,13 +159,17 @@ class ProjectRepository extends BaseRepository
         $data = $input['data'];
         $keys = array('quote_total', 'budget_total', 'labour_total');
         foreach ($data as $key => $val) {
-            if (in_array($key, $keys, 1)) {
-                $input['budget'][$key] = numberClean($val);
-            }
+            if (in_array($key, $keys, 1)) 
+                $data[$key] = numberClean($val);
         }   
         $result = $budget->update($data);
 
         $data_items = $input['data_items'];
+        // delete omitted budget items
+        $budget->items()->whereNotIn('id', array_map(function ($v) { 
+            return $v['item_id']; 
+        }, $data_items))->delete();
+        // create or update 
         foreach($data_items as $item) {
             $item['price'] = numberClean($item['price']);
             $new_item = BudgetItem::firstOrNew([
@@ -175,12 +179,17 @@ class ProjectRepository extends BaseRepository
             foreach($item as $key => $value) {
                 $new_item[$key] = $value;
             }
-            if ($new_item->id) unset($new_item['id']);
+            if (!$new_item->id) unset($new_item->id);
             unset($new_item->item_id);
             $new_item->save();
         }
 
         $data_skillset = $input['data_skillset'];
+        // delete omitted skillset
+        $budget->skillsets()->whereNotIn('id', array_map(function ($v) { 
+            return $v['skillitem_id'];
+        }, $data_skillset))->delete();
+        //create or update
         foreach($data_skillset as $item) {
             $item['charge'] = numberClean($item['charge']);
             $new_item = BudgetSkillset::firstOrNew([
