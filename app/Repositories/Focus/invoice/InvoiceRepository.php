@@ -199,12 +199,16 @@ class InvoiceRepository extends BaseRepository
 
         // WIP and COG Accounts
         $tr_data = [];
-        // invoice related quotes and pi
-        $quotes = Quote::whereIn('id', function ($q) use($result) {
+        // invoice related quotes and pi query
+        $q = Quote::whereIn('id', function ($q) use($result) {
             $q->select('quote_id')->from('invoice_items')->where('invoice_id', $result->id);
-        })->get();
-        $quotes->update(['closed_by' => $result['user_id']]);
-        
+        });
+        // update query results
+        $q1 = clone $q;
+        $q1->update(['closed_by' => $result['user_id']]);
+        // fetch query results
+        $quotes = $q->get();
+
         // stock issued from store to project
         $store_inventory_amount = 0;
         // direct purchase items issued directly to project
