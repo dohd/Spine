@@ -37,6 +37,7 @@ use App\Http\Requests\Focus\product\ManageProductRequest;
 use App\Http\Requests\Focus\product\CreateProductRequest;
 use App\Http\Requests\Focus\product\EditProductRequest;
 use App\Http\Requests\Focus\product\DeleteProductRequest;
+use App\Models\items\PurchaseItem;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\pricelist\PriceList;
 use Illuminate\Support\Facades\DB;
@@ -382,17 +383,17 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
+        $pricelist = array();
+        $pricegroup = Pricegroup::find($request->pricegroup_id);
+        if ($pricegroup) $pricelist = PriceList::where('pricegroup_id', $pricegroup->id)->get();
+
+        $products = array();
         $product_variations = ProductVariation::whereHas('product', function ($q) {
             $q->where('name', 'LIKE', '%'. request('keyword') .'%');
         })->with(['warehouse' => function($q) {
             $q->select(['id', 'title']);
         }])->limit(6)->get();
-        
-        $pricelist = array();
-        $pricegroup = Pricegroup::find($request->pricegroup_id);
-        if ($pricegroup) $pricelist = PriceList::where('pricegroup_id', $pricegroup->id)->get();
-            
-        $output = array();
+        // modify products price properties
         foreach ($product_variations as $row) {
             $product = [
                 'id' => $row->id, 
@@ -405,22 +406,52 @@ class ProductsController extends Controller
                 'code' => $row->code, 
                 'qty' => $row->qty, 
                 'image' => $row->image,
-                'warehouse' => $row->warehouse
+                'warehouse' => $row->warehouse,
             ];  
+            // apply respective product buying price according to order of purchase
+            $product_rate = $this->compute_product_rate($row->id, $row->qty);
+            if ($product_rate) $product['purchase_price'] = numberFormat($product_rate);
+
+            // if pricelist
             if (count($pricelist)) {
+                // apply client selling price, else supplier buying price
                 foreach ($pricelist as $item) {
                     if ($item->product_id == $row->product_id) {
                         $product['name'] = $item->name;
                         if ($pricegroup->is_client) {
                             $product['price'] = numberFormat($item->price);
                         } else $product['purchase_price'] = numberFormat($item->price);
-                        $output[] =  $product;
+                        $products[] =  $product;
                     }
                 }
-            }  else $output[] =  $product;
+                continue;
+            }
+            $products[] =  $product;
         }
 
-        return response()->json($output);
+        return response()->json($products);
+    }
+
+    // compute product rate by FIFO (First in First out) rule of purchase
+    public function compute_product_rate($id, $qty)
+    {
+        $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
+            ->where('item_id', $id)
+            ->orderBy('rate', 'DESC')
+            ->groupBy('rate')
+            ->get();
+
+        $rate = 0;
+        $set = range(1, $qty);
+        foreach ($rate_groups as $group) {
+            $subset = array_splice($set, 0, $group->count);
+            if (!$subset) continue;
+            if ($qty >= $subset[0] && $qty <= $subset[count($subset) - 1]) {
+                $rate = $group->rate;
+                break;
+            }
+        }
+        return $rate;
     }
 
 
