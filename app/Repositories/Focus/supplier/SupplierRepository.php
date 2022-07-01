@@ -175,16 +175,16 @@ class SupplierRepository extends BaseRepository
         // dd($input);
         $data = $input['data'];
         $account_data = $input['account_data'];
-        $open_balance = numberClean($account_data['opening_balance']);
-        $open_balance_date = date_for_database($account_data['opening_balance_date']);
-
         if (!empty($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
-        $data['open_balance'] = $open_balance;
-        $data['open_balance_date'] = $open_balance_date;            
 
         DB::beginTransaction();
-
+        
+        $open_balance = numberClean($account_data['opening_balance']);
+        $open_balance_date = date_for_database($account_data['opening_balance_date']);
+        $data['open_balance'] = $open_balance;
+        $data['open_balance_date'] = $open_balance_date;            
         $result = Supplier::create($data);
+
         if ($open_balance > 0) {
             $note = 'Account Opening Balance';
             $bill_data = [
