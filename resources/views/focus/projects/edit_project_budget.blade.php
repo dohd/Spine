@@ -364,10 +364,10 @@
     budgetItems.forEach(v => {
         const i = productIndx;
         // check type if item type is product else assign title
-        if (v.a_type === 1) {
+        if (v.a_type == 1) {
             $('#budget-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
-            // set default values
+
             $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
@@ -377,9 +377,9 @@
             $('#newqty-'+i).val(parseFloat(v.new_qty));
             $('#price-'+i).val(v.price).change();
             if (v.issue_qty) $('#issueqty-'+i).val(v.issue_qty);  
-        } else {
+        } else if (v.a_type == 2) {
             $('#budget-item tbody').append(titleRow(i));
-            // set default values
+            
             $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
             $('#itemid-'+i).val(v.id);

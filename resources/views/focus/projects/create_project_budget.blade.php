@@ -256,7 +256,7 @@
         return `
             <tr>
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
-                <td colspan="9"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
+                <td colspan="7"><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" readonly></td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" class="form-control" name="product_qty[]" value="0" id="amount-${n}">               
@@ -342,14 +342,14 @@
 
     // set default product rows
     let productIndx = 0;
-    const quoteItems = @json($quote->products()->orderByRow()->get());    
+    const quoteItems = @json($quote->products()->orderByRow()->get());  
     quoteItems.forEach(v => {
         let i = productIndx;
         // if a_type is 1 then product, else title
-        if (v.a_type === 1) {
+        if (v.a_type == 1) {
             $('#quote-item tbody').append(productRow(i));
             $('#itemname-'+i).autocomplete(autocompleteProp(i));
-            // set default values
+
             $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
@@ -357,16 +357,15 @@
             $('#unit-'+i).val(v.unit);                
             $('#amount-'+i).val(parseFloat(v.product_qty));
             $('#newqty-'+i).val(parseFloat(v.estimate_qty));
-            $('#price-'+i).val(parseFloat(v.buy_price));
-        } else {
+            $('#price-'+i).val(parseFloat(v.buy_price)).change();
+        } else if (v.a_type == 2) {
             $('#quote-item tbody').append(titleRow(i));
-            // set default values
+
             $('#numbering-'+i).val(v.numbering);
             $('#itemname-'+i).val(v.product_name);
         }
         productIndx++;
     });
-    $('#price-0').change();
 
     // add product row
     $('#add-product').click(function() {
