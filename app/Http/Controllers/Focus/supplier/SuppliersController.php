@@ -194,10 +194,13 @@ class SuppliersController extends Controller
 
     public function search(CreatePurchaseorderRequest $request)
     {
-
         $q = $request->post('keyword');
-        $user = Supplier::where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email'));
-        if (count($user) > 0) return view('focus.suppliers.partials.search')->with(compact('user'));
+        $user = Supplier::where('name', 'LIKE', '%' . $q . '%')
+            ->where('active', 1)
+            ->orWhere('email', 'LIKE', '%' . $q . '')
+            ->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email']);
+
+        return view('focus.suppliers.partials.search')->with(compact('user'));
     }
 
     /**
@@ -205,10 +208,9 @@ class SuppliersController extends Controller
      */
     public function select(ManageSupplierRequest $request)
     {
-        $q = $request->post('q');
+        $q = $request->keyword;
         $suppliers = Supplier::where('name', 'LIKE', '%'.$q.'%')
-            ->where('active', 1)
-            ->orWhere('email', 'LIKE', '%'.$q.'')
+            ->where('active', 1)->orWhere('email', 'LIKE', '%'.$q.'')
             ->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email', 'taxid']);
 
         return response()->json($suppliers);
