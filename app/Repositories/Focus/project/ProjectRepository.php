@@ -2,18 +2,13 @@
 
 namespace App\Repositories\Focus\project;
 
-use App\Models\event\EventRelation;
 use App\Models\project\Project;
 use App\Exceptions\GeneralException;
-use App\Models\account\Account;
-use App\Models\invoice\Invoice;
 use App\Models\project\Budget;
 use App\Models\project\BudgetItem;
 use App\Models\project\BudgetSkillset;
 use App\Models\project\ProjectQuote;
 use App\Models\quote\Quote;
-use App\Models\transaction\Transaction;
-use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -33,11 +28,9 @@ class ProjectRepository extends BaseRepository
      * the grid
      * @return mixed
      */
-    public function getForDataTable($c = true)
+    public function getForDataTable()
     {
-        $q = $this->query()->withoutGlobalScopes();
-
-        return $q->get();
+        return $this->query()->get();
     }
 
     /**
@@ -61,10 +54,9 @@ class ProjectRepository extends BaseRepository
         $result = Project::create($data);
 
         // create project quote and update related foreign key
-        foreach ($data_items as $val) {
-            $obj = ['quote_id' => $val, 'project_id' => $result->id]; 
-            $id = ProjectQuote::insertGetId($obj);
-            Quote::find($val)->update(['project_quote_id' => $id]);
+        foreach ($data_items as $id) {
+            $id = ProjectQuote::insertGetId(['quote_id' => $id, 'project_id' => $result->id]);
+            Quote::find($id)->update(['project_quote_id' => $id]);
         }
 
         DB::commit();
