@@ -61,12 +61,11 @@ class ProjectsTableController extends Controller
                 return gen4tid('Prj-', $project->tid);
             })
             ->addColumn('quote_tid', function($project) {
-                $tids = array();                
-                foreach ($project->quotes as $quote) {
+                $quote = $project->quote;
+                if ($quote) {
                     $tid = $quote->bank_id ? gen4tid('PI-', $quote->tid) : gen4tid('QT-', $quote->tid);
-                    $tids[] = '<a href="'.route('biller.projects.create_project_budget', $quote).'" data-toggle="tooltip" title="Budget"><b>'. $tid .'</b></a>';
+                    return '<a href="'.route('biller.projects.create_project_budget', $quote).'" data-toggle="tooltip" title="Budget"><b>'. $tid .'</b></a>';
                 }
-                return implode(', ', $tids);
             })
             ->addColumn('lead_tid', function($project) {
                 $tids = array();                
@@ -75,7 +74,7 @@ class ProjectsTableController extends Controller
                 }
                 return implode(', ', $tids);
             })
-            ->addColumn('start_status', function ($project) {
+            ->addColumn('budget_status', function ($project) {
                 if ($project->quote && $project->quote->budget)
                     return 'budgeted:';
                 return 'pending:';
