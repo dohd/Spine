@@ -31,7 +31,7 @@
                             <th>Customer</th>
                             <th>#Quote / PI No</th>
                             <th>Ticket No</th>
-                            <th>Start Status</th>  
+                            <th>Budget Status</th>  
                             <th>Start Date</th>
                             <th>{{ trans('general.action') }}</th>
                         </tr>
@@ -105,8 +105,8 @@
                     name: 'lead_tid'
                 },
                 {
-                    data: 'start_status',
-                    name: 'start_status'
+                    data: 'budget_status',
+                    name: 'budget_status'
                 },
                 {
                     data: 'start_date',
