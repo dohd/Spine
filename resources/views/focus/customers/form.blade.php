@@ -8,7 +8,10 @@
                 <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" role="tab" aria-selected="false">{{trans('customers.shipping_address')}}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" role="tab" aria-selected="false">{{trans('general.other')}}</a>
+                <a class="nav-link" id="base-tab3" data-toggle="tab" aria-controls="tab3" href="#tab3" role="tab" aria-selected="false">Opening Balance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" role="tab" aria-selected="false">{{trans('general.other')}}</a>
             </li>
         </ul>
         <div class="tab-content px-1">
@@ -92,6 +95,7 @@
                     </div>
                 </div>
                 <div class="row">
+                    {{-- 
                     <div class="col-sm-6">
                         <div class="form-group">
                             {{ Form::label( 'gid', trans('customers.gid'),['class' => 'col-lg-6 control-label']) }}
@@ -111,6 +115,8 @@
                             </div>
                         </div>
                     </div>
+                    --}}
+
                     <div class="col-sm-6">
                         <div class='form-group'>
                             {{ Form::label( 'taxid', trans('customers.taxid'),['class' => 'col-lg-6 control-label']) }}
@@ -121,6 +127,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="base-tab2">
                 <div class="row">
                     <div class="col-sm-6">
@@ -195,7 +202,23 @@
                     </div>
                 </div>
             </div>
+
             <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
+                <div class='form-group'>
+                    {{ Form::label('opening_balance', 'Opening Balance', ['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        {{ Form::text('open_balance', '0.00', ['class' => 'form-control', 'id' => 'open_balance']) }}
+                    </div>
+                </div>
+                <div class='form-group'>
+                    {{ Form::label('as_at_date', 'As At Date',['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        {{ Form::text('open_balance_date', null, ['class' => 'form-control datepicker', 'id' => 'open_balance_date']) }}
+                    </div>
+                </div>                
+            </div>
+
+            <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                 {!! @$fields !!}
                 <div class='form-group'>
                     {{ Form::label( 'docid', trans('customers.docid'),['class' => 'col-lg-2 control-label']) }}
@@ -228,8 +251,18 @@
 
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
-
 <script type="text/javascript">
+    // datepicker
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    .datepicker('setDate', new Date());
+                        
+    const customer = @json(@$customer);
+    if (customer) {
+        $('#open_balance_date').datepicker('setDate', new Date(customer?.open_balance_date));
+        const balance = customer.open_balance.replace(/,/g, '');
+        $('#open_balance').val(parseFloat(balance).toLocaleString());
+    }
+    
     $(document).ready(function() {
         $("#groups").select2();
         $("#groups").on("select2:select", function(evt) {

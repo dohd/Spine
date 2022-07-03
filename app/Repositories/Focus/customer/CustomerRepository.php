@@ -7,11 +7,15 @@ use App\Models\items\CustomEntry;
 use DB;
 use App\Models\customer\Customer;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Models\branch\Branch;
 use App\Models\invoice\Invoice;
+use App\Models\items\JournalItem;
+use App\Models\manualjournal\Journal;
 use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 
 /**
  * Class CustomerRepository.
@@ -207,44 +211,70 @@ class CustomerRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        DB::beginTransaction();
-        
+        // dd($input);      
         if (!empty($input['picture'])) 
             $input['picture'] = $this->uploadPicture($input['picture']);
+
+        DB::beginTransaction();
         
         $customer = Customer::where('email', $input['email'])->first('id');
         if ($customer) return session()->flash('flash_error', 'Duplicate Email');
 
-        $groups = isset($input['groups']) ? $input['groups'] : array();
-        $custom_field = isset($input['custom_field']) ? $input['custom_field'] : array();
-        unset($input['groups'], $input['custom_field']);
+        $input['open_balance'] = numberClean($input['open_balance']);
+        $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
         $result = Customer::create($input);
 
         $branches = [['name' => 'All Branches'], ['name' => 'Head Office']];
-        foreach ($branches as $k => $branch) {
-            $branch['customer_id'] = $result->id;
-            $branch['ins'] = $result->ins;
-            $branches[$k] = $branch;
-        }
+        $branches = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'customer_id' => $result->id,
+                'ins' => $result->ins
+            ]);
+        }, $branches);
         Branch::insert($branches);
 
-        $groups = array_reduce($groups, function ($init, $val) use($result) {
-            $init[] = ['customer_id' => $result->id, 'customer_group_id' => $val];
-            return $init;
-        }, []);
-        if ($groups) CustomerGroupEntry::insert($groups);
-
-        $fields = array();
-        foreach ($custom_field as $k => $val) {
-            $fields[] = [
-                'custom_field_id' => $k,
-                'rid' => $result->id,
-                'module' => 1,
-                'data' => $val,
-                'ins' => $result->ins
+        $open_balance = $result->open_balance;
+        $open_balance_date = $result->open_balance_date;
+        if ($open_balance > 0) {
+            $note = $result->id .  '-customer Account Opening Balance';
+            $data = [
+                'tid' => Journal::max('tid') + 1,
+                'date' => $open_balance_date,
+                'note' => $note,
+                'debit_ttl' => $open_balance,
+                'credit_ttl' => $open_balance,
+                'ins' => $result->ins,
+                'user_id' => auth()->user()->id,
             ];
+            $journal = Journal::create($data);
+
+            $journal_items = array();
+            $debtor_account = Account::where('system', 'receivable')->first(['id']);
+            $data = [
+                'journal_id' => $journal->id,
+                'account_id' => $debtor_account->id,
+            ];
+            foreach ([1,2] as $v) {
+                if ($v == 1) {
+                    $data['credit'] = $open_balance;
+                    $data['debit'] = 0;
+                } else {
+                    $balance_account = Account::where('system', 'open_balance')->first(['id']);
+                    $data['account_id'] = $balance_account->id;
+                    $data['debit'] = $open_balance;
+                    $data['credit'] = 0;
+                }                
+                $journal_items[] = $data;
+            }
+            JournalItem::insert($journal_items);
+
+            /**accounting */
+            $data = array_replace($journal->toArray(), [
+                'open_balance' => $open_balance,
+                'account_id' => $debtor_account->id
+            ]);
+            $this->post_transaction((object) $data);
         }
-        if ($fields) CustomEntry::insert($fields);
 
         DB::commit();
         if ($result) return $result;
@@ -260,67 +290,92 @@ class CustomerRepository extends BaseRepository
      */
     public function update($customer, array $input)
     {
-        // dd($input, $customer->id);
-        DB::beginTransaction();
-
+        // dd($input);
         if (!empty($input['picture'])) {
             $this->removePicture($customer, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
         }
         if (empty($input['password'])) unset($input['password']);
 
-        $is_email = Customer::whereNotIn('id', [$customer->id])->where('email', $input['email'])->first('id');
-        if ($is_email) {
-            session()->flash('flash_error', 'Duplicate Email');
-            return false;
-        }
+        $email = Customer::whereNotIn('id', [$customer->id])->where('email', $input['email'])->first('id');
+        if ($email) return session()->flash('flash_error', 'Email already in use');
 
-        $groups = isset($input['groups']) ? $input['groups'] : array();
-        $custom_field = isset($input['custom_field']) ? $input['custom_field'] : array();
-        unset($input['groups'], $input['custom_field']);
-        $customer->update($input);
+        DB::beginTransaction();
 
-        if ($groups)  {
-            $groups = array_reduce($groups, function ($init, $val) use($customer) {
-                $init[] = ['customer_id' => $customer->id, 'customer_group_id' => $val];
-                return $init;
-            }, []);    
-            CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
-            CustomerGroupEntry::insert($groups);
-        }
-        if ($custom_field) {
-            $fields = array();
-            foreach ($custom_field as $k => $val) {
-                $fields[] = [
-                    'custom_field_id' => $k,
-                    'rid' => $customer->id,
-                    'module' => 1,
-                    'data' => $val,
-                    'ins' => $customer->ins
-                ];
-                CustomEntry::where(['custom_field_id' => $k, 'rid' => $customer->id])->delete();
+        $input['open_balance'] = numberClean($input['open_balance']);
+        $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
+        $result = $customer->update($input);
+
+        $open_balance = $customer->open_balance;
+        $open_balance_date = $customer->open_balance_date;
+        if ($open_balance > 0) {
+            $note = $customer->id .  '-customer Account Opening Balance';
+            $journal = Journal::where('note', $note)->first();
+            $journal->update([
+                'date' => $open_balance_date,
+                'debit_ttl' => $open_balance,
+                'credit_ttl' => $open_balance,
+            ]);
+            $debtor_account = Account::where('system', 'receivable')->first(['id']);   
+            $data = array_replace($journal->toArray(), [
+                'open_balance' => $open_balance,
+                'account_id' => $debtor_account->id,
+            ]);
+
+            foreach ($journal->items as $item) {
+                if ($item->debit > 0) $item->update(['debit' => $open_balance]);
+                elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
             }
-            CustomEntry::insert($fields);
-        }
+
+            /**accounting */
+            Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();
+            $this->post_transaction((object) $data);
+        }     
 
         DB::commit();
-        return true;
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.update_error'));
     }
 
+    public function post_transaction($result)
+    {
+        // debit Accounts Receivable (Debtor)
+        $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
+        $dr_data = [
+            'tid' => Transaction::max('tid') + 1,
+            'account_id' => $result->account_id,
+            'trans_category_id' => $tr_category->id,
+            'tr_date' => $result->date,
+            'due_date' => $result->date,
+            'user_id' => auth()->user()->id,
+            'note' => $result->note,
+            'debit' => $result->open_balance,
+            'ins' => auth()->user()->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result->id,
+            'user_type' => 'customer',
+            'is_primary' => 1,
+        ];
+        Transaction::create($dr_data);
+
+        // credit Opening Balance (Expense)
+        $account = Account::where('system', 'open_balance')->first(['id']);
+        unset($dr_data['debit'], $dr_data['is_primary']);
+        $cr_data = array_replace($dr_data, ['account_id' => $account->id, 'credit' => $result->open_balance]);
+        Transaction::create($cr_data);
+        aggregate_account_transactions();
+    }
+
     /*
- * Upload logo image
- */
+    * Upload logo image
+    */
     public function uploadPicture($logo)
     {
-        $path = $this->customer_picture_path;
+        $image = $this->customer_picture_path . time() . $logo->getClientOriginalName();
+        $this->storage->put($image, file_get_contents($logo->getRealPath()));
 
-        $image_name = time() . $logo->getClientOriginalName();
-
-        $this->storage->put($path . $image_name, file_get_contents($logo->getRealPath()));
-
-        return $image_name;
+        return $image;
     }
 
     /*
@@ -329,17 +384,13 @@ class CustomerRepository extends BaseRepository
     public function removePicture(Customer $customer, $type)
     {
         $path = $this->customer_picture_path;
-
-        if ($customer->$type && $this->storage->exists($path . $customer->$type)) {
+        $storage_exists = $this->storage->exists($path . $customer->$type);
+        if ($customer->$type && $storage_exists) {
             $this->storage->delete($path . $customer->$type);
         }
 
-        $result = $customer->update([$type => null]);
-
-        if ($result) {
-            return true;
-        }
-
+        if ($customer->update([$type => ''])) return true;
+            
         throw new GeneralException(trans('exceptions.backend.settings.update_error'));
     }
 
@@ -352,7 +403,8 @@ class CustomerRepository extends BaseRepository
      */
     public function delete($customer)
     {
-        if ($customer->leads()->first()) return;
+        if ($customer->leads->count()) 
+            return session()->flash('flash_error', 'Customer has attached Ticket');
         if ($customer->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.delete_error'));

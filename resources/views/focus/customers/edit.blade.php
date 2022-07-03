@@ -23,7 +23,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            {{ Form::model($customers, ['route' => ['biller.customers.update', $customers], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH','files' => true, 'id' => 'edit-customer']) }}
+                            {{ Form::model($customer, ['route' => ['biller.customers.update', $customer], 'method' => 'PATCH','files' => true, 'id' => 'edit-customer']) }}
                                 <div class="form-group">
                                     @include("focus.customers.form")
                                     <div class="edit-form-btn ml-2">

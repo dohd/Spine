@@ -27,9 +27,9 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            {{ Form::open(['route' => 'biller.customers.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post','files' => true, 'id' => 'create-customer']) }}
+                            {{ Form::open(['route' => 'biller.customers.store', 'method' => 'post', 'files' => true, 'id' => 'create-customer']) }}
                                 <div class="form-group">
-                                    @include("focus.customers.form")
+                                    @include('focus.customers.form')
                                     @if (@$input['rel_type'])
                                         {{ Form::hidden('rel_id', @$input['rel_id']) }}
                                         {{ Form::hidden('main', 0) }}
