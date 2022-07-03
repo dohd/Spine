@@ -9,14 +9,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\supplier\Supplier
      */
-    protected $suppliers;
+    protected $supplier;
 
     /**
-     * @param App\Models\supplier\Supplier $suppliers
+     * @param App\Models\supplier\Supplier $supplier
      */
-    public function __construct($suppliers)
+    public function __construct($supplier)
     {
-        $this->suppliers = $suppliers;
+        $this->supplier = $supplier;
     }
 
     /**
@@ -29,7 +29,7 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         return view('focus.suppliers.edit')->with([
-            'suppliers' => $this->suppliers
+            'supplier' => $this->supplier
         ]);
     }
 }

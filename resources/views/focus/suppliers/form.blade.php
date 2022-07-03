@@ -107,15 +107,15 @@
 
             <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab3">
                 <div class='form-group'>
-                    {{ Form::label( 'balance', 'OPENING BALANCE',['class' => 'col-lg-2 control-label']) }}
+                    {{ Form::label('balance', 'Opening Balance',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('opening_balance', null, ['class' => 'form-control box-size','id'=>'balance', 'placeholder' => 'OPENING BALANCE']) }}
+                        {{ Form::text('opening_balance', '0.00', ['class' => 'form-control', 'id'=>'open_balance']) }}
                     </div>
                 </div>
                 <div class='form-group'>
-                    {{ Form::label( 'date', 'AS AT DATE',['class' => 'col-lg-2 control-label']) }}
+                    {{ Form::label('date', 'As At Date',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('opening_balance_date', null, ['class' => 'form-control box-size datepicker','id'=>'opening_balance_date', 'placeholder' => 'AS AT DATE']) }}
+                        {{ Form::text('opening_balance_date', null, ['class' => 'form-control datepicker','id'=>'open_balance_date']) }}
                     </div>
                 </div>               
             </div>
@@ -169,36 +169,41 @@
 </div>
 
 @section("after-scripts")
-    {{ Html::script('focus/js/select2.min.js') }}
-    <script type="text/javascript">
-        $("#groups").select2({
-            multiple: true
-        });
+{{ Html::script('focus/js/select2.min.js') }}
+<script type="text/javascript">
+    // datepicker
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    .datepicker('setDate', new Date());
+    
+    const supplier = @json(@$supplier);
+    if (supplier) {
+        $('#open_balance_date').datepicker('setDate', new Date(supplier?.open_balance_date));
+        const balance = supplier.open_balance.replace(/,/g, '');
+        $('#open_balance').val(parseFloat(balance).toLocaleString());
+    }    
 
-        $("#groups").on("select2:select", function (evt) {
-            var element = evt.params.data.element;
-            var $element = $(element);
-            $element.detach();
-            $(this).append($element);
+    $("#groups").select2({
+        multiple: true
+    });
 
-            $(this).trigger("change");
-        });
+    $("#groups").on("select2:select", function (evt) {
+        var element = evt.params.data.element;
+        var $element = $(element);
+        $element.detach();
+        $(this).append($element);
 
-        $("#balance").change(function() {
-            const input_val = $(this).val();
-            $("#balance").val(accounting.formatNumber(input_val));
-            
-        });
+        $(this).trigger("change");
+    });
 
-        $("#credit_limit").change(function() {
-            const input_val = $(this).val();
-            $("#credit_limit").val(accounting.formatNumber(input_val));
-        });
+    $("#balance").change(function() {
+        const input_val = $(this).val();
+        $("#balance").val(accounting.formatNumber(input_val));
+        
+    });
 
-        // Initialize datepicker
-        $('.datepicker').datepicker({
-            format: "{{ config('core.user_date_format') }}"
-        });
-        $('#opening_balance_date').datepicker('setDate', new Date());
-    </script>
+    $("#credit_limit").change(function() {
+        const input_val = $(this).val();
+        $("#credit_limit").val(accounting.formatNumber(input_val));
+    });
+</script>
 @endsection

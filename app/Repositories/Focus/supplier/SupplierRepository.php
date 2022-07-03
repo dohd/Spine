@@ -8,6 +8,8 @@ use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\bill\Bill;
 use App\Models\billitem\BillItem;
+use App\Models\items\JournalItem;
+use App\Models\manualjournal\Journal;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
@@ -174,50 +176,56 @@ class SupplierRepository extends BaseRepository
     {
         // dd($input);
         $data = $input['data'];
-        $account_data = $input['account_data'];
         if (!empty($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
 
         DB::beginTransaction();
-        
-        $open_balance = numberClean($account_data['opening_balance']);
-        $open_balance_date = date_for_database($account_data['opening_balance_date']);
-        $data['open_balance'] = $open_balance;
-        $data['open_balance_date'] = $open_balance_date;            
+
+        $account_data = $input['account_data'];
+        $data['open_balance'] = numberClean($account_data['opening_balance']);
+        $data['open_balance_date'] = date_for_database($account_data['opening_balance_date']);
         $result = Supplier::create($data);
 
+        $open_balance = $result->open_balance;
+        $open_balance_date = $result->open_balance_date;
         if ($open_balance > 0) {
-            $note = 'Account Opening Balance';
-            $bill_data = [
-                'tid' => Bill::max('tid') + 1,
-                'date' => date('Y-m-d'),
-                'due_date' => date('Y-m-d'),
-                'supplier_type' => 'supplier',
-                'supplier_id' => $result->id,
-                'supplier_taxid' => $result->taxid,
-                'expense_subttl' => $open_balance,
-                'expense_grandttl' => $open_balance,
-                'grandttl' => $open_balance,
+            $note = $result->id .  '-supplier Account Opening Balance';
+            $data = [
+                'tid' => Journal::max('tid') + 1,
+                'date' => $open_balance_date,
                 'note' => $note,
+                'debit_ttl' => $open_balance,
+                'credit_ttl' => $open_balance,
                 'ins' => $result->ins,
                 'user_id' => auth()->user()->id,
             ];
-            $bill = Bill::create($bill_data);
-            $bill_item_data = [
-                'bill_id' => $bill->id,
-                'description' => $note,
-                'qty' => 1,
-                'rate' => $open_balance,
-                'amount' => $open_balance,
-                'type' => 'Expense',
-                'ins' => $bill->ins,
-                'user_id' => $bill->user_id,
+            $journal = Journal::create($data);
+
+            $journal_items = array();
+            $creditor_account = Account::where('system', 'payable')->first(['id']);
+            $data = [
+                'journal_id' => $journal->id,
+                'account_id' => $creditor_account->id,
             ];
-            BillItem::create($bill_item_data);
+            foreach ([1,2] as $v) {
+                if ($v == 1) {
+                    $data['credit'] = $open_balance;
+                    $data['debit'] = 0;
+                } else {
+                    $balance_account = Account::where('system', 'open_balance')->first(['id']);
+                    $data['account_id'] = $balance_account->id;
+                    $data['debit'] = $open_balance;
+                    $data['credit'] = 0;
+                }                
+                $journal_items[] = $data;
+            }
+            JournalItem::insert($journal_items);
 
             /**accounting */
-            $bill['open_balance'] = $open_balance;
-            $bill['open_balance_date'] = $open_balance_date;
-            $this->post_transaction($bill);
+            $data = array_replace($journal->toArray(), [
+                'open_balance' => $open_balance,
+                'account_id' => $creditor_account->id
+            ]);
+            $this->post_transaction((object) $data);
         }
 
         DB::commit();
@@ -237,62 +245,44 @@ class SupplierRepository extends BaseRepository
     {
         // dd($input);
         $data = $input['data'];
-        $account_data = $input['account_data'];
-        $open_balance = numberClean($account_data['opening_balance']);
-        $open_balance_date = date_for_database($account_data['opening_balance_date']);
 
         if (!empty($input['picture'])) {
             $this->removePicture($supplier, 'picture');
-            $input['picture'] = $this->uploadPicture($input['picture']);
+            $data['picture'] = $this->uploadPicture($data['picture']);
         }
-        $data['open_balance'] = $open_balance;
-        $data['open_balance_date'] = $open_balance_date;  
 
         DB::beginTransaction();
 
+        $account_data = $input['account_data'];
+        $data['open_balance'] = numberClean($account_data['opening_balance']);
+        $data['open_balance_date'] = date_for_database($account_data['opening_balance_date']);
         $result = $supplier->update($data);
+
+        $open_balance = $supplier->open_balance;
+        $open_balance_date = $supplier->open_balance_date;
         if ($open_balance > 0) {
-            $note = 'Account Opening Balance';
-            // delete previous bill
-            $bill = Bill::where(['supplier_id' => $supplier->id, 'note' => $note])->first();
-            if ($bill) {
-                $bill->delete();
-                $bill->transactions()->delete();
-                aggregate_account_transactions();
+            $note = $supplier->id .  '-supplier Account Opening Balance';
+            $journal = Journal::where('note', $note)->first();
+            $journal->update([
+                'date' => $open_balance_date,
+                'debit_ttl' => $open_balance,
+                'credit_ttl' => $open_balance,
+            ]);
+            $account = Account::where('system', 'payable')->first(['id']);           
+            $data = array_replace($journal->toArray(), [
+                'open_balance' => $open_balance,
+                'account_id' => $account->id
+            ]);
+
+            foreach ($journal->items as $item) {
+                if ($item->debit > 0) $item->update(['debit' => $open_balance]);
+                elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
             }
-            // create new bill
-            $bill_data = [
-                'tid' => Bill::max('tid') + 1,
-                'date' => date('Y-m-d'),
-                'due_date' => date('Y-m-d'),
-                'supplier_type' => 'supplier',
-                'supplier_id' => $supplier->id,
-                'supplier_taxid' => $supplier->taxid,
-                'expense_subttl' => $open_balance,
-                'expense_grandttl' => $open_balance,
-                'grandttl' => $open_balance,
-                'note' => $note,
-                'ins' => $supplier->ins,
-                'user_id' => auth()->user()->id,
-            ];
-            $bill = Bill::create($bill_data);
-            $bill_item_data = [
-                'bill_id' => $bill->id,
-                'description' => $note,
-                'qty' => 1,
-                'rate' => $open_balance,
-                'amount' => $open_balance,
-                'type' => 'Expense',
-                'ins' => $bill->ins,
-                'user_id' => $bill->user_id,
-            ];
-            BillItem::create($bill_item_data);            
 
             /**accounting */
-            $bill['open_balance'] = $open_balance;
-            $bill['open_balance_date'] = $open_balance_date;
-            $this->post_transaction($bill);
-        }
+            Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete(); 
+            $this->post_transaction((object) $data);
+        }    
 
         DB::commit();
         if ($result) return $result;        
@@ -301,31 +291,31 @@ class SupplierRepository extends BaseRepository
     }
 
     // transaction
-    public function post_transaction($bill)
+    public function post_transaction($result)
     {
-        // credit Accounts  Payable (Creditor)
-        $account = Account::where('system', 'payable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
+        // credit Accounts Payable (Creditor)
+        $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $cr_data = [
             'tid' => Transaction::max('tid') + 1,
-            'account_id' => $account->id,
+            'account_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $bill->open_balance,
-            'tr_date' => $bill->open_balance_date,
-            'due_date' => date('Y-m-d'),
-            'user_id' => $bill->user_id,
-            'note' => $bill->note,
-            'ins' => $bill->ins,
+            'tr_date' => $result->date,
+            'due_date' => $result->date,
+            'user_id' => auth()->user()->id,
+            'note' => $result->note,
+            'credit' => $result->open_balance,
+            'ins' => auth()->user()->ins,
             'tr_type' => $tr_category->code,
-            'tr_ref' => $bill->id,
+            'tr_ref' => $result->id,
             'user_type' => 'supplier',
             'is_primary' => 1,
         ];
         Transaction::create($cr_data);
+
         // debit Opening Balance (Expense)
-        $account = Account::where('system', 'open_balance')->where('account_type_id', 4)->first(['id']);
+        $account = Account::where('system', 'open_balance')->first(['id']);
         unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, ['account_id' => $account->id, 'debit' => $bill->open_balance]);
+        $dr_data = array_replace($cr_data, ['account_id' => $account->id, 'debit' => $result->open_balance]);
         Transaction::create($dr_data);
         aggregate_account_transactions();
     }
@@ -339,8 +329,9 @@ class SupplierRepository extends BaseRepository
      */
     public function delete($supplier)
     {
-        if ($supplier->purchase_orders->count() || $supplier->bills->count())
-            return false;
+
+        if ($supplier->bills->count())
+            return session()->flash('flash_error', 'Supplier has attached Bill');
         if ($supplier->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.suppliers.delete_error'));

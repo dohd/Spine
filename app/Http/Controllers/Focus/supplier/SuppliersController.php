@@ -142,12 +142,9 @@ class SuppliersController extends Controller
      */
     public function destroy(Supplier $supplier)
     {
-        $result = $this->repository->delete($supplier);
+        $this->repository->delete($supplier);
 
-        $params = ['flash_success' => trans('alerts.backend.suppliers.deleted')];
-        if (!$result) $params = ['flash_error' => 'Supplier is attached to a Purchase Order / Direct Purchase'];
-
-        return new RedirectResponse(route('biller.suppliers.index'), $params);
+        return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.deleted')]);
     }
 
     /**
