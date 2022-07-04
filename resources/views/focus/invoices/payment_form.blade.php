@@ -46,7 +46,7 @@
         <select name="is_allocated" id="allocated" class="form-control" required>
             <option value="">-- Select Type --</option>
                 @foreach (['On Account', 'Per Invoice',] as $k => $val)
-                    <option value="{{ $k }}" {{ $k == @$payment->is_allocated ? 'selected' : '' }}>
+                    <option value="{{ $k }}" {{ ($k == @$payment->is_allocated ? 'selected' : $k)? 'selected' : '' }}>
                         {{ $val }}
                     </option>
                 @endforeach

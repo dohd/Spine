@@ -320,6 +320,7 @@ class InvoiceRepository extends BaseRepository
             $bill['deposit_ttl'] = $bill['deposit'];
             unset($bill['amount_ttl']);
             $result = PaidInvoice::create($bill);
+            $result->note = $result->payment_mode . ' - ' . $result->reference;
         }
 
         /** accounting */

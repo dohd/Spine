@@ -51,9 +51,9 @@
     // datepicker
     $('.datepicker')
     .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date())
+    .datepicker('setDate', new Date());
 
-    // 
+    // customer select2 config
     $('#person').select2({
         ajax: {
             url: "{{ route('biller.customers.select') }}",
