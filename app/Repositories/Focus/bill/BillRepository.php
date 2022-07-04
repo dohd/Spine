@@ -56,6 +56,7 @@ class BillRepository extends BaseRepository
                 $bill[$key] = numberClean($val);
         }
         $result = Paidbill::create($bill);
+        $result->note = $result->doc_ref_type . ' - '. $result->doc_ref . ' ' . $result->note;
 
         $bill_items = $input['bill_items'];
         foreach ($bill_items as $k => $item) {
@@ -77,7 +78,8 @@ class BillRepository extends BaseRepository
         foreach ($result->items as $item) {            
             $bill = $item->bill;
             if ($bill->grandttl == $bill->amountpaid) $bill->update(['status' => 'paid']);  
-            if ($bill->grandttl > $bill->amountpaid) $bill->update(['status' => 'partial']);
+            elseif ($bill->amountpaid == 0) $bill->update(['status' => 'pending']);
+            elseif ($bill->grandttl > $bill->amountpaid) $bill->update(['status' => 'partial']);
         }
 
         /** accounts */
@@ -91,7 +93,7 @@ class BillRepository extends BaseRepository
 
     public function post_transaction($bill)
     {
-        // credit supplier
+        // credit Bank (Income)
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $cr_data = [
@@ -99,7 +101,7 @@ class BillRepository extends BaseRepository
             'account_id' => $bill['account_id'],
             'trans_category_id' => $tr_category->id,
             'credit' => $bill['deposit_ttl'],
-            'tr_date' => date('Y-m-d'),
+            'tr_date' => $bill['date'],
             'due_date' => $bill['due_date'],
             'user_id' => $bill['user_id'],
             'ins' => $bill['ins'],
@@ -107,11 +109,11 @@ class BillRepository extends BaseRepository
             'tr_ref' => $bill['id'],
             'user_type' => 'supplier',
             'is_primary' => 1,
-            'note' => $bill['doc_ref_type'] . ' - ' . $bill['doc_ref'],
+            'note' => $bill['note'],
         ];
         Transaction::create($cr_data);
 
-        // debit accounts payable
+        // debit Accounts Payable (Creditor)
         unset($cr_data['credit'], $cr_data['is_primary']);
         $account = Account::where('system', 'payable')->first(['id']);
         $dr_data = array_replace($cr_data, [
@@ -119,8 +121,6 @@ class BillRepository extends BaseRepository
             'debit' => $bill['deposit_ttl'],
         ]);
         Transaction::create($dr_data);
-
-        // update account ledgers debit and credit totals
         aggregate_account_transactions();    
     }
 }
