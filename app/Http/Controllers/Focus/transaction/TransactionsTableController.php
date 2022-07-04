@@ -22,6 +22,7 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\transaction\TransactionRepository;
 use App\Http\Requests\Focus\transaction\ManageTransactionRequest;
+
 /**
  * Class TransactionsTableController.
  */
@@ -40,27 +41,6 @@ class TransactionsTableController extends Controller
     public function __construct(TransactionRepository $transaction)
     {
         $this->transaction = $transaction;
-    }
-
-    public function tax_transaction($col='', $tr)
-    {
-        if (request('system') != 'tax') return;
-        switch ($col) {
-            case 'reference':
-                if ($tr->invoice) 
-                    return $tr->invoice->customer->taxid . ' : ' . $tr->invoice->customer->company;
-                if ($tr->bill)
-                    return $tr->bill->supplier->taxid . ' : ' . $tr->bill->supplier->company;
-            case 'tr_type':
-                if ($tr->invoice) return 'Sale';
-                if ($tr->bill) return 'Purchase';
-            case 'vat_rate':
-                if ($tr->invoice) return $tr->invoice->tax_id;
-                if ($tr->bill) return $tr->bill->tax;
-            case 'vat_amount':
-                if ($tr->invoice) return numberFormat($tr->invoice->tax);
-                if ($tr->bill) return numberFormat($tr->bill->grandtax);
-        }
     }
 
     /**
@@ -115,4 +95,26 @@ class TransactionsTableController extends Controller
             })
             ->make(true);
     }
+
+    // tax transaction
+    public function tax_transaction($col='', $tr)
+    {
+        if (request('system') != 'tax') return;
+        switch ($col) {
+            case 'reference':
+                if ($tr->invoice) 
+                    return $tr->invoice->customer->taxid . ' : ' . $tr->invoice->customer->company;
+                if ($tr->bill)
+                    return $tr->bill->supplier->taxid . ' : ' . $tr->bill->supplier->company;
+            case 'tr_type':
+                if ($tr->invoice) return 'Sale';
+                if ($tr->bill) return 'Purchase';
+            case 'vat_rate':
+                if ($tr->invoice) return $tr->invoice->tax_id;
+                if ($tr->bill) return $tr->bill->tax;
+            case 'vat_amount':
+                if ($tr->invoice) return numberFormat($tr->invoice->tax);
+                if ($tr->bill) return numberFormat($tr->bill->grandtax);
+        }
+    }    
 }
