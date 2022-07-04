@@ -220,7 +220,7 @@
      */
     let expRowId = 0;
     const expHtml = [$('#expTbl tbody tr:eq(0)').html(), $('#expTbl tbody tr:eq(1)').html()];
-    const expUrl = "{{ route('biller.accounts.account_search') }}";
+    const expUrl = "{{ route('biller.accounts.account_search') }}?type=Expense";
     $('.accountname').autocomplete(predict(expUrl, expSelect));
     $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
     $('#expvat-0').mousedown(function() { taxRule('expvat-0', $('#tax').val()); });

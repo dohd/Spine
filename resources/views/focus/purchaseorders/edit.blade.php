@@ -234,7 +234,7 @@
     let expRowId = @json(count($po->products));
     const expHtml = [$('#expTbl tbody tr:eq(0)').html(), $('#expTbl tbody tr:eq(1)').html()];
     $('#expTbl tbody tr:lt(2)').remove(); 
-    const expUrl = "{{ route('biller.accounts.account_search') }}";
+    const expUrl = "{{ route('biller.accounts.account_search') }}?type=Expense";
     $('.accountname').autocomplete(predict(expUrl, expSelect));
     $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
     $('#expTbl').on('click', '#addexp, .remove', function() {
