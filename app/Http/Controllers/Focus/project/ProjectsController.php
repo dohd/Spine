@@ -397,27 +397,28 @@ class ProjectsController extends Controller
         $q = $request->post('keyword');
 
         $projects = Project::where('name', 'LIKE', '%'.$q.'%')
+            ->orWhere('tid', 'LIKE', '%'.$q.'%')
             ->orWhereHas('customer', function ($query) use ($q) {
                 $query->where('company', 'LIKE', '%'.$q.'%');
             })
             ->orWhereHas('branch', function ($query) use ($q) {
                 $query->where('name', 'LIKE', '%'.$q.'%');
-            })
+            })            
             ->limit(6)->get();
         
         // response format
         $output = array();
         foreach ($projects as $project) {
             if (empty($project->quotes)) continue;
-            
-            $tid = 'Prj-'.sprintf('%04d', $project->tid);
-            $name = implode(' - ', array($tid, $project->name));
-            $output[] = array(
+            $customer = $project->customer_project->company;
+            $branch = $project->branch->name;
+            $name = implode(' - ', array($customer, $branch, gen4tid('Prj-', $project->tid), $project->name));
+            $output[] = [
                 'id' => $project->id, 
                 'name' => $name,
                 'client_id' => $project->customer_project->id, 
                 'branch_id' => $project->branch->id
-            );
+            ];
         }
 
         return response()->json($output);
