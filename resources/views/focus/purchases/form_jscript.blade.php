@@ -177,7 +177,7 @@
 
     // on change project
     $('#stockTbl').on('change', '.projectstock, .warehouse', function() {
-        const row = $(this).parents('tr');
+        const row = $(this).parents('tr:first');
         if ($(this).is('.projectstock')) {
             row.find('.warehouse').val('');
         } else if ($(this).is('.warehouse')) {
@@ -186,7 +186,6 @@
         }
     });
     
-
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
     $('.projectstock').autocomplete(predict(projectUrl, projectStockSelect));
     $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
