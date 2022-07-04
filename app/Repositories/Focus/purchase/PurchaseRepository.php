@@ -77,7 +77,7 @@ class PurchaseRepository extends BaseRepository
             ]);
 
             // increase product stock
-            if ($item['type'] == 'Stock') {
+            if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 $product = ProductVariation::find($item['item_id']);
                 if ($product->warehouse_id == $item['warehouse_id']) {
                     $product->increment('qty', $item['qty']);
@@ -152,7 +152,7 @@ class PurchaseRepository extends BaseRepository
             $new_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
 
             // update stock product
-            if ($item['type'] == 'Stock') {
+            if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 // if is existing line item, else new line item
                 $product = ProductVariation::find($new_item->item_id);
                 if ($new_item->id && $product->warehouse_id == $item['warehouse_id']) {
@@ -198,7 +198,7 @@ class PurchaseRepository extends BaseRepository
         }
 
         /** accounts */
-        $purchase->transactions()->delete();
+        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id, 'note' => $purchase->note])->delete();
         $this->post_transaction($purchase);
 
         DB::commit();
@@ -218,7 +218,7 @@ class PurchaseRepository extends BaseRepository
     {
         DB::begin();
 
-        $purchase->transactions()->delete();
+        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id, 'note' => $purchase->note])->delete();
         aggregate_account_transactions();
         $purchase->products()->delete();
         $result = $purchase->delete();
