@@ -80,50 +80,6 @@ class BillsController extends Controller
         return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'Bills payment successfully received']);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Bill $bill)
-    {
-        return new ViewResponse('focus.bills.view', compact('bill'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 
     /**
      * Fetch Supplier bills
@@ -132,7 +88,10 @@ class BillsController extends Controller
     {
         $bills = Bill::where('supplier_id', $request->id)
             ->whereIn('status', ['Pending', 'Partial'])
-            ->get(['id', 'tid', 'supplier_id', 'note', 'status', 'grandttl', 'due_date', 'amountpaid']);
+            ->get([
+                'id', 'tid', 'supplier_id', 'suppliername', 'doc_ref', 'doc_ref_type', 'note', 
+                'status', 'grandttl', 'due_date', 'amountpaid'
+            ]);
 
         return response()->json($bills);
     }
