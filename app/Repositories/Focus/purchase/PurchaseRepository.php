@@ -7,6 +7,7 @@ use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
 use App\Models\items\PurchaseItem;
+use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
@@ -66,16 +67,46 @@ class PurchaseRepository extends BaseRepository
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
+                if ($key == 'itemproject_id' && $val > 0) $item['warehouse_id'] = null;
+                elseif ($key == 'warehouse_id' && $val > 0) $item['itemproject_id'] = null;
             }
             $data_items[$i] = array_replace($item, [
                 'ins' => $result->ins,
                 'user_id' => $result->user_id,
                 'bill_id' => $result->id
             ]);
+
+            // increase product stock
+            if ($item['type'] == 'Stock') {
+                $product = ProductVariation::find($item['item_id']);
+                if ($product->warehouse_id == $item['warehouse_id']) {
+                    $product->increment('qty', $item['qty']);
+                } else {
+                    // check for similar products
+                    $is_similar = false;
+                    $similar_products = ProductVariation::where('id', '!=', $product->id)
+                        ->where('name', 'LIKE', '%'. $product->name .'%')->get();
+                    foreach ($similar_products as $s_product) {
+                        if ($product->warehouse_id == $item['warehouse_id']) {
+                            $s_product->increment('qty', $item['qty']);
+                            $is_similar = true;
+                            break;
+                        }
+                    }
+                    // if no similar product, create new product
+                    if (!$is_similar) {
+                        $new_product = clone $product;
+                        $new_product->qty =  $item['qty'];
+                        $new_product->warehouse_id = $item['warehouse_id'];
+                        unset($new_product->id);
+                        $new_product->save();
+                    }
+                }
+            }
         }
         PurchaseItem::insert($data_items);
 
-        // accounting
+        /** accounting **/
         $this->post_transaction($result);
 
         DB::commit();
@@ -110,6 +141,7 @@ class PurchaseRepository extends BaseRepository
         }
         $purchase->update($data);
 
+        // create or update purchase item
         $data_items = $input['data_items'];
         foreach ($data_items as $item) {
             $item = $item + [
@@ -118,9 +150,47 @@ class PurchaseRepository extends BaseRepository
                 'bill_id' => $purchase->id
             ];            
             $new_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
+
+            // update stock product
+            if ($item['type'] == 'Stock') {
+                // if is existing line item, else new line item
+                $product = ProductVariation::find($new_item->item_id);
+                if ($new_item->id && $product->warehouse_id == $item['warehouse_id']) {
+                    $product->decrement('qty', $new_item->qty);
+                    $product->increment('qty', $item['qty']);
+                } else {
+                    if ($product->warehouse_id == $item['warehouse_id']) {
+                        $product->increment('qty', $item['qty']);
+                    } else {
+                        // check for similar products
+                        $is_similar = false;
+                        $similar_products = ProductVariation::where('id', '!=', $product->id)
+                            ->where('name', 'LIKE', '%'. $product->name .'%')->get();
+                        foreach ($similar_products as $s_product) {
+                            if ($product->warehouse_id == $item['warehouse_id']) {
+                                $s_product->increment('qty', $item['qty']);
+                                $is_similar = true;
+                                break;
+                            }
+                        }
+                        // if no similar product, create new product
+                        if (!$is_similar) {
+                            $new_product = clone $product;
+                            $new_product->qty = $item['qty'];
+                            $new_product->warehouse_id = $item['warehouse_id'];
+                            unset($new_product->id);
+                            $new_product->save();
+                        }
+                    }
+                }                    
+            }    
+                    
+            // add properties to new_item
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
+                if ($key == 'itemproject_id' && $val > 0) $item['warehouse_id'] = null;
+                elseif ($key == 'warehouse_id' && $val > 0) $item['itemproject_id'] = null;
                 $new_item[$key] = $item[$key];
             }
             if (!$new_item->id) unset($new_item['id']);

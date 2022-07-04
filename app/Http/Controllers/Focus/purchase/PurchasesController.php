@@ -91,7 +91,7 @@ class PurchasesController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl', 'is_tax_exc'
         ]);
         $data_items = $request->only([
-            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
+            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type', 'warehouse_id'
         ]);
 
         $data['ins'] = auth()->user()->ins;
@@ -100,7 +100,7 @@ class PurchasesController extends Controller
         $data_items = modify_array($data_items);
         // filter non auto-generated items
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
-        if (!$data_items) throw ValidationException::withMessages(['Please use auto-generated items as line items!']);
+        if (!$data_items) return session()->flash('flash_error', 'Please use auto-generated items as line items!');
 
         $this->repository->create(compact('data', 'data_items'));
 
@@ -135,7 +135,7 @@ class PurchasesController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl', 'is_tax_exc'
         ]);
         $data_items = $request->only([
-            'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
+            'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type', 'warehouse_id'
         ]);
 
         $data['ins'] = auth()->user()->ins;
@@ -144,7 +144,7 @@ class PurchasesController extends Controller
         $data_items = modify_array($data_items);
         // filter non auto-generated items
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
-        if (!$data_items) throw ValidationException::withMessages(['Please use auto-generated items as line items!']);
+        if (!$data_items) return session()->flash('flash_error', 'Please use auto-generated items as line items!');
 
         $this->repository->update($purchase, compact('data', 'data_items'));
 

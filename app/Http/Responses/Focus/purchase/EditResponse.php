@@ -4,6 +4,7 @@ namespace App\Http\Responses\Focus\purchase;
 
 use App\Models\additional\Additional;
 use App\Models\pricegroup\Pricegroup;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -33,7 +34,8 @@ class EditResponse implements Responsable
         $purchase = $this->purchase;
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
+        $warehouses = Warehouse::all();
 
-        return view('focus.purchases.edit', compact('purchase', 'additionals', 'pricegroups'));
+        return view('focus.purchases.edit', compact('purchase', 'additionals', 'pricegroups', 'warehouses'));
     }
 }

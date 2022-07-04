@@ -28,7 +28,7 @@
                 </td>  
                 <td class="text-center"><span class="asset_tax">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class='asset_amount'>0</span></b></td>
-                <td><button type="button" class="btn btn-danger remove d-none"><i class="fa fa-minus-square"></i></button></td>
+                <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square"></i></button></td>
                 <input type="hidden" id="assetitemid-0" name="item_id[]">
                 <input type="hidden" class="assettaxr" name="taxrate[]">
                 <input type="hidden" class="assetamountr" name="amount[]">

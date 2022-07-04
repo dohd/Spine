@@ -28,7 +28,7 @@
                 </td>
                 <td><input type="text" class="form-control taxable" value="0" readonly></td>
                 <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td>              
-                <td><button type="button" class="btn btn-danger d-none remove"><i class="fa fa-minus-square"></i></button></td>
+                <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square"></i></button></td>
                 <input type="hidden" id="stockitemid-0" name="item_id[]">
                 <input type="hidden" class="stocktaxr" name="taxrate[]">
                 <input type="hidden" class="stockamountr" name="amount[]">
@@ -36,8 +36,16 @@
                 <input type="hidden" name="id[]" value="0">
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="2">
                     <textarea id="stockdescr-0" class="form-control descr" name="description[]" placeholder="Product Description"></textarea>
+                </td>
+                <td>
+                    <select name="warehouse_id[]" class="form-control warehouse" id="warehouseid">
+                        <option value="">-- Warehouse --</option>
+                        @foreach ($warehouses as $row)
+                            <option value="{{ $row->id }}">{{ $row->title }}</option>
+                        @endforeach
+                    </select>
                 </td>
                 <td colspan="4">
                     <input type="text" class="form-control projectstock" id="projectstocktext-0" placeholder="Search Project By Name">
@@ -74,8 +82,18 @@
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
                         <tr>
-                            <td colspan=3>
+                            <td colspan=2>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
+                            </td>
+                            <td>
+                                <select name="warehouse_id[]" class="form-control warehouse" id="warehouseid-{{$i}}">
+                                    <option value="">-- Warehouse --</option>
+                                    @foreach ($warehouses as $row)
+                                        <option value="{{ $row->id }}" {{ $row->id == $item->warehouse_id? 'selected' : '' }}>
+                                            {{ $row->title }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td colspan="4">
                                 <input type="text" class="form-control projectstock" value="{{ $item->project ? $item->project->name : '' }}" id="projectstocktext-0" placeholder="Search Project By Name">

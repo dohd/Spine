@@ -6,6 +6,7 @@ use App\Models\additional\Additional;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\purchase\Purchase;
 use App\Models\supplier\Supplier;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -20,10 +21,11 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
+        $warehouses = Warehouse::all();
         $last_tid = Purchase::max('tid');
         $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
-        $pricegroups = Pricegroup::all();
 
-        return view('focus.purchases.create', compact('last_tid', 'additionals', 'supplier', 'pricegroups'));
+        return view('focus.purchases.create', compact('last_tid', 'additionals', 'supplier', 'pricegroups', 'warehouses'));
     }
 }

@@ -175,6 +175,18 @@
         $('#stockTbl tbody tr:lt(2)').remove(); 
     }
 
+    // on change project
+    $('#stockTbl').on('change', '.projectstock, .warehouse', function() {
+        const row = $(this).parents('tr');
+        if ($(this).is('.projectstock')) {
+            row.find('.warehouse').val('');
+        } else if ($(this).is('.warehouse')) {
+            if ($(this).val()*1 > 0) row.find('.projectstock').val('').attr('readonly', true);
+            else row.find('.projectstock').val('').attr('readonly', false);
+        }
+    });
+    
+
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
     $('.projectstock').autocomplete(predict(projectUrl, projectStockSelect));
     $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
