@@ -93,27 +93,30 @@
                             </div>                                                     
                         </div>
 
-                        <table class="table-responsive tfr my_stripe_single" id="billsTbl">
+                        <table class="table-responsive tfr my_stripe_single text-center" id="billsTbl">
                             <thead>
-                                <tr class="item_header bg-gradient-directional-blue white">
-                                    <th width="15%" class="text-center">Due date</th>
+                                <tr class="bg-gradient-directional-blue white">
+                                    <th width="15%">Due date</th>
                                     <th width="5%">Bill Number</th>
-                                    <th width="40%" class="text-center">Note</th>
+                                    <th width="30%">Note</th>
+                                    <th width="8%">Reference</th>
                                     <th width="10%">Status</th>
-                                    <th width="15%" class="text-center">Amount (VAT Inc)</th>
-                                    <th width="15%" class="text-center">Paid (Ksh.)</th>
+                                    <th width="15%">Amount</th>
+                                    <th>Paid</th>
+                                    <th>Balance</th>
+                                    <th width="12%">Allocate</th>
                                 </tr>
                             </thead>
                             <tbody>                                
                                 <tr class="bg-white">
-                                    <td colspan="4"></td>
+                                    <td colspan="7"></td>
                                     <td colspan="2">
                                         <div class="form-inline mb-1 float-right">
                                             <label for="total_bill">Total Bill</label>
                                             {{ Form::text('amount_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'amount_ttl', 'readonly']) }}
                                         </div>
                                         <div class="form-inline float-right">
-                                            <label for="total_paid">Total Paid</label>
+                                            <label for="total_paid">Total Allocated</label>
                                             {{ Form::text('deposit_ttl', 0, ['class' => 'form-control col-7 ml-1', 'id' => 'deposit_ttl', 'readonly']) }}
                                         </div>
                                     </td>
@@ -122,7 +125,7 @@
                         </table>
                         <div class="form-group row">                            
                             <div class="col-12"> 
-                                <button type="button" class="btn btn-primary btn-lg float-right mr-3" id="makePay">Make Payment</button>
+                                {{ Form::submit('Make Payment', ['class' => 'btn btn-primary btn-lg float-right mr-3']) }}                                
                             </div>
                         </div>
                     {{ Form::close() }}
@@ -137,21 +140,10 @@
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    // form submit
-    $('#makePay').click(function() {
-        swal({
-            title: 'Are You  Sure?',
-            icon: "warning",
-            buttons: true,
-            dangerMode: true,
-            showCancelButton: true,
-        }, () => $('form#payBill').submit());   
-    });
-
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
-    $('.datepicker')
-    .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    // datepicker
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date())
 
     // Load suppliers
@@ -178,14 +170,19 @@
 
     // bill row
     function billRow(v, i) {
-        const amount = parseFloat(v.grandttl - v.amountpaid).toLocaleString();
+        let amount = parseFloat(v.grandttl).toLocaleString();
+        let paid = parseFloat(v.amountpaid).toLocaleString();
+        let balance = parseFloat(v.grandttl - v.amountpaid).toLocaleString();
         return `
             <tr>
-                <td class="text-center">${new Date(v.due_date).toDateString()}</td>
+                <td>${new Date(v.due_date).toDateString()}</td>
                 <td>${v.tid}</td>
-                <td class="text-center">${v.note}</td>
+                <td>${v.supplier_id == 1? v.suppliername + ' - ' + v.note : v.note}</td>
+                <td>${v.doc_ref_type} - ${v.doc_ref}</td>
                 <td>${v.status}</td>
-                <td class="text-center amount"><b>${amount}</b></td>
+                <td>${amount}</td>
+                <td>${paid}</td>
+                <td class="text-center amount"><b>${balance}</b></td>
                 <td><input type="text" class="form-control paid" name="paid[]"></td>
                 <input type="hidden" name="bill_id[]" value="${v.id}">
             </tr>
