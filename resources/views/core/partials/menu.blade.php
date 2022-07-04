@@ -617,7 +617,7 @@
                         </ul>
                     </li>
                     @endauth
-                    {{-- 
+                    
                     @permission('transaction-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-exchange"></i>Transfer Money
                         </a>
@@ -631,7 +631,7 @@
                         </ul>
                     </li>
                     @endauth
-                    --}}
+                
                     @permission('transaction-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file"></i>Withhoding Certificate
                         </a>

@@ -15,10 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\banktransfer;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\banktransfer\BanktransferRepository;
@@ -52,36 +51,28 @@ class BanktransfersTableController extends Controller
      */
     public function __invoke(ManageBanktransferRequest $request)
     {
-        //
         $core = $this->banktransfer->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('account_id', function ($banktransfer) {
                 return $banktransfer->account->holder;
             })
-             ->addColumn('transaction_date', function ($charge) {
+            ->addColumn('transaction_date', function ($banktransfer) {
                 return dateFormat($banktransfer->transaction_date);
             })
-              ->addColumn('debit', function ($banktransfer) {
+            ->addColumn('debit', function ($banktransfer) {
                 return amountFormat($banktransfer->debit);
             })
-           ->addColumn('credit', function ($banktransfer) {
+            ->addColumn('credit', function ($banktransfer) {
                 return amountFormat($banktransfer->credit);
             })
-
             ->addColumn('created_at', function ($banktransfer) {
-                return Carbon::parse($banktransfer->created_at)->toDateString();
+                return $banktransfer->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($banktransfer) {
-                if($banktransfer->second_trans==0){
-                  return $banktransfer->action_buttons;  
-                }else{
-                       return '';  
-                }
-
-               
-                
+                return $banktransfer->action_buttons;
             })
             ->make(true);
     }

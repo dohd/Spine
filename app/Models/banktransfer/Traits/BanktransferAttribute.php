@@ -15,12 +15,11 @@ trait BanktransferAttribute
      * Action Button Attribute to show in grid
      * @return string
      */
-     public function getActionButtonsAttribute()
+    public function getActionButtonsAttribute()
     {
-        return '
-         '.$this->getViewButtonAttribute("transaction-manage", "biller.banktransfers.show").'
-                '.$this->getEditButtonAttribute("transaction-data", "biller.banktransfers.edit").'
-                '.$this->getDeleteButtonAttribute("transaction-data", "biller.banktransfers.destroy").'
-                ';
+        return 
+        //  $this->getViewButtonAttribute("transaction-manage", "biller.banktransfers.show") 
+        // $this->getEditButtonAttribute("transaction-data", "biller.banktransfers.edit")
+        ' ' . $this->getDeleteButtonAttribute("transaction-data", "biller.banktransfers.destroy");                
     }
 }
