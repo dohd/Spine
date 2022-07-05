@@ -119,12 +119,12 @@ class DjcRepository extends BaseRepository
         DB::beginTransaction();
 
         // if different lead, open previous lead
-        if ($djc->lead && $djc->lead_id != $data['lead_id']) 
-            if ($djc->lead->status) $djc->lead->update(['status' => 0]);
-        // close lead
+        if ($djc->lead && $djc->lead->status && $djc->lead_id != $data['lead_id']) 
+            $djc->lead->update(['status' => 0]);
+        // close current lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
-
         $result = $djc->update($data);
+
         // update or create new djc_item
         $data_items = $input['data_items'];
         foreach($data_items as $item) {
@@ -144,7 +144,7 @@ class DjcRepository extends BaseRepository
             }
             // remove stale attributes and save
             unset($djc_item['item_id']);
-            if (!$djc_item['id']) unset($djc_item['id']);
+            if (!$djc_item->id) unset($djc_item->id);
             $djc_item->save();
         }
 
@@ -180,29 +180,9 @@ class DjcRepository extends BaseRepository
     // Upload file to storage
     public function uploadFile($file)
     {
-        $path = $this->file_path;
-        $file_name = time() . $file->getClientOriginalName();
-
-        $this->storage->put($path . $file_name, file_get_contents($file->getRealPath()));
+        $file_name = $this->file_path . time() . $file->getClientOriginalName();
+        $this->storage->put($file_name, file_get_contents($file->getRealPath()));
 
         return $file_name;
-    }
-
-    // Convert array to database collection format
-    protected function items_array($count=0, $item=[], $extra=[])
-    {
-        $data_items = array();
-        for ($i = 0; $i < $count; $i++) {
-            $row = $extra;
-            foreach (array_keys($item) as $key) {
-                $value = $item[$key][$i];
-                if ($key == 'last_service_date' || $key == 'next_service_date') {
-                    $value = date_for_database($value);
-                }
-                $row[$key] = $value;
-            }
-            $data_items[] = $row;
-        }
-        return $data_items;
     }
 }
