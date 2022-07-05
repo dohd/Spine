@@ -59,7 +59,7 @@ class AccountRepository extends BaseRepository
       $account_type = AccountType::find($result->account_type_id);
       $seco_account = Account::where('system', 'share_capital')->first();
       $tid = Transaction::max('tid') + 1;
-      $date = date('Y-m-d');
+      $date = $result->opening_balance_date;
       $note = 'Account Opening Balance';
       $data = [
         'date' => $date,
@@ -103,18 +103,19 @@ class AccountRepository extends BaseRepository
         ];
         $journal = Journal::create($data);
 
-        for ($i = 0; $i < 2; $i++) {
+        foreach ([1,2] as $v) {
           $item_data = [
             'journal_id' => $journal->id,
             'account_id' => $result->id,
           ];
-          if (!$i) $item_data['debit'] = $open_bal;
+          if ($v == 1) $item_data['debit'] = $open_bal;
           else $item_data['credit'] = $open_bal;
           JournalItem::create($item_data);
         }
 
         $entry_type = 'dr';
-        if (in_array($system, array_splice($systems, 3, 3), 1)) $entry_type = 'cr';
+        if (in_array($system, array_splice($systems, 3, 3), 1)) 
+          $entry_type = 'cr';
         $args = [
           $tid, $result->id, $seco_account->id, $result->opening_balance, $entry_type, $pri_tr->id,
           'employee', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
