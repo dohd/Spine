@@ -309,26 +309,67 @@ class CustomerRepository extends BaseRepository
         $open_balance = $customer->open_balance;
         $open_balance_date = $customer->open_balance_date;
         if ($open_balance > 0) {
+            $data = array();
             $note = $customer->id .  '-customer Account Opening Balance';
             $journal = Journal::where('note', $note)->first();
-            $journal->update([
-                'date' => $open_balance_date,
-                'debit_ttl' => $open_balance,
-                'credit_ttl' => $open_balance,
-            ]);
-            $debtor_account = Account::where('system', 'receivable')->first(['id']);   
-            $data = array_replace($journal->toArray(), [
-                'open_balance' => $open_balance,
-                'account_id' => $debtor_account->id,
-            ]);
+            if ($journal) {
+                $journal->update([
+                    'date' => $open_balance_date,
+                    'debit_ttl' => $open_balance,
+                    'credit_ttl' => $open_balance,
+                ]);
+                $debtor_account = Account::where('system', 'receivable')->first(['id']);   
+                $data = array_replace($journal->toArray(), [
+                    'open_balance' => $open_balance,
+                    'account_id' => $debtor_account->id,
+                ]);
+    
+                foreach ($journal->items as $item) {
+                    if ($item->debit > 0) $item->update(['debit' => $open_balance]);
+                    elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
+                }
 
-            foreach ($journal->items as $item) {
-                if ($item->debit > 0) $item->update(['debit' => $open_balance]);
-                elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
+                // remove previous transactions
+                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();
+            } else {
+                $data = [
+                    'tid' => Journal::max('tid') + 1,
+                    'date' => $open_balance_date,
+                    'note' => $note,
+                    'debit_ttl' => $open_balance,
+                    'credit_ttl' => $open_balance,
+                    'ins' => $customer->ins,
+                    'user_id' => auth()->user()->id,
+                ];
+                $journal = Journal::create($data);
+    
+                $journal_items = array();
+                $debtor_account = Account::where('system', 'receivable')->first(['id']);
+                $data = [
+                    'journal_id' => $journal->id,
+                    'account_id' => $debtor_account->id,
+                ];
+                foreach ([1,2] as $v) {
+                    if ($v == 1) {
+                        $data['credit'] = $open_balance;
+                        $data['debit'] = 0;
+                    } else {
+                        $balance_account = Account::where('system', 'open_balance')->first(['id']);
+                        $data['account_id'] = $balance_account->id;
+                        $data['debit'] = $open_balance;
+                        $data['credit'] = 0;
+                    }                
+                    $journal_items[] = $data;
+                }
+                JournalItem::insert($journal_items);
+    
+                $data = array_replace($journal->toArray(), [
+                    'open_balance' => $open_balance,
+                    'account_id' => $debtor_account->id
+                ]);
             }
-
-            /**accounting */
-            Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();
+            
+            /**accounting */           
             $this->post_transaction((object) $data);
         }     
 
