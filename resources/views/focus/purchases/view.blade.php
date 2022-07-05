@@ -129,7 +129,7 @@
                                 @if ($item->type == 'Expense')
                                     <tr>
                                         <td>{{ $item->description }}</td>
-                                        <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ numberFormat($item->rate) }}</td>
                                         <td>{{ (int) $item->itemtax }}%</td>
                                         <td>{{ numberFormat($item->taxrate) }}</td>
@@ -163,7 +163,7 @@
                                 @if ($item->type == 'Asset')
                                     <tr>
                                         <td>{{ $item->description }}</td>
-                                        <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ (int) $item->itemtax }}%</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>

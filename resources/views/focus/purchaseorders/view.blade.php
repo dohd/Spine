@@ -103,7 +103,7 @@
                                     <tr>
                                         <td>{{ $item->purchaseorder_item->type }}</td>
                                         <td>{{ $item->purchaseorder_item->description }}</td>
-                                        <td>{{ number_format($item->qty) }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->dnote }}</td>
                                         <td>{{ dateFormat($item->date) }}</td>
                                     </tr>
@@ -158,7 +158,7 @@
                                 @if ($item->type == 'Expense')
                                     <tr>
                                         <td>{{ $item->description }}</td>
-                                        <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->uom }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>
@@ -191,7 +191,7 @@
                                 @if ($item->type == 'Asset')
                                     <tr>
                                         <td>{{ $item->description }}</td>
-                                        <td>{{ (int) $item->qty }}</td>
+                                        <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->uom }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>
                                         <td>{{ number_format($item->taxrate, 2) }}</td>

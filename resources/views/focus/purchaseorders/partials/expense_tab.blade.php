@@ -55,7 +55,7 @@
                     @if ($item->type == 'Expense')
                         <tr>
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" placeholder="Enter Ledger"></td>
-                            <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ (int) $item->qty }}" id="expqty-{{$i}}"></td>
+                            <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
                             <td>

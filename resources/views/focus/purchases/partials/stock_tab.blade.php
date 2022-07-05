@@ -61,7 +61,7 @@
                     @if ($item->type == 'Stock')
                         <tr>
                             <td><input type="text" class="form-control stockname" name="name[]" value="{{ $item->product->name }}" placeholder="Product Name" id='stockname-{{$i}}'></td>
-                            <td><input type="text" class="form-control qty" name="qty[]" value="{{ (int) $item->qty }}" id="qty-{{$i}}"></td>                    
+                            <td><input type="text" class="form-control qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="qty-{{$i}}"></td>                    
                             <td><input type="text" class="form-control price" name="rate[]" value="{{ (float) $item->rate }}" id="price-{{$i}}"></td>
                             <td>
                                 <select class="form-control rowtax" name="itemtax[]" id="rowtax-{{$i}}">
