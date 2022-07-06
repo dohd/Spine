@@ -104,9 +104,6 @@
                         @if ($balance)
                             <!-- Equity -->
                             @if ($i == 1)
-                                @php                                                    
-                                    if ($k == 1) continue;
-                                @endphp
                                 @if ($account->account_type == $type)  
                                     @php                                                
                                         $gross_balance += $balance;
@@ -120,6 +117,9 @@
                                     </tr>
                                 @else  
                                     <!-- P&L -->
+                                        @php                                                    
+                                        if ($k == 1) continue;
+                                    @endphp
                                     <tr class="dotted">
                                         <td></td>
                                         <td></td>
