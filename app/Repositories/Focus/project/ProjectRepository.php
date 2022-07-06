@@ -53,10 +53,11 @@ class ProjectRepository extends BaseRepository
         $data['main_quote_id'] = $data_items[0];
         $result = Project::create($data);
 
-        // create project quote and update related foreign key
-        foreach ($data_items as $id) {
-            $id = ProjectQuote::insertGetId(['quote_id' => $id, 'project_id' => $result->id]);
-            Quote::find($id)->update(['project_quote_id' => $id]);
+        foreach ($data_items as $quote_id) {
+            // create project_quote
+            $project_quote_id = ProjectQuote::insertGetId(['quote_id' => $quote_id, 'project_id' => $result->id]);
+            // update project_quote foreign key in quote
+            Quote::find($quote_id)->update(compact('project_quote_id'));
         }
 
         DB::commit();
@@ -86,9 +87,9 @@ class ProjectRepository extends BaseRepository
 
         // create or update project quotes
         ProjectQuote::where('project_id', $project->id)->whereNotIn('quote_id', $data_items)->delete();
-        foreach($data_items as $val) {
-            $item = ProjectQuote::firstOrNew(['project_id' => $project->id, 'quote_id' => $val]);
-            Quote::find($val)->update(['project_quote_id' => $item->id]);
+        foreach($data_items as $quote_id) {
+            $item = ProjectQuote::firstOrNew(['project_id' => $project->id, 'quote_id' => $quote_id]);
+            Quote::find($quote_id)->update(['project_quote_id' => $item->id]);
             $item->save();
         }
 

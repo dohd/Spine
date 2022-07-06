@@ -19,8 +19,6 @@
 namespace App\Http\Controllers\Focus\project;
 
 use App\Models\Company\ConfigMeta;
-use App\Models\hrm\Hrm;
-use App\Models\misc\Misc;
 use App\Models\note\Note;
 use App\Models\account\Account;
 use App\Models\project\ProjectLog;
