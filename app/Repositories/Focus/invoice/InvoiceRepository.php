@@ -234,7 +234,7 @@ class InvoiceRepository extends BaseRepository
         // credit WIP account and debit COG
         $wip_account = Account::where('system', 'wip')->first(['id']);
         $cog_account = Account::where('system', 'cog')->first(['id']);
-        $cr_data = array_replace($dr_data, ['account_id' => $wip_account->id]);
+        $cr_data = array_replace($dr_data, ['account_id' => $wip_account->id, 'is_primary' => 1]);
         $dr_data = array_replace($dr_data, ['account_id' => $cog_account->id, 'is_primary' => 0]);
         if ($dirpurch_inventory_amount > 0) {
             $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_inventory_amount]);
