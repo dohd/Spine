@@ -60,47 +60,66 @@
                                     <tbody>
                                         @php
                                             $gross_balance = 0;
-                                            $j = 0;
+                                            $j = 0;  
+                                            $k = 0;                                          
                                         @endphp
                                         @foreach ($accounts as $account)
-                                            @if ($account->account_type == $type)
-                                                @php
-                                                    $balance = 0;
-                                                    $debit = $account->transactions->sum('debit');
-                                                    $credit = $account->transactions->sum('credit');
-                                                    if ($type == 'Asset') $balance = $debit - $credit;
-                                                    elseif ($type == 'Liability') $balance = $credit - $debit;
-                                                    else $balance = $credit;
-                                                    $gross_balance += $balance;
-                                                    $j++;
-                                                @endphp
-                                                @if ($balance && $i == 1)
-                                                    <!-- Equity -->
-                                                    <tr>
-                                                        <td>{{ $j }}</td>
-                                                        <td>{{ $account->number }}</td>
-                                                        <td>{{ $account->holder }}</td>
-                                                        <td>{{ numberFormat($balance) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td><i>Net Profit</i></td>
-                                                        <td>{{ numberFormat($net_profit) }}</td>
-                                                    </tr>
-                                                    @php
-                                                        $gross_balance += $net_profit;
+                                            @php
+                                                $balance = 0;
+                                                $debit = $account->transactions->sum('debit');
+                                                $credit = $account->transactions->sum('credit');
+                                                if ($type == 'Asset') {
+                                                    $balance = round($debit - $credit, 2);
+                                                    if ($balance < 0) $balance = 0;
+                                                } elseif ($type == 'Liability') {
+                                                    $balance = $credit - $debit;
+                                                    if ($balance < 0) $balance = 0;
+                                                } else $balance = $credit;
+                                            @endphp
+                                            @if ($balance)
+                                                <!-- Equity -->
+                                                @if ($i == 1)
+                                                    @php                                                    
+                                                        if ($k == 1) continue;
                                                     @endphp
-                                                @elseif ($balance)
+                                                    @if ($account->account_type == $type)  
+                                                        @php                                                
+                                                            $gross_balance += $balance;
+                                                            $j++;
+                                                        @endphp                                                  
+                                                        <tr>
+                                                            <td>{{ $j }}</td>
+                                                            <td>{{ $account->number }}</td>
+                                                            <td>{{ $account->holder }}</td>
+                                                            <td>{{ numberFormat($balance) }}</td>
+                                                        </tr>
+                                                    @else  
+                                                        <!-- P&L -->
+                                                        <tr>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td><i>Net Profit</i></td>
+                                                            <td>{{ numberFormat($net_profit) }}</td>
+                                                        </tr>
+                                                        @php
+                                                            $gross_balance += $net_profit;
+                                                            $k++;
+                                                        @endphp
+                                                    @endif                                                
+                                                @elseif (in_array($i, [0, 2], 1) && $account->account_type == $type)
                                                     <!-- Asset or Liability -->
+                                                    @php                                                
+                                                        $gross_balance += $balance;
+                                                        $j++;
+                                                    @endphp     
                                                     <tr>
                                                         <td>{{ $j }}</td>
                                                         <td>{{ $account->number }}</td>
                                                         <td>{{ $account->holder }}</td>
                                                         <td>{{ numberFormat($balance) }}</td>
                                                     </tr>
-                                                @endif
-                                            @endif
+                                                @endif   
+                                            @endif                                     
                                         @endforeach
                                         @php
                                             $balance_cluster[] = compact('type', 'gross_balance');
@@ -115,21 +134,22 @@
                                 </table>                                
                             @else
                                 <!-- summary -->
-                                <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }} || Asset = Equity  + (Revenue - Expense) + Liability</h5>
+                                <h5 class="title {{ $bg_styles[$i] }} p-1 white">{{ $type }} <br><br>Asset = Equity  + (Revenue - Expense) + Liability</h5>
                                 <table class="table table-striped table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>{{trans('accounts.account_type')}}</th>
-                                            <th>Balance</th>
-                                        </tr>
-                                    </thead>
                                     <tbody>
-                                        @foreach($balance_cluster as $cluster)
-                                            <tr>
-                                                <td>{{ $cluster['type'] }}</td>
-                                                <td>{{ amountFormat($cluster['gross_balance']) }}</td>
-                                            </tr>
-                                        @endforeach
+                                        @php
+                                            $asset_bal = $balance_cluster[0]['gross_balance'];
+                                            $equity_bal = $balance_cluster[1]['gross_balance'];
+                                            $liability_bal = $balance_cluster[2]['gross_balance'];
+                                        @endphp                                        
+                                        <tr>
+                                            <td>
+                                                <h3>
+                                                    {{ numberFormat($equity_bal + $liability_bal) }} = {{ numberFormat($equity_bal) }} + {{ numberFormat($liability_bal) }} <br>
+                                                    <span style="visibility: hidden;">{{ numberFormat($equity_bal + $liability_bal) }}</span> = {{ numberFormat($equity_bal + $liability_bal) }}
+                                                </h3>
+                                            </td>                                            
+                                        </tr>                                        
                                     </tbody>
                                 </table>    
                             @endif                           
