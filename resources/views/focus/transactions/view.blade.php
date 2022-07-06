@@ -14,9 +14,18 @@
         'stock' => 'STOCK',
         'withholding' => 'WITHHOLDING'
     ];
+
+    $bill_url = '#';
+    $bill = $tr->bill;
+    if ($bill) {
+        $id = $bill->po_id? $bill->po_id : $bill->id;
+        if ($bill->po_id) $bill_url = route('biller.purchaseorders.show', $id);
+        else $bill_url = route('biller.purchases.show', $id);
+    }
+
     $tr_type_urls = [
         'PAYMENT' => route('biller.show_transaction_payment', $tr->id),
-        'BILL' => $tr->bill ? route('biller.bills.show', $tr->bill->id) : '#',
+        'BILL' => $bill_url,
         'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice->id) : '#',
         'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan->id) : '#',
         'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge->id) : '#',

@@ -30,13 +30,13 @@ class PurchasesTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var PurchaseorderRepository
+     * @var PurchaseRepository
      */
     protected $purchase;
 
     /**
      * contructor to initialize repository object
-     * @param PurchaseorderRepository $purchaseorder ;
+     * @param PurchaseRepository $purchaseorder ;
      */
     public function __construct(PurchaseRepository $purchase)
     {
@@ -57,7 +57,7 @@ class PurchasesTableController extends Controller
             ->addIndexColumn()
             ->escapeColumns(['id'])
             ->addColumn('tid', function ($purchase) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchase->id]) . '">' . gen4tid('DP-', $purchase->tid) . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.purchases.show', $purchase->id) . '">' . gen4tid('DP-', $purchase->tid) . '</a>';
             })
             ->addColumn('date', function ($purchase) {
                 return dateFormat($purchase->date);

@@ -216,7 +216,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
-        DB::begin();
+        DB::beginTransaction();
 
         Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id, 'note' => $purchase->note])->delete();
         aggregate_account_transactions();

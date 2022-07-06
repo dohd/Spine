@@ -20,7 +20,7 @@ trait PurchaseorderAttribute
         return '
          '.$this->getViewButtonAttribute("purchaseorder-manage", "biller.purchaseorders.show").'
                 '.$this->getEditButtonAttribute("purchaseorder-data", "biller.purchaseorders.edit").'
-                '.$this->getDeleteButtonAttribute("purchaseorder-data", "biller.purchaseorders.destroy",'table').'
+                '.$this->getDeleteButtonAttribute("purchaseorder-data", "biller.purchaseorders.destroy").'
                 ';
     }
 }

@@ -162,7 +162,7 @@ class PurchasesController extends Controller
     {
         $this->repository->delete($purchase);
         
-        return response()->json(['status' => 'Success', 'message' => 'Purchase record deleted successfully']);
+        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase deleted successfully']);
     }
 
     /**
