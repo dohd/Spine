@@ -152,8 +152,8 @@ class PurchaseordersController extends Controller
     public function destroy(Purchaseorder $purchaseorder)
     {
         $this->repository->delete($purchaseorder);
-        
-        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')]);
+
+        new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => trans('alerts.backend.purchaseorders.deleted')]);        
     }
 
 
