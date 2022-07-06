@@ -70,14 +70,16 @@
     $("#branch_id").append(new Option(branch.name, branch.id, 'selected', true));
     // quotes
     const quotes = @json($project->quotes);
-    const qt_id = @json($project->main_quote_id);
+    const quoteId = @json($project->main_quote_id);
 
-    const mainqt = quotes.filter(v => v.id === qt_id)[0];
-    const tid = String(mainqt.tid).length < 4 ? ('000'+mainqt.tid).slice(-4) : mainqt.tid;
-    const text = `${mainqt.bank_id? '#PI-' : '#QT-'}${tid} - ${mainqt.notes}`;
-    $("#main_quote").append(new Option(text, mainqt.id, 'selected', true));
+    const mainQuote = quotes.filter(v => v.id == quoteId)[0];
+    if (mainQuote) {
+        const tid = String(mainQuote.tid).length < 4 ? ('000'+mainQuote.tid).slice(-4) : mainQuote.tid;
+        const text = `${mainQuote.bank_id? '#PI-' : '#QT-'}${tid} - ${mainQuote.notes}`;
+        $("#main_quote").append(new Option(text, mainQuote.id, 'selected', true));
+    }
 
-    const otherqt = quotes.filter(v => v.id !== qt_id);
+    const otherqt = quotes.filter(v => v.id !== quoteId);
     otherqt.forEach(v => {
         const tid = String(v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
         const text = `${v.bank_id? '#PI-' : '#QT-'}${tid} - ${v.notes}`;
