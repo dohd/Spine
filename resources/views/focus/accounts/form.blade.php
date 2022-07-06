@@ -85,8 +85,12 @@
     // initialize datepicker
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
-    const date = @json(@$account->opening_balance_date);
-    if (date) $('#date').datepicker('setDate', new Date(date)); 
+
+    const account = @json(@$account);
+    if (account) {
+        $('#date').datepicker('setDate', new Date(account.opening_balance_date)).attr('readonly', false);
+        $('#openBalance').attr('readonly', false);
+    }
         
     // on selecting account type
     $('#accType').change(function() {
