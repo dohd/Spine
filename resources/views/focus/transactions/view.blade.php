@@ -15,22 +15,25 @@
         'withholding' => 'WITHHOLDING'
     ];
 
-    $bill_url = '#';
-    $bill = $tr->bill;
-    if ($bill) {
-        $id = $bill->po_id? $bill->po_id : $bill->id;
-        if ($bill->po_id) $bill_url = route('biller.purchaseorders.show', $id);
+    $bill_url = 'javascript:';
+    if ($tr->bill) {
+        $id = $tr->bill->po_id? $tr->bill->po_id : $tr->bill->id;
+        if ($tr->bill->po_id) $bill_url = route('biller.purchaseorders.show', $id);
         else $bill_url = route('biller.purchases.show', $id);
     }
 
+    $payment_url = 'javascript:';
+    if (isset($tr->paidinvoice->customer)) 
+        $payment_url = route('biller.invoices.edit_payment', $tr->paidinvoice->id);
+
     $tr_type_urls = [
-        'PAYMENT' => route('biller.show_transaction_payment', $tr->id),
+        'PAYMENT' => $payment_url,
         'BILL' => $bill_url,
-        'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice->id) : '#',
-        'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan->id) : '#',
-        'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge->id) : '#',
-        'STOCK' => $tr->issuance ? route('biller.issuance.show', $tr->issuance->id) : '#',
-        'WITHHOLDING' => $tr->withholding ? route('biller.withholdings.show', $tr->withholding->id) : '#',
+        'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice->id) : 'javascript:',
+        'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan->id) : 'javascript:',
+        'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge->id) : 'javascript:',
+        'STOCK' => $tr->issuance ? route('biller.issuance.show', $tr->issuance->id) : 'javascript:',
+        'WITHHOLDING' => $tr->withholding ? route('biller.withholdings.show', $tr->withholding->id) : 'javascript:',
     ];
 @endphp
 
