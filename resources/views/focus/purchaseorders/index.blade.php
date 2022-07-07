@@ -29,6 +29,7 @@
                                         <th>#</th>
                                         <th>#Order No</th>
                                         <th>{{ trans('suppliers.supplier') }}</th>
+                                        <th>Note</th>
                                         <th>Order Qty</th>
                                         <th>{{ trans('general.amount') }} (VAT Inc)</th>
                                         <th>Order date</th>
@@ -85,6 +86,10 @@
             {
                 data: 'supplier',
                 name: 'supplier'
+            },
+            {
+                data: 'note',
+                name: 'note'
             },
             {
                 data: 'qty',

@@ -28,9 +28,10 @@
                                     <tr>
                                         <th>#</th>
                                         <th>#Purchase No</th>
-                                        <th>Purchase Date</th>
-                                        <th>Reference</th>
                                         <th>Supplier</th>
+                                        <th>Note</th>
+                                        <th>Date</th>
+                                        <th>Reference</th>                                        
                                         <th>Amount</th>
                                         <th>Balance</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -77,16 +78,20 @@
                 name: 'tid'
             },
             {
+                data: 'supplier',
+                name: 'supplier'
+            },
+            {
+                data: 'note',
+                name: 'note'
+            },
+            {
                 data: 'date',
                 name: 'date'
             },
             {
                 data: 'reference',
                 name: 'reference'
-            },
-            {
-                data: 'supplier',
-                name: 'supplier'
             },
             {
                 data: 'amount',
