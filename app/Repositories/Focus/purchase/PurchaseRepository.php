@@ -110,7 +110,7 @@ class PurchaseRepository extends BaseRepository
         $this->post_transaction($result);
 
         DB::commit();
-        if ($result) return true;        
+        if ($result) return $result;        
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
@@ -202,7 +202,7 @@ class PurchaseRepository extends BaseRepository
         $this->post_transaction($purchase);
 
         DB::commit();
-        if ($purchase) return true;
+        if ($purchase) return $purchase;
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
