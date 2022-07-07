@@ -258,7 +258,8 @@
                         
     const customer = @json(@$customer);
     if (customer) {
-        $('#open_balance_date').datepicker('setDate', new Date(customer?.open_balance_date));
+        if (customer.open_balance_date) 
+            $('#open_balance_date').datepicker('setDate', new Date(customer.open_balance_date));
         const balance = customer.open_balance.replace(/,/g, '');
         $('#open_balance').val(parseFloat(balance).toLocaleString());
     }

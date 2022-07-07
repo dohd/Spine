@@ -177,28 +177,25 @@
     
     const supplier = @json(@$supplier);
     if (supplier) {
-        $('#open_balance_date').datepicker('setDate', new Date(supplier?.open_balance_date));
+        if (supplier.open_balance_date) 
+            $('#open_balance_date').datepicker('setDate', new Date(supplier.open_balance_date));
         const balance = supplier.open_balance.replace(/,/g, '');
         $('#open_balance').val(parseFloat(balance).toLocaleString());
-    }    
+    }
 
-    $("#groups").select2({
-        multiple: true
-    });
-
+    $("#groups").select2({multiple: true});
+    
     $("#groups").on("select2:select", function (evt) {
         var element = evt.params.data.element;
         var $element = $(element);
         $element.detach();
         $(this).append($element);
-
         $(this).trigger("change");
     });
 
     $("#balance").change(function() {
         const input_val = $(this).val();
         $("#balance").val(accounting.formatNumber(input_val));
-        
     });
 
     $("#credit_limit").change(function() {
