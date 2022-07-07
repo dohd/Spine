@@ -26,11 +26,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>System</th>  
                                         <th>#Account No</th>
                                         <th>Name</th>
                                         <th>Type</th>
                                         <th>Debit</th>
-                                        <th>Credit</th>                                      
+                                        <th>Credit</th>    
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -72,6 +73,10 @@
             columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
+                },
+                {
+                    data: 'system_type',
+                    name: 'system_type'
                 },
                 {
                     data: 'number',

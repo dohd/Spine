@@ -65,6 +65,9 @@ class AccountsTableController extends Controller
             ->addColumn('account_type', function ($account) {
                 return  $account->account_type;
             })
+            ->addColumn('system_type', function ($account) {
+                return $account->system? 'default' : 'custom';
+            })
             ->addColumn('actions', function ($account) {
                 return $account->action_buttons;
             })
