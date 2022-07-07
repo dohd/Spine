@@ -200,26 +200,21 @@ class SupplierRepository extends BaseRepository
             ];
             $journal = Journal::create($data);
 
-            $journal_items = array();
             $creditor_account = Account::where('system', 'payable')->first(['id']);
-            $data = [
-                'journal_id' => $journal->id,
-                'account_id' => $creditor_account->id,
-            ];
             foreach ([1,2] as $v) {
-                if ($v == 1) {
-                    $data['credit'] = $open_balance;
-                    $data['debit'] = 0;
-                } else {
-                    $balance_account = Account::where('system', 'open_balance')->first(['id']);
+                $data = [
+                    'journal_id' => $journal->id,
+                    'account_id' => $creditor_account->id,
+                ];
+                if ($v == 1) $data['credit'] = $open_balance;
+                else {
+                    $balance_account = Account::where('system', 'retained_earning')->first(['id']);
                     $data['account_id'] = $balance_account->id;
                     $data['debit'] = $open_balance;
-                    $data['credit'] = 0;
                 }                
-                $journal_items[] = $data;
+                JournalItem::create($data);
             }
-            JournalItem::insert($journal_items);
-
+            
             /**accounting */
             $data = array_replace($journal->toArray(), [
                 'open_balance' => $open_balance,
@@ -264,7 +259,10 @@ class SupplierRepository extends BaseRepository
             $data = array();
             $note = $supplier->id .  '-supplier Account Opening Balance';
             $journal = Journal::where('note', $note)->first();
+
             if ($journal) {
+                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete(); 
+
                 $journal->update([
                     'date' => $open_balance_date,
                     'debit_ttl' => $open_balance,
@@ -280,8 +278,6 @@ class SupplierRepository extends BaseRepository
                     if ($item->debit > 0) $item->update(['debit' => $open_balance]);
                     elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
                 }
-                // remove previous transactions
-                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete(); 
             } else {
                 $data = [
                     'tid' => Journal::max('tid') + 1,
@@ -294,25 +290,20 @@ class SupplierRepository extends BaseRepository
                 ];
                 $journal = Journal::create($data);
     
-                $journal_items = array();
                 $creditor_account = Account::where('system', 'payable')->first(['id']);
-                $data = [
-                    'journal_id' => $journal->id,
-                    'account_id' => $creditor_account->id,
-                ];
                 foreach ([1,2] as $v) {
-                    if ($v == 1) {
-                        $data['credit'] = $open_balance;
-                        $data['debit'] = 0;
-                    } else {
-                        $balance_account = Account::where('system', 'open_balance')->first(['id']);
+                    $data = [
+                        'journal_id' => $journal->id,
+                        'account_id' => $creditor_account->id,
+                    ];
+                    if ($v == 1) $data['credit'] = $open_balance;
+                    else {
+                        $balance_account = Account::where('system', 'retained_earning')->first(['id']);
                         $data['account_id'] = $balance_account->id;
                         $data['debit'] = $open_balance;
-                        $data['credit'] = 0;
                     }                
-                    $journal_items[] = $data;
+                    JournalItem::create($data);
                 }
-                JournalItem::insert($journal_items);
     
                 $data = array_replace($journal->toArray(), [
                     'open_balance' => $open_balance,
@@ -322,7 +313,7 @@ class SupplierRepository extends BaseRepository
             
             /**accounting */
             $this->post_transaction((object) $data);
-        }    
+        }
 
         DB::commit();
         if ($result) return $result;        
@@ -353,7 +344,7 @@ class SupplierRepository extends BaseRepository
         Transaction::create($cr_data);
 
         // debit Opening Balance (Expense)
-        $account = Account::where('system', 'open_balance')->first(['id']);
+        $account = Account::where('system', 'retained_earning')->first(['id']);
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, ['account_id' => $account->id, 'debit' => $result->open_balance]);
         Transaction::create($dr_data);
