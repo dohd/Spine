@@ -41,12 +41,12 @@
                                         <th>#Invoice No</th>
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th>Subject</th>
-                                        <th>{{ trans('invoices.invoice_date') }}</th>
+                                        <th>Date</th>
                                         <th>{{ trans('general.amount') }}</th>
+                                        <th>Balance</th>
                                         <th>{{ trans('general.status') }}</th>
                                         <th>Due Date</th>
                                         <th>#Quote / PI No</th>
-                                        <th>#Ticket No</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -127,6 +127,10 @@
                     name: 'total'
                 },
                 {
+                    data: 'amountpaid',
+                    name: 'amountpaid'
+                },
+                {
                     data: 'status',
                     name: 'status'
                 },
@@ -137,10 +141,6 @@
                 {
                     data: 'quote_tid',
                     name: 'quote_tid'
-                },
-                {
-                    data: 'lead_tid',
-                    name: 'lead_tid'
                 },
                 {
                     data: 'actions',

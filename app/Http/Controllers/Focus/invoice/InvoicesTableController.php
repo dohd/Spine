@@ -68,7 +68,10 @@ class InvoicesTableController extends Controller
                 return dateFormat($invoice->invoicedate);
             })
             ->addColumn('total', function ($invoice) {
-                return amountFormat($invoice->total);
+                return numberFormat($invoice->total);
+            })
+            ->addColumn('amountpaid', function ($invoice) {
+                return numberFormat($invoice->amountpaid);
             })
             ->addColumn('status', function ($invoice) {
                 return '<span class="st-' . $invoice->status . '">' . trans('payments.' . $invoice->status) . '</span>';
