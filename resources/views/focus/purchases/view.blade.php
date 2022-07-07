@@ -122,6 +122,7 @@
                             <th>Tax</th>
                             <th>Tax Rate</th>                            
                             <th>Amount ({{ $purchase->is_tax_exc? 'VAT Exc' : 'VAT Inc' }})</th>
+                            <th>Ledger Account</th>
                             <th>Project</th>
                         </tr>
                         <tbody>
@@ -134,6 +135,7 @@
                                         <td>{{ (int) $item->itemtax }}%</td>
                                         <td>{{ numberFormat($item->taxrate) }}</td>
                                         <td>{{ numberFormat($item->amount) }}</td>
+                                        <td>{{ $item->account? $item->account->holder : '' }}</td>
                                         <td>
                                             @if($item->project)
                                                 {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
@@ -156,6 +158,7 @@
                             <th>Tax</th>
                             <th>Tax Rate</th>                            
                             <th>Amount ({{ $purchase->is_tax_exc? 'VAT Exc' : 'VAT Inc' }})</th>
+                            <th>Ledger Account</th>
                             <th>Project</th>
                         </tr>
                         <tbody>
@@ -164,10 +167,11 @@
                                     <tr>
                                         <td>{{ $item->description }}</td>
                                         <td>{{ number_format($item->qty, 1) }}</td>
-                                        <td>{{ number_format($item->rate, 2) }}</td>
+                                        <td>{{ numberFormat($item->rate) }}</td>
                                         <td>{{ (int) $item->itemtax }}%</td>
-                                        <td>{{ number_format($item->taxrate, 2) }}</td>
-                                        <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ numberFormat($item->taxrate) }}</td>
+                                        <td>{{ numberFormat($item->amount) }}</td>
+                                        <td>{{ $item->account? $item->account->holder : '' }}</td>
                                         <td>
                                             @if($item->project)
                                                 {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}

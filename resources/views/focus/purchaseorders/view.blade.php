@@ -96,7 +96,6 @@
                                 <th>Quantity</th>
                                 <th>DNote</th>
                                 <th>Date</th>
-                                
                             </tr>
                             <tbody>
                                 @foreach ($grn_items as $item)
@@ -151,6 +150,7 @@
                             <th>Price</th>
                             <th>Tax</th>
                             <th>Amount</th>
+                            <th>Ledger Account</th>
                             <th>Project</th>
                         </tr>
                         <tbody>
@@ -160,9 +160,10 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->uom }}</td>
-                                        <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ number_format($item->taxrate, 2) }}</td>
-                                        <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ numberFormat($item->rate) }}</td>
+                                        <td>{{ numberFormat($item->taxrate) }}</td>
+                                        <td>{{ numberFormat($item->amount) }}</td>
+                                        <td>{{ $item->account? $item->account->holder : '' }}</td>
                                         <td>
                                             @isset($item->project->tid)
                                                 {{ gen4tid('Prj-', $item->project->tid) }}; {{ $item->project->name }}
@@ -185,6 +186,7 @@
                             <th>Price</th>
                             <th>Tax</th>
                             <th>Amount</th>
+                            <th>Ledger Account</th>
                         </tr>
                         <tbody>
                             @foreach ($po->products as $item)
@@ -193,9 +195,10 @@
                                         <td>{{ $item->description }}</td>
                                         <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->uom }}</td>
-                                        <td>{{ number_format($item->rate, 2) }}</td>
-                                        <td>{{ number_format($item->taxrate, 2) }}</td>
-                                        <td>{{ number_format($item->amount, 2) }}</td>
+                                        <td>{{ numberFormat($item->rate) }}</td>
+                                        <td>{{ numberFormat($item->taxrate) }}</td>
+                                        <td>{{ numberFormat($item->amount) }}</td>
+                                        <td>{{ $item->account? $item->account->holder : '' }}</td>
                                     </tr>
                                 @endif
                             @endforeach
