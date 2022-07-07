@@ -12,6 +12,7 @@ use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class AccountRepository.
@@ -254,7 +255,11 @@ class AccountRepository extends BaseRepository
    */
   public function delete($account)
   {
-    if (!$account->system && $account->delete()) {
+    if ($account->transactions->count()) 
+      throw ValidationException::withMessages(['Account has attached transactions']);
+    if ($account->system) 
+      throw ValidationException::withMessages(['System Account cannot be deleted']);
+    if ($account->delete()) {
       aggregate_account_transactions();
       return true;
     }
