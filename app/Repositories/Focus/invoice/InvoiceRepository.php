@@ -155,7 +155,7 @@ class InvoiceRepository extends BaseRepository
     {
         // debit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'rcpt')->first(['id', 'code']);
+        $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $dr_data = [
             'tid' => $tid,

@@ -85,7 +85,7 @@ class CustomerRepository extends BaseRepository
          
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
-        })->where('tr_type', 'rcpt')->whereHas('invoice', function ($q) use($id) { 
+        })->where('tr_type', 'inv')->whereHas('invoice', function ($q) use($id) { 
             $q->where('customer_id', $id); 
         })
         ->orWhereHas('account', function ($q) { 
@@ -159,7 +159,7 @@ class CustomerRepository extends BaseRepository
         $statements = collect();
         $index_visited = array();
         foreach ($transactions as $i => $tr_one) {
-            if ($tr_one->tr_type == 'rcpt') {
+            if ($tr_one->tr_type == 'inv') {
                 // add invoice, 
                 $statements->add($tr_one);
                 $index_visited[] = $i;

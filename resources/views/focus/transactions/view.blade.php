@@ -8,7 +8,7 @@
     $tr_types = [
         'pmt' => 'PAYMENT',
         'bill' => 'BILL', 
-        'rcpt' => 'INVOICE', 
+        'inv' => 'INVOICE', 
         'loan' => 'LOAN', 
         'chrg' => 'CHARGE',
         'stock' => 'STOCK',
