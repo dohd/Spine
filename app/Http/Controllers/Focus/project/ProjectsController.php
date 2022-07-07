@@ -392,25 +392,36 @@ class ProjectsController extends Controller
     {        
         if (!access()->allow('product_search')) return false;
 
-        $q = $request->post('keyword');
+        $k = $request->post('keyword');
 
-        $projects = Project::where('name', 'LIKE', '%'.$q.'%')
-            ->orWhere('tid', 'LIKE', '%'.$q.'%')
-            ->orWhereHas('customer', function ($query) use ($q) {
-                $query->where('company', 'LIKE', '%'.$q.'%');
+        $projects = Project::where('name', 'LIKE', '%'.$k.'%')
+            ->orWhere('tid', $k)
+            ->orwhereHas('quote', function ($q) use($k) {
+                $q->where('tid', $k);
             })
-            ->orWhereHas('branch', function ($query) use ($q) {
-                $query->where('name', 'LIKE', '%'.$q.'%');
-            })            
+            ->orWhereHas('customer', function ($q) use ($k) {
+                $q->where('company', 'LIKE', '%'.$k.'%');
+            })
+            ->orWhereHas('branch', function ($q) use ($k) {
+                $q->where('name', 'LIKE', '%'.$k.'%');
+            })         
             ->limit(6)->get();
         
         // response format
         $output = array();
         foreach ($projects as $project) {
-            if (empty($project->quotes)) continue;
             $customer = $project->customer_project->company;
             $branch = $project->branch->name;
-            $name = implode(' - ', array($customer, $branch, gen4tid('Prj-', $project->tid), $project->name));
+            $project_tid = gen4tid('Prj-', $project->tid);
+
+            $quote_tids = array();
+            foreach ($project->quotes as $quote) {
+                if ($quote->bank_id) $quote_tids[] = gen4tid('PI-', $quote->tid);
+                else $quote_tids[] = gen4tid('QT-', $quote->tid);
+            }
+            $quote_tids = '[' . implode(', ', $quote_tids) . ']';
+
+            $name = implode(' - ', [$quote_tids, $customer, $branch, $project_tid, $project->name]);
             $output[] = [
                 'id' => $project->id, 
                 'name' => $name,
