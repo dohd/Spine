@@ -30,7 +30,7 @@
         {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'deposit', 'required']) }}
     </div>                              
     <div class="col-2">
-        <label for="reference" class="caption">Reference</label>
+        <label for="reference" class="caption">Certificate Serial No.</label>
         {{ Form::text('doc_ref', null, ['class' => 'form-control', 'required']) }}
     </div>    
     <div class="col-2">
@@ -39,7 +39,7 @@
     </div>     
     <div class="col-6">
         <label for="date" class="caption">Note</label>
-        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
+        {{ Form::text('note', null, ['class' => 'form-control', 'placeholder' => 'e.g Gross Amount & Tax Rate', 'id' => 'note']) }}
     </div>                                                  
 </div>
 <div class="table-responsive">
