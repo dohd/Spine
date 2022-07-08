@@ -105,7 +105,8 @@ class PurchasesController extends Controller
         $result = $this->repository->create(compact('data', 'data_items'));
 
         $msg = ['flash_success' => 'Direct Purchase posted successfully'];
-        if ($result->omission_error) $msg = ['flash_error' => 'Something went wrong! Please update Direct Purchase'];
+        if ($result->omission_error) 
+            $msg = ['flash_error' => 'Something went wrong! Please update Direct Purchase ' . gen4tid('DP-', $result->tid)];
 
         return new RedirectResponse(route('biller.purchases.index'), $msg);
     }
