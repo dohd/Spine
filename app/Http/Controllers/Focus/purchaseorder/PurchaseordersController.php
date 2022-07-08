@@ -97,7 +97,10 @@ class PurchaseordersController extends Controller
 
         $result = $this->repository->create(compact('order', 'order_items'));
 
-        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
+        $msg = ['flash_success' => 'Purchase Order created successfully'];
+        if ($result->omission_error) $msg = ['flash_error' => 'Something went wrong! Please update Purchase Order'];
+
+        return new RedirectResponse(route('biller.purchaseorders.index'), $msg);
     }
 
     /**
