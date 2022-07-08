@@ -261,8 +261,8 @@
                 taxable = qty * price - amount;
                 amount += taxable;
             } 
-            tax += taxable;
-            grandTotal += amount;
+            tax += parseFloat(taxable.toFixed(2));
+            grandTotal += parseFloat(amount.toFixed(2));
         });
 
         
@@ -364,7 +364,6 @@
 
             let amount = 0;
             let taxable = 0;
-
             if ($('.is_tax_exc:checked').val() * 1) {
                 amount = qty * price * rowtax;
                 taxable = amount - qty * price;
@@ -373,8 +372,8 @@
                 taxable = qty * price - amount;
                 amount += taxable;
             }
-            tax += taxable;
-            totalInc += amount;            
+            tax += parseFloat(taxable.toFixed(2));
+            totalInc += parseFloat(amount.toFixed(2));         
         });
         $('#exprow_taxttl').text(tax.toLocaleString());
         $('#exp_tax').val(tax.toLocaleString());
@@ -479,8 +478,8 @@
                 taxable = qty * price - amount;
                 amount += taxable;
             }
-            tax += taxable;
-            totalInc += amount;
+            tax += parseFloat(taxable.toFixed(2));
+            totalInc += parseFloat(amount.toFixed(2));
         });
         $('#assettaxrow').text(tax.toLocaleString());
         $('#asset_tax').val(tax.toLocaleString());
