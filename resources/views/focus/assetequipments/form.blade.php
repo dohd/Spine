@@ -137,19 +137,22 @@
     $("#account_id").select2();
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
+    // select2 config
+    $("#account_id").select2({
+        ajax: {
+            url: "{{ route('biller.assetequipments.ledger_load') }}",
+            dataType: 'json',
+            type: 'POST',
+            data: ({term}) => ({term, account_type: $("#account_type").val()}),
+            quietMillis: 50,
+            processResults: function(data) {
+                return { results: data.map(v => ({text: v.holder, id: v.id})) };
+            },
+        }
+    });
+
     $("#account_type").on('change', function() {
         $("#account_id").val('').change();
-        $("#account_id").select2({
-            ajax: {
-                url: "{{ route('biller.assetequipments.ledger_load') }}?account_type=" + $(this).val(),
-                dataType: 'json',
-                type: 'POST',
-                quietMillis: 50,
-                processResults: function(data) {
-                    return { results: data.map(v => ({text: v.holder, id: v.id})) };
-                },
-            }
-        });
     });
 </script>
 @endsection
