@@ -14,7 +14,7 @@
         <tbody>
             <!-- layout -->
             <tr>
-                <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0'></td>
+                <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0' autocomplete="off"></td>
                 <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="1"></td>  
                 <td><input type="text" class="form-control price" name="rate[]" id="price-0"></td>
                 <td>

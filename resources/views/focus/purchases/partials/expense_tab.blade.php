@@ -14,7 +14,7 @@
         <tbody>
             <!-- layout -->
             <tr>
-                <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger"></td>
+                <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger Account" autocomplete="off"></td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
                 <td>

@@ -14,7 +14,7 @@
         <tbody>
             <!-- layout -->
             <tr>
-                <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment"></td>
+                <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment" autocomplete="off"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
                 <td>
