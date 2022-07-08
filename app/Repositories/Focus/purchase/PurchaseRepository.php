@@ -131,7 +131,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function update($purchase, array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
