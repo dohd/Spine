@@ -27,10 +27,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>#TID</th>
                                         <th>Customer</th>
-                                        <th>Certificate</th>
+                                        <th>Certificate / Serial</th>
                                         <th>Amount</th>
                                         <th>Date</th>
+                                        <th>Invoice</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -65,10 +67,12 @@
         },
         columns: [
             {data: 'DT_Row_Index', name: 'id'},
+            {data: 'tid', name: 'tid'},
             {data: 'customer', name: 'customer'},
             {data: 'reference', name: 'reference'},
             {data: 'amount', name: 'amount'},
             {data: 'date', name: 'date'},
+            {data: 'invoice_tid', name: 'invoice_tid'},
             {data: 'actions', name: 'actions', searchable: false, sortable: false}
         ],
         order: [[0, "desc"]],

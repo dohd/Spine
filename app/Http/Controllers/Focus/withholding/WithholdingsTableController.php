@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\withholding;
 
 use App\Http\Controllers\Controller;
@@ -55,17 +56,29 @@ class WithholdingsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function ($withholding) {
+                return gen4tid('WH-', $withholding->tid);
+            })
             ->addColumn('customer', function ($withholding) {
                 return $withholding->customer->company;
             })
             ->addColumn('reference', function ($withholding) {
                 return strtoupper($withholding->certificate)  . ' - ' . $withholding->doc_ref;
             })
-             ->addColumn('date', function ($withholding) {
+            ->addColumn('date', function ($withholding) {
                 return dateFormat($withholding->date);
             })
-              ->addColumn('amount', function ($withholding) {
+            ->addColumn('amount', function ($withholding) {
                 return amountFormat($withholding->deposit_ttl);
+            })
+            ->addColumn('invoice_tid', function ($withholding) {
+                if ($withholding->items->count()) {
+                    $invoice_tids = array();
+                    foreach ($withholding->items as $item) {
+                        if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
+                    }
+                    return implode(', ', $invoice_tids);
+                }
             })
             ->addColumn('actions', function ($withholding) {
                 return $withholding->action_buttons;

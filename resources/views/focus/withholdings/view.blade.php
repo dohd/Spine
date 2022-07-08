@@ -22,13 +22,13 @@
             <table id="withholdingTbl" class="table table-sm table-bordered mb-2">
                 @php
                     $details = [
-                        'Transaction ID' => $withholding->tid,
+                        'TID' => gen4tid('WH-', $withholding->tid),
                         'Customer' => $withholding->customer->company,
                         'Date' => dateFormat($withholding->date),
                         'Due Date' => dateFormat($withholding->due_date),
                         'Amount' => numberFormat($withholding->deposit_ttl),
                         'Certificate' => strtoupper($withholding->certificate),
-                        'Reference' => $withholding->doc_ref
+                        'Certificate Serial No' => $withholding->doc_ref
                     ];
                 @endphp
                 <tbody>                    
