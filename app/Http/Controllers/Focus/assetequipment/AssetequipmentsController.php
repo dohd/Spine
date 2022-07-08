@@ -164,7 +164,9 @@ class AssetequipmentsController extends Controller
      */
     public function ledger_load(Request $request)
     {
-        $accounts = Account::where('account_type', $request->account_type)->get();
+        $accounts = Account::where('account_type', $request->account_type)
+            ->where('holder', 'LIKE', '%' . $request->term .'%')
+            ->limit(6)->get();
 
         return response()->json($accounts);
     }
@@ -176,12 +178,12 @@ class AssetequipmentsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        $q = $request->post('keyword');
+        $k = $request->post('keyword');
 
-        $equipments = Assetequipment::where('name', 'LIKE', '%'.$q.'%')
-            ->orWhere('account_type', 'LIKE', '%'.$q.'%')
-            ->orWhereHas('account', function ($query) use ($q) {
-                $query->where('holder', 'LIKE', '%'.$q.'%');
+        $equipments = Assetequipment::where('name', 'LIKE', '%'.$k.'%')
+            ->orWhere('account_type', 'LIKE', '%'.$k.'%')
+            ->orWhereHas('account', function ($q) use ($k) {
+                $q->where('holder', 'LIKE', '%'.$k.'%');
             })
             ->limit(6)->get(['id', 'name', 'account_id', 'account_type']);
 
