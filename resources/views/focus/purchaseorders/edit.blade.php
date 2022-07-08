@@ -207,10 +207,11 @@
             const qty = $(this).find('.qty').val();
             const price = $(this).find('.price').val().replace(/,/g, '') || 0;
             const rowtax = $(this).find('.rowtax').val()/100 + 1;
-            const amountInc = qty * price * rowtax;
-            const amountExc = qty * price;
-            tax += (amountInc - amountExc);
-            grandTotal += amountInc;
+
+            const amount = qty * price * rowtax;
+            const taxable = amount - qty * price;
+            tax += parseFloat(taxable.toFixed(2));
+            grandTotal += parseFloat(amount.toFixed(2));
         });
         $('#invtax').text(tax.toLocaleString());
         $('#stock_tax').val(tax.toLocaleString());
@@ -289,10 +290,11 @@
             const qty = $(this).find('.exp_qty').val();
             const price = $(this).find('.exp_price').val().replace(/,/g, '') || 0;
             const rowtax = $(this).find('.exp_vat').val()/100 + 1;
-            const amountInc = qty * price * rowtax;
-            const amountExc = qty * price;
-            tax += (amountInc - amountExc);
-            totalInc += amountInc;
+
+            const amount = qty * price * rowtax;
+            const taxable = amount - qty * price;
+            tax += parseFloat(taxable.toFixed(2));
+            totalInc += parseFloat(amount.toFixed(2));
         });
         $('#exprow_taxttl').text(tax.toLocaleString());
         $('#exp_tax').val(tax.toLocaleString());
@@ -367,10 +369,11 @@
             const qty = $(this).find('.asset_qty').val();
             const price = $(this).find('.asset_price').val().replace(/,/g, '') || 0;
             const rowtax = $(this).find('.asset_vat').val()/100 + 1;
-            const amountInc = qty * price * rowtax;
-            const amountExc = qty * price;
-            tax += (amountInc - amountExc);
-            totalInc += amountInc;
+            
+            const amount = qty * price * rowtax;
+            const taxable = amount -  qty * price;
+            tax += parseFloat(taxable.toFixed(2));
+            totalInc += parseFloat(amount.toFixed(2));
         });
         $('#assettaxrow').text(tax.toLocaleString());
         $('#asset_tax').val(tax.toLocaleString());
