@@ -113,7 +113,7 @@ class PurchaseRepository extends BaseRepository
         // proof check line item totals against parent totals
         $grandtax = $result->items->sum('taxrate');
         $subtotal = $result->items->sum('amount') - $result->items->sum('taxrate');
-        if ($result->grandtax != $grandtax || $result->paidttl != $subtotal) {
+        if (round($result->grandtax) != round($grandtax) || round($result->paidttl) != round($subtotal)) {
             $result['omission_error'] = true;
         }
 
