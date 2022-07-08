@@ -77,6 +77,15 @@ class PaymentsTableController extends Controller
 
                 return $str;
             })
+            ->addColumn('invoice_tid', function ($payment) {
+                if ($payment->items->count()) {
+                    $invoice_tids = array();
+                    foreach ($payment->items as $item) {
+                        if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
+                    }
+                    return implode(', ', $invoice_tids);
+                }
+            })
             ->addColumn('actions', function ($payment) {
                 return $this->action_buttons($payment);
             })

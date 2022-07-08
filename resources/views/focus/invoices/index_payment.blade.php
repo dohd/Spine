@@ -31,6 +31,7 @@
                                         <th>Amount</th>
                                         <th>Payment Mode</th>
                                         <th>Reference</th>
+                                        <th>Invoice</th>
                                         <th>Payment Type</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -64,7 +65,7 @@
     .datepicker('setDate', new Date())
 
     function draw_data() {
-        const cols = ['customer', 'account','date', 'amount', 'payment_mode', 'reference', 'payment_type']
+        const cols = ['customer', 'account','date', 'amount', 'payment_mode', 'reference', 'invoice_tid', 'payment_type']
         .map(v => ({data: v, name: v}));
         const language = {@lang('datatable.strings')};
         var dataTable = $('#paymentTbl').dataTable({
