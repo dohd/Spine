@@ -108,10 +108,16 @@ class PurchaseRepository extends BaseRepository
 
         /** accounting **/
         $this->post_transaction($result);
-
         DB::commit();
-        if ($result) return $result;        
 
+        // proof check line item totals against parent totals
+        $grandtax = $result->items->sum('taxrate');
+        $subtotal = $result->items->sum('amount') - $result->items->sum('taxrate');
+        if ($result->grandtax != $grandtax || $result->paidttl != $subtotal) {
+            $result['omission_error'] = true;
+        }
+
+        if ($result) return $result;        
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -125,7 +131,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function update($purchase, array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];

@@ -102,9 +102,12 @@ class PurchasesController extends Controller
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
         if (!$data_items) return session()->flash('flash_error', 'Please use auto-generated items as line items!');
 
-        $this->repository->create(compact('data', 'data_items'));
+        $result = $this->repository->create(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase posted successfully']);
+        $msg = ['flash_success' => 'Direct Purchase posted successfully'];
+        if ($result->omission_error) $msg = ['flash_error' => 'Something went wrong! Please update Direct Purchase'];
+
+        return new RedirectResponse(route('biller.purchases.index'), $msg);
     }
 
     /**
