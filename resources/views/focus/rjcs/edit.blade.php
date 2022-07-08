@@ -1,9 +1,8 @@
 @extends ('core.layouts.app')
 
-@section ('title', ' Diagnosis Job Card | Edit Diagnosis Job Card')
+@section ('title', ' Repiar Job Card | Edit')
 
 @section('content')
-
     <div class="content-wrapper">
         <div class="content-header row mb-1">
             <div class="content-header-left col-6">
@@ -67,7 +66,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
+                                                {{ Form::text('report_date', null, ['class' => 'form-control round datepicker']) }}
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
@@ -211,9 +210,8 @@
         headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}"}
     });
 
-
     // initialize datepicker
-    $('[data-toggle="datepicker"]')
+    $('.datepicker')
         .datepicker({format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date("{{ $rjc->report_date }}"));
 
@@ -221,14 +219,14 @@
     function equipmentRow(cvalue) {
         return `
             <tr>
-                <td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
+                <td><input type="text" class="form-control required"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}"></td>
+                <td><input type="text" class="form-control amnt" name="joc_card[]" id="joc_card-${cvalue}"></td>
+                <td><input type="text" class="form-control prc" name="equipment_type[]" id="equipment_type-${cvalue}"></td>
                 <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle="datepicker"></td>
+                <td><input type="text" class="form-control" name="capacity[]" id="capacity-${cvalue}"></td>
+                <td><input type="text" class="form-control" name="location[]" id="location-${cvalue}"></td>
+                <td><input type="text" class="form-control datepicker" name="last_service_date[]" id="last_service_date-${cvalue}"></td>
+                <td><input type="text" class="form-control datepicker" name="next_service_date[]" id="next_service_date-${cvalue}"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -256,18 +254,13 @@
         });
     }
 
-    // equipment row counter;
-    var counter = 1;
-    // set default rjc items rows
+    // default products
+    let productIndx = 0;
     const rjcItems = @json($items);
     rjcItems.forEach(v => {
-        const i = counter;
-        // add poduct row to equipment table
+        const i = productIndx;
         const row = equipmentRow(i);
-        $('#equipment tr:last').after(row);
-        // initialize date picker with php parsed date
-        $('[data-toggle="datepicker"]')
-            .datepicker({format: "{{config('core.user_date_format')}}"});
+        $('#equipment tr:last').after(row);            
         $('#tag_number-' + i).autocomplete(autocompleteProp(i));
 
         // default input with values
@@ -278,16 +271,16 @@
         $('#make-'+i).val(v.make);
         $('#capacity-'+i).val(v.capacity);
         $('#location-'+i).val(v.location);
-        $('#last_service_date-'+i).val(v.last_service_date);
-        $('#next_service_date-'+i).val(v.next_service_date);
+        
+        if (v.last_service_date)
+            $('#last_service_date-'+i).datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+            .datepicker('setDate', new Date(v.last_service_date));
+        if (v.next_service_date)
+            $('#next_service_date-'+i).datepicker({format: "{{config('core.user_date_format')}}", autoHide: true}) 
+            .datepicker('setDate', new Date(v.next_service_date));
 
         assignIndex();
-        counter++;
-    });
-
-    // ajax setup
-    $.ajaxSetup({ 
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+        productIndx++;
     });
 
     // autocompleteProp returns autocomplete object properties
@@ -313,59 +306,41 @@
             autoFocus: true,
             minLength: 0,
             select: function(event, ui) {
-                const {data} = ui.item;
-                $('#equipment_type-'+i).val(data.unit_type);
-                $('#make-'+i).val(data.make_type);
-                $('#capacity-'+i).val(data.capacity);
-                $('#location-'+i).val(data.location);
-                $('#last_service_date-'+i).val(data.last_maint_date);
-                $('#next_service_date-'+i).val(data.next_maintenance_date);
+                const {v} = ui.item;
+                $('#equipment_type-'+i).val(v.unit_type);
+                $('#make-'+i).val(v.make_type);
+                $('#capacity-'+i).val(v.capacity);
+                $('#location-'+i).val(v.location);
+                if (v.last_maint_date)
+                    $('#last_service_date-'+i).datepicker('setDate', new Date(v.last_maint_date));
+                if (v.next_maintenance_date)
+                    $('#next_service_date-'+i).datepicker('setDate', new Date(v.next_maintenance_date));
             }
         };
     }
 
     // on clicking addproduct (equipment) button
     $('#addqproduct').on('click', function() {
-        const cvalue = counter++;
-        // product (equipment) row
+        const cvalue = productIndx++;
         const row = equipmentRow(cvalue);
-        // add poduct row to equipment table
         $('#equipment tr:last').after(row);
-        // initialize date picker with php parsed date
-        $('[data-toggle="datepicker"]')
-            .datepicker({format: "{{config('core.user_date_format')}}"})
-            .datepicker('setDate', new Date());
-        // add jobcard
         $('#joc_card-' + cvalue).val($('#jobcard').val());
-        // autocomplete on added product row
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
+
+        $('#last_service_date-' + cvalue).datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+            .datepicker('setDate', new Date());
+        $('#next_service_date-' + cvalue).datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+            .datepicker('setDate', new Date());
 
         assignIndex();
     });
 
     // on clicking equipment drop down options
     $("#equipment").on("click", ".up,.down,.removeProd", function() {
-        var row = $(this).parents("tr:first");
-        // move row up 
+        let row = $(this).parents("tr:first");
         if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down 
         if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
-        if ($(this).is('.removeProd')) {
-            const response = window.confirm('Are you sure to delete this item ?');
-            if (response) {
-                const row = $(this).closest('tr');
-                row.remove();
-                const itemId = row.find('input[name="item_id[]"]').val();
-                // delete item api call 
-                $.ajax({
-                    url: baseurl + 'rjcs/delete_item/' + itemId,
-                    dataType: "json",
-                    method: 'DELETE',
-                });
-            }
-        }
-
+        if ($(this).is('.removeProd')) row.remove();
         assignIndex();
     });
 </script>

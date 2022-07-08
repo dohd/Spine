@@ -65,7 +65,7 @@
                                         <div class="input-group">
                                             <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
                                             </div>
-                                            {{ Form::text('report_date', null, ['class' => 'form-control round required', 'placeholder' => trans('general.date'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
+                                            {{ Form::text('report_date', null, ['class' => 'form-control round datepicker']) }}
                                         </div>
                                     </div>
                                     <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
@@ -238,9 +238,8 @@
     });
 
     // initialize date picker 
-    $('[data-toggle="datepicker"]')
-        .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date());
+    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+    .datepicker('setDate', new Date());
 
     // on project select
     const projects = @json($projects);
@@ -261,14 +260,14 @@
     function productRow(cvalue=0) {            
         return `
             <tr>
-                <td><input type="text" class="form-control"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" autocomplete="off" data-toggle-${cvalue}="datepicker"></td>
+                <td><input type="text" class="form-control"  required="required" name="tag_number[]" placeholder="Search Equipment" id="tag_number-${cvalue}"></td>
+                <td><input type="text" class="form-control amnt" name="joc_card[]" id="joc_card-${cvalue}"></td>
+                <td><input type="text" class="form-control prc" name="equipment_type[]" id="equipment_type-${cvalue}"></td>
+                <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}"></td>
+                <td><input type="text" class="form-control" name="capacity[]" id="capacity-${cvalue}"></td>
+                <td><input type="text" class="form-control" name="location[]" id="location-${cvalue}"></td>
+                <td><input type="text" class="form-control datepicker" name="last_service_date[]" id="last_service_date-${cvalue}"></td>
+                <td><input type="text" class="form-control datepicker" name="next_service_date[]" id="next_service_date-${cvalue}"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -295,46 +294,29 @@
         });
     }
 
-    // add default product row
-    $('#equipment tr:last').after(productRow());
-    // initialize date picker
-    $('[data-toggle-0="datepicker"]')
-        .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date());
-    // add jobcard
-    $('#jobcard').change(function() {
-        $('input[name="joc_card[]"]').val($(this).val());
-    });
-    // autocomplete on default product row
-    $('#tag_number-0').autocomplete(autocompleteProp());
-    assignIndex();
-    
-    // equipment row counter;
-    var counter = 1;
-    // on clicking addproduct (equipment) button
+    // on clicking add product
+    let productIndx = 0;
     $('#addqproduct').on('click', function() {
-        const cvalue = counter++;
+        const cvalue = productIndx++;
         // append row
         const row = productRow(cvalue);
-        $('#equipment tr:last').after(row);        
-        $(`[data-toggle-${cvalue}="datepicker"]`)
-            .datepicker({format: "{{config('core.user_date_format')}}"})
-            .datepicker('setDate', new Date());
-        // add jobcard
-        $('#joc_card-' + cvalue).val($('#jobcard').val());
-        // autocomplete on added product row
+        $('#equipment tr:last').after(row);   
         $('#tag_number-' + cvalue).autocomplete(autocompleteProp(cvalue));
+        $('#joc_card-' + cvalue).val($('#jobcard').val());
+        // datepicker  
+        $(`#last_service_date-${cvalue}`).datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+        .datepicker('setDate', new Date());
+        $(`#next_service_date-${cvalue}`).datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
+        .datepicker('setDate', new Date());
         assignIndex();
     });
+    $('#addqproduct').click();
 
     // on clicking equipment drop down options
     $("#equipment").on("click", ".up,.down,.removeProd", function() {
         var row = $(this).parents("tr:first");
-        // move row up 
         if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
         if ($(this).is('.removeProd')) $(this).closest('tr').remove();
         assignIndex();
     });
@@ -362,13 +344,15 @@
             autoFocus: true,
             minLength: 0,
             select: function(event, ui) {
-                const {data} = ui.item;
-                $('#equipment_type-'+i).val(data.unit_type);
-                $('#make-'+i).val(data.make_type);
-                $('#capacity-'+i).val(data.capacity);
-                $('#location-'+i).val(data.location);
-                $('#last_service_date-'+i).val(data.last_maint_date);
-                $('#next_service_date-'+i).val(data.next_maintenance_date);
+                const {v} = ui.item;
+                $('#equipment_type-'+i).val(v.unit_type);
+                $('#make-'+i).val(v.make_type);
+                $('#capacity-'+i).val(v.capacity);
+                $('#location-'+i).val(v.location);
+                if (v.last_maint_date)
+                    $('#last_service_date-'+i).datepicker('setDate', new Date(v.last_maint_date));
+                if (v.next_maintenance_date)
+                    $('#next_service_date-'+i).datepicker('setDate', new Date(v.next_maintenance_date));
             }
         };
     }
@@ -377,11 +361,8 @@
     const keys = ['one', 'two', 'three', 'four'];
     keys.forEach(v => {
         $('#image_'+v).on('change', function() {
-            if ($(this).get(0).files.length > 0) {
-                $('#caption_'+v).prop('required', true);
-                return;
-            }
-            $('#caption_'+v).prop('required', false);
+            if ($(this).get(0).files.length > 0) $('#caption_'+v).prop('required', true);
+            else $('#caption_'+v).prop('required', false);
         });
     });    
 </script>

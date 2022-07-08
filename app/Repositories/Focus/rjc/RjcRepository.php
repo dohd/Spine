@@ -62,38 +62,34 @@ class RjcRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        // rjc input data
         $data = $input['data'];
-        
-        $data['report_date'] = date_for_database($data['report_date']);
-        // increament tid
-        $ref =  Rjc::orderBy('tid', 'desc')->first('tid');
-        if (isset($ref) && $data['tid'] <= $ref->tid) {
-            $data['tid'] = $ref->tid + 1;
-        }        
-        // upload files
         foreach($data as $key => $value) {
-            if ($key == 'image_one' || $key == 'image_two' || $key == 'image_three' || $key == 'image_four') {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
                 if ($value) $data[$key] = $this->uploadFile($value);
             }
+            if ($key == 'report_date') 
+                $data[$key] = date_for_database($value);
         }
+        $last_tid =  Rjc::max('tid');
+        if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
         $result = Rjc::create($data);
 
-        // rjc items
-        $item_count = count($input['data_items']['tag_number']);
-        $data_items = $this->items_array(
-            $item_count, 
-            $input['data_items'],
-            ['rjc_id' => $result['id'], 'ins' => $result['ins']]
-        );
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'rjc_id' => $result->id,
+                'ins' => $result->ins,
+                'last_service_date' => date_for_database($v['last_service_date']),
+                'next_service_date' => date_for_database($v['next_service_date']),
+            ]);
+        }, $data_items);
         RjcItem::insert($data_items);
 
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
+        DB::commit();
+        if ($result) return $result;
 
         throw new GeneralException('Error Creating Rjc');
     }
@@ -106,46 +102,44 @@ class RjcRepository extends BaseRepository
      * @throws GeneralException
      * @return object
      */
-    public function update(array $input)
+    public function update($rjc, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        // rjc input data
         $data = $input['data'];
-        $data['report_date'] = date_for_database($data['report_date']);
-
-        $rjc = Rjc::find($data['id']);
+        foreach($data as $key => $value) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
+                if ($value) $data[$key] = $this->uploadFile($value);
+            }
+            if ($key == 'report_date') 
+                $data[$key] = date_for_database($value);
+        }
         $result = $rjc->update($data);
 
-        // rjc items
-        $item_count = count($input['data_items']['tag_number']);
-        $data_items = $this->items_array(
-            $item_count, 
-            $input['data_items'],
-            ['rjc_id' => $data['id'], 'ins' => $data['ins']]
-        );
+        $data_items = $input['data_items'];
+        $item_ids = array_map(function ($v) { return $v['item_id']; }, $data_items);
+        $rjc->rjc_items()->whereNotIn('id', $item_ids)->delete();
 
-        // update or create new rjc_item
         foreach($data_items as $item) {
-            $rjc_item = RjcItem::firstOrNew([
-                'id' => $item['item_id'],
-                'rjc_id' => $item['rjc_id'],
+            $item = array_replace($item, [
+                'rjc_id' => $rjc->id, 
+                'ins' => $rjc->ins,
+                'last_service_date' => date_for_database($item['last_service_date']),
+                'next_service_date' => date_for_database($item['next_service_date']),
             ]);
-            // assign properties to the item
+
+            $rjc_item = RjcItem::firstOrNew(['id' => $item['item_id']]);
             foreach($item as $key => $value) {
                 $rjc_item[$key] = $value;
             }
-            // remove stale attributes and save
-            if ($rjc_item['id'] == 0) unset($rjc_item['id']);
-            unset($rjc_item['item_id']);
+            if ($rjc_item->id) unset($rjc_item->id);
+            unset($rjc_item->item_id);
             $rjc_item->save();
         }
 
-
-        if ($result) {
-            DB::commit();
-            return $rjc;
-        }
+        DB::commit();
+        if ($result) return $rjc;
 
         throw new GeneralException('Error Updating Rjc');
     }
@@ -159,46 +153,18 @@ class RjcRepository extends BaseRepository
      */
     public function delete(Rjc $rjc)
     {
-        // delete rjc_items items then delete rjc
-        if ($rjc->rjc_items()->delete() && $rjc->delete()) return true;
+        if ($rjc->rjc_items()->delete() && $rjc->delete()) 
+            return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
-    }
-
-    // Delete rjc item from storage
-    public function delete_item($id)
-    {
-        if (RjcItem::destroy($id)) return true;
-
-        throw new GeneralException('Error deleting Rjc Item');
     }
 
     // Upload file to storage
     public function uploadFile($file)
     {
-        $path = $this->file_path;
-        $file_name = time() . $file->getClientOriginalName();
-
-        $this->storage->put($path . $file_name, file_get_contents($file->getRealPath()));
+        $file_name = $this->file_path . time() . $file->getClientOriginalName();
+        $this->storage->put($file_name, file_get_contents($file->getRealPath()));
 
         return $file_name;
-    }
-
-    // Convert array to database collection format
-    protected function items_array($count=0, $item=[], $extra=[])
-    {
-        $data_items = array();
-        for ($i = 0; $i < $count; $i++) {
-            $row = $extra;
-            foreach (array_keys($item) as $key) {
-                $value = $item[$key][$i];
-                if ($key == 'last_service_date' || $key == 'next_service_date') {
-                    $value = date_for_database($value);
-                }
-                $row[$key] = $value;
-            }
-            $data_items[] = $row;
-        }
-        return $data_items;
     }
 }

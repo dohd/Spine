@@ -85,9 +85,11 @@ class RjcsController extends Controller
             'caption_two', 'caption_three', 'caption_four'
         ]);
         $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
-        $data['ins'] = auth()->user()->ins;
 
-        $result = $this->repository->create(compact('data', 'data_items'));
+        $data['ins'] = auth()->user()->ins;
+        $data_items = modify_array($data_items);
+
+        $this->repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully created']);
     }    
@@ -123,10 +125,9 @@ class RjcsController extends Controller
             $quote_tids = array();                
             foreach ($project->quotes as $quote) {
                 $lead_tids[] = 'Tkt-'.sprintf('%04d', $quote->lead->reference);
-                // quote
-                $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $quote_tids[] = 'PI-'. $tid;
-                else $quote_tids[] = 'QT-'. $tid;
+                
+                if ($quote->bank_id) $quote_tids[] = gen4tid('PI-', $quote->tid);
+                else $quote_tids[] = gen4tid('QT-', $quote->tid);
             }
             $project['lead_tids'] = implode(', ', $lead_tids);            
             $project['quote_tids'] = implode(', ', $quote_tids);            
@@ -150,17 +151,21 @@ class RjcsController extends Controller
             'technician' => 'required',
             'subject' => 'required'
         ]);
+
         $data = $request->only([
             'tid', 'project_id', 'client_ref', 'technician', 'action_taken', 'root_cause', 'recommendations', 
             'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 
             'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four'
         ]);
-        $data_items = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data_items = $request->only([
+            'row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 
+            'next_service_date'
+        ]);
         
         $data['ins'] = auth()->user()->ins;
-        $data['id'] = $rjc->id;
+        $data_items = modify_array($data_items);
 
-        $this->repository->update(compact('data', 'data_items'));
+        $this->repository->update($rjc, compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully updated']);
     }
