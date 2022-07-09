@@ -2,8 +2,6 @@
 
 namespace App\Repositories\Focus\customer;
 
-use App\Models\customergroup\CustomerGroupEntry;
-use App\Models\items\CustomEntry;
 use DB;
 use App\Models\customer\Customer;
 use App\Exceptions\GeneralException;
@@ -16,6 +14,7 @@ use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class CustomerRepository.
@@ -62,7 +61,6 @@ class CustomerRepository extends BaseRepository
     {
         $q = $this->query();
         $q->when(request('g_rel_type'), function ($q) {
-
             return $q->where('rel_id', '=',request('g_rel_id',-1));
         });
         if (!request('g_rel_type') AND request('g_rel_id')) {
@@ -217,8 +215,8 @@ class CustomerRepository extends BaseRepository
 
         DB::beginTransaction();
         
-        $customer = Customer::where('email', $input['email'])->first('id');
-        if ($customer) return session()->flash('flash_error', 'Duplicate Email');
+        $email_exists = Customer::where('email', $input['email'])->count();
+        if ($email_exists) throw ValidationException::withMessages(['Duplicate Email!']);
 
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
@@ -292,8 +290,8 @@ class CustomerRepository extends BaseRepository
         }
         if (empty($input['password'])) unset($input['password']);
 
-        $email = Customer::whereNotIn('id', [$customer->id])->where('email', $input['email'])->first('id');
-        if ($email) return session()->flash('flash_error', 'Email already in use');
+        $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->count();
+        if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
 
         DB::beginTransaction();
 
@@ -435,7 +433,7 @@ class CustomerRepository extends BaseRepository
     public function delete($customer)
     {
         if ($customer->leads->count()) 
-            return session()->flash('flash_error', 'Customer has attached Ticket');
+            throw ValidationException::withMessages(['Customer has attached Ticket']);
         if ($customer->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.delete_error'));

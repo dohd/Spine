@@ -11,6 +11,7 @@ use App\Models\project\ProjectQuote;
 use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProjectRepository.
@@ -45,18 +46,19 @@ class ProjectRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $data = $input['data'];
         $data_items = $input['data_items'];
+        $project_quote_exists = ProjectQuote::whereIn('quote_id', $data_items)->count();
+        if ($project_quote_exists) throw ValidationException::withMessages(['Tagged Quote / PI already attached to a project']);
 
+        $data = $input['data'];
         $tid = Project::max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
         $data['main_quote_id'] = $data_items[0];
         $result = Project::create($data);
 
+        // create project_quote and update related foreign key in quote
         foreach ($data_items as $quote_id) {
-            // create project_quote
             $project_quote_id = ProjectQuote::insertGetId(['quote_id' => $quote_id, 'project_id' => $result->id]);
-            // update project_quote foreign key in quote
             Quote::find($quote_id)->update(compact('project_quote_id'));
         }
 

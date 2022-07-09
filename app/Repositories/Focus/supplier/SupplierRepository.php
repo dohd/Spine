@@ -14,6 +14,7 @@ use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class SupplierRepository.
@@ -362,7 +363,7 @@ class SupplierRepository extends BaseRepository
     {
 
         if ($supplier->bills->count())
-            return session()->flash('flash_error', 'Supplier has attached Bill');
+            throw ValidationException::withMessages(['Supplier has attached Bill!']);
         if ($supplier->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.suppliers.delete_error'));
