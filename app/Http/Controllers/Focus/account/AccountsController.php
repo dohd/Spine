@@ -216,14 +216,18 @@ class AccountsController extends Controller
         $q = Account::query();
         $q1 = clone $q;
         if (request('end_date')) {
+            // balance sheet accounts
             $q->whereHas('transactions', function ($q) use($date) {
                 $q->where('tr_date', '<=', $date);
             })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            // profit & loss accounts
             $q1->whereHas('transactions', function ($q) use($date) {
                 $q->where('tr_date', '<=', $date);
             })->whereIn('account_type', ['Income', 'Expense']);
         } else {
+            // balance sheet accounts
             $q->whereHas('transactions')->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            // profit & loss accounts
             $q1->whereHas('transactions')->whereIn('account_type', ['Income', 'Expense']);
         }
 
@@ -241,14 +245,13 @@ class AccountsController extends Controller
             elseif ($is_dir_expense) $net_profit -= $debit;
         }
 
+        // fetch balance sheet accounts
         $accounts = $q->get();
-        if ($request->type == 'p')             
-            return $this->print_document('balance_sheet', $accounts, array(0, $date), $net_profit);
+        $bg_styles = ['bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger'];
 
-        $bg_styles = [
-            'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger', 
-        ];
-    
+        // print balance_sheet
+        if ($request->type == 'p') return $this->print_document('balance_sheet', $accounts, array(0, $date), $net_profit);       
+            
         return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles', 'net_profit', 'date'));
     }
 
@@ -287,7 +290,7 @@ class AccountsController extends Controller
     /**
      * Print document
      */
-    public function print_document(string $name, $accounts, array $dates, int $net_profit)
+    public function print_document(string $name, $accounts, array $dates, float $net_profit)
     {
         $account_types = ['Assets', 'Equity', 'Expenses', 'Liabilities', 'Income'];
         $params = compact('accounts', 'account_types', 'dates', 'net_profit');
