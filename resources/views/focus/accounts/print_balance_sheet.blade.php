@@ -84,7 +84,7 @@
                 </thead>
                 <tbody>
                     @php
-                        $gross_balance = 0;
+                        $ledger_balance = 0;
                         $j = 0;
                         $k = 0;
                     @endphp
@@ -93,20 +93,28 @@
                             $balance = 0;
                             $debit = $account->transactions->sum('debit');
                             $credit = $account->transactions->sum('credit');
-                            if ($type == 'Asset') {
+                            if ($account->account_type == 'Asset') {
                                 $balance = round($debit - $credit, 2);
-                                if ($balance < 0) $balance = 0;
-                            } elseif ($type == 'Liability') {
-                                $balance = $credit - $debit;
-                                if ($balance < 0) $balance = 0;
-                            } else $balance = $credit;
+                                if ($balance < 0) {
+                                    $account->holder .= ' (credit)';
+                                    $account->account_type = 'Liability';
+                                    $balance *= -1; 
+                                }
+                            } elseif (in_array($account->account_type, ['Liability', 'Equity'], 1)) {
+                                $balance = round($credit - $debit, 2);
+                                if ($balance < 0 && $account->account_type == 'Liability') {
+                                    $account->holder .= ' (debit)';
+                                    $account->account_type = 'Asset';
+                                    $balance *= -1; 
+                                }
+                            }
                         @endphp
                         @if ($balance)
                             <!-- Equity -->
                             @if ($i == 1)
                                 @if ($account->account_type == $type)  
                                     @php                                                
-                                        $gross_balance += $balance;
+                                        $ledger_balance += $balance;
                                         $j++;
                                     @endphp                                  
                                     <tr class="dotted">
@@ -117,7 +125,7 @@
                                     </tr>
                                 @else  
                                     <!-- P&L -->
-                                        @php                                                    
+                                    @php                                                    
                                         if ($k == 1) continue;
                                     @endphp
                                     <tr class="dotted">
@@ -127,14 +135,15 @@
                                         <td style="text-align: center;">{{ numberFormat($net_profit) }}</td>
                                     </tr>
                                     @php
-                                        $gross_balance += $net_profit;
+                                        
+                                        $ledger_balance += $net_profit;
                                         $k++;
                                     @endphp
                                 @endif
                             @elseif (in_array($i, [0, 2], 1) && $account->account_type == $type)
                                 <!-- Asset or Liability -->
                                 @php                                                
-                                    $gross_balance += $balance;
+                                    $ledger_balance += $balance;
                                     $j++;
                                 @endphp   
                                 <tr class="dotted">
@@ -147,13 +156,13 @@
                         @endif
                     @endforeach
                     @php
-                        $balance_cluster[] = compact('type', 'gross_balance');
+                        $balance_cluster[] = compact('type', 'ledger_balance');
                     @endphp
                     <tr class="dotted">
                         @for ($k = 0; $k < 3; $k++)
                             <td></td>
                         @endfor
-                        <td style="text-align: center;"><h3 class="text-xl-left">{{ amountFormat($gross_balance) }}</h3></td>
+                        <td style="text-align: center;"><h3 class="text-xl-left">{{ amountFormat($ledger_balance) }}</h3></td>
                     </tr>
                 </tbody>
             </table>                                
@@ -163,15 +172,20 @@
             <table class="table table-items" cellpadding=8>
                 <tbody>
                     @php
-                        $asset_bal = $balance_cluster[0]['gross_balance'];
-                        $equity_bal = $balance_cluster[1]['gross_balance'];
-                        $liability_bal = $balance_cluster[2]['gross_balance'];
+                        $asset_bal = $balance_cluster[0]['ledger_balance'];
+                        $equity_bal = $balance_cluster[1]['ledger_balance'];
+                        $liability_bal = $balance_cluster[2]['ledger_balance'];
                     @endphp   
                     <tr class="dotted">
                         <td>
                             <h3>
-                                {{ numberFormat($equity_bal + $liability_bal) }} = {{ numberFormat($equity_bal) }} + {{ numberFormat($liability_bal) }} <br>
-                                <span style="visibility: hidden;">{{ numberFormat($equity_bal + $liability_bal) }}</span> = {{ numberFormat($equity_bal + $liability_bal) }}
+                                {{ numberFormat($asset_bal) }} 
+                                = {{ numberFormat($equity_bal - $net_profit) }} + ({{ numberFormat($net_profit) }}) + {{ numberFormat($liability_bal) }} <br>
+                                <span style="visibility: hidden;">{{ numberFormat($equity_bal + $liability_bal) }}</span> 
+                                = {{ numberFormat($equity_bal + $liability_bal) }}
+                                @if ($asset_bal != $equity_bal + $liability_bal)
+                                    <span style="color: red; font-size:small">(Asset diff: {{ numberFormat($asset_bal - ($equity_bal + $liability_bal)) }})</span> 
+                                @endif
                             </h3>
                         </td>
                     </tr>                    
