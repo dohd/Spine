@@ -835,15 +835,20 @@ function aggregate_account_transactions()
         ->groupBy('account_id')
         ->get()->toArray();
     Batch::update(new Account, $tr_totals, 'id');
+
+    // reset accounts without transactions
+    $account_ids = array_map(function ($v) { return $v['id']; }, $tr_totals);
+    Account::whereNotIn('id', $account_ids)->where(function ($q) {
+        $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+    })->update(['debit' => 0, 'credit' => 0]);
 }
-// generate char identifier
+// auto-generate a 4 digit number prefixed with a string e.g ID-0001 
 function gen4tid($str='', $n=0)
 {
     if ($str) return $str . sprintf('%04d', $n);
     return sprintf('%04d', $n);
 }
-
-// accounts numbering
+// account numbering
 function accounts_numbering($account)
 {
     switch ($account) {
@@ -854,7 +859,7 @@ function accounts_numbering($account)
         case 'Equity' : return 300; 
     }
 }
-// double transaction entry
+// transaction double entry (debit, credit)
 function double_entry(
     $tid, $pr_account_id, $sec_account_id, $opening_balance, $entry_type, $trans_category_id, $user_type, 
     $user_id, $tr_date, $duedate, $tr_type, $note, $ins
