@@ -24,8 +24,8 @@
                     $details = [
                         'TID' => gen4tid('WH-', $withholding->tid),
                         'Customer' => $withholding->customer->company,
-                        'Date' => dateFormat($withholding->date),
-                        'Due Date' => dateFormat($withholding->due_date),
+                        'Certificate Date' => dateFormat($withholding->date),
+                        'Payment / Transaction Date' => dateFormat($withholding->due_date),
                         'Amount' => numberFormat($withholding->deposit_ttl),
                         'Certificate' => strtoupper($withholding->certificate),
                         'Certificate Serial No' => $withholding->doc_ref
@@ -44,6 +44,7 @@
             <table class="table table-sm text-center">
                 <thead>
                     <tr class="bg-gradient-directional-blue white">
+                        <th>#Invoice No</th>
                         <th>Date</th>
                         <th>Note</th>
                         <th>Amount</th>
@@ -53,6 +54,7 @@
                     @foreach($withholding->items as $item)
                         @if ($item->invoice)
                             <tr>
+                                <td>{{ $item->invoice->tid }}</td>
                                 <td>{{ dateFormat($item->invoice->invoicedate) }}</td>
                                 <td>{{ $item->invoice->notes }}</td>
                                 <td>{{ numberFormat($item->paid) }}</td>
