@@ -234,7 +234,8 @@ class CustomerRepository extends BaseRepository
         $open_balance = $result->open_balance;
         $open_balance_date = $result->open_balance_date;
         if ($open_balance > 0) {
-            $note = $result->id .  '-customer Account Opening Balance';
+            $note = $result->id . '-customer Account Opening Balance ' . $result->open_balance_note;
+            $user_id = auth()->user()->id;
             $data = [
                 'tid' => Journal::max('tid') + 1,
                 'date' => $open_balance_date,
@@ -242,7 +243,7 @@ class CustomerRepository extends BaseRepository
                 'debit_ttl' => $open_balance,
                 'credit_ttl' => $open_balance,
                 'ins' => $result->ins,
-                'user_id' => auth()->user()->id,
+                'user_id' => $user_id,
             ];
             $journal = Journal::create($data);
 
@@ -261,10 +262,24 @@ class CustomerRepository extends BaseRepository
                 JournalItem::create($data);
             }
 
-            /**accounting */
+            // generate invoice (unrecognised sale)
+            $invoice_data = [
+                'invoicedate' => $open_balance_date,
+                'invoiceduedate' => $open_balance_date,
+                'subtotal' => $open_balance,
+                'total' => $open_balance,
+                'notes' => $note,
+                'customer_id' => $result->id,
+                'user_id' => $user_id,
+                'ins' => $result->ins,
+                'account_id' => $result->sale_account_id
+            ];
+            Invoice::create($invoice_data);
+
+            /** accounting */
             $data = array_replace($journal->toArray(), [
                 'open_balance' => $open_balance,
-                'account_id' => $debtor_account->id
+                'account_id' => $debtor_account->id,
             ]);
             $this->post_transaction((object) $data);
         }
@@ -303,27 +318,11 @@ class CustomerRepository extends BaseRepository
         $open_balance_date = $customer->open_balance_date;
         if ($open_balance > 0) {
             $data = array();
-            $note = $customer->id .  '-customer Account Opening Balance';
+            $note = $customer->id . '-customer Account Opening Balance ' . $customer->open_balance_note;
+            $user_id = auth()->user()->id;
             $journal = Journal::where('note', $note)->first();
-            if ($journal) {
-                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();
 
-                $journal->update([
-                    'date' => $open_balance_date,
-                    'debit_ttl' => $open_balance,
-                    'credit_ttl' => $open_balance,
-                ]);
-                $debtor_account = Account::where('system', 'receivable')->first(['id']);   
-                $data = array_replace($journal->toArray(), [
-                    'open_balance' => $open_balance,
-                    'account_id' => $debtor_account->id,
-                ]);
-    
-                foreach ($journal->items as $item) {
-                    if ($item->debit > 0) $item->update(['debit' => $open_balance]);
-                    elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
-                }                
-            } else {
+            if (!$journal) {
                 $data = [
                     'tid' => Journal::max('tid') + 1,
                     'date' => $open_balance_date,
@@ -331,7 +330,7 @@ class CustomerRepository extends BaseRepository
                     'debit_ttl' => $open_balance,
                     'credit_ttl' => $open_balance,
                     'ins' => $customer->ins,
-                    'user_id' => auth()->user()->id,
+                    'user_id' => $user_id,
                 ];
                 $journal = Journal::create($data);
     
@@ -350,11 +349,56 @@ class CustomerRepository extends BaseRepository
                     }                
                     JournalItem::create($data);
                 }
+
+                // generate invoice (unrecognised sale)
+                $invoice_data = [
+                    'invoicedate' => $open_balance_date,
+                    'invoiceduedate' => $open_balance_date,
+                    'subtotal' => $open_balance,
+                    'total' => $open_balance,
+                    'notes' => $note,
+                    'customer_id' => $customer->id,
+                    'user_id' => $user_id,
+                    'ins' => $customer->ins,
+                    'account_id' => $customer->sale_account_id
+                ];
+                Invoice::create($invoice_data);
                 
                 $data = array_replace($journal->toArray(), [
                     'open_balance' => $open_balance,
                     'account_id' => $debtor_account->id
                 ]);
+            } else {
+                $journal->update([
+                    'note' => $note,
+                    'date' => $open_balance_date,
+                    'debit_ttl' => $open_balance,
+                    'credit_ttl' => $open_balance,
+                ]);
+
+                $k = $customer->id . '-customer Account Opening Balance ';
+                Invoice::where('notes', 'LIKE', '%' . $k . '%')->first()
+                    ->update([
+                        'notes' => $note, 
+                        'subtotal' => $open_balance, 
+                        'total' => $open_balance,
+                        'account_id' => $customer->sale_account_id
+                    ]);
+                        
+
+                $debtor_account = Account::where('system', 'receivable')->first(['id']);   
+                $data = array_replace($journal->toArray(), [
+                    'open_balance' => $open_balance,
+                    'account_id' => $debtor_account->id,
+                ]);
+    
+                foreach ($journal->items as $item) {
+                    if ($item->debit > 0) $item->update(['debit' => $open_balance]);
+                    elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
+                }
+
+                // remove previous transactions
+                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete(); 
             }
             
             /**accounting */           
@@ -377,10 +421,10 @@ class CustomerRepository extends BaseRepository
             'trans_category_id' => $tr_category->id,
             'tr_date' => $result->date,
             'due_date' => $result->date,
-            'user_id' => auth()->user()->id,
+            'user_id' => $result->user_id,
             'note' => $result->note,
             'debit' => $result->open_balance,
-            'ins' => auth()->user()->ins,
+            'ins' => $result->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $result->id,
             'user_type' => 'customer',
