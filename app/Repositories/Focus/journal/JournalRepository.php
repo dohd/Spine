@@ -45,18 +45,21 @@ class JournalRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        $data['date'] = date_for_database($data['date']);
-        $data['debit_ttl'] = numberClean($data['debit_ttl']);
-        $data['credit_ttl'] = numberClean($data['credit_ttl']);
+        $data = array_replace($data, [
+            'date' => date_for_database($data['date']),
+            'debit_ttl' => numberClean($data['debit_ttl']),
+            'credit_ttl' => numberClean($data['credit_ttl'])
+        ]);
         $result = Journal::create($data);
 
         $data_items = $input['data_items'];
-        foreach ($data_items as $k => $item) {
-            $item['journal_id'] = $result->id;
-            $item['credit'] = numberClean($item['credit']);
-            $item['debit'] = numberClean($item['debit']);
-            $data_items[$k] = $item;
-        }
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'journal_id' => $result->id,
+                'debit' =>  numberClean($v['debit']),
+                'credit' => numberClean($v['credit']),
+            ]);
+        }, $data_items);
         JournalItem::insert($data_items);
 
         // accounting
@@ -73,10 +76,14 @@ class JournalRepository extends BaseRepository
      */
     public function delete($journal)
     {
-        if ($journal->delete()) {
-            aggregate_account_transactions(); 
-            return true;
-        }
+        DB::beginTransaction();
+
+        Transaction::where(['tr_ref' => $journal->id, 'tr_type' => 'genjr'])->delete();
+        aggregate_account_transactions(); 
+        $result = $journal->delete();
+
+        DB::commit();
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.create_error'));
     }
@@ -89,30 +96,35 @@ class JournalRepository extends BaseRepository
         $data = [
             'tid' => $tid,
             'trans_category_id' => $tr_category->id,
-            'tr_date' => date('Y-m-d'),
-            'due_date' => $result['date'],
-            'user_id' => $result['user_id'],
-            'ins' => $result['ins'],
+            'tr_date' => $result->date,
+            'due_date' => $result->date,
+            'user_id' => $result->user_id,
+            'ins' => $result->ins,
             'tr_type' => $tr_category->code,
-            'tr_ref' => $result['id'],
-            'user_type' => 'employee',
+            'tr_ref' => $result->id,
+            'user_type' => 'company',
             'is_primary' => 1,
-            'note' => $result['note'],
+            'note' => $result->note,
         ];
 
         $tr_data = array();
         foreach ($result->items as $item) {
-            if ($item->credit > 0) {
-                $tr_data[] = $data + [
-                    'account_id' => $item->account_id,
-                    'credit' => $item->credit,
-                    'debit' => 0
-                ];
-            } elseif ($item->debit > 0) {
+            $i = count($tr_data) - 1;
+            if (isset($tr_data[$i])) {
+                if ($tr_data[$i]['is_primary'])
+                    $tr_data[$i]['is_primary'] = 0;
+            }
+            if ($item->debit > 0) {
                 $tr_data[] = $data + [
                     'account_id' => $item->account_id,
                     'debit' => $item->debit,
                     'credit' => 0
+                ];
+            } elseif ($item->credit > 0) {
+                $tr_data[] = $data + [
+                    'account_id' => $item->account_id,
+                    'credit' => $item->credit,
+                    'debit' => 0
                 ];
             }
         }
