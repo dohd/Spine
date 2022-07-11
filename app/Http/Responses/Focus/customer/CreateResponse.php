@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\customer;
 
+use App\Models\account\Account;
 use App\Models\customer\Customer;
 use App\Models\customergroup\Customergroup;
 use App\Models\customfield\Customfield;
@@ -19,11 +20,13 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $input = $request->only('rel_type', 'rel_id');
-         $customergroups=Customergroup::all();
-         $customer='';
-         if(isset($input['rel_id']))$customer=Customer::find($input['rel_id']);
-          $fields=custom_fields(Customfield::where('module_id', '1')->get()->groupBy('field_type'));
-        return view('focus.customers.create',compact('customergroups','fields','input','customer'));
+        $customergroups = Customergroup::all();
+        $customer = array();
+        if (isset($input['rel_id'])) $customer = Customer::find($input['rel_id']);
+        $fields = custom_fields(Customfield::where('module_id', '1')->get()->groupBy('field_type'));
 
+        $accounts = Account::where('account_type', 'Income')->get(['id', 'holder']);
+
+        return view('focus.customers.create', compact('customergroups', 'fields', 'input', 'customer', 'accounts'));
     }
 }
