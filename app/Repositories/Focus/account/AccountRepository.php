@@ -84,7 +84,7 @@ class AccountRepository extends BaseRepository
         // transaction
         double_entry(
           $tid, $result->id, $seco_account->id, $result->opening_balance, 'dr', $pri_tr->id,
-          'employee', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
+          'company', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         );
       }
 
@@ -119,7 +119,7 @@ class AccountRepository extends BaseRepository
         // transaction
         double_entry(
           $tid, $result->id, $seco_account->id, $result->opening_balance, $entry_type, $pri_tr->id,
-          'employee', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
+          'company', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         );
       }
     }
