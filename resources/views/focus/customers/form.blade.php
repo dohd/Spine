@@ -15,6 +15,7 @@
             </li>
         </ul>
         <div class="tab-content px-1">
+            <!-- billing address -->
             <div class="tab-pane active" id="tab1" role="tabpanel" aria-labelledby="base-tab1">
                 <div class="row">
                     <div class="col-sm-6">
@@ -127,7 +128,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- shipping address -->
             <div class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="base-tab2">
                 <div class="row">
                     <div class="col-sm-6">
@@ -202,7 +203,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- opening balance -->
             <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
                 <div class='form-group'>
                     {{ Form::label('opening_balance', 'Opening Balance', ['class' => 'col-lg-2 control-label']) }}
@@ -215,9 +216,28 @@
                     <div class='col-lg-10'>
                         {{ Form::text('open_balance_date', null, ['class' => 'form-control datepicker', 'id' => 'open_balance_date']) }}
                     </div>
-                </div>                
+                </div>      
+                <div class='form-group'>
+                    {{ Form::label('note', 'Note',['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        {{ Form::text('open_balance_note', null, ['class' => 'form-control', 'id' => 'open_balance_note']) }}
+                    </div>
+                </div>       
+                <div class='form-group'>
+                    {{ Form::label('sale_account', 'Recognise Sale on Account',['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        <select name="sale_account_id" class="custom-select" id="sale_account">
+                            <option value="">-- Select Sale Account --</option>
+                            @foreach ($accounts as $row) 
+                                <option value="{{ $row->id }}" {{ $row->id == @$customer->sale_account_id? 'selected' : '' }}>
+                                    {{ $row->holder }}
+                                </option>
+                            @endforeach
+                        </select>                        
+                    </div>
+                </div>           
             </div>
-
+            <!-- other details -->
             <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                 {!! @$fields !!}
                 <div class='form-group'>
