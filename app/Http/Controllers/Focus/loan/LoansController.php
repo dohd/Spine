@@ -66,13 +66,13 @@ class LoansController extends Controller
      */
     public function create()
     {
-        $last_loan = Loan::orderBy('id', 'desc')->first(['tid']);
-        // loan account and account receivables
+        // loan lender accounts and bank accounts
         $accounts = Account::whereHas('accountType', function ($q) {
-            $q->whereIn('id', [2, 7]);
-        })->get(['id', 'holder', 'account_type_id']);
+            $q->whereIn('system', ['loan', 'bank']);
+        })->get(['id', 'holder', 'account_type']);
+        $last_tid = Loan::max('tid');
 
-        return new ViewResponse('focus.loans.create', compact('last_loan', 'accounts'));
+        return new ViewResponse('focus.loans.create', compact('last_tid', 'accounts'));
     }
 
     /**
@@ -84,17 +84,11 @@ class LoansController extends Controller
     public function store(Request $request)
     {
         // extract input fields
-        $data = $request->only([
-            'tid', 'bank_id', 'lender_id', 'amount', 'amount_pm', 'date', 'note',
-            'time_pm'
-        ]);
+        $data = $request->only(['tid', 'bank_id', 'lender_id', 'amount', 'amount_pm', 'date', 'note', 'time_pm']);
 
-        $data = $data + [
-            'ins' => auth()->user()->ins,
-            'user_id' => auth()->user()->id
-        ];
-
-        $result = $this->repository->create($data);
+        $data = $data + ['ins' => auth()->user()->ins, 'user_id' => auth()->user()->id];
+            
+        $this->repository->create($data);
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan created successfully']);
     }
@@ -140,11 +134,13 @@ class LoansController extends Controller
      */
     public function pay_loans()
     {
-        $last_paidloan = Paidloan::orderBy('id', 'DESC')->first(['tid']);
-        $accounts = Account::whereIn('account_type_id', [6, 3])->get(['id', 'holder', 'account_type_id']);
-        $payment_modes = ['Cash', 'Bank Transfer', 'Cheque', 'Mpesa', 'Card' ];
+        $accounts = Account::whereHas('accountType', function($q) {
+            $q->whereIn('system', ['bank', 'expense', 'other_current_liability']);
+        })->where('system', null)
+        ->get(['id', 'holder', 'account_type']);
+        $last_tid = Paidloan::max('tid');
 
-        return new ViewResponse('focus.loans.pay_loans', compact('last_paidloan', 'accounts', 'payment_modes'));
+        return new ViewResponse('focus.loans.pay_loans', compact('last_tid', 'accounts'));
     }
 
     /**
@@ -171,15 +167,16 @@ class LoansController extends Controller
     }
 
     /**
-     * Lenders for select box
+     * Lenders for select dropdown search 
      */
     public function lenders()
     {
-        $k = request('keyword');
-
-        $accounts = Account::where('account_type_id', 2)
-        ->where('holder', 'LIKE', '%'. $k .'%')
-        ->limit(6)->get(['id', 'holder']);
+        // loan lender accounts
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->where('system', 'loan');
+        })->where('holder', 'LIKE', '%'. request('keyword') .'%')
+        ->where('system', null)
+        ->limit(6)->get(['id', 'holder', 'account_type']);
 
         return response()->json($accounts);
     }
@@ -190,7 +187,7 @@ class LoansController extends Controller
     public function lender_loans()
     {
         $accounts = Loan::where(['lender_id' => request('id'), 'is_approved' => 1])
-        ->whereIn('status', ['pending', 'partial'])->get();
+            ->whereIn('status', ['pending', 'partial'])->get();
 
         return response()->json($accounts);
     }

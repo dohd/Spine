@@ -30,7 +30,7 @@
                             <div class="col-2">
                                 <label for="reference" class="caption">Payment ID</label>
                                 <div class="input-group">
-                                    {{ Form::text('tid', @$last_paidloan->tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
+                                    {{ Form::text('tid', $last_tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
                                 </div>
                             </div> 
                             <div class="col-2">
@@ -43,7 +43,7 @@
                                 <label for="payment_mode">Payment Mode</label>
                                 <select name="payment_mode" class="form-control" required>
                                    <option value="">-- Select Mode --</option>
-                                    @foreach ($payment_modes as $val)
+                                    @foreach (['Cash', 'Bank Transfer', 'Cheque', 'Mpesa', 'Card' ] as $val)
                                         <option value="{{ $val }}">{{ $val }}</option>
                                     @endforeach
                                 </select>
@@ -56,7 +56,7 @@
                                 <select name="bank_id" id="" class="form-control" required>
                                    <option value="">-- Select Bank --</option>
                                     @foreach ($accounts as $row)
-                                        @if ($row->account_type_id == 6)
+                                        @if ($row->account_type == 'Asset')
                                             <option value="{{ $row->id }}">{{ $row->holder }}</option>
                                         @endif
                                     @endforeach
@@ -69,22 +69,22 @@
                                 </div>
                             </div>    
                             <div class="col-2">
-                                <label for="interest_account">Interest Account</label>
+                                <label for="interest_account">Interest Account (Liability)</label>
                                 <select name="interest_id" id="interest" class="form-control">
-                                   <option value="">-- Select Bank --</option>
+                                   <option value="">-- Select Account --</option>
                                     @foreach ($accounts as $row)
-                                        @if ($row->account_type_id == 3)
+                                        @if ($row->account_type == 'Liability')
                                             <option value="{{ $row->id }}">{{ $row->holder }}</option>
                                         @endif
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-2">
-                                <label for="penalty_account">Penalty Account</label>
+                                <label for="penalty_account">Penalty Account (Expense)</label>
                                 <select name="penalty_id" id="penalty" class="form-control">
-                                   <option value="">-- Select Bank --</option>
+                                   <option value="">-- Select Account --</option>
                                     @foreach ($accounts as $row)
-                                        @if ($row->account_type_id == 3)
+                                        @if ($row->account_type == 'Expense')
                                             <option value="{{ $row->id }}">{{ $row->holder }}</option>
                                         @endif
                                     @endforeach

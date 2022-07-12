@@ -1,10 +1,10 @@
 <div class='row'>
     <div class='form-group col-5'>
-        <div><label for="bank">Lender</label></div>
+        <div><label for="bank">Loan Lender</label></div>
         <select name="lender_id" class='form-control round' required>
             <option value="">-- Select Lender --</option>
             @foreach($accounts as $account)
-                @if ($account->account_type_id == 2)
+                @if ($account->account_type == 'Liability')
                     <option value="{{ $account['id'] }}">
                         {{ $account['holder'] }}
                     </option>
@@ -13,11 +13,11 @@
         </select>
     </div> 
     <div class='form-group col-6'>
-        <div><label for="expense">Account</label></div>
+        <div><label for="expense">Bank Account</label></div>
         <select name="bank_id" class='form-control round' required>
             <option value="">-- Select Account --</option>
             @foreach($accounts as $account)
-                @if ($account->account_type_id == 7)
+                @if ($account->account_type == 'Asset')
                     <option value="{{ $account['id'] }}">
                         {{ $account['holder'] }}
                     </option>
@@ -30,7 +30,7 @@
 <div class='row'>
     <div class='form-group col-2'>
         <div><label for="tid">Loan ID</label></div>
-        {{ Form::text('tid', @$last_loan->tid+1, ['class' => 'form-control round', 'readonly']) }}
+        {{ Form::text('tid', $last_tid+1, ['class' => 'form-control round', 'readonly']) }}
     </div>
     <div class='form-group col-3'>
         <div><label for="date">Date</label></div>

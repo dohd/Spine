@@ -28,6 +28,7 @@
                                     <th>#</th>
                                     <th>#Bill No</th>
                                     <th>Supplier</th>
+                                    <th>Note</th>
                                     <th>Amount</th>
                                     <th>Status</th>
                                     <th>Paid</th>
@@ -81,6 +82,10 @@
                 {
                     data: 'supplier',
                     name: 'supplier'
+                },
+                {
+                    data: 'note',
+                    name: 'note'
                 },
                 {
                     data: 'amount',
