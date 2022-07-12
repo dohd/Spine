@@ -91,6 +91,7 @@ class BillRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
+    // create bill transaction 
     public function post_transaction($bill)
     {
         // credit Bank (Income)
@@ -122,5 +123,13 @@ class BillRepository extends BaseRepository
         ]);
         Transaction::create($dr_data);
         aggregate_account_transactions();    
+    }
+
+    /**
+     * Create KRA Bill
+     */
+    public function create_kra(array $input)
+    {
+        throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 }

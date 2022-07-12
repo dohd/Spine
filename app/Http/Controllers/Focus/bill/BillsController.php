@@ -77,7 +77,7 @@ class BillsController extends Controller
 
         $result = $this->repository->create(compact('bill', 'bill_items'));
 
-        return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'Bills payment successfully received']);
+        return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'Bill payment successfully received']);
     }
 
 
@@ -94,5 +94,25 @@ class BillsController extends Controller
             ]);
 
         return response()->json($bills);
+    }
+
+    /**
+     * Show the form for creating KRA Bill
+     */
+    public function create_kra()
+    {
+        return new ViewResponse('focus.bills.create_kra');
+    }
+
+    /**
+     * Store KRA bill in storage
+     */
+    public function store_kra(Request $request)
+    {
+        $data = $request->except('_token');
+
+        $this->repository->create_kra($data);
+
+        return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'KRA Bill created successfully']);
     }
 }

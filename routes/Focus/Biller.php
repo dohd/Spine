@@ -277,8 +277,11 @@ Route::group(['namespace' => 'purchase'], function () {
 });
 
 Route::group(['namespace' => 'bill'], function () {
+    Route::get('bills/create_kra', 'BillsController@create_kra')->name('bills.create_kra');
+    Route::post('bills/store_kra', 'BillsController@store_kra')->name('bills.store_kra');
     Route::get('bills/supplier_bills', 'BillsController@supplier_bills')->name('bills.supplier_bills');
     Route::resource('bills', 'BillsController');
+    
     //For Datatable
     Route::post('bills/get', 'BillsTableController')->name('bills.get');
 });

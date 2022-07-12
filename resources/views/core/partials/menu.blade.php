@@ -599,7 +599,10 @@
                             <li><a class="dropdown-item" href="{{ route('biller.bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Bills
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.create') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Bills Payment
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.create_kra') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create KRA Bill
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.create') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Make Bill Payment
                                 </a>
                             </li>
                         </ul>
