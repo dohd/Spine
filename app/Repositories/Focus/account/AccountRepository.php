@@ -162,10 +162,11 @@ class AccountRepository extends BaseRepository
       // debit Bank and credit Retained Earnings
       $system = $account_type->system;
       if ($system == 'bank') {
+        // remove pprevious transactions
         Transaction::where(['tr_ref' => $account->id, 'tr_type' => 'dep', 'note' => $note])->delete();
         Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'dep', 'note' => $note])->delete();
-        $tid = Transaction::max('tid') + 1;
 
+        $tid = Transaction::max('tid') + 1;
         $pri_tr = Transactioncategory::where('code', 'dep')->first(['id', 'code']);
         $data = $data + [
           'account_id' => $account->id,
@@ -194,10 +195,11 @@ class AccountRepository extends BaseRepository
         'other_current_liability', 'long_term_liability', 'equity'
       ];
       if (in_array($system, $systems, 1)) {
+        // remove previous transactions
         Transaction::where(['tr_ref' => $account->id, 'tr_type' => 'genjr', 'note' => $note])->delete();
         Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'genjr', 'note' => $note])->delete();
+
         $tid = Transaction::max('tid') + 1;
-        
         $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $open_bal = $account->opening_balance;
         $data = $data + [
@@ -212,13 +214,9 @@ class AccountRepository extends BaseRepository
           if ($key == 'tid' && $journal->tid) continue;
           else $journal[$key] = $val;
         }
+        $journal->save();
 
-        if ($journal->items) {
-          foreach ($journal->items as $item) {
-            if ($item->debit > 0) $item->update(['debit' => $open_bal]);
-            elseif ($item->credit > 0) $item->update(['credit' => $open_bal]);
-          }
-        } else {
+        if (!$journal->items->count()) {
           foreach ([1,2] as $v) {
             $item_data = [
               'journal_id' => $journal->id,
@@ -228,14 +226,19 @@ class AccountRepository extends BaseRepository
             else $item_data['credit'] = $open_bal;
             JournalItem::create($item_data);
           }
-        }        
+        } else {
+          foreach ($journal->items as $item) {
+            if ($item->debit > 0) $item->update(['debit' => $open_bal]);
+            elseif ($item->credit > 0) $item->update(['credit' => $open_bal]);
+          }
+        } 
 
         $entry_type = 'dr';
         if (in_array($system, array_splice($systems, 3, 3), 1)) $entry_type = 'cr';
         
         double_entry(
           $tid, $account->id, $seco_account->id, $account->opening_balance, $entry_type, $pri_tr->id,
-          'employee', $journal->user_id, $date, $account->opening_balance_date, $pri_tr->code, $note, $account->ins
+          'company', $journal->user_id, $date, $account->opening_balance_date, $pri_tr->code, $note, $account->ins
         );
       }
     }
