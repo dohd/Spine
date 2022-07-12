@@ -48,7 +48,7 @@
                                     @php
                                         if ($type == 'Income') echo 'Revenue';
                                         elseif ($type == 'COG') echo $type;
-                                        else echo 'Direct ' . $type;
+                                        else echo 'Indirect ' . $type;
                                     @endphp
                                 </h5>
                                 <table class="table table-sm">
@@ -127,7 +127,7 @@
                                                 <td><h5><b>{{ amountFormat($gross_profit) }}</b></h5></td>
                                             </tr>
                                             <tr>
-                                                <td>Direct Expense</td>
+                                                <td>Indirect Expense</td>
                                                 <td><h5>- {{ amountFormat($balance_cluster[2]['gross_balance']) }}</h5></td>
                                             </tr>
                                             <tr style="border-top: 2px solid grey;">

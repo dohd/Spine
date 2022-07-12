@@ -80,7 +80,7 @@
                 @php
                     if ($type == 'Income') echo 'Revenue';
                     elseif ($type == 'COG') echo $type;
-                    else echo 'Direct ' . $type;
+                    else echo 'Indirect ' . $type;
                 @endphp
             </h5>
             <table class="table table-items" cellpadding="8">
@@ -164,7 +164,7 @@
                     </tr>
                     <tr class="dotted">
                         <td>3</td>
-                        <td>Direct Expense</td>
+                        <td>Indirect Expense</td>
                         <td style="text-align: center;">- {{ amountFormat($balance_cluster[2]['gross_balance']) }}</td>
                     </tr>
                     <tr class="dotted">
