@@ -82,9 +82,12 @@ class SuppliersController extends Controller
         // extract request input
         $data = $request->only([
             'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
-            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token'
+            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
         ]);
-        $account_data = $request->only(['account_name', 'account_no', 'opening_balance', 'opening_balance_date']);
+        $account_data = $request->only([
+            'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
+            'expense_account_id'
+        ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
 
         $data['ins'] = auth()->user()->ins;
@@ -125,7 +128,10 @@ class SuppliersController extends Controller
             'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
             'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token'
         ]);
-        $account_data = $request->only(['account_name', 'account_no', 'opening_balance', 'opening_balance_date']);
+        $account_data = $request->only([
+            'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
+            'expense_account_id'
+        ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
 
         $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));        
