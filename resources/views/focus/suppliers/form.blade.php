@@ -20,6 +20,7 @@
         </ul>
 
         <div class="tab-content px-1 pt-1">
+            <!-- billing address -->
             <div class="tab-pane active" id="tab1" role="tabpanel" aria-labelledby="base-tab1">
                 <div class='form-group'>
                     {{ Form::label( 'company', trans('customers.company'),['class' => 'col-lg-2 control-label']) }}
@@ -83,7 +84,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- payment setting -->
             <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
                 <div class='form-group'>
                     {{ Form::label( 'docid', trans('customers.docid'),['class' => 'col-lg-2 control-label']) }}
@@ -104,22 +105,41 @@
                     </div>
                 </div>
             </div>
-
+            <!-- opening balance -->
             <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab3">
                 <div class='form-group'>
                     {{ Form::label('balance', 'Opening Balance',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('opening_balance', '0.00', ['class' => 'form-control', 'id'=>'open_balance']) }}
+                        {{ Form::text('open_balance', '0.00', ['class' => 'form-control', 'id'=>'open_balance']) }}
                     </div>
                 </div>
                 <div class='form-group'>
                     {{ Form::label('date', 'As At Date',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('opening_balance_date', null, ['class' => 'form-control datepicker','id'=>'open_balance_date']) }}
+                        {{ Form::text('open_balance_date', null, ['class' => 'form-control datepicker','id'=>'open_balance_date']) }}
                     </div>
-                </div>               
+                </div>       
+                <div class='form-group'>
+                    {{ Form::label('note', 'Note',['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        {{ Form::text('open_balance_note', null, ['class' => 'form-control', 'id' => 'open_balance_note']) }}
+                    </div>
+                </div>       
+                <div class='form-group'>
+                    {{ Form::label('expense_account', 'Recognise Expense on Account',['class' => 'col-lg-3 control-label']) }}
+                    <div class='col-lg-10'>
+                        <select name="expense_account_id" class="custom-select" id="expense_account">
+                            <option value="">-- Select Expense Account --</option>
+                            @foreach ($accounts as $row) 
+                                <option value="{{ $row->id }}" {{ $row->id == @$customer->expense_account_id? 'selected' : '' }}>
+                                    {{ $row->holder }}
+                                </option>
+                            @endforeach
+                        </select>                        
+                    </div>
+                </div>          
             </div>
-
+            <!-- other details -->
             <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab3">              
                 <div class='form-group'>
                     {{ Form::label( 'account_no', 'ACCOUNT NUMBER',['class' => 'col-lg-2 control-label']) }}
