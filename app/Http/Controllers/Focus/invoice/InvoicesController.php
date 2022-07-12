@@ -326,6 +326,16 @@ class InvoicesController extends Controller
     }    
 
     /**
+     * Show invoice payment
+     */
+    public function show_payment($id)
+    {
+        $payment = PaidInvoice::find($id);
+
+        return new ViewResponse('focus.invoices.view_payment', compact('payment'));
+    }   
+
+    /**
      * Update invoice payment
      */
     public function update_payment(Request $request, $id)

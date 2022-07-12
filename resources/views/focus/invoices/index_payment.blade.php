@@ -29,10 +29,10 @@
                                         <th>Account</th>
                                         <th>Date</th>
                                         <th>Amount</th>
-                                        <th>Payment Mode</th>
+                                        <th>Mode</th>
                                         <th>Reference</th>
                                         <th>Invoice</th>
-                                        <th>Payment Type</th>
+                                        <th>Allocation Type</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>

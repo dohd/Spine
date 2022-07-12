@@ -24,7 +24,7 @@
 
     $payment_url = 'javascript:';
     if (isset($tr->paidinvoice->customer)) 
-        $payment_url = route('biller.invoices.edit_payment', $tr->paidinvoice->id);
+        $payment_url = route('biller.invoices.show_payment', $tr->paidinvoice->id);
 
     $tr_type_urls = [
         'PAYMENT' => $payment_url,

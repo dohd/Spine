@@ -95,8 +95,9 @@ class PaymentsTableController extends Controller
     // action buttons
     public function action_buttons($payment)
     {
-        $print = '<a href="' . route('biller.invoices.print_payment', $payment) . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> ';
-        $edit = '<a href="' . route('biller.invoices.edit_payment', $payment) . '" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="fa fa-pencil "></i></a> ';
+        $print = ' <a href="' . route('biller.invoices.print_payment', $payment) . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> ';
+        $edit = ' <a href="' . route('biller.invoices.edit_payment', $payment) . '" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="fa fa-pencil"></i></a> ';
+        $view = ' <a href="' . route('biller.invoices.show_payment', $payment) . '" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i  class="fa fa-eye"></i></a> ';
         $delete = '<a href="' . route('biller.invoices.delete_payment', $payment) . '" 
                 class="btn btn-danger round" data-method="post"
                 data-trans-button-cancel="' . trans('buttons.general.cancel') . '"
@@ -106,6 +107,6 @@ class PaymentsTableController extends Controller
                 <i  class="fa fa-trash"></i>
             </a>';
 
-        return $print . $edit . $delete;
+        return $print . $view . $edit . $delete;
     }
 }
