@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\supplier;
 
+use App\Models\account\Account;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -15,6 +16,8 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.suppliers.create');
+        $accounts = Account::where('account_type', 'Expense')->get(['id', 'holder']);
+
+        return view('focus.suppliers.create', compact('accounts'));
     }
 }

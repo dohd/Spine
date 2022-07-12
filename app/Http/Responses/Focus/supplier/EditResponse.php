@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\supplier;
 
+use App\Models\account\Account;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -28,8 +29,8 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.suppliers.edit')->with([
-            'supplier' => $this->supplier
-        ]);
+        $accounts = Account::where('account_type', 'Expense')->get(['id', 'holder']);
+
+        return view('focus.suppliers.edit', compact('accounts'))->with(['supplier' => $this->supplier]);
     }
 }
