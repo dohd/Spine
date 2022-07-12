@@ -45,12 +45,7 @@
                                 </select>
                             </div>                                                     
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-2">
-                            <input type="button" name="search" id="search" value="Filter" class="btn btn-info btn-sm" />
-                        </div>
-                    </div>
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -93,10 +88,10 @@
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    // on clicking search
-    $('#search').click(function() {
+    // on filter
+    $('#status_filter').change(function() {
         $('#quotes-table').DataTable().destroy();
-        return draw_data($('#status_filter').val());          
+        return draw_data($(this).val());   
     });
 
     // Initialize datepicker
