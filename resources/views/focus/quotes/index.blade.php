@@ -22,23 +22,43 @@
             </div>
         </div>
     </div>
+
     <div class="content-body">
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-2">{{ trans('general.search_date')}} </div>
-                        <div class="col-md-2">
-                            <input type="text" name="start_date" id="start_date" class="date30 form-control form-control-sm datepicker" />
-                        </div>
-                        <div class="col-md-2">
-                            <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker" />
-                        </div>
-                        <div class="col-md-2">
-                            <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
+                    <div class="form-group row">
+                        <div class="col-4">
+                            <div class="d-inline">Filter Criteria (Quote / PI):</div>                             
+                            <div class="d-inline">
+                                @php
+                                    $criteria = [
+                                        'Unapproved', 'Approved & Unbudgeted', 'Budgeted & Unverified', 'Verified with LPO & Uninvoiced',
+                                        'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced',
+                                    ];
+                                @endphp
+                                <select name="filter" class="custom-select" id="status_filter">
+                                    <option value="">-- Choose Filter Criteria --</option>
+                                    @foreach ($criteria as $val)
+                                        <option value="{{ $val }}">{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                            </div>                                                     
                         </div>
                     </div>
-                    <hr>
+                    <div class="form-group row">
+                        <div class="col-2">
+                            <input type="button" name="search" id="search" value="Filter" class="btn btn-info btn-sm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">  
+                    
                     <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -70,19 +90,13 @@
 @endsection
 
 @section('after-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    setTimeout(() => draw_data(), @json(config('master.delay')));
-
-    // on clicking search by date
+    // on clicking search
     $('#search').click(function() {
-        var start_date = $('#start_date').val();
-        var end_date = $('#end_date').val();
-        if (start_date && end_date) {
-            $('#quotes-table').DataTable().destroy();
-            return draw_data(start_date, end_date);
-        } 
-        alert("Date range is Required");            
+        $('#quotes-table').DataTable().destroy();
+        return draw_data($('#status_filter').val());          
     });
 
     // Initialize datepicker
@@ -90,7 +104,9 @@
     $('#start_date').datepicker('setDate', new Date());
     $('#end_date').datepicker('setDate', new Date());
 
-    function draw_data(start_date = '', end_date = '') {
+    setTimeout(() => draw_data(), @json(config('master.delay')));
+
+    function draw_data(status_filter='') {
         const language = {@lang('datatable.strings')};
         const table = $('#quotes-table').dataTable({
             processing: true,
@@ -100,10 +116,9 @@
             language,
             ajax: {
                 url: "{{ route('biller.quotes.get') }}",
-                type: 'post',
+                type: 'POST',
                 data: {
-                    start_date: start_date,
-                    end_date: end_date,
+                    status_filter,
                     page: location.href.includes('page=pi') ? 'pi' : 0
                 },
             },

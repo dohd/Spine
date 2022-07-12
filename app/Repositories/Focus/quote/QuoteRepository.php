@@ -42,6 +42,7 @@ class QuoteRepository extends BaseRepository
         if (request('page') == 'pi') $q->where('bank_id', '>', 0);
         else $q->where('bank_id', 0);
         
+        // filter by date
         if (request('start_date') && request('end_date')) {
             $q->whereBetween('date', [
                 date_for_database(request('start_date')), 
@@ -49,8 +50,30 @@ class QuoteRepository extends BaseRepository
             ]);
         }
 
-        // order by latest updated record
-        $q->orderBy('updated_at', 'DESC');
+        // filter by status
+        if (request('status_filter')) {
+            switch (request('status_filter')) {
+                case 'Unapproved':
+                    $q->whereNull('approved_by');
+                    break;
+                case 'Approved & Unbudgeted':
+                    $q->whereNotNull('approved_by')->whereNull('project_quote_id');
+                    break;
+                case 'Approved & Unbudgeted':
+                    $q->whereNotNull('approved_by')->whereNull('project_quote_id');
+                    break;
+                case 'Budgeted & Unverified':
+                    $q->whereNotNull('project_quote_id')->whereNull('verified_by');
+                    break;
+                case 'Verified with LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNotNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Verified without LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+            }
+            
+        }
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
