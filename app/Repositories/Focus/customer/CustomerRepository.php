@@ -14,6 +14,7 @@ use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -21,7 +22,6 @@ use Illuminate\Validation\ValidationException;
  */
 class CustomerRepository extends BaseRepository
 {
-
     /**
      *customer_picture_path .
      *
@@ -36,6 +36,7 @@ class CustomerRepository extends BaseRepository
      * @var \Illuminate\Support\Facades\Storage
      */
     protected $storage;
+
     /**
      * Associated Repository Model.
      */
@@ -73,8 +74,7 @@ class CustomerRepository extends BaseRepository
 
     public function getInvoicesForDataTable($customer_id = 0)
     {
-        $id = $customer_id ?: request('customer_id');
-        return Invoice::where('customer_id', $id)->get();
+        return Invoice::where('customer_id', request('customer_id', $customer_id))->get();
     }
 
     public function getTransactionsForDataTable($customer_id = 0)
@@ -138,67 +138,83 @@ class CustomerRepository extends BaseRepository
         return $q->get();
     }
 
-    public function getStatementsForDataTable($customer_id = 0)
+    public function getStatementForDataTable($customer_id = 0)
     {
-        $id = $customer_id ?: request('customer_id');
-        $transactions = $this->getTransactionsForDataTable($id);
+        $i = 0;
+        $statement = collect();
+        $invoices = $this->getInvoicesForDataTable($customer_id);
+        foreach ($invoices as $invoice) {
+            $i++;
+            $tid = gen4tid('Inv-', $invoice->tid);
+            $note = $invoice->notes;
+            $inv_record = (object) array(
+                'id' => $i,
+                'date' => $invoice->invoicedate,
+                'type' => 'invoice',
+                'note' => '(' . $tid . ')' . ' ' . $note,
+                'debit' => $invoice->total,
+                'credit' => 0
+            );
 
-        // on date filter
-        $start_date = request('start_date');
-        $end_date = request('end_date');
-        if ($start_date && $end_date) {
-            $transactions = $transactions->whereBetween('tr_date', [
-                date_for_database($start_date), 
-                date_for_database($end_date)
-            ]);
+            $payments = collect();
+            if ($invoice->payments->count()) {
+                foreach ($invoice->payments as $pmt) {
+                    $i++;
+                    $reference = $pmt->paid_invoice->reference;
+                    $mode = $pmt->paid_invoice->payment_mode;
+                    $record = (object) array(
+                        'id' => $i,
+                        'date' => $pmt->paid_invoice->date,
+                        'type' => 'payment',
+                        'note' => '(' . $tid . ')' . ' reference: ' . $reference . ' mode: ' . ucfirst($mode),
+                        'debit' => 0,
+                        'credit' => $pmt->paid
+                    );
+                    $payments->add($record);
+                }    
+            }
+            $withholdings = collect();
+            if ($invoice->withholding_payments->count()) {
+                foreach ($invoice->withholding_payments as $pmt) {
+                    $i++;
+                    $note = $pmt->withholding->doc_ref . ' - ' . $pmt->withholding->certificate . ' ' . $pmt->withholding->note;
+                    $record = (object) array(
+                        'id' => $i,
+                        'date' => $pmt->withholding->date,
+                        'type' => 'withholding',
+                        'note' => '(' . $tid . ')' . ' ' . $note,
+                        'debit' => 0,
+                        'credit' => $pmt->paid
+                    );
+                    $withholdings->add($record);
+                }   
+            }
+            $creditnotes = collect();
+            if ($invoice->creditnotes->count()) {
+                foreach ($invoice->creditnotes as $cnote) {
+                    $i++;
+                    $record = (object) array(
+                        'id' => $i,
+                        'date' => $cnote->date,
+                        'type' => 'credit-note',
+                        'note' => '(' . $tid . ')' . ' ' . $cnote->note,
+                        'debit' => 0,
+                        'credit' => $cnote->total
+                    );
+                    $creditnotes->add($record);
+                }   
+            }
+
+            if ($payments->count() || $withholdings->count() || $creditnotes->count()) {
+                $statement->add($inv_record);
+                $statement = $statement->merge($payments);
+                $statement = $statement->merge($creditnotes);
+                $statement = $statement->merge($withholdings);
+            } else $statement->add($inv_record);
         }
 
-        // sequence invoice and related payments
-        $statements = collect();
-        $index_visited = array();
-        foreach ($transactions as $i => $tr_one) {
-            if ($tr_one->tr_type == 'inv') {
-                // add invoice, 
-                $statements->add($tr_one);
-                $index_visited[] = $i;
-                $invoice_id = $tr_one->invoice->id;
-                $customer_id = $tr_one->invoice->customer_id;
-                // add related payment, withholding, cnote, dnote
-                foreach ($transactions as $j => $tr_two) {
-                    $types = ['pmt', 'withholding', 'cnote', 'dnote'];
-                    if (in_array($tr_two->tr_type, $types, 1)) { 
-                        $exists = false;                       
-                        if ($tr_two->paidinvoice) {
-                            $is_paidinvoice = $tr_two->paidinvoice->items->where('invoice_id', $invoice_id)->count();
-                            if ($is_paidinvoice) $exists = true; 
-                        } elseif ($tr_two->creditnote && $tr_two->creditnote->invoice_id == $invoice_id) {
-                            $exists = true; 
-                        } elseif ($tr_two->debitnote && $tr_two->debitnote->invoice_id == $invoice_id) {
-                            $exists = true; 
-                        } elseif ($tr_two->withholding && $tr_two->withholding->customer_id == $customer_id) {
-                            $exists = true;
-                        }                                                                 
-                        if ($exists) {
-                            $statements->add($tr_two);
-                            $index_visited[] = $j;
-                        }
-                    }
-                }
-            }
-        }
-        // add remaining transactions
-        if ($index_visited) {
-            foreach ($transactions as $i => $tr) {
-                // check if already added and skip
-                if (in_array($i, $index_visited, 1)) continue;
-                $statements->add($tr);
-            }
-        } else $statements = $transactions;
-
-        return $statements;
+        return $statement;
     }
-
-
 
     /**
      * For Creating the respective model in storage

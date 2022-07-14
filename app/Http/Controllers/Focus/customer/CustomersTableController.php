@@ -129,31 +129,30 @@ class CustomersTableController extends Controller
 
     public function invoke_statement()
     {
-        $core = $this->customer->getStatementsForDataTable();
+        $core = $this->customer->getStatementForDataTable();
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
-        ->addColumn('date', function ($tr) {
-            return dateFormat($tr->tr_date);
+        ->addColumn('date', function ($statement) {
+            return dateFormat($statement->date);
         })
-        ->addColumn('type', function ($tr) {
-            return $tr->tr_type;
+        ->addColumn('type', function ($statement) {
+            return $statement->type;
         })
-        ->addColumn('note', function ($tr) {
-            if ($tr->invoice && $tr->tr_type == 'inv')
-                return gen4tid('Inv-', $tr->invoice->tid) . ' - ' . $tr->invoice->notes;
-            return $tr->note;
+        ->addColumn('note', function ($statement) {
+            return $statement->note;
         })
-        ->addColumn('invoice_amount', function ($tr) {
-            return numberFormat($tr->debit);
+        ->addColumn('invoice_amount', function ($statement) {
+            return numberFormat($statement->debit);
         })
-        ->addColumn('amount_paid', function ($tr) {
-            return numberFormat($tr->credit);
+        ->addColumn('amount_paid', function ($statement) {
+            return numberFormat($statement->credit);
         })
-        ->addColumn('invoice_balance', function ($tr) {
-            if ($tr->tr_type == 'inv') $this->balance = $tr->debit;
-            $this->balance -= $tr->credit;
+        ->addColumn('invoice_balance', function ($statement) {
+            if ($statement->type == 'invoice') 
+                $this->balance = $statement->debit;
+            else $this->balance -= $statement->credit;
 
             return numberFormat($this->balance);
         })
