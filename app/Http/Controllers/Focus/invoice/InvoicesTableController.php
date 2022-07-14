@@ -70,8 +70,8 @@ class InvoicesTableController extends Controller
             ->addColumn('total', function ($invoice) {
                 return numberFormat($invoice->total);
             })
-            ->addColumn('amountpaid', function ($invoice) {
-                return numberFormat($invoice->amountpaid);
+            ->addColumn('balance', function ($invoice) {
+                return numberFormat($invoice->total - $invoice->amountpaid);
             })
             ->addColumn('status', function ($invoice) {
                 return '<span class="st-' . $invoice->status . '">' . trans('payments.' . $invoice->status) . '</span>';

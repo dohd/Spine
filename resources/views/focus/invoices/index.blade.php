@@ -43,7 +43,7 @@
                                         <th>Subject</th>
                                         <th>Date</th>
                                         <th>{{ trans('general.amount') }}</th>
-                                        <th>Paid</th>
+                                        <th>Balance</th>
                                         <th>{{ trans('general.status') }}</th>
                                         <th>Due Date</th>
                                         <th>#Quote / PI No</th>
@@ -127,8 +127,8 @@
                     name: 'total'
                 },
                 {
-                    data: 'amountpaid',
-                    name: 'amountpaid'
+                    data: 'balance',
+                    name: 'balance'
                 },
                 {
                     data: 'status',
