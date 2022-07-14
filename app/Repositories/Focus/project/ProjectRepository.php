@@ -105,7 +105,7 @@ class ProjectRepository extends BaseRepository
      * store a newly created Project Quote Budget
      * @param Request request
      */
-    public function store_budget($input)
+    public function create_budget($input)
     {                
         // dd($input);
         DB::beginTransaction();
@@ -129,13 +129,16 @@ class ProjectRepository extends BaseRepository
 
         $data_skillset = $input['data_skillset'];
         foreach ($data_skillset as $item) {
-            $item['budget_id'] = $result->id;
-            $new_item = BudgetSkillset::firstOrNew(['quote_id' => $result->quote_id]);
-            foreach ($item as $key => $val) {
-                if ($key == 'charge') $item[$key] = numberClean($val);
-                $new_item[$key] = $item[$key];
-            }
-            $new_item->save();
+            $item = array_replace($item, [
+                'charge' => numberClean($item['charge']),
+                'budget_id' => $result->id,
+                'quote_id' => $result->quote_id
+            ]);
+            $skillset = BudgetSkillset::firstOrNew(['id' => $item['skillitem_id']]);
+            $skillset->fill($item);
+            if (!$skillset->id) unset($skillset->id);
+            unset($skillset->skillitem_id);
+            $skillset->save();
         }
 
         DB::commit();

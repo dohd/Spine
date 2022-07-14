@@ -200,12 +200,12 @@ class ProjectsController extends Controller
             'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 
             'new_qty', 'price'
         );
-        $data_skillset = $request->only('skill', 'charge', 'hours', 'no_technician');
+        $data_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
 
         $data_items = modify_array($data_items);
         $data_skillset = modify_array($data_skillset);
 
-        $this->repository->store_budget(compact('data', 'data_items', 'data_skillset'));
+        $this->repository->create_budget(compact('data', 'data_items', 'data_skillset'));
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Budget created successfully']);
     }
