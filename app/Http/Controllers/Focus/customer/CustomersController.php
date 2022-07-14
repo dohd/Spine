@@ -167,12 +167,7 @@ class CustomersController extends Controller
      */
     public function show(Customer $customer, ManageCustomerRequest $request)
     {
-        // account balance
-        $transactions = $this->repository->getTransactionsForDataTable($customer->id);
-        $account_balance = $transactions->sum('debit') - $transactions->sum('credit');
-
-        // invoice balances for each date interval
-        $aging_cluster = array_fill(0, 4, 0);
+        // 4 date intervals of between 0 - 120 days earlier 
         $intervals = array();
         for ($i = 0; $i < 4; $i++) {
             $from = date('Y-m-d');
@@ -184,18 +179,28 @@ class CustomersController extends Controller
             }
             $intervals[] = [$from, $to];
         }
+
+        // total debt and aging balance
+        $account_balance = 0;
+        $aging_cluster = array_fill(0, 4, 0);
         $invoices = $this->repository->getInvoicesForDataTable($customer->id);
         foreach ($invoices as $invoice) {
+            $debt_amount = $invoice->total - $invoice->amountpaid;
+            $due_date = new DateTime($invoice->invoicedate);
+            // due_date between 0 - 120 days
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
                 $end = new DateTime($dates[1]);
-                $due = new DateTime($invoice->invoicedate);
-                if ($start >= $due && $end <= $due) {
-                    $diff = $invoice->total - $invoice->amountpaid;
-                    $aging_cluster[$i] += $diff;
+                if ($start >= $due_date && $end <= $due_date) {
+                    $aging_cluster[$i] += $debt_amount;
                     break;
                 }
             }
+            // due_date in 120 days plus
+            if ($due_date < new DateTime($intervals[3][1])) {
+                $aging_cluster[3] += $debt_amount;
+            }
+            $account_balance += $debt_amount;
         }
 
         // advance payment transactions
