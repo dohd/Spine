@@ -66,7 +66,7 @@ class Purchase extends Model
     {
         parent::boot();
         static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', auth()->user()->ins)->where('po_id', 0);
+            $builder->where('ins', auth()->user()->ins);
         });
     }
 }

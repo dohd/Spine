@@ -32,7 +32,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
+        $q = $this->query()->whereNull('po_id');
 
         return $q->get();
     }
