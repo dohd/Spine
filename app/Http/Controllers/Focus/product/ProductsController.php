@@ -383,17 +383,16 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        $pricelist = array();
+        $pricelist = PriceList::where('pricegroup_id', $request->pricegroup_id)->get();
         $pricegroup = Pricegroup::find($request->pricegroup_id);
-        if ($pricegroup) $pricelist = PriceList::where('pricegroup_id', $pricegroup->id)->get();
-
-        $products = array();
         $product_variations = ProductVariation::whereHas('product', function ($q) {
             $q->where('name', 'LIKE', '%'. request('keyword') .'%');
         })->with(['warehouse' => function($q) {
             $q->select(['id', 'title']);
         }])->limit(6)->get();
-        // modify products price properties
+
+        // modify price properties of products
+        $products = array();
         foreach ($product_variations as $row) {
             $product = [
                 'id' => $row->id, 
@@ -411,9 +410,8 @@ class ProductsController extends Controller
             // apply respective product buying price according to order of purchase
             $product_rate = $this->compute_product_rate($row->id, $row->qty);
             if ($product_rate) $product['purchase_price'] = numberFormat($product_rate);
-
-            // if pricelist
-            if (count($pricelist)) {
+            
+            if ($pricelist->count()) {
                 // apply client selling price, else supplier buying price
                 foreach ($pricelist as $item) {
                     if ($item->product_id == $row->product_id) {
@@ -435,6 +433,7 @@ class ProductsController extends Controller
     // compute product rate by FIFO (First in First out) rule of purchase
     public function compute_product_rate($id, $qty)
     {
+        if (!$qty) return;
         $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
             ->where('item_id', $id)
             ->orderBy('rate', 'DESC')
@@ -445,8 +444,8 @@ class ProductsController extends Controller
         $set = range(1, $qty);
         foreach ($rate_groups as $group) {
             $subset = array_splice($set, 0, $group->count);
-            if (!$subset) continue;
-            if ($qty >= $subset[0] && $qty <= $subset[count($subset) - 1]) {
+            $last_indx = count($subset) - 1;
+            if ($subset && $qty >= $subset[0] && $qty <= $subset[$last_indx]) {
                 $rate = $group->rate;
                 break;
             }
