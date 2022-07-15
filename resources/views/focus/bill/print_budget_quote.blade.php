@@ -229,7 +229,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			@foreach($resource->items as $item)
+			@foreach($resource->products as $item)
 				@if ($item->a_type == 1)	
 					<tr>
 						<td>{{ $item->numbering }}</td>
@@ -247,15 +247,15 @@
 					</tr>
 				@endif				
 			@endforeach
+			
 			<!-- 20 dynamic empty rows -->
-			@for ($i = count($resource->items); $i < 15; $i++)
+			@for ($i = $resource->products->count(); $i < 15; $i++)
 				<tr>
 					@for($j = 0; $j < 4; $j++) 
 						<td></td>
 					@endfor
 				</tr>
 			@endfor
-			<!--  -->
 		</tbody>
 	</table>
 	<br>
