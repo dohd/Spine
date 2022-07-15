@@ -111,7 +111,9 @@
         var row = $(this).parents("tr:first");
         if ($(this).is('.up')) row.insertBefore(row.prev());
         if ($(this).is('.down')) row.insertAfter(row.next());
-        if ($(this).is('.remv')) $(this).closest('tr').remove();
+        if ($(this).is('.remv')) {
+            if (confirm('Are you sure?')) $(this).closest('tr').remove();
+        }
         calcTotal();
     });
     // add product
@@ -210,25 +212,21 @@
     function autoComp(i) {
         return {
             source: function(request, response) {
+                // stock product
                 let term = request.term;
+                let url = "{{ route('biller.products.quote_product_search') }}";
+                let data = {keyword: term, pricegroup_id: $('#pricegroup_id').val()};
+                // equipment service product 
                 if (term.charAt(0) == '#') {
-                    // service product search
                     term = term.replace('#', '');
-                    $.ajax({
-                    url: "{{ route('biller.contractservices.service_product_search') }}",
+                    url = "{{ route('biller.contractservices.service_product_search') }}";
+                    data = {term};
+                } 
+                $.ajax({
+                    url, data,
                     method: 'POST',
-                        data: {term},
-                        success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
-                    });
-                } else {
-                    // stock product search
-                    $.ajax({
-                    url: "{{ route('biller.products.quote_product_search') }}",
-                    method: 'POST',
-                        data: {keyword: term, pricegroup_id: $('#pricegroup_id').val()},
-                        success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
-                    });
-                }
+                    success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
+                });
             },
             autoFocus: true,
             minLength: 0,
@@ -285,7 +283,6 @@
         const html = skillHtml.replace(/-0/g, '-'+skillId);
         $('#skillTbl tbody').append('<tr>'+html+'</tr>');
     });
-    skillTotal();
 
     function skillTotal() {
         total = 0;
@@ -301,5 +298,6 @@
         profitState.skill_ttl = total;
         calcProfit();
     }
+    skillTotal();
 </script>
 @endsection
