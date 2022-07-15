@@ -127,7 +127,7 @@
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="form-control round" name="validity" id="validity">
                         @foreach ([0, 14, 30, 45, 60, 90] as $val)
-                            <option value="{{ $val }}" {{ !$val ? 'selected' : '' }}>
+                            <option value="{{ $val }}" {{ $val == @$quote->validity? 'selected' : '' }}>
                                 {{ $val ? 'Valid For '.$val.' Days' : 'On Receipt' }}
                             </option>
                         @endforeach                                                
@@ -222,11 +222,12 @@
 <!-- footer -->
 <div class="form-group row">
     <div class="col-9">
-        <button type="button" class="btn btn-success" id="addProduct"><i class="fa fa-plus-square"></i> Add Product</button>
-        <button type="button" class="btn btn-primary" id="addTitle"><i class="fa fa-plus-square"></i> Add Title</button>
-        <button type="button" class="btn btn-secondary ml-1" data-toggle="modal" data-target="#skillModal" id="addSkill">
+        <a href="javascript:" class="btn btn-success" id="addProduct"><i class="fa fa-plus-square"></i> Add Product</a>
+        <a href="javascript:" class="btn btn-primary" id="addTitle"><i class="fa fa-plus-square"></i> Add Title</a>
+        <a href="javascript:" class="btn btn-secondary ml-1" data-toggle="modal" data-target="#skillModal" id="addSkill">
             <i class="fa fa-wrench"></i> Labour
-        </button>
+        </a>
+        <a href="javascript:" class="btn btn-warning" id="addMisc"><i class="fa fa-plus"></i> Miscellaneous</a>
     </div>
     <div class="col-3">
         <label>SubTotal ({{ config('currency.symbol') }})</label>
