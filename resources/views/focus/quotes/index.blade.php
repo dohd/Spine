@@ -53,27 +53,25 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">  
-                    
                     <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Date</th>   
                                 <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
                                 <th>Customer & Branch</th>   
                                 <th>Title</th>                                                                       
                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
                                 <th>Client Ref</th>
                                 <th>Ticket No</th>
-                                <th>{{ trans('general.status') }}</th>
-                                <th>Verified</th>   
-                                <th>Date</th>                                       
                                 <th>{{ trans('labels.general.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="8" class="text-center text-success font-large-1">
-                                    <i class="fa fa-spinner spinner"></i></td>
+                                <td colspan="100%" class="text-center text-success font-large-1">
+                                    <i class="fa fa-spinner spinner"></i>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -122,6 +120,10 @@
                     name: 'id'
                 },
                 {
+                    data: 'date',
+                    name: 'date'
+                },
+                {
                     data: 'tid',
                     name: 'tid'
                 },
@@ -144,18 +146,6 @@
                 {
                     data: 'lead_tid',
                     name: 'lead_tid'
-                },
-                {
-                    data: 'status',
-                    name: 'status'
-                },
-                {
-                    data: 'verified',
-                    name: 'verified'
-                },
-                {
-                    data: 'date',
-                    name: 'date'
                 },
                 {
                     data: 'actions',
