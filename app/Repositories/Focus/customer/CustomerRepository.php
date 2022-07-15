@@ -79,34 +79,30 @@ class CustomerRepository extends BaseRepository
 
     public function getTransactionsForDataTable($customer_id = 0)
     {
-        $id = $customer_id ?: request('customer_id');
+        $id = request('customer_id', $customer_id);
          
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })->where('tr_type', 'inv')->whereHas('invoice', function ($q) use($id) { 
             $q->where('customer_id', $id); 
-        })
-        ->orWhereHas('account', function ($q) { 
+        })->orWhereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })->where('tr_type', 'pmt')->whereHas('paidinvoice', function ($q) use($id) {
             $q->where('customer_id', $id);
-        })
-        ->orWhereHas('account', function ($q) { 
+        })->orWhereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })->where('tr_type', 'withholding')->whereHas('withholding', function ($q) use($id) {
             $q->where('customer_id', $id);
-        })
-        ->orWhereHas('account', function ($q) { 
+        })->orWhereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })->where('tr_type', 'cnote')->whereHas('creditnote', function ($q) use($id) {
             $q->where('customer_id', $id);
-        })
-        ->orWhereHas('account', function ($q) { 
+        })->orWhereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })->where('tr_type', 'dnote')->whereHas('debitnote', function ($q) use($id) {
             $q->where('customer_id', $id);
-        });
-            
+        });       
+                    
         // on date filter
         $start_date = request('start_date');
         $end_date = request('end_date');
@@ -114,23 +110,24 @@ class CustomerRepository extends BaseRepository
             $start_date = date_for_database($start_date);
             $end_date = date_for_database($end_date);
             $prior_date = date('Y-m-d', strtotime($start_date . ' - 1 day'));
-            $q1 = clone $q;
-            $q2 = clone $q;
 
             $params = ['id', 'tr_date', 'tr_type', 'note', 'debit', 'credit'];
-            $bf_transactions = $q1->where('tr_date', '<', $start_date)->get($params);
-            $diff = $bf_transactions->sum('debit') - $bf_transactions->sum('credit');
-            $record = (object) array(
-                'id' => 0,
-                'tr_date' => $prior_date,
-                'tr_type' => '',
-                'note' => 'Balance brought foward as of '. dateFormat($start_date),
-                'debit' => $diff > 0 ? $diff : 0,
-                'credit' => $diff < 0 ? $diff : 0,
-            );
-            $collection = collect([$record]);
-            $transactions = $q2->whereBetween('tr_date', [$start_date, $end_date])->get($params);
-            if ($diff > 0) $transactions = $collection->merge($transactions);
+            $transactions = Transaction::whereIn('id', $q->pluck('id'))->whereBetween('tr_date', [$start_date, $end_date])->get($params);
+            // compute balance brought foward as of start date
+            $bf_transactions = Transaction::whereIn('id', $q->pluck('id'))->where('tr_date', '<', $start_date)->get($params);
+            $debit_balance = $bf_transactions->sum('debit') - $bf_transactions->sum('credit');
+            if ($debit_balance) {
+                $record = (object) array(
+                    'id' => 0,
+                    'tr_date' => $prior_date,
+                    'tr_type' => 'bbf',
+                    'note' => 'Balance brought foward as of '. dateFormat($start_date),
+                    'debit' => $debit_balance > 0 ? $debit_balance : 0,
+                    'credit' => $debit_balance < 0 ? ($debit_balance * -1) : 0,
+                );
+                // merge balance to the rest of records within date boundary
+                $transactions = collect([$record])->merge($transactions);
+            }
 
             return $transactions;
         }
@@ -202,6 +199,21 @@ class CustomerRepository extends BaseRepository
                         'credit' => $cnote->total
                     );
                     $creditnotes->add($record);
+                }   
+            }
+            $debitnotes = collect();
+            if ($invoice->debitnotes->count()) {
+                foreach ($invoice->debitnotes as $dnote) {
+                    $i++;
+                    $record = (object) array(
+                        'id' => $i,
+                        'date' => $dnote->date,
+                        'type' => 'debit-note',
+                        'note' => '(' . $tid . ')' . ' ' . $dnote->note,
+                        'dedit' => $dnote->total,
+                        'credit' => 0,
+                    );
+                    $debitnotes->add($record);
                 }   
             }
 
