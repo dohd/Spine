@@ -64,6 +64,7 @@
             </thead>
             <tbody></tbody> 
         </table>
+
         <!-- aging -->
         <div class="aging mt-2" id="active5">
             <h5>Aging</h5>
@@ -71,7 +72,7 @@
                 <thead>
                     <tr>    
                         @foreach ([30, 60, 90, 120] as $val)
-                            <th>{{ $val }} Days</th>
+                            <th>{{ $val == 120? '120+' : $val }} Days</th>
                         @endforeach
                         <th>Total</th>
                     </tr>
