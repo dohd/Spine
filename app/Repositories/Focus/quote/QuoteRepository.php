@@ -59,9 +59,6 @@ class QuoteRepository extends BaseRepository
                 case 'Approved & Unbudgeted':
                     $q->whereNotNull('approved_by')->whereNull('project_quote_id');
                     break;
-                case 'Approved & Unbudgeted':
-                    $q->whereNotNull('approved_by')->whereNull('project_quote_id');
-                    break;
                 case 'Budgeted & Unverified':
                     $q->whereNotNull('project_quote_id')->whereNull('verified_by');
                     break;
@@ -71,8 +68,11 @@ class QuoteRepository extends BaseRepository
                 case 'Verified without LPO & Uninvoiced':
                     $q->whereNotNull('verified_by')->whereNull('lpo_id')->where('invoiced', 'No');
                     break;
+                case 'Approved without LPO & Uninvoiced':
+                    $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
             }
-            
+            $q->where('status', '!=', 'cancelled');
         }
 
         return $q->get([
@@ -162,21 +162,21 @@ class QuoteRepository extends BaseRepository
         $result = Quote::create($data);
 
         $data_items = $input['data_items'];
-        foreach ($data_items as $k => $item) {
-            $data_items[$k] = array_replace($item, [
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
                 'quote_id' => $result->id, 
                 'ins' => $result->ins,
-                'product_price' => numberClean($item['product_price']),
-                'product_subtotal' => numberClean($item['product_subtotal']),
-                'buy_price' => numberClean($item['buy_price']),
+                'product_price' => numberClean($v['product_price']),
+                'product_subtotal' => numberClean($v['product_subtotal']),
+                'buy_price' => numberClean($v['buy_price']),
             ]);
-        }
+        }, $data_items);
         QuoteItem::insert($data_items);
 
         $skill_items = $input['skill_items'];
-        foreach ($skill_items as $k => $item) {
-            $skill_items[$k] = $item + ['quote_id' => $result->id];
-        }
+        $skill_items = array_map(function ($v) use($result) {
+            return array_replace($v, ['quote_id' => $result->id]);
+        }, $skill_items);
         BudgetSkillset::insert($skill_items);
 
         DB::commit();
@@ -214,46 +214,33 @@ class QuoteRepository extends BaseRepository
         $result = $quote->update($data);
 
         $data_items = $input['data_items'];
-        $item_ids = array_reduce($data_items, function ($init, $item) {
-            $init[] = $item['id'];
-            return $init;
-        }, []);
+        // remove omitted items
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $quote->products()->whereNotIn('id', $item_ids)->delete();
 
+        // create or update items
         foreach($data_items as $item) {
-            $item = $item + ['quote_id' => $quote['id'], 'ins' => $quote['ins']];
-            $quote_item = QuoteItem::firstOrNew([
-                'id' => $item['id'],
-                'quote_id' => $item['quote_id'],
-            ]);
             foreach ($item as $key => $val) {
-                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price'], 1)) {
-                    $quote_item[$key] = numberClean($val);
-                } else $quote_item[$key] = $val;                   
+                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price']))
+                    $item[$key] = numberClean($val);
             }
-            if (!$quote_item['id']) unset($quote_item['id']);
+            $quote_item = QuoteItem::firstOrNew(['id' => $item['id']]);
+            $quote_item->fill(array_replace($item, ['quote_id' => $quote['id'], 'ins' => $quote['ins']]));
+            if (!$quote_item->id) unset($quote_item->id);
             $quote_item->save();
         }
 
         $skill_items = $input['skill_items'];
-        $skill_ids = array_reduce($data_items, function ($init, $item) {
-            $init[] = $item['id'];
-            return $init;
-        }, []);
+        // remove omitted items
+        $skill_ids = array_map(function ($v) { return $v['skill_id']; }, $skill_items);
         $quote->skill_items()->whereNotIn('id', $skill_ids)->delete();
-
+        // create or update items
         foreach($skill_items as $item) {
-            $item = $item + ['quote_id' => $quote->id];
-            $skill_item = BudgetSkillset::firstOrNew([
-                'id' => $item['skill_id'],
-                'quote_id' => $item['quote_id'],
-            ]);
-            foreach ($item as $key => $val) {
-                if ($key == 'skill_id') continue;
-                $skill_item[$key] = $val;
-            }
-            if (!$skill_item['id']) unset($skill_item['id']);
-            $skill_item->save();
+            $skillset = BudgetSkillset::firstOrNew(['id' => $item['skill_id']]);         
+            $skillset->fill(array_replace($item, ['quote_id' => $quote->id]));
+            if (!$skillset->id) unset($skillset->id);
+            unset($skillset->skill_id);
+            $skillset->save();
         }
 
         DB::commit();
