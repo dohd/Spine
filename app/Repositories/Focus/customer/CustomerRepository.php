@@ -14,7 +14,6 @@ use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -159,11 +158,15 @@ class CustomerRepository extends BaseRepository
                     $i++;
                     $reference = $pmt->paid_invoice->reference;
                     $mode = $pmt->paid_invoice->payment_mode;
+                    $pmt_tid = gen4tid('pmt-', $pmt->paid_invoice->tid);
+                    $account = $pmt->paid_invoice->account->holder;
+                    $amount = $pmt->paid_invoice->deposit;
                     $record = (object) array(
                         'id' => $i,
                         'date' => $pmt->paid_invoice->date,
                         'type' => 'payment',
-                        'note' => '(' . $tid . ')' . ' reference: ' . $reference . ' mode: ' . ucfirst($mode),
+                        'note' => '(' . $tid . ')' . ' ' . $pmt_tid . ' ' . ' reference: ' . $reference . ' mode: ' 
+                            . ucfirst($mode) . ', account: ' . $account . ', amount: ' . numberFormat($amount),
                         'debit' => 0,
                         'credit' => $pmt->paid
                     );
