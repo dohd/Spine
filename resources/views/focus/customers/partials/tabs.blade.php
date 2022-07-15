@@ -11,6 +11,9 @@
     <li class="nav-item">
         <a class="nav-link " id="active-tab4" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Statement on Invoice</a>
     </li> 
+    <li class="nav-item">
+        <a class="nav-link " id="active-tab5" data-toggle="tab" href="#active5" aria-controls="active5" role="tab">Aging Report</a>
+    </li> 
 </ul>
 <div class="tab-content px-1 pt-1">
     <!-- Customer Info -->
@@ -41,7 +44,7 @@
                 <input type="text" class="form-control form-control-sm datepicker start_date">
             </div>
             <div class="col-2">
-                <input type="text" class="form-control form-control-sm datepicker end_date">
+                <input type="text" class="form-control form-control-sm datepicker end_date" disabled>
             </div>
             <div class="col-2">
                 <input type="button" id="search2" value="Search" class="btn btn-info btn-sm search">
@@ -58,6 +61,7 @@
             </thead>
             <tbody></tbody>
         </table>
+
         <!-- Aging -->
         <div class="mt-2 aging">
             <h5>Aging Report</h5>
@@ -65,7 +69,7 @@
                 <thead>
                     <tr>                                                    
                         @foreach ([30, 60, 90, 120] as $val)
-                            <th>{{ $val }} Days</th>
+                            <th>{{ $val == 120? '120+' : $val }} Days</th>
                         @endforeach
                         <th>Aging Total</th>
                         <th style="border-top: 1px solid white; border-bottom: 1px solid white;"></th>
@@ -117,7 +121,7 @@
                 <input type="text" class="form-control form-control-sm datepicker start_date">
             </div>
             <div class="col-2">
-                <input type="text" id="end_date" class="form-control form-control-sm datepicker end_date">
+                <input type="text" id="end_date" class="form-control form-control-sm datepicker end_date" disabled>
             </div>
             <div class="col-2">
                 <input type="button" id="search4" value="Search" class="btn btn-info btn-sm search">
@@ -136,4 +140,9 @@
         </table>   
         <!-- Aging -->
     </div>
+
+    <!-- Aging -->
+    <div class="tab-pane" id="active5" aria-labelledby="link-tab5" role="tabpanel">
+        <!-- Aging -->
+    </div>    
 </div>
