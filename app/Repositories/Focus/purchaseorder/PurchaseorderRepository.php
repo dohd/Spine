@@ -53,35 +53,31 @@ class PurchaseorderRepository extends BaseRepository
         DB::beginTransaction();
 
         $order = $input['order'];
-        $rate_keys = [
-            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
-        ];
         foreach ($order as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1)) {
+            $rate_keys = [
+                'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+                'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+            ];
+            if (in_array($key, ['date', 'due_date'], 1))
                 $order[$key] = date_for_database($val);
-            }
-            if (in_array($key, $rate_keys, 1)) {
+            if (in_array($key, $rate_keys, 1)) 
                 $order[$key] = numberClean($val);
-            }
         }
         $result = Purchaseorder::create($order);
 
         $order_items = $input['order_items'];
-        foreach ($order_items as $i => $item) {
-            $item = $item + [
-                'ins' => $order['ins'],
-                'user_id' => $order['user_id'],
-                'purchaseorder_id' => $result->id
-            ];
-            foreach ($item as $key => $val) {
-                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
-                    $item[$key] = numberClean($val);
-                }
-            }
-            $order_items[$i] = $item;
-        }
+        $order_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'ins' => $result->ins,
+                'user_id' => $result->user_id,
+                'purchaseorder_id' => $result->id,
+                'rate' => numberClean($v['rate']),
+                'taxrate' => numberClean($v['taxrate']),
+                'amount' => numberClean($v['amount'])
+            ]);
+        }, $order_items);
         PurchaseorderItem::insert($order_items);
+
         DB::commit();
         
         // proof check line item totals against parent totals
@@ -106,14 +102,15 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function update($purchaseorder, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $order = $input['order'];
-        $rate_keys = [
-            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
-        ];
         foreach ($order as $key => $val) {
+            $rate_keys = [
+                'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+                'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+            ];    
             if (in_array($key, ['date', 'due_date'], 1)) 
                 $order[$key] = date_for_database($val);
             if (in_array($key, $rate_keys, 1)) 
@@ -122,29 +119,22 @@ class PurchaseorderRepository extends BaseRepository
         $purchaseorder->update($order);
 
         $order_items = $input['order_items'];
-        // delete items excluded
-        $item_ids = array_reduce($order_items, function ($init, $item) {
-            array_push($init, $item['id']);
-            return $init;
-        }, []);
+        // delete omitted items
+        $item_ids = array_map(function ($v) { return $v['id']; }, $order_items);
         $purchaseorder->products()->whereNotIn('id', $item_ids)->delete();
-
         // update or create new items
         foreach ($order_items as $item) {
-            $item = $item + [
+            $item = array_replace($item, [
                 'ins' => $order['ins'],
                 'user_id' => $order['user_id'],
-                'purchaseorder_id' => $purchaseorder->id
-            ];
-
+                'purchaseorder_id' => $purchaseorder->id,
+                'rate' => numberClean($item['rate']),
+                'taxrate' => numberClean($item['taxrate']),
+                'amount' => numberClean($item['amount'])
+            ]);
             $order_item = PurchaseorderItem::firstOrNew(['id' => $item['id']]);
-            foreach($item as $key => $val) {
-                if (in_array($key, ['rate', 'taxrate', 'amount'], 1)) {
-                    $order_item[$key] = numberClean($val);
-                } 
-                else $order_item[$key] = $val;
-            }
-            if (!$order_item->id) unset($order_item['id']);
+            $order_item->fill($item);
+            if (!$order_item->id) unset($order_item->id);
             $order_item->save();                
         }
 
@@ -163,10 +153,8 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function delete($purchaseorder)
     {
-        $po = $purchaseorder;
-        if ($po->bill && $po->bill->delete() && $po->delete())
-            return true;            
-        
+        if ($purchaseorder->delete()) return true;         
+               
         throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
     }
 

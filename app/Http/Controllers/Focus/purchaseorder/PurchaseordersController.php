@@ -143,7 +143,7 @@ class PurchaseordersController extends Controller
 
         $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
 
-        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => trans('alerts.backend.purchaseorders.updated')]);
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order updated successfully']);
     }
 
     /**
@@ -157,7 +157,7 @@ class PurchaseordersController extends Controller
     {
         $this->repository->delete($purchaseorder);
 
-        new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => trans('alerts.backend.purchaseorders.deleted')]);        
+        new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        
     }
 
 
@@ -203,7 +203,7 @@ class PurchaseordersController extends Controller
         $order['user_id'] = auth()->user()->id;
         // modify and filter items with 0 qty
         $order_items = modify_array($order_items);
-        $order_items = array_filter($order_items, function ($item) { return $item['qty']; });
+        $order_items = array_filter($order_items, function ($v) { return $v['qty']; });
 
         $result = $this->repository->create_grn($purchaseorder, compact('order', 'order_items'));
 
