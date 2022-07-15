@@ -98,8 +98,10 @@
         }
     });
 
-    // insert aging table after statement table
-    $('#stmentTbl').after($('.aging').clone());
+    // aging report clone
+    const aging = $('.aging').clone();
+    $('#stmentTbl').after(aging);
+    $('#active5').append(aging.clone());
 
     // draw data
     setTimeout(() => {
