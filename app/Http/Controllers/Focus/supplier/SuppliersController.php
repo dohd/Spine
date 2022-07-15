@@ -162,11 +162,7 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
-        $transactions = $this->repository->getTransactionsForDataTable($supplier->id);
-        $account_balance = $transactions->sum('credit') - $transactions->sum('debit');
-
-        // bill balance for each date interval
-        $aging_cluster = array_fill(0, 4, 0);
+        // 4 date intervals of between 0 - 120 days earlier 
         $intervals = array();
         for ($i = 0; $i < 4; $i++) {
             $from = date('Y-m-d');
@@ -178,18 +174,28 @@ class SuppliersController extends Controller
             }
             $intervals[] = [$from, $to];
         }
+
+        // total debt and aging balance
+        $account_balance = 0;
+        $aging_cluster = array_fill(0, 4, 0);
         $bills = $this->repository->getBillsForDataTable($supplier->id);
         foreach ($bills as $bill) {
+            $debt_amount = $bill->grandttl - $bill->amountpaid;
+            $due_date = new DateTime($bill->date);
+            // due_date between 0 - 120 days
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
                 $end = new DateTime($dates[1]);
-                $due = new DateTime($bill->date);
-                if ($start >= $due && $end <= $due) {
-                    $diff = $bill->grandttl - $bill->amountpaid;
-                    $aging_cluster[$i] += $diff;
+                if ($start >= $due_date && $end <= $due_date) {
+                    $aging_cluster[$i] += $debt_amount;
                     break;
                 }
             }
+            // due_date in 120 days plus
+            if ($due_date < new DateTime($intervals[3][1])) {
+                $aging_cluster[3] += $debt_amount;
+            }
+            $account_balance += $debt_amount;
         }
 
         return new ViewResponse('focus.suppliers.view', compact('supplier', 'account_balance', 'aging_cluster'));
