@@ -385,8 +385,7 @@
         const {data} = ui.item;
         const i = assetRowId;
         $('#assetitemid-'+i).val(data.id);
-        const cost = parseFloat(data.cost).toLocaleString();
-        $('#assetprice-'+i).val(cost).change();
+        $('#assetprice-'+i).val(0).change();
     } 
 
 
