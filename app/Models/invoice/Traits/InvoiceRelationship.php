@@ -6,12 +6,24 @@ use App\Models\creditnote\CreditNote;
 use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
+use App\Models\items\PaidInvoiceItem;
+use App\Models\items\WithholdingItem;
 
 /**
  * Class InvoiceRelationship
  */
 trait InvoiceRelationship
 {
+    public function withholding_payments()
+    {
+        return $this->hasMany(WithholdingItem::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(PaidInvoiceItem::class);
+    }
+
     public function creditnotes()
     {
         return $this->hasMany(CreditNote::class)->where('is_debit', 0);
