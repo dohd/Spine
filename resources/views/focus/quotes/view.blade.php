@@ -332,8 +332,7 @@
             $form.find('label[for=approved-by]').text('Approved By');
             $form.find('label[for=approval-date]').text('Approval Date');
             $('#approvedby').attr('placeholder', 'Approved By');
-            $('#approvedmethod').attr('disabled', false).off('mousedown');
-            $('#approveddate').attr('readonly', false).off('mousedown');
+            $('#approvedmethod').attr('disabled', false);
             $('#btn_approve').text('Approve');
 
             if ($(this).val() === 'cancelled') {
@@ -342,10 +341,7 @@
                 $('#approvedby').attr('placeholder', 'Called By');
                 $('#btn_approve').text('Cancel');
 
-                $('#approvedmethod').attr('disabled', true)
-                    .on('mousedown', function(e) { e.preventDefault(); });          
-                $('#approveddate').attr('readonly', true).datepicker('setDate', new Date())
-                    .on('mousedown', function(e) { e.preventDefault(); });   
+                $('#approvedmethod').attr('disabled', true);
             }
         });
     });
