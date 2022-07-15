@@ -53,14 +53,14 @@ class QuoteVerifyTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($quote) {
-                $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $tid = 'PI-'.$tid;
-                else $tid = 'QT-'.$tid;
+                $tid = gen4tid('QT-', $quote->tid);
+                if ($quote->bank_id) $tid = gen4tid('PI-', $quote->tid);
 
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . $quote->revision . '</a>';
             })
             ->addColumn('lead_tid', function($quote) {
-                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                if (isset($quote->lead->reference))
+                return gen4tid('Tkt-', $quote->lead->reference);
             })
             ->addColumn('customer', function ($quote) {
                 $client_name = $quote->customer ? $quote->customer->name : '';
@@ -80,21 +80,19 @@ class QuoteVerifyTableController extends Controller
                 return $quote->verified . ':';
             })
             ->addColumn('lpo_number', function($quote) {
-                return $quote->lpo ? $quote->lpo->lpo_no : '';
+                if ($quote->lpo) return 'lpo - ' . $quote->lpo->lpo_no;
             })
-            ->addColumn('tid', function($quote) {
-                $tid = '';
-                if (isset($quote->project_quote->project)) {
-                    $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->tid);
-                }
-                return $tid;
+            ->addColumn('project_tid', function($quote) {
+                if (isset($quote->project_quote->project)) 
+                return gen4tid('Prj-', $quote->project_quote->project->tid);
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-                if ($quote->verified == 'No')
+                if ($quote->verified == 'No') {
                     return '<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify">
                         <i class="fa fa-check"></i></a>';
-
+                }
+                    
                 return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print">
                     <i class="fa fa-print"></i></a> '
                     .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify">
