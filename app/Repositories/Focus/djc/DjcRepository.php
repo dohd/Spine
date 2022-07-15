@@ -73,7 +73,7 @@ class DjcRepository extends BaseRepository
         }
 
         DB::beginTransaction();
-        // close ticket
+        // close lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         // increament tid
         $last_tid =  Djc::max('tid');
@@ -125,26 +125,24 @@ class DjcRepository extends BaseRepository
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         $result = $djc->update($data);
 
-        // update or create new djc_item
         $data_items = $input['data_items'];
+        // remove omitted items
+        $item_ids = array_map(function ($v) { return $v['item_id']; }, $data_items);
+        $djc->items()->whereNotIn('id', $item_ids)->delete();
+
+        // update or create new djc_item
         foreach($data_items as $item) {
             $item = array_replace($item, [
                 'ins' => $djc->ins,
                 'last_service_date' => date_for_database($item['last_service_date']),
                 'next_service_date' => date_for_database($item['next_service_date'])
             ]);
-            
-            $djc_item = DjcItem::firstOrNew([
-                'id' => $item['item_id'],
-                'djc_id' => $djc->id,
-            ]);
-            // assign properties to the item
+            $djc_item = DjcItem::firstOrNew(['id' => $item['item_id']]);
             foreach($item as $key => $value) {
                 $djc_item[$key] = $value;
             }
-            // remove stale attributes and save
-            unset($djc_item['item_id']);
             if (!$djc_item->id) unset($djc_item->id);
+            unset($djc_item->item_id);
             $djc_item->save();
         }
 
