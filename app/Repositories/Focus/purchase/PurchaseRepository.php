@@ -50,16 +50,18 @@ class PurchaseRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        $rate_keys = [
-            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
-        ];
         foreach ($data as $key => $val) {
+            $rate_keys = [
+                'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+                'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+            ];
             if (in_array($key, ['date', 'due_date'], 1)) 
                 $data[$key] = date_for_database($val);
             if (in_array($key, $rate_keys, 1)) 
                 $data[$key] = numberClean($val);
         }
+        $tid = Purchase::max('tid');
+        if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
         $result = Purchase::create($data);
 
         $data_items = $input['data_items'];
