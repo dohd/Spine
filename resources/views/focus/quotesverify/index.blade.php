@@ -46,7 +46,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>{{ trans('customers.customer') }}</th>
-                                            <th># {{ trans('quotes.quote') }} / PI</th>
+                                            <th># Quote / PI</th>
                                             <th>Title</th>                                            
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
                                             <th>Quote / PI Date</th>
@@ -139,8 +139,8 @@
                     name: 'created_at'
                 },
                 {
-                    data: 'tid',
-                    name: 'tid'
+                    data: 'project_tid',
+                    name: 'project_tid'
                 },
                 {
                     data: 'lpo_number',
