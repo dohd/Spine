@@ -52,13 +52,10 @@ class CustomersTableController extends Controller
      */
     public function __invoke(ManageCustomerRequest $request)
     {
-        if (request('is_transaction')) 
-            return $this->invoke_transaction();
-        if (request('is_invoice')) 
-            return $this->invoke_invoice();
-        if (request('is_statement')) 
-            return $this->invoke_statement();
-
+        if (request('is_transaction')) return $this->invoke_transaction();
+        if (request('is_invoice')) return $this->invoke_invoice();
+        if (request('is_statement')) return $this->invoke_statement();
+            
         $core = $this->customer->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
@@ -83,7 +80,7 @@ class CustomersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            if ($tr->invoice && $tr->tr_type == 'inv')
+            if ($tr->tr_type == 'inv' && $tr->invoice)
                 return gen4tid('Inv-', $tr->invoice->tid) . ' - ' . $tr->invoice->notes;
             return $tr->note;
         })
