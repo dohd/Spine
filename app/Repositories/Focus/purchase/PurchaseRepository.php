@@ -108,6 +108,7 @@ class PurchaseRepository extends BaseRepository
 
         /** accounting **/
         $this->post_transaction($result);
+
         DB::commit();
 
         // proof check line item totals against parent totals
@@ -135,11 +136,11 @@ class PurchaseRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        $rate_keys = [
-            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
-        ];
         foreach ($data as $key => $val) {
+            $rate_keys = [
+                'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+                'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+            ];
             if (in_array($key, ['date', 'due_date'], 1)) 
                 $data[$key] = date_for_database($val);
             if (in_array($key, $rate_keys, 1)) 
@@ -147,16 +148,14 @@ class PurchaseRepository extends BaseRepository
         }
         $purchase->update($data);
 
-        // create or update purchase item
         $data_items = $input['data_items'];
-        foreach ($data_items as $item) {
-            $item = $item + [
-                'ins' => $purchase->ins,
-                'user_id' => $purchase->user_id,
-                'bill_id' => $purchase->id
-            ];            
-            $new_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
+        // remove omitted items
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $purchase->items()->whereNotIn('id', $item_ids)->delete();
 
+        // create or update purchase item
+        foreach ($data_items as $item) {         
+            $new_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
             // update stock product
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 // if is existing line item, else new line item
@@ -190,21 +189,24 @@ class PurchaseRepository extends BaseRepository
                     }
                 }                    
             }    
-                    
-            // add properties to new_item
-            foreach ($item as $key => $val) {
-                if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
-                    $item[$key] = numberClean($val);
-                if ($key == 'itemproject_id' && $val > 0) $item['warehouse_id'] = null;
-                elseif ($key == 'warehouse_id' && $val > 0) $item['itemproject_id'] = null;
-                $new_item[$key] = $item[$key];
-            }
+            // save updated item
+            if (isset($item['warehouse_id'])) $item['itemproject_id'] = null;
+            if (isset($item['itemproject_id'])) $item['warehouse_id'] = null;
+            $item = array_replace($item, [
+                'ins' => $purchase->ins,
+                'user_id' => $purchase->user_id,
+                'bill_id' => $purchase->id,
+                'rate' => numberClean($item['rate']),
+                'taxrate' => numberClean($item['taxrate']),
+                'amount' => numberClean($item['amount']),
+            ]);   
+            $new_item->fill($item);
             if (!$new_item->id) unset($new_item['id']);
             $new_item->save();
         }
 
         /** accounts */
-        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id, 'note' => $purchase->note])->delete();
+        $purchase->transactions()->where('note', $purchase->note)->delete();
         $this->post_transaction($purchase);
 
         DB::commit();
@@ -224,9 +226,8 @@ class PurchaseRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id, 'note' => $purchase->note])->delete();
+        $purchase->transactions()->where('note', $purchase->note)->delete();
         aggregate_account_transactions();
-        $purchase->products()->delete();
         $result = $purchase->delete();
 
         DB::commit();
