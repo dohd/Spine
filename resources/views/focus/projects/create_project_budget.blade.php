@@ -300,6 +300,7 @@
         skillItems.forEach(v => {
             let i = skillIndx;
             $('#skill-item tbody').append(skillRow(i));
+            $('#skillitemid-'+i).val(v.id);
             $('#skill-'+i).val(v.skill);
             $('#charge-'+i).val(v.charge);
             $('#hours-'+i).val(v.hours);
@@ -310,8 +311,8 @@
     } else $('#skill-item tbody').append(skillRow(0));
     // on adding skill
     $('#add-skill').click(function() {
-        skillIndx++;
         $('#skill-item tbody').append(skillRow(skillIndx));
+        skillIndx++;
     });
     // Remove skill row
     $('#skill-item').on('click', '.removeItem', function() {
