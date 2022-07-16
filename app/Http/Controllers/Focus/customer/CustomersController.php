@@ -181,7 +181,8 @@ class CustomersController extends Controller
         }
 
         // total debt and aging balance
-        $account_balance = 0;
+        $transactions = $this->repository->getTransactionsForDataTable($customer->id);
+        $account_balance = $transactions->sum('debit') - $transactions->sum('credit');
         $aging_cluster = array_fill(0, 4, 0);
         $invoices = $this->repository->getInvoicesForDataTable($customer->id);
         foreach ($invoices as $invoice) {
@@ -200,7 +201,7 @@ class CustomersController extends Controller
             if ($due_date < new DateTime($intervals[3][1])) {
                 $aging_cluster[3] += $debt_amount;
             }
-            $account_balance += $debt_amount;
+            // $account_balance += $debt_amount;
         }
 
         // advance payment transactions
