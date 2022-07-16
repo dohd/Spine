@@ -103,28 +103,25 @@ class CustomerRepository extends BaseRepository
         });       
                     
         // on date filter
-        $start_date = request('start_date');
-        $end_date = request('end_date');
-        if ($start_date && $end_date && request('is_transaction')) {
-            $start_date = date_for_database($start_date);
-            $end_date = date_for_database($end_date);
-            $prior_date = date('Y-m-d', strtotime($start_date . ' - 1 day'));
-
+        if (request('start_date') && request('is_transaction')) {
+            $from = date_for_database(request('start_date'));
+            $tr_ids = $q->pluck('id')->toArray();
+            
             $params = ['id', 'tr_date', 'tr_type', 'note', 'debit', 'credit'];
-            $transactions = Transaction::whereIn('id', $q->pluck('id'))->whereBetween('tr_date', [$start_date, $end_date])->get($params);
+            $transactions = Transaction::whereIn('id', $tr_ids)->whereBetween('tr_date', [$from, date('Y-m-d')])->get($params);
             // compute balance brought foward as of start date
-            $bf_transactions = Transaction::whereIn('id', $q->pluck('id'))->where('tr_date', '<', $start_date)->get($params);
+            $bf_transactions = Transaction::whereIn('id', $tr_ids)->where('tr_date', '<', $from)->get($params);
             $debit_balance = $bf_transactions->sum('debit') - $bf_transactions->sum('credit');
             if ($debit_balance) {
                 $record = (object) array(
                     'id' => 0,
-                    'tr_date' => $prior_date,
-                    'tr_type' => 'bbf',
-                    'note' => 'Balance brought foward as of '. dateFormat($start_date),
+                    'tr_date' => date('Y-m-d', strtotime($from . ' - 1 day')),
+                    'tr_type' => 'balance',
+                    'note' => '** Balance Brought Foward ** ',
                     'debit' => $debit_balance > 0 ? $debit_balance : 0,
                     'credit' => $debit_balance < 0 ? ($debit_balance * -1) : 0,
                 );
-                // merge balance to the rest of records within date boundary
+                // merge brought foward balance with the rest of the transactions
                 $transactions = collect([$record])->merge($transactions);
             }
 
@@ -136,9 +133,17 @@ class CustomerRepository extends BaseRepository
 
     public function getStatementForDataTable($customer_id = 0)
     {
+        $q = Invoice::where('customer_id', request('customer_id', $customer_id));
+        // date filter
+
+        return $this->generate_statement($q->get());
+    }
+
+    // generate statement
+    public function generate_statement($invoices = [])
+    {
         $i = 0;
         $statement = collect();
-        $invoices = $this->getInvoicesForDataTable($customer_id);
         foreach ($invoices as $invoice) {
             $i++;
             $tid = gen4tid('Inv-', $invoice->tid);
@@ -228,7 +233,7 @@ class CustomerRepository extends BaseRepository
             } else $statement->add($inv_record);
         }
 
-        return $statement;
+        return $statement;        
     }
 
     /**
