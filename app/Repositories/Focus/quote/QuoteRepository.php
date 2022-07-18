@@ -17,6 +17,7 @@ use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class QuoteRepository.
@@ -258,10 +259,12 @@ class QuoteRepository extends BaseRepository
      */
     public function delete($quote)
     {
-        if ($quote->project_quote) return false;
+        $type = $quote->bank_id ? 'PI' : 'Quote';
+        if ($quote->project_quote) 
+            throw new ValidationException([$type . ' is attached to a project!']);
         if ($quote->delete()) {
             $quote->lead->update(['status' => 0, 'reason' => 'new']);
-            return true;
+            return $type;
         }
 
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
