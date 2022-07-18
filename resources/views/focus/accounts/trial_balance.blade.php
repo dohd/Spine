@@ -95,8 +95,13 @@
                                     @for ($i = 0; $i < 3; $i++)
                                         <td></td>
                                     @endfor 
-                                    @foreach ([$debit_total, $credit_total] as $val)
-                                        <td><h3 class="text-xl-left">{{ amountFormat($val) }}</h3></td>
+                                    @foreach ([$debit_total, $credit_total] as $i => $val)
+                                        <td>
+                                            <span class="text-xl-left h3">{{ amountFormat($val) }}</span>&nbsp;
+                                            @if (!$i && round($debit_total - $credit_total))
+                                                <span class="text-danger h5">({{ $debit_total - $credit_total }})</span>
+                                            @endif
+                                        </td>
                                     @endforeach                                       
                                 </tr>
                             </tbody>
