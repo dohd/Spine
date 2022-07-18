@@ -54,6 +54,10 @@
     const projectName = "{{ $purchase->project? $purchase->project->name : '' }}";
     const projectId = "{{ $purchase->project_id }}";
     $('#project').append(new Option(projectName, projectId, true, true)).change();
+    // expense tab row 1
+    let rowItems = @json($purchase->products);
+    rowItems = rowItems.filter(v => v.type == 'Expense');
+    $('#projectexptext-0').val(rowItems[0]['project']?.name);
 
     // if amount is tax exclusive
     const isTaxExc =  @json($purchase->is_tax_exc);
