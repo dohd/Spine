@@ -108,8 +108,8 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($quote->products as $item)
-                                            @if ($item['a_type'] == 1)                                               
-                                                <tr>
+                                            @if ($item->a_type == 1)                                               
+                                                <tr class="{{ !$item->misc ?: 'text-danger' }}">
                                                     <td scope="row">{{ $item['numbering'] }}</td>
                                                     <td>
                                                         <p>{{$item['product_name']}}</p>
@@ -282,22 +282,31 @@
 
     // on delete Quote
     $('.quote-delete').click(function() {
-        $(this).children('form').submit();
-    });
-    // on cancel Quote
-    $('.quote-cancel').click(function() {
-        $(this).children('form').submit();
-    });
-    // On close quote
-    $('#closeQuote').click(function() { 
+        const form = $(this).children('form');
         swal({
             title: 'Are You  Sure?',
             icon: "warning",
             buttons: true,
             dangerMode: true,
             showCancelButton: true,
-        }, () => $('#closeQuote').children().submit());
+        }, () => form.submit());
     });
+
+    // on cancel Quote
+    $('.quote-cancel').click(function() {
+        $(this).children('form').submit();
+    });
+
+    // On close quote
+    // $('#closeQuote').click(function() { 
+    //     swal({
+    //         title: 'Are You  Sure?',
+    //         icon: "warning",
+    //         buttons: true,
+    //         dangerMode: true,
+    //         showCancelButton: true,
+    //     }, () => $('#closeQuote').children().submit());
+    // });
 
     // On Approve Quote
     $('.quote-approve').click(function(e) {
