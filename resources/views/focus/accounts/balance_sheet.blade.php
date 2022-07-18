@@ -157,7 +157,7 @@
                                                     = {{ numberFormat($equity_bal - $net_profit) }} + ({{ numberFormat($net_profit) }}) + {{ numberFormat($liability_bal) }} <br>
                                                     <span style="visibility: hidden;">{{ numberFormat($equity_bal + $liability_bal) }}</span> 
                                                     = {{ numberFormat($equity_bal + $liability_bal) }}
-                                                    @if ($asset_bal != $equity_bal + $liability_bal)
+                                                    @if (round($asset_bal) != round($equity_bal + $liability_bal))
                                                         <span class="text-danger h5">(Asset diff: {{ numberFormat($asset_bal - ($equity_bal + $liability_bal)) }})</span> 
                                                     @endif
                                                 </h3>
