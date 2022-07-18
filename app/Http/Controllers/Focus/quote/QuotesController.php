@@ -95,7 +95,7 @@ class QuotesController extends Controller
         ]);
         $data_items = $request->only([
             'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
-            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 
+            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 'misc'
         ]);
         $skill_items = $request->only(['skill', 'charge', 'hours', 'no_technician' ]);
             
@@ -147,7 +147,7 @@ class QuotesController extends Controller
         ]);
         $data_items = $request->only([
             'id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
-            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 
+            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 'misc'
         ]);
         $skill_items = $request->only(['skill_id', 'skill', 'charge', 'hours', 'no_technician' ]);
 
@@ -182,12 +182,10 @@ class QuotesController extends Controller
 
         $link = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.deleted');
-        if ($quote->bank_id) {
+        if ($res == 'PI') {
             $link = route('biller.quotes.index', 'page=pi');
             $msg = 'The Proforma Invoice was successfully deleted';
         }
-
-        if (!$res) return new RedirectResponse($link, ['flash_error' => 'Quote/PI is attached to a project']);
 
         return new RedirectResponse($link, ['flash_success' => $msg]);
     }
