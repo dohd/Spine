@@ -69,25 +69,27 @@
             $('#customer_id').val(opt.attr('customer_id'));
             subject.title = opt.attr('title');
         } else subject.djc = $(this).val();
+        // subject
         if (subject.title && subject.djc) $('#subject').val(subject.title + ' ; Djc-' + subject.djc);
         else if (subject.title) $('#subject').val(subject.title);
     });
 
     // calculate profit
-    const profitState = {sp_ttl: 0, bp_subttl: 0, skill_ttl: 0};
+    const profitState = {sp_total: 0, bp_subtotal: 0, skill_total: 0};
     function calcProfit() {
-        const {sp_ttl, bp_ttl, skill_ttl} = profitState;
-        const profit = parseFloat((sp_ttl - bp_ttl - skill_ttl).toFixed(2));
-        const pcent = Math.round(profit/bp_ttl * 100);
+        const {sp_total, bp_total, skill_total} = profitState;
+        const profit = parseFloat((sp_total - bp_total - skill_total).toFixed(2));
+        const pcent_profit = Math.round(profit/bp_total * 100);
 
-        const profitText = bp_ttl > 0 ?  profit.toLocaleString() + ' : ' + pcent + '%' : profit.toLocaleString();
+        const profitText = bp_total > 0 ? 
+            `${profit.toLocaleString()} : ${pcent_profit}%` : profit.toLocaleString();
         $('.profit').text(profitText);
 
         if (profit < 0) $('.profit').removeClass('text-dark').addClass('text-danger');
         else $('.profit').removeClass('text-danger').addClass('text-dark');
 
         // budget limit 30 percent
-        if (sp_ttl < bp_ttl * 1.3) {
+        if (sp_total < bp_total * 1.3) {
             $('.budget-alert').removeClass('d-none');
             scroll(0, 0);
         } else $('.budget-alert').addClass('d-none');
@@ -100,11 +102,11 @@
     // default autocomplete
     $("#quoteTbl tbody tr").each(function() {
         const id = $(this).find('.pname').attr('id');
-        if (id) {
+        if (id > 0) {
             const i = id.split('-')[1];
             $('#name-'+i).autocomplete(autoComp(i));
         }
-    })
+    });
 
     // on clicking action drop down
     $("#quoteTbl").on("click", ".up, .down, .remv", function() {
@@ -114,18 +116,6 @@
         if ($(this).is('.remv')) {
             if (confirm('Are you sure?')) $(this).closest('tr').remove();
         }
-        calcTotal();
-    });
-    // add product
-    const rowHtml = $("#productRow").html();
-    $("#productRow").remove();
-    let rowId = $("#quoteTbl tbody tr").length;
-    $('#addProduct').click(function() {
-        const i = 'p' + rowId;
-        const newRowHtml = '<tr>' + rowHtml.replace(/p0/g, i) + '</tr>';
-        $("#quoteTbl tbody").append(newRowHtml);
-        $('#name-'+i).autocomplete(autoComp(i));
-        rowId++;
         calcTotal();
     });
 
@@ -141,25 +131,56 @@
         calcTotal();
     });
 
+    // add product
+    const rowHtml = $("#productRow").html();
+    $("#productRow").remove();
+    let rowId = $("#quoteTbl tbody tr").length;
+    $('#addProduct').click(function() {
+        const i = 'p' + rowId;
+        const newRowHtml = '<tr>' + rowHtml.replace(/p0/g, i) + '</tr>';
+        $("#quoteTbl tbody").append(newRowHtml);
+        $('#name-'+i).autocomplete(autoComp(i));
+        rowId++;
+        calcTotal();
+    });
+
+    // add miscellaneous product
+    $('#addMisc').click(function() {
+        const i = 'p' + rowId;
+        const newRowHtml = `<tr class="misc"> ${rowHtml.replace(/p0/g, i)} </tr>`;
+        $("#quoteTbl tbody").append(newRowHtml);
+        $('#name-'+i).autocomplete(autoComp(i));
+        $('#qty-'+i).val(1).attr('readonly', true);
+        $('#rate-'+i).attr('readonly', true);
+        rowId++;
+        calcTotal();
+    });
+
     // on change qty and rate
     $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty", function() {
         const id = $(this).attr('id').split('-')[1];
+        const tax = $('#tax_id').val()/100 + 1;
         const qty = $('#qty-'+id).val() || '0';
+        let buyprice = $('#buyprice-'+id).val() || '0';
+        let estqty = $('#estqty-'+id).val() || '1';
         let rate = $('#rate-'+id).val() || '0';
-        let price = rate.replace(/,/g, '') * ($('#tax_id').val()/100 + 1);
-        const amount = parseFloat((qty * price).toFixed(2)).toLocaleString();
 
+        buyprice = buyprice.replace(/,/g, '') * 1;
+        estqty = estqty.replace(/,/g, '') * 1;
         rate = rate.replace(/,/g, '') * 1;
+
+        let price = rate * tax;
+        let profit = (qty * price) - (estqty * buyprice);
+        let pcent_profit = Math.round(profit / (estqty * buyprice) * 100);
+
+        let amount = parseFloat((qty * price).toFixed(2)).toLocaleString();
         rate = parseFloat(rate.toFixed(2)).toLocaleString();
         price = parseFloat(price.toFixed(2)).toLocaleString();
-
         $('#rate-'+id).val(rate);
         $('#price-'+id).val(price);
         $('#amount-'+id).text(amount);
+        $('#lineprofit-'+id).text(pcent_profit + '%');
 
-        if (!qty) $('#qty-'+id).val(1);
-        if (!$('#buyprice-'+id).val()) $('#buyprice-'+id).val(0);
-        if (!$('#estqty-'+id).val()) $('#estqty-'+id).val(1);
         calcTotal();
     });
 
@@ -183,28 +204,31 @@
 
     // compute totals
     function calcTotal() {
-        let grandttl = 0;
-        let subttl = 0;
-        let bp_subttl = 0;
+        let total = 0;
+        let subtotal = 0;
+        let bp_subtotal = 0;
         $("#quoteTbl tbody tr").each(function(i) {
-            $(this).find('.index').val(i);
+            const isMisc = $(this).hasClass('misc');
             const qty = $(this).find('.qty').val() * 1;
             if (qty > 0) {
-                const amount = $(this).find('.amount').text().replace(/,/g, '');
-                const rate = $(this).find('.rate').val().replace(/,/g, '');
-                grandttl += amount * 1;
-                subttl += qty * rate;
-                
+                if (!isMisc) {
+                    const amount = $(this).find('.amount').text().replace(/,/g, '');
+                    const rate = $(this).find('.rate').val().replace(/,/g, '');
+                    total += amount * 1;
+                    subtotal += qty * rate;
+                }
+                // profit variables
                 const buyprice = $(this).find('.buyprice').val().replace(/,/g, '');
                 const estqty = $(this).find('.estqty').val();
-                bp_subttl += estqty * buyprice;
+                bp_subtotal += estqty * buyprice;
             }
+            $(this).find('.index').val(i);
         });
-        $('#total').val(parseFloat(grandttl.toFixed(2)).toLocaleString());
-        $('#subtotal').val(parseFloat(subttl.toFixed(2)).toLocaleString());
-        $('#tax').val(parseFloat((grandttl - subttl).toFixed(2)).toLocaleString());
-        profitState.bp_ttl = bp_subttl;
-        profitState.sp_ttl = subttl;
+        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
+        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
+        $('#tax').val(parseFloat((total - subtotal).toFixed(2)).toLocaleString());
+        profitState.bp_total = bp_subtotal;
+        profitState.sp_total = subtotal;
         calcProfit();        
     }
 
@@ -239,6 +263,7 @@
                 $('#qty-'+i).val(1);                
                 const buyprice = data.purchase_price.replace(/,/g, '')*1;
                 $('#buyprice-'+i).val(parseFloat(buyprice.toFixed(2)).toLocaleString()); 
+                $('#estqty-'+i).val(1);
 
                 const rate = data.price.replace(/,/g, '')*1;
                 $('#rate-'+i).val(parseFloat(rate.toFixed(2)).toLocaleString());
@@ -294,8 +319,8 @@
             total += amount;
             $(this).find('.amount').text(amount);
         });
-        $('#skill_ttl').val(total.toLocaleString());
-        profitState.skill_ttl = total;
+        $('#skill_total').val(total.toLocaleString());
+        profitState.skill_total = total;
         calcProfit();
     }
     skillTotal();
