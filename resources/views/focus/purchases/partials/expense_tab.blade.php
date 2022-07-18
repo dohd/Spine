@@ -14,7 +14,10 @@
         <tbody>
             <!-- layout -->
             <tr>
-                <td><input type="text" class="form-control accountname" name="name[]" id="accountname-0" placeholder="Enter Ledger Account" autocomplete="off"></td>
+                <td>
+                    <input type="text" class="form-control accountname" name="name[]" id="accountname-0" placeholder="Enter Ledger Account" autocomplete="off">
+                    <input type="hidden" id="expitemid-0" name="item_id[]">
+                </td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
                 <td>
@@ -29,12 +32,12 @@
                 <td class="text-center"><span class="exp_tax" id="exptax-0">0</span></td>
                 <td>{{config('currency.symbol')}} <b><span class="exp_amount" id="expamount-0">0</span></b></td>
                 <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square"></i></button></td>
-                <input type="hidden" id="expitemid-0" name="item_id[]">
                 <input type="hidden" class="exptaxr" name="taxrate[]">
                 <input type="hidden" class="expamountr" name="amount[]">
                 <input type="hidden" name="type[]" value="Expense">
                 <input type="hidden" name="id[]" value="0">
                 <input type="hidden" name="uom[]">
+                <input type="hidden" name="warehouse_id[]">
             </tr>
             <tr>
                 <td colspan="3">
@@ -74,6 +77,7 @@
                             <input type="hidden" name="type[]" value="Expense">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                             <input type="hidden" name="uom[]">
+                            <input type="hidden" name="warehouse_id[]">
                         </tr>
                         <tr>
                             <td colspan="3">

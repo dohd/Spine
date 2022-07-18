@@ -35,6 +35,7 @@
                 <input type="hidden" name="type[]" value="Asset">
                 <input type="hidden" name="id[]" value="0">
                 <input type="hidden" name="uom[]">
+                <input type="hidden" name="warehouse_id[]">
             </tr>
             <tr>
                 <td colspan="3">
@@ -74,6 +75,7 @@
                             <input type="hidden" name="type[]" value="Asset">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                             <input type="hidden" name="uom[]">
+                            <input type="hidden" name="warehouse_id[]">
                         </tr>
                         <tr>
                             <td colspan="3">
