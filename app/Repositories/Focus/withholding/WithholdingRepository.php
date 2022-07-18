@@ -106,14 +106,11 @@ class WithholdingRepository extends BaseRepository
         Transaction::create($cr_data);
 
         // debit Withholding
-        $q = Account::query();
-        $q->when($result->certificate == 'vat', function ($q) {
+        $account = Account::when($result->certificate == 'vat', function ($q) {
             $q->where('system', 'withholding_vat');
-        });
-        $q->when($result->certificate == 'tax', function ($q) {
+        })->when($result->certificate == 'tax', function ($q) {
             $q->where('system', 'withholding_inc');
-        });
-        $account = $q->first();
+        })->first();
 
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
@@ -147,18 +144,16 @@ class WithholdingRepository extends BaseRepository
     public function delete($withholding)
     {
         DB::beginTransaction();
-        
         // decrement invoice amount paid and update status
         foreach ($withholding->items as $item) {
             if ($item->invoice) {
                 $invoice = $item->invoice;
                 $invoice->decrement('amountpaid', $item->paid);
-                if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
                 elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
+                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
             }
         }
-        $withholding->items()->delete();
         $withholding->transactions()->delete();
         aggregate_account_transactions();
         $result = $withholding->delete();
