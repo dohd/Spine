@@ -204,13 +204,12 @@
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
-				@php
-					$tid = sprintf('%04d', $resource->tid);
+				@php					
 					$field_name = 'Quotation No';
-					$field_value = 'QT-' . $tid;
+					$field_value =  gen4tid('QT-', $resource->tid);
 					if ($resource->bank_id) {
 						$field_name = 'Proforma No';
-						$field_value = 'PI-' . $tid;
+						$field_value = gen4tid('PI-', $resource->tid);
 					}
 				@endphp
 				<b>{{ $field_name }} :</b> {{ $field_value . $resource->revision }}<br><br>		
@@ -238,6 +237,9 @@
 		</thead>
 		<tbody>
 			@foreach($resource->products as $product)
+				@php 
+					if ($product->misc) continue;
+				@endphp
 				@if ($product->a_type == 1)	
 					<tr>
 						<td>{{ $product->numbering }}</td>
@@ -260,7 +262,7 @@
 							<td></td>
 						@endfor
 					</tr>
-				@endif				
+				@endif					
 			@endforeach
 			<!-- 20 dynamic empty rows -->
 			@for ($i = count($resource->products); $i < 15; $i++)
