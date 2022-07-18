@@ -394,18 +394,14 @@ class ProjectsController extends Controller
 
         $k = $request->post('keyword');
 
-        $projects = Project::where('name', 'LIKE', '%'.$k.'%')
-            ->orWhere('tid', $k)
-            ->orwhereHas('quote', function ($q) use($k) {
-                $q->where('tid', $k);
-            })
-            ->orWhereHas('customer', function ($q) use ($k) {
-                $q->where('company', 'LIKE', '%'.$k.'%');
-            })
-            ->orWhereHas('branch', function ($q) use ($k) {
-                $q->where('name', 'LIKE', '%'.$k.'%');
-            })         
-            ->limit(6)->get();
+        $projects = Project::orwhereHas('quote', function ($q) use($k) {
+            $q->where('tid', $k);
+        })->orWhereHas('branch', function ($q) use ($k) {
+            $q->where('name', 'LIKE', '%'.$k.'%');
+        })->orWhereHas('customer_project', function ($q) use ($k) {
+            $q->where('company', 'LIKE', '%'.$k.'%');
+        })->orwhere('name', 'LIKE', '%'.$k.'%')->orWhere('tid', $k)         
+        ->limit(6)->get();
         
         // response format
         $output = array();
