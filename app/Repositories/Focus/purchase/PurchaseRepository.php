@@ -69,8 +69,8 @@ class PurchaseRepository extends BaseRepository
             foreach ($item as $key => $val) {
                 if (in_array($key, ['rate', 'taxrate', 'amount'], 1))
                     $item[$key] = numberClean($val);
-                if ($key == 'itemproject_id' && $val > 0) $item['warehouse_id'] = null;
-                elseif ($key == 'warehouse_id' && $val > 0) $item['itemproject_id'] = null;
+                if (isset($item['itemproject_id'])) $item['warehouse_id'] = null;
+                if (isset($item['warehouse_id'])) $item['itemproject_id'] = null;
             }
             $data_items[$i] = array_replace($item, [
                 'ins' => $result->ins,
