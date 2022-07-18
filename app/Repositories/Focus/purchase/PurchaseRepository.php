@@ -226,16 +226,19 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        $purchase->transactions()->where('note', $purchase->note)->delete();
-        aggregate_account_transactions();
-        $result = $purchase->delete();
+            $purchase->transactions()->where('note', $purchase->note)->delete();
+            aggregate_account_transactions();
+            $purchase->delete();
 
-        DB::commit();
-        if ($result) return true;            
-            
-        throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
+        }
     }
 
     // Account transaction
