@@ -200,7 +200,7 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
-            $('.projectstock').autocomplete(predict(projectUrl, projectExpSelect));
+            $('.projectstock').autocomplete(predict(projectUrl, projectStockSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectstocktext-'+i).val(projectText);
             $('#projectstockval-'+i).val($("#project option:selected").val());
@@ -272,19 +272,27 @@
         $('#stock_subttl').val((grandTotal - tax).toLocaleString());
         transxnCalc();
     }
+
+    // stock and project autocomplete
+    let stockNameRowId = 0;
+    let projectStockRowId = 0;
     function stockSelect(event, ui) {
         const {data} = ui.item;
-        const i = stockRowId;
+        const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
-        const price = data.purchase_price.replace(/,/g, '');
-        $('#price-'+i).val((price*1).toLocaleString()).change();
         $('#stockdescr-'+i).val(data.name);
+        const price = data.purchase_price.replace(/,/g, '') * 1;
+        $('#price-'+i).val(price.toLocaleString()).change();
     }
     function projectStockSelect(event, ui) {
         const {data} = ui.item;
-        const i = stockRowId;
-        $('#projectstockval-'+i).val(data.id);
+        $('#projectstockval-'+projectStockRowId).val(data.id);
     }
+    $('#stockTbl').on('mouseup', '.projectstock, .stockname', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.projectstock')) projectStockRowId = id;
+        if ($(this).is('.stockname')) stockNameRowId = id;
+    });    
 </script>
 
 <!-- Expense Tab -->
@@ -381,16 +389,23 @@
         $('#exp_subttl').val((totalInc - tax).toLocaleString());
         transxnCalc();
     }
+    
+    // account and project autocomplete
+    let accountRowId = 0;
+    let projectExpRowId = 0;
     function expSelect(event, ui) {
         const {data} = ui.item;
-        const i = expRowId;
-        $('#expitemid-'+i).val(data.id);
+        $('#expitemid-'+accountRowId).val(data.id);
     }
     function projectExpSelect(event, ui) {
         const {data} = ui.item;
-        const i = expRowId;
-        $('#projectexpval-'+i).val(data.id);
+        $('#projectexpval-'+projectExpRowId).val(data.id);
     }
+    $('#expTbl').on('mouseup', '.projectexp, .accountname', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.projectexp')) projectExpRowId = id;
+        if ($(this).is('.accountname')) accountRowId = id;
+    });
 </script>
 
 <!-- Asset Tab -->
@@ -418,7 +433,7 @@
 
             $('#assetTbl tbody tr:eq(-3)').before(html);
             $('.assetname').autocomplete(predict(assetUrl, assetSelect));
-            $('.projectasset').autocomplete(predict(projectUrl, projectExpSelect));
+            $('.projectasset').autocomplete(predict(projectUrl, projectAssetSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectassettext-'+i).val(projectText);
             $('#projectassetval-'+i).val($("#project option:selected").val());
@@ -487,15 +502,23 @@
         $('#asset_grandttl').val((totalInc).toLocaleString());
         transxnCalc();
     }
+
+    // asset and project autocomplete
+    let assetNameRowId = 0;
+    let projectAssetRowId = 0;
     function assetSelect(event, ui) {
         const {data} = ui.item;
-        const i = assetRowId;
+        const i = assetNameRowId;
         $('#assetitemid-'+i).val(data.id);
         $('#assetprice-'+i).val(0).change();
     } 
     function projectAssetSelect(event, ui) {
         const {data} = ui.item;
-        const i = assetRowId;
-        $('#projectassetval-'+i).val(data.id);
+        $('#projectassetval-'+projectAssetRowId).val(data.id);
     }
+    $('#assetTbl').on('mouseup', '.projectasset, .assetname', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.projectasset')) projectAssetRowId = id;
+        if ($(this).is('.assetname')) assetNameRowId = id;
+    });    
 </script>
