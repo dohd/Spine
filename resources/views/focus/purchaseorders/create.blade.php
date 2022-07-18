@@ -206,16 +206,22 @@
         $('#stock_subttl').val((grandTotal - tax).toLocaleString());
         transxnCalc();
     }
+
+    // stock select autocomplete
+    let stockNameRowId = 0;
     function stockSelect(event, ui) {
         const {data} = ui.item;
-        const i = stockRowId;
+        const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
-        const price = data.purchase_price.replace(/,/g, '');
-        $('#price-'+i).val((price*1).toLocaleString()).change();
         $('#stockdescr-'+i).val(data.name);
+        const price = data.purchase_price.replace(/,/g, '') * 1;
+        $('#price-'+i).val(price.toLocaleString()).change();
     }
+    $('#stockTbl').on('mouseup', '.stockname', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.stockname')) stockNameRowId = id;
+    });    
 
-    
     /**
      * Expense Tab
      */
@@ -288,9 +294,12 @@
         $('#exp_grandttl').val((totalInc).toLocaleString());
         transxnCalc();
     }
+
+    // account and project autocomplete
+    let accountRowId = 0;
     function expSelect(event, ui) {
         const {data} = ui.item;
-        const i = expRowId;
+        const i = accountRowId;
         $('#expitemid-'+i).val(data.id);
     }
     function projectExpSelect(event, ui) {
@@ -298,6 +307,10 @@
         const i = expRowId;
         $('#projectexpval-'+i).val(data.id);
     }
+    $('#expTbl').on('mouseup', '.accountname', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.accountname')) accountRowId = id;
+    });
 
     /**
      * Asset tab
@@ -366,13 +379,19 @@
         $('#asset_grandttl').val((totalInc).toLocaleString());
         transxnCalc();
     }
+
+    // asset and project autocomplete
+    let assetNameRowId = 0;
     function assetSelect(event, ui) {
         const {data} = ui.item;
-        const i = assetRowId;
+        const i = assetNameRowId;
         $('#assetitemid-'+i).val(data.id);
         $('#assetprice-'+i).val(0).change();
     } 
-
+    $('#assetTbl').on('mouseup', '.assetname', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.assetname')) assetNameRowId = id;
+    });    
 
     // autocomplete config method
     function predict(url, callback) {
