@@ -133,14 +133,13 @@ class DjcRepository extends BaseRepository
         // update or create new djc_item
         foreach($data_items as $item) {
             $item = array_replace($item, [
+                'djc_id' => $djc->id,
                 'ins' => $djc->ins,
                 'last_service_date' => date_for_database($item['last_service_date']),
                 'next_service_date' => date_for_database($item['next_service_date'])
             ]);
             $djc_item = DjcItem::firstOrNew(['id' => $item['item_id']]);
-            foreach($item as $key => $value) {
-                $djc_item[$key] = $value;
-            }
+            $djc_item->fill($item);
             if (!$djc_item->id) unset($djc_item->id);
             unset($djc_item->item_id);
             $djc_item->save();
