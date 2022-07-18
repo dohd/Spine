@@ -90,9 +90,6 @@ class QuotesTableController extends Controller
                 $tid = 'NIL:';
                 if (isset($quote->invoice_product->invoice)) {
                     $tid = gen4tid('Inv-', $quote->invoice_product->invoice->tid);
-                    $proj_no = gen4tid('Prj-', $quote->project_quote->project->tid);
-                    if ($quote->closed_by) $tid .= ' closed-' . $proj_no;
-                    else $tid .= ' open-' . $proj_no;
                 }
                 
                 return $quote->verified . ':; <br>' . $tid;

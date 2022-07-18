@@ -63,6 +63,7 @@
                                 <th>Title</th>                                                                       
                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
                                 <th>Client Ref</th>
+                                <th>Verified</th>
                                 <th>Ticket No</th>
                                 <th>{{ trans('labels.general.actions') }}</th>
                             </tr>
@@ -142,6 +143,10 @@
                 {
                     data: 'client_ref',
                     name: 'client_ref'
+                },
+                {
+                    data: 'verified',
+                    name: 'verified'
                 },
                 {
                     data: 'lead_tid',
