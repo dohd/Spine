@@ -167,12 +167,12 @@
                 </select>               
             </div>
             <div class="col-4">
-                <label for="taxFormat" >{{trans('general.tax')}}</label>
+                <label for="taxFormat" >{{ trans('general.tax') }}</label>
                 <select class="form-control" name='tax_id' id="tax_id">
                     @foreach ([16, 8, 0] as $val)
-                    <option value="{{ $val }}" {{ $val == 16 ? 'selected' : '' }}>
-                        {{ $val ? $val .'% VAT' : 'Off' }}
-                    </option>
+                        <option value="{{ $val }}" {{ @$quote && $val == @$quote->tax_id ? 'selected' : '' }}>
+                            {{ $val ? $val .'% VAT' : 'Off' }}
+                        </option>
                     @endforeach                                            
                 </select>
                 <input type="hidden" name="tax_format" value="exclusive" id="tax_format">
