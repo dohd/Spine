@@ -312,8 +312,9 @@ class InvoiceRepository extends BaseRepository
             // update payment status in invoices
             foreach ($result->items as $item) {            
                 $invoice = $item->invoice;
-                if ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
             }
         } else {
             // payment on account
