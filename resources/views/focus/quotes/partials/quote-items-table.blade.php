@@ -96,7 +96,7 @@
                         <td><input type="number" class="form-control qty {{ !$item->misc ?: 'invisible' }}" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required></td>
                         <td><input type="text" class="form-control rate {{ !$item->misc ?: 'invisible' }}" name="product_subtotal[]" value="{{ numberFormat($item->product_subtotal) }}" id="rate-p{{$k}}" required></td>
                         <td><input type="text" class="form-control price {{ !$item->misc ?: 'invisible' }}" name="product_price[]" value="{{ numberFormat($item->product_price) }}" id="price-p{{$k}}" readonly></td>
-                        <td class='text-center'>
+                        <td class="text-center {{ !$item->misc ?: 'invisible' }}">
                             <span class="amount" id="amount-p{{$k}}">0</span>&nbsp;&nbsp;
                             <span class="lineprofit text-info" id="lineprofit-p{{$k}}">0%</span>
                         </td>

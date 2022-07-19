@@ -153,6 +153,8 @@
         $('#qty-'+i).val(1).css('visibility', 'hidden');
         $('#rate-'+i).css('visibility', 'hidden');
         $('#price-'+i).css('visibility', 'hidden');
+        $('#amount-'+i).css('visibility', 'hidden');
+        $('#lineprofit-'+i).css('visibility', 'hidden');
         rowId++;
         calcTotal();
     });
