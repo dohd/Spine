@@ -26,7 +26,7 @@
                                 <td>
                                     <select class="form-control type" name="skill[]" id="skill-0">
                                         <option value="">-- Select Skill --</option>                        
-                                        @foreach (['casual', 'contract', 'outsourced'] as $val)
+                                        @foreach (['casual', 'contract', 'attachee', 'outsourced'] as $val)
                                             <option value="{{ $val }}">
                                                 {{ ucfirst($val) }}
                                             </option>    
@@ -48,7 +48,7 @@
                                     <td>
                                         <select class="form-control type" name="skill[]" id="skill-{{$k}}" required>
                                             <option value="">-- Select Skill --</option> 
-                                            @foreach (['casual', 'contract', 'outsourced'] as $val)
+                                            @foreach (['casual', 'contract', 'attachee', 'outsourced'] as $val)
                                                 <option value="{{ $val }}" {{ $val == $item->skill ? 'selected' : ''}}>
                                                     {{ ucfirst($val) }}
                                                 </option>    
