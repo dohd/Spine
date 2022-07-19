@@ -148,6 +148,13 @@
                     method: "POST",
                     data: {keyword: request.term, pricegroup_id: $('#pricegroup_id').val()},
                     success: data => {
+                        let defaultOpt = {
+                            id: null, 
+                            name: 'None',
+                            client_id: null, 
+                            branch_id: null
+                        };
+                        data.splice(0, 0, defaultOpt);
                         response(data.map(v => ({
                             label: v.name,
                             value: v.name,
