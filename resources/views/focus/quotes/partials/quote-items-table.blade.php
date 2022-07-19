@@ -93,9 +93,9 @@
                         <td><input type="text" class="form-control" name="unit[]" value="{{ $item->unit }}" id="unit-p{{$k}}"></td>    
                         <td><input type="number" class="form-control estqty" name="estimate_qty[]" value="{{ number_format($item->estimate_qty, 1) }}" id="estqty-p{{$k}}" step="0.1" required></td>  
                         <td><input type="text" class="form-control buyprice" name="buy_price[]" value="{{ numberFormat($item->buy_price) }}" id="buyprice-p{{$k}}" required></td>          
-                        <td><input type="number" class="form-control qty" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required {{ !$item->misc ?: 'readonly' }}></td>
-                        <td><input type="text" class="form-control rate" name="product_subtotal[]" value="{{ numberFormat($item->product_subtotal) }}" id="rate-p{{$k}}" required {{ !$item->misc ?: 'readonly' }}></td>
-                        <td><input type="text" class="form-control price" name="product_price[]" value="{{ numberFormat($item->product_price) }}" id="price-p{{$k}}" readonly></td>
+                        <td><input type="number" class="form-control qty {{ !$item->misc ?: 'invisible' }}" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required></td>
+                        <td><input type="text" class="form-control rate {{ !$item->misc ?: 'invisible' }}" name="product_subtotal[]" value="{{ numberFormat($item->product_subtotal) }}" id="rate-p{{$k}}" required></td>
+                        <td><input type="text" class="form-control price {{ !$item->misc ?: 'invisible' }}" name="product_price[]" value="{{ numberFormat($item->product_price) }}" id="price-p{{$k}}" readonly></td>
                         <td class='text-center'>
                             <span class="amount" id="amount-p{{$k}}">0</span>&nbsp;&nbsp;
                             <span class="lineprofit text-info" id="lineprofit-p{{$k}}">0%</span>

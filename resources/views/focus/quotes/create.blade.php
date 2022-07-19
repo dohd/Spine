@@ -133,8 +133,9 @@
         const newRowHtml = `<tr class="misc"> ${rowHtml.replace(/p0/g, i)} </tr>`;
         $("#quoteTbl tbody").append(newRowHtml);
         $('#name-'+i).autocomplete(autoComp(i));
-        $('#qty-'+i).val(1).attr('readonly', true);
-        $('#rate-'+i).attr('readonly', true);
+        $('#qty-'+i).val(1).css('visibility', 'hidden');
+        $('#rate-'+i).css('visibility', 'hidden');
+        $('#price-'+i).css('visibility', 'hidden');
         rowId++;
         calcTotal();
     });
@@ -152,8 +153,9 @@
         estqty = estqty.replace(/,/g, '') * 1;
         rate = rate.replace(/,/g, '') * 1;
 
+        // row item % profit
         let price = rate * tax;
-        let profit = (qty * price) - (estqty * buyprice);
+        let profit = (qty * rate) - (estqty * buyprice);
         let pcent_profit = Math.round(profit / (estqty * buyprice) * 100);
 
         let amount = parseFloat((qty * price).toFixed(2)).toLocaleString();
@@ -268,12 +270,15 @@
     });
     $('#skillTbl').on('change', '.type, .chrg, .hrs, .tech', function() {
         const row = $(this).parents('tr');
-        const hrs = row.find('.hrs').val();
-        const tech = row.find('.tech').val();
-        const chrg = row.find('.chrg');
+        let hrs = row.find('.hrs').val();
+        let tech = row.find('.tech').val();
+        let chrg = row.find('.chrg');
+
+        // labour type charges
         switch (row.find('.type').val()) {
-            case 'casual': chrg.val(200).attr('readonly', true); break;
-            case 'contract': chrg.val(350).attr('readonly', true); break;
+            case 'casual': chrg.val(250).attr('readonly', true); break;
+            case 'contract': chrg.val(250).attr('readonly', true); break;
+            case 'attachee': chrg.val(150).attr('readonly', true); break;
             case 'outsourced': chrg.val(chrg.val()).attr('readonly', false); break;
         }
         skillTotal();
@@ -300,7 +305,7 @@
             $(this).find('.amount').text(amount);
         });
         $('#skill_ttl').val(total.toLocaleString());
-        profitState.skill_ttl = total;
+        profitState.skill_total = total;
         calcProfit();
     }
 </script>
