@@ -32,6 +32,7 @@ use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
 use App\Http\Requests\Focus\quote\CreateQuoteRequest;
 use App\Http\Requests\Focus\quote\EditQuoteRequest;
+use App\Models\customer\Customer;
 use App\Models\items\VerifiedItem;
 use App\Models\lpo\Lpo;
 use App\Models\verifiedjcs\VerifiedJc;
@@ -64,7 +65,9 @@ class QuotesController extends Controller
      */
     public function index(ManageQuoteRequest $request)
     {
-        return new ViewResponse('focus.quotes.index');
+        $customers = Customer::all(['id', 'company']);
+
+        return new ViewResponse('focus.quotes.index', compact('customers'));
     }
 
     /**

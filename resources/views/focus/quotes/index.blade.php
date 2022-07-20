@@ -24,26 +24,33 @@
     </div>
 
     <div class="content-body">
-        <div class="card">
+        <div class="card" id="filters">
             <div class="card-content">
                 <div class="card-body">
                     <div class="form-group row">
                         <div class="col-4">
-                            <div class="d-inline">Filter Criteria (Quote / PI):</div>                             
-                            <div class="d-inline">
-                                @php
-                                    $criteria = [
-                                        'Unapproved', 'Approved & Unbudgeted', 'Budgeted & Unverified', 'Verified with LPO & Uninvoiced',
-                                        'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced',
-                                    ];
-                                @endphp
-                                <select name="filter" class="custom-select" id="status_filter">
-                                    <option value="">-- Choose Filter Criteria --</option>
-                                    @foreach ($criteria as $val)
-                                        <option value="{{ $val }}">{{ $val }}</option>
-                                    @endforeach
-                                </select>
-                            </div>                                                     
+                            <label for="client">Client:</label>                             
+                            <select name="client_id" class="custom-select" id="client" data-placeholder="Choose Client">
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="filter">Filter Criteria:</label>                             
+                            @php
+                                $criteria = [
+                                    'Unapproved', 'Approved & Unbudgeted', 'Budgeted & Unverified', 'Verified with LPO & Uninvoiced',
+                                    'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced',
+                                ];
+                            @endphp
+                            <select name="filter" class="custom-select" id="status_filter">
+                                <option value="">-- Choose Filter Criteria --</option>
+                                @foreach ($criteria as $val)
+                                    <option value="{{ $val }}">{{ $val }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="total">Amount Total (Ksh):</label>                             
+                            <input type="text" name="amount_total" class="form-control" id="amount_total" readonly>
                         </div>
                     </div>                    
                 </div>
@@ -87,10 +94,16 @@
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    // client filter
+    let clients = @json($customers);
+    clients = clients.map(v => ({id: v.id, text: v.company}));
+    clients.splice(0, 0, {id: 0, text: 'None'});
+    $('#client').select2({data: clients});
+        
     // on filter
-    $('#status_filter').change(function() {
+    $('#filters').on('change', '#status_filter, #client', function() {
         $('#quotes-table').DataTable().destroy();
-        return draw_data($(this).val());   
+        return draw_data($('#status_filter').val(), $('#client').val());   
     });
 
     // Initialize datepicker
@@ -100,7 +113,7 @@
 
     setTimeout(() => draw_data(), @json(config('master.delay')));
 
-    function draw_data(status_filter='') {
+    function draw_data(status_filter = '', client_id = 0) {
         const language = {@lang('datatable.strings')};
         const table = $('#quotes-table').dataTable({
             processing: true,
@@ -112,8 +125,15 @@
                 url: "{{ route('biller.quotes.get') }}",
                 type: 'POST',
                 data: {
-                    status_filter,
+                    status_filter, client_id,
                     page: location.href.includes('page=pi') ? 'pi' : 0
+                },
+                dataSrc: res => {
+                    const {data} = res;
+                    if (data.length) $('#amount_total').val(data[0].sum_total);
+                    else $('#amount_total').val('');
+                    
+                    return data;
                 },
             },
             columns: [{

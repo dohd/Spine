@@ -39,11 +39,11 @@ class QuoteRepository extends BaseRepository
     {
         $q = $this->query();
         
-        // distinguish pi from quote
+        // pi or quote filter
         if (request('page') == 'pi') $q->where('bank_id', '>', 0);
         else $q->where('bank_id', 0);
         
-        // filter by date
+        // date filter
         if (request('start_date') && request('end_date')) {
             $q->whereBetween('date', [
                 date_for_database(request('start_date')), 
@@ -51,7 +51,10 @@ class QuoteRepository extends BaseRepository
             ]);
         }
 
-        // filter by status
+        // client filter
+        if (request('client_id')) $q->where('customer_id', request('client_id'));
+
+        // status criteria filter
         if (request('status_filter')) {
             switch (request('status_filter')) {
                 case 'Unapproved':

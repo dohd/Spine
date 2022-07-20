@@ -41,6 +41,9 @@ class QuotesTableController extends Controller
         $this->quote = $quote;
     }
 
+    // sum total quotes worth
+    protected $sum_total;
+
     /**
      * This method return the data of the model
      * @return mixed
@@ -48,6 +51,9 @@ class QuotesTableController extends Controller
     public function __invoke()
     {
         $core = $this->quote->getForDataTable();
+
+        $this->sum_total = $core->sum('total');
+    
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -76,7 +82,10 @@ class QuotesTableController extends Controller
                 return dateFormat($quote->date);
             })
             ->addColumn('total', function ($quote) {
-                return number_format($quote->total, 2);
+                return numberFormat($quote->total);
+            })
+            ->addColumn('sum_total', function ($quote) {
+                return numberFormat($this->sum_total);
             })
             ->addColumn('status', function ($quote) {
                 $statuses = array('approved', 'client_approved', 'cancelled', 'pending');
