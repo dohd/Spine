@@ -2,6 +2,10 @@
 
 namespace App\Http\Responses\Focus\product;
 
+use App\Models\product\ProductVariation;
+use App\Models\productcategory\Productcategory;
+use App\Models\productvariable\Productvariable;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -9,14 +13,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\product\Product
      */
-    protected $products;
+    protected $product;
 
     /**
-     * @param App\Models\product\Product $products
+     * @param App\Models\product\Product $product
      */
-    public function __construct($products)
+    public function __construct($product)
     {
-        $this->products = $products;
+        $this->product = $product;
     }
 
     /**
@@ -28,10 +32,12 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $fields_raw=get_custom_fields(3,$this->products->id);
-         $fields_data = custom_fields($fields_raw);
-        return view('focus.products.edit')->with([
-            'products' => $this->products,'fields_data'=>$fields_data
-        ])->with(product_helper());
+        $product_categories = Productcategory::all();
+        $product_variables = Productvariable::where('type', 0)->get();
+        $warehouses = Warehouse::all();
+
+        return view('focus.products.edit', ['product' => $this->product])->with(
+            compact('product_categories', 'product_variables', 'warehouses')
+        );
     }
 }

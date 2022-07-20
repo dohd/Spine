@@ -2,7 +2,9 @@
 
 namespace App\Http\Responses\Focus\product;
 
-use App\Models\customfield\Customfield;
+use App\Models\productcategory\Productcategory;
+use App\Models\productvariable\Productvariable;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -16,6 +18,10 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.products.create')->with(product_helper());
+        $product_categories = Productcategory::all();
+        $product_variables = Productvariable::where('type', 0)->get();
+        $warehouses = Warehouse::all();
+
+        return view('focus.products.create')->with(compact('product_categories', 'product_variables', 'warehouses'));
     }
 }
