@@ -104,19 +104,22 @@ class ProductsController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
+        // extract request input
+        $data = $request->only([
+            'name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 'code_type', 
+            'stock_type'
+        ]);
+        $data_items = $request->only([
+            'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
+            'warehouse_id', 'variation_name', 'image'
+        ]);
 
-        //Input received from the request
-        $input['main'] = $request->only(['name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 'code_type', 'stock_type']);
-        $input['custom_field'] = $request->only(['custom_field']);
-        $input['serial'] = $request->only(['product_serial']);
-        $input['variation'] = $request->only(['v_id', 'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 'warehouse_id', 'variation_name', 'image']);
-        $input['main']['ins'] = auth()->user()->ins;
-        $input['custom_field']['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $id = $this->repository->create($input);
+        $data['ins'] = auth()->user()->ins;
+        $data_items = modify_array($data_items);
 
-        //return with successfull message
-        return new RedirectResponse(route('biller.products.show', [$id]), ['flash_success' => trans('alerts.backend.products.created') . ' <a href="' . route('biller.products.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.products.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.products.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        $this->repository->create(compact('data', 'data_items'));
+
+        return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.created')]);
     }
 
     /**
@@ -140,23 +143,29 @@ class ProductsController extends Controller
      */
     public function update(EditProductRequest $request, Product $product)
     {
-
         $request->validate([
             'name' => 'required',
             'price' => 'required',
             'qty' => 'required',
         ]);
-        $input['main'] = $request->only(['name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 'code_type', 'stock_type', 'pv_id']);
-        $input['variation'] = $request->only(['v_id', 'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 'warehouse_id', 'variation_name', 'image', 'remove_v']);
-        $input['custom_field'] = $request->only(['custom_field']);
-        $input['product_serial'] = $request->only(['product_serial_e']);
-        $input['serial'] = $request->only(['product_serial']);
-        //Input received from the request
-        //  $input = $request->except(['_token','ins']);
-        //Update the model using repository update method
-        $this->repository->update($product, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.products.show', [$product->id]), ['flash_success' => trans('alerts.backend.products.created') . ' <a href="' . route('biller.products.show', [$product->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.products.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.products.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        // dd($request->all());
+
+        // extract request input
+        $data = $request->only([
+            'name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 'code_type', 
+            'stock_type'
+        ]);
+        $data_items = $request->only([
+            'v_id', 'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
+            'warehouse_id', 'variation_name', 'image'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data_items = modify_array($data_items);
+
+        $this->repository->update($product, compact('data', 'data_items'));
+        
+        return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.created')]);
     }
 
     /**
@@ -386,8 +395,8 @@ class ProductsController extends Controller
         $pricelist = PriceList::where('pricegroup_id', $request->pricegroup_id)->get();
         $pricegroup = Pricegroup::find($request->pricegroup_id);
         $product_variations = ProductVariation::whereHas('product', function ($q) {
-            $q->where('name', 'LIKE', '%'. request('keyword') .'%');
-        })->with(['warehouse' => function($q) {
+            $q->where('name', 'LIKE', '%' . request('keyword') . '%');
+        })->with(['warehouse' => function ($q) {
             $q->select(['id', 'title']);
         }])->limit(6)->get();
 
@@ -395,22 +404,24 @@ class ProductsController extends Controller
         $products = array();
         foreach ($product_variations as $row) {
             $product = [
-                'id' => $row->id, 
+                'id' => $row->id,
                 'product_id' => $row->product_id,
-                'name' => $row->name, 
-                'purchase_price' => numberFormat($row->purchase_price), 
-                'price' => numberFormat($row->price), 
-                'product_des' => $row->product['product_des'], 
-                'unit' => $row->product['unit'], 
-                'code' => $row->code, 
-                'qty' => $row->qty, 
+                'name' => $row->name,
+                'purchase_price' => numberFormat($row->purchase_price),
+                'price' => numberFormat($row->price),
+                'product_des' => $row->product['product_des'],
+                'unit' => $row->product['unit'],
+                'code' => $row->code,
+                'qty' => $row->qty,
                 'image' => $row->image,
                 'warehouse' => $row->warehouse,
-            ];  
+            ];
             // apply respective product buying price according to order of purchase
-            $product_rate = $this->compute_product_rate($row->id, $row->qty);
-            if ($product_rate) $product['purchase_price'] = numberFormat($product_rate);
-            
+            if ($row->qty) {
+                $product_rate = $this->compute_product_rate($row->id, $row->qty);
+                if ($product_rate) $product['purchase_price'] = numberFormat($product_rate);
+            }           
+
             if ($pricelist->count()) {
                 // apply client selling price, else supplier buying price
                 foreach ($pricelist as $item) {
@@ -433,10 +444,9 @@ class ProductsController extends Controller
     // compute product rate by FIFO (First in First out) rule of purchase
     public function compute_product_rate($id, $qty)
     {
-        if (!$qty) return;
         $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
             ->where('item_id', $id)
-            ->orderBy('rate', 'DESC')
+            ->orderBy('created_at', 'DESC')
             ->groupBy('rate')
             ->get();
 
