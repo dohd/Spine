@@ -79,27 +79,28 @@
     $('#deposit').on('focus', function(e) {
         if (!$('#person').val()) $(this).blur();
     });
-    $('#deposit').change(function() {
+    $('#deposit').keyup(function() {
         if ($('#allocated').val() == 0) return;
         let amountSum = 0;
         let depoSum = 0;
-        let depo = $(this).val().replace(/,/g, '') * 1;
-        $(this).val(parseFloat(depo).toLocaleString());
+        let depo = parseFloat($(this).val().replace(/,/g, ''));
         const rows = $('#invoiceTbl tbody tr').length;
         $('#invoiceTbl tbody tr').each(function() {
             if ($(this).index() == rows-1) return;
-            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
+            const amount = parseFloat($(this).find('.amount').text().replace(/,/g, ''));
             if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
             else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
             else $(this).find('.paid').val(0);
-            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
+            const paid = parseFloat($(this).find('.paid').val().replace(/,/g, ''));
             depo -= amount;
             amountSum += amount;
             depoSum += paid;
         });
         $('#amount_ttl').val(amountSum.toLocaleString());
         $('#deposit_ttl').val(depoSum.toLocaleString());
-    });    
+    }).focusout(function() { 
+        $(this).val(parseFloat($(this).val().replace(/,/g, '')).toLocaleString());
+    });
 
     // invoice row
     function invoiceRow(v, i) {
@@ -149,7 +150,7 @@
             $('#advanced').attr('disabled', false);
             $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
         } else {
-            $('#deposit').change();
+            $('#deposit').keyup();
             $('#source').attr('disabled', false);
             $('#advanced').attr('disabled', true);
         }
