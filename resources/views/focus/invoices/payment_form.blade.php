@@ -105,13 +105,8 @@
                 <th>Note</th>
                 <th>Status</th>
                 <th>Amount</th>
-                @if (strpos(request()->url(), 'create'))
-                    <th>Paid</th>
-                    <th>Balance</th>
-                @else
-                    <th>Balance</th>
-                    <th>Paid</th>
-                @endif
+                <th>Paid</th>
+                <th>Balance</th>
                 <th>Allocate (Ksh.)</th>
             </tr>
         </thead>
@@ -128,8 +123,8 @@
                             <td>{{ $invoice->notes }}</td>
                             <td>{{ $invoice->status }}</td>
                             <td>{{ numberFormat($invoice->total) }}</td>
-                            <td>{{ numberFormat($invoice->total - $invoice->amountpaid) }}</td>
-                            <td class="amount"><b>{{ numberFormat($invoice->amountpaid - $row->paid) }}<b></td>
+                            <td>{{ numberFormat($invoice->amountpaid) }}</td>
+                            <td class="amount"><b>{{ numberFormat($invoice->total - $invoice->amountpaid) }}<b></td>
                             <td><input type="text" class="form-control paid" name="paid[]" value="{{ numberFormat($row->paid) }}"></td>
                             <input type="hidden" name="id[]" value="{{ $row->id }}">
                         </tr>
