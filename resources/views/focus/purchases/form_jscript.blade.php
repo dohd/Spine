@@ -137,6 +137,7 @@
         });
     }    
 </script>
+
 <!-- autocomplete method -->
 <script>
     function predict(url, callback) {
@@ -148,13 +149,17 @@
                     method: "POST",
                     data: {keyword: request.term, pricegroup_id: $('#pricegroup_id').val()},
                     success: data => {
-                        let defaultOpt = {
-                            id: null, 
-                            name: 'None',
-                            client_id: null, 
-                            branch_id: null
-                        };
-                        data.splice(0, 0, defaultOpt);
+                        // prepend default project option
+                        if (url.includes('projects')) {
+                            const projectOpt = {
+                                id: null, 
+                                name: 'None',
+                                client_id: null, 
+                                branch_id: null
+                            };
+                            data.splice(0, 0, projectOpt);
+                        }
+                        
                         response(data.map(v => ({
                             label: v.name,
                             value: v.name,
