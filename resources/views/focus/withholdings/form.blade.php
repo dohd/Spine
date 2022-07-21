@@ -52,7 +52,7 @@
     <table class="table tfr my_stripe_single text-center" id="invoiceTbl">
         <thead>
             <tr class="bg-gradient-directional-blue white">
-                <th>Due Date</th>
+                <th>Date</th>
                 <th>Invoice No</th>
                 <th width="40%">Note</th>
                 <th>Status</th>

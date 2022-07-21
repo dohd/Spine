@@ -95,7 +95,7 @@
         const outstanding = parseFloat(v.total - v.amountpaid).toLocaleString();
         return `
             <tr>
-                <td class="text-center">${new Date(v.invoiceduedate).toDateString()}</td>
+                <td class="text-center">${new Date(v.invoicedate).toDateString()}</td>
                 <td>${v.tid}</td>
                 <td class="text-center">${v.notes}</td>
                 <td>${v.status}</td>
