@@ -63,13 +63,13 @@ class WithholdingsTableController extends Controller
                 return $withholding->customer->company;
             })
             ->addColumn('reference', function ($withholding) {
-                return strtoupper($withholding->certificate)  . ' - ' . $withholding->doc_ref;
+                return strtoupper($withholding->certificate)  . ' - ' . $withholding->reference;
             })
-            ->addColumn('date', function ($withholding) {
-                return dateFormat($withholding->date);
+            ->addColumn('cert_date', function ($withholding) {
+                return dateFormat($withholding->cert_date);
             })
             ->addColumn('amount', function ($withholding) {
-                return amountFormat($withholding->deposit_ttl);
+                return amountFormat($withholding->amount);
             })
             ->addColumn('invoice_tid', function ($withholding) {
                 if ($withholding->items->count()) {

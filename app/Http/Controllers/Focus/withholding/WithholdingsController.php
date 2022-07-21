@@ -79,8 +79,8 @@ class WithholdingsController extends Controller
     {
         // extract request fields
         $data = $request->only([
-            'customer_id', 'tid', 'date', 'due_date', 'certificate', 'amount', 'amount_ttl', 
-            'deposit_ttl', 'doc_ref', 'note'
+            'customer_id', 'tid', 'certificate', 'cert_date', 'tr_date', 'amount', 'reference', 'allocate_ttl', 
+            'note', 'withholding_tax_id'
         ]);
         $data_items = $request->only(['invoice_id', 'paid']);
 

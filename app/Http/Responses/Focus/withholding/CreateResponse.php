@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\withholding;
 
 use App\Models\withholding\Withholding;
+use DB;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -17,7 +18,8 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $last_tid = Withholding::max('tid');
+        $withholdings = Withholding::where('certificate', 'tax')->whereColumn('amount', '>', 'allocate_ttl')->get();
         
-        return view('focus.withholdings.create', compact('last_tid'));
+        return view('focus.withholdings.create', compact('last_tid', 'withholdings'));
     }
 }

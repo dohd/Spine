@@ -29,6 +29,7 @@
                                         <th>#</th>
                                         <th>#TID</th>
                                         <th>Customer</th>
+                                        <th>Note</th>
                                         <th>Certificate / Serial</th>
                                         <th>Amount</th>
                                         <th>Date</th>
@@ -69,9 +70,10 @@
             {data: 'DT_Row_Index', name: 'id'},
             {data: 'tid', name: 'tid'},
             {data: 'customer', name: 'customer'},
+            {data: 'note', name: 'note'},
             {data: 'reference', name: 'reference'},
             {data: 'amount', name: 'amount'},
-            {data: 'date', name: 'date'},
+            {data: 'cert_date', name: 'cert_date'},
             {data: 'invoice_tid', name: 'invoice_tid'},
             {data: 'actions', name: 'actions', searchable: false, sortable: false}
         ],

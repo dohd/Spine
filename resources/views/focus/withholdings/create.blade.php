@@ -38,9 +38,9 @@
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date())
+    .datepicker('setDate', new Date());
 
-    // On searching customer
+    // customer select2 config
     $('#person').select2({
         ajax: {
             url: "{{ route('biller.customers.select') }}",
@@ -51,22 +51,48 @@
             processResults: result => {
                 return { results: result.map(v => ({text: `${v.company} - ${v.taxid}`, id: v.id }))};
             }      
-        }
+        },
+        allowClear: true
+    }).change(function() {
+        $.ajax({
+            url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
+            success: data => loadInvoice(data) 
+        });
     });
 
-    // On adding paid values
+    // on change certificate
+    $('#certificate').change(function() {
+        if ($(this).val() == 'tax') {
+            $('#withholding_cert').attr('disabled', false);
+            loadInvoice();
+        } else {
+            $('#withholding_cert').attr('disabled', true);
+            $('#withholding_cert').val('0').change();
+            $('#person').change();
+        }
+    });    
+
+    // On allocating amount on invoices
     $('#invoiceTbl').on('change', '.paid', function() {
-        const amount = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
-        const paid = $(this).val().replace(/,/g, '') * 1;
-        if (paid > amount) $(this).val(amount.toLocaleString());
+        const due = parseFloat($(this).parents('tr').find('.due').text().replace(/,/g, ''));
+        const paid = parseFloat($(this).val().replace(/,/g, ''));
+        if (paid > due) $(this).val(due.toLocaleString());
+        else $(this).val(paid.toLocaleString());
         calcTotal();
+        // check if amount is less than allocated
+        const amount = parseFloat($('#amount').val().replace(/,/g, ''));
+        const allocatedTotal = parseFloat($('#allocate_ttl').val().replace(/,/g, ''));
+        if (amount < allocatedTotal) {
+            alert('Cannot allocate more than withheld amount!');
+            $(this).val(0).change();
+        } 
     });
 
     // invoice row
     function invoiceRow(v, i) {
         const amount = parseFloat(v.total).toLocaleString();
         const amountpaid = parseFloat(v.amountpaid).toLocaleString();
-        const balance = parseFloat(v.total - v.amountpaid).toLocaleString();
+        const outstanding = parseFloat(v.total - v.amountpaid).toLocaleString();
         return `
             <tr>
                 <td class="text-center">${new Date(v.invoiceduedate).toDateString()}</td>
@@ -75,66 +101,108 @@
                 <td>${v.status}</td>
                 <td>${amount}</td>
                 <td>${amountpaid}</td>
-                <td class="text-center amount"><b>${balance}</b></td>
+                <td class="text-center due"><b>${outstanding}</b></td>
                 <td><input type="text" class="form-control paid" name="paid[]"></td>
                 <input type="hidden" name="invoice_id[]" value="${v.id}">
             </tr>
         `;
     }
-
     // load client invoices
-    $('#person').change(function() {
-        $('#deposit').val('');
-        $.ajax({
-            url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
-            success: result => {
-                $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
-                if (!result.length) return;
-                result.forEach((v, i) => {
-                    $('#invoiceTbl tbody tr:eq(-1)').before(invoiceRow(v, i));
-                });
-            }
+    function loadInvoice(data = []) {
+        $('#amount').val('');
+        $('#balance').val('');
+        $('#allocate_ttl').val('');
+        $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
+        if (!data.length) return;
+        data.forEach((v, i) => {
+            $('#invoiceTbl tbody tr:eq(-1)').before(invoiceRow(v, i));
         });
-    });
+        calcTotal();
+    }
 
-    // On deposit change
-    $('#deposit').on('focus', function(e) {
+    // On amount change
+    $('#amount').keyup(function() {
+        let dueTotal = 0;
+        let allocatedTotal = 0;
+        let amount = parseFloat($(this).val().replace(/,/g, ''));
+        const rows = $('#invoiceTbl tbody tr').length;
+        $('#invoiceTbl tbody tr').each(function() {
+            if ($(this).index() == rows-1) return;
+            const due = parseFloat($(this).find('.due').text().replace(/,/g, ''));
+            if (amount > due) $(this).find('.paid').val(due.toLocaleString());
+            else if (amount > 0) $(this).find('.paid').val(amount.toLocaleString());
+            else $(this).find('.paid').val(0);
+            const paid = parseFloat($(this).find('.paid').val().replace(/,/g, ''));
+            amount -= due;
+            dueTotal += due;
+            allocatedTotal += paid;
+        });
+        $('#balance').val(parseFloat(dueTotal - allocatedTotal).toLocaleString());
+        $('#allocate_ttl').val(parseFloat(allocatedTotal.toFixed(2)).toLocaleString());
+    }).focusout(function() {
+        if (!$(this).val()) return;
+        const val = $(this).val().replace(/,/g, '') * 1;
+        $(this).val(parseFloat(val.toFixed(2)).toLocaleString());
+    }).focus(function() {
         if (!$('#person').val()) $(this).blur();
     });
-    $('#deposit').change(function() {
-        let amountSum = 0;
-        let depoSum = 0;
-        let depo = $(this).val().replace(/,/g, '') * 1;
-        $(this).val(parseFloat(depo).toLocaleString());
-        const rows = $('#invoiceTbl tbody tr').length;
-        $('#invoiceTbl tbody tr').each(function() {
-            if ($(this).index() == rows-1) return;
-            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
-            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
-            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
-            else $(this).find('.paid').val(0);
-            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
-            depo -= amount;
-            amountSum += amount;
-            depoSum += paid;
+
+    // withholding tax select2 config
+    $('#withholding_cert').select2({
+        data: [{id: 0, text: 'None'}], 
+    }).change(function() {
+        // if withholding tax
+        if ($(this).val() > 0) {
+            $('#person').change();
+            ['cert_date', 'amount', 'reference', 'tr_date', 'note'].forEach(v => {
+                $('#'+v).attr('readonly', true);
+            });
+            const opt = $(this).find(':selected');
+            const amount = opt.attr('amount');
+            setTimeout(() => $('#amount').val(amount).keyup().focusout(), 100);
+            $('#cert_date').datepicker('setDate', new Date(opt.attr('certDate')));
+            $('#reference').val(opt.attr('reference'));
+            $('#tr_date').datepicker('setDate', new Date(opt.attr('trDate')));
+            $('#note').val(opt.attr('note'));
+        } else {
+            loadInvoice();
+            ['amount', 'reference', 'note'].forEach(v => {
+                $('#'+v).attr('readonly', false).val('');
+            });
+            ['cert_date', 'tr_date'].forEach(v => $('#'+v).datepicker('setDate', new Date()));
+        }
+    });   
+
+    // load tax certificate withholdings
+    const withholdings = @json($withholdings);
+    if (withholdings.length) {
+        const option = $(document.createElement('option'));
+        withholdings.forEach(v => {
+            option.val(v.id)
+            .text(`${v.reference} - ${parseFloat(v.amount).toFixed(2)} - ${v.note}`)
+            .attr('certDate', v.cert_date)
+            .attr('amount', v.amount)
+            .attr('reference', v.reference)
+            .attr('trDate', v.tr_date)
+            .attr('note', v.note);
+
+            $('#withholding_cert').append(option);
         });
-        $('#amount_ttl').val(amountSum.toLocaleString());
-        $('#deposit_ttl').val(depoSum.toLocaleString());
-    });
+    } 
 
     function calcTotal() {
-        let amountSum = 0;
-        let depoSum = 0;
+        let dueTotal = 0;
+        let allocatedTotal = 0;
         const rows = $('#invoiceTbl tbody tr').length;
         $('#invoiceTbl tbody tr').each(function() {
             if ($(this).index() == rows-1) return;
-            const amount = $(this).find('.amount').text().replace(/,/g, '') * 1;
-            const paid = $(this).find('.paid').val().replace(/,/g, '') * 1;
-            amountSum += amount;
-            depoSum += paid;
+            const due = parseFloat($(this).find('.due').text().replace(/,/g, '')) || 0;
+            const paid = parseFloat($(this).find('.paid').val().replace(/,/g, '')) || 0;
+            dueTotal += due;
+            allocatedTotal += paid;
         });
-        $('#amount_ttl').val(amountSum.toLocaleString());
-        $('#deposit_ttl').val(depoSum.toLocaleString());
+        $('#balance').val(parseFloat(dueTotal - allocatedTotal).toLocaleString());
+        $('#allocate_ttl').val(parseFloat(allocatedTotal.toFixed(2)).toLocaleString());
     }
 </script>
 @endsection

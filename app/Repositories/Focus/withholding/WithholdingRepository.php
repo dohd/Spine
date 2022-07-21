@@ -47,34 +47,51 @@ class WithholdingRepository extends BaseRepository
 
         $data = $input['data'];
         foreach ($data as $key => $val) {
-            if (in_array($key, ['date', 'due_date'], 1))
+            if (in_array($key, ['cert_date', 'tr_date']))
                 $data[$key] = date_for_database($val);
-            if (in_array($key, ['amount', 'amount_ttl', 'deposit_ttl'], 1))
+            if (in_array($key, ['amount', 'allocate_ttl']))
                 $data[$key] = numberClean($val);
         }
-        $result = Withholding::create($data);
 
+        $result = (object) array();
+        $is_payment = empty($data['withholding_tax_id']);
+        if ($is_payment) {
+            $result = Withholding::create($data);
+
+            $unallocated = round($result->amount - $result->allocate_ttl);
+            if ($unallocated) $result->customer->increment('on_account', $unallocated);    
+        } else {
+            $result = Withholding::find($data['withholding_tax_id']);
+            $result->increment('allocate_ttl', $data['allocate_ttl']);
+
+            $allocated = round($result->amount - $result->allocate_ttl);
+            if ($allocated) $result->customer->decrement('on_account', $allocated);    
+        }
+
+        // allocated items
         $data_items = $input['data_items'];
-        foreach ($data_items as $k => $item) {
-            $data_items[$k] = array_replace($item, [
-                'withholding_id' => $result->id,
-                'paid' => numberClean($item['paid'])
-            ]);
-        }
-        WithholdingItem::insert($data_items);
+        if ($data_items) {
+            $data_items = array_map(function ($v) use($result) {
+                return array_replace($v, [
+                    'withholding_id' => $result->id,
+                    'paid' => numberClean($v['paid'])
+                ]);
+            }, $data_items);
+            WithholdingItem::insert($data_items);
 
-        // increment invoice amount paid and update status
-        foreach ($result->items as $item) {
-            $invoice = $item->invoice;
-            $invoice->increment('amountpaid', $item->paid);
-            if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-            elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-            elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            // increment invoice amount paid and update status
+            foreach ($result->items as $item) {
+                $invoice = $item->invoice;
+                $invoice->increment('amountpaid', $item->paid);
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+            }
         }
-
+        
         /**accounting */
-        $this->post_transaction($result);
-
+        if ($is_payment) $this->post_transaction($result);
+        
         DB::commit();
         if ($result) return true;
 
@@ -92,9 +109,9 @@ class WithholdingRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $result->deposit_ttl,
-            'tr_date' => $result->due_date,
-            'due_date' => $result->due_date,
+            'credit' => $result->amount,
+            'tr_date' => $result->tr_date,
+            'due_date' => $result->tr_date,
             'user_id' => $result->user_id,
             'note' => $result->note,
             'ins' => $result->ins,
@@ -105,7 +122,7 @@ class WithholdingRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit Withholding
+        // debit Withholding Account
         $account = Account::when($result->certificate == 'vat', function ($q) {
             $q->where('system', 'withholding_vat');
         })->when($result->certificate == 'tax', function ($q) {
@@ -115,7 +132,7 @@ class WithholdingRepository extends BaseRepository
         unset($cr_data['credit'], $cr_data['is_primary']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $account->id,
-            'debit' => $result->deposit_ttl
+            'debit' => $result->amount
         ]);
         Transaction::create($dr_data);
         aggregate_account_transactions();            

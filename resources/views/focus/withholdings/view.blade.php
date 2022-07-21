@@ -24,11 +24,12 @@
                     $details = [
                         'TID' => gen4tid('WH-', $withholding->tid),
                         'Customer' => $withholding->customer->company,
-                        'Certificate Date' => dateFormat($withholding->date),
-                        'Payment / Transaction Date' => dateFormat($withholding->due_date),
-                        'Amount' => numberFormat($withholding->deposit_ttl),
+                        'Certificate Date' => dateFormat($withholding->cert_date),
+                        'Payment / Transaction Date' => dateFormat($withholding->tr_date),
+                        'Amount' => numberFormat($withholding->amount),
                         'Certificate' => strtoupper($withholding->certificate),
-                        'Certificate Serial No' => $withholding->doc_ref
+                        'Certificate Serial No' => $withholding->reference,
+                        'Allocated' => numberFormat($withholding->allocate_ttl),
                     ];
                 @endphp
                 <tbody>                    
