@@ -35,7 +35,7 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Ticket </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round  select-box" name="lead_id" id="lead_id" required>
+                                                <select class="form-control  round" name="lead_id" id="lead_id" required>
                                                     <option value="">-- Select Ticket --</option>
                                                         @foreach ($leads as $lead)
                                                             @php
@@ -43,7 +43,11 @@
                                                                 $branch = isset($lead->branch) ? $lead->branch->name : '';
                                                                 if ($name && $branch) $name .= ' - ' . $branch;                                                                
                                                             @endphp
-                                                            <option value="{{ $lead->id }}">
+                                                            <option 
+                                                                value="{{ $lead->id }}" 
+                                                                branchId="{{ $lead->branch? $lead->branch->id : 0 }}"
+                                                                clientId="{{ $lead->customer? $lead->customer->id : 0 }}"
+                                                                >
                                                                 {{ 'Tkt-'.sprintf('%04d', @$lead->reference) }} - {{ $name }} - {{ $lead->title }}
                                                             </option>
                                                         @endforeach
@@ -321,13 +325,10 @@
 
     // equipment row counter;
     let eqmntIndx = 0;
-    // add default product row
     $('#equipment tr:last').after(productRow(0));
-    // initialize date picker
     $('[data-toggle-0="datepicker"]')
         .datepicker({format: "{{config('core.user_date_format')}}"})
         .datepicker('setDate', new Date());
-    // autocomplete on default product row
     $('#tag_number-0').autocomplete(autocompleteProp(0));
     assignIndex();
     
@@ -335,16 +336,12 @@
     $('#addqproduct').on('click', function() {
         eqmntIndx++;
         const i = eqmntIndx;
-        // add poduct row to equipment table
         const row = productRow(i);
         $('#equipment tr:last').after(row);
-        // add jobcard value   
         $('input[name="joc_card[]"]').val($("#jobcard").val());     
-        // initialize datepicker
         $(`[data-toggle-${i}="datepicker"]`)
             .datepicker({format: "{{config('core.user_date_format')}}"})
             .datepicker('setDate', new Date());
-        // autocomplete on added product row
         $('#tag_number-' + i).autocomplete(autocompleteProp(i));
         assignIndex();
     });
@@ -352,26 +349,25 @@
     // on clicking equipment drop down options
     $("#equipment").on("click", ".up,.down,.removeProd", function() {
         var row = $(this).parents("tr:first");
-        // move row up 
         if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down
         if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
         if ($(this).is('.removeProd')) $(this).closest('tr').remove();
-
         assignIndex();
     });
 
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i) {
-        console.log('auto called')
         return {
             source: function(request, response) {
                 $.ajax({
                     url: baseurl + 'equipments/search/' + $("#client_id").val(),
                     dataType: "json",
                     method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
+                    data: {
+                        keyword: request.term, 
+                        client_id: $('#lead_id option:selected').attr('clientId'),
+                        branch_id: $('#lead_id option:selected').attr('branchId')
+                    },
                     success: function(data) {
                         const equips = data.map(v => ({
                             label: `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`,

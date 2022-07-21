@@ -175,29 +175,33 @@ class EquipmentsController extends Controller
      */
     public function equipment_search(Request $request, $id)
     {
-        $key_word = $request->post('keyword');
-        $equipments = Equipment::where('unique_id', 'LIKE', '%' . $key_word. '%')
-            ->where('customer_id', $id)
-            ->limit(6)
-            ->with(['customer'])
-            ->get();
+        $k = $request->post('keyword');
 
-        // transform equipemts
+        $equipments = Equipment::when(request('client_id'), function ($q) {
+            $q->where('customer_id', request('client_id'));
+        })->when(request('branch_id'), function ($q) {
+            $q->where('branch_id', request('branch_id'));
+        })
+        ->where('unique_id', 'LIKE', '%' . $k . '%')
+        ->limit(6)
+        ->with('customer')
+        ->get();
+
         $output = array();
         foreach ($equipments as $row) {
             $output[] = array(
                 'name' => $row->unique_id,
-                'customer' => $row->customer->company, 
-                'unit_type' => $row->unit_type, 
-                'make_type' => $row->make_type, 
-                'id' => $row->id, 
-                'capacity' => $row->capacity, 
-                'location' => $row->location, 
-                'next_maintenance_date' => $row->next_maintenance_date, 
+                'customer' => $row->customer->company,
+                'unit_type' => $row->unit_type,
+                'make_type' => $row->make_type,
+                'id' => $row->id,
+                'capacity' => $row->capacity,
+                'location' => $row->location,
+                'next_maintenance_date' => $row->next_maintenance_date,
                 'last_maint_date' => $row->last_maint_date,
             );
         }
-        
+
         return view('focus.djcs.partials.search')->withDetails($output);
     }
 }

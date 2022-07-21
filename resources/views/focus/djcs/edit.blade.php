@@ -52,7 +52,12 @@
                                                             $branch = isset($lead->branch) ? $lead->branch->name : '';
                                                             if ($name && $branch) $name .= ' - ' . $branch;  
                                                         @endphp
-                                                        <option value="{{ $lead->id }}" {{ $lead->id === $djc->lead_id ? 'selected' : '' }}>
+                                                        <option 
+                                                            {{ $lead->id == $djc->lead_id ? 'selected' : '' }}
+                                                            value="{{ $lead->id }}" 
+                                                            branchId="{{ $lead->branch? $lead->branch->id : 0 }}"
+                                                            clientId="{{ $lead->customer? $lead->customer->id : 0 }}"
+                                                            >
                                                             {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                         </option>
                                                     @endforeach
@@ -353,7 +358,11 @@
                     url: baseurl + 'equipments/search/' + $("#client_id").val(),
                     dataType: "json",
                     method: 'post',
-                    data: 'keyword=' + request.term + '&type=product_list&row_num=1&client_id=' + $("#client_id").val(),
+                    data: {
+                        keyword: request.term, 
+                        client_id: $('#lead_id option:selected').attr('clientId'),
+                        branch_id: $('#lead_id option:selected').attr('branchId')
+                    },
                     success: function(data) {
                         const equips = data.map(v => ({
                             label: `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`,
