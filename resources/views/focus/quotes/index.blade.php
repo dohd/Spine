@@ -38,7 +38,7 @@
                             @php
                                 $criteria = [
                                     'Unapproved', 'Approved & Unbudgeted', 'Budgeted & Unverified', 'Verified with LPO & Uninvoiced',
-                                    'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced',
+                                    'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced', 'Invoiced'
                                 ];
                             @endphp
                             <select name="filter" class="custom-select" id="status_filter">
@@ -69,8 +69,7 @@
                                 <th>Customer & Branch</th>   
                                 <th>Title</th>                                                                       
                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                <th>Client Ref</th>
-                                <th>Verified</th>
+                                <th>Client Ref</th>                                
                                 <th>Ticket No</th>
                                 <th>{{ trans('labels.general.actions') }}</th>
                             </tr>
@@ -163,10 +162,6 @@
                 {
                     data: 'client_ref',
                     name: 'client_ref'
-                },
-                {
-                    data: 'verified',
-                    name: 'verified'
                 },
                 {
                     data: 'lead_tid',

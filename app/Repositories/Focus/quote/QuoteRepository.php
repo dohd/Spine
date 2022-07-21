@@ -75,9 +75,14 @@ class QuoteRepository extends BaseRepository
                 case 'Approved without LPO & Uninvoiced':
                     $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
                     break;
+                case 'Invoiced':
+                    $q->where('invoiced', 'Yes');
+                    break;
             }
-            $q->where('status', '!=', 'cancelled');
         }
+
+        if (request('client_id') || request('status_filter')) 
+            $q->where('status', '!=', 'cancelled');
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
