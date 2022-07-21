@@ -106,7 +106,7 @@
                 <th>Status</th>
                 <th>Amount</th>
                 <th>Paid</th>
-                <th>Balance</th>
+                <th>Outstanding</th>
                 <th>Allocate (Ksh.)</th>
             </tr>
         </thead>
