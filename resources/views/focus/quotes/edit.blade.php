@@ -150,11 +150,12 @@
         const newRowHtml = `<tr class="misc"> ${rowHtml.replace(/p0/g, i)} </tr>`;
         $("#quoteTbl tbody").append(newRowHtml);
         $('#name-'+i).autocomplete(autoComp(i));
-        $('#qty-'+i).val(1).css('visibility', 'hidden');
-        $('#rate-'+i).css('visibility', 'hidden');
-        $('#price-'+i).css('visibility', 'hidden');
-        $('#amount-'+i).css('visibility', 'hidden');
-        $('#lineprofit-'+i).css('visibility', 'hidden');
+        $('#misc-'+i).val(1);
+        $('#qty-'+i).val(1).addClass('invisible');
+        $('#rate-'+i).addClass('invisible');
+        $('#price-'+i).addClass('invisible');
+        $('#amount-'+i).addClass('invisible');
+        $('#lineprofit-'+i).addClass('invisible');
         rowId++;
         calcTotal();
     });

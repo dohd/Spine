@@ -247,11 +247,11 @@
 						<td class="align-c">{{ number_format($product->product_qty, 1) }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
 						@if ($resource->print_type == 'exclusive')
-							<td class="align-r">{{ number_format($product->product_subtotal, 2) }}</td>
-							<td class="align-r">{{ number_format($product->product_qty * $product->product_subtotal, 2) }}</td>
+							<td class="align-r">{{ numberFormat($product->product_subtotal) }}</td>
+							<td class="align-r">{{ numberFormat($product->product_qty * $product->product_subtotal) }}</td>
 						@else
-							<td class="align-r">{{ number_format($product->product_price, 2) }}</td>
-							<td class="align-r">{{ number_format($product->product_qty * $product->product_price, 2) }}</td>
+							<td class="align-r">{{ numberFormat($product->product_price) }}</td>
+							<td class="align-r">{{ numberFormat($product->product_qty * $product->product_price) }}</td>
 						@endif
 					</tr>
 				@else
