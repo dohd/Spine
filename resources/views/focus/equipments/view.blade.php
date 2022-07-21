@@ -30,7 +30,6 @@
                                         'Branch' => $equipment->branch? $equipment->branch->name : '',
                                         'Unique ID' => $equipment->unique_id,
                                         'Serial No' => $equipment->equip_serial,
-                                        'Unit Type' => $equipment->unit_type,
                                         'Make' => $equipment->make_type,
                                         'Model / Model Number' => $equipment->model,
                                         'Capacity' => numberFormat($equipment->capacity),

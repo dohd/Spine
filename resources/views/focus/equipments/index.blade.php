@@ -44,8 +44,6 @@
                                         <th>#</th>
                                         <th>System ID</th>
                                         <th>Tag ID</th>
-                                        <th>Branch</th>
-                                        <th>Type</th>
                                         <th>Size</th>
                                         <th>Make</th>
                                         <th>Location</th>                                        
@@ -131,8 +129,6 @@
                 {data: 'DT_Row_Index', name: 'id'},
                 {data: 'tid', name: 'tid'},
                 {data: 'unique_id', name: 'unique_id'},
-                {data: 'branch', name: 'branch'},
-                {data: 'unit_type', name: 'unit_type'},
                 {data: 'capacity', name: 'capacity'},
                 {data: 'make_type', name: 'make_type'},
                 {data: 'location', name: 'location'},

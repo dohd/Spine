@@ -31,23 +31,23 @@
         {{ Form::text('equip_serial', null, ['class' => 'col form-control ', 'placeholder' => 'Equipment Serial*', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label('unit_type', 'Unit Type',['class' => 'col-12 control-label']) }}
-        <select class="custom-select" id="unit_type" name="unit_type" required>
-            <option value="">-- Select Unit Type --</option>
-            @foreach (['Indoor', 'Outdoor', 'Standalone'] as $val)
-                <option value="{{ $val }}" {{ @$equipment->unit_type == $val? 'selected' : '' }}>
-                    {{ $val }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class='col-md-4'>
         {{ Form::label('machine_gas', 'Gas Type',['class' => 'col-12 control-label']) }}
         <select class="custom-select" id="todo-select" name="machine_gas" required>
             <option value="">-- Select Gas Type --</option>
             @foreach (['R22', 'R404a', 'R410a', 'R134a'] as $val)
                 <option value="{{ $val }}" {{ @$equipment->machine_gas == $val? 'selected' : '' }}>
                     {{ $val }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <div class='col-md-4'>
+        {{ Form::label('equipment_category_id', 'Equipment Category',['class' => 'col-12 control-label']) }}
+        <select name="equipment_category_id" class="custom-select" id="category_id">
+            <option value="">-- Select Category --</option>
+            @foreach ($categories as $row)
+                <option value="{{ $row->id }}" {{ $row->id == @$equipment->equipment_category_id ? 'selected' : '' }}>
+                    {{ $row->name }}
                 </option>
             @endforeach
         </select>
@@ -89,17 +89,6 @@
     <div class='col-md-4'>
         {{ Form::label('unique_id', 'Tag ID',['class' => 'col-12 control-label']) }}
         {{ Form::text('unique_id', null, ['class' => 'col form-control ', 'placeholder' => 'Building*', 'required']) }}
-    </div>
-    <div class='col-md-4'>
-        {{ Form::label('equipment_category_id', 'Equipment Category',['class' => 'col-12 control-label']) }}
-        <select name="equipment_category_id" class="custom-select" id="category_id">
-            <option value="">-- Select Category --</option>
-            @foreach ($categories as $row)
-                <option value="{{ $row->id }}" {{ $row->id == @$equipment->equipment_category_id ? 'selected' : '' }}>
-                    {{ $row->name }}
-                </option>
-            @endforeach
-        </select>
     </div>
     <div class='col-md-4'>
         {{ Form::label('service_rate', 'Maintanance Rate (VAT Exc)',['class' => 'col-12 control-label']) }}
