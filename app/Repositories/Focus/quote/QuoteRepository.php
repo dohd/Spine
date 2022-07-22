@@ -76,7 +76,12 @@ class QuoteRepository extends BaseRepository
                     $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
                     break;
                 case 'Invoiced':
-                    $q->where('invoiced', 'Yes');
+                    // quotes in due invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'due');
+                        });
+                    });
                     break;
             }
         }
