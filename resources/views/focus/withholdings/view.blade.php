@@ -41,12 +41,11 @@
                     @endforeach                    
                 </tbody>
             </table>
-            <h4><b>Invoices</b></h4>
             <table class="table table-sm text-center">
                 <thead>
                     <tr class="bg-gradient-directional-blue white">
-                        <th>#Invoice No</th>
                         <th>Date</th>
+                        <th>Invoice No</th>
                         <th>Note</th>
                         <th>Amount</th>
                     </tr>
@@ -55,8 +54,8 @@
                     @foreach($withholding->items as $item)
                         @if ($item->invoice)
                             <tr>
-                                <td>{{ $item->invoice->tid }}</td>
                                 <td>{{ dateFormat($item->invoice->invoicedate) }}</td>
+                                <td>{{ $item->invoice->tid }}</td>
                                 <td>{{ $item->invoice->notes }}</td>
                                 <td>{{ numberFormat($item->paid) }}</td>
                             </tr>
