@@ -188,8 +188,9 @@ class ProductRepository extends BaseRepository
 */
     public function uploadFile($file)
     {
-        $file_name = $this->file_path . time() . $file->getClientOriginalName();
-        $this->storage->put($file_name, file_get_contents($file->getRealPath()));
+        $file_name = time() . $file->getClientOriginalName();
+
+        $this->storage->put($this->file_path . $file_name, file_get_contents($file->getRealPath()));
 
         return $file_name;
     }
@@ -197,12 +198,12 @@ class ProductRepository extends BaseRepository
     /*
     * remove logo or favicon icon
     */
-    public function removePicture(Product $file, $type)
+    public function removePicture(Product $product, $type)
     {
-        if ($file->$type && $this->storage->exists( $this->file_path . $file->$type)) 
-            $this->storage->delete( $this->file_path . $file->$type);
+        if ($product->type && $this->storage->exists($this->file_path . $product->type)) 
+            $this->storage->delete($this->file_path . $product->type);
         
-        if ($file->update([$type => null])) return true;
+        if ($product->update([$type => null])) return true;
             
         throw new GeneralException(trans('exceptions.backend.settings.update_error'));
     }

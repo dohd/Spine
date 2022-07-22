@@ -162,8 +162,9 @@ class RjcRepository extends BaseRepository
     // Upload file to storage
     public function uploadFile($file)
     {
-        $file_name = $this->file_path . time() . $file->getClientOriginalName();
-        $this->storage->put($file_name, file_get_contents($file->getRealPath()));
+        $file_name = time() . $file->getClientOriginalName();
+        
+        $this->storage->put($this->file_path . $file_name, file_get_contents($file->getRealPath()));
 
         return $file_name;
     }

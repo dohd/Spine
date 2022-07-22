@@ -160,26 +160,18 @@ class DjcRepository extends BaseRepository
      */
     public function delete(Djc $djc)
     {
-        // delete djc_items items then delete djc
-        if ($djc->items()->delete() && $djc->delete()) return true;
+        if ($djc->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
-    }
-
-    // Delete djc item from storage
-    public function delete_item($id)
-    {
-        if (DjcItem::destroy($id)) return true;        
-
-        throw new GeneralException('Error deleting Djc Item');
     }
 
     // Upload file to storage
     public function uploadFile($file)
     {
-        $file_name = $this->file_path . time() . $file->getClientOriginalName();
-        $this->storage->put($file_name, file_get_contents($file->getRealPath()));
+        $file_name = time() . $file->getClientOriginalName();
 
+        $this->storage->put($this->file_path . $file_name, file_get_contents($file->getRealPath()));
+        
         return $file_name;
     }
 }
