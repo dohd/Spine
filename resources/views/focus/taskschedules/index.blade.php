@@ -25,10 +25,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Contract</th>
+                                        <th>Client Contract</th>
                                         <th>Title</th>
-                                        <th>Units Loaded</th>
-                                        <th>Service Rate</th>
+                                        <th>Loaded Unit</th>
+                                        <th>Unserviced Unit</th>
+                                        <th>Total Rate</th>
+                                        <th>Total Charge</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Action</th>
@@ -75,8 +77,8 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     name: 'id'
                 },
                 {
-                    data: 'contract_tid',
-                    name: 'contract_tid'
+                    data: 'contract',
+                    name: 'contract'
                 },
                 {
                     data: 'title',
@@ -87,8 +89,16 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     name: 'loaded'
                 },
                 {
-                    data: 'service_rate',
-                    name: 'service_rate'
+                    data: 'unserviced',
+                    name: 'unserviced'
+                },
+                {
+                    data: 'total_rate',
+                    name: 'total_rate'
+                },
+                {
+                    data: 'total_charged',
+                    name: 'total_charged'
                 },
                 {
                     data: 'start_date',
