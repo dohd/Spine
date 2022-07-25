@@ -297,6 +297,7 @@
 
     // account and project autocomplete
     let accountRowId = 0;
+    let projectExpRowId = 0;
     function expSelect(event, ui) {
         const {data} = ui.item;
         const i = accountRowId;
@@ -304,14 +305,16 @@
     }
     function projectExpSelect(event, ui) {
         const {data} = ui.item;
-        const i = expRowId;
+        const i = projectExpRowId;
         $('#projectexpval-'+i).val(data.id);
     }
-    $('#expTbl').on('mouseup', '.accountname', function() {
+    $('#expTbl').on('mouseup', '.accountname, .projectexp', function() {
         const id = $(this).attr('id').split('-')[1];
         if ($(this).is('.accountname')) accountRowId = id;
+        if ($(this).is('.projectexp')) projectExpRowId = id;
     });
 
+    
     /**
      * Asset tab
      */
