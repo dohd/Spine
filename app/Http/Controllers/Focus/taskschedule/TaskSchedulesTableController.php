@@ -53,17 +53,24 @@ class TaskSchedulesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('contract_tid', function ($schedule) {        
-                if ($schedule->contract)
-                return $schedule->contract->tid . ' - ' . $schedule->contract->title;
-            })
-            ->addColumn('schedule', function ($schedule) {
-                return $schedule->title;
+            ->addColumn('contract', function ($schedule) {        
+                if ($schedule->contract) 
+                return  $schedule->contract->title . ' - ' . $schedule->contract->customer->company;
             })
             ->addColumn('loaded', function ($schedule) {
                 return $schedule->taskschedule_equipments->count();
             })
-            ->addColumn('service_rate', function ($schedule) {
+            ->addColumn('unserviced', function ($schedule) {
+                return $schedule->taskschedule_equipments->count();
+            })
+            ->addColumn('total_rate', function ($schedule) {
+                $total = 0;
+                foreach ($schedule->taskschedule_equipments as $row) {
+                    if ($row->equipment) $total += $row->equipment->service_rate;
+                }
+                return numberFormat($total);
+            })
+            ->addColumn('total_charged', function ($schedule) {
                 $total = 0;
                 foreach ($schedule->taskschedule_equipments as $row) {
                     if ($row->equipment) $total += $row->equipment->service_rate;
