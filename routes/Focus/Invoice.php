@@ -20,10 +20,10 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::get('invoices/index_payment', 'InvoicesController@index_payment')->name('invoices.index_payment');
     Route::get('invoices/create_payment', 'InvoicesController@create_payment')->name('invoices.create_payment');
     Route::post('invoices/store_payment', 'InvoicesController@store_payment')->name('invoices.store_payment');
-    Route::get('invoices/edit_payment/{id}', 'InvoicesController@edit_payment')->name('invoices.edit_payment');
-    Route::get('invoices/show_payment/{id}', 'InvoicesController@show_payment')->name('invoices.show_payment');
-    Route::patch('invoices/update_payment/{id}', 'InvoicesController@update_payment')->name('invoices.update_payment');
-    Route::post('invoices/delete_payment/{id}', 'InvoicesController@delete_payment')->name('invoices.delete_payment');
+    Route::get('invoices/edit_payment/{payment}', 'InvoicesController@edit_payment')->name('invoices.edit_payment');
+    Route::get('invoices/show_payment/{payment}', 'InvoicesController@show_payment')->name('invoices.show_payment');
+    Route::patch('invoices/update_payment/{payment}', 'InvoicesController@update_payment')->name('invoices.update_payment');
+    Route::post('invoices/delete_payment/{payment}', 'InvoicesController@delete_payment')->name('invoices.delete_payment');
 
     // project invoice
     Route::get('invoices/edit_project_invoice/{invoice}', 'InvoicesController@edit_project_invoice')->name('invoices.edit_project_invoice');
