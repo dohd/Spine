@@ -2,10 +2,12 @@
 
 namespace App\Models\verifiedjcs;
 
+use App\Models\verifiedjcs\Traits\VerifiedJcRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class VerifiedJc extends Model
 {
+    use VerifiedJcRelationship;
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
