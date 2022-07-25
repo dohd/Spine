@@ -289,83 +289,67 @@ class QuoteRepository extends BaseRepository
      */
     public function verify(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        // quote properties
-        $quote_data = $input['quote'];
-        $quote_id = $quote_data['id'];
-        $verify_no = $quote_data['verify_no'];
-        $ins = auth()->user()->ins;
-
-        // update or create new quote_item
-        $quote_items = modify_array($input['quote_items']);
-        foreach($quote_items as $item) {
-            $item = $item + compact('quote_id', 'ins');
-            $quote_item = VerifiedItem::firstOrNew([
-                'id' => $item['item_id'],
-                'quote_id' => $quote_id,
-            ]);
-            foreach($item as $key => $val) {
-                if (in_array($key, ['product_price', 'product_subtotal'], 1)) {
-                    $quote_item[$key] = numberClean($val);
-                } else $quote_item[$key] = $val;  
-            }
-            unset($quote_item['item_id']);
-            if (!$quote_item['id']) unset($quote_item['id']);
-            $quote_item->save();
-        }
-        
-        // update or create new job_card
-        $job_cards = modify_array($input['job_cards']);
-        foreach($job_cards as $item) {
-            $job_card = VerifiedJc::where(['reference' => $item['reference']])->first();
-            if ($job_card) continue;
-
-            $item = $item + compact('quote_id', 'verify_no');
-            $job_card = VerifiedJc::firstOrNew([
-                'id' => $item['jcitem_id'],
-                'quote_id' => $quote_id,
-            ]);
-            foreach($item as $key => $value) {
-                if ($key == 'date') $job_card[$key] = date_for_database($value);
-                else $job_card[$key] = $value;
-            }
-            unset($job_card['jcitem_id']);                
-            if (!$job_card['id']) unset($job_card['id']);
-            $job_card->save();
-        }
-        
-        $quote = Quote::find($quote_id);
+        $data = $input['data'];
+        $quote = Quote::find($data['id']);
         $result = $quote->update([
             'verified' => 'Yes', 
             'verification_date' => date('Y-m-d'),
             'verified_by' => auth()->user()->id,
-            'gen_remark' => $quote_data['gen_remark'],
-            'verified_amount' => $quote_data['subtotal'],
-            'verified_total' => $quote_data['total'],
-            'verified_tax' => $quote_data['tax']
+            'gen_remark' => $data['gen_remark'],
+            'verified_amount' => numberClean($data['subtotal']),
+            'verified_total' => numberClean($data['total']),
+            'verified_tax' => numberClean($data['tax']), 
         ]);
+
+        $data_items = $input['data_items'];
+        // delete omitted items
+        $item_ids = array_map(function ($v) { return $v['item_id']; }, $data_items);
+        VerifiedItem::where('quote_id', $data['id'])->whereNotIn('id', $item_ids)->delete();
+        // update or create verified item
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'quote_id' => $data['id'],
+                'product_qty' => numberClean($item['product_qty']),
+                'product_price' => numberClean($item['product_price']),
+                'product_subtotal' => numberClean($item['product_subtotal']),
+                'ins' => auth()->user()->ins
+            ]);
+            $verify_item = VerifiedItem::firstOrNew(['id' => $item['item_id']]);
+            $verify_item->fill($item);
+            if (!$verify_item->id) unset($verify_item->id);
+            unset($verify_item->item_id);
+            $verify_item->save();
+        }
+
+        $job_cards = $input['job_cards'];
+        // delete omitted items
+        $item_ids = array_map(function ($v) { return $v['jcitem_id']; }, $job_cards);
+        VerifiedJc::where('quote_id', $data['id'])->whereNotIn('id', $item_ids)->delete();        
+        // duplicate jobcard reference
+        $references = array_map(function ($v) { return $v['reference']; }, $job_cards);
+        $references = VerifiedJc::whereIn('reference', $references)->pluck('reference')->toArray();
+        // update or create verified jobcards
+        foreach ($job_cards as $item) {
+            // skip duplicate reference
+            if (in_array($item['reference'], $references) && !$item['jcitem_id']) continue;
+            $item = array_replace($item, [
+                'quote_id' => $data['id'],
+                'date' => date_for_database($item['date']),
+            ]);
+            $jobcard = VerifiedJc::firstOrNew(['id' => $item['jcitem_id']]);
+            $jobcard->fill($item);
+            if (!$jobcard->id) unset($jobcard->id);
+            unset($jobcard->jcitem_id);
+            $jobcard->save();
+        }
 
         DB::commit();
         if ($result) return $quote;      
         
         throw new GeneralException('Error Verifying Quote');
-    }
-
-    // Delete verified Quote product
-    public function delete_verified_item($id)
-    {        
-        if (VerifiedItem::destroy($id)) return true;
-
-        throw new GeneralException(trans('Error deleting verified product'));
-    }
-
-    // Delete verified Job card
-    public function delete_verified_jcs($id)
-    {        
-        if (VerifiedJc::destroy($id)) return true;
-
-        throw new GeneralException(trans('Error deleting verified job card'));
     }
 
     /**
