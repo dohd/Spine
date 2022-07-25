@@ -243,14 +243,11 @@ class QuotesController extends Controller
      */
     public function verify_quote(Quote $quote)
     {
-        $verified_jc = $quote->verified_jcs()->orderBy('verify_no', 'desc')->first();
-        $verify_no = $verified_jc ? $verified_jc->verify_no+1 : 1;
-        $products = $quote->products;
-        if ($verify_no > 1) {
-            $products = VerifiedItem::where('quote_id', $quote->id)->orderBy('row_index')->get();
-        }
+        $products = VerifiedItem::where('quote_id', $quote->id)->get();
+        $jobcards = VerifiedJc::where('quote_id', $quote->id)->with('equipment')->get();
+        if (!$products->count()) $products = $quote->products;
 
-        return new ViewResponse('focus.quotesverify.create', compact('quote', 'products', 'verify_no') + bill_helper(2, 4));
+        return new ViewResponse('focus.quotesverify.create', compact('quote', 'products', 'jobcards') + bill_helper(2, 4));
     }
 
     /**
@@ -262,52 +259,23 @@ class QuotesController extends Controller
     public function storeverified(ManageQuoteRequest $request)
     {
         //filter request input fields
-        $quote = $request->only(['id', 'verify_no', 'gen_remark', 'total', 'tax', 'subtotal']);
-        $quote_items = $request->only([
+        $data = $request->only(['id', 'verify_no', 'gen_remark', 'total', 'tax', 'subtotal']);
+        $data_items = $request->only([
             'remark', 'row_index', 'item_id', 'a_type', 'numbering', 'product_id', 
             'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit'
         ]);
-        $job_cards = $request->only(['type', 'jcitem_id', 'reference', 'date', 'technician']);
+        $job_cards = $request->only(['type', 'jcitem_id', 'reference', 'date', 'technician', 'equipment_id', 'fault']);
 
-        $result = $this->repository->verify(compact('quote', 'quote_items', 'job_cards'));
+        $data_items = modify_array($data_items);
+        $job_cards = modify_array($job_cards);
+
+        $result = $this->repository->verify(compact('data', 'data_items', 'job_cards'));
 
         $tid = $result->tid;
         if ($result->bank_id) $tid = gen4tid('PI-', $tid);
         else $tid = gen4tid('QT-', $tid);
 
         return new RedirectResponse(route('biller.quotes.get_verify_quote'), ['flash_success' => $tid . ' verified successfully']);
-    }
-
-    // Fetch Verified Job cards
-    public function fetch_verified_jcs($id)
-    {
-        $verified_jcs = VerifiedJc::where('quote_id', $id)->get();
-
-        return json_encode($verified_jcs);
-    }
-
-    // Delete Quote product
-    public function delete_product($id)
-    {
-        $this->repository->delete_product($id);
-
-        return response()->noContent();
-    }
-
-    // Delete Verified Quote Item
-    public function delete_verified_item($id)
-    {
-        $this->repository->delete_verified_item($id);
-
-        return response()->noContent();
-    }
-
-    // Delete Verified Job card
-    public function delete_verified_jcs($id)
-    {
-        $this->repository->delete_verified_jcs($id);
-
-        return response()->noContent();
     }
 
     // Reset verified Quote
