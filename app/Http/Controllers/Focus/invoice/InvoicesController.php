@@ -272,12 +272,12 @@ class InvoicesController extends Controller
     public function create_payment(Request $request)
     {
         $tid = PaidInvoice::max('tid');
-        // bank and advanced pmt accounts (type_id: 6, type_id: 10)
         $accounts = Account::whereHas('accountType', function ($q) {
-            $q->whereIn('system', ['bank', 'other_current_liability']);
-        })->get(['id', 'account_type_id', 'holder', 'debit', 'credit', 'system']);
+            $q->where('system', 'bank');
+        })->get(['id', 'holder']);
+        $payments = PaidInvoice::whereColumn('amount', '>', 'allocate_ttl')->get();
 
-        return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid'));
+        return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid', 'payments'));
     }
 
     /**
@@ -285,28 +285,21 @@ class InvoicesController extends Controller
      */
     public function store_payment(Request $request)
     {
-        // custom validation
-        if (!$request->reference || !$request->payment_mode)
-            throw ValidationException::withMessages([
-                'reference' => 'Reference is required!',
-                'payment_mode' => 'Payment mode is required!'
-            ]);
-
         // extract request input
-        $bill = $request->only([
-            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl',
-            'payment_mode', 'reference', 'is_allocated', 'advance_account_id', 'source'
+        $data = $request->only([
+            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
+            'payment_mode', 'reference', 'payment_id', 'payment_type'
         ]);
-        $bill_items = $request->only(['invoice_id', 'paid']); 
+        $data_items = $request->only(['invoice_id', 'paid']); 
 
-        $bill['ins'] = auth()->user()->ins;
-        $bill['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
-        // modify and filter paid bill items 
-        $bill_items = modify_array($bill_items);
-        $bill_items = array_filter($bill_items, function ($item) { return $item['paid']; });
+        // modify and filter paid data items 
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($item) { return $item['paid']; });
 
-        $result = $this->repository->create_invoice_payment(compact('bill', 'bill_items'));
+        $result = $this->repository->create_invoice_payment(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
     }
@@ -314,47 +307,41 @@ class InvoicesController extends Controller
     /**
      * Edit invoice payment
      */
-    public function edit_payment($id)
+    public function edit_payment(PaidInvoice $payment)
     {
-        $payment = PaidInvoice::find($id);
-        // bank and advanced pmt accounts (type_id: 6, type_id: 10)
         $accounts = Account::whereHas('accountType', function ($q) {
-            $q->whereIn('system', ['bank', 'other_current_liability']);
-        })->get(['id', 'account_type_id', 'holder', 'debit', 'credit', 'system']);
+            $q->where('system', 'bank');
+        })->get(['id', 'holder']);
+        $payments = PaidInvoice::whereColumn('amount', '>', 'allocate_ttl')->get();
 
-        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts'));
+        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts', 'payments'));
     }    
 
     /**
      * Show invoice payment
      */
-    public function show_payment($id)
+    public function show_payment(PaidInvoice $payment)
     {
-        $payment = PaidInvoice::find($id);
-
         return new ViewResponse('focus.invoices.view_payment', compact('payment'));
     }   
 
     /**
      * Update invoice payment
      */
-    public function update_payment(Request $request, $id)
+    public function update_payment(PaidInvoice $payment, Request $request)
     {
         // extract request input
-        $bill = $request->only([
-            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount_ttl', 'deposit_ttl',
-            'payment_mode', 'reference', 'is_allocated', 'advance_account_id'
+        $data = $request->only([
+            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
+            'payment_mode', 'reference', 'payment_id', 'payment_type'
         ]);
-        $bill_items = $request->only(['id', 'paid']); 
+        $data_items = $request->only(['id', 'invoice_id', 'paid']); 
 
-        $bill['ins'] = auth()->user()->ins;
-        $bill['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        $data_items = modify_array($data_items);
 
-        // modify and filter paid bill items 
-        $bill_items = modify_array($bill_items);
-        $bill_items = array_filter($bill_items, function ($item) { return $item['paid']; });
-
-        $result = $this->repository->update_invoice_payment($id, compact('bill', 'bill_items'));
+        $result = $this->repository->update_invoice_payment($payment, compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
     }    
