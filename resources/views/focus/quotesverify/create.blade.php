@@ -29,189 +29,7 @@
                         if ($query_str == 'page=pi') $link = route('biller.quotes.storeverified', 'page=pi');
                     @endphp
                     {{ Form::model($quote, ['url' => $link, 'class' => 'form-horizontal', 'method' => 'POST']) }}                   
-                    <input type="hidden" name="id" value="{{ $quote->id }}">
-                    <div class="row">
-                        <div class="col-sm-6 cmp-pnl">
-                            <div id="customerpanel" class="inner-cmp-pnl">
-                                <div class="form-group row">
-                                    <div class="fcol-sm-12">
-                                        <h3 class="title pl-1">{{ $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote' }}</h3>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-12">
-                                        <label for="subject" class="caption">Subject / Title</label>
-                                        {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
-                                    </div>
-                                </div>   
-                                <div class="form-group row">                                    
-                                    <div class="col-sm-6">
-                                        <label for="client" class="caption">Client</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('client', @$quote->client->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label for="branch" class="caption">Branch</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('branch', @$quote->branch->name, ['class' => 'form-control round', 'id' => 'branch', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                </div> 
-                                <div class="form-group row">
-                                    <div class="col-sm-6"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('invoicedate', null, ['class' => 'form-control round datepicker', 'id'=>'invoicedate', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">                                        
-                                        <label for="serial_no" class="caption">{{ $quote->bank_id ? '#PI' : '#Qt' }} {{trans('general.serial_no')}}</label>
-                                        <div class="input-group">
-                                            <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
-                                            @php
-                                                $tid = 'QT-'.sprintf('%04d', $quote->tid);
-                                                if ($quote->bank_id) $tid = 'PI-'.sprintf('%04d', $quote->tid);
-                                            @endphp
-                                            {{ Form::text('tid', $tid . $quote->revision, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
-                                        </div>
-                                    </div>                                    
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-6">
-                                        <label for="invocieno" class="caption">Djc Reference</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference', null, ['class' => 'form-control round', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6"><label for="reference_date" class="caption">Djc Reference Date</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id'=>'reference-date', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 cmp-pnl">
-                            <div class="inner-cmp-pnl">
-                                <div class="form-group row">
-                                    <div class="col-sm-12">
-                                        <h3 class="title">Properties</h3>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group row">
-                                    <div class="col-sm-4">
-                                        <label for="client_ref" class="caption">Client Ref / Callout ID</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                            {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference', 'id' => 'client_ref', 'disabled']) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label for="verify_no" class="caption">Verification</label>
-                                        <div class="input-group">
-                                            <select class="form-control" name="verify_no" id="verify_no" required>
-                                                <option value="1" selected>V1</option>
-                                                <option value="2">V2</option>
-                                                <option value="3">V3</option>
-                                                <option value="4">V4</option>
-                                                <option value="5">V5</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-12">
-                                        <table id="jobcard" class="table-responsive pb-2 tfr">
-                                            <thead class="bg-gradient-directional-blue white pb-1">
-                                                <tr>
-                                                    <th class="text-center" width="23%">Type</th>
-                                                    <th class="text-center" width="23%">Reference No</th>                                                    
-                                                    <th class="text-center" width="22%">Reference Date</th>
-                                                    <th class="text-center" width="50%">Technician</th>
-                                                    <th class="text-center" width="5%">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                        <button type="button" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
-                                            <i class="fa fa-plus-square"></i> Add Jobcard / DNote
-                                        </button>                                            
-                                    </div>
-                                </div>                                                                
-                            </div>
-                        </div>                        
-                    </div>                  
-
-                    <div>                            
-                        <table id="quotation" class="table-responsive pb-5 tfr my_stripe_single">
-                            <thead>
-                                <tr class="item_header bg-gradient-directional-blue white">
-                                    <th width="7%" class="text-center">Numbering</th>
-                                    <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
-                                    <th width="7%" class="text-center">UOM</th>
-                                    <th width="5%" class="text-center">{{trans('general.quantity')}}</th>
-                                    <th width="10%" class="text-center">{{trans('general.rate')}} Exclusive</th>
-                                    <th width="10%" class="text-center">{{trans('general.rate')}} Inclusive</th>
-                                    <th width="10%" class="text-center">{{trans('general.amount')}} ({{config('currency.symbol')}})</th>
-                                    <th width="12%" class="text-center">Remark</th>
-                                    <th width="5%" class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-
-                        <div class="row">
-                            <div class="col-md-8 col-xs-7">
-                                <button type="button" class="btn btn-success" aria-label="Left Align" id="add-product">
-                                    <i class="fa fa-plus-square"></i> Add Product
-                                </button>
-                                <button type="button" class="btn btn-primary" aria-label="Left Align" id="add-title">
-                                    <i class="fa fa-plus-square"></i> Add Title
-                                </button>
-                                <div class="form-group mt-3">
-                                    <div><label for="gen_remark" class="caption">General Remark</label></div>
-                                    <textarea class="form-control" name="gen_remark" id="gen_remark" cols="30" rows="5"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 col-xs-5 invoice-block pull-right">
-                                <div class="unstyled amounts">
-                                    <div class="form-group">
-                                        <label>SubTotal (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
-                                        <div class="input-group m-bot15">
-                                            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>{{trans('general.total_tax')}}</label>
-                                        <div class="input-group m-bot15">
-                                            <input type="text" name="tax" id="tax" class="form-control" readonly>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>{{trans('general.grand_total')}} (<span class="currenty lightMode">{{config('currency.symbol')}}</span>)</label>
-                                        <div class="input-group m-bot15">
-                                            <input type="text" name="total" class="form-control" id="total" placeholder="Total" readonly>
-                                        </div>
-                                    </div>
-                                    {{ Form::submit('Verify & Save', ['class' => 'btn btn-success btn-lg']) }}
-                                    @if ($verify_no)
-                                        <button type="button" class="btn btn-danger btn-lg" aria-label="Left Align" id="reset-items">
-                                            <i class="fa fa-refresh"></i> Undo
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        @include('focus/quotesverify/form')
                     {{ Form::close() }}
                 </div>
             </div>   
@@ -224,12 +42,10 @@
 <script>    
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
-    const verify_no = "{{ $verify_no }}";
-
     // Intialize datepicker
     $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" });
     $('#reference-date').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
-    $('#invoicedate').datepicker('setDate', new Date("{{ $quote->invoicedate }}"));
+    $('#date').datepicker('setDate', new Date("{{ $quote->date }}"));
     $('#date-0').datepicker('setDate', new Date());
 
     // set general remark
@@ -237,11 +53,10 @@
 
     // reset Quote Verification 
     $('#reset-items').click(function() {
-        const msg = 'This is a destructive process! Are you sure to reset all previously verified items ?'
+        const msg = 'Are you sure to reset all previously verified items ?'
         if (confirm(msg)) {
             $.ajax({
                 url: baseurl + 'quotes/reset_verified/' + "{{ $quote->id }}",
-                // method: 'DELETE',
                 success: function() {
                     return location.reload();
                 }
@@ -254,74 +69,87 @@
         return `
             <tr>
                 <td>
-                    <select name="type[]" id="type-${n}" class="form-control">
-                        <option value="1" selected>JobCard</option>
+                    <select class="custom-select type" name="type[]" id="type-${n}">
+                        <option value="1" selected>Jobcard</option>
                         <option value="2">DNote</option> 
                     </select>
                 </td>
                 <td><input type="text" class="form-control" name="reference[]" id="reference-${n}" required></td>
                 <td><input type="text" class="form-control datepicker" name="date[]" id="date-${n}" required></td>
                 <td><input type="text" class="form-control" name="technician[]" id="technician-${n}" required></td>
-                <td><button class="btn btn-primary btn-md removeJc" type="button">Remove</button></td>
+                <td><textarea class="form-control equip" name="equipment[]" id="equip-${n}"></textarea>
+                <td><input type="text location" class="form-control" name="location[]" id="location-${n}"></td>
+                <td>
+                    <select class="custom-select fault" name="fault[]" id="fault-${n}">
+                        <option value="none">None</option>
+                        <option value="faulty_compressor">Faulty Compressor</option>
+                        <option value="faulty_pcb">Faulty PCB</option>
+                        <option value="leakage_arrest">Leakage Arrest</option>
+                        <option value="electrical_fault">Electrical Fault</option>
+                        <option value="drainage">Drainage</option>
+                        <option value="other">Other</option>
+                    </select>
+                </td>
+                <td><a href="javascript:" class="btn btn-primary btn-md removeJc" type="button">Remove</a></td>
                 <input type="hidden" name="jcitem_id[]" value="0" id="jcitemid-${n}">
+                <input type="hidden" name="equipment_id[]" value="0" id="equipmentid-${n}">
             </tr>
         `;
     }
 
+    // on change type
+    $('#jobcardTbl').on('change', '.type', function() {
+        let i = $(this).attr('id').split('-')[1];
+        if ($(this).val() == 2) {
+            $('#fault-'+i).addClass('invisible');
+            $('#equip-'+i).addClass('invisible');
+            $('#location-'+i).addClass('invisible');
+        } else {
+            $('#fault-'+i).removeClass('invisible');
+            $('#equip-'+i).removeClass('invisible');
+            $('#location-'+i).removeClass('invisible');
+        }
+    });
+    
     // addjob card row
     let jcIndex = 0;
     $('#add-jobcard').click(function() {
         const i = jcIndex;
-        $('#jobcard tbody').append(jobCardRow(i));
-        $('#date-'+i)
-            .datepicker({ format: "{{ config('core.user_date_format') }}"  })
-            .datepicker('setDate', new Date());
-
+        $('#jobcardTbl tbody').append(jobCardRow(i));
+        $('#equip-'+i).autocomplete(autocompleteEquip(i));
+        $('#date-'+i).datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+        .datepicker('setDate', new Date());
         jcIndex++;
     });
 
     // remove job card row
-    $('#jobcard').on('click', '.removeJc', function() {
-        if ($(this).is('.removeJc')) {
-            const $row = $(this).parents('tr:first');
-            const itemId = $row.find('input[name="jcitem_id[]"]').val();
-            if (itemId == 0) return $row.remove();
-            if (verify_no) {
-                if (confirm('Are you sure to delete this job card ?')) {
-                    $.ajax({
-                        url: baseurl + 'quotes/verified_jcs/' + itemId,
-                        // method: 'DELETE'
-                    });
-                    $row.remove();
-                }
-            } 
-        }
+    $('#jobcardTbl').on('click', '.removeJc', function() {
+        const row = $(this).parents('tr:first');
+        if (confirm('Are you sure ?')) row.remove();
     });
 
-    // On next verifications fetch jobcards
-    if (verify_no) {
-        const quoteId = "{{ $quote->id }}";
-        $.ajax({
-            url: baseurl + 'quotes/verified_jcs/' + quoteId,
-            method: 'POST',
-            dataType: 'json',
-            success: function(data) {
-                // set default job card rows
-                data.forEach((v, i) => {
-                    jcIndex++;
-                    $('#jobcard tbody').append(jobCardRow(i));                    
-                    // set values
-                    $('#jcitemid-'+i).val(v.id);
-                    $('#reference-'+i).val(v.reference);
-                    $('#type-'+i).val(v.type);
-                    $('#technician-'+i).val(v.technician);
-                    $('#date-'+i)
-                        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-                        .datepicker('setDate', new Date(v.date));
-                });
-            }
-        });
-    }
+    // jobcards
+    const jobcards = @json($jobcards);
+    jobcards.forEach((v, i) => {
+        jcIndex++;
+        $('#jobcardTbl tbody').append(jobCardRow(i));                    
+        $('#jcitemid-'+i).val(v.id);
+        $('#reference-'+i).val(v.reference);
+        $('#type-'+i).val(v.type);
+        $('#technician-'+i).val(v.technician);
+        $('#equip-'+i).autocomplete(autocompleteEquip(i)).val(v.equipment?.make_type);
+        $('#equipmentid-'+i).val(v.equipment_id);
+        $('#location-'+i).val(v.equipment?.location);
+        $('#fault-'+i).val(v.fault)
+        $('#date-'+i).datepicker({ format: "{{ config('core.user_date_format') }}" })
+        .datepicker('setDate', new Date(v.date));
+        // hidden dnote fields 
+        if (v.type == 2) {
+            $('#equip-'+i).addClass('invisible');
+            $('#location-'+i).addClass('invisible');
+            $('#fault-'+i).addClass('invisible');
+        }
+    });
 
     // row dropdown menu
     function dropDown() {
@@ -347,8 +175,8 @@
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
                 <td><input type="text" class="form-control req amount" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req price" name="product_price[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_subtotal[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
+                <td><input type="text" class="form-control req price" name="product_subtotal[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prcrate" name="product_price[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
                 <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
                 <td><textarea class="form-control" name="remark[]" id="remark-${val}"></textarea></td>
                 <td class="text-center">${dropDown()}</td>
@@ -393,8 +221,8 @@
         const i = rowIndx;
         const item = {...v};
         // format float values to integer
-        const keys = ['product_price', 'product_qty', 'product_subtotal'];
         for (let prop in item) {
+            let keys = ['product_price', 'product_qty', 'product_subtotal'];
             if (keys.includes(prop) && item[prop]) {
                 item[prop] = parseFloat(item[prop].replace(/,/g, ''));
             }
@@ -403,7 +231,6 @@
         if (item.a_type == 1) {
             $('#quotation tbody').append(productRow(rowIndx));
             $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
-
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
@@ -411,10 +238,10 @@
             $('#itemname-'+i).val(item.product_name);
             $('#unit-'+i).val(item.unit); 
             $('#remark-'+i).val(item.remark);
-            $('#amount-'+i).val(parseFloat(item.product_qty));
-            $('#price-'+i).val(item.product_price.toFixed(2));
-            $('#rateinclusive-'+i).val(item.product_subtotal.toFixed(2));                
-            $('#result-'+i).text(item.product_subtotal.toFixed(2));
+            $('#amount-'+i).val(item.product_qty.toFixed(2));
+            $('#price-'+i).val(item.product_subtotal.toFixed(2));
+            $('#rateinclusive-'+i).val(item.product_price.toFixed(2));                
+            $('#result-'+i).text((item.product_qty * item.product_price).toFixed(2));
         } else {
             $('#quotation tbody').append(productTitleRow(rowIndx));
             // set default values
@@ -424,7 +251,7 @@
             $('#itemname-'+i).val(item.product_name);
         }
         rowIndx++;
-        totals();
+        calcTotals();
     });    
 
     // On click Add Product
@@ -441,37 +268,81 @@
 
     // on clicking Product row drop down menu
     $("#quotation").on("click", ".up, .down, .removeProd", function() {
-        const $row = $(this).parents("tr:first");
-        if ($(this).is('.up')) $row.insertBefore($row.prev());
-        if ($(this).is('.down')) $row.insertAfter($row.next());
+        const row = $(this).parents("tr:first");
+        if ($(this).is('.up')) row.insertBefore(row.prev());
+        if ($(this).is('.down')) row.insertAfter(row.next());
         if ($(this).is('.removeProd')) {
-            const itemId = $row.find('input[name="item_id[]"]').val();
-            if (itemId == 0) return $row.remove();            
-            if (verify_no) {
-                if (confirm('Are you sure to delete this item?')) {
-                    $.ajax({
-                        url: baseurl + 'quotes/verified_item/' + itemId,
-                        // method: 'DELETE',
-                    });
-                    $row.remove();                
-                }
-            }            
+            if (confirm('Are you sure to delete this item?')) row.remove();            
         }
-        
-        totals();
+        calcTotals();
     });
 
     // default tax
-    const tax = "{{ $quote->tax_id }}";
-    const taxInt = parseFloat(tax.replace(/,/g, ''));
-    let taxRate = (taxInt+100)/100;
+    const tax = @json($quote->tax_id);
+    let taxRate = parseFloat(tax/100 + 1);
 
-    // autocompleteProp returns autocomplete object properties
+    // on quantity input change
+    function qtyChange(e) {
+        const id = e.target.id;
+        const indx = id.split('-')[1];
+        const productQty = $('#'+id).val();
+        let productPrice = $('#price-'+indx).val();
+        productPrice = parseFloat(productPrice.replace(/,/g, ''));
+
+        const rateInclusive = taxRate * productPrice;
+        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
+        const rowAmount = productQty * parseFloat(rateInclusive);
+        $('#result-'+indx).text(rowAmount.toFixed(2));
+        calcTotals();
+    }
+    // on price input change
+    function priceChange(e) {
+        // change value to float
+        e.target.value = Number(e.target.value).toFixed(2);
+
+        const id = e.target.id;
+        indx = id.split('-')[1];
+        const productQty = $('#amount-'+indx).val();
+        let productPrice = $('#'+id).val();
+        productPrice = parseFloat(productPrice.replace(/,/g, ''));
+
+        const rateInclusive = taxRate * productPrice;
+        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
+        const rowAmount = productQty * parseFloat(rateInclusive);
+        $('#result-'+indx).text(rowAmount.toFixed(2));
+        calcTotals();
+    }
+
+    // totals
+    function calcTotals() {
+        let subTotal = 0;
+        let grandTotal = 0;
+        $('#quotation tr').each(function(i) {
+            if (i == 0) return;
+            const qty = $(this).find('td').eq(3).children().val()
+            if (qty) {
+                let price = $(this).find('td').eq(4).children().val();
+                let rate = $(this).find('td').eq(5).children().val();
+                price = parseFloat(price.replace(/,/g, ''));
+                rate = parseFloat(rate.replace(/,/g, ''));
+                subTotal += qty * price;
+                grandTotal += qty * rate;
+            }
+            // update row_index
+            $(this).find('input[name="row_index[]"]').val($(this).index());
+        });
+        $('#subtotal').val(parseFloat(subTotal.toFixed(2)).toLocaleString());
+        $('#total').val(parseFloat(grandTotal.toFixed(2)).toLocaleString());
+        $('#tax').val(parseFloat((grandTotal - subTotal).toFixed(2)).toLocaleString());        
+    }
+
+    // product autocomplete
     function autocompleteProp(i) {
         return {
             source: function(request, response) {
                 $.ajax({
                     url: "{{ route('biller.products.quote_product_search') }}",
+                    method: 'POST',
                     data: 'keyword=' + request.term,
                     success: result => response(result.map(v => ({
                         label: v.name,
@@ -488,76 +359,44 @@
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
-                const productPrice = parseFloat(data.price.replace(',',''));
-                $('#price-'+i).val(productPrice.toFixed(2));
-                $('#rateinclusive-'+i).val((taxRate * productPrice).toFixed(2));                
-                $('#result-'+i).text((taxRate * productPrice).toFixed(2));
-                totals();
+
+                let price = parseFloat(data.price.replace(/,/g,''));
+                $('#price-'+i).val(price.toLocaleString());
+                $('#rateinclusive-'+i).val((taxRate * price).toLocaleString());                
+                $('#result-'+i).text((taxRate * price).toLocaleString());
+                calcTotals();
             }
         };
     }
-
-    // on quantity input change
-    function qtyChange(e) {
-        const id = e.target.id;
-        const indx = id.split('-')[1];
-
-        const productQty = $('#'+id).val();
-
-        let productPrice = $('#price-'+indx).val();
-        productPrice = parseFloat(productPrice.replace(/,/g, ''));
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
-
-        totals();
-    }
-    // on price input change
-    function priceChange(e) {
-        // change value to float
-        e.target.value = Number(e.target.value).toFixed(2);
-
-        const id = e.target.id;
-        indx = id.split('-')[1];
-
-        const productQty = $('#amount-'+indx).val();
-
-        let productPrice = $('#'+id).val();
-        productPrice = parseFloat(productPrice.replace(/,/g, ''));
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
-        totals();
-    }
-
-    // totals
-    function totals() {
-        let subTotal = 0;
-        let grandTotal = 0;
-        $('#quotation tr').each(function(i) {
-            if (!i) return;
-            const productQty = $(this).find('td').eq(3).children().val()
-            if (productQty) {
-                const productPrice = $(this).find('td').eq(4).children().val();
-                const rateInclusive = $(this).find('td').eq(5).children().val();
-                // increament
-                subTotal += Number(productQty) * parseFloat(productPrice);
-                grandTotal += Number(productQty) * parseFloat(rateInclusive);
+    
+    // equipment autocomplete
+    function autocompleteEquip(i) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url: baseurl + 'equipments/search/' + $("#client_id").val(),
+                    method: 'POST',
+                    data: {
+                        keyword: request.term, 
+                        client_id: "{{ $quote->customer_id }}",
+                        branch_id: "{{ $quote->branch_id }}",
+                    },
+                    success: data => response(data.map(v => ({
+                        label: `Eq-${v.tid} - ${[v.capacity, v.make_type, v.location].join('; ')}`,
+                        value: v.make_type,
+                        data: v
+                    })))
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                $('#equipmentid-'+i).val(data.id);
+                $('#equip-'+i).val(data.make_type);
+                $('#location-'+i).val(data.location);
             }
-            // update row_index
-            $(this).find('input[name="row_index[]"]').val($(this).index());
-        });
-
-        const taxTotal = parseFloat(grandTotal) - parseFloat(subTotal);
-        $('#tax').val(taxTotal.toFixed(2));        
-        $('#subtotal').val(subTotal.toFixed(2));
-        $('#total').val(grandTotal.toFixed(2));
-    }
+        };
+    }    
 </script>
 @endsection
