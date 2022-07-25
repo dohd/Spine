@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Payments | Invoice Management')
+@section ('title', 'Invoice Payment Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -29,10 +29,11 @@
                                         <th>Account</th>
                                         <th>Date</th>
                                         <th>Amount</th>
+                                        <th>Allocate</th>
                                         <th>Mode</th>
                                         <th>Reference</th>
                                         <th>Invoice</th>
-                                        <th>Allocation Type</th>
+                                        <th>Payment Type</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -65,7 +66,7 @@
     .datepicker('setDate', new Date())
 
     function draw_data() {
-        const cols = ['customer', 'account','date', 'amount', 'payment_mode', 'reference', 'invoice_tid', 'payment_type']
+        const cols = ['customer', 'account','date', 'amount', 'allocate_ttl', 'payment_mode', 'reference', 'invoice_tid', 'payment_type']
         .map(v => ({data: v, name: v}));
         const language = {@lang('datatable.strings')};
         var dataTable = $('#paymentTbl').dataTable({
@@ -78,7 +79,6 @@
             ajax: {
                 url: "{{ route('biller.invoices.get_payments') }}",
                 type: 'POST',
-                data: {},
             },
             columns: [{
                     data: 'DT_Row_Index',

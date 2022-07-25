@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Receive Payment | Invoice Management')
+@section('title', 'Edit | Invoice Payment Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Invoice Management</h4>
+            <h4 class="content-header-title">Invoice Payment Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -19,7 +19,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::model($payment, ['route' => ['biller.invoices.update_payment', $payment->id], 'method' => 'PATCH']) }}
+                    {{ Form::model($payment, ['route' => ['biller.invoices.update_payment', $payment], 'method' => 'PATCH']) }}
                         @include('focus.invoices.payment_form')
                     {{ Form::close() }}
                 </div>
@@ -32,184 +32,57 @@
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
+@include('focus/invoices/form_js')
 <script>
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
-
-    // form submmit
-    $('form').submit(function(e) {
-        // enable disabled attributes
-        ['#paymentMode', '#allocated', '#account', '#date', '#person'].forEach(v => $(v).attr('disabled', false));
-        // on submit conditions
-        const rowNum = $('#invoiceTbl tbody tr').length
-        if ($('#deposit_ttl').val() == 0 && rowNum > 1) {
-            e.preventDefault();
-            return alert('Allocate payment amount on at least one invoice!');
-        } else if ($('#deposit').val() == 0) {
-            e.preventDefault();
-            return alert('Enter payment amount!'); 
-        } else {
-            const amountTotal = $('#deposit').val().replace(/,/g, '') * 1;
-            const allocatedTotal = $('#deposit_ttl').val().replace(/,/g, '') * 1;
-            const source = $('#source').val();
-            if (amountTotal != allocatedTotal && rowNum > 1 && source == 'direct') {
-                e.preventDefault();
-                alert('Payment Amount should be equal to Total Allocated Amount');
-            }
-        } 
-    });
-
     // default
     const payment = @json($payment);
     $('#person').attr('disabled', true);
+    $('#date').datepicker('setDate', new Date(payment.date)); 
+    $('#payment_type').attr('disabled', true);
+    const amount = parseFloat($('#amount').val().replace(/,/g, ''));
+    $('#amount').val(amount.toLocaleString());
     calcTotal();
 
-    // datepicker
-    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date());
-    if (payment.date) $('#date').datepicker('setDate', new Date(payment.date)); 
-
-    // select 2 config
-    $('#person').select2({
-        ajax: {
-            url: "{{ route('biller.customers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({search: term}),
-            processResults: result => {
-                return { results: result.map(v => ({text: `${v.name} - ${v.company}`, id: v.id }))};
-            }      
-        }
-    });
-
-    // On adding paid values
-    $('#invoiceTbl').on('change', '.paid', function() {
-        const balance = $(this).parents('tr').find('.amount').text().replace(/,/g, '') * 1;
-        const paid = $(this).val().replace(/,/g, '') * 1;
-        if (balance > 0 && balance < paid) $(this).val(balance.toLocaleString());
-        calcTotal();
-    });
-
-    // On deposit change
-    $('#deposit').on('focus', function(e) {
-        if (!$('#person').val()) $(this).blur();
-    });
-    $('#deposit').keyup(function() {
-        let totalAmount = 0;
-        let totalAllocated = 0;
-        let depo = parseFloat($(this).val().replace(/,/g, ''));
-        const rows = $('#invoiceTbl tbody tr').length;
+    // on amount change
+    $('#amount').keyup(function() {
+        let dueTotal = 0;
+        let allocateTotal = 0;
+        let amount = parseFloat($(this).val().replace(/,/g, ''));
+        const lastCount = $('#invoiceTbl tbody tr').length - 1;
         $('#invoiceTbl tbody tr').each(function(i) {
-            if (i == rows-1) return;
-            const amount = parseFloat($(this).find('.amount').text().replace(/,/g, ''));
-            if (depo > amount) $(this).find('.paid').val(amount.toLocaleString());
-            else if (depo > 0) $(this).find('.paid').val(depo.toLocaleString());
+            if (i == lastCount) return;
+            const invAmount = parseFloat($(this).find('.inv-amount').text().replace(/,/g, ''))
+            if (invAmount > amount) $(this).find('.paid').val(amount.toLocaleString());
+            else if (amount > invAmount) $(this).find('.paid').val(invAmount.toLocaleString());
             else $(this).find('.paid').val(0);
             const paid = parseFloat($(this).find('.paid').val().replace(/,/g, ''));
-            depo -= amount;
-            totalAmount += amount;
-            totalAllocated += paid;
+            amount -= paid;
+            dueTotal += invAmount;
+            allocateTotal += paid;
         });
-        $('#amount_ttl').val(totalAmount.toLocaleString());
-        $('#deposit_ttl').val(totalAllocated.toLocaleString());
+        $('#allocate_ttl').val(parseFloat(allocateTotal.toFixed(2)).toLocaleString());
+        $('#balance').val(parseFloat(dueTotal - allocateTotal).toLocaleString());
     }).focusout(function() { 
+        if (!$(this).val()) return;
         $(this).val(parseFloat($(this).val().replace(/,/g, '')).toLocaleString());
-    });
-
-    // invoice row
-    function invoiceRow(v, i) {
-        const amount = parseFloat(v.total).toLocaleString();
-        const paid = parseFloat(v.amountpaid).toLocaleString();
-        const balance = parseFloat(v.total - v.amountpaid).toLocaleString();
-        return `
-            <tr>
-                <td class="text-center">${new Date(v.invoiceduedate).toDateString()}</td>
-                <td>${v.tid}</td>
-                <td class="text-center">${v.notes}</td>
-                <td>${v.status}</td>
-                <td>${amount}</td>
-                <td>${paid}</td>
-                <td class="text-center amount"><b>${balance}</b></td>
-                <td><input type="text" class="form-control paid" name="paid[]"></td>
-                <input type="hidden" name="invoice_id[]" value="${v.id}">
-            </tr>
-        `;
-    }
-
-    // on change customer
-    $('#person').change(function() {
-        $('#deposit').val('');
-        // load client invoices
-        $.ajax({
-            url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
-            success: result => {
-                $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
-                if (!result.length) return;
-                result.forEach((v, i) => {
-                    $('#invoiceTbl tbody tr:eq(-1)').before(invoiceRow(v, i));
-                });
-                calcTotal();
-            }
-        });
-    });
-
-    // on change allocation type
-    $('#allocated').change(function() {
-        // on account
-        if ($(this).val() == 0) {
-            $('#invoiceTbl tbody tr').each(function() {
-                $(this).find('.paid').val('').change();
-            });
-            $('#source').attr('disabled', true);
-            $('#advanced').attr('disabled', false);
-            $('#invoiceTbl tbody tr:not(:eq(-1))').remove();
-        } else {
-            $('#deposit').keyup();
-            $('#source').attr('disabled', false);
-            $('#advanced').attr('disabled', true);
-        }
-    });
-
-    // on change allocation source
-    $('#source').change(function() {
-        // advance payment
-        if ($(this).val() == 'advance') {
-            $('#deposit').attr('readonly', true);
-            $('#paymentMode').attr('disabled', true);
-            $('#reference').attr('readonly', true);
-            $('#date').attr('disabled', true);
-            $('#account').attr('disabled', true);
-            $('#advanced').attr('disabled', false);
-        } else {
-            ['#paymentMode', '#date', '#account'].forEach(v => $(v).attr('disabled', false));
-            ['#deposit','#reference'].forEach(v => $(v).attr('readonly', false));
-            $('#advanced').attr('disabled', true);
-        }
-    });
-
-    // on change advanced payment
-    $('#advanced').change(function() {
-        let balance = $(this).find(':selected').attr('balance');
-        balance = balance.replace(/,/g, '') * 1;
-        balance = parseFloat(balance.toFixed(2)).toLocaleString();
-        if ($('#allocated').val() == 0) return;
-        $('#deposit').val(balance).change();
-    });
+    }).focus(function() {
+        if (!$('#person').val()) $(this).blur();
+    });    
 
     // compute totals
     function calcTotal() {
-        let totalAmount = 0;
-        let totalAllocated = 0;
-        const rowNum = $('#invoiceTbl tbody tr').length;
+        let dueTotal = 0;
+        let allocateTotal = 0;
+        const lastCount = $('#invoiceTbl tbody tr').length - 1;
         $('#invoiceTbl tbody tr').each(function(i) {
-            if (i == rowNum - 1) return;
-            const amount = $(this).find('.amount').text().replace(/,/g, '');
-            const paid = $(this).find('.paid').val().replace(/,/g, '');
-            totalAmount += amount*1;
-            totalAllocated += paid*1;
+            if (i == lastCount) return;
+            const invAmount = parseFloat($(this).find('.inv-amount').text().replace(/,/g, '')) || 0;
+            const paid = parseFloat($(this).find('.paid').val().replace(/,/g, '')) || 0;
+            dueTotal += invAmount;
+            allocateTotal += paid;
         });
-        $('#amount_ttl').val(totalAmount.toLocaleString());
-        $('#deposit_ttl').val(totalAllocated.toLocaleString());
+        $('#allocate_ttl').val(parseFloat(allocateTotal.toFixed(2)).toLocaleString());
+        $('#balance').val(parseFloat(dueTotal - allocateTotal).toLocaleString());
     }
 </script>
 @endsection
