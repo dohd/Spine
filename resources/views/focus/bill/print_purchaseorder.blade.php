@@ -185,7 +185,7 @@
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">SHIPPING DETAILS:</span><br><br>
-				<b>PO Number :</b> 0001<br><br>				
+				<b>PO Number :</b> {{ gen4tid('PO-', $resource->tid) }}<br><br>				
 				<b>Branch :</b> Head Office<br>		
 				<b>Client :</b> Lean Ventures Ltd<br>		
 				<b>Address :</b> P.O Box 36082-00200, Nairobi <br>
