@@ -61,8 +61,8 @@ class ProjectsTableController extends Controller
                 return gen4tid('Prj-', $project->tid);
             })
             ->addColumn('quote_tid', function($project) {
-                $quote = $project->quote;
-                if ($quote) {
+                if ($project->quote) {
+                    $quote = $project->quote;
                     $tid = $quote->bank_id ? gen4tid('PI-', $quote->tid) : gen4tid('QT-', $quote->tid);
                     return '<a href="'.route('biller.projects.create_project_budget', $quote).'" data-toggle="tooltip" title="Budget"><b>'. $tid .'</b></a>';
                 }
