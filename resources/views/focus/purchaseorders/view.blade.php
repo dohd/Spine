@@ -186,7 +186,6 @@
                             <th>Price</th>
                             <th>Tax</th>
                             <th>Amount</th>
-                            <th>Ledger Account</th>
                         </tr>
                         <tbody>
                             @foreach ($po->products as $item)
@@ -198,7 +197,6 @@
                                         <td>{{ numberFormat($item->rate) }}</td>
                                         <td>{{ numberFormat($item->taxrate) }}</td>
                                         <td>{{ numberFormat($item->amount) }}</td>
-                                        <td>{{ $item->account? $item->account->holder : '' }}</td>
                                     </tr>
                                 @endif
                             @endforeach
