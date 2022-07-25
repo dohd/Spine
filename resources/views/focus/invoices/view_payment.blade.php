@@ -24,12 +24,13 @@
                             @php
                                 $payment_details = [
                                     'Payment No' => $payment->tid,
-                                    'Customer' => $payment->customer? $payment->customer->company : '',
+                                    'Customer' => $payment->customer ? $payment->customer->company : '',
                                     'Date' => dateFormat($payment->date),
-                                    'Amount' => numberFormat($payment->deposit),
+                                    'Amount' => numberFormat($payment->amount),
+                                    'Allocated Amount' => numberFormat($payment->allocate_ttl),
                                     'Payment Mode' => $payment->payment_mode,
                                     'Reference' => $payment->reference,
-                                    'Received on Account' => $payment->account? $payment->account->holder : '',
+                                    'Payment Account' => $payment->account? $payment->account->holder : '',
                                 ];
                             @endphp   
                             @foreach ($payment_details as $key => $val)
