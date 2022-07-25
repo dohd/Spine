@@ -79,7 +79,6 @@
                 </thead>
                 <tbody>
                     @php
-                        $on_account = $advance_pmts->sum('credit') - $advance_pmts->sum('debit');
                         $total = 0;
                     @endphp
                     <tr>                        
@@ -91,8 +90,8 @@
                         @endfor
                         <td>{{ numberFormat($total) }}</td>
                         <td style="border-top: 1px solid white; border-bottom: 1px solid white;"></td>
-                        <td>{{ numberFormat($on_account) }}</td>
-                        <td>{{ numberFormat($total - $on_account) }}</td>
+                        <td>{{ numberFormat($customer->on_account) }}</td>
+                        <td>{{ numberFormat($total - $customer->on_account) }}</td>
                     </tr>
                 </tbody>                     
             </table>  
