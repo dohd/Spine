@@ -15,7 +15,7 @@
         <tbody>
             <!-- layout -->
             <tr>
-                <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment"></td>
+                <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment" id="assetname-0"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
                 <td><input type="text" class="form-control uom" name="uom[]" id="uom-0"></td>                    
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
@@ -50,7 +50,7 @@
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Asset')
                         <tr>
-                            <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment"></td>
+                            <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment" id="assetname-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    
                             <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>

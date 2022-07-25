@@ -15,7 +15,7 @@
         <tbody>
             <!-- layout -->
             <tr>
-                <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger"></td>
+                <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger" id="accountname-0"></td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
                 <td><input type="text" class="form-control uom" name="uom[]" id="uom-0"></td>                    
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
@@ -54,7 +54,7 @@
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Expense')
                         <tr>
-                            <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" placeholder="Enter Ledger"></td>
+                            <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" placeholder="Enter Ledger" id="accountname-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
