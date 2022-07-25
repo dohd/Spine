@@ -286,7 +286,7 @@
                     @endauth
 
                     @permission('quote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Verification</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Verification Management</a>
                         <ul class="dropdown-menu">
                             <li>
                                 <a class="dropdown-item" href="{{ route('biller.quotes.get_verify_quote') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a>
@@ -876,8 +876,18 @@
                             </li>
                         </ul>
                     </li>
-                    <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Contract Service Management
-                        </a>
+                    <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Contract Service Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Service Equipment
+                                </a>                                
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Service Report 
+                                </a>                                
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.contractservices.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Service Report
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     @endauth
                 </ul>
