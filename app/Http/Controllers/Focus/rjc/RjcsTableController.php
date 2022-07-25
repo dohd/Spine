@@ -61,7 +61,7 @@ class RjcsTableController extends Controller
                     return gen4tid('Prj-', $rjc->project->tid);
             })
             ->addColumn('customer', function ($rjc) {
-                $client_name = $rjc->project ? $rjc->project->customer_project->name : '';
+                $client_name = $rjc->project ? $rjc->project->customer_project->company : '';
                 $branch_name = $rjc->project ? $rjc->project->branch->name : '';
                 if ($client_name && $branch_name) 
                     return $client_name . ' - ' . $branch_name;
