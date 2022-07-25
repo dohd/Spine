@@ -56,8 +56,7 @@ class PaymentsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('customer', function ($payment) {
-                if ($payment->customer)
-                return $payment->customer->company;
+                if ($payment->customer) return $payment->customer->company;
             })
             ->addColumn('account', function ($payment) {
                 if ($payment->account)
@@ -67,15 +66,10 @@ class PaymentsTableController extends Controller
                 return dateFormat($payment->date);
             })
             ->addColumn('amount', function ($payment) {
-                return amountFormat($payment->deposit_ttl);
+                return amountFormat($payment->amount);
             })
-            ->addColumn('payment_type', function ($payment) {
-                $str = '';
-                if (!$payment->is_allocated && !$payment->source) $str = 'Advance Payment';
-                elseif ($payment->source == 'direct') $str = 'Direct Payment & Allocated';
-                else $str = 'Allocated Advance Payment';
-
-                return $str;
+            ->addColumn('allocate_ttl', function ($payment) {
+                return amountFormat($payment->allocate_ttl);
             })
             ->addColumn('invoice_tid', function ($payment) {
                 if ($payment->items->count()) {
@@ -83,6 +77,7 @@ class PaymentsTableController extends Controller
                     foreach ($payment->items as $item) {
                         if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
                     }
+                    
                     return implode(', ', $invoice_tids);
                 }
             })
