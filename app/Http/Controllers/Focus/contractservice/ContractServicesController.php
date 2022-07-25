@@ -44,7 +44,7 @@ class ContractServicesController extends Controller
      */
     public function create()
     {
-        // 
+        return new ViewResponse('focus.contractservices.create');
     }
 
     /**
@@ -55,7 +55,7 @@ class ContractServicesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**
