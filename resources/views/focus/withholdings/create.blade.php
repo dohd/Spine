@@ -60,6 +60,7 @@
         });
     });
 
+    const withholdings = @json($withholdings);
     // on change certificate
     $('#certificate').change(function() {
         if ($(this).val() == 'tax') {
@@ -70,6 +71,24 @@
             $('#withholding_cert').val('0').change();
             $('#person').change();
         }
+        
+        // load tax certificate withholdings
+        $('#withholding_cert option:not(:eq(0))').remove();
+        withholdings.forEach(v => {
+            if ($('#person').val() == v.customer_id) {
+                const option = $(document.createElement('option'));
+                option.val(v.id)
+                .text(`${v.reference} - ${parseFloat(v.amount).toFixed(2)} - ${v.note}`)
+                .attr('certDate', v.cert_date)
+                .attr('amount', v.amount)
+                .attr('allocateTotal', v.allocate_ttl)
+                .attr('reference', v.reference)
+                .attr('trDate', v.tr_date)
+                .attr('note', v.note);
+
+                $('#withholding_cert').append(option);
+            }
+        });
     });    
 
     // On allocating amount on invoices
@@ -151,44 +170,23 @@
     $('#withholding_cert').select2({
         data: [{id: 0, text: 'None'}], 
     }).change(function() {
-        // if withholding tax
-        if ($(this).val() > 0) {
+        if ($(this).val() == 0) {
+            ['amount', 'reference', 'note'].forEach(v => $('#'+v).attr('readonly', false).val(''));
+            ['cert_date', 'tr_date'].forEach(v => $('#'+v).datepicker('setDate', new Date()));
+            loadInvoice();
+        } else {
             $('#person').change();
-            ['cert_date', 'amount', 'reference', 'tr_date', 'note'].forEach(v => {
-                $('#'+v).attr('readonly', true);
-            });
+            ['cert_date', 'amount', 'reference', 'tr_date', 'note'].forEach(v => $('#'+v).attr('readonly', true));
             const opt = $(this).find(':selected');
-            const amount = opt.attr('amount');
-            setTimeout(() => $('#amount').val(amount).keyup().focusout(), 100);
             $('#cert_date').datepicker('setDate', new Date(opt.attr('certDate')));
             $('#reference').val(opt.attr('reference'));
             $('#tr_date').datepicker('setDate', new Date(opt.attr('trDate')));
             $('#note').val(opt.attr('note'));
-        } else {
-            loadInvoice();
-            ['amount', 'reference', 'note'].forEach(v => {
-                $('#'+v).attr('readonly', false).val('');
-            });
-            ['cert_date', 'tr_date'].forEach(v => $('#'+v).datepicker('setDate', new Date()));
+            // execute after ajax async call
+            const balance = parseFloat(opt.attr('amount') - opt.attr('allocateTotal'));
+            setTimeout(() => $('#amount').val(balance).keyup().focusout(), 100);
         }
     });   
-
-    // load tax certificate withholdings
-    const withholdings = @json($withholdings);
-    if (withholdings.length) {
-        const option = $(document.createElement('option'));
-        withholdings.forEach(v => {
-            option.val(v.id)
-            .text(`${v.reference} - ${parseFloat(v.amount).toFixed(2)} - ${v.note}`)
-            .attr('certDate', v.cert_date)
-            .attr('amount', v.amount)
-            .attr('reference', v.reference)
-            .attr('trDate', v.tr_date)
-            .attr('note', v.note);
-
-            $('#withholding_cert').append(option);
-        });
-    } 
 
     function calcTotal() {
         let dueTotal = 0;
