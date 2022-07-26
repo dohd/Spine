@@ -12,7 +12,7 @@
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.contractservices.partials.contractservices-header-buttons')
-                </div>    
+                </div>
             </div>
         </div>
     </div>
@@ -27,10 +27,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Service Name</th>
-                                        <th>Unit</th>
-                                        <th>Serviced Unit</th>
-                                        <th>Amount</th>                                        
+                                        <th>Customer - Branch</th>
+                                        <th>Contract Schedule</th>
+                                        <th>Bill Amount</th>
+                                        <th>Service Unit</th>
+                                        <th>Jobcard No</th>
+                                        <th>Date</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -55,11 +57,17 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-$.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        }
+    });
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     function draw_data() {
-        const language = { @lang("datatable.strings") };
+        const language = {
+            @lang("datatable.strings")
+        };
         const dataTable = $('#serviceTbl').dataTable({
             processing: true,
             serverSide: true,
@@ -69,26 +77,33 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                 url: '{{ route("biller.contractservices.get") }}',
                 type: 'POST',
             },
-            columns: [
-                {
+            columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
                 },
                 {
-                    data: 'name',
-                    name: 'name'
+                    data: 'client',
+                    name: 'client'
+                },
+                {
+                    data: 'contract',
+                    name: 'contract'
+                },
+                {
+                    data: 'bill',
+                    name: 'bill'
                 },
                 {
                     data: 'unit',
                     name: 'unit'
                 },
                 {
-                    data: 'serviced_unit',
-                    name: 'serviced_unit'
+                    data: 'jobcard_no',
+                    name: 'jobcard_no'
                 },
                 {
-                    data: 'amount',
-                    name: 'amount'
+                    data: 'date',
+                    name: 'date'
                 },
                 {
                     data: 'actions',
@@ -97,11 +112,13 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     sortable: false
                 }
             ],
-            order: [[0, "desc"]],
+            order: [
+                [0, "desc"]
+            ],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons:  [ 'csv', 'excel', 'print'],
+            buttons: ['csv', 'excel', 'print'],
         });
-    }        
+    }
 </script>
 @endsection

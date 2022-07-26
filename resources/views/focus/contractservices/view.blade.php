@@ -26,10 +26,15 @@
                             <table id="serviceTbl" class="table table-bordered table-sm mb-2">
                                 @php
                                     $details = [
-                                        'Contract' => $contractservice->contract->title,
-                                        'Task Schedule' => $contractservice->task_schedule->title,
-                                        'Service Name' => $contractservice->name,
-                                        'Amount' => numberFormat($contractservice->amount),
+                                        'Customer' => $contractservice->customer? $contractservice->customer->company : '',
+                                        'Branch' => $contractservice->branch? $contractservice->branch->name : '',
+                                        'Contract' => $contractservice->contract? $contractservice->contract->title : '',
+                                        'Task Schedule' => $contractservice->task_schedule?$contractservice->task_schedule->title : '',
+                                        'Rate Amount' => amountFormat($contractservice->rate_ttl),
+                                        'Bill Amount' => amountFormat($contractservice->bill_ttl),
+                                        'Jobcard No' => $contractservice->jobcard_no,
+                                        'Date' => dateFormat($contractservice->date),
+                                        'Technician' => $contractservice->technician
                                     ];
                                 @endphp
                                 @foreach ($details as $key => $val)
@@ -44,22 +49,18 @@
                                     <thead>
                                         <tr class="bg-gradient-directional-blue white">
                                             <th>System ID</th>
-                                            <th>Location</th>
-                                            <th>Description</th>                                           
-                                            <th>Jobcard No</th>
-                                            <th>Jobcard Date</th>
-                                            <th width="10%">Status</th>
-                                            <th>Amount</th>
-                                            <th>Charge</th>                                            
-                                            <th>Technician</th>
+                                            <th>Description</th>    
+                                            <th>Location</th>   
+                                            <th>Rate</th> 
+                                            <th width="10%">Status</th>                                                                              
+                                            <th>Bill</th>
                                             <th width="12%">Note</th>
                                         </tr>
                                     </thead>
                                     <tbody>                                            
                                         @foreach ($contractservice->items as $i => $row)                                            
                                             <tr>                                                
-                                                <td>{{ gen4tid('E-', $row->equipment->tid) }}</td>
-                                                <td>{{ $row->equipment->location }}</td>  
+                                                <td>{{ gen4tid('Eq-', $row->equipment->tid) }}</td>
                                                 <td>
                                                     @php
                                                         $descr = array_intersect_key(
@@ -68,17 +69,11 @@
                                                         );
                                                         echo implode('; ', array_values($descr));
                                                     @endphp                                                                                          
-                                                </td>                                                
-                                                <td>{{ $row->jobcard_no }}</td>
-                                                <td>{{ $row->jobcard_date?  dateFormat($row->jobcard_date) : '' }}</td>
+                                                </td>       
+                                                <td>{{ $row->equipment->location }}</td>    
+                                                <td>{{ numberFormat($row->equipment->service_rate) }}</td>                                       
                                                 <td>{{ ucfirst($row->status) }}</td>
-                                                <td>{{ numberFormat($row->equipment->service_rate) }}</td>
-                                                <td>
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input ml-1"  {{ $row->is_charged ? 'checked' : '' }} onClick="return false;">
-                                                    </div>
-                                                </td>  
-                                                <td>{{ $row->technician }}</td>
+                                                <td>{{ $row->is_bill? 'Yes' : 'No' }}</td>
                                                 <td>{{ $row->note }}</td>
                                             </tr>                                                        
                                         @endforeach                                                    
