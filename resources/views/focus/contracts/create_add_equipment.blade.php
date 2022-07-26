@@ -153,7 +153,7 @@
             $.ajax({
                 url: "{{ route('biller.contracts.customer_contracts')  }}",
                 type: 'POST',
-                data: {id: customer_id},
+                data: {customer_id},
                 success: data => {
                     $('#contract option:not(:eq(0))').remove();
                     data.forEach(v => $('#contract').append(new Option(v.title, v.id)));
