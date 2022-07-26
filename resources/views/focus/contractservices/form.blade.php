@@ -1,71 +1,160 @@
-<div class="table-reponsive" style="overflow-x: scroll;">
-    <table id="equipmentTbl" class="table">
-        <thead>
-            <tr class="bg-gradient-directional-blue white">
-                <th>System ID</th>
-                <th>Location</th>
-                <th>Description</th>                                           
-                <th>Jobcard No</th>
-                <th>Jobcard Date</th>
-                <th width="10%">Status</th>
-                <th>Amount</th>
-                <th>
-                    Charge
-                    <div class="d-inline ml-2">
-                        <input type="checkbox" class="form-check-input" id="selectAll">
-                    </div>
-                </th>
-                <th>Technician</th>
-                <th width="12%">Note</th>
-            </tr>
-        </thead>
-        <tbody>                                            
-            @foreach ($contractservice->items as $i => $row)                                            
-                <tr>                                                    
-                    <td>{{ gen4tid('E-', $row->equipment->tid) }}</td>
-                    <td>{{ $row->equipment->location }}</td>                                                    
-                    <td>
-                        @php
-                            $descr = array_intersect_key(
-                                $row->equipment->toArray(), 
-                                array_flip(['make_type', 'equip_serial', 'unique_id', 'capacity', 'machine_gas'])
-                            );
-                            echo implode('; ', array_values($descr));
-                        @endphp                                                                                          
-                    </td>
-                    <td><input type="text" class="form-control" name="jobcard_no[]" value="{{ $row->jobcard_no }}" id=""></td>
-                    <td><input type="text" class="form-control datepicker" name="jobcard_date[]" id="jobcardDate-{{ $i }}"></td>
-                    <td>
-                        <select name="status[]" class="form-control" id="">
-                            @foreach (['working', 'faulty', 'cannibalised', 'decommissioned'] as $val)
-                                <option value="{{ $val }}" {{ $val == $row->status? 'selected' : '' }}>{{ ucfirst($val) }}</option>
-                            @endforeach
-                        </select>                                                   
-                    </td>
-                    <td>{{ numberFormat($row->equipment->service_rate) }}</td>
-                    <td>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input ml-1 select" id="chargeCheck-{{ $i }}">
-                        </div>
-                    </td>                       
-                    <td><input type="text" class="form-control" name="technician[]" value="{{ $row->technician }}"></td>
-                    <td><input type="text" class="form-control" name="note[]" value="{{ $row->note }}"></td>
-                    <input type="hidden" class="rate" value="{{ $row->equipment->service_rate }}" disabled>
-                    <input type="hidden" class="charged" name="is_charged[]" value="{{ $row->is_charged }}">                    
-                    <input type="hidden" name="id[]" value="{{ $row->id }}">                    
-                </tr>                                                        
-            @endforeach                                                    
-        </tbody>
-    </table>
-</div>
 <div class="form-group row">
-    <div class="col-2 ml-auto">
-        <label for="charge">Total Charge Amount</label>
-        <input type="text" name="charge_amount" class="form-control" id="totalRate" readonly>
+    <div class="col-4">
+        <label for="client">Customer</label>
+        <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Client">
+            @isset ($contractservice)
+                <option value="{{ $contractservice->customer_id }}">
+                    {{ $contractservice->customer? $contractservice->customer->company : 'None' }}
+                </option>
+            @endisset
+        </select>
+    </div>
+    <div class="col-2">
+        <label for="branch">Branch</label>
+        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose Branch">
+            @isset ($contractservice)
+                <option value="{{ $contractservice->branch_id }}">
+                    {{ $contractservice->branch? $contractservice->branch->name : 'None' }}
+                </option>
+            @endisset
+        </select>
+    </div>
+    <div class="col-4">
+        <label for="contract">Contract</label>
+        <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract">
+            @isset ($contractservice)
+                <option value="{{ $contractservice->contract_id }}">
+                    {{ $contractservice->contract? $contractservice->contract->title : 'None' }}
+                </option>
+            @endisset
+        </select>
+    </div>
+    <div class="col-2">
+        <label for="schedule">Schedule</label>
+        <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Schedule">
+            @isset ($contractservice)
+                <option value="{{ $contractservice->schedule_id }}">
+                    {{ $contractservice->task_schedule? $contractservice->task_schedule->title : 'None' }}
+                </option>
+            @endisset
+        </select>
     </div>
 </div>
 <div class="form-group row">
+    <div class="col-2">
+        <label for="date">Jobcard Date</label>
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
+    </div>
+    <div class="col-2">
+        <label for="jobcard_no">Jobcard No</label>
+        {{ Form::text('jobcard_no', null, ['class' => 'form-control', 'id' => 'jobcard_no']) }}
+    </div>
+    <div class="col-2">
+        <label for="technician">Technician</label>
+        {{ Form::text('technician', null, ['class' => 'form-control', 'id' => 'technician']) }}
+    </div>
+</div>
+<div class="table-reponsive">
+    <table id="equipTbl" class="table text-center">
+        <thead>
+            <tr class="bg-gradient-directional-blue white">
+                <th>System ID</th>
+                <th>Description</th>                                           
+                <th>Location</th>
+                <th>Rate</th>
+                <th>Status</th>
+                <th width="9%">Bill</th>
+                <th width="30%">Note</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>        
+            <!-- row template -->
+            <tr>                                                    
+                <td><span id="tid-0"></span></td>                                                               
+                <td>
+                    <textarea class="form-control" name="description" id="descr-0" cols="20" required></textarea>
+                </td> 
+                <td><span id="location-0"></span></td>     
+                <td><span id="rate-0" class="rate"></span></td>	
+                <td>
+                    <select name="status[]" class="custom-select" id="status-0">
+                        @foreach (['working', 'faulty', 'cannibalised', 'decommissioned'] as $val)
+                            <option value="{{ $val }}">{{ ucfirst($val) }}</option>
+                        @endforeach
+                    </select>                                                   
+                </td>
+                <td>
+                    <select name="is_bill[]" class="custom-select bill" id="bill-0">
+                        @foreach (['No', 'Yes'] as $k => $val)
+                            <option value="{{ $k }}" {{ $k? 'selected' : ''}}>{{ $val }}</option>
+                        @endforeach
+                    </select>     
+                </td>                       
+                <td><input type="text" class="form-control" name="note[]" id="note-0"></td>    
+                <td><a href="javascript:" class="btn btn-light del"><i class="danger fa fa-trash fa-lg"></i></a></td> 
+                <input type="hidden" name="equipment_id[]" id="equipmentid-0">        
+                <input type="hidden" name="item_id[]" value="0" id="itemid-0">     
+            </tr>   
+            <!-- contract service equipments -->
+            @isset ($contractservice)
+                @foreach ($contractservice->items as $i => $row)
+                    <tr>                                                    
+                        <td><span id="tid-{{$i}}">{{ gen4tid('Eq-', $row->equipment->tid) }}</span></td>                                                               
+                        <td>
+                            @php
+                                $descr = array_intersect_key(
+                                    $row->equipment->toArray(), 
+                                    array_flip(['make_type', 'equip_serial', 'unique_id', 'capacity', 'machine_gas'])
+                                );
+                            @endphp  
+                            <textarea class="form-control" name="description" id="descr-{{$i}}" cols="20" required>{{ implode('; ', array_values($descr)) }}</textarea>
+                        </td> 
+                        <td><span id="location-{{$i}}">{{ $row->equipment->location }}</span></td>     
+                        <td><span id="rate-{{$i}}" class="rate">{{ numberFormat($row->equipment->service_rate) }}</span></td>	
+                        <td>
+                            <select name="status[]" class="custom-select" id="status-{{$i}}">
+                                @foreach (['working', 'faulty', 'cannibalised', 'decommissioned'] as $val)
+                                    <option value="{{ $val }}" {{ $val == $row->status? 'selected' : ''  }}>
+                                        {{ ucfirst($val) }}
+                                    </option>
+                                @endforeach
+                            </select>                                                   
+                        </td>
+                        <td>
+                            <select name="is_bill[]" class="custom-select bill" id="bill-{{$i}}">
+                                @foreach (['No', 'Yes'] as $k => $val)
+                                    <option value="{{ $k }}" {{ $k == $row->is_bill? 'selected' : ''}}>{{ $val }}</option>
+                                @endforeach
+                            </select>     
+                        </td>                       
+                        <td><input type="text" class="form-control" name="note[]" value="{{ $row->note }}" id="note-{{$i}}"></td>    
+                        <td><a href="javascript:" class="btn btn-light del"><i class="danger fa fa-trash fa-lg"></i></a></td> 
+                        <input type="hidden" name="equipment_id[]" value="{{ $row->equipment_id }}" id="equipmentid-{{$i}}">  
+                        <input type="hidden" name="item_id[]" value="{{ $row->id }}" id="itemid-{{$i}}">         
+                    </tr>   
+                @endforeach
+            @endisset
+        </tbody>
+    </table>
+</div>
+<a href="javascript:" class="btn btn-success" aria-label="Left Align" id="add_equip">
+    <i class="fa fa-plus-square"></i> Add Equipment
+</a>
+<div class="row">
     <div class="col-2 ml-auto">
-        {{ Form::submit('Update', ['class' => 'btn btn-primary btn-lg']) }}
+        <label for="total_rate">Total Rate (Ksh.)</label>
+        {{ Form::text('rate_ttl', null, ['class' => 'form-control', 'id' => 'rate_ttl', 'readonly']) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col-2 ml-auto">
+        <label for="total_bill">Total Bill (Ksh.)</label>
+        {{ Form::text('bill_ttl', null, ['class' => 'form-control', 'id' => 'bill_ttl', 'readonly']) }}
+    </div>
+</div>
+<div class="form-group row mt-1">
+    <div class="col-12">
+        {{ Form::submit('Submit', ['class' => 'btn btn-primary btn-lg float-right']) }}
     </div>
 </div>
