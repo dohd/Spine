@@ -58,14 +58,14 @@ class WithholdingRepository extends BaseRepository
         if ($is_payment) {
             $result = Withholding::create($data);
 
-            $unallocated = round($result->amount - $result->allocate_ttl);
-            if ($unallocated) $result->customer->increment('on_account', $unallocated);    
+            $unallocated = $result->amount - $result->allocate_ttl;
+            $result->customer->increment('on_account', $unallocated);    
         } else {
             $result = Withholding::find($data['withholding_tax_id']);
             $result->increment('allocate_ttl', $data['allocate_ttl']);
 
-            $allocated = round($result->amount - $result->allocate_ttl);
-            if ($allocated) $result->customer->decrement('on_account', $allocated);    
+            $allocated = $result->amount - $result->allocate_ttl;
+            $result->customer->decrement('on_account', $allocated);    
         }
 
         // allocated items
@@ -161,7 +161,10 @@ class WithholdingRepository extends BaseRepository
     public function delete($withholding)
     {
         DB::beginTransaction();
-        // decrement invoice amount paid and update status
+        // reverse client unallocated amount
+        $unallocated = $withholding->amount - $withholding->allocate_ttl;
+        $withholding->customer->decrement('on_account', $unallocated);
+        // reverse invoice amount paid and update status
         foreach ($withholding->items as $item) {
             if ($item->invoice) {
                 $invoice = $item->invoice;
