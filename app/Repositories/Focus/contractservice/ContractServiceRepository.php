@@ -4,9 +4,7 @@ namespace App\Repositories\Focus\contractservice;
 
 use App\Exceptions\GeneralException;
 use App\Models\contractservice\ContractService;
-use App\Models\items\ServiceItem;
 use App\Repositories\BaseRepository;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class ProductcategoryRepository.
@@ -51,17 +49,9 @@ class ContractServiceRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update($contract, array $input)
+    public function update($contractservice, array $input)
     {
-        // dd($input);
-        $service_items = array_map(function ($v) {
-            $v['jobcard_date'] = date_for_database($v['jobcard_date']);
-            return $v;
-        }, $input);
-
-        Batch::update(new ServiceItem, $service_items, 'id');
-
-        if ($service_items) return $service_items;
+        dd($input);
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
@@ -73,8 +63,10 @@ class ContractServiceRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Contract $contract)
+    public function delete($contractservice)
     {   
+        if ($contractservice->delete()) return true;
+
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }
