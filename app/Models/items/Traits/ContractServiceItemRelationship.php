@@ -5,11 +5,11 @@ namespace App\Models\items\Traits;
 use App\Models\contract_service\ContractService;
 use App\Models\equipment\Equipment;
 
-trait ServiceItemRelationship
+trait ContractServiceItemRelationship
 {
-    public function contract_service()
+    public function contractservice()
     {
-        return $this->belongsTo(ContractService::class, 'service_id');
+        return $this->belongsTo(ContractService::class, 'contractservice_id');
     }
 
     public function  equipment()
