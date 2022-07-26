@@ -57,7 +57,7 @@ class ContractServicesController extends Controller
     {
         // extract request input
         $data = $request->only(['customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 'rate_ttl', 'bill_ttl']);
-        $data_items = $request->only(['equipment_id', 'status', 'bill', 'note']);
+        $data_items = $request->only(['equipment_id', 'status', 'is_bill', 'note']);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
@@ -103,7 +103,7 @@ class ContractServicesController extends Controller
     {
         // extract request input
         $data = $request->only(['customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 'rate_ttl', 'bill_ttl']);
-        $data_items = $request->only(['equipment_id', 'status', 'bill', 'note']);
+        $data_items = $request->only(['item_id', 'equipment_id', 'status', 'is_bill', 'note']);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
