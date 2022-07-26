@@ -162,11 +162,9 @@
                     <input type="text" name="total" class="form-control" id="total" placeholder="Total" readonly>
                 </div>
             </div>
-            @if ($jobcards->count())
-                <button type="button" class="btn btn-danger" aria-label="Left Align" id="reset-items">
-                    <i class="fa fa-trash"></i> Undo
-                </button>
-            @endif
+            <button type="button" class="btn btn-danger" aria-label="Left Align" id="reset-items">
+                <i class="fa fa-trash"></i> Undo
+            </button>
             {{ Form::submit('Submit', ['class' => 'btn btn-success']) }}
         </div>
     </div>
