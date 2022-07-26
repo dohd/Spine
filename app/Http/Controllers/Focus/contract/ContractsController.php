@@ -7,6 +7,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
 use App\Models\equipment\Equipment;
+use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\contract\ContractRepository;
 use Illuminate\Http\Request;
 
@@ -151,7 +152,7 @@ class ContractsController extends Controller
      */
     public function customer_contracts()
     {
-        $contracts = Contract::where('customer_id', request('id'))->get(['id', 'title', 'customer_id']);
+        $contracts = Contract::where('customer_id', request('customer_id'))->get();
 
         return response()->json($contracts);
     }
@@ -161,8 +162,7 @@ class ContractsController extends Controller
      */
     public function task_schedules()
     {
-        $contract = Contract::find(request('id'));
-        $schedules = $contract ? $contract->task_schedules : array();
+        $schedules = TaskSchedule::where('contract_id', request('contract_id'))->get();
 
         return response()->json($schedules);
     }
