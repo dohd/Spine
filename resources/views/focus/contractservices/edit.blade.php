@@ -1,6 +1,6 @@
 @extends('core.layouts.app')
 
-@section('title', 'View | Contract Service Management')
+@section('title', 'Contract Service Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -23,24 +23,8 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="serviceTbl" class="table table-bordered table-sm mb-2">
-                                @php
-                                    $details = [
-                                        'Contract' => $contractservice->contract->title,
-                                        'Task Schedule' => $contractservice->task_schedule->title,
-                                        'Service Name' => $contractservice->name,
-                                        'Service Rate' => numberFormat($contractservice->amount),
-                                    ];
-                                @endphp
-                                @foreach ($details as $key => $val)
-                                    <tr>
-                                        <th>{{ $key }}</th>
-                                        <td>{{ $val }}</td>
-                                    </tr>
-                                @endforeach
-                            </table>
-                            {{ Form::open(['route' => ['biller.contractservices.update', $contractservice], 'method' => 'PATCH']) }}
-                                @include('focus.contractservices.form')
+                            {{ Form::model(['route' => ['biller.contractservices.update', $contractservice], 'method' => 'PATCH']) }}
+                                @include('focus.contractservices.formA')
                             {{ Form::close() }}
                         </div>
                     </div>
@@ -52,51 +36,120 @@
 @endsection
 
 @section('extra-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
 <script>  
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
+
     // initialize datepicker
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
-    
-    // on change row checkbox
-    $('#equipmentTbl').on('change', '.select', function() {
-        const select = $(this).is(':checked');
-        const charged = $(this).parents('tr').find('.charged');
-        const rate = $(this).parents('tr').find('.rate');
-        if (select) {
-            charged.val(1);
-            rate.attr('disabled', false);
-        } else {
-            charged.val(0);
-            rate.attr('disabled', true);
-        }  
-        calcTotal();
-    })
 
-    // on change action checkbox
-    $('#selectAll').change(function() {
-        const selectAll = $(this).is(':checked');
-        $('#equipmentTbl tbody tr').each(function() {
-            if (selectAll) $(this).find('.select').prop('checked', true).change();
-            else $(this).find('.select').prop('checked', false).change();
+    // customer select2
+    $('#customer').select2({
+        ajax: {
+            url: "{{ route('biller.customers.select') }}",
+            dataType: 'json',
+            type: 'POST',
+            quietMillis: 50,
+            data: ({term}) => ({search: term}),
+            processResults: result => {
+                return { results: result.map(v => ({text: `${v.company}`, id: v.id }))};
+            }      
+        },
+        allowClear: true
+    }).change(function() {
+        $("#branch").html('').select2({
+            ajax: {
+                url: "{{ route('biller.branches.select') }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({search: term, customer_id: $(this).val()}),                                
+                processResults: data => {
+                    data = data.filter(v => v.name != 'All Branches');
+                    return { results: data.map(v => ({ text: v.name, id: v.id })) };
+                },
+            }
+        });
+        $("#contract").html('').select2({
+            ajax: {
+                url: "{{ route('biller.contracts.customer_contracts')  }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({search: term, customer_id: $(this).val()}),                                
+                processResults: data => {
+                    return { results: data.map(v => ({ text: v.title, id: v.id })) };
+                },
+            }
+        });
+        
+    });
+
+    // on contract change
+    $('#contract').change(function() {
+        $("#schedule").html('').select2({
+            ajax: {
+                url: "{{ route('biller.contracts.task_schedules')  }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({search: term, contract_id: $(this).val()}),                                
+                processResults: data => {
+                    return { results: data.map(v => ({ text: v.title, id: v.id })) };
+                },
+            }
         });
     });
-    
-    // compute total rate
-    function calcTotal() {
-        let totalRate = 0;
-        $('#equipmentTbl tbody tr').each(function() {
-            const rate = $(this).find('.rate:not(:disabled)');
-            if (rate.val()) totalRate += parseFloat(rate.val());
-        });
-        $('#totalRate').val(parseFloat(totalRate.toFixed(2)).toLocaleString());
-    }    
 
-    // update jobcard date and checked rows
-    const serviceItems = @json($contractservice->items);
-    serviceItems.forEach((v, i) => {
-        if (v.jobcard_date) $('#jobcardDate-'+i).datepicker('setDate', new Date(v.jobcard_date));
-        else $('#jobcardDate-'+i).val(null);
-        if (v.is_charged == 1) $('#chargeCheck-'+i).prop('checked', true).change();
-    });    
+    // on add equipment
+    let rowIndx = 1;
+    const rowHtml = $('#equipTbl tbody tr:eq(0)').html();
+    $('#descr-0').autocomplete(completeEquip());
+    $('#add_equip').click(function() {
+        const i = rowIndx;
+        let html = rowHtml.replace(/-0/g, '-'+i);
+        $('#equipTbl tbody').append('<tr>' + html + '</tr>');
+        $('#descr-'+i).autocomplete(completeEquip(i));
+        rowIndx++;
+    });
+
+    // on delete row
+    $('#equipTbl').on('click', '.del', function() {
+        $(this).parents('tr').remove();
+    });
+    
+    // autocomplete equipment properties
+    function completeEquip(i = 0) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url: baseurl + 'equipments/search/' + $("#client_id").val(),
+                    method: 'POST',
+                    data: {
+                        keyword: request.term, 
+                        client_id: $('#customer').val(),
+                        branch_id: $('#branch').val()
+                    },
+                    success: data => {
+                        if (!$('#customer').val()) return;
+                        return response(data.map(v => ({
+                            label: `Eq-${v.tid} - ${[v.make_type, v.capacity, v.location].join('; ')}`,
+                            value: `${[v.make_type, v.capacity].join('; ')}`,
+                            data: v
+                        })))
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                console.log(data, i)
+                $('#equipmentid-'+i).val(data.id);
+                $('#tid-'+i).text(data.tid);
+                $('#location-'+i).text(data.location);
+                let rate = parseFloat(data.service_rate);
+                $('#rate-'+i).text(rate.toLocaleString());
+            }
+        };
+    }    
 </script>
 @endsection
