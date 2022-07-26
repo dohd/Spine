@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Focus\contractservice;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Models\contract\Contract;
 use App\Models\contractservice\ContractService;
 use App\Repositories\Focus\contractservice\ContractServiceRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ContractServicesController extends Controller
 {
@@ -55,7 +55,19 @@ class ContractServicesController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // extract request input
+        $data = $request->only(['customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 'rate_ttl', 'bill_ttl']);
+        $data_items = $request->only(['equipment_id', 'status', 'bill', 'note']);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        $data_items = modify_array($data_items);
+        if (!$data_items) throw new ValidationException(['Cannot create report without equipments!']);
+
+        $this->repository->create(compact('data', 'data_items'));
+
+        return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report created successfully']);
     }
 
     /**
@@ -75,11 +87,9 @@ class ContractServicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(ContractService $contractservice)
+    public function edit(ContractService $contractservice, Request $request)
     {
-        $contracts = Contract::all();
-
-        return new ViewResponse('focus.contractservices.edit', compact('contractservice', 'contracts'));
+        return new ViewResponse('focus.contractservices.edit', compact('contractservice'));
     }
 
     /**
@@ -92,13 +102,18 @@ class ContractServicesController extends Controller
     public function update(Request $request, ContractService $contractservice)
     {
         // extract request input
-        $data_items = $request->only('id', 'jobcard_no', 'jobcard_date', 'status', 'note', 'is_charged', 'technician');
+        $data = $request->only(['customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 'rate_ttl', 'bill_ttl']);
+        $data_items = $request->only(['equipment_id', 'status', 'bill', 'note']);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
+        if (!$data_items) throw new ValidationException(['Cannot create report without equipments!']);
 
-        $this->repository->update($contractservice, $data_items);
+        $this->repository->update($contractservice, compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Service updated successfully']);
+        return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report updated successfully']);
     }
 
     /**
@@ -107,27 +122,10 @@ class ContractServicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(ContractService $contractservice)
     {
-        //
-    }
+        $this->repository->delete($contractservice);
 
-    /**
-     * Service poduct search
-     */
-    public function service_product_search()
-    {
-        $q = request('term');
-
-        $services = ContractService::where('name', 'LIKE', '%'. $q .'%')->limit(10)
-            ->get(['id', 'name', 'amount as price'])->toArray();
-            
-        $services = array_map(function ($v) {
-            $v['unit'] = 'Pc';
-            $v['purchase_price'] = '0.00';
-            return $v;
-        }, $services);
-
-        return response()->json($services);
+        return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report deleted successfully']);
     }
 }
