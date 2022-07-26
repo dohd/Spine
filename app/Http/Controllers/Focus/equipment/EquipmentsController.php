@@ -186,6 +186,7 @@ class EquipmentsController extends Controller
         ->orWhere('location', 'LIKE', '%' . $k . '%')
         ->limit(6)->get([
             'id', 'tid', 'unique_id', 'make_type', 'capacity', 'location', 
+            'service_rate'
         ]);
 
         return response()->json($equipments);
