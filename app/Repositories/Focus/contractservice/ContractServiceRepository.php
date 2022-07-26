@@ -4,7 +4,9 @@ namespace App\Repositories\Focus\contractservice;
 
 use App\Exceptions\GeneralException;
 use App\Models\contractservice\ContractService;
+use App\Models\items\ContractServiceItem;
 use App\Repositories\BaseRepository;
+use DB;
 
 /**
  * Class ProductcategoryRepository.
@@ -36,7 +38,25 @@ class ContractServiceRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
+        DB::beginTransaction();
+
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if ($key == 'date') $data[$key] = date_for_database($val);
+            if (in_array($key, ['bill_ttl', 'rate_ttl']))
+                $data[$key] = numberClean($val);
+        }
+        $result = ContractService::create($data);
+
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, ['contractservice_id' => $result->id]);
+        }, $data_items);
+        ContractServiceItem::insert($data_items);
+
+        DB::commit();
+        if ($result) return $result;
         
         throw new GeneralException('Error Creating Contract');
     }
@@ -51,7 +71,31 @@ class ContractServiceRepository extends BaseRepository
      */
     public function update($contractservice, array $input)
     {
-        dd($input);
+        // dd($input);
+        DB::beginTransaction();
+
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if ($key == 'date') $data[$key] = date_for_database($val);
+            if (in_array($key, ['bill_ttl', 'rate_ttl']))
+                $data[$key] = numberClean($val);
+        }
+        $result = $contractservice->update($data);
+
+        $data_items = $input['data_items'];
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'contractservice_id' => $contractservice->id,
+            ]);
+            $new_item = ContractServiceItem::firstOrNew(['id' => $item['item_id']]);
+            $new_item->fill($item);
+            if (!$new_item->id) unset($new_item->id);
+            unset($new_item->item_id);
+            $new_item->save();
+        }
+
+        DB::commit();
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
