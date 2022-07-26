@@ -77,29 +77,22 @@ class CustomerRepository extends BaseRepository
     }
 
     public function getTransactionsForDataTable($customer_id = 0)
-    {
-        $id = request('customer_id', $customer_id);
-         
+    {         
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
-        })->where('tr_type', 'inv')->whereHas('invoice', function ($q) use($id) { 
-            $q->where('customer_id', $id); 
-        })->orWhereHas('account', function ($q) { 
-            $q->where('system', 'receivable');  
-        })->where('tr_type', 'pmt')->whereHas('paidinvoice', function ($q) use($id) {
-            $q->where('customer_id', $id);
-        })->orWhereHas('account', function ($q) { 
-            $q->where('system', 'receivable');  
-        })->where('tr_type', 'withholding')->whereHas('withholding', function ($q) use($id) {
-            $q->where('customer_id', $id);
-        })->orWhereHas('account', function ($q) { 
-            $q->where('system', 'receivable');  
-        })->where('tr_type', 'cnote')->whereHas('creditnote', function ($q) use($id) {
-            $q->where('customer_id', $id);
-        })->orWhereHas('account', function ($q) { 
-            $q->where('system', 'receivable');  
-        })->where('tr_type', 'dnote')->whereHas('debitnote', function ($q) use($id) {
-            $q->where('customer_id', $id);
+        })->where(function ($q) use($customer_id) {
+            $customer = ['customer_id' => request('customer_id', $customer_id)];
+            $q->where('tr_type', 'inv')->whereHas('invoice', function ($q1) use($customer) { 
+                $q1->where($customer); 
+            })->orWhere('tr_type', 'pmt')->whereHas('paidinvoice', function ($q1) use($customer) {
+                $q1->where($customer);
+            })->orWhere('tr_type', 'withholding')->whereHas('withholding', function ($q1) use($customer) {
+                $q1->where($customer);
+            })->orWhere('tr_type', 'cnote')->whereHas('creditnote', function ($q1) use($customer) {
+                $q1->where($customer);
+            })->orWhere('tr_type', 'dnote')->whereHas('debitnote', function ($q1) use($customer) {
+                $q1->where($customer);
+            });
         });       
                     
         // on date filter
@@ -158,79 +151,72 @@ class CustomerRepository extends BaseRepository
             );
 
             $payments = collect();
-            if ($invoice->payments->count()) {
-                foreach ($invoice->payments as $pmt) {
-                    $i++;
-                    $reference = $pmt->paid_invoice->reference;
-                    $mode = $pmt->paid_invoice->payment_mode;
-                    $pmt_tid = gen4tid('pmt-', $pmt->paid_invoice->tid);
-                    $account = $pmt->paid_invoice->account->holder;
-                    $amount = $pmt->paid_invoice->deposit;
-                    $record = (object) array(
-                        'id' => $i,
-                        'date' => $pmt->paid_invoice->date,
-                        'type' => 'payment',
-                        'note' => '(' . $tid . ')' . ' ' . $pmt_tid . ' ' . ' reference: ' . $reference . ' mode: ' 
-                            . ucfirst($mode) . ', account: ' . $account . ', amount: ' . numberFormat($amount),
-                        'debit' => 0,
-                        'credit' => $pmt->paid
-                    );
-                    $payments->add($record);
-                }    
-            }
-            $withholdings = collect();
-            if ($invoice->withholding_payments->count()) {
-                foreach ($invoice->withholding_payments as $pmt) {
-                    $i++;
-                    $note = $pmt->withholding->doc_ref . ' - ' . $pmt->withholding->certificate . ' ' . $pmt->withholding->note;
-                    $record = (object) array(
-                        'id' => $i,
-                        'date' => $pmt->withholding->date,
-                        'type' => 'withholding',
-                        'note' => '(' . $tid . ')' . ' ' . $note,
-                        'debit' => 0,
-                        'credit' => $pmt->paid
-                    );
-                    $withholdings->add($record);
-                }   
-            }
-            $creditnotes = collect();
-            if ($invoice->creditnotes->count()) {
-                foreach ($invoice->creditnotes as $cnote) {
-                    $i++;
-                    $record = (object) array(
-                        'id' => $i,
-                        'date' => $cnote->date,
-                        'type' => 'credit-note',
-                        'note' => '(' . $tid . ')' . ' ' . $cnote->note,
-                        'debit' => 0,
-                        'credit' => $cnote->total
-                    );
-                    $creditnotes->add($record);
-                }   
-            }
-            $debitnotes = collect();
-            if ($invoice->debitnotes->count()) {
-                foreach ($invoice->debitnotes as $dnote) {
-                    $i++;
-                    $record = (object) array(
-                        'id' => $i,
-                        'date' => $dnote->date,
-                        'type' => 'debit-note',
-                        'note' => '(' . $tid . ')' . ' ' . $dnote->note,
-                        'dedit' => $dnote->total,
-                        'credit' => 0,
-                    );
-                    $debitnotes->add($record);
-                }   
-            }
+            foreach ($invoice->payments as $pmt) {
+                $i++;
+                $reference = $pmt->paid_invoice->reference;
+                $mode = $pmt->paid_invoice->payment_mode;
+                $pmt_tid = gen4tid('pmt-', $pmt->paid_invoice->tid);
+                $account = $pmt->paid_invoice->account->holder;
+                $amount = $pmt->paid_invoice->deposit;
+                $record = (object) array(
+                    'id' => $i,
+                    'date' => $pmt->paid_invoice->date,
+                    'type' => 'payment',
+                    'note' => '(' . $tid . ')' . ' ' . $pmt_tid . ' ' . ' reference: ' . $reference . ' mode: ' 
+                        . ucfirst($mode) . ', account: ' . $account . ', amount: ' . numberFormat($amount),
+                    'debit' => 0,
+                    'credit' => $pmt->paid
+                );
+                $payments->add($record);
+            }    
 
-            if ($payments->count() || $withholdings->count() || $creditnotes->count()) {
-                $statement->add($inv_record);
-                $statement = $statement->merge($payments);
-                $statement = $statement->merge($creditnotes);
-                $statement = $statement->merge($withholdings);
-            } else $statement->add($inv_record);
+            $withholdings = collect();
+            foreach ($invoice->withholding_payments as $pmt) {
+                $i++;
+                $note = $pmt->withholding->reference . ' - ' . $pmt->withholding->certificate . ' ' . $pmt->withholding->note;
+                $record = (object) array(
+                    'id' => $i,
+                    'date' => $pmt->withholding->date,
+                    'type' => 'withholding',
+                    'note' => '(' . $tid . ')' . ' ' . $note,
+                    'debit' => 0,
+                    'credit' => $pmt->paid
+                );
+                $withholdings->add($record);
+            }  
+
+            $creditnotes = collect();
+            foreach ($invoice->creditnotes as $cnote) {
+                $i++;
+                $record = (object) array(
+                    'id' => $i,
+                    'date' => $cnote->date,
+                    'type' => 'credit-note',
+                    'note' => '(' . $tid . ')' . ' ' . $cnote->note,
+                    'debit' => 0,
+                    'credit' => $cnote->total
+                );
+                $creditnotes->add($record);
+            }   
+
+            $debitnotes = collect();
+            foreach ($invoice->debitnotes as $dnote) {
+                $i++;
+                $record = (object) array(
+                    'id' => $i,
+                    'date' => $dnote->date,
+                    'type' => 'debit-note',
+                    'note' => '(' . $tid . ')' . ' ' . $dnote->note,
+                    'dedit' => $dnote->total,
+                    'credit' => 0,
+                );
+                $debitnotes->add($record);
+            }   
+
+            $statement->add($inv_record);
+            $statement = $statement->merge($payments);
+            $statement = $statement->merge($creditnotes);
+            $statement = $statement->merge($withholdings);
         }
 
         return $statement;        
@@ -383,7 +369,6 @@ class CustomerRepository extends BaseRepository
                         $balance_account = Account::where('system', 'retained_earning')->first(['id']);
                         $data['account_id'] = $balance_account->id;
                         $data['credit'] = $open_balance;
-                        
                     }                
                     JournalItem::create($data);
                 }
@@ -478,10 +463,10 @@ class CustomerRepository extends BaseRepository
     /*
     * Upload logo image
     */
-    public function uploadPicture($logo)
+    public function uploadPicture($file)
     {
-        $image = $this->customer_picture_path . time() . $logo->getClientOriginalName();
-        $this->storage->put($image, file_get_contents($logo->getRealPath()));
+        $image = time() . $file->getClientOriginalName();
+        $this->storage->put($this->customer_picture_path . $image, file_get_contents($file->getRealPath()));
 
         return $image;
     }
