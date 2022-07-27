@@ -54,18 +54,20 @@ class CreditNoteRepository extends BaseRepository
         }
         $result = CreditNote::create($input);
 
-        // decrement or increment invoice amount paid and update status
         $invoice = $result->invoice;
+        // if debit note, reduce invoice amount
         if ($result->is_debit) $invoice->decrement('amountpaid', $result->total);
         else $invoice->increment('amountpaid', $result->total);
-        if ($invoice->total == $invoice->amountpaid) 
-            $invoice->update(['status' => 'paid']);
-        if ($invoice->total > $invoice->amountpaid) 
-            $invoice->update(['status' => 'partial']);
-        
+
+        // update invoicce status
+        if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+        elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+
+
         /** accounts  */
         $this->post_transaction($result);
-
+        
         DB::commit();
         if ($result) return $result;
 
@@ -107,7 +109,7 @@ class CreditNoteRepository extends BaseRepository
         // update invoice status
         if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
         elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-        elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);
+        elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
         
         $result = $creditnote->update($input);
 
