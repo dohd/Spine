@@ -12,28 +12,30 @@
         'loan' => 'LOAN', 
         'chrg' => 'CHARGE',
         'stock' => 'STOCK',
-        'withholding' => 'WITHHOLDING'
+        'withholding' => 'WITHHOLDING',
+        'cnote' => 'CREDIT NOTE',
+        'genjr' => 'JOURNAL ENTRY'
     ];
 
-    $bill_url = 'javascript:';
+    $void = 'javascript:';
+
+    $bill_url = $void;
     if ($tr->bill) {
         $id = $tr->bill->po_id? $tr->bill->po_id : $tr->bill->id;
-        if ($tr->bill->po_id) $bill_url = route('biller.purchaseorders.show', $id);
-        else $bill_url = route('biller.purchases.show', $id);
+        if (isset($tr->bill->po_id)) $bill_url = route('biller.purchaseorders.show', $id);
+        elseif (isset($tr->bill->id)) $bill_url = route('biller.purchases.show', $id);
     }
 
-    $payment_url = 'javascript:';
-    if (isset($tr->paidinvoice->customer)) 
-        $payment_url = route('biller.invoices.show_payment', $tr->paidinvoice->id);
-
     $tr_type_urls = [
-        'PAYMENT' => $payment_url,
         'BILL' => $bill_url,
-        'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice->id) : 'javascript:',
-        'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan->id) : 'javascript:',
-        'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge->id) : 'javascript:',
-        'STOCK' => $tr->issuance ? route('biller.issuance.show', $tr->issuance->id) : 'javascript:',
-        'WITHHOLDING' => $tr->withholding ? route('biller.withholdings.show', $tr->withholding->id) : 'javascript:',
+        'PAYMENT' => isset($tr->paidinvoice->customer) ? route('biller.invoices.show_payment', $tr->paidinvoice) : $void,
+        'INVOICE' => $tr->invoice ? route('biller.invoices.show', $tr->invoice) : $void,
+        'LOAN' => $tr->loan ? route('biller.loans.show', $tr->loan) : $void,
+        'CHARGE' => $tr->charge ? route('biller.charges.show', $tr->charge) : $void,
+        'STOCK' => $tr->issuance ? route('biller.issuance.show', $tr->issuance) : $void,
+        'WITHHOLDING' => $tr->withholding ? route('biller.withholdings.show', $tr->withholding) : $void,
+        'JOURNAL ENTRY' => $tr->journalentry ? route('biller.journals.show', $tr->journalentry) : $void,
+        'CREDIT NOTE' => $tr->creditnote ? route('biller.creditnotes.edit', $tr->creditnote) : $void,
     ];
 @endphp
 
