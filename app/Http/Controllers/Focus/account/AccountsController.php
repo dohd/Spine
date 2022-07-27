@@ -213,27 +213,27 @@ class AccountsController extends Controller
     {
         $date = date_for_database(request('end_date'));
 
-        $q = Account::query();
-        $q1 = clone $q;
+        $bal_sheet_q = Account::query();
+        $profit_loss_q = Account::query();
         if (request('end_date')) {
             // balance sheet accounts
-            $q->whereHas('transactions', function ($q) use($date) {
+            $bal_sheet_q->whereHas('transactions', function ($q) use($date) {
                 $q->where('tr_date', '<=', $date);
             })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
             // profit & loss accounts
-            $q1->whereHas('transactions', function ($q) use($date) {
+            $profit_loss_q->whereHas('transactions', function ($q) use($date) {
                 $q->where('tr_date', '<=', $date);
             })->whereIn('account_type', ['Income', 'Expense']);
         } else {
             // balance sheet accounts
-            $q->whereHas('transactions')->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            $bal_sheet_q->whereHas('transactions')->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
             // profit & loss accounts
-            $q1->whereHas('transactions')->whereIn('account_type', ['Income', 'Expense']);
+            $profit_loss_q->whereHas('transactions')->whereIn('account_type', ['Income', 'Expense']);
         }
 
         // compute profit and loss
         $net_profit = 0;
-        $net_accounts = $q1->get();
+        $net_accounts = $profit_loss_q->get();
         foreach ($net_accounts as $account) {
             $is_revenue = $account->account_type == 'Income';
             $is_cog = $account->system == 'cog';
@@ -246,7 +246,7 @@ class AccountsController extends Controller
         }
 
         // fetch balance sheet accounts
-        $accounts = $q->get();
+        $accounts = $bal_sheet_q->get();
         $bg_styles = ['bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger'];
 
         // print balance_sheet
