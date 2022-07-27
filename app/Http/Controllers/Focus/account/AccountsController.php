@@ -235,14 +235,16 @@ class AccountsController extends Controller
         $net_profit = 0;
         $net_accounts = $profit_loss_q->get();
         foreach ($net_accounts as $account) {
-            $is_revenue = $account->account_type == 'Income';
-            $is_cog = $account->system == 'cog';
-            $is_dir_expense = $account->account_type == 'Expense' && $account->system != 'cog';
             $debit = $account->transactions->sum('debit');
             $credit = $account->transactions->sum('credit');
-            if ($is_revenue) $net_profit += $credit;
-            elseif ($is_cog) $net_profit -= $debit;
-            elseif ($is_dir_expense) $net_profit -= $debit;
+            $account_type = $account->account_type;
+            if ($account_type == 'Income') {
+                $credit_balance = round($credit - $debit, 2);
+                $net_profit += $credit_balance;
+            } elseif ($account_type == 'Expense') {
+                $debit_balance = round($debit - $credit, 2);
+                $net_profit -= $debit_balance;
+            }
         }
 
         // fetch balance sheet accounts
