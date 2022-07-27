@@ -11,6 +11,7 @@ use App\Models\invoice\PaidInvoice;
 use App\Models\issuance\Issuance;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
+use App\Models\manualjournal\Journal;
 use App\Models\withholding\Withholding;
 
 /**
@@ -18,6 +19,11 @@ use App\Models\withholding\Withholding;
  */
 trait TransactionRelationship
 {
+    public function journalentry() 
+    {
+        return $this->belongsTo(Journal::class, 'tr_ref');
+    }
+
     public function debitnote()
     {
         return $this->belongsTo(CreditNote::class, 'tr_ref')->where('is_debit', 1);
@@ -25,7 +31,7 @@ trait TransactionRelationship
 
     public function creditnote()
     {
-        return $this->belongsTo(CreditNote::class, 'tr_ref');
+        return $this->belongsTo(CreditNote::class, 'tr_ref')->where('is_debit', 0);
     }
 
     public function withholding()
