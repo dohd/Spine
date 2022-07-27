@@ -57,10 +57,17 @@ class AccountsTableController extends Controller
             ->escapeColumns(['id', 'number', 'holder'])
             ->addIndexColumn()
             ->addColumn('debit', function ($account) {
-                return amountFormat($account->debit);
+                return numberFormat($account->debit);
             })
             ->addColumn('credit', function ($account) {
-                return amountFormat($account->credit);
+                return numberFormat($account->credit);
+            })
+            ->addColumn('balance', function ($account) {
+                $balance = $account->credit - $account->debit;
+                if (in_array($account->account_type, ['Asset', 'Expense']))
+                    $balance = $account->debit - $account->credit;
+
+                return numberFormat($balance);
             })
             ->addColumn('account_type', function ($account) {
                 return  $account->account_type;

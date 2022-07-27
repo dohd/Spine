@@ -31,7 +31,8 @@
                                         <th>Name</th>
                                         <th>Type</th>
                                         <th>Debit</th>
-                                        <th>Credit</th>    
+                                        <th>Credit</th> 
+                                        <th>Balance</th>   
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -97,6 +98,10 @@
                 {
                     data: 'credit',
                     name: 'credit'
+                },
+                {
+                    data: 'balance',
+                    name: 'balance'
                 },
                 {
                     data: 'actions',
