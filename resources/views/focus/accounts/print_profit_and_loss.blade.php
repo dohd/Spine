@@ -108,17 +108,25 @@
                                 $balance = 0;
                                 $debit = $account->transactions->sum('debit');
                                 $credit = $account->transactions->sum('credit');
-                                if ($type == 'Income') $balance = $credit;
-                                else $balance = $debit;
+                                if ($type == 'Income') {
+                                    $credit_balance = round($credit - $debit, 2);
+                                    $balance = $credit_balance;
+                                } else {
+                                    $debit_balance = round($debit - $credit, 2); 
+                                    $balance = $debit_balance;
+                                }
+
                                 $gross_balance += $balance;
                                 $j++;
                             @endphp
-                            <tr class="dotted">
-                                <td>{{ $j }}</td>
-                                <td>{{ $account->number }}</td>
-                                <td>{{ $account->holder }}</td>
-                                <td style="text-align: center;">{{ numberFormat($balance) }}</td>
-                            </tr>
+                            @if ($balance)
+                                <tr class="dotted">
+                                    <td>{{ $j }}</td>
+                                    <td>{{ $account->number }}</td>
+                                    <td>{{ $account->holder }}</td>
+                                    <td style="text-align: center;">{{ numberFormat($balance) }}</td>
+                                </tr>
+                            @endif
                         @endif
                     @endforeach
                     <tr class="dotted">
