@@ -54,20 +54,19 @@
         $.ajax({
             url: "{{ route('biller.contracts.task_schedules')  }}",
             type: 'POST',
-            data: {id: $(this).val()},
+            data: {contract_id: $(this).val()},
             success: data => {
-               $('#schedule option').remove();
-               $('#schedule').append(new Option('-- Select Schedule --', ''));
+               $('#schedule').html('').append(new Option('-- Select Schedule --', ''));
                 data.forEach(v => {                    
                     $('#schedule').append(new Option(v.title, v.id));
                 });
             }
-        })
+        });
         // load equipments
         $.ajax({
             url: "{{ route('biller.contracts.contract_equipment')  }}",
             type: 'POST',
-            data: {id: $(this).val()},
+            data: {contract_id: $(this).val()},
             success: data => {
                 $('#equipmentTbl tbody tr').remove();
                 data.forEach(fillTable);

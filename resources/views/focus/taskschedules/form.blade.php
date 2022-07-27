@@ -55,7 +55,7 @@
 </div>
 <div class="form-group row">
     <div class="col-2 ml-auto">
-        <label for="rate">Total Serive Rate</label>
+        <label for="rate">Total Rate (Ksh.)</label>
         <input type="text" name="" class="form-control" id="totalRate" disabled>
     </div>
 </div>
