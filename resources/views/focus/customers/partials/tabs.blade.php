@@ -64,34 +64,39 @@
 
         <!-- Aging -->
         <div class="mt-2 aging">
-            <h5>Aging Report</h5>
+            <h5>Aging (days)</h5>
             <table class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
                 <thead>
                     <tr>                                                    
-                        @foreach ([30, 60, 90, 120] as $val)
-                            <th>{{ $val == 120? '120+' : $val }} Days</th>
+                        @foreach (['0 - 30', '31 - 60', '61 - 90', '91 - 120', '120+'] as $val)
+                            <th>{{ $val }}</th>
                         @endforeach
-                        <th>Aging Total</th>
-                        <th style="border-top: 1px solid white; border-bottom: 1px solid white;"></th>
-                        <th>On Account</th>
-                        <th>Total</th>
+                        <th>Aging Total</th>                       
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-                        $total = 0;
-                    @endphp
-                    <tr>                        
+                    <tr>              
+                        @php
+                            $total_aging = 0;
+                        @endphp          
                         @for ($i = 0; $i < count($aging_cluster); $i++) 
-                            <td>{{ numberFormat($aging_cluster[$i]) }}</td>
-                            @php
-                                $total += $aging_cluster[$i];
-                            @endphp
+                            <td>
+                                @php
+                                    echo numberFormat($aging_cluster[$i]);
+                                    $total_aging += $aging_cluster[$i];
+                                @endphp
+                            </td>
                         @endfor
-                        <td>{{ numberFormat($total) }}</td>
-                        <td style="border-top: 1px solid white; border-bottom: 1px solid white;"></td>
-                        <td>{{ numberFormat($customer->on_account) }}</td>
-                        <td>{{ numberFormat($total - $customer->on_account) }}</td>
+                        <td>{{ numberFormat($total_aging) }}</td>
+                    </tr>
+                    <tr><td style="border-left: 1px solid white; border-right: 1px solid white;" colspan="6">&nbsp;</td></tr>
+                    <tr>
+                        <th colspan="3">On Account</th>
+                        <th colspan="3">Total</th>
+                    </tr>
+                    <tr>
+                        <td colspan="3">{{ numberFormat($customer->on_account) }}</td>
+                        <td colspan="3">{{ numberFormat($total_aging - $customer->on_account) }}</td>
                     </tr>
                 </tbody>                     
             </table>  
