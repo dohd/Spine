@@ -129,6 +129,9 @@ class CustomerRepository extends BaseRepository
         $q = Invoice::where('customer_id', request('customer_id', $customer_id));
         // date filter
 
+        // lazy load
+        $q->with(['payments', 'withholding_payments', 'creditnotes', 'debitnotes']);
+        
         return $this->generate_statement($q->get());
     }
 
@@ -139,6 +142,7 @@ class CustomerRepository extends BaseRepository
         $statement = collect();
         foreach ($invoices as $invoice) {
             $i++;
+            $invoice_id = $invoice->id;
             $tid = gen4tid('Inv-', $invoice->tid);
             $note = $invoice->notes;
             $inv_record = (object) array(
@@ -147,7 +151,8 @@ class CustomerRepository extends BaseRepository
                 'type' => 'invoice',
                 'note' => '(' . $tid . ')' . ' ' . $note,
                 'debit' => $invoice->total,
-                'credit' => 0
+                'credit' => 0,
+                'invoice_id' => $invoice_id
             );
 
             $payments = collect();
@@ -165,7 +170,9 @@ class CustomerRepository extends BaseRepository
                     'note' => '(' . $tid . ')' . ' ' . $pmt_tid . ' ' . ' reference: ' . $reference . ' mode: ' 
                         . ucfirst($mode) . ', account: ' . $account . ', amount: ' . numberFormat($amount),
                     'debit' => 0,
-                    'credit' => $pmt->paid
+                    'credit' => $pmt->paid,
+                    'invoice_id' => $invoice_id,
+                    'payment_item_id' => $pmt->id
                 );
                 $payments->add($record);
             }    
@@ -180,7 +187,9 @@ class CustomerRepository extends BaseRepository
                     'type' => 'withholding',
                     'note' => '(' . $tid . ')' . ' ' . $note,
                     'debit' => 0,
-                    'credit' => $pmt->paid
+                    'credit' => $pmt->paid,
+                    'invoice_id' => $invoice_id,
+                    'withholding_item_id' => $pmt->id 
                 );
                 $withholdings->add($record);
             }  
@@ -194,7 +203,9 @@ class CustomerRepository extends BaseRepository
                     'type' => 'credit-note',
                     'note' => '(' . $tid . ')' . ' ' . $cnote->note,
                     'debit' => 0,
-                    'credit' => $cnote->total
+                    'credit' => $cnote->total,
+                    'invoice_id' => $invoice_id,
+                    'creditnote_id' => $cnote->id
                 );
                 $creditnotes->add($record);
             }   
@@ -209,6 +220,8 @@ class CustomerRepository extends BaseRepository
                     'note' => '(' . $tid . ')' . ' ' . $dnote->note,
                     'dedit' => $dnote->total,
                     'credit' => 0,
+                    'invoice_id' => $invoice_id,
+                    'debitnote_id' => $dnote->id
                 );
                 $debitnotes->add($record);
             }   
