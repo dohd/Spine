@@ -47,9 +47,4 @@ trait CustomerRelationship
     {
         return $this->belongsTo(Project::class);
     }
-
-    public function transactions()
-    {
-        return $this->hasMany('App\Models\transaction\Transaction', 'payer_id')->where('relation_id', '=', 0)->orWhere('relation_id', '=', 21)->withoutGlobalScopes();
-    }
 }
