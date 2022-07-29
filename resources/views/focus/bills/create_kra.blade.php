@@ -25,44 +25,46 @@
                         <div class="form-group row">
                             <div class="col-4">
                                 <label for="supplier">KRA Creditor</label>
-                                <select name="supplier_id" class="form-control"  data-placeholder="Search KRA Creditor" id="supplier"></select>
-                            </div>
-                            <div class="col-2">
-                                <label for="tid">Transaction ID</label>
-                                {{ Form::text('tid', 1, ['class' => 'form-control', 'readonly']) }}
-                            </div>
-                            <div class="col-2">
-                                <label for="date">Date</label>
-                                {{ Form::text('date', null, ['class' => 'form-control datepicker']) }}
-                            </div>
-                            <div class="col-2">
-                                <label for="due_date">Due Date</label>
-                                {{ Form::text('due_date', null, ['class' => 'form-control datepicker']) }}
-                            </div>
-                            <div class="col-2">
-                                <label for="amount">Amount (Ksh.)</label>
-                                {{ Form::text('amount', null, ['class' => 'form-control']) }}
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-2">
-                                <label for="doc_type">Document Type</label>
-                                <select name="doc_type" class="form-control" id="doc_type">
-                                    @foreach (['Receipt', 'Invoice', 'DNote', 'Voucher'] as $val)
-                                        <option value="{{ $val }}">{{ $val }}</option>
-                                    @endforeach
+                                <select name="supplier_id" class="form-control"  data-placeholder="Search KRA Creditor" id="supplier" required>
                                 </select>
                             </div>
                             <div class="col-2">
-                                <label for="reference">Reference No.</label>
-                                {{ Form::text('doc_ref', null, ['class' => 'form-control']) }}
+                                <label for="tid">Transaction ID</label>
+                                {{ Form::text('tid', $tid+1, ['class' => 'form-control', 'readonly']) }}
                             </div>
-                            <div class="col-8">
+                            <div class="col-2">
+                                <label for="date">Registration Date</label>
+                                {{ Form::text('reg_date', null, ['class' => 'form-control datepicker']) }}
+                            </div>
+                            <div class="col-3">
+                                <label for="number">Registration No.</label>
+                                {{ Form::text('reg_no', null, ['class' => 'form-control', 'required']) }}
+                            </div>                            
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-3">
+                                <label for="payment_type">Payment Type</label>
+                                {{ Form::text('payment_type', null, ['class' => 'form-control', 'required']) }}
+                            </div>   
+                            <div class="col-3">
+                                <label for="tax_type">Tax Obligation</label>
+                                {{ Form::text('tax_type', null, ['class' => 'form-control', 'required']) }}
+                            </div>   
+                            <div class="col-2">
+                                <label for="period">Tax Period</label>
+                                {{ Form::text('tax_period', null, ['class' => 'form-control', 'required']) }}
+                            </div>
+                            <div class="col-2">
+                                <label for="amount">Amount (Ksh.)</label>
+                                {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
+                            </div>                            
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-6">
                                 <label for="note">Note</label>
                                 {{ Form::text('note', null, ['class' => 'form-control']) }}
                             </div>
                         </div>
-                        
                         <div class="form-group row">                            
                             <div class="col-12"> 
                                 {{ Form::submit('Generate', ['class' => 'btn btn-primary btn-lg float-right mr-3']) }}                                
@@ -98,6 +100,12 @@
                 return {results: data.map(v => ({id: v.id, text: v.name + ' : ' + v.email}))}; 
             },
         }
+    });
+
+    // on change maount
+    $('#amount').focusout(function() {
+        if ($(this).val()) 
+            $(this).val(accounting.formatNumber($(this).val(), 2, ','))
     });
 
 </script>
