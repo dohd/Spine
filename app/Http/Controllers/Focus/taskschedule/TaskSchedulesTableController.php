@@ -54,28 +54,20 @@ class TaskSchedulesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('contract', function ($schedule) {        
-                if ($schedule->contract) 
+                if (isset($schedule->contract->customer)) 
                 return  $schedule->contract->title . ' - ' . $schedule->contract->customer->company;
             })
             ->addColumn('loaded', function ($schedule) {
-                return $schedule->taskschedule_equipments->count();
+                return $schedule->equipments->count();
             })
             ->addColumn('unserviced', function ($schedule) {
-                return $schedule->taskschedule_equipments->count();
+                return $schedule->equipments->count();
             })
             ->addColumn('total_rate', function ($schedule) {
-                $total = 0;
-                foreach ($schedule->taskschedule_equipments as $row) {
-                    if ($row->equipment) $total += $row->equipment->service_rate;
-                }
-                return numberFormat($total);
+                return numberFormat($schedule->equipments->sum('service_rate'));
             })
             ->addColumn('total_charged', function ($schedule) {
-                $total = 0;
-                foreach ($schedule->taskschedule_equipments as $row) {
-                    if ($row->equipment) $total += $row->equipment->service_rate;
-                }
-                return numberFormat($total);
+                return numberFormat($schedule->equipments->sum('service_rate'));
             })
             ->addColumn('start_date', function ($schedule) {
                 return dateFormat($schedule->start_date);
