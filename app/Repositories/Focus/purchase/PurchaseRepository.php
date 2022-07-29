@@ -242,7 +242,7 @@ class PurchaseRepository extends BaseRepository
     }
 
     // Account transaction
-    protected function post_transaction($bill) 
+    private function post_transaction($bill) 
     {
         // credit Accounts Payable (Creditors)
         $account = Account::where('system', 'payable')->first(['id']);
