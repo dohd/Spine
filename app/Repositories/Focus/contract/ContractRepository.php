@@ -47,32 +47,30 @@ class ContractRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $c_data = $input['contract_data'];
-        foreach ($c_data as $k => $val) {
-            if (in_array($k, ['amount', 'start_date', 'end_date'])) {
-                if ($k == 'amount') $c_data[$k] = numberClean($val);
-                else $c_data[$k] = date_for_database($val);
-            }
+        $contract_data = $input['contract_data'];
+        foreach ($contract_data as $k => $val) {
+            if ($k == 'amount') $contract_data[$k] = numberClean($val);
+            if (in_array($k, ['start_date', 'end_date'])) 
+                $contract_data[$k] = date_for_database($val);
         }
-        $result = Contract::create($c_data);
-        $contract_id = $result->id;
+        $result = Contract::create($contract_data);
 
-        $s_data = $input['schedule_data'];
-        $s_data = array_map(function ($v) use($contract_id) {
+        $schedule_data = $input['schedule_data'];
+        $schedule_data = array_map(function ($v) use($result) {
             return [
-                'contract_id' => $contract_id,
+                'contract_id' => $result->id,
                 'title' => $v['s_title'],
                 'start_date' => date_for_database($v['s_start_date']),
                 'end_date' => date_for_database($v['s_end_date'])
             ];
-        }, $s_data);
-        TaskSchedule::insert($s_data);
+        }, $schedule_data);
+        TaskSchedule::insert($schedule_data);
 
-        $eq_data = $input['equipment_data'];
-        $eq_data = array_map(function ($v) use($contract_id) {
-            return ['contract_id' => $contract_id] + $v;
-        }, $eq_data);
-        ContractEquipment::insert($eq_data);
+        $equipment_data = $input['equipment_data'];
+        $equipment_data = array_map(function ($v) use($result) {
+            return $v + ['contract_id' => $result->id];
+        }, $equipment_data);
+        ContractEquipment::insert($equipment_data);
         
         DB::commit();
         if ($result) return $result;
@@ -93,53 +91,49 @@ class ContractRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $c_data = $input['contract_data'];
-        foreach ($c_data as $k => $val) {
+        $contract_data = $input['contract_data'];
+        foreach ($contract_data as $k => $val) {
             if (in_array($k, ['amount', 'start_date', 'end_date'])) {
-                if ($k == 'amount') $c_data[$k] = numberClean($val);
-                else $c_data[$k] = date_for_database($val);
+                if ($k == 'amount') $contract_data[$k] = numberClean($val);
+                else $contract_data[$k] = date_for_database($val);
             }
         }
-        $result = $contract->update($c_data);
+        $result = $contract->update($contract_data);
 
-        $s_data = $input['schedule_data'];        
+        $schedule_data = $input['schedule_data'];        
         // delete omitted items
-        $s_ids = array_map(function ($v) { return $v['s_id']; }, $s_data);
-        $contract->task_schedules()->whereNotIn('id', $s_ids)->where('status', 'pending')->delete();
+        $item_ids = array_map(function ($v) { return $v['s_id']; }, $schedule_data);
+        $contract->task_schedules()->whereNotIn('id', $item_ids)->where('status', 'pending')->delete();
         // create or update item
-        foreach ($s_data as $v) {
-            $v = [
+        foreach ($schedule_data as $item) {
+            $item = [
+                'id' => $item['s_id'],
                 'contract_id' => $contract->id,
-                'id' => $v['s_id'],
-                'title' => $v['s_title'],
-                'start_date' => date_for_database($v['s_start_date']),
-                'end_date' => date_for_database($v['s_end_date'])
+                'title' => $item['s_title'],
+                'start_date' => date_for_database($item['s_start_date']),
+                'end_date' => date_for_database($item['s_end_date'])
             ];
-            $item = TaskSchedule::firstOrNew(['id' => $v['id']]);
-            foreach ($v as $key => $val) {
-                $item[$key] = $val;
-            }
-            if (!$item->id) unset($item->id);
-            $item->save();
+            $new_item = TaskSchedule::firstOrNew(['id' => $item['id']]);
+            $new_item->fill($item);
+            if (!$new_item->id) unset($new_item->id);
+            $new_item->save();
         }
 
-        $eq_data = $input['equipment_data'];
+        $equipment_data = $input['equipment_data'];
         // delete omitted items
-        $eq_ids = array_map(function ($v) { return $v['contracteq_id']; }, $eq_data);
-        $contract->contract_equipments()->whereNotIn('id', $eq_ids)->delete();
+        $item_ids = array_map(function ($v) { return $v['contracteq_id']; }, $equipment_data);
+        $contract->contract_equipment()->whereNotIn('equipment_id', $item_ids)->delete();
         // create or update item
-        foreach ($eq_data as $v) {
-            $v = [
+        foreach ($equipment_data as $item) {
+            $item = [
+                'id' => $item['contracteq_id'],
                 'contract_id' => $contract->id, 
-                'id' => $v['contracteq_id'],
-                'equipment_id' => $v['equipment_id']
+                'equipment_id' => $item['equipment_id']
             ];
-            $item = ContractEquipment::firstOrNew(['id' => $v['id']]);
-            foreach ($v as $key => $val) {
-                $item[$key] = $val;
-            }
-            if (!$item->id) unset($item->id);
-            $item->save();
+            $new_item = ContractEquipment::firstOrNew(['id' => $item['id']]);
+            $new_item->fill($item);
+            if (!$new_item->id) unset($new_item->id);
+            $new_item->save();
         }
 
         DB::commit();
@@ -176,6 +170,8 @@ class ContractRepository extends BaseRepository
      */
     public function delete(Contract $contract)
     {   
+        if ($contract->delete()) return true;
+        
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }
