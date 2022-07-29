@@ -59,10 +59,11 @@ class TaskSchedulesController extends Controller
     public function store(Request $request)
     {
         // extract request input
-        $data = $request->only('contract_id', 'schedule_id');
-        $data_items = $request->only('equipment_id', 'service_rate');
+        $data = $request->only(['contract_id', 'schedule_id' , 'actual_startdate', 'actual_enddate']);
+        $data_items = $request->only(['equipment_id']);
 
         $data_items = modify_array($data_items);
+        if (!$data_items) return session()->flash('flash_error', 'No equipments loaded!');
 
         $this->repository->create(compact('data', 'data_items'));
         
@@ -76,17 +77,8 @@ class TaskSchedulesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(TaskSchedule $taskschedule)
-    {
-        $schedule_id = $taskschedule->id;
-        $equipments = Equipment::whereIn('id', function ($q) use($schedule_id) {
-            $q->select('equipment_id')->from('contract_equipments')->where([
-                'schedule_id' => $schedule_id
-            ]);
-        })->with(['branch' => function($q) {
-            $q->get(['id', 'name']);
-        }])->limit(10)->get();
-        
-        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'equipments'));
+    {    
+        return new ViewResponse('focus.taskschedules.view', compact('taskschedule'));
     }
 
     /**
@@ -109,7 +101,7 @@ class TaskSchedulesController extends Controller
      */
     public function update(Request $request, TaskSchedule $taskschedule)
     {
-        $data = $request->only('title', 'start_date', 'end_date');
+        $data = $request->only('title', 'start_date', 'end_date', 'actual_startdate', 'actual_enddate');
         $data_items = $request->only('id');
 
         $data_items = modify_array($data_items);
