@@ -101,7 +101,8 @@ class BillsController extends Controller
      */
     public function create_kra()
     {
-        return new ViewResponse('focus.bills.create_kra');
+        $tid = Bill::max('tid');
+        return new ViewResponse('focus.bills.create_kra', compact('tid'));
     }
 
     /**
