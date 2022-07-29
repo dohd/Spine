@@ -11,7 +11,7 @@ class ContractEquipment extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'contract_equipments';
+    protected $table = 'contract_equipment';
 
     /**
      * Mass Assignable fields of model
