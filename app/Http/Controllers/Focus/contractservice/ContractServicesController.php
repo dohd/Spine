@@ -63,7 +63,7 @@ class ContractServicesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        if (!$data_items) throw new ValidationException(['Cannot create report without equipments!']);
+        if (!$data_items) throw ValidationException::withMessages(['Cannot create report without equipments!']);
 
         $this->repository->create(compact('data', 'data_items'));
 
@@ -109,7 +109,7 @@ class ContractServicesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        if (!$data_items) throw new ValidationException(['Cannot create report without equipments!']);
+        if (!$data_items) throw ValidationException::withMessages(['Cannot create report without equipments!']);
 
         $this->repository->update($contractservice, compact('data', 'data_items'));
 

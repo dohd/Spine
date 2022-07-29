@@ -274,7 +274,8 @@ class QuoteRepository extends BaseRepository
     {
         $type = $quote->bank_id ? 'PI' : 'Quote';
         if ($quote->project_quote) 
-            throw new ValidationException([$type . ' is attached to a project!']);
+            throw ValidationException::withMessages([$type . ' is attached to a project!']);
+            
         if ($quote->delete()) {
             $quote->lead->update(['status' => 0, 'reason' => 'new']);
             return $type;

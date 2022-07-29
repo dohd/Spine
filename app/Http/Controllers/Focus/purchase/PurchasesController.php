@@ -98,9 +98,9 @@ class PurchasesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        // filter non auto-generated items
+
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
-        if (empty($data_items)) throw new ValidationException(['Please select system-generated row items as line items!']);
+        if (!$data_items) throw ValidationException::withMessages(['Please select system-generated row items as line items!']);
 
         $result = $this->repository->create(compact('data', 'data_items'));
 
@@ -146,9 +146,9 @@ class PurchasesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        // filter non auto-generated items
+        
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
-        if (!$data_items) return session()->flash('flash_error', 'Please use auto-generated items as line items!');
+        if (!$data_items) throw ValidationException::withMessages(['Please use auto-generated items as line items!']);
 
         $this->repository->update($purchase, compact('data', 'data_items'));
 
