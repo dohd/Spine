@@ -38,14 +38,9 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
-    // form submit
-    $('form').submit(function(e) {
-        const equipments = $('#equipmentTbl .equipId:not(:disabled)').length;
-        if (equipments < 1) {
-            e.preventDefault();
-            alert('Include at least one equipment!');
-        }
-    });
+    // initialize datepicker
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
 
     // on contract select
     const equipRow =  $('#equipmentTbl tbody tr').html();
@@ -91,10 +86,9 @@
 
     // on change row checkbox
     $('#equipmentTbl').on('change', '.select', function() {
-        const select = $(this).is(':checked');
         const equipId = $(this).parents('tr').find('.equipId');
         const rate = $(this).parents('tr').find('.rate');
-        if (select) {
+        if ($(this).is(':checked')) {
             equipId.attr('disabled', false);
             rate.attr('disabled', false);
         } else {

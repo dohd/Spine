@@ -1,5 +1,5 @@
 <div class="form-group row">
-    <div class="col-6">
+    <div class="col-4">
         <label for="contract">Contract</label>
         <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract" required>
             <option value="">-- Select Contract --</option>
@@ -10,14 +10,22 @@
             @endforeach
         </select>
     </div>
-    <div class="col-6">
+    <div class="col-2">
         <label for="schedule">Task Schedule</label>
         <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Task Schedule" required>
             <option value="">-- Select Schedule --</option>
         </select>
     </div>
+    <div class="col-2">
+        <label for="actual_date">Actual Start Date</label>
+        {{ Form::text('actual_startdate', null, ['class' => 'form-control datepicker', 'id' => 'actual_startdate']) }}
+    </div>
+    <div class="col-2">
+        <label for="actual_date">Actual End Date</label>
+        {{ Form::text('actual_enddate', null, ['class' => 'form-control datepicker', 'id' => 'actual_enddate']) }}
+    </div>
 </div>
-<legend>Equipments</legend><hr>
+<legend>Equipments</legend>
 <div class="table-responsive mb-1">
     <table id="equipmentTbl" class="table">
         <thead>

@@ -27,14 +27,22 @@
                                         <label for="title">Schedule Title</label>
                                         {{ Form::text('title', null, ['class' => 'form-control', 'required']) }}
                                     </div>
-                                    <div class="col-3">
+                                    <div class="col-2">
                                         <label for="start_date">Start Date</label>
                                         {{ Form::text('start_date', null, ['class' => 'form-control datepicker', 'id' => 'start_date']) }}
                                     </div>
-                                    <div class="col-3">
+                                    <div class="col-2">
                                         <label for="end_date">End Date</label>
                                         {{ Form::text('end_date', null, ['class' => 'form-control datepicker', 'id' => 'end_date']) }}
-                                    </div>                                    
+                                    </div>   
+                                    <div class="col-2">
+                                        <label for="start_date">Actual Start Date</label>
+                                        {{ Form::text('actual_startdate', null, ['class' => 'form-control datepicker', 'id' => 'actual_startdate']) }}
+                                    </div>
+                                    <div class="col-2">
+                                        <label for="end_date">Actual End Date</label>
+                                        {{ Form::text('actual_enddate', null, ['class' => 'form-control datepicker', 'id' => 'actual_enddate']) }}
+                                    </div>                                   
                                 </div>
                                 <legend>Equipments</legend>
                                 <div class="table-reponsive mb-2">
@@ -55,13 +63,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>                                                                                    
-                                            @foreach ($taskschedule->taskschedule_equipments as $i => $row)                                            
+                                            @foreach ($taskschedule->equipments as $i => $row)                                            
                                                 <tr>
                                                     <td>{{ $i+1 }}</td>
-                                                    <td>{{ $row->equipment->unique_id }}</td>
-                                                    <td>{{ $row->equipment->make_type }}</td>
-                                                    <td>{{ $row->equipment->branch->name }}</td>
-                                                    <td>{{ $row->equipment->location }}</td>
+                                                    <td>{{ $row->unique_id }}</td>
+                                                    <td>{{ $row->make_type }}</td>
+                                                    <td>{{ $row->branch->name }}</td>
+                                                    <td>{{ $row->location }}</td>
                                                     <td>
                                                         <div class="form-check">
                                                             <input type="checkbox" class="form-check-input ml-1 select">
@@ -94,10 +102,12 @@
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
     const schedule = @json($taskschedule);
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true}) 
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());
     $('#start_date').datepicker('setDate', new Date(schedule.start_date));
-    $('#end_date').datepicker('setDate', new Date(schedule.end_date));     
+    $('#end_date').datepicker('setDate', new Date(schedule.end_date));  
+    $('#actual_startdate').datepicker('setDate', new Date(schedule.actual_startdate));
+    $('#actual_enddate').datepicker('setDate', new Date(schedule.actual_enddate));       
     
     // on change row checkbox
     $('#equipmentTbl').on('change', '.select', function() {
