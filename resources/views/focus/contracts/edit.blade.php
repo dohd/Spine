@@ -42,24 +42,9 @@
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
     const contract = @json($contract);
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true});
     $('#start_date').datepicker('setDate', new Date(contract.start_date));
     $('#end_date').datepicker('setDate', new Date(contract.end_date));    
-
-    // form submit
-    $('form').submit(function(e) {
-        const schedules = $('#scheduleTbl tbody tr').length;
-        const equipments = $('#equipmentTbl .equipId:not(:disabled)').length
-        if (schedules < 1 || equipments < 1) {
-            e.preventDefault();
-            alert('Include at least one task schedule and one equipment!');
-        }
-    });
-
-    function renderDatepicker() {
-        return $('.datepicker')
-            .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true});    
-    }
-    renderDatepicker();
 
     // select2 config
     function select2Config(url, callback, extraData) {
@@ -91,7 +76,7 @@
         rowId++;
         let html = scheduleRow.replace(/-0/g, '-'+rowId);
         $('#scheduleTbl tbody').append('<tr>' + html + '</tr>');
-        renderDatepicker();
+        $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true});
         $('#startdate-'+ rowId).datepicker('setDate', new Date());
         $('#enddate-'+ rowId).datepicker('setDate', new Date());
     });
@@ -110,7 +95,7 @@
             $.ajax({
                 url: "{{ route('biller.contracts.customer_equipment')  }}",
                 type: 'POST',
-                data: {id: customer_id},
+                data: {customer_id},
                 success: data => {
                     $('#equipmentTbl tbody tr').remove();
                     data.forEach(fillTable);
@@ -122,7 +107,7 @@
             $.ajax({
                 url: "{{ route('biller.contracts.customer_equipment')  }}?branch_id=" + branch_id,
                 type: 'POST',
-                data: {id: customer_id},
+                data: {customer_id, branch_id},
                 success: data => {
                     $('#equipmentTbl tbody tr').remove();
                     data.forEach(fillTable);
@@ -145,10 +130,9 @@
     
     // on change row checkbox
     $('#equipmentTbl').on('change', '.select', function() {
-        const select = $(this).is(':checked');
         const equipId = $(this).parents('tr').find('.equipId');
         const contEquipId = $(this).parents('tr').find('.contEquipId');
-        if (select) {
+        if ($(this).is(':checked')) {
             equipId.attr('disabled', false);
             contEquipId.attr('disabled', false);
         } else {

@@ -30,8 +30,8 @@
                                         <th>Title</th>
                                         <th>Customer</th>
                                         <th>Amount</th>
-                                        <th>Schedule</th>
-                                        <th>No of Units</th>
+                                        <th>Schedule Count</th>
+                                        <th>Unit Count</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Action</th>

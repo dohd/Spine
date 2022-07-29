@@ -143,12 +143,12 @@
             </tr>
             <!-- edit equipment -->
             @isset($contract)
-                @foreach ($contract->contract_equipments as $row)
+                @foreach ($contract->equipments as $row)
                     <tr>
-                        <td>{{ $row->equipment->unique_id }}</td>
-                        <td>{{ $row->equipment->make_type }}</td>
-                        <td>{{ $row->equipment->branch->name }}</td>
-                        <td>{{ $row->equipment->location }}</td>
+                        <td>{{ $row->unique_id }}</td>
+                        <td>{{ $row->make_type }}</td>
+                        <td>{{ $row->branch->name }}</td>
+                        <td>{{ $row->location }}</td>
                         <td>
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input ml-1 select">

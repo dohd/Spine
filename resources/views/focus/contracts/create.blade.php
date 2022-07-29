@@ -122,7 +122,7 @@
             $.ajax({
                 url: "{{ route('biller.contracts.customer_equipment')  }}",
                 type: 'POST',
-                data: {id: customer_id},
+                data: {customer_id},
                 success: data => {
                     $('#equipmentTbl tbody tr').remove();
                     data.forEach(fillTable);
@@ -134,7 +134,7 @@
             $.ajax({
                 url: "{{ route('biller.contracts.customer_equipment')  }}?branch_id=" + branch_id,
                 type: 'POST',
-                data: {id: customer_id},
+                data: {customer_id, branch_id},
                 success: data => {
                     $('#equipmentTbl tbody tr').remove();
                     data.forEach(fillTable);

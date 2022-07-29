@@ -33,7 +33,7 @@
                                     'End Date' => dateFormat($contract->end_date),
                                     'Contract Period (years)' => $contract->period,
                                     'Per Schedule Period (months)' => $contract->schedule_period,
-                                    'Number of Units' => $contract->contract_equipments->count(),
+                                    'Number of Units' => $contract->equipments->count(),
                                 ];
                             @endphp
                             <table class="table table-bordered table-sm mb-3">
@@ -79,12 +79,9 @@
                                                         <td>{{ $row->title }}</td>
                                                         <td>{{ dateFormat($row->start_date) }}</td>
                                                         <td>{{ dateFormat($row->end_date) }}</td>
-                                                        <td>{{ $row->status }} - {{ $row->taskschedule_equipments->count() }}</td>
+                                                        <td>{{ $row->status }} - {{ $row->equipments->count() }}</td>
                                                         <td>
-                                                            @php
-                                                                $service = $row->contractservice? $row->contractservice : '';
-                                                            @endphp
-                                                            {{ $service? $service->items()->where('jobcard_no', '>', 0)->count() : 0 }}
+                                                            0
                                                         </td>
                                                     </tr>
                                                 @endforeach                                                    
@@ -105,13 +102,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>   
-                                                @php
-                                                    $equipments = array();
-                                                    foreach ($contract->contract_equipments as $row) {
-                                                        $equipments[] = $row->equipment;
-                                                    }
-                                                @endphp                                             
-                                                @foreach ($equipments as $i => $row)                                            
+                                                @foreach ($contract->equipments as $i => $row)                                            
                                                     <tr>
                                                         <td>{{ $i+1 }}</td>
                                                         <td>{{ $row->unique_id }}</td>
