@@ -68,7 +68,7 @@ class ContractsTableController extends Controller
                 return $contract->task_schedules->count();
             })
             ->addColumn('equipment', function ($contract) {
-                return $contract->contract_equipments->count();
+                return $contract->equipments->count();
             })
             ->addColumn('start_date', function ($contract) {
                 return dateFormat($contract->start_date);
