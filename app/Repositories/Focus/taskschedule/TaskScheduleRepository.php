@@ -7,6 +7,7 @@ use App\Models\contract_equipment\ContractEquipment;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\BaseRepository;
 use DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -42,27 +43,31 @@ class TaskScheduleRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        // existing equipments id
-        $eq_ids = ContractEquipment::where([
-            'contract_id' => $data['contract_id'], 
-            'schedule_id' => $data['schedule_id']
-        ])->pluck('equipment_id')->toArray();
-
-        // load unique equipments
-        $data_items = array();
-        foreach ($input['data_items'] as $item) {
-            $item = $data + ['equipment_id' => $item['equipment_id']];
-            if (!in_array($item['equipment_id'], $eq_ids)) $data_items[] = $item;
-        }
-        $result = ContractEquipment::insert($data_items);
-
-        $schedule = TaskSchedule::find($data['schedule_id']);
         // update schedule status to loaded
-        if ($data_items && $schedule->status == 'pending') 
-            $schedule->update(['status' => 'loaded']);
+        $schedule = TaskSchedule::find($data['schedule_id']);
+        if ($schedule->status == 'pending') $schedule->update(['status' => 'loaded']);
+        if (!$schedule->actual_startdate || !$schedule->actual_enddate)
+            $schedule->update([
+                'actual_startdate' => date_for_database($data['actual_stardate']),
+                'actual_enddate' => date_for_database($data['actual_enddate']),
+            ]);
+
+        // fetch existing equipments ids
+        $fields = array_intersect_key($data, array_flip(['contract_id', 'schedule_id']));
+        $item_ids = ContractEquipment::where($fields)->pluck('equipment_id')->toArray();
+
+        // filter out duplicates
+        $data_items = $input['data_items'];
+        $data_items = array_reduce($data_items, function ($init, $v) use($item_ids, $fields) {
+            if (!in_array($v['equipment_id'], $item_ids)) $init[] = $v + $fields;
+            return $init;
+        }, []);
+        
+        if (!$data_items) throw ValidationException::withMessages(['Equipments already loaded!']);
+        ContractEquipment::insert($data_items);
         
         DB::commit();
-        if ($result) return $result;
+        if ($schedule) return $schedule;
 
         throw new GeneralException('Error Creating Contract');
     }
@@ -81,14 +86,16 @@ class TaskScheduleRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        $data['start_date'] = date_for_database($data['start_date']);
-        $data['end_date'] = date_for_database($data['end_date']);
+        foreach ($data as $key => $val) {
+            $dates = ['start_date', 'end_date', 'actual_startdate', 'actual_enddate'];
+            if (in_array($key, $dates)) $data[$key] = date_for_database($val);
+        }
         $result = $taskschedule->update($data);
 
         // delete omitted items
         $data_items = $input['data_items'];
-        $eq_ids = array_map(function ($v) { return $v['id']; }, $data_items);
-        $taskschedule->taskschedule_equipments()->whereNotIn('id', $eq_ids)->delete();
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $taskschedule->contract_equipment()->whereNotIn('id', $item_ids)->delete();
 
         DB::commit();
         if ($result) return $result;
@@ -124,13 +131,7 @@ class TaskScheduleRepository extends BaseRepository
      */
     public function delete($taskschedule)
     {
-        DB::beginTransaction();
-
-        $taskschedule->taskschedule_equipments()->delete();
-        $result = $taskschedule->delete();
-
-        DB::commit();
-        if ($result) return true;
+        if ($taskschedule->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
