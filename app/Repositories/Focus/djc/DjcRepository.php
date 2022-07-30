@@ -146,7 +146,7 @@ class DjcRepository extends BaseRepository
         }
 
         DB::commit();
-        if ($result)  return $result;
+        if ($result) return $djc;
 
         throw new GeneralException('Error Updating Djc');
     }

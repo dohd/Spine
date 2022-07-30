@@ -198,21 +198,15 @@ class InvoicesController extends Controller
 
         $bill['user_id'] = auth()->user()->id;
         $bill['ins'] = auth()->user()->ins;
-
         $bill_items = modify_array($bill_items);
 
         $result = $this->repository->create_project_invoice(compact('bill', 'bill_items'));
 
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $msg = trans('alerts.backend.invoices.created') . 
-            '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-md bg-purple ml-2">
-                <span class="fa fa-print" aria-hidden="true"></span>Print  </a>  
-            <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md">
-                <span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> 
-            <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-warning">
-                <span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;';
-
-        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => $msg]);
+        // print preview
+        $valid_token = token_validator('', 'i' . $result->id . $result->tid, true);
+        $msg = ' <a href="'. route( 'biller.print_bill',[$result->id, 1, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+        
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice created successfully' . $msg]);
     }
 
     /**
@@ -254,7 +248,11 @@ class InvoicesController extends Controller
 
         $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
 
-        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice Updated successfully']);
+        // print preview
+        $valid_token = token_validator('', 'i' . $result->id . $result->tid, true);
+        $msg = ' <a href="'. route( 'biller.print_bill',[$result->id, 1, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice Updated successfully' . $msg]);
     }
 
 

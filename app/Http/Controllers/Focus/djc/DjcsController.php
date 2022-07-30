@@ -93,13 +93,15 @@ class DjcsController extends Controller
         $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
 
         $data['ins'] = auth()->user()->ins;
-
         $data_items = modify_array($data_items);
 
-        //Create the model using repository create method
         $result = $this->repository->create(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created']);
+        // print preview 
+        $valid_token = token_validator('', 'd' . $result->id, true);
+        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+
+        return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created' . $msg]);
     }
 
     /**
@@ -142,9 +144,13 @@ class DjcsController extends Controller
 
         $data_items = modify_array($data_items);
 
-        $this->repository->update($djc, compact('data', 'data_items'));
+        $result = $this->repository->update($djc, compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated']);
+        // print preview 
+        $valid_token = token_validator('', 'd' . $result->id, true);
+        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+
+        return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated' . $msg]);
     }
 
     /**

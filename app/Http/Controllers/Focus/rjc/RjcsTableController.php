@@ -87,9 +87,8 @@ class RjcsTableController extends Controller
             })
             ->addColumn('actions', function ($rjc) {
                 $valid_token = token_validator('', 'd' . $rjc->id, true);
-                $link = route('biller.print_rjc', [$rjc->id, 11, $valid_token, 1]);
 
-                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print">
+                return '<a href="' . route('biller.print_rjc', [$rjc->id, 11, $valid_token, 1]) . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print">
                     <i class="fa fa-print"></i></a> '. $rjc->action_buttons;
             })
             ->make(true);

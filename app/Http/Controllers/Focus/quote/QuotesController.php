@@ -117,6 +117,10 @@ class QuotesController extends Controller
             $msg = 'Proforma Invoice created successfully';
         }
 
+        // print preview url
+        $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
+        $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+
         return new RedirectResponse($route, ['flash_success' => $msg]);
     }
 
@@ -168,6 +172,10 @@ class QuotesController extends Controller
             $route = route('biller.quotes.index', 'page=pi');
             $msg = 'Proforma Invoice updated successfully';
         }
+
+        // print preview url
+        $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
+        $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';        
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
     }
@@ -310,34 +318,6 @@ class QuotesController extends Controller
             ->get();
 
         return response()->json($quotes);
-    }
-
-    public function convert(InvoiceRepository $invoicerepository, ManageInvoiceRequest $request)
-    {
-        $input = $request->only(['bill_id', 'delete_item']);
-        $quote_o = Quote::where('id', '=', $input['bill_id'])->first();
-        //Input received from the request
-        $invoice = array('customer_id' => $quote_o['customer_id'], 'tid' => $quote_o['tid'], 'refer' => $quote_o['refer'], 'invoicedate' => $quote_o['invoicedate'], 'invoiceduedate' => $quote_o['invoiceduedate'], 'notes' => $quote_o['notes'], 'subtotal' => $quote_o['subtotal'], 'shipping' => $quote_o['shipping'], 'tax' => $quote_o['tax'], 'discount' => $quote_o['discount'], 'discount_rate' => $quote_o['discount_rate'], 'after_disc' => $quote_o['after_disc'], 'total' => $quote_o['total'], 'tax_format' => $quote_o['tax_format'], 'discount_format' => $quote_o['discount_format'], 'ship_tax' => $quote_o['ship_tax'], 'ship_tax_type' => $quote_o['ship_tax_type'], 'ship_rate' => $quote_o['ship_rate'], 'term_id' => $quote_o['term_id'], 'tax_id' => $quote_o['tax_id']);
-        $invoice_items = $quote_o->products;
-        //$data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-
-        //Create the model using repository create method
-        $result = $invoicerepository->convert(compact('invoice', 'invoice_items', 'data2'));
-
-        if ($input['bill_id'] == @$input['delete_item']) {
-            $quote_o->delete();
-        } else {
-            $quote_o->status = 'approved';
-            $quote_o->save();
-        }
-
-        //return with successfull message
-        //return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => trans('alerts.backend.invoices.created')]);
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
     }
 
     /**

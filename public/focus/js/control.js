@@ -663,3 +663,11 @@ function readNotifications(n_id=0) {
         }
     });
 }
+
+// print preview
+$(function() {
+    if ($('#printpreview').length) {
+        $('#printpreview').attr('target', '_blank');
+        $('#printpreview').get(0).click();
+    }
+});

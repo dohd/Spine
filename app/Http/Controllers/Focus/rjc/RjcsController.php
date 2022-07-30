@@ -89,9 +89,13 @@ class RjcsController extends Controller
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
 
-        $this->repository->create(compact('data', 'data_items'));
+        $result = $this->repository->create(compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully created']);
+        // print preview
+        $valid_token = token_validator('', 'd' . $result->id, true);
+        $msg = ' <a href="'. route('biller.print_rjc', [$result->id, 11, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully created' . $msg]);
     }    
 
     /**
@@ -165,9 +169,13 @@ class RjcsController extends Controller
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
 
-        $this->repository->update($rjc, compact('data', 'data_items'));
+        $result = $this->repository->update($rjc, compact('data', 'data_items'));
 
-        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully updated']);
+        // print preview
+        $valid_token = token_validator('', 'd' . $result->id, true);
+        $msg = ' <a href="'. route('biller.print_rjc', [$result->id, 11, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+        
+        return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report successfully updated' . $msg]);
     }
 
     /**

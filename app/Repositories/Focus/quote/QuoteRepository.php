@@ -152,7 +152,7 @@ class QuoteRepository extends BaseRepository
      *
      * @param array $input
      * @throws GeneralException
-     * @return bool
+     * @return $quote
      */
     public function create(array $input)
     {
@@ -205,7 +205,7 @@ class QuoteRepository extends BaseRepository
      * @param Quote $quote
      * @param  $input
      * @throws GeneralException
-     * return bool
+     * @return $quote
      */
     public function update($quote, array $input)
     {

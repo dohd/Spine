@@ -146,7 +146,7 @@ class InvoiceRepository extends BaseRepository
         $this->post_transaction_project_invoice($invoice);
 
         DB::commit();
-        if ($bill) return true;        
+        if ($bill) return $invoice;        
     }
 
 
