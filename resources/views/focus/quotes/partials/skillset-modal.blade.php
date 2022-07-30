@@ -70,7 +70,7 @@
                 <div class="row">
                     <div class="col-2 ml-auto">
                         <label for="total">Total (Ksh.)</label>
-                        <input type="text" class="form-control" id="skill_ttl" readonly>
+                        <input type="text" class="form-control" id="skill_total" readonly>
                     </div>
                 </div>         
             </div>
