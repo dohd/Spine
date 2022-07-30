@@ -111,7 +111,6 @@
     $('#end_date').datepicker('setDate', new Date());
 
     setTimeout(() => draw_data(), @json(config('master.delay')));
-
     function draw_data(status_filter = '', client_id = 0) {
         const language = {@lang('datatable.strings')};
         const table = $('#quotes-table').dataTable({
@@ -129,9 +128,9 @@
                 },
                 dataSrc: res => {
                     const {data} = res;
+                    $('#amount_total').val('');
                     if (data.length) $('#amount_total').val(data[0].sum_total);
-                    else $('#amount_total').val('');
-                    
+
                     return data;
                 },
             },
