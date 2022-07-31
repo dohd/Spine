@@ -3,127 +3,64 @@
 namespace App\Imports;
 
 use App\Models\equipment\Equipment;
-use App\Models\region\Region;
-use App\Models\branch\Branch;
-use App\Models\equipmentcategory\EquipmentCategory;
-use App\Models\section\Section;
+use Error;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Row;
 
 class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation, WithStartRow
 {
     /**
-     * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @var int $row_count
      */
-    private $rows = 0;
-    private $records;
+    private $row_count = 0;
 
+    /**
+     *
+     * @var Illuminate\Support\Collection $data
+     */
     private $data;
 
-    public function __construct(array $data = [])
+    public function __construct(Collection $data)
     {
         $this->data = $data;
     }
 
-
-    public function collection(Collection $rows)
+    /**
+     * 
+     * @param Illuminate\Support\Collection $rows
+     * @return void
+     */
+    public function collection($rows)
     {
-          if (isset($this->data['customer'])) $customer = $this->data['customer']; else return false;
-           //if (isset($this->data['warehouse'])) $warehouse = $this->data['warehouse']; else return false;
-        ++$this->rows;
-        foreach ($rows as $row) {
-            if (count($row) == 19) {
-
-
-               //Add region
-                    //Check if region exists else create new
-                    $region_name = $row[0];
-                    if (!empty($region_name)) {
-                        $region = Region::firstOrCreate(
-                            ['name' => $region_name,'ins' => auth()->user()->ins]
-                        );
-                        $region_id = $region->id;
-                    }
-
-                       //Add branch
-                    //Check if branch exists else create new
-                    $branch_name = $row[1];
-                    if (!empty($branch_name)) {
-                        $branch = Branch::firstOrCreate(
-                            ['name' => $branch_name,'ins' => auth()->user()->ins]
-                        );
-                        $branch_id = $branch->id;
-                    }
-
-
-
-                       //Add section
-                    //Check if section exists else create new
-                    $section_name = $row[2];
-                    if (!empty($section_name)) {
-                        $section = Section::firstOrCreate(
-                            ['name' => $section_name,'ins' => auth()->user()->ins]
-                        );
-                        $section_id = $section->id;
-                    }
-
-                       $category_name = $row[4];
-                    if (!empty($category_name)) {
-                        $category = EquipmentCategory::firstOrCreate(
-                            ['name' => $category_name,'ins' => auth()->user()->ins]
-                        );
-                        $category_id = $category->id;
-                    }
-
-                    
-
-
-                $equipment = new  Equipment([
-                   'customer_id'=>$customer,
-                   'region_id' =>$region_id,
-                    'branch_id' => $branch_id,
-                    'section_id' => $section_id,
-                    'location' => $row[3],
-                    'equipment_category_id' => $category_id,
-                    'unit_type' => $row[5],
-                    'make_type' => $row[6],
-                    'capacity' => $row[7],
-                    'machine_gas' => $row[8],
-                    'model' => $row[9],
-                    'equip_serial' => $row[10],
-                    'unique_id' => $row[11],
-                    'related_equipments' => $row[12],
-                    'main_duration' => $row[13],
-                    'service_rate' => $row[14],
-                    'attendance_rate' => $row[15],
-                    'total_rate' => $row[16],
-                    'actual_extra' => $row[17],
-                    'equip_status' => $row[18],
-                    'ins' => auth()->user()->ins
-
-                ]);
-            
-                $equipment->save();
-
-             
+        $equipments_data = array();
+        $tid = Equipment::max('tid');
+        $ins = auth()->user()->ins;
+        $columns = array();
+        foreach ($rows as $i => $row) {
+            if ($i == 0) {
+                $columns = $row;
+                continue;
             }
-            else {
-               return false;
-           }
+            if (count($row) != count($columns)) throw new Error('Columns mismatch!');
+            foreach ($columns as $j => $label) {
+                $val = $row[$j];
+                if (in_array($label, ['id', 'created_at', 'updated_at'])) continue;
+                if ($label == 'ins') $val = $ins;
+                if ($label == 'tid') {
+                    $tid++;
+                    $val = $tid;
+                }
+                $equipments_data[$i][$label] = $val;
+            }
         }
 
-
+        $result = Equipment::insert($equipments_data);
+        if ($result) $this->row_count = count($equipments_data);
     }
-
 
 
     public function rules(): array
@@ -141,7 +78,7 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
 
     public function getRowCount(): int
     {
-        return $this->rows;
+        return $this->row_count;
     }
 
     public function startRow(): int
