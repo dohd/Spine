@@ -168,7 +168,7 @@ class ContractRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Contract $contract)
+    public function delete($contract)
     {   
         if ($contract->delete()) return true;
         
