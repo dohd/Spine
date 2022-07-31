@@ -128,6 +128,17 @@ class ContractsController extends Controller
         return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract edited successfully']);
     }
 
+
+    /**
+     * Remove resource from storage
+     */
+    public function destroy(Contract $contract)
+    {
+        $this->repository->delete($contract);
+
+        return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract deleted successfully']);
+    }
+
     /**
      * Load Additional Equipments
      */
