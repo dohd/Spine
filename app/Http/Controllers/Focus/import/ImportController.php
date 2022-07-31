@@ -15,10 +15,10 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\import;
 
 use App\Http\Requests\Focus\report\ManageReports;
-use App\Http\Responses\RedirectResponse;
 use App\Imports\AccountsImport;
 use App\Imports\CustomersImport;
 use App\Imports\ProductsImport;
@@ -26,16 +26,18 @@ use App\Imports\TransactionsImport;
 use App\Imports\EquipmentsImport;
 use App\Models\account\Account;
 use App\Models\customer\Customer;
-use App\Models\pricegroup\Pricegroup;
-use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Models\warehouse\Warehouse;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ViewResponse;
+use DB;
+use Error;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 /**
  * ImportController
@@ -49,160 +51,144 @@ class ImportController extends Controller
         $this->upload_temp = Storage::disk('public');
     }
 
+    /**
+     * index page for import
+     */
     public function index(ManageReports $request)
     {
-        if ($request->post()) {
-
-
-
-            $request->validate([
-                'import_file' => 'required|max:' . config('master.file_size')]);
-            $extension = File::extension($request->import_file->getClientOriginalName());
-            if ($extension == "xlsx" || $extension == "xls" || $extension == "csv") {
-
-            } else {
-                return new RedirectResponse(route('biller.import.general', [$request->type]), ['flash_error' => trans('import.import_invalid_file')]);
-            }
-
-            $move = false;
-            $data = array();
-            $file = $request->file('import_file');
-            $filename = date('Ymd_his') . rand(9999, 99999) . $file->getClientOriginalName();
-            $temp_path = 'temp' . DIRECTORY_SEPARATOR;
-            switch ($request->type) {
-                case 'customer' :
-                    $move = $this->upload_temp->put($temp_path . $filename, file_get_contents($file->getRealPath()));
-                    $data['customer_password_type'] = $request->customer_password_type;
-                    session(['customer_password' => $request->customer_password]);
-                    break;
-                case  'products':
-                    $move = $this->upload_temp->put($temp_path . $filename, file_get_contents($file->getRealPath()));
-                    $data['productcategory'] = $request->productcategory;
-                    $data['warehouse'] = $request->warehouse;
-                    break;
-                case  'accounts':
-                    $move = $this->upload_temp->put($temp_path . $filename, file_get_contents($file->getRealPath()));
-                    break;
-                case  'transactions':
-                    $move = $this->upload_temp->put($temp_path . $filename, file_get_contents($file->getRealPath()));
-                    $data['accounts'] = $request->account;
-                    $data['transaction_categories'] = $request->trans_category;
-                    break;
-                case  'transactions':
-                    $move = $this->upload_temp->put($temp_path . $filename, file_get_contents($file->getRealPath()));
-                    $data['accounts'] = $request->account;
-                    $data['transaction_categories'] = $request->trans_category;
-                    break;
-                case  'equipments':
-                    $move = $this->upload_temp->put($temp_path . $filename, file_get_contents($file->getRealPath()));
-                    $data['customer'] = $request->customer;
-                    break;
-            }
-
-            if ($move) {
-                $response = 1;
-                $file_value = $filename;
-                $section = $request->type;
-                return view('focus.import.step_1', compact('response', 'file_value', 'section', 'data'));
-            }
-
-        } elseif ($request->type) {
-            $words['title'] = '';
-            $words['template_path'] = '';
-            $data = array();
-            switch ($request->type) {
-                case 'customer' :
-                    $words['title'] = trans('import.import_customers');
-                    $words['template_path'] = $request->type;
-                    break;
-                case 'products' :
-                    $data['product_category'] = Productcategory::all();
-                    $data['warehouses'] = Warehouse::all();
-                    $words['title'] = trans('import.import_products');
-                    $words['template_path'] = $request->type;
-                    break;
-                case 'accounts' :
-                    $words['title'] = trans('import.import_accounts');
-                    $words['template_path'] = $request->type;
-                    break;
-                case 'transactions' :
-                    $words['title'] = trans('import.import_transactions');
-                    $data['accounts'] = Account::all();
-                    $data['transaction_categories'] = Transactioncategory::all();
-                    $words['template_path'] = $request->type;
-                    break;
-               case 'equipments' :
-                    $words['title'] = 'Import Equipments';
-                    $data['customers'] = Customer::all();
-                    $words['template_path'] = $request->type;
-                    break;
-            }
-
-            if ($words['title']) return view('focus.import.index', compact('words', 'data'));
-
+        $prop = (object) array(
+            'title' => '', 
+            'template' => $request->type
+        );
+        $data = collect();
+        switch ($request->type) {
+            case 'customers':
+                $prop->title = trans('import.import_customers');
+                break;
+            case 'products':
+                $prop->title = trans('import.import_products');
+                $data->put('product_category', Productcategory::all());
+                $data->pu('warehouses', Warehouse::all());
+                break;
+            case 'accounts':
+                $prop->title = trans('import.import_accounts');
+                break;
+            case 'transactions':
+                $prop->title = trans('import.import_transactions');
+                $data->put('accounts', Account::all());
+                $data->put('transaction_categories', Transactioncategory::all());
+                break;
+            case 'equipments':
+                $prop->title = 'Import Equipments';
+                $data->put('customers', Customer::all());
+                break;
         }
 
+        return new ViewResponse('focus.import.index', compact('prop', 'data'));
     }
 
-    public function import_process(ManageReports $request)
+    /**
+     * Download sample template
+     */
+    public function sample_template($file_name)
     {
-        if ($request->name) {
-            $temp_path = 'temp' . DIRECTORY_SEPARATOR;
-            $path = Storage::disk('public')->exists($temp_path . $request->name);
-            if ($path) {
-                $path = Storage::disk('public')->path($temp_path . $request->name);
-                $data = array();
-                switch ($request->type) {
-                    case 'customer' :
-                        if ($request->customer_password_type == 1) {
-                            $data['password'] = $request->session()->pull('customer_password', null);
-                        }
-                        $import = new CustomersImport($data);
-                        break;
-                    case 'products' :
-                        $data['category'] = $request->productcategory;
-                        $data['warehouse'] = $request->warehouse;
-                        $import = new ProductsImport($data);
-                        break;
+        return Storage::disk('public')->download('sample/' . $file_name . '.csv');
+    }    
 
-                    case 'accounts' :
-                        $import = new AccountsImport();
-                        break;
-                    case 'transactions' :
-                        $data['account'] = $request->accounts;
-                        $data['trans_category'] = $request->transaction_categories;
-                        $import = new TransactionsImport($data);
-                        break;
-                    case 'equipments' :
-                        $data['customer'] = $request->customer;
-                        $import = new EquipmentsImport($data);
-                        break;
-                }
+    /**
+     * store template data in storage 
+     */
+    public function store(Request $request)
+    {
+        $request->validate(['import_file' => 'required|max:' . config('master.file_size')]);
 
-
-                try {
-                    Excel::import($import, $path);
-                } catch (\Exception $e) {
-                    Storage::disk('public')->delete($temp_path . $request->name);
-                    return array('status' => 'Error', 'message' => trans('import.import_process_failed'));
-                }
-
-                Storage::disk('public')->delete($temp_path . $request->name);
-                if (@$import->getRowCount()>-1) {
-                    return json_encode(array('status' => 'Success', 'message' => trans('import.import_process_success') . @$import->getRowCount()));
-                } else {
-                    return array('status' => 'Error', 'message' => trans('import.import_process_failed'));
-                }
-            }
+        $extension = File::extension($request->import_file->getClientOriginalName());
+        if (!in_array($extension, ['xlsx', 'xls', 'csv'])) 
+            throw ValidationException::withMessages([trans('import.import_invalid_file')]);
+            
+        $data = collect();
+        $template = $request->type;
+        switch ($template) {
+            case 'customer':
+                $data->put('customer_password_type', $request->customer_password_type);
+                session(['customer_password' => $request->customer_password]);
+                break;
+            case 'products':
+                $data->put('productcategory', $request->productcategory);
+                $data->put('warehouse', $request->warehouse);
+                break;
+            case 'transactions':
+                $data->put('accounts', $request->account);
+                $data->put('transaction_categories', $request->trans_category);
+                break;
+            case 'transactions':
+                $data->put('accounts', $request->account);
+                $data->put('transaction_categories', $request->trans_category);
+                break;
+            case 'equipments':
+                $data->put('customer', $request->customer);
+                break;
         }
-    }
 
-    public function samples($file_name)
-    {
-        $file = Storage::disk('public')->get('sample/' . $file_name);
+        $file = $request->file('import_file');
+        $filename = date('Ymd_his') . rand(9999, 99999) . $file->getClientOriginalName();
+        $path = 'temp' . DIRECTORY_SEPARATOR;
+        $success_upload = $this->upload_temp->put($path . $filename, file_get_contents($file->getRealPath()));
 
+        return new ViewResponse('focus.import.import_progress', compact('data', 'filename', 'success_upload', 'template'));
+    }    
 
-        return (new Response($file, 200))
-            ->header('Content-Type', 'text/csv');
+    /**
+     * Process imported template
+     */
+    public function process_template(ManageReports $request)
+    {   
+        try {
+            DB::beginTransaction();
+
+            $filename = $request->name;
+            $path = 'temp' . DIRECTORY_SEPARATOR;
+            $file_exists = Storage::disk('public')->exists($path . $filename);
+            if (!$file_exists) throw ValidationException::withMessages(['file does not exist!']);
+            
+            $import_model = null;
+            $data = collect();
+            switch ($request->type) {
+                case 'customer':
+                    if ($request->customer_password_type == 1) 
+                        $data->put('password', $request->session()->pull('customer_password', null));
+                    $import_model = new CustomersImport((array) $data);
+                    break;
+                case 'products':
+                    $data = $data->merge(['category' => $request->productcategory, 'warehouse' => $request->warehouse]);
+                    $import_model = new ProductsImport($data);
+                    break;
+                case 'accounts':
+                    $import_model = new AccountsImport();
+                    break;
+                case 'transactions':
+                    $data = $data->merge(['account' => $request->accounts, 'trans_category' => $request->transaction_categories]);
+                    $import_model = new TransactionsImport((array) $data);
+                    break;
+                case 'equipments':
+                    $data->put('customer', $request->customer);
+                    $import_model = new EquipmentsImport($data);
+                    break;
+            }
+
+            $storage_path = Storage::disk('public')->path($path . $filename);
+            Excel::import($import_model, $storage_path);
+            $rowCount = $import_model->getRowCount();
+            if (!$rowCount) throw new Error(trans('import.import_process_failed'));
+
+            DB::commit();
+            Storage::disk('public')->delete($path . $filename);
+            $msg = ' ' . $rowCount . ' rows imported successfully';
+            return response()->json(['status' => 'Success', 'message' => trans('import.import_process_success') . $msg]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Storage::disk('public')->delete($path . $filename);
+            return response()->json(['status' => 'Error', 'message' => trans('import.import_process_failed')]);
+        }
     }
 }
