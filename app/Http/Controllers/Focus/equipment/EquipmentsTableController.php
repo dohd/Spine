@@ -58,14 +58,14 @@ class EquipmentsTableController extends Controller
       ->escapeColumns(['id'])
       ->addIndexColumn()
       ->addColumn('tid', function ($equipment) {
-        return gen4tid('E-', $equipment->tid);
+        return gen4tid('Eq-', $equipment->tid);
       })
       ->addColumn('branch', function ($equipment) {
         if ($equipment->branch)
         return $equipment->branch->name;
       })
       ->addColumn('capacity', function ($equipment) {
-        return numberFormat($equipment->capacity);
+        return $equipment->capacity;
       })
       ->addColumn('actions', function ($equipment) {
         return $equipment->action_buttons;
