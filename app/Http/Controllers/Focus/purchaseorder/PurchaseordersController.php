@@ -157,7 +157,7 @@ class PurchaseordersController extends Controller
     {
         $this->repository->delete($purchaseorder);
 
-        new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        
     }
 
 
@@ -170,11 +170,7 @@ class PurchaseordersController extends Controller
      */
     public function show(Purchaseorder $purchaseorder)
     {   
-        $grn_items = GrnItem::whereHas('grn', function ($q) use($purchaseorder) {
-            $q->where('purchaseorder_id', $purchaseorder->id);
-        })->get(); 
-
-        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'grn_items'));
+        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder'));
     }
 
     /**
