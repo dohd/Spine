@@ -68,16 +68,20 @@ class TransactionRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $input['debit'] = numberClean($input['debit']);
-        $input['credit'] = numberClean($input['credit']);
+        $input['due_date'] = $input['tr_date'];
+        foreach ($input as $key => $val) {
+            if (in_array($key, ['debit', 'credit']))
+                $input[$key] = numberClean($val);
+            if (in_array($key, ['tr_date', 'due_date'])) {
+                $input[$key] = date_for_database($val);
+            }
+        }
 
-        $transaction->update($input);
-
-        // update account ledgers debit and credit totals
+        $result = $transaction->update($input);
         aggregate_account_transactions();
 
         DB::commit();
-        return true;
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }

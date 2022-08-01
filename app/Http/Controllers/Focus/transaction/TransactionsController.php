@@ -178,13 +178,13 @@ class TransactionsController extends Controller
     public function update(Request $request, Transaction $transaction)
     {
         // extract input fields
-        $input = $request->only(['account_id', 'debit', 'credit', 'note']);
+        $input = $request->except('_token');
         $input['user_id'] = auth()->user()->id;
     
         //Update the model using repository update method
         $this->repository->update($transaction, $input);
 
-        return redirect()->back();
+        return redirect()->back()->with(['flash_success' => 'Transaction updated successfully']);
     }
 
     /**

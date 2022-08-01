@@ -136,6 +136,21 @@
 <script type="text/javascript">
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
+    const transaction = @json($transaction);
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})    
+    if (transaction.tr_date) $('#tr_date').datepicker('setDate', new Date(transaction.tr_date));
+
+    $('#editTrModal').on('change', '#credit, #debit', function() {
+        $(this).val(accounting.formatNumber($(this).val()));
+        if ($(this).is('#debit')) {
+            $('#debit').attr('disabled', false);
+            $('#credit').val('0.00').attr('disabled', true);
+        } else {
+            $('#credit').attr('disabled', false);
+            $('#debit').val('0.00').attr('disabled', true);
+        }
+    });
+
     // on account search
     $('#account').select2({
         dropdownParent: $('#editTrModal'),
