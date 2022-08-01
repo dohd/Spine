@@ -88,18 +88,15 @@
                                         <th>#</th> 
                                         <th>TID</th>
                                         <th>Type</th>
-                                        @if ($is_tax)
-                                            <th>Cutomer PIN</th>   
-                                        @else
-                                            <th>Reference</th>                                      
-                                        @endif
+                                        <th>{{ $is_tax? 'Customer PIN' : 'Reference' }}</th>
                                         <th>Note</th>
                                         @if ($is_tax)
-                                            <th>VAT(%)</th>
+                                            <th>VAT %</th>
                                             <th>VAT Amount</th>   
                                         @endif
                                         <th>{{ trans('transactions.debit') }}</th>
                                         <th>{{ trans('transactions.credit') }}</th>
+                                        <th>Balance</th>
                                         <th>Date</th>
                                         <th>Created At</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -146,11 +143,13 @@
     });
 
     function draw_data(start_date='', end_date='') {
-        const system = "{{ request('system') }}"
-        const obj = [];
+        let obj = [];
+        const system = @json(request('system'));
         if (system == 'tax') {
-            obj.push({data: 'vat_rate', name: 'vat_rate'});
-            obj.push({data: 'vat_amount', name: 'vat_amount'});
+            obj = [
+                {data: 'vat_rate', name: 'vat_rate'},
+                {data: 'vat_amount', name: 'vat_amount'}
+            ]
         }
         const input = @json(@$input);
         const language = {@lang('datatable.strings')};
@@ -193,6 +192,10 @@
                 {
                     data: 'credit',
                     name: 'credit'
+                },
+                {
+                    data: 'balance',
+                    name: 'balance'
                 },
                 {
                     data: 'tr_date',

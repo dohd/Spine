@@ -22,7 +22,6 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\transaction\TransactionRepository;
 use App\Http\Requests\Focus\transaction\ManageTransactionRequest;
-use App\Models\transactioncategory\Transactioncategory;
 
 /**
  * Class TransactionsTableController.
@@ -34,6 +33,14 @@ class TransactionsTableController extends Controller
      * @var TransactionRepository
      */
     protected $transaction;
+
+
+    /**
+     * list of transaction groups indicating error in double entry
+     * 
+     * @var array $balance_group
+     */
+    protected $balance_groups;
 
     /**
      * contructor to initialize repository object
@@ -54,6 +61,14 @@ class TransactionsTableController extends Controller
     {
         $core = $this->transaction->getForDataTable();
 
+        // balance group
+        $result = $core;
+        $this->balance_groups = $result->groupBy('tid')->reduce(function ($init, $v) {
+            $balance = round($v->sum('credit') - $v->sum('debit'));
+            if ($balance) $init[] = (object) ['tid' => $v->first()->tid, 'balance' => $balance];
+            return $init;
+        }, []);
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -61,14 +76,15 @@ class TransactionsTableController extends Controller
                 return 'Tr-' . $tr->tid;                
             })
             ->addColumn('tr_type', function ($tr) {
-                $result = $this->tax_transaction('tr_type', $tr);
-                if ($result) return $result;
+                $tax_tr_type = $this->tax_transaction('tr_type', $tr);
+                if ($tax_tr_type) return $tax_tr_type;
                 
                 return $tr->category->name;
             })
             ->addColumn('reference', function ($tr) {
                 $result = $this->tax_transaction('reference', $tr);
                 if ($result) return $result;
+                
                 if ($tr->account) return $tr->account->holder . ' - ' . $tr->user_type;
             })
             ->addColumn('vat_rate', function ($tr) {
@@ -83,6 +99,13 @@ class TransactionsTableController extends Controller
             ->addColumn('credit', function ($tr) {
                 return numberFormat($tr->credit);
             })
+            ->addColumn('balance', function ($tr) {
+                $balance = 0;
+                foreach($this->balance_groups as $group) {
+                    if ($group->tid == $tr->tid) $balance = $group->balance;
+                }
+                return 'Bal: ' . numberFormat($balance);
+            })
             ->addColumn('tr_date', function ($tr) {
                 return dateFormat($tr->tr_date);
             })
@@ -90,9 +113,7 @@ class TransactionsTableController extends Controller
                 return $tr->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($tr) {
-                return '<a href="' . route('biller.print_payslip', [$tr['id'], 1, 1]) . '" class="btn btn-blue round" data-toggle="tooltip" data-placement="top" title="View">
-                    <i class="fa fa-print"></i> </a>'
-                    . $tr->action_buttons;
+                return $tr->action_buttons;
             })
             ->make(true);
     }
