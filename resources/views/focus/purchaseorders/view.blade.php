@@ -98,7 +98,7 @@
                                 <th>Date</th>
                             </tr>
                             <tbody>
-                                @foreach ($grn_items as $item)
+                                @foreach ($po->grn_items as $item)
                                     <tr>
                                         <td>{{ $item->purchaseorder_item->type }}</td>
                                         <td>{{ $item->purchaseorder_item->description }}</td>
