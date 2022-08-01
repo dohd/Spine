@@ -92,7 +92,9 @@ class ImportController extends Controller
      */
     public function sample_template($file_name)
     {
-        return Storage::disk('public')->download('sample/' . $file_name . '.csv');
+        $file = Storage::disk('public')->get('sample/' . $file_name . '.csv');
+
+        return response($file, 200, ['Content-Type' => 'text/csv']);
     }    
 
     /**
