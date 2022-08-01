@@ -2,10 +2,13 @@
 
 namespace App\Models\purchaseorder\Traits;
 
+use App\Models\bill\Bill;
 use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
 use App\Models\project\Project;
 use App\Models\purchaseorder\Grn;
+use App\Models\transaction\Transaction;
+use PayPal\Api\Transactions;
 
 /**
  * Class PurchaseorderRelationship
@@ -59,7 +62,7 @@ trait PurchaseorderRelationship
     
     public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 9)->withoutGlobalScopes();
+        return $this->hasManyThrough(Transaction::class, Bill::class, 'po_id', 'tr_ref')->where('tr_type', 'bill')->withoutGlobalScopes();
     }
 
     public function attachment()
