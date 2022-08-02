@@ -664,10 +664,40 @@ function readNotifications(n_id=0) {
     });
 }
 
-// print preview
+
+// On document ready
 $(function() {
+    /**
+     * Print preview on create or update
+     */
     if ($('#printpreview').length) {
         $('#printpreview').attr('target', '_blank');
         $('#printpreview').get(0).click();
     }
+
+    /**
+     * DataTable custom sort extension
+     */
+    $.extend($.fn.dataTableExt.oSort, {
+        'custom-date-sort-asc': (x, y) => {
+            x = parseInt(x.split('-').reverse().join(''));
+            y = parseInt(y.split('-').reverse().join(''));
+            return x-y;
+        },
+        'custom-date-sort-desc': (x, y) => {
+            x = parseInt(x.split('-').reverse().join(''));
+            y = parseInt(y.split('-').reverse().join(''));
+            return y-x;
+        },
+        'custom-number-sort-asc': (x, y) => {
+            x = accounting.unformat(x);
+            y = accounting.unformat(y);
+            return x-y;
+        },
+        'custom-number-sort-desc': (x, y) => {
+            x = accounting.unformat(x);
+            y = accounting.unformat(y);
+            return y-x;
+        }
+    });
 });

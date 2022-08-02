@@ -76,10 +76,13 @@ class QuoteInvoiceTableController extends Controller
                 return dateFormat($quote->invoicedate);
             })
             ->addColumn('total', function ($quote) {
-                return number_format($quote->total, 2);
+                return numberFormat($quote->total);
             })
             ->addColumn('verified_total', function ($quote) {
-                return number_format($quote->verified_total, 2);
+                return numberFormat($quote->verified_total);
+            })
+            ->addColumn('diff_total', function ($quote) {
+                return numberFormat($quote->total - $quote->verified_total);
             })
             ->addColumn('project_tid', function($quote) {
                 if ($quote->project_quote_id) 
@@ -87,12 +90,12 @@ class QuoteInvoiceTableController extends Controller
             })
             ->addColumn('lpo_number', function($quote) {
                 if ($quote->lpo)
-                    return $quote->lpo->lpo_no . '<br> Kes: ' . number_format($quote->lpo->amount, 2);
+                    return $quote->lpo->lpo_no . '<br> Kes: ' . numberFormat($quote->lpo->amount);
 
                 return 'Null:';
             })
             ->addColumn('lead_tid', function($quote) {
-                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                // return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
             })          
             ->make(true);
     }

@@ -59,7 +59,6 @@
         const language = {@lang("datatable.strings")};
         const dataTable = $('#creditnotesTbl').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             language,
             ajax: {
@@ -97,7 +96,12 @@
                     name: 'actions',
                     searchable: false,
                     sortable: false
-                }            ],
+                }            
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [4] },
+                { type: "custom-date-sort", targets: [5] }
+            ],
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',

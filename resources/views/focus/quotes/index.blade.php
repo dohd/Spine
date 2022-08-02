@@ -115,7 +115,6 @@
         const language = {@lang('datatable.strings')};
         const table = $('#quotes-table').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             stateSave: true,
             language,
@@ -129,8 +128,8 @@
                 dataSrc: res => {
                     const {data} = res;
                     $('#amount_total').val('');
-                    if (data.length) $('#amount_total').val(data[0].sum_total);
-
+                    if (data.length) 
+                        $('#amount_total').val(data[0].sum_total);
                     return data;
                 },
             },
@@ -172,6 +171,10 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: 5 },
+                { type: "custom-date-sort", targets: 1 }
             ],
             order:[[0, 'desc']],
             searchDelay: 500,

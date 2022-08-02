@@ -65,7 +65,6 @@
         const language = { @lang("datatable.strings") };
         const dataTable = $('#contractTbl').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             language,
             ajax: {
@@ -111,6 +110,10 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [3] },
+                { type: "custom-date-sort", targets: [6, 7] }
             ],
             order: [[0, "desc"]],
             searchDelay: 500,

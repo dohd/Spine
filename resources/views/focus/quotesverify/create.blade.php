@@ -64,6 +64,21 @@
         }
     });
 
+    // check if quote total is equal to verified amount
+    // else general remark is required
+    $(function() {
+        const total = accounting.unformat($('#total').val());
+        const quoteTotal = accounting.unformat($('#quote_total').val());
+        if (total != quoteTotal) $('#gen_remark').attr('required', true);
+        else $('#gen_remark').attr('required', false);
+    });
+    $('#total').change(function() {
+        const total = accounting.unformat($(this).val());
+        const quoteTotal = accounting.unformat($('#quote_total').val());
+        if (total != quoteTotal) $('#gen_remark').attr('required', true);
+        else $('#gen_remark').attr('required', false);
+    });
+
     // job card row
     function jobCardRow(n) {
         return `
@@ -332,7 +347,7 @@
             $(this).find('input[name="row_index[]"]').val($(this).index());
         });
         $('#subtotal').val(parseFloat(subTotal.toFixed(2)).toLocaleString());
-        $('#total').val(parseFloat(grandTotal.toFixed(2)).toLocaleString());
+        $('#total').val(parseFloat(grandTotal.toFixed(2)).toLocaleString()).change();
         $('#tax').val(parseFloat((grandTotal - subTotal).toFixed(2)).toLocaleString());        
     }
 

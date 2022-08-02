@@ -34,7 +34,6 @@
                                     <th>Paid</th>
                                     <th>Document</th>
                                     <th>Date</th>
-                                    <th>Due Date</th>                                            
                                 </tr>
                             </thead>
                             <tbody>
@@ -63,7 +62,6 @@
         const language = {@lang("datatable.strings")};
         const dataTable = $('#billsTbl').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             language,
             ajax: {
@@ -107,10 +105,10 @@
                     data: 'date',
                     name: 'date'
                 },
-                {
-                    data: 'due_date',
-                    name: 'due_date'
-                },
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [4, 6] },
+                { type: "custom-date-sort", targets: [8] }
             ],
             order: [[0, "desc"]],
             searchDelay: 500,

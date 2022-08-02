@@ -93,7 +93,6 @@
         var dataTable = $('#invoiceTbl').dataTable({
             processing: true,
             stateSave: true,
-            serverSide: true,
             responsive: true,
             deferRender: true,
             language,
@@ -148,6 +147,10 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [5, 6] },
+                { type: "custom-date-sort", targets: [4, 8] }
             ],
             orderBy: [[0, "desc"]],
             searchDelay: 500,

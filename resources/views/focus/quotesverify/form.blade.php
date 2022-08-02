@@ -1,5 +1,8 @@
-<input type="hidden" name="id" value="{{ $quote->id }}">
+@php
+    $label = $quote->bank_id ? 'PI' : 'Quote';
+@endphp
 <div class="row">
+    {{ Form::hidden('id', $quote->id) }}
     <div class="col-6 cmp-pnl">
         <div id="customerpanel" class="inner-cmp-pnl">
             <div class="form-group row">
@@ -9,7 +12,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-6">                                        
-                    <label for="serial_no" class="caption">{{ $quote->bank_id ? '#PI' : '#Qt' }} {{trans('general.serial_no')}}</label>
+                    <label for="serial_no" class="caption">{{ $label . ' ' . trans('general.serial_no') }}</label>
                     <div class="input-group">
                         <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
                         @php
@@ -20,7 +23,7 @@
                     </div>
                 </div>    
                 <div class="col-6">
-                    <label for="date" class="caption">{{ $quote->bank_id ? 'PI' : 'Quote' }} Date</label>
+                    <label for="date" class="caption">{{ $label }} Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                         {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id'=>'date', 'disabled']) }}
@@ -46,8 +49,8 @@
             </div> 
             <div class="form-group row">
                 <div class="col-12">
-                    <label for="gen_remark" class="caption">General Remark</label>
-                    {{ Form::text('gen_remark', null, ['class' => 'form-control', 'id' => 'gen_remark']) }}
+                    <label for="subject" class="caption">Subject / Title</label>
+                    {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
                 </div>
             </div>  
         </div>
@@ -84,12 +87,21 @@
                 </div>             
             </div>
             <div class="form-group row">
+                <div class="col-6">
+                    <label for="quote_subtotal">{{ $label }} Subtotal (Ksh.)</label>
+                    {{ Form::text('quote_subtotal', numberFormat($quote->subtotal), ['class' => 'form-control', 'id' => 'quote_subtotal',  'disabled']) }}
+                </div>
+                <div class="col-6">
+                    <label for="quote_subtotal">{{ $label }} Amount (Ksh.)</label>
+                    {{ Form::text('quote_total', numberFormat($quote->total), ['class' => 'form-control', 'id' => 'quote_total', 'disabled']) }}
+                </div>                
+            </div>   
+            <div class="form-group row">
                 <div class="col-12">
-                    <label for="subject" class="caption">Subject / Title</label>
-                    {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                    <label for="gen_remark" class="caption">General Remark</label>
+                    {{ Form::text('gen_remark', null, ['class' => 'form-control', 'id' => 'gen_remark']) }}
                 </div>
             </div>   
-                                                                     
         </div>
     </div>                        
 </div>                  

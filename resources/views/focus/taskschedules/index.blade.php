@@ -64,7 +64,6 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
         const language = { @lang("datatable.strings") };
         const dataTable = $('#scheduleTbl').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             language,
             ajax: {
@@ -114,6 +113,10 @@ $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [5, 6] },
+                { type: "custom-date-sort", targets: [7, 8] }
             ],
             order: [[0, "desc"]],
             searchDelay: 500,

@@ -102,9 +102,13 @@ class TransactionsTableController extends Controller
             ->addColumn('balance', function ($tr) {
                 $balance = 0;
                 foreach($this->balance_groups as $group) {
-                    if ($group->tid == $tr->tid) $balance = $group->balance;
+                    if ($group->tid == $tr->tid) {
+                        $balance = $group->balance;
+                        break;
+                    }
                 }
-                return 'Bal: ' . numberFormat($balance);
+                
+                return numberFormat($balance);
             })
             ->addColumn('tr_date', function ($tr) {
                 return dateFormat($tr->tr_date);

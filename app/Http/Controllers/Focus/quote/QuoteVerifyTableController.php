@@ -58,10 +58,6 @@ class QuoteVerifyTableController extends Controller
 
                 return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . $quote->revision . '</a>';
             })
-            ->addColumn('lead_tid', function($quote) {
-                if (isset($quote->lead->reference))
-                return gen4tid('Tkt-', $quote->lead->reference);
-            })
             ->addColumn('customer', function ($quote) {
                 $client_name = $quote->customer ? $quote->customer->name : '';
                 $branch_name = $quote->branch ? $quote->branch->name : '';
@@ -70,14 +66,11 @@ class QuoteVerifyTableController extends Controller
 
                 return $quote->lead->client_name;
             })
-            ->addColumn('created_at', function ($quote) {
-                return dateFormat($quote->invoicedate);
-            })
             ->addColumn('total', function ($quote) {
-                return number_format($quote->total, 2);
+                return numberFormat($quote->total);
             })
-            ->addColumn('verified', function ($quote) {
-                return $quote->verified . ':';
+            ->addColumn('verified_total', function ($quote) {
+                return numberFormat($quote->verified_total);
             })
             ->addColumn('lpo_number', function($quote) {
                 if ($quote->lpo) return 'lpo - ' . $quote->lpo->lpo_no;

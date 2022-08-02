@@ -31,7 +31,7 @@
                                         <th>Customer</th>
                                         <th>Note</th>
                                         <th>Certificate / Serial</th>
-                                        <th>Amount</th>
+                                        <th>Amount (Ksh.)</th>
                                         <th>Date</th>
                                         <th>Invoice</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -59,7 +59,6 @@
     const language = {@lang('datatable.strings')};
     const dataTable = $('#withholdings-table').dataTable({
         processing: true,
-        serverSide: true,
         responsive: true,
         language,
         ajax: {
@@ -76,6 +75,10 @@
             {data: 'cert_date', name: 'cert_date'},
             {data: 'invoice_tid', name: 'invoice_tid'},
             {data: 'actions', name: 'actions', searchable: false, sortable: false}
+        ],
+        columnDefs: [
+            { type: "custom-number-sort", targets: [5] },
+            { type: "custom-date-sort", targets: [6] }
         ],
         order: [[0, "desc"]],
         searchDelay: 500,

@@ -66,10 +66,10 @@ class PaymentsTableController extends Controller
                 return dateFormat($payment->date);
             })
             ->addColumn('amount', function ($payment) {
-                return amountFormat($payment->amount);
+                return numberFormat($payment->amount);
             })
             ->addColumn('allocate_ttl', function ($payment) {
-                return amountFormat($payment->allocate_ttl);
+                return numberFormat($payment->allocate_ttl);
             })
             ->addColumn('invoice_tid', function ($payment) {
                 if ($payment->items->count()) {

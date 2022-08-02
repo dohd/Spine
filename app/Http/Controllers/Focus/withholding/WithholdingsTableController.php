@@ -69,7 +69,7 @@ class WithholdingsTableController extends Controller
                 return dateFormat($withholding->cert_date);
             })
             ->addColumn('amount', function ($withholding) {
-                return amountFormat($withholding->amount);
+                return numberFormat($withholding->amount);
             })
             ->addColumn('invoice_tid', function ($withholding) {
                 if ($withholding->items->count()) {

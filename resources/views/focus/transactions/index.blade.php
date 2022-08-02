@@ -86,7 +86,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th> 
-                                        <th>TID</th>
+                                        <th>Tr No.</th>
                                         <th>Type</th>
                                         <th>{{ $is_tax? 'Customer PIN' : 'Reference' }}</th>
                                         <th>Note</th>
@@ -97,7 +97,7 @@
                                         <th>{{ trans('transactions.debit') }}</th>
                                         <th>{{ trans('transactions.credit') }}</th>
                                         <th>Balance</th>
-                                        <th>Date</th>
+                                        <th class="th-date">Date</th>
                                         <th>Created At</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -145,24 +145,22 @@
     function draw_data(start_date='', end_date='') {
         let obj = [];
         const system = @json(request('system'));
-        if (system == 'tax') {
-            obj = [
-                {data: 'vat_rate', name: 'vat_rate'},
-                {data: 'vat_amount', name: 'vat_amount'}
-            ]
-        }
+        if (system == 'tax') obj.push(
+            {data: 'vat_rate', name: 'vat_rate'},
+            {data: 'vat_amount', name: 'vat_amount'}
+        );
         const input = @json(@$input);
         const language = {@lang('datatable.strings')};
+
         const dataTable = $('#transactionsTbl').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             stateSave: true,
             language,
             ajax: {
                 url: '{{ route("biller.transactions.get") }}',
                 type: 'post',
-                data: {...input, system, start_date, end_date},
+                data: {system, start_date, end_date, ...input},
             },
             columns: [{
                     data: 'DT_Row_Index',
@@ -212,36 +210,14 @@
                     sortable: false
                 }
             ],
-            order: [
-                [0, "desc"]
+            columnDefs: [
+                { type: "custom-number-sort", targets: [5,6,7] },
+                { type: "custom-date-sort", targets: 8 }
             ],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print']
         });
     }
 </script>

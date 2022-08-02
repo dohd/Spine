@@ -61,12 +61,9 @@
         }
     });
 
-    const language = {
-        @lang('datatable.strings')
-    };
+    const language = {@lang('datatable.strings')};
     const dataTable = $('#journalsTbl').dataTable({
         processing: true,
-        serverSide: true,
         responsive: true,
         language,
         ajax: {
@@ -103,6 +100,10 @@
                 searchable: false,
                 sortable: false
             },            
+        ],
+        columnDefs: [
+            { type: "custom-number-sort", targets: [4, 5] },
+            { type: "custom-date-sort", targets: [2] }
         ],
         order: [
             [0, "desc"]

@@ -68,15 +68,17 @@
                                         <th>Title</th>
                                         <th>{{ trans('general.amount') }} (Ksh.)</th>
                                         <th>Verified (Ksh.)</th>
+                                        <th>Difference (Ksh.)</th>
                                         <th>Quote / PI Date</th>
                                         <th>LPO No</th>
                                         <th>Project No</th>
-                                        <th>Ticket No</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="8" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -104,92 +106,6 @@
         }
         alert("Date range is Required");
     });
-
-    function draw_data(customer_id = '', lpo_number = '', project_id = '') {
-        const tableLang = {@lang('datatable.strings')};
-        const table = $('#quotes-table').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            stateSave: true,
-            language: tableLang,
-            ajax: {
-                url: "{{ route('biller.quotes.get_univoiced_quote') }}",
-                type: 'POST',
-                data: { customer_id, lpo_number, project_id },
-            },
-            columns: [
-                {
-                    data: 'mass_select',
-                    searchable: false,
-                    sortable: false
-                },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'title',
-                    name: 'title'
-                },
-                {
-                    data: 'total',
-                    name: 'total'
-                },
-                {
-                    data: 'verified_total',
-                    name: 'verified_total'
-                },
-                {
-                    data: 'created_at',
-                    name: 'created_at'
-                },
-                {
-                    data: 'lpo_number',
-                    name: 'lpo_number'
-                },
-                {
-                    data: 'project_tid',
-                    name: 'project_tid'
-                },
-                {
-                    data: 'lead_tid',
-                    name: 'lead_tid'
-                }
-            ],
-            order:[[0, 'desc']],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: {
-                buttons: [{
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
-        });
-    }
 
     // On selecting filter dropdown
     $('#customer_id, #lpo_number, #project_id').change(function() {
@@ -241,5 +157,68 @@
             showCancelButton: true,
         }, () => $('form#mass_add_form').submit()); 
     });
+
+    function draw_data(customer_id = '', lpo_number = '', project_id = '') {
+        const tableLang = {@lang('datatable.strings')};
+        const table = $('#quotes-table').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            stateSave: true,
+            language: tableLang,
+            ajax: {
+                url: "{{ route('biller.quotes.get_univoiced_quote') }}",
+                type: 'POST',
+                data: { customer_id, lpo_number, project_id },
+            },
+            columns: [
+                {
+                    data: 'mass_select',
+                    searchable: false,
+                    sortable: false
+                },
+                {
+                    data: 'customer',
+                    name: 'customer'
+                },
+                {
+                    data: 'tid',
+                    name: 'tid'
+                },
+                {
+                    data: 'title',
+                    name: 'title'
+                },
+                {
+                    data: 'total',
+                    name: 'total'
+                },
+                {
+                    data: 'verified_total',
+                    name: 'verified_total'
+                },
+                {
+                    data: 'diff_total',
+                    name: 'diff_total'
+                },
+                {
+                    data: 'created_at',
+                    name: 'created_at'
+                },
+                {
+                    data: 'lpo_number',
+                    name: 'lpo_number'
+                },
+                {
+                    data: 'project_tid',
+                    name: 'project_tid'
+                },
+            ],
+            order:[[0, 'desc']],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons: ['csv', 'excel', 'print',]
+        });
+    }
 </script>
 @endsection

@@ -66,7 +66,6 @@
         const language = { @lang("datatable.strings") };
         const dataTable = $('#leads-table').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             language,
             ajax: {
@@ -100,7 +99,7 @@
                 },
                 {
                     data: 'created_at',
-                    name: "{{ config('module.leads.table') }}.created_at"
+                    name: 'created_at',
                 },
                 {
                     data: 'client_ref',
@@ -112,6 +111,9 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-date-sort", targets: [6] }
             ],
             order: [[0, "desc"]],
             searchDelay: 500,

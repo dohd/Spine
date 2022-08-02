@@ -70,7 +70,6 @@
         };
         const dataTable = $('#serviceTbl').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             language,
             ajax: {
@@ -112,9 +111,11 @@
                     sortable: false
                 }
             ],
-            order: [
-                [0, "desc"]
+            columnDefs: [
+                { type: "custom-number-sort", targets: [3] },
+                { type: "custom-date-sort", targets: [6] }
             ],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: ['csv', 'excel', 'print'],

@@ -58,11 +58,10 @@ class BillsTableController extends Controller
                 return '<a class="font-weight-bold" href="' . $link . '">' . gen4tid('BILL-', $bill->tid) . '</a>';
             })
             ->addColumn('amount', function ($bill) {
-                return number_format($bill->grandttl, 2);
+                return numberFormat($bill->grandttl);
             })
             ->addColumn('paid', function ($bill) {
-                if ($bill->paidbill) 
-                    return number_format($bill->paidbill->paid, 2);
+                return numberFormat($bill->amountpaid);
             })
             ->addColumn('status', function ($bill) {
                 return $bill->status . ':';
@@ -77,10 +76,6 @@ class BillsTableController extends Controller
             ->addColumn('date', function ($bill) {
                 if ($bill->po_id) return dateFormat($bill->purchaseorder->date);
                 return dateFormat($bill->date); 
-            })
-            ->addColumn('due_date', function ($bill) {
-                if ($bill->po_id) return dateFormat($bill->purchaseorder->due_date); 
-                return dateFormat($bill->due_date); 
             })
             ->make(true);
     }

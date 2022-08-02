@@ -169,7 +169,6 @@
         const tableLang = { @lang('datatable.strings') };
         var dataTable = $('#lpo-table').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             stateSave: true,
             language: tableLang,
@@ -215,6 +214,9 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [3, 7] },
             ],
             order: [[0, "desc"]],
             searchDelay: 500,

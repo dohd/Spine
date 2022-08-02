@@ -307,7 +307,7 @@
             total += amount;
             $(this).find('.amount').text(amount);
         });
-        $('#skill_ttl').val(total.toLocaleString());
+        $('#skill_total').val(total.toLocaleString());
         profitState.skill_total = total;
         calcProfit();
     }

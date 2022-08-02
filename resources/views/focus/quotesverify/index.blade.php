@@ -49,12 +49,10 @@
                                             <th># Quote / PI</th>
                                             <th>Title</th>                                            
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                            <th>Quote / PI Date</th>
+                                            <th>Verified (Ksh.)</th>
                                             <th>Project No</th>
                                             <th>LPO No</th>
-                                            <th>Ticket No</th>
                                             <th>Client Ref</th>
-                                            <th>Verified</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -98,13 +96,12 @@
     .datepicker('setDate', new Date());
 
     function draw_data(start_date = '', end_date = '') {
-        const tableLang = { @lang('datatable.strings') };
+        const language = { @lang('datatable.strings') };
         const table = $('#quotes-table').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLang,
+            language,
             ajax: {
                 url: '{{ route("biller.quotes.get_project") }}',
                 type: 'post',
@@ -135,8 +132,8 @@
                     name: 'total'
                 },
                 {
-                    data: 'created_at',
-                    name: 'created_at'
+                    data: 'verified_total',
+                    name: 'verified_total'
                 },
                 {
                     data: 'project_tid',
@@ -147,16 +144,8 @@
                     name: 'lpo_number'
                 },
                 {
-                    data: 'lead_tid',
-                    name: 'lead_tid'
-                },
-                {
                     data: 'client_ref',
                     name: 'client_ref'
-                },
-                {
-                    data: 'verified',
-                    name: 'verified'
                 },
                 {
                     data: 'actions',
@@ -164,6 +153,9 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [4, 5] },
             ],
             order: [[0, "desc"]],
             searchDelay: 500,

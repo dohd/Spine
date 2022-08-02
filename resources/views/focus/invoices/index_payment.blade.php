@@ -72,7 +72,6 @@
         var dataTable = $('#paymentTbl').dataTable({
             processing: true,
             stateSave: true,
-            serverSide: true,
             responsive: true,
             deferRender: true,
             language,
@@ -91,6 +90,10 @@
                     searchable: false,
                     sortable: false
                 }
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [4, 5] },
+                { type: "custom-date-sort", targets: 3 }
             ],
             orderBy: [[0, "desc"]],
             searchDelay: 500,
