@@ -46,6 +46,7 @@
                                                     $labels = [
                                                         'Name', 'Phone', 'Email', 'Address', 'Company', 'City', 'Region', 'Country', 'PostBox',
                                                         'Tax ID' => 'taxid',  
+                                                        'Contact Person Info' => 'contact_person_info'
                                                     ];
                                                 @endphp
                                                 <tbody> 

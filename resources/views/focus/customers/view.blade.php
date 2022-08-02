@@ -29,8 +29,9 @@
                                         <i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}
                                     </a>&nbsp;
                                     <button type="button" class="btn btn-danger btn-outline-accent-5 btn-sm" id="delCustomer">
-                                        {{Form::open(['route' => ['biller.customers.destroy', $customer], 'method' => 'DELETE'])}}{{Form::close()}}
-                                        <i class="fa fa-trash"></i> {{trans('buttons.general.crud.delete')}}
+                                        {{ Form::open(['route' => ['biller.customers.destroy', $customer], 'method' => 'DELETE']) }}
+                                        {{ Form::close() }}
+                                        <i class="fa fa-trash"></i> {{ trans('buttons.general.crud.delete') }}
                                     </button>
                                 </div>
                                 

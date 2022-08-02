@@ -83,6 +83,7 @@ class SuppliersController extends Controller
         $data = $request->only([
             'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
             'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
+            'contact_person_info'
         ]);
         $account_data = $request->only([
             'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
@@ -126,7 +127,8 @@ class SuppliersController extends Controller
         // extract request input
         $data = $request->only([
             'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
-            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token'
+            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
+            'contact_person_info'
         ]);
         $account_data = $request->only([
             'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 

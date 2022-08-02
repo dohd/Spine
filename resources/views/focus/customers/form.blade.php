@@ -128,6 +128,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- shipping address -->
             <div class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="base-tab2">
                 <div class="row">
@@ -203,6 +204,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- opening balance -->
             <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
                 <div class='form-group'>
@@ -237,9 +239,16 @@
                     </div>
                 </div>           
             </div>
+
             <!-- other details -->
             <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                 {!! @$fields !!}
+                <div class='form-group'>
+                    <label for="contact_person_info" class="col-2">Contact Person Info</label>
+                    <div class='col-10'>
+                        {{ Form::textarea('contact_person_info', null, ['class' => 'form-control', 'placeholder' => 'Contact Person Info', 'rows' => '5']) }}
+                    </div>
+                </div>
                 <div class='form-group'>
                     {{ Form::label( 'docid', trans('customers.docid'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>

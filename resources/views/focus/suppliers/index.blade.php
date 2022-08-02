@@ -51,7 +51,8 @@
                                                         'Account Name' => 'account_name', 
                                                         'Bank Code' =>  'bank_code',
                                                         'Mpesa Account' => 'mpesa_payment',
-                                                        'Document ID' => 'docid'
+                                                        'Document ID' => 'docid',
+                                                        'Contact Person Info' => 'contact_person_info'
                                                     ];
                                                 @endphp
                                                 <tbody> 
