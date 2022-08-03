@@ -86,8 +86,7 @@ class BillsController extends Controller
      */
     public function supplier_bills(Request $request)
     {
-        $bills = Bill::where('supplier_id', $request->id)
-            ->whereIn('status', ['Pending', 'Partial'])
+        $bills = Bill::where('supplier_id', $request->id)->whereIn('status', ['Pending', 'Partial'])
             ->get([
                 'id', 'tid', 'supplier_id', 'suppliername', 'doc_ref', 'doc_ref_type', 'note', 
                 'status', 'grandttl', 'due_date', 'amountpaid'
@@ -110,9 +109,7 @@ class BillsController extends Controller
      */
     public function store_kra(Request $request)
     {
-        $data = $request->except('_token');
-
-        $this->repository->create_kra($data);
+        $this->repository->create_kra($request->except('_token'));
 
         return new RedirectResponse(route('biller.bills.index'), ['flash_success' => 'KRA Bill created successfully']);
     }

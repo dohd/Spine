@@ -12,8 +12,9 @@ use App\Models\items\PaidbillItem;
 use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
-use App\Repositories\Focus\purchase\PurchaseRepository;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
@@ -134,16 +135,20 @@ class BillRepository extends BaseRepository
     public function create_kra(array $input)
     {
         // dd($input);
+        foreach ($input as $key => $val) {
+            if ($key == 'reg_date') $input[$key] = date_for_database($val);
+            if ($key == 'total') $input[$key] = numberClean($val);
+            if ($key == 'amount') 
+                $input[$key] = array_map(function ($n) { return numberClean($n); }, $val); 
+        }
+        $data = Arr::only($input, ['supplier_id', 'tid', 'reg_date', 'reg_no', 'note', 'total']);
+        $data_items = Arr::only($input, ['payment_type', 'tax_type', 'tax_period', 'amount']);
+        if (!$data_items) throw ValidationException::withMessages(['Payment Details line items required!']);
+
         DB::beginTransaction();
 
-        $data = (object) $input;
-        $data->amount = numberClean($data->amount);
-        $data->reg_date = date_for_database($data->reg_date);
-        $note = implode(' - ', [
-            $data->reg_no, $data->payment_type, $data->tax_type, $data->tax_period, 
-            $data->amount
-        ]);
-
+        $data = (object) $data;
+        $data->amount = $data->total;
         $supplier = Supplier::find($data->supplier_id);
         $bill_data = [
             'date' => $data->reg_date,
@@ -155,7 +160,7 @@ class BillRepository extends BaseRepository
             'expense_grandttl' => $data->amount,
             'paidttl' => $data->amount,
             'grandttl' => $data->amount,
-            'note' => (!$data->note? $note : $note . ' - ' . $data->note),
+            'note' => $data->note,
             'ins' => auth()->user()->ins,
             'user_id' => auth()->user()->id,
             'doc_ref_type' => 'Receipt',
@@ -163,19 +168,22 @@ class BillRepository extends BaseRepository
             'suppliername' => $supplier->name,
             'tid' => $data->tid,
         ];
+        unset($data->total);
         $result = Bill::create($bill_data);
 
-        $item_data = [
-            'bill_id' => $result->id,
-            'description' => $result->note,
-            'qty' => 1,
-            'rate' => $result->grandttl,
-            'amount' => $result->grandttl,
-            'ins' => $result->ins,
-            'user_id' => $result->user_id,
-            'type' => 'Expense',
-        ];
-        BillItem::create($item_data);
+        $bill_items_data = array_map(function ($v) use($result) {
+            return [
+                'bill_id' => $result->id,
+                'description' => implode(' - ', array($v['payment_type'], $v['tax_type'], $v['tax_period'])),
+                'qty' => 1,
+                'rate' => $v['amount'],
+                'amount' => $v['amount'],
+                'ins' => $result->ins,
+                'user_id' => $result->user_id,
+                'type' => 'Expense',
+            ];
+        }, modify_array($data_items));
+        BillItem::create($bill_items_data);
 
         /** accounting */
         $this->post_kra_transaction($result);
