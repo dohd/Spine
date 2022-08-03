@@ -22,54 +22,7 @@
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.bills.store_kra', 'method' => 'POST']) }}
-                        <div class="form-group row">
-                            <div class="col-4">
-                                <label for="supplier">KRA Creditor</label>
-                                <select name="supplier_id" class="form-control"  data-placeholder="Search KRA Creditor" id="supplier" required>
-                                </select>
-                            </div>
-                            <div class="col-2">
-                                <label for="tid">Transaction ID</label>
-                                {{ Form::text('tid', $tid+1, ['class' => 'form-control', 'readonly']) }}
-                            </div>
-                            <div class="col-2">
-                                <label for="date">Registration Date</label>
-                                {{ Form::text('reg_date', null, ['class' => 'form-control datepicker']) }}
-                            </div>
-                            <div class="col-3">
-                                <label for="number">Registration No.</label>
-                                {{ Form::text('reg_no', null, ['class' => 'form-control', 'required']) }}
-                            </div>                            
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-3">
-                                <label for="payment_type">Payment Type</label>
-                                {{ Form::text('payment_type', null, ['class' => 'form-control', 'required']) }}
-                            </div>   
-                            <div class="col-3">
-                                <label for="tax_type">Tax Obligation</label>
-                                {{ Form::text('tax_type', null, ['class' => 'form-control', 'required']) }}
-                            </div>   
-                            <div class="col-2">
-                                <label for="period">Tax Period</label>
-                                {{ Form::text('tax_period', null, ['class' => 'form-control', 'required']) }}
-                            </div>
-                            <div class="col-2">
-                                <label for="amount">Amount (Ksh.)</label>
-                                {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
-                            </div>                            
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-6">
-                                <label for="note">Note</label>
-                                {{ Form::text('note', null, ['class' => 'form-control']) }}
-                            </div>
-                        </div>
-                        <div class="form-group row">                            
-                            <div class="col-12"> 
-                                {{ Form::submit('Generate', ['class' => 'btn btn-primary btn-lg float-right mr-3']) }}                                
-                            </div>
-                        </div>
+                        @include('focus.bills.kra_form')
                     {{ Form::close() }}
                 </div>
             </div>
@@ -102,11 +55,35 @@
         }
     });
 
-    // on change maount
-    $('#amount').focusout(function() {
-        if ($(this).val()) 
-            $(this).val(accounting.formatNumber($(this).val(), 2, ','))
+    // format amount on change
+    $('#billsTbl').on('change', '.amount', function() {
+        $(this).val(accounting.formatNumber($(this).val()));
+        calcTotal();
     });
 
+    // delete row
+    $('#billsTbl').on('click', '.del', function() {
+        $(this).parents('tr').remove();
+        calcTotal();
+    });
+
+    // add row 
+    let rowId = 0;
+    const rowHmtl = $('#billsTbl tbody tr:first').html();
+    $('.add-row').click(function() {
+        rowId++;
+        const html = rowHmtl.replace(/-0/g, '-'+rowId);
+        $('#billsTbl tbody').append('<tr>' + html + '</tr>');
+    });
+
+    // calc totals
+    function calcTotal() {
+        let total = 0;
+        $('#billsTbl tbody tr').each(function() {
+            let amount = accounting.unformat($(this).find('.amount').val());
+            total += amount;
+        });
+        $('#total').val(accounting.formatNumber(total));
+    }
 </script>
 @endsection
