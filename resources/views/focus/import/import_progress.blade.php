@@ -14,10 +14,9 @@
                 <a href="#" class="close" data-dismiss="alert">&times;</a>
                 <div class="message"></div>
             </div>
-            @if ($success_upload)
+            @if ($is_success)
                 <div id="ups" class="card-body">
-                    <h6>{{ trans('import.import_process_started') }}</h6>
-                    <hr>
+                    <h6>{{ trans('import.import_process_started') }}</h6><hr>
                     <div class="row ">
                         <div class="col-md-12">
                             <div class="card card-block">
@@ -33,8 +32,7 @@
                 </div>
             @else
                 <div class="card-body">
-                    <h6>Import Process Failed! Incorrect file format or unrecognised templateuploading</h6>
-                    <hr>
+                    <h6>Import Process Failed! Incorrect file format or unrecognised templateuploading</h6><hr>
                     <div class="row sameheight-container">
                         <div class="col-md-12">
                             <div class="card card-block">
@@ -58,28 +56,22 @@
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
     });
+    const params = @json($data);
 
     const progressBar = new ldBar("#progressbar");
     setInterval(() => progressBar.set(Math.floor((Math.random() * 70) + 30)), 500);
     setTimeout(ajaxCall, 2000);
 
     function ajaxCall() {
-        const extraData = @json($data);
         $.ajax({
-            url: "{{ route('biller.import.process_template') . '/' . $template }}",
+            url: "{{ route('biller.import.process_template') . '/' . request('type') }}",
             type: 'POST',
-            data: {
-                name: "{{ $filename }}",
-                ...extraData
-            },
+            data: {name: "{{ $filename }}", ...params},
             success: data => {
                 $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
                 $("#progressbar").hide();
                 $("#notify").addClass("alert-info white").fadeIn();
                 $("html, body").scrollTop($("body").offset().top);
-                setTimeout(() => {
-                    window.location.href = "{{ route('biller.import.general') . '/' . $template }}";
-                }, 3000);
             },
             error: data => {
                 const {message} = data.responseJSON;

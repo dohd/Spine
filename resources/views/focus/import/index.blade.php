@@ -12,17 +12,15 @@
         <div class="card">
             <div class="card-body">
                 <div class="card-block">
-                    <h4>{{ $prop->title }}</h4>
-                    <hr>
-                    <p class="alert alert-light mb-3">
-                        {{ trans('import.as_per_template') }}. 
-                        <a href="{{ route('biller.import.sample_template', $prop->template) }}" target="_blank">
-                            <strong>{{ trans('import.download_template') }}</strong>
-                            ({{ $prop->title }})
-                        </a>. 
+                    <h4>{{ $data['title'] }}</h4><hr>
+                    <p class="alert alert-light mb-3">{{ trans('import.as_per_template') }}. 
+                        <a href="{{ route('biller.import.sample_template', $data['type']) }}" target="_blank">
+                            <b>{{ trans('import.download_template') }}</b> ({{ $data['title'] }}).
+                        </a>
                     </p>
                     <p><strong class="mb-2">File : csv, xls or xlsx</strong></p>
-                    @include('focus.import.partials.' . $prop->template)
+                    {{-- Include template import form --}}
+                    @include('focus.import.partials.' . $data['type'])
                 </div>
             </div>
         </div>
