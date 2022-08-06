@@ -22,13 +22,11 @@
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.products.store', 'method' => 'post', 'files' => true, 'id' => 'create-product']) }}
-                        <div class="form-group">
-                            @include("focus.products.form")
-                            <div class="edit-form-btn mt-2">
-                                {{ link_to_route('biller.products.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
-                            </div><!--edit-form-btn-->
-                        </div><!-- form-group -->
+                        @include("focus.products.form")
+                        <div class="edit-form-btn mt-2">
+                            {{ link_to_route('biller.products.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                            {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
+                        </div><!--edit-form-btn-->
                     {{ Form::close() }}
                 </div>
             </div>
