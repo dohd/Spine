@@ -20,11 +20,11 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
 
     /**
      *
-     * @var Illuminate\Support\Collection $data
+     * @var array $data
      */
     private $data;
 
-    public function __construct(Collection $data)
+    public function __construct(array $data = [])
     {
         $this->data = $data;
     }
@@ -34,34 +34,50 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
      * @param Illuminate\Support\Collection $rows
      * @return void
      */
-    public function collection($rows)
-    {
-        $equipments_data = array();
-        $tid = Equipment::max('tid');
-        $ins = auth()->user()->ins;
-        $columns = array();
+    public function collection(Collection $rows)
+    {        
+        $has_customer = isset($this->data['customer_id']);
+        $has_branch = isset($this->data['branch_id']);
+
+        $equipments_data = [];
+        $columns = [];
+        $tid = Equipment::max('tid') + 1;
+
         foreach ($rows as $i => $row) {
             if ($i == 0) {
                 $columns = $row;
                 continue;
+            } elseif (count($row) != count($columns)) {
+                throw new Error('Columns mismatch!');
             }
-            if (count($row) != count($columns)) throw new Error('Columns mismatch!');
-            foreach ($columns as $j => $label) {
-                $val = $row[$j];
-                if (in_array($label, ['id', 'created_at', 'updated_at'])) continue;
-                if ($label == 'ins') $val = $ins;
-                if ($label == 'tid') {
-                    $tid++;
-                    $val = $tid;
-                }
-                $equipments_data[$i][$label] = $val;
+            
+            $new_row = [];
+            foreach ($columns as $j => $col) {
+                $value = $row[$j];
+                if (in_array($col, ['id', 'created_at', 'updated_at'])) $value = null;                
+                $new_row[$col] = $value;
+            }
+            $new_row['ins'] = $this->data['ins'];
+            $new_row['tid'] = $tid;
+            if ($new_row['customer_id'] == $this->data['customer_id']) {
+                $is_invalid_branch = $has_branch && $this->data['branch_id'] != $new_row['branch_id'];
+                if ($is_invalid_branch) throw new Error('Branch does not exist!');
+                $equipments_data[$i] = $new_row;
+                $tid++;
             }
         }
 
+        // delete previous data
+        if ($has_customer && $has_branch) {
+            Equipment::where([
+                'customer_id' => $this->data['customer_id'], 
+                'branch_id' => $this->data['branch_id']
+            ])->delete();
+        } else Equipment::where(['customer_id' => $this->data['customer_id']])->delete();
+            
         $result = Equipment::insert($equipments_data);
         if ($result) $this->row_count = count($equipments_data);
     }
-
 
     public function rules(): array
     {
