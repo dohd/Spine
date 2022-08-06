@@ -24,18 +24,12 @@ use App\Imports\CustomersImport;
 use App\Imports\ProductsImport;
 use App\Imports\TransactionsImport;
 use App\Imports\EquipmentsImport;
-use App\Models\account\Account;
-use App\Models\customer\Customer;
-use App\Models\productcategory\Productcategory;
-use App\Models\transactioncategory\Transactioncategory;
-use App\Models\warehouse\Warehouse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
 use DB;
-use Error;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -54,37 +48,18 @@ class ImportController extends Controller
     /**
      * index page for import
      */
-    public function index(ManageReports $request)
+    public function index(ManageReports $request, $type)
     {
-        $prop = (object) array(
-            'title' => '', 
-            'template' => $request->type
-        );
-        $data = collect();
-        switch ($request->type) {
-            case 'customers':
-                $prop->title = trans('import.import_customers');
-                break;
-            case 'products':
-                $prop->title = trans('import.import_products');
-                $data->put('product_category', Productcategory::all());
-                $data->pu('warehouses', Warehouse::all());
-                break;
-            case 'accounts':
-                $prop->title = trans('import.import_accounts');
-                break;
-            case 'transactions':
-                $prop->title = trans('import.import_transactions');
-                $data->put('accounts', Account::all());
-                $data->put('transaction_categories', Transactioncategory::all());
-                break;
-            case 'equipments':
-                $prop->title = 'Import Equipments';
-                $data->put('customers', Customer::all());
-                break;
-        }
-
-        return new ViewResponse('focus.import.index', compact('prop', 'data'));
+        $titles = [
+            'customers' => trans('import.import_customers'),
+            'products' => trans('import.import_products'),
+            'accounts' => trans('import.import_accounts'),
+            'transactions' => trans('import.import_transactions'),
+            'equipments' => 'Import Equipments',
+        ];
+        $data = ['title' => $titles[$type]] + compact('type');
+            
+        return new ViewResponse('focus.import.index', compact('data'));
     }
 
     /**
@@ -100,44 +75,22 @@ class ImportController extends Controller
     /**
      * store template data in storage 
      */
-    public function store(Request $request)
+    public function store(Request $request, $type)
     {
         $request->validate(['import_file' => 'required|max:' . config('master.file_size')]);
+
+        $data = $request->except(['_token']) + compact('type');
 
         $extension = File::extension($request->import_file->getClientOriginalName());
         if (!in_array($extension, ['xlsx', 'xls', 'csv'])) 
             throw ValidationException::withMessages([trans('import.import_invalid_file')]);
-            
-        $data = collect();
-        $template = $request->type;
-        switch ($template) {
-            case 'customer':
-                $data->put('customer_password_type', $request->customer_password_type);
-                session(['customer_password' => $request->customer_password]);
-                break;
-            case 'products':
-                $data->put('productcategory', $request->productcategory);
-                $data->put('warehouse', $request->warehouse);
-                break;
-            case 'transactions':
-                $data->put('accounts', $request->account);
-                $data->put('transaction_categories', $request->trans_category);
-                break;
-            case 'transactions':
-                $data->put('accounts', $request->account);
-                $data->put('transaction_categories', $request->trans_category);
-                break;
-            case 'equipments':
-                $data->put('customer', $request->customer);
-                break;
-        }
 
         $file = $request->file('import_file');
         $filename = date('Ymd_his') . rand(9999, 99999) . $file->getClientOriginalName();
         $path = 'temp' . DIRECTORY_SEPARATOR;
-        $success_upload = $this->upload_temp->put($path . $filename, file_get_contents($file->getRealPath()));
+        $is_success = $this->upload_temp->put($path . $filename, file_get_contents($file->getRealPath()));
 
-        return new ViewResponse('focus.import.import_progress', compact('data', 'filename', 'success_upload', 'template'));
+        return new ViewResponse('focus.import.import_progress', compact('filename', 'is_success', 'data'));
     }    
 
     /**
@@ -145,52 +98,43 @@ class ImportController extends Controller
      */
     public function process_template(ManageReports $request)
     {   
+        $data = $request->except('_token');
+        $data['ins'] = auth()->user()->ins;
+
+        $filename = $request->name;
+        $path = 'temp' . DIRECTORY_SEPARATOR;
+        $file_exists = Storage::disk('public')->exists($path . $filename);
+        if (!$file_exists) throw ValidationException::withMessages(['File does not exist!']);
+
+        $models = [
+            'customer' => new CustomersImport($data),
+            'products' => new ProductsImport($data),
+            'accounts' => new AccountsImport($data),
+            'transactions' => new TransactionsImport($data),
+            'equipments' => new EquipmentsImport($data),
+        ];
+
+        $storage_path = Storage::disk('public')->path($path . $filename);
+        $model = $models[$data['type']];
+
         try {
             DB::beginTransaction();
-
-            $filename = $request->name;
-            $path = 'temp' . DIRECTORY_SEPARATOR;
-            $file_exists = Storage::disk('public')->exists($path . $filename);
-            if (!$file_exists) throw ValidationException::withMessages(['file does not exist!']);
-            
-            $import_model = null;
-            $data = collect();
-            switch ($request->type) {
-                case 'customer':
-                    if ($request->customer_password_type == 1) 
-                        $data->put('password', $request->session()->pull('customer_password', null));
-                    $import_model = new CustomersImport((array) $data);
-                    break;
-                case 'products':
-                    $data = $data->merge(['category' => $request->productcategory, 'warehouse' => $request->warehouse]);
-                    $import_model = new ProductsImport($data);
-                    break;
-                case 'accounts':
-                    $import_model = new AccountsImport();
-                    break;
-                case 'transactions':
-                    $data = $data->merge(['account' => $request->accounts, 'trans_category' => $request->transaction_categories]);
-                    $import_model = new TransactionsImport((array) $data);
-                    break;
-                case 'equipments':
-                    $data->put('customer', $request->customer);
-                    $import_model = new EquipmentsImport($data);
-                    break;
-            }
-
-            $storage_path = Storage::disk('public')->path($path . $filename);
-            Excel::import($import_model, $storage_path);
-            $rowCount = $import_model->getRowCount();
-            if (!$rowCount) throw new Error(trans('import.import_process_failed'));
-
+            Excel::import($model, $storage_path);
             DB::commit();
-            Storage::disk('public')->delete($path . $filename);
-            $msg = ' ' . $rowCount . ' rows imported successfully';
-            return response()->json(['status' => 'Success', 'message' => trans('import.import_process_success') . $msg]);
         } catch (\Exception $e) {
             DB::rollBack();
             Storage::disk('public')->delete($path . $filename);
+            // printlog($e->getMessage());
             return response()->json(['status' => 'Error', 'message' => trans('import.import_process_failed')]);
         }
+
+        $rowCount = $model->getRowCount();
+        if (!$rowCount) throw ValidationException::withMessages([trans('import.import_process_failed')]);
+
+        Storage::disk('public')->delete($path . $filename);
+        return response()->json([
+            'status' => 'Success', 
+            'message' => trans('import.import_process_success') . ' ' . $rowCount . ' rows imported successfully'
+        ]);
     }
 }
