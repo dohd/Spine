@@ -75,7 +75,7 @@ class QuoteRepository extends BaseRepository
                 case 'Approved without LPO & Uninvoiced':
                     $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
                     break;
-                case 'Invoiced':
+                case 'Invoiced & Due':
                     // quotes in due invoices
                     $q->whereHas('invoice_product', function ($q) {
                         $q->whereHas('invoice', function ($q) {
@@ -100,15 +100,18 @@ class QuoteRepository extends BaseRepository
      */
     public function getForVerifyDataTable()
     {
-        $q = $this->query();
-        $q->whereHas('budget');
+        $q = $this->query()->whereHas('budget');
 
-        if (request('start_date') && request('end_date')) {
+        $q->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('date', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
-        }
+        });
+
+        $q->when(request('verify_state'), function ($q) {
+            $q->where('verified', request('verify_state'));
+        });
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'total', 'bank_id', 'verified',

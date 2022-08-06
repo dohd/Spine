@@ -38,7 +38,7 @@
                             @php
                                 $criteria = [
                                     'Unapproved', 'Approved & Unbudgeted', 'Budgeted & Unverified', 'Verified with LPO & Uninvoiced',
-                                    'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced', 'Invoiced'
+                                    'Verified without LPO & Uninvoiced', 'Approved without LPO & Uninvoiced', 'Invoiced & Due'
                                 ];
                             @endphp
                             <select name="filter" class="custom-select" id="status_filter">
@@ -60,7 +60,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">  
-                    <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                    <table id="quotesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -93,118 +93,135 @@
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    // client filter
-    let clients = @json($customers);
-    clients = clients.map(v => ({id: v.id, text: v.company}));
-    clients.splice(0, 0, {id: 0, text: 'None'});
-    $('#client').select2({data: clients});
-        
-    // on filter
-    $('#filters').on('change', '#status_filter, #client', function() {
-        $('#quotes-table').DataTable().destroy();
-        return draw_data($('#status_filter').val(), $('#client').val());   
-    });
+    const config = {
+        ajaxSetup: {
+            headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
+        },
+        datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    };
 
-    // Initialize datepicker
-    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-    $('#start_date').datepicker('setDate', new Date());
-    $('#end_date').datepicker('setDate', new Date());
+    const Index = {
+        customers: @json($customers),
 
-    setTimeout(() => draw_data(), @json(config('master.delay')));
-    function draw_data(status_filter = '', client_id = 0) {
-        const language = {@lang('datatable.strings')};
-        const table = $('#quotes-table').dataTable({
-            processing: true,
-            responsive: true,
-            stateSave: true,
-            language,
-            ajax: {
-                url: "{{ route('biller.quotes.get') }}",
-                type: 'POST',
-                data: {
-                    status_filter, client_id,
-                    page: location.href.includes('page=pi') ? 'pi' : 0
+        init(config) {
+            $.ajaxSetup(config.ajaxSetup);
+            $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
+
+            $('#client').select2({data: this.clientOptions()});
+            $('#filters').on('change', '#status_filter, #client', this.filterCriteriaChange);
+            this.drawDataTable();
+        },
+
+        clientOptions() {
+            clients = this.customers.map(v => ({id: v.id, text: v.company}));
+            clients.splice(0, 0, {id: 0, text: 'None'});
+            return clients;
+        },
+
+        filterCriteriaChange() {
+            $('#quotesTbl').DataTable().destroy();
+            return Index.drawDataTable({
+                status_filter: $('#status_filter').val(),
+                client_id: $('#client').val()
+            });   
+        },
+
+        drawDataTable(params={}) {
+            $('#quotesTbl').dataTable({
+                processing: true,
+                responsive: true,
+                stateSave: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.quotes.get') }}",
+                    type: 'POST',
+                    data: {
+                        ...params,
+                        page: location.href.includes('page=pi') ? 'pi' : 0
+                    },
+                    dataSrc: res => {
+                        const {data} = res;
+                        $('#amount_total').val('');
+                        if (data.length) 
+                            $('#amount_total').val(data[0].sum_total);
+                        return data;
+                    },
                 },
-                dataSrc: res => {
-                    const {data} = res;
-                    $('#amount_total').val('');
-                    if (data.length) 
-                        $('#amount_total').val(data[0].sum_total);
-                    return data;
-                },
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                {
-                    data: 'date',
-                    name: 'date'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'notes',
-                    name: 'notes'
-                },                
-                {
-                    data: 'total',
-                    name: 'total'
-                },
-                {
-                    data: 'client_ref',
-                    name: 'client_ref'
-                },
-                {
-                    data: 'lead_tid',
-                    name: 'lead_tid'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            columnDefs: [
-                { type: "custom-number-sort", targets: 5 },
-                { type: "custom-date-sort", targets: 1 }
-            ],
-            order:[[0, 'desc']],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                        }
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
                     },
                     {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                        }
+                        data: 'date',
+                        name: 'date'
                     },
                     {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                        }
+                        data: 'tid',
+                        name: 'tid'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
+                    },
+                    {
+                        data: 'notes',
+                        name: 'notes'
+                    },                
+                    {
+                        data: 'total',
+                        name: 'total'
+                    },
+                    {
+                        data: 'client_ref',
+                        name: 'client_ref'
+                    },
+                    {
+                        data: 'lead_tid',
+                        name: 'lead_tid'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
                     }
-                ]
-            }
-        });
-    }
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: 5 },
+                    { type: "custom-date-sort", targets: 1 }
+                ],
+                order:[[0, 'desc']],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: {
+                    buttons: [
+                        {
+                            extend: 'csv',
+                            footer: true,
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                            }
+                        },
+                        {
+                            extend: 'excel',
+                            footer: true,
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            footer: true,
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                            }
+                        }
+                    ]
+                }
+            });
+        }
+    };
+
+    $(() => Index.init(config));
 </script>
 @endsection
