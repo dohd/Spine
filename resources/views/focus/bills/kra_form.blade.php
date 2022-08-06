@@ -46,7 +46,7 @@
         </tbody>
     </table>
 </div>
-<a href="javascript:" class="btn btn-success add-row" aria-label="Left Align">
+<a href="javascript:" class="btn btn-success" aria-label="Left Align" id="addRow">
     <i class="fa fa-plus-square"></i> Add Row
 </a>
 

@@ -35,55 +35,71 @@
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
-
-    // datepicker
-    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date());
-
-    // Load suppliers
-    $('#supplier').select2({
-        ajax: {
-            url: "{{ route('biller.suppliers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({keyword: term}),
-            processResults: function(data) {
-                return {results: data.map(v => ({id: v.id, text: v.name + ' : ' + v.email}))}; 
-            },
+    const config = {
+        ajaxSetup: { 
+            headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} 
+        },
+        datepicker: {
+            format: "{{config('core.user_date_format')}}", 
+            autoHide: true,
+        },
+        supplierSelect2: {
+            ajax: {
+                url: "{{ route('biller.suppliers.select') }}",
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({keyword: term}),
+                processResults: function(data) {
+                    return {results: data.map(v => ({id: v.id, text: v.name + ' : ' + v.email}))}; 
+                }
+            }
         }
-    });
+    };
 
-    // format amount on change
-    $('#billsTbl').on('change', '.amount', function() {
-        $(this).val(accounting.formatNumber($(this).val()));
-        calcTotal();
-    });
+    const Form = {
+        rowIndx: 0,
+        tableRow: $('#billsTbl tbody tr:first').html(),
 
-    // delete row
-    $('#billsTbl').on('click', '.del', function() {
-        $(this).parents('tr').remove();
-        calcTotal();
-    });
+        init (config) {
+            $.ajaxSetup(config.ajaxSetup);
+            $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
+            $('#supplier').select2(config.supplierSelect2);
 
-    // add row 
-    let rowId = 0;
-    const rowHmtl = $('#billsTbl tbody tr:first').html();
-    $('.add-row').click(function() {
-        rowId++;
-        const html = rowHmtl.replace(/-0/g, '-'+rowId);
-        $('#billsTbl tbody').append('<tr>' + html + '</tr>');
-    });
+            $('#billsTbl').on('change', '.amount', this.amountChange);
+            $('#billsTbl').on('click', '.del', this.deleteRow);
+            $('#addRow').click(this.addRow);
+        },
 
-    // calc totals
-    function calcTotal() {
-        let total = 0;
-        $('#billsTbl tbody tr').each(function() {
-            let amount = accounting.unformat($(this).find('.amount').val());
-            total += amount;
-        });
-        $('#total').val(accounting.formatNumber(total));
+        addRow() {
+            this.rowIndx++;
+            const i = this.rowIndx;
+            const html = Form.tableRow.replace(/-0/g, '-'+i);
+            $('#billsTbl tbody').append('<tr>' + html + '</tr>');
+        },
+
+        amountChange() {
+            const el = $(this);
+            el.val(accounting.formatNumber(el.val()));
+            Form.columnTotals();
+        },
+
+        deleteRow() {
+            $(this).parents('tr').remove();
+            Form.columnTotals();
+        },
+
+        columnTotals() {
+            let total = 0;
+            $('#billsTbl tbody tr').each(function() {
+                const el = $(this);
+                let amount = accounting.unformat(el.find('.amount').val());
+                total += amount;
+            });
+            $('#total').val(accounting.formatNumber(total));
+        }
     }
+
+    $(() => Form.init(config));
 </script>
 @endsection
