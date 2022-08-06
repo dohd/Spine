@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\productvariable;
 use App\Models\productvariable\Productvariable;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductvariableRepository.
@@ -38,6 +39,8 @@ class ProductvariableRepository extends BaseRepository
     {
         // dd($input);
         $input['ins'] = auth()->user()->ins;
+        $is_exist = Productvariable::where('name', 'LIKE', '%' . $input['name'] . '%')->count();
+        if ($is_exist) throw ValidationException::withMessages(['Unit name already taken!']);
 
         $result = Productvariable::create($input);
         if ($result) return $result;

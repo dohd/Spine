@@ -19,9 +19,9 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $product_categories = Productcategory::all();
-        $product_variables = Productvariable::where('type', 0)->get();
         $warehouses = Warehouse::all();
-
+        $product_variables = Productvariable::all();
+        
         return view('focus.products.create')->with(compact('product_categories', 'product_variables', 'warehouses'));
     }
 }
