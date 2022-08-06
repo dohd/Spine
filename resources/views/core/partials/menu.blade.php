@@ -567,6 +567,7 @@
                 </ul>
             </li>
             @endif
+            
             @if(access()->allow('transaction-manage') || access()->allow('account-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-calculator"></i><span>{{trans('general.finance')}}</span></a>
                 <ul class="dropdown-menu">
@@ -575,6 +576,23 @@
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Client LPO</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.lpo.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Client LPO</a></li>                           
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('invoice-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>Bill Management
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Bills
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.create_kra') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create KRA Bill
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.bills.create') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Make Bill Payment
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endauth
@@ -593,20 +611,36 @@
                         </ul>
                     </li>
                     @endauth
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>Bill Management
-                        </a>
+
+                    @permission('creditnote-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Credit Note</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Bills
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> {{ trans('orders.credit_notes_manage')}}
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.create_kra') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create KRA Bill
+                            @permission('data-creditnote')
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.create') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Make Bill Payment
-                                </a>
-                            </li>
+                            @endauth
                         </ul>
                     </li>
+                    @endauth
+                    @permission('creditnote-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Debit Note</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}?is_debit=1" data-toggle="dropdown"><i class="ft-list"></i> Manage Debit Notes
+                                </a>
+                            </li>
+                            @permission('data-creditnote')
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}?is_debit=1" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Debit Note
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
+
                     @permission('transaction-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Account Charges
                         </a>
@@ -709,52 +743,30 @@
                             </li>
                         </ul>
                     </li>
-                    @endauth            
-                    @permission('creditnote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Credit Note</a>
+                    @endauth  
+                    
+                    @permission('account-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Book Balance Report</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> {{ trans('orders.credit_notes_manage')}}
+                            <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance', 'v') }}"><i class="fa fa-balance-scale"></i> Trial Balance
                                 </a>
                             </li>
-                            @permission('data-creditnote')
-                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
+                            @endauth
+                            @permission('account-manage')
+                            <li><a class="dropdown-item " href="{{ route('biller.accounts.balance_sheet', 'v') }}"><i class="fa fa-book"></i> {{ trans('accounts.balance_sheet') }}
+                                </a>
+                            </li>
+                            @endauth
+                            @permission('account-manage')
+                            <li><a class="dropdown-item " href="{{ route('biller.accounts.profit_and_loss', 'v') }}"><i class="fa fa-book"></i> Profit & Loss
                                 </a>
                             </li>
                             @endauth
                         </ul>
                     </li>
-                    @endauth
-                    @permission('creditnote-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Debit Note</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}?is_debit=1" data-toggle="dropdown"><i class="ft-list"></i> Manage Debit Notes
-                                </a>
-                            </li>
-                            @permission('data-creditnote')
-                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}?is_debit=1" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Debit Note
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
-                    @permission('account-manage')
-                    <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance', 'v') }}"><i class="fa fa-balance-scale"></i> Trial Balance
-                        </a>
-                    </li>
-                    @endauth
-                    @permission('account-manage')
-                    <li><a class="dropdown-item " href="{{ route('biller.accounts.balance_sheet', 'v') }}"><i class="fa fa-book"></i> {{ trans('accounts.balance_sheet') }}
-                        </a>
-                    </li>
-                    @endauth
-                    @permission('account-manage')
-                    <li><a class="dropdown-item " href="{{ route('biller.accounts.profit_and_loss', 'v') }}"><i class="fa fa-book"></i> Profit & Loss
-                        </a>
-                    </li>
-                    @endauth
                 </ul>
-            </li> @endif
+            </li>
+             @endif
             @if(access()->allow('project-manage') || access()->allow('task-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-briefcase"></i><span>{{trans('features.project_tasks')}}</span></a>
                 <ul class="dropdown-menu">
