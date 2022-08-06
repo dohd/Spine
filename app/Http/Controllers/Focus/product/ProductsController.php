@@ -386,7 +386,7 @@ class ProductsController extends Controller
     }
 
     /**
-     * Autocomplete product search dropdown options
+     * Quote or PI searchable product drop down options
      */
     public function quote_product_search(Request $request)
     {
@@ -441,16 +441,16 @@ class ProductsController extends Controller
         return response()->json($products);
     }
 
-    // compute product rate by FIFO (First in First out) rule of purchase
+    // LIFO (Last in First out) rule of purchase
     public function compute_product_rate($id, $qty)
     {
+        $rate = 0;
         $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
             ->where('item_id', $id)
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('created_at', 'ASC')
             ->groupBy('rate')
             ->get();
 
-        $rate = 0;
         $set = range(1, $qty);
         foreach ($rate_groups as $group) {
             $subset = array_splice($set, 0, $group->count);
@@ -460,6 +460,7 @@ class ProductsController extends Controller
                 break;
             }
         }
+        
         return $rate;
     }
 
