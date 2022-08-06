@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
-            <strong>Profit Margin Not Met!</strong> Check line item rates.
+            <strong>E.P Margin Not Met!</strong> Check line item rates.
         </div>
     </div>
 
@@ -159,7 +159,7 @@
                                     <div>
                                         <label for="budget-total">Total Budget</label>&nbsp;
                                         <span class="text-primary font-weight-bold">
-                                            (Profit: &nbsp;<span class="text-dark profit">0</span>)
+                                            (E.P: &nbsp;<span class="text-dark profit">0</span>)
                                         </span>
                                     </div>
                                     <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
