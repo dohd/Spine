@@ -641,7 +641,7 @@ function user_data($id)
 }
 function units()
 {
-    $u = \App\Models\productvariable\Productvariable::where('type', '=', 0)->get(['id', 'name', 'code', 'val'])->toJson();
+    $u = \App\Models\productvariable\Productvariable::all()->toJson();
     return $u;
 }
 
