@@ -9,6 +9,7 @@ use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 use DateTime;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductRepository.
@@ -72,42 +73,43 @@ class ProductRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
         $data['taxrate'] = numberClean($data['taxrate']);
         $result = Product::create($data);
 
-        // product variations
+        $product_variations = [];
         $data_items = $input['data_items'];
-        $data_items = array_map(function ($item) use ($result) {
+        foreach ($data_items as $item) {
+            if (empty($item['image'])) $item['image'] = 'example.png';
+            $name = $item['variation_name'];
+            unset($item['variation_name']);
+
             foreach ($item as $key => $val) {
-                if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert']))
+                if ($key == 'image' && !empty($val)) $item[$key] = $this->uploadFile($val);
+                if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
+                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' cannot be null!']);
                     $item[$key] = numberClean($val);
-                if ($key == 'image' && !empty($val))
-                    $item[$key] = $this->uploadFile($val);
+                }
+                if ($key == 'barcode' && !$val)
+                    $item[$key] =  rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
                 if ($key == 'expiry') {
                     $expiry = new DateTime(date_for_database($val));
                     $now = new DateTime(date('Y-m-d'));
                     if ($expiry > $now) $item[$key] = date_for_database($val);
                     else $item[$key] = null;
                 }
-                if ($key == 'barcode' && !$val)
-                    $item[$key] =  rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
             }
 
-            if (!isset($item['image'])) $item['image'] = 'example.png';
-            $name = $item['variation_name'];
-            unset($item['variation_name']);
-
-            return array_replace($item, [
+            $product_variations[] =  array_replace($item, [
                 'product_id' => $result->id,
                 'ins' => $result->ins,
                 'name' => $name,
             ]);
-        }, $data_items);
-        ProductVariation::insert($data_items);
+        }
+        ProductVariation::insert($product_variations);
 
         DB::commit();
         if ($result) return $result;
@@ -136,21 +138,22 @@ class ProductRepository extends BaseRepository
         $data_items = $input['data_items'];
         foreach ($data_items as $item) {
             foreach ($item as $key => $val) {
-                if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert']))
+                if ($key == 'image' && !empty($val)) $item[$key] = $this->uploadFile($val);
+                if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
+                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' cannot be null!']);
                     $item[$key] = numberClean($val);
-                if ($key == 'image' && !empty($val))
-                    $item[$key] = $this->uploadFile($val);
+                }
+                if ($key == 'barcode' && !$val) 
+                    $item[$key] =  rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
                 if ($key == 'expiry') {
                     $expiry = new DateTime(date_for_database($val));
                     $now = new DateTime(date('Y-m-d'));
                     if ($expiry > $now) $item[$key] = date_for_database($val);
                     else $item[$key] = null;
-                }
-                if ($key == 'barcode' && !$val)
-                    $item[$key] =  rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
+                }                
             }
-            if (!isset($item['image'])) $item['image'] = 'example.png';
 
+            if (empty($item['image'])) $item['image'] = 'example.png';
             $item = array_replace($item, [
                 'product_id' => $product->id,
                 'ins' => $product->ins,
