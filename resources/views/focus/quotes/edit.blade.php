@@ -13,7 +13,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
-            <strong>Profit Margin Not Met!</strong> Check line item rates.
+            <strong>E.P Margin Not Met!</strong> Check line item rates.
         </div>
         <div class="content-header-left col-6">
             <h4 class="content-header-title">{{ $header_title }}</h4>
@@ -29,11 +29,13 @@
         <div class="card-body">
             @if ($task)
                 {{ Form::model($quote, ['route' => ['biller.quotes.store', $quote], 'method' => 'post']) }}
+                    @include('focus.quotes.form')
+                {{ Form::close() }}
             @else
                 {{ Form::model($quote, ['route' => ['biller.quotes.update', $quote], 'method' => 'patch']) }}
+                    @include('focus.quotes.form')
+                {{ Form::close() }}
             @endif
-                @include('focus.quotes.form')
-            {{ Form::close() }}
         </div>
     </div> 
 </div>

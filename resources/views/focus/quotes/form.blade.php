@@ -239,7 +239,7 @@
         <label>
             {{trans('general.grand_total')}} ({{ config('currency.symbol') }})
             <b class="text-primary">
-                (Profit: &nbsp;<span class="text-dark profit">0</span>)
+                (E.P: &nbsp;<span class="text-dark profit">0</span>)
             </b>
         </label>
         <input type="text" name="total" class="form-control" id="total" readonly>
