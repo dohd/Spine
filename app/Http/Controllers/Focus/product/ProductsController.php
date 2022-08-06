@@ -106,8 +106,8 @@ class ProductsController extends Controller
     {
         // extract request input
         $data = $request->only([
-            'name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 'code_type', 
-            'stock_type'
+            'name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 
+            'unit_id', 'code_type', 'stock_type'
         ]);
         $data_items = $request->only([
             'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
@@ -152,8 +152,8 @@ class ProductsController extends Controller
 
         // extract request input
         $data = $request->only([
-            'name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 'code_type', 
-            'stock_type'
+            'name', 'taxrate', 'product_des', 'productcategory_id', 'sub_cat_id', 'unit', 
+            'unit_id', 'code_type', 'stock_type'
         ]);
         $data_items = $request->only([
             'v_id', 'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
