@@ -1,21 +1,14 @@
 <h4>{{trans('products.general_product_details')}}</h4>
-
 <div class="row form-group">
-    <div class="col-md-8">
+    <div class="col-6">
         {{ Form::label( 'name', trans('products.name'),['class' => 'control-label']) }}
         {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('products.name').'*','required'=>'required']) }}
     </div>
-    <div class="col-md-4">
+    <div class="col-1">
         {{ Form::label('taxrate', 'Tax % Rate', ['class' => 'control-label']) }}
         {{ Form::text('taxrate', numberFormat(@$product['taxrate']), ['class' => 'form-control box-size', 'placeholder' => trans('products.taxrate'),'onkeypress'=>"return isNumber(event)"]) }}
     </div>
-</div>
-<div class="row form-group">
-    <div class="col-md-8">
-        {{ Form::label('product_des', trans('products.product_des'),['class' => 'control-label']) }}
-        {{ Form::textarea('product_des', null, ['class' => 'form-control col', 'rows'=>2, 'placeholder' => trans('products.product_des')]) }}
-    </div>
-    <div class="col-md-2">
+    <div class="col-2">
         {{ Form::label('code_type', trans('products.code_type'), ['class' => 'control-label']) }}
         <select class="custom-select" name="code_type">
             @foreach (['ean13', 'upca', 'ean8', 'issn', 'isbn', 'c128a', 'c39'] as $val) 
@@ -25,20 +18,7 @@
             @endforeach       
         </select>       
     </div>
-    <div class="col-md-2">
-        {{ Form::label('unit', trans('products.stock_type'),['class' => 'control-label']) }}
-        <select class="custom-select" name="stock_type">
-            @foreach (['service', 'general'] as $i => $val)
-                <option value="{{ $i }}" {{ (@$product && @$product->stock_type == $val? 'selected' : $val)? 'selected' : '' }}>
-                    {{ ucfirst($val) }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-</div>
-
-<div class="row form-group">
-    <div class="col-md-4">
+    <div class="col-3">
         {{ Form::label( 'productcategory_id', trans('products.productcategory_id'),['class' => 'control-label']) }}
         <select class="custom-select" name="productcategory_id" id="product_cat">
             @foreach($product_categories as $item)
@@ -50,36 +30,35 @@
             @endforeach
         </select>
     </div>
-
-    {{-- 
-    <div class="col-md-4">
-        <div class="form-group">
-            {{ Form::label('sub_cat_id', trans('products.sub_cat_id'),['class' => 'col control-label']) }}
-            <div class='col'>
-                <select class="form-control" name="sub_cat_id" id="sub_cat">
-                    <option value="0">-- {{ trans('products.sub_cat_id')}} --</option>
-                    @foreach($product_categories as $item)
-                        @if ($item->c_type && $product_category->first()['id']==$item->rel_id)
-                            <option value="{{ $item->id }}" {{ $item->id === @$product->productcategory_id ? 'selected' : '' }}>
-                                {{ $item->title }}
-                            </option>
-                        @endif
-                    @endforeach
-                </select>
-            </div>
-        </div>
+</div>
+<div class="row form-group">
+    <div class="col-6">
+        {{ Form::label('product_des', trans('products.product_des'),['class' => 'control-label']) }}
+        {{ Form::textarea('product_des', null, ['class' => 'form-control col', 'rows'=>2, 'placeholder' => trans('products.product_des')]) }}
     </div>
-    --}}
-
-    <div class="col-md-4">
+    <div class="col-2">
+        {{ Form::label('unit', trans('products.stock_type'),['class' => 'control-label']) }}
+        <select class="custom-select" name="stock_type">
+            @foreach (['service', 'general'] as $i => $val)
+                <option value="{{ $i }}" {{ (@$product && @$product->stock_type == $val? 'selected' : $val)? 'selected' : '' }}>
+                    {{ ucfirst($val) }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <div class="col-2">
         {{ Form::label('unit', trans('products.unit'), ['class' => 'control-label']) }}
-        <select class="custom-select" name="unit">
+        <select class="custom-select" name="unit" id="unit">
             @foreach($product_variables as $item)
-                <option value="{{ $item->code }}" {{ $item->code == @$product->unit ? 'selected' : '' }}>
-                    {{ $item->name }} - {{ $item->code }}
+                <option 
+                    value="{{ $item->base_unit }}" {{ $item->base_unit == @$product->unit ? 'selected' : '' }}
+                    unitId="{{ $item->id }}"
+                >
+                    {{ $item->name }} - {{ $item->base_unit }}
                 </option>                        
             @endforeach
         </select>
+        {{ Form::hidden('unit_id', null, ['id' => 'unit_id']) }}
     </div>
 
     <div class="col-2">
@@ -93,12 +72,9 @@
         </select>
     </div>
 </div>
-<hr class="mb-5">
-<div class="row">
-    <div class='col-lg-10'>
-        {{trans('products.standard_details')}}
-    </div>
-</div>
+<hr class="mb-3">
+
+<h4>Standard Product Variation Details</h4>
 <div id="main_product">
     <div class="product round">
         <div class="row mt-1 mb-1">
@@ -191,7 +167,7 @@
                 <div class='form-group'>
                     {{ Form::label( 'expiry', trans('products.expiry'),['class' => 'col control-label']) }}
                     <div class='col'>
-                        {{ Form::text('expiry[]', dateFormat(@$product->standard['expiry']), ['class' => 'form-control box-size', 'placeholder' => trans('products.expiry'),'data-toggle'=>'datepicker','autocomplete'=>'false']) }}
+                        {{ Form::text('expiry[]', dateFormat(@$product->standard['expiry']), ['class' => 'form-control datepicker']) }}
                     </div>
                 </div>
             </div>
@@ -210,129 +186,132 @@
         <hr>
     </div>
 </div>
+
 @if(isset($product->standard->product_serial))
-@foreach($product->standard->product_serial as $serial)
-<div class="form-group serial"><label for="field_s" class="col-lg-2 control-label">{{trans('products.product_serial')}}</label>
-    <div class="col-lg-10"><input class="form-control box-size" placeholder="{{trans('products.product_serial')}}" name="product_serial_e[{{$serial['id']}}]" type="text" value="{{$serial['value']}}" @if($serial['value2']) readonly="" @endif></div>
-</div>
-@endforeach
-@endif
-@if(isset($product->variations[0]))
-<h4 class="card-title mt-3">{{trans('products.variation')}}</h4>
-<div id="product_sub">
-    @foreach($product->variations as $row)
-        <div class="v_product_t border-blue-grey border-lighten-4 round p-1 bg-blue-grey bg-lighten-5" id="pv_{{$row->id}}">
-            <input type="hidden" id="" name="v_id[]" value="{{$row->id}}">
-            <div class="row mt-3 mb-3">
-                <div class="col-6">{{trans('general.description')}} 
-                    <input type="text" class="form-control " name="variation_name[]" value="{{$row->name}}" placeholder="{{trans('general.description')}}">
-                </div>
-                <div class="del_b offset-4 col-1" data-vid="{{$row->id}}">
-                    <button class="btn btn-danger v_delete m-1 align-content-end"><i class="fa fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'price', trans('products.price'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('price[]', numberFormat(@$row->price), ['class' => 'form-control box-size', 'placeholder' => trans('products.price'),'onkeypress'=>"return isNumber(event)"]) }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'purchase_price', trans('products.purchase_price'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('purchase_price[]', numberFormat(@$row->purchase_price), ['class' => 'form-control box-size', 'placeholder' => trans('products.purchase_price'),'onkeypress'=>"return isNumber(event)"]) }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'qty', trans('products.qty'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('qty[]', numberFormat(@$row->qty), ['class' => 'form-control box-size', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        {{ Form::label( 'productcategory_id', trans('products.warehouse_id'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            <select class="form-control" name="warehouse_id[]">
-                                @foreach($warehouses as $item)
-                                <option value="{{$item->id}}" {{ $item->id === @$row->warehouse_id ? " selected" : "" }}>{{$item->title}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'code', trans('products.code'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('code[]', @$row->code, ['class' => 'form-control box-size', 'placeholder' => trans('products.code')]) }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'barcode', trans('products.barcode'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('barcode[]', $row->barcode, ['class' => 'form-control box-size', 'placeholder' => trans('products.barcode')]) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'disrate', trans('products.disrate'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('disrate[]', numberFormat(@$row->disrate), ['class' => 'form-control box-size', 'placeholder' => trans('products.disrate'),'onkeypress'=>"return isNumber(event)"]) }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'alert', trans('products.alert'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('alert[]', numberFormat(@$row->alert), ['class' => 'form-control box-size', 'placeholder' => trans('products.alert'),'onkeypress'=>"return isNumber(event)"]) }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class='form-group'>
-                        {{ Form::label( 'expiry', trans('products.expiry'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('expiry[]', dateFormat(@$row->expiry), ['class' => 'form-control box-size', 'placeholder' => trans('products.expiry')]) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class='form-group'>
-                        {{ Form::label( 'image', trans('products.image'),['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {!! Form::file('image[]', array('class'=>'input' )) !!}
-                        </div>
-                    </div>
-                </div>
-            </div>
+    @foreach($product->standard->product_serial as $serial)
+        <div class="form-group serial"><label for="field_s" class="col-lg-2 control-label">{{trans('products.product_serial')}}</label>
+            <div class="col-lg-10"><input class="form-control box-size" placeholder="{{trans('products.product_serial')}}" name="product_serial_e[{{$serial['id']}}]" type="text" value="{{$serial['value']}}" @if($serial['value2']) readonly="" @endif></div>
         </div>
     @endforeach
-</div>
 @endif
+@if(isset($product->variations[0]))
+    <h4 class="card-title mt-3">{{trans('products.variation')}}</h4>
+    <div id="product_sub">
+        @foreach($product->variations as $row)
+            <div class="v_product_t border-blue-grey border-lighten-4 round p-1 bg-blue-grey bg-lighten-5" id="pv_{{$row->id}}">
+                <input type="hidden" id="" name="v_id[]" value="{{$row->id}}">
+                <div class="row mt-3 mb-3">
+                    <div class="col-6">{{trans('general.description')}} 
+                        <input type="text" class="form-control " name="variation_name[]" value="{{$row->name}}" placeholder="{{trans('general.description')}}">
+                    </div>
+                    <div class="del_b offset-4 col-1" data-vid="{{$row->id}}">
+                        <button class="btn btn-danger v_delete m-1 align-content-end"><i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'price', trans('products.price'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('price[]', numberFormat(@$row->price), ['class' => 'form-control box-size', 'placeholder' => trans('products.price'),'onkeypress'=>"return isNumber(event)"]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'purchase_price', trans('products.purchase_price'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('purchase_price[]', numberFormat(@$row->purchase_price), ['class' => 'form-control box-size', 'placeholder' => trans('products.purchase_price'),'onkeypress'=>"return isNumber(event)"]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'qty', trans('products.qty'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('qty[]', numberFormat(@$row->qty), ['class' => 'form-control box-size', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ Form::label( 'productcategory_id', trans('products.warehouse_id'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                <select class="form-control" name="warehouse_id[]">
+                                    @foreach($warehouses as $item)
+                                    <option value="{{$item->id}}" {{ $item->id === @$row->warehouse_id ? " selected" : "" }}>{{$item->title}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'code', trans('products.code'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('code[]', @$row->code, ['class' => 'form-control box-size', 'placeholder' => trans('products.code')]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'barcode', trans('products.barcode'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('barcode[]', $row->barcode, ['class' => 'form-control box-size', 'placeholder' => trans('products.barcode')]) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'disrate', trans('products.disrate'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('disrate[]', numberFormat(@$row->disrate), ['class' => 'form-control box-size', 'placeholder' => trans('products.disrate'),'onkeypress'=>"return isNumber(event)"]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'alert', trans('products.alert'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('alert[]', numberFormat(@$row->alert), ['class' => 'form-control box-size', 'placeholder' => trans('products.alert'),'onkeypress'=>"return isNumber(event)"]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class='form-group'>
+                            {{ Form::label( 'expiry', trans('products.expiry'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('expiry[]', dateFormat(@$row->expiry), ['class' => 'form-control box-size', 'placeholder' => trans('products.expiry')]) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class='form-group'>
+                            {{ Form::label( 'image', trans('products.image'),['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {!! Form::file('image[]', array('class'=>'input' )) !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+@endif
+
 <div id="added_product"></div>
 <a href="#" class="card-title "><i class="fa fa-plus-circle"></i> {{trans('products.variation')}}</a>
 <button class="btn btn-blue add_more btn-sm m-1">{{trans('general.add_row')}}</button>
 <button class="btn btn-pink add_serial btn-sm m-1">{{trans('products.add_serial')}}</button>
 <div id="remove_variation"></div>
+
 @section("after-styles")
 <style>
     #added_product div:nth-child(even) .product {
@@ -353,90 +332,69 @@
 </style>
 {!! Html::style('focus/css/select2.min.css') !!}
 @endsection
+
 @section("after-scripts")
-
-<script type="text/javascript">
-    $('[data-toggle="datepicker"]').datepicker({
-        autoHide: true,
-        format: "{{config('core.user_date_format')}}"
-    });
-
-    $(document).on('click', ".add_serial", function(e) {
-        e.preventDefault();
-        $('#added_product').append(
-            `<div class="form-group serial"><label for="field_s" class="col-lg-2 control-label">{{trans('products.product_serial')}}</label><div class="col-lg-10">
-            <input class="form-control box-size" placeholder="{{trans('products.product_serial')}}" name="product_serial[]" type="text"  value=""></div>
-            <button class="btn-sm btn-purple v_delete_serial m-1 align-content-end"><i class="fa fa-trash"></i> </button></div>`
-        );
-    });
-
-    $(document).on('click', ".add_more", function(e) {
-        e.preventDefault();
-        var product_details = $('#main_product').clone().find(".old_id input:hidden").val(0).end();
-        product_details.find(".del_b").append('<button class="btn btn-danger v_delete_temp m-1 align-content-end"><i class="fa fa-trash"></i> </button>').end();
-        $('#added_product').append(product_details);
-        $('[data-toggle="datepicker"]').datepicker({
-            autoHide: true,
-            format: "{{config('core.user_date_format')}}"
-        });
-    });
-
-
-    $(document).on('click', ".v_delete", function(e) {
-        e.preventDefault();
-        var p_v = $(this).closest('div').attr('data-vid');
-        $('#remove_variation').append("<input type='hidden' name='remove_v[]' value='" + p_v + "'>");
-        alert("{{trans('products.alert_removed')}}");
-        $('#pv_' + p_v).remove();
-    });
-
-    $(document).on('click', ".v_delete_temp", function(e) {
-        e.preventDefault();
-        $(this).closest('div .product').remove();
-    });
-
-    $(document).on('click', ".v_delete_serial", function(e) {
-        e.preventDefault();
-        $(this).closest('div .serial').remove();
-    });
-</script>
 {{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
-    $("#sub_cat").select2();
-    $("#product_cat").on('change', function() {
-        $("#sub_cat").val('').trigger('change');
-        var tips = $('#product_cat :selected').val();
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-        $("#sub_cat").select2({
-            ajax: {
-                url: "{{route('biller.products.product_sub_load')}}?id=" + tips,
-                dataType: 'json',
-                type: 'POST',
-                quietMillis: 50,
-                params: {
-                    'cat_id': tips
-                },
-                data: function(product) {
-                    return {
-                        product: product
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
-                                text: item.title,
-                                id: item.id
-                            }
-                        })
-                    };
-                },
-            }
-        });
-    });
+    const config = {
+        datepicker: {
+            autoHide: true,
+            format: "{{config('core.user_date_format')}}"
+        },
+    };
+   
+    const Form = {
+        init() {
+            $('.datepicker').datepicker(config.datepicker);
+
+            const events = [".add_more", ".add_serial", ".v_delete", ".v_delete_temp", ".v_delete_serial"];
+            const handlers = [this.addMore, this.addSerial, this.delVariableProduct, this.delProduct, this.delSerial];
+            events.forEach((v,i) => $(document).on('click', v, handlers[i]));
+
+            this.setUnitId();
+            $('#unit').change(this.setUnitId());
+        },
+
+        setUnitId() {
+            $('#unit_id').val($('#unit option:selected').attr('unitId'));
+        },
+
+        addMore(e) {
+            e.preventDefault();
+            var product_details = $('#main_product').clone().find(".old_id input:hidden").val(0).end();
+            product_details.find(".del_b").append('<button class="btn btn-danger v_delete_temp m-1 align-content-end"><i class="fa fa-trash"></i> </button>').end();
+            $('#added_product').append(product_details);
+            $('.datepicker').datepicker(config.datepicker);
+        },
+
+        delVariableProduct(e) {
+            e.preventDefault();
+            var p_v = $(this).closest('div').attr('data-vid');
+            $('#remove_variation').append("<input type='hidden' name='remove_v[]' value='" + p_v + "'>");
+            alert("{{trans('products.alert_removed')}}");
+            $('#pv_' + p_v).remove();        
+        },
+
+        delProduct(e) {
+            e.preventDefault();
+            $(this).closest('div .product').remove();
+        },
+
+        addSerial(e) {
+            e.preventDefault();
+            $('#added_product').append(
+                `<div class="form-group serial"><label for="field_s" class="col-lg-2 control-label">{{trans('products.product_serial')}}</label><div class="col-lg-10">
+                <input class="form-control box-size" placeholder="{{trans('products.product_serial')}}" name="product_serial[]" type="text"  value=""></div>
+                <button class="btn-sm btn-purple v_delete_serial m-1 align-content-end"><i class="fa fa-trash"></i> </button></div>`
+            );
+        },
+
+        delSerial(e) {
+            e.preventDefault();
+            $(this).closest('div .serial').remove();
+        },
+    };
+
+    $(() => Form.init());
 </script>
 @endsection
