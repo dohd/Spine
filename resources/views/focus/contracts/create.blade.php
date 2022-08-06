@@ -40,22 +40,8 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
-    // form submit
-    $('form').submit(function(e) {
-        const schedules = $('#scheduleTbl tbody tr').length;
-        const equipments = $('#equipmentTbl .equipId:not(:disabled)').length
-        if (schedules < 1 || equipments < 1) {
-            e.preventDefault();
-            alert('Include at least one task schedule and one equipment!');
-        }
-    });
-
-    function renderDatepicker() {
-        return $('.datepicker')
-            .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true}) 
-            .datepicker('setDate', new Date());   
-    }
-    renderDatepicker();
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    .datepicker('setDate', new Date());   
 
     // select2 config
     function select2Config(url, callback, extraData) {
@@ -86,14 +72,15 @@
         const yrs = $('#periodYr').val();
         const months = $('#periodMn').val();
         if (!yrs || !months) return;
+
         const n = Math.round(yrs * 12 / months);
         $('#scheduleTbl tbody tr').remove();
-        Array.from({length: n}, v => v)
-        .forEach(v => {
+        Array.from({length: n}, v => v).forEach(v => {
             rowId++;
             let html = scheduleRow.replace(/-0/g, '-'+rowId);
             $('#scheduleTbl tbody').append('<tr>' + html + '</tr>');
-            renderDatepicker();
+            $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+            .datepicker('setDate', new Date());  
         });
     });
     $('#periodYr').change();
