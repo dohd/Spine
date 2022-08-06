@@ -18,7 +18,6 @@
 namespace App\Http\Controllers\Focus\productvariable;
 
 use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\productvariable\ProductvariableRepository;
@@ -52,13 +51,13 @@ class ProductvariablesTableController extends Controller
      */
     public function __invoke(ManageCompanyRequest $request)
     {
-        //
         $core = $this->productvariable->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('created_at', function ($productvariable) {
-                return Carbon::parse($productvariable->created_at)->toDateString();
+            ->addColumn('conversion_rate', function ($productvariable) {
+                return numberFormat($productvariable->conversion_rate);
             })
             ->addColumn('actions', function ($productvariable) {
                 return $productvariable->action_buttons;

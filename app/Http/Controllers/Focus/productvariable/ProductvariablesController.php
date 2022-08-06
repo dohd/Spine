@@ -19,7 +19,6 @@ namespace App\Http\Controllers\Focus\productvariable;
 
 use App\Http\Requests\Focus\general\ManageCompanyRequest;
 use App\Models\productvariable\Productvariable;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -77,13 +76,10 @@ class ProductvariablesController extends Controller
      */
     public function store(ManageCompanyRequest $request)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        if ($input['val'] < 1) $input['val'] = 1;
-        $this->repository->create($input);
-        //return with successfull message
+        $data = $request->except(['_token']);
+
+        $this->repository->create($data);
+
         return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => trans('alerts.backend.productvariables.created')]);
     }
 
@@ -94,7 +90,7 @@ class ProductvariablesController extends Controller
      * @param EditProductvariableRequestNamespace $request
      * @return \App\Http\Responses\Focus\productvariable\EditResponse
      */
-    public function edit(Productvariable $productvariable, ManageCompanyRequest $request)
+    public function edit(Productvariable $productvariable)
     {
         return new EditResponse($productvariable);
     }
@@ -108,12 +104,10 @@ class ProductvariablesController extends Controller
      */
     public function update(ManageCompanyRequest $request, Productvariable $productvariable)
     {
-        //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        if ($input['val'] < 1) $input['val'] = 1;
+
         $this->repository->update($productvariable, $input);
-        //return with successfull message
+
         return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => trans('alerts.backend.productvariables.updated')]);
     }
 
@@ -124,16 +118,15 @@ class ProductvariablesController extends Controller
      * @param App\Models\productvariable\Productvariable $productvariable
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Productvariable $productvariable, ManageCompanyRequest $request)
+    public function destroy(Productvariable $productvariable)
     {
-        //Calling the delete method on repository
         $this->repository->delete($productvariable);
-        //returning with successfull message
+        
         return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => trans('alerts.backend.productvariables.deleted')]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Show the specified resource.
      *
      * @param DeleteProductvariableRequestNamespace $request
      * @param App\Models\productvariable\Productvariable $productvariable
@@ -141,9 +134,6 @@ class ProductvariablesController extends Controller
      */
     public function show(Productvariable $productvariable, ManageCompanyRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.productvariables.view', compact('productvariable'));
     }
-
 }

@@ -14,9 +14,9 @@ class EditResponse implements Responsable
     /**
      * @param App\Models\productvariable\Productvariable $productvariables
      */
-    public function __construct($productvariables)
+    public function __construct($productvariable)
     {
-        $this->productvariables = $productvariables;
+        $this->productvariable = $productvariable;
     }
 
     /**
@@ -29,7 +29,7 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         return view('focus.productvariables.edit')->with([
-            'productvariables' => $this->productvariables
+            'productvariable' => $this->productvariable
         ]);
     }
 }
