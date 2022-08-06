@@ -678,7 +678,7 @@ $(function() {
     /**
      * DataTable custom sort extension
      */
-    $.extend($.fn.dataTableExt.oSort, {
+    $.extend($.fn.dataTableExt?.oSort, {
         'custom-date-sort-asc': (x, y) => {
             x = parseInt(x.split('-').reverse().join(''));
             y = parseInt(y.split('-').reverse().join(''));
