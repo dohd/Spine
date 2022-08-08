@@ -235,11 +235,20 @@ class PurchaseorderRepository extends BaseRepository
         })->toArray();
         BillItem::insert($bill_items_data);
 
-        // increase inventory per received items
+        // increase product stock
         foreach ($grn->items as $item) {
             $po_item = $item->purchaseorder_item;
             if ($po_item->type == 'Stock' && $po_item->product) {
-                $po_item->product->increment('qty', $item->qty);
+                $productvariation = $po_item->product;
+                $product_unit = $productvariation->product->unit;
+                
+                // apply quantity conversion
+                if ($product_unit->base_unit == $item['uom']) {
+                    $productvariation->increment('qty', $item['qty']);
+                } elseif ($product_unit->compound_unit == $item['uom']) {
+                    $qty = $product_unit->bas_ratio * $item['qty'];
+                    $productvariation->increment('qty', $qty);
+                } 
             }
         }
 

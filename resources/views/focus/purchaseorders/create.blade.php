@@ -214,8 +214,13 @@
         const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
-        const price = data.purchase_price.replace(/,/g, '') * 1;
-        $('#price-'+i).val(price.toLocaleString()).change();
+        $('#price-'+i).val(accounting.formatNumber(data.purchase_price)).change();
+        data.units.forEach(v => {
+            $('#uom-'+i).append(`
+                <option value="${v.base_unit}">${v.base_unit} (${v.description})</option>
+                <option value="${v.compound_unit}">${v.compound_unit} (${v.description})</option>
+            `);
+        });
     }
     $('#stockTbl').on('mouseup', '.stockname', function() {
         const id = $(this).attr('id').split('-')[1];
