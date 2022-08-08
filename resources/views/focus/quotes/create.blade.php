@@ -246,18 +246,21 @@
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
                 $('#qty-'+i).val(1);                
-                const buyprice = data.purchase_price.replace(/,/g, '')*1;
-                $('#buyprice-'+i).val(parseFloat(buyprice.toFixed(2)).toLocaleString()); 
+                $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
                 $('#estqty-'+i).val(1);
 
-                const rate = data.price.replace(/,/g, '')*1;
-                $('#rate-'+i).val(parseFloat(rate.toFixed(2)).toLocaleString());
-
+                const rate = accounting.unformat(data.price);
                 let price = rate * ($('#tax_id').val()/100 + 1);
-                price = parseFloat(price.toFixed(2)).toLocaleString();
-                $('#price-'+i).val(price);                
-                $('#amount-'+i).text(price);
-                $('#rate-'+i).change();
+                $('#price-'+i).val(accounting.formatNumber(price));                
+                $('#amount-'+i).text(accounting.formatNumber(price));
+                $('#rate-'+i).val(accounting.formatNumber(rate)).change();
+                
+                data.units.forEach(v => {
+                    $('#unit-'+i).html('').append(`
+                        <option value="${v.base_unit}">${v.base_unit} (${v.description})</option>
+                        <option value="${v.compound_unit}">${v.compound_unit} (${v.description})</option>
+                    `);
+                });
             }
         };
     }

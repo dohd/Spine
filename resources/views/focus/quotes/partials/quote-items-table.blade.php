@@ -20,7 +20,7 @@
             <td>
                 <textarea name="product_name[]" id="name-p0" cols="35" rows="2" class="form-control" placeholder="{{trans('general.enter_product')}}" required></textarea>
             </td>
-            <td><input type="text" class="form-control" name="unit[]" id="unit-p0"></td>
+            <td><select name="unit[]" id="unit-p0" class="form-control"></select></td>
             <td><input type="number" class="form-control estqty" name="estimate_qty[]" id="estqty-p0" step="0.1" required></td>  
             <td><input type="text" class="form-control buyprice" name="buy_price[]" id="buyprice-p0" required></td>  
             <td><input type="number" class="form-control qty" name="product_qty[]" id="qty-p0" step="0.1" required></td>
@@ -90,7 +90,11 @@
                         <td>
                             <textarea name="product_name[]" id="name-p{{$k}}" cols="35" rows="2" class="form-control pname" placeholder="{{trans('general.enter_product')}}" required>{{ $item->product_name }}</textarea>
                         </td>
-                        <td><input type="text" class="form-control" name="unit[]" value="{{ $item->unit }}" id="unit-p{{$k}}"></td>    
+                        <td>
+                            <select name="unit[]" id="unit-p{{ $k }}" class="form-control">
+                                <option value="{{ $item->unit }}">{{ $item->unit }}</option>
+                            </select>
+                        </td>                        
                         <td><input type="number" class="form-control estqty" name="estimate_qty[]" value="{{ number_format($item->estimate_qty, 1) }}" id="estqty-p{{$k}}" step="0.1" required></td>  
                         <td><input type="text" class="form-control buyprice" name="buy_price[]" value="{{ numberFormat($item->buy_price) }}" id="buyprice-p{{$k}}" required></td>          
                         <td><input type="number" class="form-control qty {{ !$item->misc ?: 'invisible' }}" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required></td>

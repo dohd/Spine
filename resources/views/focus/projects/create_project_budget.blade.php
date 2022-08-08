@@ -238,7 +238,7 @@
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${n}" required></td>
                 <td><input type="text" class="form-control" name="product_name[]" id="itemname-${n}" required></td>
                 <td><input type="number" class="form-control" name="product_qty[]" value="0" id="amount-${n}" readonly></td>                
-                <td><input type="text" class="form-control" name="unit[]" id="unit-${n}" required></td>                
+                <td><select class="form-control" name="unit[]" id="unit-${n}" required></select></td>                
                 <td><input type="number" step="0.1" class="form-control update" name="new_qty[]" id="newqty-${n}" required></td>
                 <td><input type="text" class="form-control update" name="price[]" id="price-${n}" required></td>
                 <td class="text-center"><span>0</span></td>
@@ -355,7 +355,7 @@
             $('#itemid-'+i).val(v.id);
             $('#productid-'+i).val(v.product_id);
             $('#itemname-'+i).val(v.product_name);
-            $('#unit-'+i).val(v.unit);                
+            $('#unit-'+i).html('').append(`<option value="${v.unit}">${v.unit}</option>`);                
             $('#amount-'+i).val(parseFloat(v.product_qty));
             $('#newqty-'+i).val(parseFloat(v.estimate_qty));
             $('#price-'+i).val(parseFloat(v.buy_price)).change();
@@ -408,9 +408,13 @@
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-
-                const price = parseFloat(data.purchase_price.replace(/,/g, ''));
-                $('#price-'+i).val(price.toLocaleString()).change();
+                $('#price-'+i).val(accounting.formatNumber(data.purchase_price)).change();
+                data.units.forEach(v => {
+                    $('#unit-'+i).append(`
+                        <option value="${v.base_unit}">${v.base_unit} (${v.description})</option>
+                        <option value="${v.compound_unit}">${v.compound_unit} (${v.description})</option>
+                    `);
+                });
             }
         };
     }
