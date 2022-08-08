@@ -90,7 +90,7 @@ class ProductRepository extends BaseRepository
             foreach ($item as $key => $val) {
                 if ($key == 'image' && !empty($val)) $item[$key] = $this->uploadFile($val);
                 if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
-                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' cannot be null!']);
+                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' required!']);
                     $item[$key] = numberClean($val);
                 }
                 if ($key == 'barcode' && !$val)
@@ -140,7 +140,7 @@ class ProductRepository extends BaseRepository
             foreach ($item as $key => $val) {
                 if ($key == 'image' && !empty($val)) $item[$key] = $this->uploadFile($val);
                 if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
-                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' cannot be null!']);
+                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' required!']);
                     $item[$key] = numberClean($val);
                 }
                 if ($key == 'barcode' && !$val) 

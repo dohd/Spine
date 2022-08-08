@@ -39,8 +39,7 @@ class ProductvariableRepository extends BaseRepository
     {
         // dd($input);
         $input['ins'] = auth()->user()->ins;
-        $is_exist = Productvariable::where('name', 'LIKE', '%' . $input['name'] . '%')->count();
-        if ($is_exist) throw ValidationException::withMessages(['Unit name already taken!']);
+        $input['base_ratio'] = numberClean($input['base_ratio']);
 
         $result = Productvariable::create($input);
         if ($result) return $result;
@@ -58,7 +57,9 @@ class ProductvariableRepository extends BaseRepository
      */
     public function update($productvariable, array $input)
     {
-    	if ($productvariable->update($input))  return true;
+        $input['ins'] = auth()->user()->ins;
+        $input['base_ratio'] = numberClean($input['base_ratio']);
+    	if ($productvariable->update($input)) return true;
 
         throw new GeneralException(trans('exceptions.backend.productvariables.update_error'));
     }

@@ -47,18 +47,14 @@
         </select>
     </div>
     <div class="col-2">
-        {{ Form::label('unit', trans('products.unit'), ['class' => 'control-label']) }}
-        <select class="custom-select" name="unit" id="unit">
-            @foreach($product_variables as $item)
-                <option 
-                    value="{{ $item->base_unit }}" {{ $item->base_unit == @$product->unit ? 'selected' : '' }}
-                    unitId="{{ $item->id }}"
-                >
-                    {{ $item->name }} - {{ $item->base_unit }}
+        {{ Form::label('unit', 'Base Unit', ['class' => 'control-label']) }}
+        <select class="custom-select" name="unit_id" id="unit" required>
+            @foreach($productvariables as $item)
+                <option value="{{ $item->id }}" {{ $item->id == @$product->unit_id ? 'selected' : '' }} >
+                    {{ $item->base_unit }} ({{ $item->category }})
                 </option>                        
             @endforeach
         </select>
-        {{ Form::hidden('unit_id', null, ['id' => 'unit_id']) }}
     </div>
 
     <div class="col-2">
@@ -350,13 +346,6 @@
             const events = [".add_more", ".add_serial", ".v_delete", ".v_delete_temp", ".v_delete_serial"];
             const handlers = [this.addMore, this.addSerial, this.delVariableProduct, this.delProduct, this.delSerial];
             events.forEach((v,i) => $(document).on('click', v, handlers[i]));
-
-            this.setUnitId();
-            $('#unit').change(this.setUnitId());
-        },
-
-        setUnitId() {
-            $('#unit_id').val($('#unit option:selected').attr('unitId'));
         },
 
         addMore(e) {

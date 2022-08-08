@@ -56,8 +56,8 @@ class ProductvariablesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('conversion_rate', function ($productvariable) {
-                return numberFormat($productvariable->conversion_rate);
+            ->addColumn('base_ratio', function ($productvariable) {
+                return numberFormat($productvariable->base_ratio);
             })
             ->addColumn('actions', function ($productvariable) {
                 return $productvariable->action_buttons;

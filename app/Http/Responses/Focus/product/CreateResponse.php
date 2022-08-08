@@ -20,8 +20,8 @@ class CreateResponse implements Responsable
     {
         $product_categories = Productcategory::all();
         $warehouses = Warehouse::all();
-        $product_variables = Productvariable::all();
+        $productvariables = Productvariable::all();
         
-        return view('focus.products.create')->with(compact('product_categories', 'product_variables', 'warehouses'));
+        return view('focus.products.create')->with(compact('product_categories', 'productvariables', 'warehouses'));
     }
 }

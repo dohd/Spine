@@ -376,4 +376,159 @@ class ProductsController extends Controller
 
             foreach ($product as $row) {
                 if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
-                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price), 'price' => numberFo
+                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'purchase_price' => numberFormat($row->purchase_price), 'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
+                }
+            }
+        }
+
+        if (count($output) > 0)
+            return view('focus.products.partials.search')->withDetails($output);
+    }
+
+    /**
+     * Quote or PI searchable product drop down options
+     */
+    public function quote_product_search(Request $request)
+    {
+        if (!access()->allow('product_search')) return false;
+
+        $pricegroup = Pricegroup::whereHas('pricelist')->find($request->pricegroup_id);
+        $productvariations = ProductVariation::whereHas('product', function ($q) {
+            $q->where('name', 'LIKE', '%' . request('keyword') . '%');
+        })->with(['warehouse' => function ($q) {
+            $q->select(['id', 'title']);
+        }])->with('product')->limit(6)->get();
+
+        // modify price properties of products
+        $products = array();
+        foreach ($productvariations as $row) {
+            $product = $row;
+            $product = array_intersect_key($product->toArray(), 
+                array_flip(['id', 'product_id', 'name', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'])
+            );
+            $unit = $row->product->unit;
+            $units = Productvariable::where('category', $unit->category)->get([
+                'id', 'description', 'compound_unit', 'base_unit', 'category'
+            ]);
+            $product = $product + [
+                'product_des' => $row->product->product_des,
+                'units' => $units->toArray(),
+                'warehouse' => $row->warehouse->toArray()
+            ];
+            
+            // set purchase price using LIFO algorithm
+            if ($row->qty > 0) {
+                $price = $this->lifo_purchase_price($row->id, $row->qty, $row->purchase_price);
+                $product['purchase_price'] = numberFormat($price);
+            }           
+
+            // set customer selling price or supplier purchase price
+            if ($pricegroup) {
+                foreach ($pricegroup->pricelist as $item) {
+                    if ($item->product_id == $row->product_id) {
+                        $product['name'] = $item->name;
+                        if ($pricegroup->is_client) $product['price'] = numberFormat($item->price);                            
+                        else $product['purchase_price'] = numberFormat($item->price);
+                        $products[] =  $product;
+                    }
+                }
+                continue;
+            }
+            $products[] =  $product;
+        }
+        
+        return response()->json($products);
+    }
+
+    // LIFO (Last in First Out) rule of purchase
+    public function lifo_purchase_price($id, $qty, $rate)
+    {
+        $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
+            ->where('item_id', $id)
+            ->orderBy('created_at', 'ASC')
+            ->groupBy('rate')
+            ->get();
+
+        $set = range(1, $qty);
+        foreach ($rate_groups as $group) {
+            $subset = array_splice($set, 0, $group->count);
+            $last_indx = count($subset) - 1;
+            if ($subset && $qty >= $subset[0] && $qty <= $subset[$last_indx]) {
+                $rate = $group->rate;
+                break;
+            }
+        }
+        return $rate;
+    }
+
+
+    public function product_sub_load(Request $request)
+    {
+        $q = $request->get('id');
+        $result = \App\Models\productcategory\Productcategory::all()->where('c_type', '=', 1)->where('rel_id', '=', $q);
+
+        return json_encode($result);
+    }
+
+    public function pos(Request $request, $bill_type)
+    {
+        if (!access()->allow('pos')) return false;
+        $q = $request->post('keyword');
+        $w = $request->wid;
+        $cat_id = $request->post('cat_id');
+        $s = $request->post('serial_mode');
+        $limit = $request->post('search_limit', 20);
+        $bill_type = $request->bill_type;
+        if ($bill_type == 'label') {
+            $q = @$request->post('product')['term'];
+        }
+
+        $wq = compact('q', 'w', 'cat_id');
+        if ($s == 1 and $q) {
+            $product = \App\Models\product\ProductMeta::where('value', 'LIKE', '%' . $q . '%')->whereNull('value2')->whereHas('product_serial', function ($query) use ($wq) {
+                if ($wq['w'] > 0) return $query->where('warehouse_id', $wq['w']);
+            })->with(['product_standard'])->limit($limit)->get();
+            $output = array();
+
+            foreach ($product as $row) {
+
+                $output[] = array('name' => $row->product_serial->product['name'], 'disrate' => $row->product_serial['disrate'], 'price' => $row->product_serial['price'], 'id' => $row->product_serial['id'], 'taxrate' => $row->product_serial->product['taxrate'], 'product_des' => $row->product_serial->product['product_des'], 'unit' => $row->product_serial->product['unit'], 'code' => $row->product_serial['code'], 'alert' => $row->product_serial['qty'], 'image' => $row->product_serial['image'], 'serial' => $row->value);
+            }
+        } else {
+
+            $product = ProductVariation::whereHas('product', function ($query) use ($wq) {
+                $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
+                if ($wq['cat_id'] > 0) $query->where('productcategory_id', $wq['cat_id']);
+                return $query;
+            })->when($wq['w'] > 0, function ($q) use ($wq) {
+                $q->where('warehouse_id', $wq['w']);
+            })->limit($limit)->get();
+            $output = array();
+
+            foreach ($product as $row) {
+                if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
+                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
+                }
+            }
+        }
+
+        if (count($output) > 0)
+
+            return view('focus.products.partials.pos')->withDetails($output);
+    }
+
+    public function getProducts(Request $request)
+    {
+        $result = \App\Models\product\ProductMeta::where('value', 'LIKE', '%' . $q . '%')->whereNull('value2')->whereHas('product_serial', function ($query) use ($wq) {
+            if ($wq['w'] > 0) return $query->where('warehouse_id', $wq['w']);
+        })->with(['product_standard'])->limit($limit)->get();
+        return json_encode($result);
+    }
+
+
+    public function quick_add(CreateProductRequest $request)
+    {
+
+        return new CreateModalResponse('focus.modal.product');
+    }
+}

@@ -4,12 +4,17 @@ namespace App\Models\product\Traits;
 
 use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
+use App\Models\productvariable\Productvariable;
 
 /**
  * Class ProductRelationship
  */
 trait ProductRelationship
 {
+    public function unit()
+    {
+        return $this->belongsTo(Productvariable::class, 'unit_id');
+    }
 
     public function standard()
     {

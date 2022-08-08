@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\productvariable;
 
+use App\Models\productvariable\Productvariable;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -15,6 +16,8 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.productvariables.create');
+        $categories = Productvariable::select('category')->distinct()->pluck('category')->toArray();
+      
+        return view('focus.productvariables.create')->with(compact('categories'));
     }
 }

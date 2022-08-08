@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\productvariable;
 
+use App\Models\productvariable\Productvariable;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -28,7 +29,9 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.productvariables.edit')->with([
+        $categories = Productvariable::select('category')->distinct()->pluck('category')->toArray();
+
+        return view('focus.productvariables.edit', compact('categories'))->with([
             'productvariable' => $this->productvariable
         ]);
     }

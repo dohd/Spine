@@ -33,11 +33,11 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $product_categories = Productcategory::all();
-        $product_variables = Productvariable::where('type', 0)->get();
+        $productvariables = Productvariable::where('type', 0)->get();
         $warehouses = Warehouse::all();
 
         return view('focus.products.edit', ['product' => $this->product])->with(
-            compact('product_categories', 'product_variables', 'warehouses')
+            compact('product_categories', 'productvariables', 'warehouses')
         );
     }
 }
