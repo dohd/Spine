@@ -91,14 +91,14 @@ class PurchasesController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl', 'is_tax_exc'
         ]);
         $data_items = $request->only([
-            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type', 'warehouse_id'
+            'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type', 'warehouse_id', 'uom'
         ]);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-
+        dd($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
         if (!$data_items) throw ValidationException::withMessages(['Please select system-generated row items as line items!']);
 

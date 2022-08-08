@@ -4,6 +4,7 @@
             <tr class="item_header bg-gradient-directional-danger white">
                 <th width="30%" class="text-center">Ledger Name</th>
                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
+                <th width="8%" class="text-center">UoM</th>
                 <th width="10%" class="text-center">{{trans('general.rate')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
                 <th width="8%" class="text-center">Tax</th>
@@ -19,6 +20,7 @@
                     <input type="hidden" id="expitemid-0" name="item_id[]">
                 </td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
+                <td><input type="text" class="form-control exp_uom" name="uom[]" id="uom-0" value=""></td>
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
                 <td>
                     <select class="form-control exp_vat" name="itemtax[]" id="expvat-0">
@@ -36,11 +38,10 @@
                 <input type="hidden" class="expamountr" name="amount[]">
                 <input type="hidden" name="type[]" value="Expense">
                 <input type="hidden" name="id[]" value="0">
-                <input type="hidden" name="uom[]">
                 <input type="hidden" name="warehouse_id[]">
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="4">
                     <textarea id="expdescr-0" class="form-control descr" name="description[]" placeholder="Enter Description"></textarea>
                 </td>
                 <td colspan="4">
@@ -58,6 +59,7 @@
                         <tr>
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" id="accountname-{{$i}}" placeholder="Enter Ledger"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="expqty-{{$i}}"></td>
+                            <td><input type="text" class="form-control exp_uom" name="uom[]" value="{{ $item->uom }}" id="expuom-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_price" name="rate[]" value="{{ (float) $item->rate }}" id="expprice-{{$i}}"></td>
                             <td>
                                 <select class="form-control exp_vat" name="itemtax[]" id="expvat-{{$i}}">
@@ -76,7 +78,6 @@
                             <input type="hidden" class="expamountr" name="amount[]" value="{{ (float) $item->amount }}">
                             <input type="hidden" name="type[]" value="Expense">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
-                            <input type="hidden" name="uom[]">
                             <input type="hidden" name="warehouse_id[]">
                         </tr>
                         <tr>

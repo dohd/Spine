@@ -4,6 +4,7 @@
             <tr class="item_header bg-gradient-directional-success white">
                 <th width="30%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
+                <th width="8%" class="text-center">UoM</th>
                 <th width="10%" class="text-center">{{trans('general.rate')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax')}}</th>
@@ -16,6 +17,7 @@
             <tr>
                 <td><input type="text" class="form-control assetname" name="name[]" id="assetname-0" placeholder="Asset Or Equipment" autocomplete="off"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
+                <td><input type="text" class="form-control asset_uom" name="uom[]" id="assetuom-0" value=""></td>
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
                 <td>
                     <select class="form-control asset_vat" name="itemtax[]" id="assetvat-0">
@@ -34,11 +36,10 @@
                 <input type="hidden" class="assetamountr" name="amount[]">
                 <input type="hidden" name="type[]" value="Asset">
                 <input type="hidden" name="id[]" value="0">
-                <input type="hidden" name="uom[]">
                 <input type="hidden" name="warehouse_id[]">
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="4">
                     <textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-0"></textarea>
                 </td>
                 <td colspan="4">
@@ -56,7 +57,8 @@
                         <tr>
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" id="assetname-{{$i}}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="assetqty-{{$i}}"></td>
-                            <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ (float) $item->rate }}" id="assetprice-{{$i}}"></td>
+                            <td><input type="text" class="form-control asset_uom" name="uom[]" value="{{ $item->uom }}" id="assetuom-{{$i}}"></td>
+                            <td><input type="text" class="form-control asset_price" name="rate[]" value="{{ numberFormat($item->rate) }}" id="assetprice-{{$i}}"></td>
                             <td>
                                 <select class="form-control asset_vat" name="itemtax[]" id="assetvat-{{$i}}">
                                     @foreach ($additionals as $tax)
@@ -74,7 +76,6 @@
                             <input type="hidden" class="assetamountr" name="amount[]" value="{{ (float) $item->amount }}">
                             <input type="hidden" name="type[]" value="Asset">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
-                            <input type="hidden" name="uom[]">
                             <input type="hidden" name="warehouse_id[]">
                         </tr>
                         <tr>

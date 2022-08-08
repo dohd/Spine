@@ -4,6 +4,7 @@
             <tr class="item_header bg-gradient-directional-blue white ">
                 <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="10%" class="text-center">{{trans('general.quantity')}}</th>
+                <th width="10%" class="text-center">UoM</th>
                 <th width="15%" class="text-center">{{trans('general.rate')}}</th>
                 <th width="10%" class="text-center">{{trans('general.tax_p')}}</th>
                 <th width="10%" class="text-center">Tax</th>
@@ -16,6 +17,7 @@
             <tr>
                 <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0' autocomplete="off"></td>
                 <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="1"></td>  
+                <td><select name="uom[]" id="uom-0" class="form-control uom"></select></td>  
                 <td><input type="text" class="form-control price" name="rate[]" id="price-0"></td>
                 <td>
                     <select class="form-control rowtax" name="itemtax[]" id="rowtax-0">
@@ -36,7 +38,7 @@
                 <input type="hidden" name="id[]" value="0">
             </tr>
             <tr>
-                <td colspan="2">
+                <td colspan="3">
                     <textarea id="stockdescr-0" class="form-control descr" name="description[]" placeholder="Product Description"></textarea>
                 </td>
                 <td>
@@ -61,8 +63,13 @@
                     @if ($item->type == 'Stock')
                         <tr>
                             <td><input type="text" class="form-control stockname" name="name[]" value="{{ $item->product->name }}" placeholder="Product Name" id='stockname-{{$i}}'></td>
-                            <td><input type="text" class="form-control qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="qty-{{$i}}"></td>                    
-                            <td><input type="text" class="form-control price" name="rate[]" value="{{ (float) $item->rate }}" id="price-{{$i}}"></td>
+                            <td><input type="text" class="form-control qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="qty-{{$i}}"></td>    
+                            <td>
+                                <select name="uom[]" id="uom-{{ $i }}" class="form-control uom">
+                                    <option value="{{ $item->uom }}">{{ $item->uom }}</option>
+                                </select>
+                            </td>                  
+                            <td><input type="text" class="form-control price" name="rate[]" value="{{ numberFormat($item->rate) }}" id="price-{{$i}}"></td>
                             <td>
                                 <select class="form-control rowtax" name="itemtax[]" id="rowtax-{{$i}}">
                                     @foreach ($additionals as $tax)
