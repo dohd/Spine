@@ -398,6 +398,7 @@
             @if(access()->allow('product-manage') || access()->allow('purchaseorder-manage') || access()->allow('manage-warehouse') || access()->allow('supplier-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="ft-layers"></i><span>{{trans('features.stock')}}</span></a>
                 <ul class="dropdown-menu">
+                    {{-- stock issuance --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cubes" aria-hidden="true"></i> Stock Issuance</a>
                         <ul class="dropdown-menu">
@@ -406,6 +407,20 @@
                             </li>                            
                         </ul>
                     </li>
+                    {{-- Goods receive note --}}
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-puzzle-piece"></i> Goods Receive Note</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.goodsreceivenote.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage GRN
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.goodsreceivenote.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create GRN
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+
                     @permission('product-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i> {{ trans('labels.backend.products.management') }}</a>
                         <ul class="dropdown-menu">

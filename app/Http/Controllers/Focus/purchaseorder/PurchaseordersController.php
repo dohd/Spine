@@ -28,6 +28,7 @@ use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Models\items\GrnItem;
+use Request;
 
 /**
  * PurchaseordersController
@@ -204,5 +205,16 @@ class PurchaseordersController extends Controller
         $result = $this->repository->create_grn($purchaseorder, compact('order', 'order_items'));
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order Goods successfully received']);
+    }
+
+    /**
+     * Purchase Order Goods
+     */
+    public function goods(Request $request)
+    {
+        $purchaseorder = Purchaseorder::find(request('purchaseorder_id'));
+        $stock_goods = $purchaseorder->goods()->where('type', 'Stock')->get();
+
+        return response()->json($stock_goods);
     }
 }

@@ -28,6 +28,7 @@ use App\Http\Responses\ViewResponse;
 use App\Models\supplier\Supplier;
 use App\Repositories\Focus\supplier\SupplierRepository;
 use DateTime;
+use Request;
 
 /**
  * SuppliersController
@@ -236,4 +237,13 @@ class SuppliersController extends Controller
         Supplier::where('id', '=', $cid)->update(array('active' => $active));
     }
 
+    /**
+     * Get Purchase Orders
+     */
+    public function purchaseorders(Request $request)
+    {
+        $supplier = Supplier::find(request('supplier_id'));
+
+        return response()->json($supplier->purchase_orders);
+    }
 }

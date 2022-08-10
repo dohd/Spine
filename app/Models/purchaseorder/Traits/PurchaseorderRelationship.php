@@ -8,13 +8,17 @@ use App\Models\items\PurchaseorderItem;
 use App\Models\project\Project;
 use App\Models\purchaseorder\Grn;
 use App\Models\transaction\Transaction;
-use PayPal\Api\Transactions;
 
 /**
  * Class PurchaseorderRelationship
  */
 trait PurchaseorderRelationship
 {
+    public function goods()
+    {
+        return $this->hasMany(PurchaseorderItem::class, 'purchaseorder_id');
+    }
+
     public function grn_items()
     {
         return $this->hasManyThrough(GrnItem::class, Grn::class, 'purchaseorder_id', 'grn_id')->withoutGlobalScopes();
