@@ -3,6 +3,7 @@
 namespace App\Models\supplier\Traits;
 
 use App\Models\bill\Bill;
+use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\purchaseorder\Purchaseorder;
 
 /**
@@ -10,6 +11,11 @@ use App\Models\purchaseorder\Purchaseorder;
  */
 trait SupplierRelationship
 {
+    public function goodsreceivenotes()
+    {
+        return $this->hasMany(Goodsreceivenote::class);
+    }
+
     public function purchase_orders()
     {
         return $this->hasMany(Purchaseorder::class);

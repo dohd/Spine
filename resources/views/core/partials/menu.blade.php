@@ -613,6 +613,20 @@
                     @endauth
 
                     @permission('invoice-manage')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>Supplier Bills
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Supplier Bills
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create Supplier Bill
+                                </a>
+                            </li>                            
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Management</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Project Invoice

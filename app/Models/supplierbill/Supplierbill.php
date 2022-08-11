@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models\goodsreceivenote;
+namespace App\Models\supplierbill;
 
-use App\Models\goodsreceivenote\Traits\GoodsreceivenoteAttribute;
-use App\Models\goodsreceivenote\Traits\GoodsreceivenoteRelationship;
 use App\Models\ModelTrait;
+use App\Models\supplierbill\Traits\SupplierbillAttribute;
+use App\Models\supplierbill\Traits\SupplierbillRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Goodsreceivenote extends Model
+class Supplierbill extends Model
 {
-    use ModelTrait, GoodsreceivenoteAttribute, GoodsreceivenoteRelationship;
+    use ModelTrait, SupplierbillAttribute, SupplierbillRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -21,15 +21,15 @@ class Goodsreceivenote extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'goods_receive_notes';
+    protected $table = 'supplier_bills';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
     protected $fillable = [
-        'tid', 'supplier_id', 'purchaseorder_id', 'subtotal', 'tax', 'total', 'date', 'note', 
-        'dnote', 'user_id', 'ins'
+        'tid', 'date', 'due_date', 'subtotal', 'tax', 'total', 'note', 'status', 'supplier_id', 
+        'tax_pin', 'term_id', 'validity', 'amount_id', 'user_id', 'ins'      
     ];
 
     /**
@@ -63,9 +63,21 @@ class Goodsreceivenote extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
         static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
         });

@@ -240,10 +240,20 @@ class SuppliersController extends Controller
     /**
      * Get Purchase Orders
      */
-    public function purchaseorders(Request $request)
+    public function purchaseorders()
     {
         $supplier = Supplier::find(request('supplier_id'));
 
         return response()->json($supplier->purchase_orders);
+    }
+
+    /**
+     * Get Goods receive note
+     */
+    public function goodsreceivenote()
+    {
+        $supplier = Supplier::find(request('supplier_id'));
+
+        return response()->json($supplier->goodsreceivenotes);
     }
 }

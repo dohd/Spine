@@ -30,7 +30,13 @@ class GoodsreceivenoteRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        $q->when(request('supplier_id'), function ($q) {
+            $q->where('supplier_id', request('supplier_id'));
+        });
+        
+        return $q->get();
     }
 
     /**
@@ -172,7 +178,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $grn->subtotal,
+            'credit' => $grn->total,
             'tr_date' => $grn->date,
             'due_date' => $grn->date,
             'user_id' => $grn->user_id,
@@ -190,7 +196,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         $account = Account::where('system', 'stock')->first(['id']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $account->id,
-            'debit' => $grn->subtotal,
+            'debit' => $grn->total,
         ]);    
         Transaction::create($dr_data);
     }

@@ -2,13 +2,13 @@
 
 namespace App\Models\items;
 
-use App\Models\items\Traits\GoodsreceivenoteItemRelationship;
+use App\Models\items\Traits\SupplierbillItemRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 
-class GoodsreceivenoteItem extends Model
+class SupplierbillItem extends Model
 {
-    use GoodsreceivenoteItemRelationship;
+    use SupplierbillItemRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -19,13 +19,13 @@ class GoodsreceivenoteItem extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'goods_receive_note_items';
+    protected $table = 'supplier_bill_items';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = ['goods_receive_note_id', 'purchaseorder_item_id', 'item_id', 'subtotal', 'tax', 'total', 'qty'];
+    protected $fillable = ['supplier_bill_id', 'goods_receive_note_id', 'note', 'subtotal', 'tax', 'total'];
 
     /**
      * Default values for model fields
