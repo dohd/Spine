@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Goods Receive Note')
+@section('title', 'Supplier Bill Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.goodsreceivenotes.partials.goodsreceivenotes-header-buttons')
+                @include('focus.supplierbills.partials.supplierbills-header-buttons')
             </div>
         </div>
     </div>
