@@ -5,7 +5,7 @@
     </div>
     <div class="col-2">
         <label for="tid" class="caption">Bill No.</label>
-        {{ Form::text('tid', @$goodsreceivenote ? $goodsreceivenote->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
+        {{ Form::text('tid', @$supplierbill ? $supplierbill->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
     </div>  
     <div class="col-2">
         <label for="pin">KRA PIN</label>
@@ -88,7 +88,7 @@
 </div>
 <div class="row mt-1">                            
     <div class="col-2 ml-auto">  
-        {{ Form::submit(@$payment? 'Update Payment' : 'Create Bill', ['class' =>'btn btn-primary btn-lg']) }}
+        {{ Form::submit(@$supplierbill? 'Update Bill' : 'Create Bill', ['class' =>'btn btn-primary btn-lg']) }}
     </div>
 </div>
 
@@ -105,7 +105,6 @@
         init() {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
         },
-
     }
 
     $(() => Form.init());
