@@ -23,7 +23,7 @@ use Request;
 use Yajra\DataTables\Facades\DataTables;
 
 
-class GrnoteTableController extends Controller
+class GoodsReceiveNoteTableController extends Controller
 {
     /**
      * variable to store the repository object

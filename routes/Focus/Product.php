@@ -2,9 +2,9 @@
 
 
 Route::group(['namespace' => 'goodsreceivenote'], function () {
-    Route::resource('goodsreceivenote', 'GrnoteController');
+    Route::resource('goodsreceivenote', 'GoodsReceiveNoteController');
 
-    Route::post('goodsreceivenote/get', 'GrnoteTableController')->name('goodsreceivenote.get');
+    Route::post('goodsreceivenote/get', 'GoodsReceiveNoteTableController')->name('goodsreceivenote.get');
 });
 
 Route::group(['namespace' => 'purchaseorder'], function () {

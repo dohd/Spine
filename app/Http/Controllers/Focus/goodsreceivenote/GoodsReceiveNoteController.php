@@ -8,7 +8,7 @@ use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Repositories\Focus\goodsreceivenote\GoodsreceivenoteRepository;
 use Illuminate\Http\Request;
 
-class GrnoteController extends Controller
+class GoodsReceiveNoteController extends Controller
 {
     /**
      * Store repository object
