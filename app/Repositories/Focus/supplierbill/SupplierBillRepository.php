@@ -105,10 +105,9 @@ class SupplierBillRepository extends BaseRepository
     public function delete(Supplierbill $supplierbill)
     {     
         DB::beginTransaction();
-        
-        Transaction::where(['tr_type' => 'bill', 'note' => $supplierbill->note])->delete();
+        // 
+        Transaction::where(['tr_type' => 'bill', 'note' => $supplierbill->note, 'tr_ref' => $supplierbill->id])->delete();
         $result = $supplierbill->delete();
-
         if ($result) {
             DB::commit(); 
             return true;
@@ -150,16 +149,18 @@ class SupplierBillRepository extends BaseRepository
         $account = Account::where('system', 'grn')->first(['id']);
         $cr_data = array_replace($dr_data, [
             'account_id' => $account->id,
-            'debit' => $supplierbill->subtotal,
+            'credit' => $supplierbill->subtotal,
         ]);    
         Transaction::create($cr_data);
 
         // credit TAX
-        $account = Account::where('system', 'tax')->first(['id']);
-        $cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'debit' => $supplierbill->tax,
-        ]);
-        Transaction::create($cr_data);
+        if ($supplierbill->tax > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $supplierbill->tax,
+            ]);
+            Transaction::create($cr_data);
+        }
     }
 }

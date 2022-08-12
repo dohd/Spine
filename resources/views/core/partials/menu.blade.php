@@ -613,15 +613,13 @@
                     @endauth
 
                     @permission('invoice-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>Supplier Bills
-                        </a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Bills Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Supplier Bills
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create Supplier Bill
-                                </a>
-                            </li>                            
+                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Bills</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create Bill</a></li> 
+                            <li><a class="dropdown-item" href="{{ route('biller.billpayments.index') }}"><i class="fa fa-money"></i> Manage Payments</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.billpayments.create') }}"><i class="fa fa-plus-circle"></i> Make Payment</a></li>                           
                         </ul>
                     </li>
                     @endauth

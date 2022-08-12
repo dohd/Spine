@@ -256,4 +256,14 @@ class SuppliersController extends Controller
 
         return response()->json($supplier->goodsreceivenotes);
     }
+
+    /**
+     * Get due bills
+     */
+    public function due_bills()
+    {
+        $supplier = Supplier::find(request('supplier_id'));
+
+        return response()->json($supplier->due_bills);
+    }
 }
