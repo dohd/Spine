@@ -13,19 +13,19 @@ use App\Models\pricegroup\PriceGroupVariation;
  */
 trait ProductVariationRelationship
 {
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'parent_id');
+    }
+
     public function warehouse()
     {
-        return $this->hasOne(Warehouse::class, 'id', 'warehouse_id');
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function product_serial()
     {
         return $this->hasMany(ProductMeta::class, 'ref_id', 'id')->where('rel_type', '=', 2)->withoutGlobalScopes();
-    }
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
     }
 
     public function v_prices()

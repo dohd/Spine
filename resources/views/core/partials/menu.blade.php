@@ -407,6 +407,13 @@
                             </li>                            
                         </ul>
                     </li>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cubes" aria-hidden="true"></i> Project Stock Issuance</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.projectstock.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Project Stock </a></li>   
+                            <li><a class="dropdown-item" href="{{ route('biller.projectstock.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Stock Issuance </a></li> 
+                        </ul>
+                    </li>
                     {{-- Goods receive note --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-puzzle-piece"></i> Goods Receive Note</a>
@@ -416,8 +423,7 @@
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.goodsreceivenote.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create GRN
                                 </a>
-                            </li>
-                            
+                            </li>                            
                         </ul>
                     </li>
 

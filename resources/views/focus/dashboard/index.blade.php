@@ -1,5 +1,5 @@
 @extends ('core.layouts.app')
-@section ('title', trans('general.dashboard_title').' | '.config('core.cname'))
+@section('title', trans('general.dashboard_title') . ' | ' . config('core.cname'))
 @section('content')
     <!-- BEGIN: Content-->
     <div class="">
@@ -17,10 +17,9 @@
                                         <i class="fa fa-file-text-o font-large-2 white"></i>
                                     </div>
                                     <div class="p-2 bg-gradient-x-primary white media-body">
-                                        <h5>{{trans('dashboard.today_invoices')}}</h5>
-                                        <h5 class="text-bold-400 mb-0"><i
-                                                    class="ft-plus"></i> <span id="dash_1"><i
-                                                        class="fa fa-spinner spinner"></i></span>
+                                        <h5>{{ trans('dashboard.today_invoices') }}</h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-plus"></i> <span id="dash_1"><i
+                                                    class="fa fa-spinner spinner"></i></span>
                                         </h5>
                                     </div>
                                 </div>
@@ -35,10 +34,9 @@
                                         <i class="icon-basket-loaded font-large-2 white"></i>
                                     </div>
                                     <div class="p-2 bg-gradient-x-warning white media-body">
-                                        <h5>{{trans('dashboard.today_sales')}}</h5>
-                                        <h5 class="text-bold-400 mb-0"><i
-                                                    class="ft-arrow-up"></i><span id="dash_2"><i
-                                                        class="fa fa-spinner spinner"></i></span>
+                                        <h5>{{ trans('dashboard.today_sales') }}</h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-arrow-up"></i><span id="dash_2"><i
+                                                    class="fa fa-spinner spinner"></i></span>
                                         </h5>
                                     </div>
                                 </div>
@@ -53,14 +51,12 @@
                                         <i class="icon-notebook font-large-2 white"></i>
                                     </div>
                                     <div class="p-2 bg-gradient-x-danger white media-body">
-                                        <h5>{{trans('dashboard.month_invoices')}}</h5>
-                                        <h5 class="text-bold-400 mb-0"><i
-                                                    class="ft-arrow-up"></i><span id="dash_3"><i
-                                                        class="fa fa-spinner spinner"></i></span>
+                                        <h5>{{ trans('dashboard.month_invoices') }}</h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-arrow-up"></i><span id="dash_3"><i
+                                                    class="fa fa-spinner spinner"></i></span>
                                         </h5>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -72,10 +68,9 @@
                                         <i class="icon-wallet font-large-2 white"></i>
                                     </div>
                                     <div class="p-2 bg-gradient-x-success white media-body">
-                                        <h5>{{trans('dashboard.month_sales')}}</h5>
-                                        <h5 class="text-bold-400 mb-0"><i
-                                                    class="ft-arrow-up"></i> <span id="dash_4"><i
-                                                        class="fa fa-spinner spinner"></i></span>
+                                        <h5>{{ trans('dashboard.month_sales') }}</h5>
+                                        <h5 class="text-bold-400 mb-0"><i class="ft-arrow-up"></i> <span id="dash_4"><i
+                                                    class="fa fa-spinner spinner"></i></span>
                                         </h5>
                                     </div>
                                 </div>
@@ -89,7 +84,7 @@
                     <div class="col-xl-8 col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">{{trans('dashboard.sales_invoice_graph')}}</h4>
+                                <h4 class="card-title">{{ trans('dashboard.sales_invoice_graph') }}</h4>
                                 <a class="heading-elements-toggle"><i class="fa fa-ellipsis-v font-medium-3"></i></a>
                                 <div class="heading-elements">
                                     <ul class="list-inline mb-0">
@@ -109,17 +104,15 @@
                                                         <div class="media">
                                                             <div class="media-body text-left w-100">
                                                                 <h3 class="info"><span id="dash_5"><i
-                                                                                class="fa fa-spinner spinner"></i></span>
+                                                                            class="fa fa-spinner spinner"></i></span>
                                                                 </h3>
-                                                                <span>{{trans('dashboard.today_sales')}}</span>
+                                                                <span>{{ trans('dashboard.today_sales') }}</span>
                                                             </div>
-
                                                         </div>
                                                         <div class="progress progress-sm mt-1 mb-0">
                                                             <div class="progress-bar bg-info" role="progressbar"
-                                                                 style="width: 80%"
-                                                                 aria-valuenow="25" aria-valuemin="0"
-                                                                 aria-valuemax="100"></div>
+                                                                style="width: 80%" aria-valuenow="25" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -132,17 +125,15 @@
                                                         <div class="media">
                                                             <div class="media-body text-left w-100">
                                                                 <h3 class="success"><span id="dash_6"><i
-                                                                                class="fa fa-spinner spinner"></i></span>
+                                                                            class="fa fa-spinner spinner"></i></span>
                                                                 </h3>
-                                                                <span>{{trans('dashboard.today_income')}}</span>
+                                                                <span>{{ trans('dashboard.today_income') }}</span>
                                                             </div>
-
                                                         </div>
                                                         <div class="progress progress-sm mt-1 mb-0">
                                                             <div class="progress-bar bg-success" role="progressbar"
-                                                                 style="width: 80%"
-                                                                 aria-valuenow="25" aria-valuemin="0"
-                                                                 aria-valuemax="100"></div>
+                                                                style="width: 80%" aria-valuenow="25" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -155,19 +146,16 @@
                                                         <div class="media">
                                                             <div class="media-body text-left w-100">
                                                                 <h3 class="danger"><span id="dash_7"><i
-                                                                                class="fa fa-spinner spinner"></i></span>
+                                                                            class="fa fa-spinner spinner"></i></span>
                                                                 </h3>
-                                                                <span>{{trans('dashboard.today_expenses')}}</span>
+                                                                <span>{{ trans('dashboard.today_expenses') }}</span>
                                                             </div>
-
                                                         </div>
                                                         <div class="progress progress-sm mt-1 mb-0">
                                                             <div class="progress-bar bg-danger" role="progressbar"
-                                                                 style="width: 80%"
-                                                                 aria-valuenow="25" aria-valuemin="0"
-                                                                 aria-valuemax="100"></div>
+                                                                style="width: 80%" aria-valuenow="25" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                         </div>
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -179,17 +167,15 @@
                                                         <div class="media">
                                                             <div class="media-body text-left w-100">
                                                                 <h3 class="purple"><span id="dash_8"><i
-                                                                                class="fa fa-spinner spinner"></i></span>
+                                                                            class="fa fa-spinner spinner"></i></span>
                                                                 </h3>
-                                                                <span>{{trans('dashboard.today_revenue')}}</span>
+                                                                <span>{{ trans('dashboard.today_revenue') }}</span>
                                                             </div>
-
                                                         </div>
                                                         <div class="progress progress-sm mt-1 mb-0">
                                                             <div class="progress-bar bg-purple" role="progressbar"
-                                                                 style="width: 80%"
-                                                                 aria-valuenow="25" aria-valuemin="0"
-                                                                 aria-valuemax="100"></div>
+                                                                style="width: 80%" aria-valuenow="25" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -203,7 +189,7 @@
                     <div class="col-xl-4 col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">{{trans('dashboard.recent_buyers')}}</h4>
+                                <h4 class="card-title">{{ trans('dashboard.recent_buyers') }}</h4>
                                 <a class="heading-elements-toggle"><i class="fa fa-ellipsis-v font-medium-3"></i></a>
                                 <div class="heading-elements">
                                     <ul class="list-inline mb-0">
@@ -213,100 +199,91 @@
                             </div>
                             <div class="card-content px-1">
                                 <div id="recent-buyers_p" class="media-list height-450 position-relative">
-                                    @foreach($data['customers'] as $customer)
+                                    @foreach ($data['customers'] as $customer)
                                         <a href="#" class="media border-0">
                                             <div class="media-left pr-1">
-                                            <span class="avatar avatar-md avatar-online"><img
+                                                <span class="avatar avatar-md avatar-online"><img
                                                         class="media-object rounded-circle"
-                                                        src="{{Storage::disk('public')->url('app/public/img/customer/' . $customer->customer->picture)}}">
-                                                <i></i>
-                                            </span>
+                                                        src="{{ Storage::disk('public')->url('app/public/img/customer/' . $customer->customer->picture) }}">
+                                                    <i></i>
+                                                </span>
                                             </div>
                                             <div class="media-body w-100">
-                                                <h6 class="list-group-item-heading">{{$customer->customer->name}}<span
-                                                            class="  float-right st-{{$customer['status']}} ml-1">{{trans('payments.'.$customer['status'])}}</span>
+                                                <h6 class="list-group-item-heading">{{ $customer->customer->name }}<span
+                                                        class="  float-right st-{{ $customer['status'] }} ml-1">{{ trans('payments.' . $customer['status']) }}</span>
                                                 </h6>
                                                 <p class="list-group-item-text mb-0">
                                                 </p>
                                             </div>
                                         </a>
-
                                     @endforeach
-
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!--/ Product sale & buyers -->
                 <!--Recent Orders & Monthly Salse -->
                 <div class="row match-height">
                     <div class="col-xl-8 col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">{{trans('dashboard.recent_invoices')}}</h4>
+                                <h4 class="card-title">{{ trans('dashboard.recent_invoices') }}</h4>
                                 <a class="heading-elements-toggle"><i class="fa fa-ellipsis-v font-medium-3"></i></a>
                                 <div class="heading-elements">
                                     <ul class="list-inline mb-0">
-                                        <li><a href="{{route('biller.invoices.create')}}"
-                                               class="btn btn-primary btn-sm rounded">{{trans('invoices.add_sale')}}</a>
+                                        <li><a href="{{ route('biller.invoices.create') }}"
+                                                class="btn btn-primary btn-sm rounded">{{ trans('invoices.add_sale') }}</a>
                                         </li>
-                                        <li><a href="{{route('biller.invoices.index')}}"
-                                               class="btn btn-success btn-sm rounded">{{trans('invoices.manage_invoices')}}</a>
+                                        <li><a href="{{ route('biller.invoices.index') }}"
+                                                class="btn btn-success btn-sm rounded">{{ trans('invoices.manage_invoices') }}</a>
                                         </li>
                                         <li></li>
-
-
                                     </ul>
                                 </div>
                             </div>
                             <div class="card-content">
-
                                 <div class="table-responsive">
                                     <table id="recent-orders"
-                                           class="table table-hover mb-0 ps-container ps-theme-default">
+                                        class="table table-hover mb-0 ps-container ps-theme-default">
                                         <thead>
-                                        <tr>
-                                            <th>{{ trans('invoices.invoice')}}</th>
-                                            <th>{{ trans('customers.customer') }}</th>
-                                            <th>{{ trans('invoices.invoice_due_date') }}</th>
-                                            <th>{{ trans('general.amount') }}</th>
-                                            <th>{{ trans('general.status') }}</th>
-
-                                        </tr>
+                                            <tr>
+                                                <th>{{ trans('invoices.invoice') }}</th>
+                                                <th>{{ trans('customers.customer') }}</th>
+                                                <th>{{ trans('invoices.invoice_due_date') }}</th>
+                                                <th>{{ trans('general.amount') }}</th>
+                                                <th>{{ trans('general.status') }}</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        @php
-                                            $prefixes=prefixes();
-
-                                        @endphp
-                                        @foreach($data['invoices'] as $invoice)
-
-                                            <tr>
-                                                <td class="text-truncate"><a
-                                                            href="{{route('biller.invoices.show',[$invoice['id']])}}">@switch($invoice['i_class'])
-                                                            @case(0)
-                                                            {{$prefixes->where('class','=',1)->first()->value}}
-                                                            @break
-                                                            @case(1)
-                                                            {{$prefixes->where('class','=',10)->first()->value}}
-                                                            @break
-                                                            @case($invoice['i_class']>1)
-                                                            {{$prefixes->where('class','=',6)->first()->value}}
-                                                            @break
-                                                        @endswitch #{{$invoice['tid']}}</a></td>
-                                                <td class="text-truncate">{{$invoice->customer->name}}</td>
-                                                <td class="text-truncate">{{dateFormat($invoice['invoiceduedate'])}}</td>
-                                                <td class="text-truncate">{{amountFormat($invoice['total'])}}</td>
-                                                <td class="text-truncate"><span
-                                                            class="st-{{$invoice['status']}}">{{trans('payments.'.$invoice['status'])}}</span>
-                                                </td>
-
-                                            </tr>
-
-                                        @endforeach
-
+                                            @php
+                                                $prefixes = prefixes();
+                                            @endphp
+                                            @foreach ($data['invoices'] as $invoice)
+                                                <tr>
+                                                    <td class="text-truncate"><a
+                                                            href="{{ route('biller.invoices.show', [$invoice['id']]) }}">
+                                                            @switch($invoice['i_class'])
+                                                                @case(0)
+                                                                    {{ $prefixes->where('class', '=', 1)->first()->value }}
+                                                                @break
+                                                                @case(1)
+                                                                    {{ $prefixes->where('class', '=', 10)->first()->value }}
+                                                                @break
+                                                                @case($invoice['i_class'] > 1)
+                                                                    {{ $prefixes->where('class', '=', 6)->first()->value }}
+                                                                @break
+                                                            @endswitch #{{ $invoice['tid'] }}
+                                                        </a></td>
+                                                    <td class="text-truncate">{{ $invoice->customer->name }}</td>
+                                                    <td class="text-truncate">{{ dateFormat($invoice['invoiceduedate']) }}
+                                                    </td>
+                                                    <td class="text-truncate">{{ amountFormat($invoice['total']) }}</td>
+                                                    <td class="text-truncate"><span
+                                                            class="st-{{ $invoice['status'] }}">{{ trans('payments.' . $invoice['status']) }}</span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -318,17 +295,15 @@
                             <div class="card-content">
                                 <div class="card-header">
                                     <div class="chart-title mb-1 text-center">
-                                        <h3>{{trans('dashboard.income_vs_expenses')}}</h3>
+                                        <h3>{{ trans('dashboard.income_vs_expenses') }}</h3>
                                     </div>
                                     <hr>
                                 </div>
                                 <div class="card-body sales-growth-chart">
-
-                                    <div class="dashboard-sales-breakdown-chart height-350"
-                                         id="income-compare-chart"></div>
+                                    <div class="dashboard-sales-breakdown-chart height-350" id="income-compare-chart">
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -337,9 +312,9 @@
                     <div class="col-xl-8 col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">{{trans('dashboard.recent')}} <a
-                                            href="{{route('biller.transactions.index')}}"
-                                            class="btn btn-primary btn-sm rounded">{{trans('transactions.transactions')}}</a>
+                                <h4 class="card-title">{{ trans('dashboard.recent') }} <a
+                                        href="{{ route('biller.transactions.index') }}"
+                                        class="btn btn-primary btn-sm rounded">{{ trans('transactions.transactions') }}</a>
                                 </h4>
                                 <a class="heading-elements-toggle"><i class="icon-ellipsis font-medium-3"></i></a>
                                 <div class="heading-elements">
@@ -350,36 +325,29 @@
                                 </div>
                             </div>
                             <div class="card-body">
-
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-1">
                                         <thead>
-                                        <tr>
-                                            <th>{{trans('transactions.payment_date')}}</th>
-                                            <th>{{ trans('transactions.account_id') }}</th>
-                                            <th>{{ trans('transactions.debit') }}</th>
-                                            <th>{{ trans('transactions.credit') }}</th>
-
-                                            <th>{{ trans('transactions.method') }}</th>
-                                        </tr>
+                                            <tr>
+                                                <th>{{ trans('transactions.payment_date') }}</th>
+                                                <th>{{ trans('transactions.account_id') }}</th>
+                                                <th>{{ trans('transactions.debit') }}</th>
+                                                <th>{{ trans('transactions.credit') }}</th>
+                                                <th>{{ trans('transactions.method') }}</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-
-
-                                        @foreach ($transactions as $item)
-
-                                            <tr>
-                                                <td class="text-truncate"><a
-                                                            href="{{route('biller.transactions.show',[$item['id']])}}">{{dateFormat($item['payment_date'])}}
-                                                        #{{$item['id']}}</a></td>
-                                                <td class="text-truncate">{{@$item->account->holder}}</td>
-                                                <td class="text-truncate">{{amountFormat($item['debit'])}} </td>
-                                                <td class="text-truncate">{{amountFormat($item['credit'])}}</td>
-                                                <td class="text-truncate">{{$item['method']}}</td>
-                                            </tr>
-
-                                        @endforeach
-
+                                            @foreach ($transactions as $item)
+                                                <tr>
+                                                    <td class="text-truncate"><a
+                                                            href="{{ route('biller.transactions.show', [$item['id']]) }}">{{ dateFormat($item['payment_date']) }}
+                                                            #{{ $item['id'] }}</a></td>
+                                                    <td class="text-truncate">{{ @$item->account->holder }}</td>
+                                                    <td class="text-truncate">{{ amountFormat($item['debit']) }} </td>
+                                                    <td class="text-truncate">{{ amountFormat($item['credit']) }}</td>
+                                                    <td class="text-truncate">{{ $item['method'] }}</td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -389,58 +357,47 @@
                     <div class="col-xl-4 col-lg-12">
                         <div class="card">
                             <div class="card-header ">
-                                <h4 class="card-title">{{trans('dashboard.stock_alert')}}</h4>
-
+                                <h4 class="card-title">{{ trans('dashboard.stock_alert') }}</h4>
                             </div>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
-
-                                    @foreach ($data['stock_alert'] as $product)
-
-                                        <li class="list-group-item"><span
-                                                    class="badge badge-danger float-xs-right">{{+$product['qty']}} {{$product->product['unit']}}</span>
-                                            <a href="{{route('biller.products.show',[$product->product_id])}}">{{$product->product['name']}} {{$product['name']}}   </a><small
-                                                    class="purple"> <i
-                                                        class="ft-map-pin"></i>{{$product->warehouse['title']}}</small>
+                                    @foreach ($data['stock_alert'] as $productvariation)
+                                        <li class="list-group-item">
+                                            <span class="badge badge-danger float-xs-right">
+                                                Qty: {{ +$productvariation->qty }} {{ $productvariation->product->unit }}                                             
+                                            </span> - 
+                                            <a href="{{ route('biller.products.show', $productvariation->parent_id) }}">
+                                                {{ $productvariation->name }}
+                                            </a> - 
+                                            <small class="purple"> <iclass="ft-map-pin"></i>{{ $productvariation->warehouse->title }}</small>
                                         </li>
-
                                     @endforeach
-
                                 </ul>
-
                             </div>
                         </div>
                     </div>
                 </div>
-
-
             </div>
             <div class="row">
                 <div class="col-xl-7 col-lg-12">
                     <div class="card" id="transactions">
-
                         <div class="card-body">
-                            <h4>{{trans('dashboard.cash_flow')}}</h4>
-                            <p>{{trans('dashboard.cash_flow_graph')}}</p>
+                            <h4>{{ trans('dashboard.cash_flow') }}</h4>
+                            <p>{{ trans('dashboard.cash_flow_graph') }}</p>
                             <ul class="nav nav-tabs">
                                 <li class="nav-item">
                                     <a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1"
-                                       href="#sales"
-                                       aria-expanded="true">{{trans('accounts.Income')}}</a>
+                                        href="#sales" aria-expanded="true">{{ trans('accounts.Income') }}</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2"
-                                       href="#transactions1"
-                                       aria-expanded="false">{{trans('accounts.Expenses')}}</a>
+                                        href="#transactions1" aria-expanded="false">{{ trans('accounts.Expenses') }}</a>
                                 </li>
-
-
                             </ul>
                             <div class="tab-content pt-1">
                                 <div role="tabpanel" class="tab-pane active" id="sales" aria-expanded="true"
-                                     data-toggle="tab">
+                                    data-toggle="tab">
                                     <div id="dashboard-income-chart"></div>
-
                                 </div>
                                 <div class="tab-pane" id="transactions1" data-toggle="tab" aria-expanded="false">
                                     <div id="dashboard-expense-chart"></div>
@@ -452,28 +409,23 @@
                 <div class="col-xl-5 col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">{{trans('dashboard.task_manager')}} <a
-                                        href="{{route('biller.todo')}}"><i
-                                            class="icon-arrow-right deep-orange"></i></a></h4>
+                            <h4 class="card-title">{{ trans('dashboard.task_manager') }} <a
+                                    href="{{ route('biller.todo') }}"><i class="icon-arrow-right deep-orange"></i></a>
+                            </h4>
                         </div>
-
                         <div class="card-content  p-1">
                             <div id="daily-activity">
                                 <table id="tasks-table"
-                                       class="table table-striped table-bordered zero-configuration font-size-base"
-                                       cellspacing="0"
-                                       width="100%">
-
+                                    class="table table-striped table-bordered zero-configuration font-size-base"
+                                    cellspacing="0" width="100%">
                                     <thead>
-                                    <tr class="font-size-small">
-                                        <th>{{ trans('tasks.task') }}</th>
-                                        <th>{{ trans('tasks.start') }}</th>
-                                        <th>{{ trans('tasks.duedate') }}</th>
-                                        <th>{{ trans('tasks.status') }}</th>
-
-                                    </tr>
+                                        <tr class="font-size-small">
+                                            <th>{{ trans('tasks.task') }}</th>
+                                            <th>{{ trans('tasks.start') }}</th>
+                                            <th>{{ trans('tasks.duedate') }}</th>
+                                            <th>{{ trans('tasks.status') }}</th>
+                                        </tr>
                                     </thead>
-
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -483,8 +435,8 @@
             </div>
         </div>
     </div>
-    <input type="hidden" id="loader_url" value="{{route('biller.tasks.load')}}">
-    <input type="hidden" id="mini_dash" value="{{route('biller.mini_dash')}}">
+    <input type="hidden" id="loader_url" value="{{ route('biller.tasks.load') }}">
+    <input type="hidden" id="mini_dash" value="{{ route('biller.mini_dash') }}">
     <!-- END: Content-->
     @include('focus.projects.modal.task_view')
 @endsection
@@ -501,9 +453,9 @@
             wheelPropagation: true,
             minScrollbarLength: 20
         });
-        $(window).on("load", function () {
+        $(window).on("load", function() {
 
-            setTimeout(function () {
+            setTimeout(function() {
                 loadDash();
             }, 1500);
         });
@@ -521,10 +473,10 @@
                 url: action_url,
                 type: 'POST',
                 dataType: 'json',
-                success: function (data) {
+                success: function(data) {
                     var i = 1;
                     //  var obj = jQuery.parseJSON(data);
-                    $.each(data.dash, function (key, value) {
+                    $.each(data.dash, function(key, value) {
                         $('#dash_' + i).text(value);
                         i++;
                     });
@@ -551,17 +503,30 @@
                     @lang('datatable.strings')
                 },
                 ajax: {
-                    url: '{{ route("biller.tasks.get") }}',
+                    url: '{{ route('biller.tasks.get') }}',
                     type: 'post'
                 },
-                columns: [
-                    {data: 'tags', name: 'tags'},
-                    {data: 'start', name: 'start'},
-                    {data: 'duedate', name: 'duedate'},
-                    {data: 'status', name: 'status'},
+                columns: [{
+                        data: 'tags',
+                        name: 'tags'
+                    },
+                    {
+                        data: 'start',
+                        name: 'start'
+                    },
+                    {
+                        data: 'duedate',
+                        name: 'duedate'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    },
                 ],
                 buttons: [],
-                order: [[0, "desc"]],
+                order: [
+                    [0, "desc"]
+                ],
                 searchDelay: 500,
                 dom: 'Blfrtip'
             });
@@ -575,11 +540,11 @@
             Morris.Donut({
                 element: 'income-compare-chart',
                 data: [{
-                    label: "{{trans('accounts.Income')}}",
-                    value: inv_exp.income
-                },
+                        label: "{{ trans('accounts.Income') }}",
+                        value: inv_exp.income
+                    },
                     {
-                        label: "{{trans('accounts.Expenses')}}",
+                        label: "{{ trans('accounts.Expenses') }}",
                         value: inv_exp.expense
                     }
                 ],
@@ -599,10 +564,10 @@
                 xkey: 'x',
                 ykeys: ['y'],
                 ymin: 'auto 40',
-                labels: ['{{trans('general.amount')}}'],
+                labels: ['{{ trans('general.amount') }}'],
                 xLabels: "day",
                 hideHover: 'auto',
-                yLabelFormat: function (y) {
+                yLabelFormat: function(y) {
                     // Only integers
                     if (y === parseInt(y, 10)) {
                         return y;
@@ -630,10 +595,10 @@
                 xkey: 'x',
                 ykeys: ['y'],
                 ymin: 'auto 0',
-                labels: ['{{trans('general.amount')}}'],
+                labels: ['{{ trans('general.amount') }}'],
                 xLabels: "day",
                 hideHover: 'auto',
-                yLabelFormat: function (y) {
+                yLabelFormat: function(y) {
                     // Only integers
                     if (y === parseInt(y, 10)) {
                         return y;
@@ -660,7 +625,7 @@
                 ykeys: ['sales', 'invoices'],
                 labels: ['sales', 'invoices'],
                 behaveLikeLine: true,
-                xLabelFormat: function (x) { // <--- x.getMonth() returns valid index
+                xLabelFormat: function(x) { // <--- x.getMonth() returns valid index
                     var day = x.getDate();
                     var month = months[x.getMonth()];
                     return day + ' ' + month;
@@ -679,7 +644,7 @@
             });
         }
 
-        $('a[data-toggle=tab').on('shown.bs.tab', function (e) {
+        $('a[data-toggle=tab').on('shown.bs.tab', function(e) {
             window.dispatchEvent(new Event('resize'));
         });
     </script>

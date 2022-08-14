@@ -16,19 +16,9 @@ trait ProductRelationship
         return $this->belongsTo(Productvariable::class, 'unit_id');
     }
 
-    public function standard()
-    {
-        return $this->hasOne(ProductVariation::class)->where('parent_id', 0);
-    }
-
     public function variations()
     {
-        return $this->hasMany(ProductVariation::class)->where('parent_id', 1);
-    }
-
-    public function variations_b()
-    {
-        return $this->belongsTo(ProductVariation::class)->where('parent_id', 1);
+        return $this->hasMany(ProductVariation::class, 'parent_id');
     }
 
     public function category()
@@ -45,6 +35,7 @@ trait ProductRelationship
     {
         return $this->hasMany(ProductVariation::class);
     }
+    
     public function record_one()
     {
         return $this->hasOne(ProductVariation::class);

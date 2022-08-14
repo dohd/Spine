@@ -12,6 +12,7 @@ use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
 use App\Models\project\Budget;
 use App\Models\project\BudgetSkillset;
+use App\Models\project\Project;
 use App\Models\project\ProjectQuote;
 use App\Models\term\Term;
 use App\Models\verifiedjcs\VerifiedJc;
@@ -21,6 +22,11 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
+    }
+
     public function issuance()
     {
         return $this->hasMany(Issuance::class);

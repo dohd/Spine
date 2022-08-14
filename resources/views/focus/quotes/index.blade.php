@@ -94,9 +94,7 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     const config = {
-        ajaxSetup: {
-            headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
-        },
+        ajaxSetup: {headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
         datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
     };
 
@@ -137,7 +135,7 @@
                     type: 'POST',
                     data: {
                         ...params,
-                        page: location.href.includes('page=pi') ? 'pi' : 0
+                        page: location.href.includes('page=pi') ? 'pi' : 'qt'
                     },
                     dataSrc: res => {
                         const {data} = res;
