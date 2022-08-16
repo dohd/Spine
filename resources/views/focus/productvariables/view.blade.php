@@ -25,10 +25,10 @@
                             <table id="variableTbl" class="table table-bordered mb-2">
                                 @php
                                     $details = [
-                                        'Unit Name' => $productvariable->name,
-                                        'Compound Unit' => $productvariable->compound_unit,
-                                        'Base Unit' => $productvariable->base_unit,
-                                        'Conversion Rate' => numberFormat($productvariable->conversion_rate),
+                                        'Title' => $productvariable->title,
+                                        'Code' => $productvariable->code,
+                                        'Unit Type' => $productvariable->unit_type,
+                                        'Ratio (per base unit)' => numberFormat($productvariable->base_ratio),
                                         'Count Type' => $productvariable->count_type
                                     ];
                                 @endphp

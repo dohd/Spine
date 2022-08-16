@@ -5,7 +5,6 @@ namespace App\Repositories\Focus\productvariable;
 use App\Models\productvariable\Productvariable;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductvariableRepository.
@@ -38,7 +37,6 @@ class ProductvariableRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        $input['ins'] = auth()->user()->ins;
         $input['base_ratio'] = numberClean($input['base_ratio']);
 
         $result = Productvariable::create($input);
@@ -57,9 +55,10 @@ class ProductvariableRepository extends BaseRepository
      */
     public function update($productvariable, array $input)
     {
-        $input['ins'] = auth()->user()->ins;
+        dd($input);
         $input['base_ratio'] = numberClean($input['base_ratio']);
-    	if ($productvariable->update($input)) return true;
+        $result = $productvariable->update($input);
+    	if ($result) return $result;
 
         throw new GeneralException(trans('exceptions.backend.productvariables.update_error'));
     }

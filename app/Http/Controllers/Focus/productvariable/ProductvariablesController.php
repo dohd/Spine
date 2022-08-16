@@ -76,11 +76,9 @@ class ProductvariablesController extends Controller
      */
     public function store(ManageCompanyRequest $request)
     {
-        $data = $request->except(['_token']);
+        $this->repository->create($request->except(['_token']));
 
-        $this->repository->create($data);
-
-        return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => trans('alerts.backend.productvariables.created')]);
+        return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => 'Product Unit Variable Successfully Created']);
     }
 
     /**
@@ -104,11 +102,9 @@ class ProductvariablesController extends Controller
      */
     public function update(ManageCompanyRequest $request, Productvariable $productvariable)
     {
-        $input = $request->except(['_token', 'ins']);
+        $this->repository->update($productvariable, $request->except(['_token']));
 
-        $this->repository->update($productvariable, $input);
-
-        return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => trans('alerts.backend.productvariables.updated')]);
+        return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => 'Product Unit Variable Successfully Updated']);
     }
 
     /**
@@ -122,7 +118,7 @@ class ProductvariablesController extends Controller
     {
         $this->repository->delete($productvariable);
         
-        return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => trans('alerts.backend.productvariables.deleted')]);
+        return new RedirectResponse(route('biller.productvariables.index'), ['flash_success' => 'Product Unit Variable Successfully Deleted']);
     }
 
     /**

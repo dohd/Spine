@@ -27,12 +27,11 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Description</th>
-                                        <th>Compound Unit</th>
-                                        <th>Base Unit</th>
+                                        <th>Title</th>
+                                        <th>Code</th>
+                                        <th>Unit Type</th>
                                         <th>Ratio (per base unit)</th>
-                                        <th>Count Type</th>
-                                        <th>Category</th>
+                                        <th>Count Type</th>                                       
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -76,12 +75,11 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'description', name: 'description'},
-                    {data: 'compound_unit', name: 'compound_unit'},
-                    {data: 'base_unit', name: 'base_unit'},
+                    {data: 'title', name: 'title'},
+                    {data: 'code', name: 'code'},
+                    {data: 'unit_type', name: 'unit_type'},
                     {data: 'base_ratio', name: 'base_ratio'},
                     {data: 'count_type', name: 'count_type'},
-                    {data: 'category', name: 'category'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

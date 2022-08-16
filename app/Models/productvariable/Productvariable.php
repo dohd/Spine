@@ -9,12 +9,8 @@ use App\Models\productvariable\Traits\ProductvariableRelationship;
 
 class Productvariable extends Model
 {
-    use ModelTrait,
-        ProductvariableAttribute,
-    	ProductvariableRelationship {
-            // ProductvariableAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
-
+    use ModelTrait,  ProductvariableAttribute, ProductvariableRelationship;
+       
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
@@ -31,16 +27,14 @@ class Productvariable extends Model
      * @var array
      */
     protected $fillable = [
-
+        'title', 'code', 'unit_type', 'base_ratio', 'count_type'
     ];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +61,22 @@ class Productvariable extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
