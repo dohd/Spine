@@ -51,26 +51,17 @@ class ProjectStockTableController extends Controller
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
-            ->addIndexColumn()    
+            ->addIndexColumn()   
             ->addColumn('tid', function ($projectstock) {
-                return gen4tid('GRN-', $projectstock->tid);
-            })
-            ->addColumn('supplier', function ($projectstock) {
-                if ($projectstock->supplier)
-                return $projectstock->supplier->name;
-            })        
-            ->addColumn('purchase_type', function ($projectstock) {
-                $purchaseorder = $projectstock->purchaseorder;
-                if ($purchaseorder) {
-                    $lpo_no = gen4tid('PO-', $purchaseorder->tid);
-                    $note = $purchaseorder->note;
-
-                    return $lpo_no . ' - ' . $note;
-                }
-            })
-            ->addColumn('dnote', function ($projectstock) {
-                return $projectstock->dnote;
-            })
+                return gen4tid('ISS-', $projectstock->tid);
+            }) 
+            ->addColumn('quote', function ($projectstock) {
+                $quote = $projectstock->quote;
+                if ($quote) {
+                    $tid = gen4tid($quote->bank_id? 'PI-' : 'Qt-', $quote->tid);
+                    return $tid . ' - ' . $quote->notes;
+                }                
+            })                    
             ->addColumn('date', function ($projectstock) {
                 return dateFormat($projectstock->date);
             })

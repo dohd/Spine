@@ -56,32 +56,46 @@ class QuoteTableController extends Controller
                 return dateFormat($quote->date);
             })
             ->addColumn('tid', function ($quote) {
-                $tid = sprintf('%04d', $quote->tid);
-                $tid = ($quote->bank_id) ? 'PI-'.$tid : 'QT-'.$tid;
+                $tid = gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid);
                 if ($quote->revision) $tid .= $quote->revision; 
-                              
-                $link = route('biller.quotes.show', [$quote->id]);
-                if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
 
-                return '<a class="font-weight-bold" href="' . $link . '">' . $tid . '</a>';
+                $url = route('biller.quotes.show', [$quote->id]);
+                if ($quote->bank_id) $url = route('biller.quotes.show', [$quote->id, 'page=pi']);
+
+                return '<a href="' . $url . '"><b>'. $tid .'</b></a>';
             })
             ->addColumn('customer', function ($quote) {
-                $client_name = $quote->customer ? $quote->customer->name : '';
-                $branch_name = $quote->branch ? $quote->branch->name : '';
-                if ($client_name && $branch_name) 
-                    return $client_name . ' - ' . $branch_name 
-                        . ' <a class="font-weight-bold" href="'. route('biller.customers.show', [$quote->customer->id]) .'"><i class="ft-eye"></i></a>';
-
-                return $quote->lead->client_name;
+                return $quote->branch ? $quote->branch->name : '';
             })
             ->addColumn('item_count', function ($quote) {
-                return $quote->products->count();
+                $budget = $quote->budget;
+                if ($budget) return $budget->items()->whereHas('product')->count();
             })
-            ->addColumn('issue_count', function ($quote) {
-                return 0;
+            ->addColumn('approved_qty', function ($quote) {
+                $budget = $quote->budget;
+                if ($budget) {
+                    $budget_items = $budget->items()->whereHas('product');
+                    return +$budget_items->sum('new_qty');
+                }
+            })
+            ->addColumn('issued_qty', function ($quote) {
+                $projectstock = $quote->projectstock;
+                if ($projectstock->count()) 
+
+                return +$projectstock->sum('qty_total');                
             })
             ->addColumn('issue_status', function ($quote) {
-                return 'pending';
+                $status = 'pending';
+                $projectstock = $quote->projectstock;
+                if ($projectstock->count()) {
+                    $qty = $projectstock->sum('qty_total');
+                    $approved_qty = $projectstock->sum('approved_qty_total');
+                    if ($approved_qty > $qty)
+                        $status = 'partial';
+                    else $status = 'complete';
+                }
+
+                return $status;
             })
             ->make(true);
     }

@@ -6,6 +6,7 @@ use App\Models\product\ProductVariation;
 use DB;
 use App\Models\product\Product;
 use App\Exceptions\GeneralException;
+use App\Models\items\PurchaseItem;
 use App\Repositories\BaseRepository;
 use DateTime;
 use Illuminate\Support\Facades\Storage;
@@ -143,14 +144,14 @@ class ProductRepository extends BaseRepository
                     if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' required!']);
                     $item[$key] = numberClean($val);
                 }
-                if ($key == 'barcode' && !$val) 
+                if ($key == 'barcode' && !$val)
                     $item[$key] =  rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
                 if ($key == 'expiry') {
                     $expiry = new DateTime(date_for_database($val));
                     $now = new DateTime(date('Y-m-d'));
                     if ($expiry > $now) $item[$key] = date_for_database($val);
                     else $item[$key] = null;
-                }                
+                }
             }
 
             if (empty($item['image'])) $item['image'] = 'example.png';
@@ -182,13 +183,14 @@ class ProductRepository extends BaseRepository
     public function delete(Product $product)
     {
         if ($product->delete()) return true;
-            
+
         throw new GeneralException(trans('exceptions.backend.products.delete_error'));
     }
 
-    /*
-* Upload logo image
-*/
+    /**
+     * Upload logo image
+     * @param mixed $file
+     */
     public function uploadFile($file)
     {
         $file_name = time() . $file->getClientOriginalName();
@@ -198,16 +200,50 @@ class ProductRepository extends BaseRepository
         return $file_name;
     }
 
-    /*
-    * remove logo or favicon icon
-    */
-    public function removePicture(Product $product, $type)
+    /**
+     * Remove logo or favicon icon
+     * @param Product $product
+     * @param string $field
+     * @return bool
+     */
+    public function removePicture(Product $product, $field)
     {
-        if ($product->type && $this->storage->exists($this->file_path . $product->type)) 
+        if ($product->type && $this->storage->exists($this->file_path . $product->type))
             $this->storage->delete($this->file_path . $product->type);
-        
-        if ($product->update([$type => null])) return true;
-            
+
+        if ($product->update([$field => null])) return true;
+
         throw new GeneralException(trans('exceptions.backend.settings.update_error'));
+    }
+
+    /**
+     * Purchase Price based on Last out First In (LIFO)
+     * accounting principle
+     * @param int $id
+     * @param float $qty
+     * @param float $rate
+     * @return float
+     */
+    public function compute_purchase_price($id, $qty, $rate)
+    {
+        if ($qty == 0) return $rate;
+        
+        $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
+            ->where('item_id', $id)
+            ->orderBy('created_at', 'ASC')
+            ->groupBy('rate')
+            ->get();
+
+        $set = range(1, $qty);
+        foreach ($rate_groups as $group) {
+            $subset = array_splice($set, 0, $group->count);
+            $last_indx = count($subset) - 1;
+            if ($subset && $qty >= $subset[0] && $qty <= $subset[$last_indx]) {
+                $rate = $group->rate;
+                break;
+            }
+        }
+
+        return $rate;
     }
 }

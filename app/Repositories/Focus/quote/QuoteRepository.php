@@ -111,6 +111,10 @@ class QuoteRepository extends BaseRepository
             ]);
         });
 
+        $q->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        });
+
         $q->when(request('verify_state'), function ($q) {
             $q->where('verified', request('verify_state'));
         });

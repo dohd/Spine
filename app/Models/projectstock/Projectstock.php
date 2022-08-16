@@ -21,15 +21,15 @@ class Projectstock extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'supplier_bills';
+    protected $table = 'project_stock';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
     protected $fillable = [
-        'tid', 'quote_id', 'reference', 'date', 'note', 'subtotal', 'tax', 'total', 
-        'ins', 'user_id'
+        'tid', 'quote_id', 'reference', 'date', 'note', 'qty_total', 'approved_qty_total', 
+        'subtotal', 'tax', 'total', 'ins', 'user_id'        
     ];
 
     /**

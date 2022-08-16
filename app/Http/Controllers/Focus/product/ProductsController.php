@@ -417,10 +417,8 @@ class ProductsController extends Controller
             ];
             
             // set purchase price using LIFO algorithm
-            if ($row->qty > 0) {
-                $price = $this->lifo_purchase_price($row->id, $row->qty, $row->purchase_price);
-                $product['purchase_price'] = numberFormat($price);
-            }           
+            $purchase_price = $this->repository->compute_purchase_price($row->id, $row->qty, $row->purchase_price);
+            $product['purchase_price'] = numberFormat($purchase_price);      
 
             // set customer selling price or supplier purchase price
             if ($pricegroup) {

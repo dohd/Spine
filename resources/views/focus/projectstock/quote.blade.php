@@ -17,6 +17,19 @@
 
     <div class="content-body">
         <div class="card">
+            <div class="card-body">
+                <div class="form-group row">
+                    <div class="col-5">
+                        <label for="customer">Customer</label>
+                        <select name="customer_id" id="customer" class="form-control">
+                            <option value="">-- search customer --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>           
+        </div>
+        
+        <div class="card">
             <div class="card-content">
                 <div class="card-body">  
                     <table id="quotesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -25,10 +38,11 @@
                                 <th>#</th>
                                 <th>Date</th>   
                                 <th>Quote / PI No</th>
-                                <th>Customer & Branch</th>   
+                                <th>Branch</th>   
                                 <th>Title</th> 
                                 <th>Product Count</th>  
-                                <th>Issued Count</th>                                                                    
+                                <th>Approved Qty</th>
+                                <th>Issued Qty</th>                                                                    
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -57,14 +71,28 @@
 <script>
     const config = {
         ajaxSetup: {headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
-        datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+        datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+        customerSelect(customers) {
+            return {
+                data: customers.map(v => ({id: v.id, text: v.company}))
+            };
+        },
     };
 
     const Index = {
+        customers: @json($customers),
+
         init(config) {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
-            this.drawDataTable();
             $('#quotesTbl').on('change', '.select-row', this.selectRow);
+            $('#customer').select2(config.customerSelect(this.customers)).change(this.customerChange);
+            this.drawDataTable();
+        },
+
+        customerChange() {
+            customer_id = $(this).val();
+            $('#quotesTbl').DataTable().destroy();
+            return Index.drawDataTable(customer_id);
         },
 
         selectRow() {
@@ -95,7 +123,7 @@
             }
         },
 
-        drawDataTable() {
+        drawDataTable(customer_id='') {
             $('#quotesTbl').dataTable({
                 processing: true,
                 responsive: true,
@@ -104,41 +132,18 @@
                 ajax: {
                     url: "{{ route('biller.projectstock.get_quote') }}",
                     type: 'POST',
+                    data: {customer_id}
                 },
                 columns: [
-                    {
-                        data: 'checkbox',
-                        searchable: false, 
-                        sortable: false
-                    },
-                    {
-                        data: 'date',
-                        name: 'date'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'notes',
-                        name: 'notes'
-                    },    
-                    {
-                        data: 'item_count',
-                        name: 'item_count'
-                    },    
-                    {
-                        data: 'issue_count',
-                        name: 'issue_count'
-                    },    
-                    {
-                        data: 'issue_status',
-                        name: 'issue_status'
-                    },                
+                    {data: 'checkbox',  searchable: false,  sortable: false},
+                    {data: 'date',  name: 'date'},
+                    {data: 'tid', name: 'tid'},
+                    {data: 'customer', name: 'customer'},
+                    {data: 'notes', name: 'notes'},    
+                    {data: 'item_count', name: 'item_count'},    
+                    {data: 'approved_qty', name: 'approved_qty' },
+                    {data: 'issued_qty',name: 'issued_qty' },  
+                    { data: 'issue_status', name: 'issue_status' },  
                 ],
                 columnDefs: [
                     { type: "custom-date-sort", targets: 1 }

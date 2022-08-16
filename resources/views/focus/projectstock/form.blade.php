@@ -9,7 +9,7 @@
     </div>
     <div class="col-2">
         <label for="tid">Issuance No.</label>
-        {{ Form::text('tid', @$projectstock ? $projectstock->tid : $tid, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
+        {{ Form::text('tid', @$projectstock ? $projectstock->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
     </div>  
     <div class="col-2">
         <label for="date">Date</label>
@@ -46,7 +46,7 @@
                     <td>{{ $i+1 }}</td>
                     <td>{{ $item->product_name }}</td>
                     <td>
-                        <select name="unit[]" id="unit" class="custom-select">
+                        <select name="unit[]" id="unit" class="custom-select unit">
                             <option value="{{ $item->unit }}">{{ $item->unit }}</option>
                         </select>
                     </td>
@@ -56,26 +56,31 @@
                         @php
                             $qty_limit = 0;
                             $stock_qty = 0;
+                            $product_id = '';
                         @endphp
                         <select name="warehouse_id[]" id="warehouse" class="custom-select wh">
                             @foreach ($stock as $stock_item)
                                 @php
-                                    if ($item->product && $item->product->parent_id == $stock_item->parent_id) {
-                                        $qty_limit = $item->product->alert;
+                                    $product = $item->product;
+                                    if ($product && $product->parent_id == $stock_item->parent_id) {
+                                        $qty_limit = $product->alert;
                                         $stock_qty = $stock_item->qty;
-                                        $wh = $stock_item->warehouse;
+                                        $warehouse = $stock_item->warehouse;
+                                        $product_id = $product->id;
                                     } else continue;
                                 @endphp
-                                <option value="{{ $wh->id }}"> 
-                                    {{ $wh->title }} ({{ +$stock_qty }})
+                                <option value="{{ $warehouse->id }}"> 
+                                    {{ $warehouse->title }} ({{ +$stock_qty }})
                                 </option>
                             @endforeach
                         </select>
                     </td>
                     <td><input type="text" name="qty[]" id="qty" class="form-control qty"></td>
                     <input type="hidden" name="budget_item_id[]" value="{{ $item->id }}">
+                    <input type="hidden" name="product_id[]" value="{{ $product_id }}">
                     <input type="hidden" name="qty_limit[]" value="{{ +$qty_limit }}" class="qty-limit">
                     <input type="hidden" name="stock_qty[]" value="{{ +$stock_qty }}" class="qty-stock">
+                    <input type="hidden" name="approved_qty[]" value="{{ +$item->new_qty }}" class="qty-approved">
                 </tr>
             @endforeach
         </tbody>                
@@ -85,6 +90,7 @@
     <div class="col-2 ml-auto">
         <label for="qty_total">Total Issue Qty</label>    
         {{ Form::text('qty_total', null, ['class' => 'form-control', 'id' => 'qty_total', 'readonly']) }}
+        {{ Form::hidden('approved_qty_total', null, ['id' => 'approved_qty_total']) }}
     </div>                          
 </div>
 <div class="row mt-1">                            
@@ -106,32 +112,41 @@
         init() {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#productsTbl').ready(this.tableReady);
-            $('#productsTbl').on('keyup', '.qty', function() { 
-                Form.columnTotals(); 
-                Form.qtyAlert($(this));
-            });
+            $('#productsTbl').on('keyup change', '.qty', this.tableEventChange);
         },
 
         tableReady() {
             $(this).find('tbody tr').each(function() {
                 const el = $(this);
+                const unit = el.find('.unit');
                 const warehouse = el.find('.wh');
                 const qty = el.find('.qty');
                 if (!warehouse.children().length) {
-                    warehouse.attr('disabled', true);
-                    qty.attr('disabled', true);
+                    [unit, warehouse, qty].forEach(el => el.attr('disabled', true));
+                    const inputs = `<input type="hidden" name="unit[]">
+                        <input type="hidden" name="warehouse_id[]"><input type="hidden" name="qty[]">`;
+                    el.append(inputs);
                 }
             });
         },
 
-        qtyAlert(el) {
-            const qty = el.val();
+        tableEventChange(event) {
+            const el = $(this);
+            const qty = parseFloat(el.val());
             const row = el.parents('tr');
-            const qtyLimit = row.find('.qty-limit').val();
-            const qtyStock = row.find('.qty-stock').val();
+            const qtyLimit = parseFloat(row.find('.qty-limit').val());
+            const qtyStock = parseFloat(row.find('.qty-stock').val());
+            if (event.type == 'change') {
+                if (qty > qtyStock) el.val(qtyStock).change();
+                else if (qty == 0) el.val(1).change();
+            }
+            Form.qtyAlert(qty, qtyLimit, qtyStock);
+            Form.columnTotals();
+        },
+
+        qtyAlert(qty = 0, qtyLimit = 0, qtyStock = 0) {
             const msg = `<div class="alert alert-warning col-12 stock-alert" role="alert">
-                <strong>Minimum inventory limit!</strong> Please restock product.
-            </div>`;
+                <strong>Minimum inventory limit!</strong> Please restock product.</div>`;
             if (qtyStock <= qtyLimit && qty >= qtyStock) {
                 $('.content-header div:first').before(msg);
                 setTimeout(() => $('.content-header div:first').remove(), 4000);
@@ -141,11 +156,17 @@
 
         columnTotals() {
             let qtyTotal = 0;
+            let qtyApprovedTotal = 0;
             $('#productsTbl tbody tr').each(function() {
                 let qty = $(this).find('.qty').val();
-                if (qty > 0) qtyTotal += parseFloat(qty);
+                let qtyApproved = $(this).find('.qty-approved').val();
+                if (qty > 0) {
+                    qtyTotal += parseFloat(qty);
+                    qtyApprovedTotal += parseFloat(qtyApproved);
+                }
             });
             $('#qty_total').val(qtyTotal);
+            $('#approved_qty_total').val(qtyTotal);
         },
     }
 

@@ -21,16 +21,19 @@
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
-                            $pmt = $billpayment;
+                            $quote_label = '';
+                            $quote = $projectstock->quote;
+                            if ($quote) {
+                                $tid = gen4tid($quote->bank_id? 'PI-' : 'Qt-', $quote->tid);
+                                $quote_label = $tid . ' - ' . $quote->notes;
+                            }      
                             $details = [
-                                'Payment No' => $pmt->tid,
-                                'Supplier' => $pmt->supplier ? $pmt->supplier->name : '',
-                                'Date' => dateFormat($pmt->date),
-                                'Amount' => numberFormat($pmt->amount),
-                                'Allocated Amount' => numberFormat($pmt->allocate_ttl),
-                                'Payment Mode' => $pmt->payment_mode,
-                                'Reference' => $pmt->reference,
-                                'Payment Account' => $pmt->account? $pmt->account->holder : '',
+                                'Issuance No' => gen4tid('ISS-', $projectstock->tid),
+                                'Quote / Proforma Invoice' => $quote_label,
+                                'Reference' => $projectstock->reference,
+                                'Date' => dateFormat($projectstock->date),
+                                'Note' => $projectstock->note,
+                                'Stock Worth' => numberFormat($projectstock->total),
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
@@ -42,34 +45,34 @@
                     </table>
 
                     <div class="table-responsive">
-                        <table class="table tfr my_stripe_single text-center" id="invoiceTbl">
+                        <table class="table tfr my_stripe_single text-center" id="productsTbl">
                             <thead>
                                 <tr class="bg-gradient-directional-blue white">
                                     <th>#</th>
-                                    <th>Due Date</th>
-                                    <th>Bill No</th>
-                                    <th>Note</th>
-                                    <th>Status</th>
-                                    <th>Amount</th>
-                                    <th>Paid</th>
-                                    <th>Outstanding</th>
+                                    <th>Product</th>
+                                    <th>UoM</th>
+                                    <th>Qty Approved</th>
+                                    <th>Warehouse</th>
+                                    <th>Qty Issued</th>                                    
                                 </tr>
                             </thead>
                             <tbody>   
-                                @foreach ($pmt->items as $i => $item)
-                                    @if ($bill = $item->supplier_bill)
-                                        <tr>
-                                            <td>{{ $i+1 }}</td>
-                                            <td>{{ dateFormat($bill->due_date) }}</td>
-                                            <td>{{ gen4tid('BILL-', $bill->tid) }}</td>
-                                            <td>{{ $bill->note }}</td>
-                                            <td>{{ $bill->status }}</td>
-                                            <td>{{ numberFormat($bill->total) }}</td>
-                                            <td>{{ numberFormat($bill->amount_paid) }}</td>
-                                            <td>{{ numberFormat($bill->total - $bill->amount_paid) }}</td>    
-                                        </tr>
-                                    @endif
+                            
+                                @foreach ($projectstock->items as $i => $item)
+                                    @php
+                                        $budget_item = $item->budget_item;
+                                        $warehouse = $item->warehouse;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $i+1 }}</td>
+                                        <td>{{ $budget_item->product_name }}</td>
+                                        <td>{{ $item->unit }} </td>
+                                        <td>{{ +$budget_item->new_qty }}</td>
+                                        <td>{{ $warehouse->title }}</td>                                         
+                                        <td>{{ +$budget_item->issue_qty }}</td>
+                                    </tr>
                                 @endforeach
+                                
                             </tbody>                
                         </table>
                     </div>

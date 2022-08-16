@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Focus\projectstock;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
-use App\Models\items\QuoteItem;
+use App\Models\customer\Customer;
 use App\Models\product\ProductVariation;
-use App\Models\project\Budget;
 use App\Models\project\BudgetItem;
 use App\Models\projectstock\Projectstock;
 use App\Models\quote\Quote;
-use App\Models\warehouse\Warehouse;
 use App\Repositories\Focus\projectstock\ProjectStockRepository;
 use DB;
 use Illuminate\Http\Request;
@@ -51,7 +49,7 @@ class ProjectStockController extends Controller
 
         $tid = Projectstock::max('tid');
         $quote = Quote::find($quote_id);
-
+        
         $budget_items = BudgetItem::where('a_type', 1)->whereHas('budget', function ($q) use($quote_id) { 
             $q->where('quote_id', $quote_id);
         })->with('product')->get();
@@ -73,7 +71,7 @@ class ProjectStockController extends Controller
     {
         $this->respository->create($request->except('_token'));
 
-        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Project Stock Created Successfully']);
+        return new RedirectResponse(route('biller.projectstock.index'), ['flash_success' => 'Project Stock Created Successfully']);
     }
 
     /**
@@ -84,7 +82,7 @@ class ProjectStockController extends Controller
      */
     public function show(Projectstock $projectstock)
     {
-        return view('focus.projectstock.view', compact('goodsreceivenote'));
+        return view('focus.projectstock.view', compact('projectstock'));
     }
 
     /**
@@ -95,7 +93,7 @@ class ProjectStockController extends Controller
      */
     public function edit(Projectstock $projectstock)
     {
-        return view('focus.projectstock.edit', compact('goodsreceivenote'));
+        return view('focus.projectstock.edit', compact('projectstock'));
     }
 
     /**
@@ -109,7 +107,7 @@ class ProjectStockController extends Controller
     {
         $this->respository->update($projectstock, $request->except('_token'));
 
-        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Project Stock  Updated Successfully']);
+        return new RedirectResponse(route('biller.projectstock.index'), ['flash_success' => 'Project Stock  Updated Successfully']);
     }
 
     /**
@@ -122,7 +120,7 @@ class ProjectStockController extends Controller
     {
         $this->respository->delete($projectstock);
 
-        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Project Stock Deleted Successfully']);
+        return new RedirectResponse(route('biller.projectstock.index'), ['flash_success' => 'Project Stock Deleted Successfully']);
     }
 
     /**
@@ -130,22 +128,8 @@ class ProjectStockController extends Controller
      */
     public function quote_index()
     {
-        return view('focus.projectstock.quote');
-    }
-
-    /**
-     * Quote / PI Products for issuance
-     * @param Quote $quote
-     */
-    public function products_for_issuance(Quote $quote)
-    {
-
-
-        $products = collect();
-        foreach ($budget_items as $item) {
-            
-            $products->add($item);
-        }
-        return $products;
+        $customers = Customer::get(['id', 'company']);
+        
+        return view('focus.projectstock.quote', compact('customers'));
     }
 }

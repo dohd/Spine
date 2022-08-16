@@ -23,14 +23,11 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Supplier</th>
-                                <th>Account</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Allocate</th>
-                                <th>Mode</th>
+                                <th>Issuance No</th>
+                                <th>Quote</th>
                                 <th>Reference</th>
-                                <th>Bill</th>                                
+                                <th>Date</th>
+                                <th>Note</th>                                                       
                                 <th>{{ trans('labels.general.actions') }}</th>
                             </tr>
                         </thead>
@@ -70,19 +67,16 @@
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.billpayments.get') }}",
+                    url: "{{ route('biller.projectstock.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'supplier', name: 'supplier'},
-                    {data: 'account', name: 'account'},                    
+                    {data: 'tid', name: 'tid'},
+                    {data: 'quote', name: 'quote'},
+                    {data: 'reference', name: 'reference'},                    
                     {data: 'date', name: 'date'},
-                    {data: 'amount', name: 'amount'},
-                    {data: 'allocate', name: 'allocate'},
-                    {data: 'payment_mode', name: 'payment_mode'},
-                    {data: 'reference', name: 'reference'},
-                    {data: 'bill_no', name: 'bill_no'},
+                    {data: 'note', name: 'note'},                    
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
