@@ -2,7 +2,6 @@
 
 namespace App\Http\Responses\Focus\product;
 
-use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
 use App\Models\productvariable\Productvariable;
 use App\Models\warehouse\Warehouse;
@@ -32,12 +31,13 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $product_categories = Productcategory::all();
-        $productvariables = Productvariable::where('type', 0)->get();
+        $productvariables = Productvariable::all();
         $warehouses = Warehouse::all();
+        $product_categories = Productcategory::all();
 
-        return view('focus.products.edit', ['product' => $this->product])->with(
-            compact('product_categories', 'productvariables', 'warehouses')
-        );
+        return view('focus.products.edit', compact('product_categories', 'productvariables', 'warehouses'))->with([
+            'product' => $this->product,
+            'compound_unit_ids' => $this->product->units->map(function ($v) { return $v->id; })->toArray()
+        ]);
     }
 }

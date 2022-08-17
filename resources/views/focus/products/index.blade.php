@@ -159,7 +159,7 @@
                     {data: 'created_at', name: '{{config('module.products.table')}}.created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
-                order: [[0, "asc"]],
+                order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: {

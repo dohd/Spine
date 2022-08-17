@@ -9,6 +9,7 @@ use App\Exceptions\GeneralException;
 use App\Models\items\PurchaseItem;
 use App\Repositories\BaseRepository;
 use DateTime;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -74,24 +75,31 @@ class ProductRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
+        // sanitize
+        $input['taxrate'] = numberClean($input['taxrate']);
+        
+        // create product
+        $result = Product::create($input);
 
-        $data = $input['data'];
-        $data['taxrate'] = numberClean($data['taxrate']);
-        $result = Product::create($data);
-
-        $product_variations = [];
-        $data_items = $input['data_items'];
+        // product variations
+        $variations = [];
+        $data_items = Arr::only($input, [
+            'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
+            'warehouse_id', 'variation_name', 'image'
+        ]);
+        $data_items = modify_array($data_items);
         foreach ($data_items as $item) {
             if (empty($item['image'])) $item['image'] = 'example.png';
-            $name = $item['variation_name'];
+            $item['name'] = $item['variation_name'];
             unset($item['variation_name']);
 
             foreach ($item as $key => $val) {
-                if ($key == 'image' && !empty($val)) $item[$key] = $this->uploadFile($val);
+                if ($key == 'image' && $val != 'example.png') $item[$key] = $this->uploadFile($val);
                 if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
-                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' required!']);
+                    if ($key != 'disrate' && !$val) 
+                        throw ValidationException::withMessages([$key . ' is required!']);
                     $item[$key] = numberClean($val);
                 }
                 if ($key == 'barcode' && !$val)
@@ -104,14 +112,16 @@ class ProductRepository extends BaseRepository
                 }
             }
 
-            $product_variations[] =  array_replace($item, [
-                'product_id' => $result->id,
-                'ins' => $result->ins,
-                'name' => $name,
+            $variations[] =  array_replace($item, [
+                'parent_id' => $result->id,
             ]);
         }
-        ProductVariation::insert($product_variations);
+        ProductVariation::insert($variations);   
 
+        // units            
+        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
+        $result->units()->attach(array_merge([$result->unit_id], $compound_unit_ids));
+        
         DB::commit();
         if ($result) return $result;
 
@@ -131,17 +141,25 @@ class ProductRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $data = $input['data'];
-        $data['taxrate'] = numberClean($data['taxrate']);
-        $result = $product->update($data);
+        $input['taxrate'] = numberClean($input['taxrate']);
+        $result = $product->update($input);
 
-        // create or update product variations
-        $data_items = $input['data_items'];
+        // create or update product variation
+        $data_items = Arr::only($input, [
+            'v_id', 'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
+            'warehouse_id', 'variation_name', 'image'
+        ]);
+        $data_items = modify_array($data_items);
         foreach ($data_items as $item) {
+            if (empty($item['image'])) $item['image'] = 'example.png';
+            $item['name'] = $item['variation_name'];
+            unset($item['variation_name']);
+
             foreach ($item as $key => $val) {
-                if ($key == 'image' && !empty($val)) $item[$key] = $this->uploadFile($val);
+                if ($key == 'image' && $val != 'example.png') $item[$key] = $this->uploadFile($val);
                 if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
-                    if ($key != 'disrate' && !$val) throw ValidationException::withMessages(['Field ' . $key . ' required!']);
+                    if ($key != 'disrate' && !$val) 
+                        throw ValidationException::withMessages([$key . ' is required!']);
                     $item[$key] = numberClean($val);
                 }
                 if ($key == 'barcode' && !$val)
@@ -154,18 +172,20 @@ class ProductRepository extends BaseRepository
                 }
             }
 
-            if (empty($item['image'])) $item['image'] = 'example.png';
             $item = array_replace($item, [
                 'product_id' => $product->id,
                 'ins' => $product->ins,
-                'name' => $item['variation_name'],
             ]);
             $new_item = ProductVariation::firstOrNew(['id' => $item['v_id']]);
             $new_item->fill($item);
             if (!$new_item->id) unset($new_item->id);
-            unset($new_item->v_id, $new_item->variation_name);
+            unset($new_item->v_id);
             $new_item->save();
         }
+
+        // update units            
+        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
+        $product->units()->sync(array_merge([$product->unit_id], $compound_unit_ids));        
 
         DB::commit();
         if ($result) return $result;
@@ -217,7 +237,7 @@ class ProductRepository extends BaseRepository
     }
 
     /**
-     * Purchase Price based on Last out First In (LIFO)
+     * LIFO (Last in First Out) Inventory valuation method
      * accounting principle
      * @param int $id
      * @param float $qty

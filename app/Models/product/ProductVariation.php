@@ -7,25 +7,24 @@ use App\Models\product\Traits\ProductVariationRelationship;
 
 class ProductVariation extends Model
 {
-        use ProductVariationRelationship{}
-
-         protected $table = 'product_variations';
+    use ProductVariationRelationship;
+    
+    protected $table = 'product_variations';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
     protected $fillable = [
-
+        'parent_id', 'name', 'warehouse_id', 'code', 'price', 'purchase_price', 'disrate', 'qty',
+        'alert', 'image', 'barcode', 'expiry', 'ins'
     ];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -52,14 +51,22 @@ class ProductVariation extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
-            $builder->where('product_variations.ins', '=', auth()->user()->ins);
-    });
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', '=', auth()->user()->ins);
+        });
     }
-
-
-
 }

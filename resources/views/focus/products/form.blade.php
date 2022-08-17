@@ -1,3 +1,4 @@
+{{-- Product --}}
 <h4>{{trans('products.general_product_details')}}</h4>
 <div class="row form-group">
     <div class="col-6">
@@ -5,8 +6,8 @@
         {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('products.name').'*','required'=>'required']) }}
     </div>
     <div class="col-1">
-        {{ Form::label('taxrate', 'Tax % Rate', ['class' => 'control-label']) }}
-        {{ Form::text('taxrate', numberFormat(@$product['taxrate']), ['class' => 'form-control box-size', 'placeholder' => trans('products.taxrate'),'onkeypress'=>"return isNumber(event)"]) }}
+        {{ Form::label('taxrate', 'Tax %', ['class' => 'control-label']) }}
+        {{ Form::text('taxrate', numberFormat(@$produc->taxrate), ['class' => 'form-control box-size', 'placeholder' => trans('products.taxrate'),'onkeypress'=>"return isNumber(event)"]) }}
     </div>
     <div class="col-2">
         {{ Form::label('code_type', trans('products.code_type'), ['class' => 'control-label']) }}
@@ -47,17 +48,6 @@
         </select>
     </div>
     <div class="col-2">
-        {{ Form::label('unit', 'Base Unit', ['class' => 'control-label']) }}
-        <select class="custom-select" name="unit_id" id="unit" required>
-            @foreach($productvariables as $item)
-                <option value="{{ $item->id }}" {{ $item->id == @$product->unit_id ? 'selected' : '' }} >
-                    {{ $item->base_unit }} ({{ $item->category }})
-                </option>                        
-            @endforeach
-        </select>
-    </div>
-
-    <div class="col-2">
         <label for="material_type">Material Type</label>
         <select class="custom-select" name="material_type">
             @foreach(['direct', 'indirect'] as $val)
@@ -67,9 +57,37 @@
             @endforeach
         </select>
     </div>
+    <div class="col-2">
+        {{ Form::label('unit', 'Base Unit', ['class' => 'control-label']) }}
+        <select class="custom-select" name="unit_id" id="unit">
+            <option value="">-- Choose Base Unit --</option>
+            @foreach($productvariables as $item)
+                @if ($item->unit_type == 'base')
+                    <option value="{{ $item->id }}" {{ $item->id == @$product->unit_id ? 'selected' : '' }} >
+                        {{ $item->title }} ({{ $item->code }})
+                    </option>    
+                @endif
+            @endforeach
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-6">
+        {{ Form::label('unit', 'Compound Unit', ['class' => 'control-label']) }}
+        <select class="custom-select" name="compound_unit_id" id="compound_unit" data-placeholder="Choose Compound Units" multiple>
+            @foreach($productvariables as $item)
+                @if ($item->unit_type == 'compound')
+                    <option value="{{ $item->id }}" {{ @$compound_unit_ids && in_array($item->id, $compound_unit_ids)? 'selected' : '' }}>
+                        {{ $item->title }} ({{ $item->code }}) - {{ +$item->base_ratio }} units
+                    </option> 
+                @endif
+            @endforeach
+        </select>
+    </div>
 </div>
 <hr class="mb-3">
 
+{{-- Product Variation --}}
 <h4>Standard Product Variation Details</h4>
 <div id="main_product">
     <div class="product round">
@@ -342,6 +360,7 @@
     const Form = {
         init() {
             $('.datepicker').datepicker(config.datepicker);
+            $('#compound_unit').select2();
 
             const events = [".add_more", ".add_serial", ".v_delete", ".v_delete_temp", ".v_delete_serial"];
             const handlers = [this.addMore, this.addSerial, this.delVariableProduct, this.delProduct, this.delSerial];

@@ -11,14 +11,24 @@ use App\Models\productvariable\Productvariable;
  */
 trait ProductRelationship
 {
+    public function units()
+    {
+        return $this->belongsToMany(Productvariable::class, 'product_unit', 'product_id', 'product_variable_id');
+    }
+
     public function unit()
     {
         return $this->belongsTo(Productvariable::class, 'unit_id');
     }
 
+    public function standard()
+    {
+        return $this->hasOne(ProductVariation::class, 'parent_id')->withoutGlobalScopes();
+    }
+
     public function variations()
     {
-        return $this->hasMany(ProductVariation::class, 'parent_id');
+        return $this->hasMany(ProductVariation::class, 'parent_id')->withoutGlobalScopes();
     }
 
     public function category()
