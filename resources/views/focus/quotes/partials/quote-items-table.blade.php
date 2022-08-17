@@ -1,8 +1,8 @@
 <table id="quoteTbl" class="table-responsive pb-5 tfr my_stripe_single">
     <thead>
         <tr class="bg-gradient-directional-blue white">
-            <th width="5%" class="text-center">Numbering</th>
-            <th width="20%" class="text-center">{{ trans('general.item_name') }}</th>
+            <th width="5%" class="text-center">#No</th>
+            <th width="20%" class="text-center">Product</th>
             <th width="6%" class="text-center">UoM</th>
             <th width="7%" class="text-center">Est. Qty</th>
             <th width="10%" class="text-center">Est. Buy Price</th>
@@ -20,7 +20,8 @@
             <td>
                 <textarea name="product_name[]" id="name-p0" cols="35" rows="2" class="form-control" placeholder="{{trans('general.enter_product')}}" required></textarea>
             </td>
-            <td><select name="unit[]" id="unit-p0" class="form-control"></select></td>
+            {{-- <td><select name="unit[]" id="unit-p0" class="form-control"></select></td> --}}
+            <td><input type="text" name="unit[]" id="unit-p0" class="form-control"></td>
             <td><input type="number" class="form-control estqty" name="estimate_qty[]" id="estqty-p0" step="0.1" required></td>  
             <td><input type="text" class="form-control buyprice" name="buy_price[]" id="buyprice-p0" required></td>  
             <td><input type="number" class="form-control qty" name="product_qty[]" id="qty-p0" step="0.1" required></td>

@@ -208,10 +208,15 @@
         </div>
     @endforeach
 @endif
-@if(isset($product->variations[0]))
+
+@if($product->standard)
     <h4 class="card-title mt-3">{{trans('products.variation')}}</h4>
     <div id="product_sub">
-        @foreach($product->variations as $row)
+        @foreach($product->variations as $i => $row)
+            @php
+                // exclude standard product
+                if (!$i) continue;
+            @endphp
             <div class="v_product_t border-blue-grey border-lighten-4 round p-1 bg-blue-grey bg-lighten-5" id="pv_{{$row->id}}">
                 <input type="hidden" id="" name="v_id[]" value="{{$row->id}}">
                 <div class="row mt-3 mb-3">

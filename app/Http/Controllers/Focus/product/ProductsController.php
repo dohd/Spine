@@ -127,7 +127,7 @@ class ProductsController extends Controller
     {
         $this->repository->update($product, $request->except(['_token']));
         
-        return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.created')]);
+        return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.deleted')]);
     }
 
     /**
@@ -163,6 +163,7 @@ class ProductsController extends Controller
         if (!access()->allow('product_search')) return false;
 
         $pricegroup = Pricegroup::whereHas('pricelist')->find($request->pricegroup_id);
+
         $productvariations = ProductVariation::whereHas('product', function ($q) {
             $q->where('name', 'LIKE', '%' . request('keyword') . '%');
         })->with(['warehouse' => function ($q) {

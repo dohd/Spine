@@ -249,18 +249,14 @@
                 $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
                 $('#estqty-'+i).val(1);
 
-                const rate = accounting.unformat(data.price);
+                const rate = parseFloat(data.price);
                 let price = rate * ($('#tax_id').val()/100 + 1);
                 $('#price-'+i).val(accounting.formatNumber(price));                
                 $('#amount-'+i).text(accounting.formatNumber(price));
                 $('#rate-'+i).val(accounting.formatNumber(rate)).change();
-                
-                data.units.forEach(v => {
-                    $('#unit-'+i).html('').append(`
-                        <option value="${v.base_unit}">${v.base_unit} (${v.description})</option>
-                        <option value="${v.compound_unit}">${v.compound_unit} (${v.description})</option>
-                    `);
-                });
+
+                let units = data.units.filter(v => v.unit_type == 'base');
+                if (units.length) $('#unit-'+i).val(units[0].code);
             }
         };
     }

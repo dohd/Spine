@@ -83,6 +83,10 @@ class ProductRepository extends BaseRepository
         // create product
         $result = Product::create($input);
 
+        // units            
+        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
+        $result->units()->attach(array_merge([$result->unit_id], $compound_unit_ids));
+
         // product variations
         $variations = [];
         $data_items = Arr::only($input, [
@@ -114,13 +118,10 @@ class ProductRepository extends BaseRepository
 
             $variations[] =  array_replace($item, [
                 'parent_id' => $result->id,
+                'ins' => auth()->user()->ins
             ]);
         }
         ProductVariation::insert($variations);   
-
-        // units            
-        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
-        $result->units()->attach(array_merge([$result->unit_id], $compound_unit_ids));
         
         DB::commit();
         if ($result) return $result;
@@ -144,12 +145,22 @@ class ProductRepository extends BaseRepository
         $input['taxrate'] = numberClean($input['taxrate']);
         $result = $product->update($input);
 
-        // create or update product variation
+        // update units            
+        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
+        $product->units()->sync(array_merge([$product->unit_id], $compound_unit_ids));   
+
+        // variations data
         $data_items = Arr::only($input, [
             'v_id', 'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
             'warehouse_id', 'variation_name', 'image'
         ]);
         $data_items = modify_array($data_items);
+
+        // delete omitted product variations
+        $variation_ids = array_map(function ($v) { return $v['v_id']; }, $data_items);
+        $product->variations()->whereNotIn('id', $variation_ids)->delete();
+
+        // create or update product variation
         foreach ($data_items as $item) {
             if (empty($item['image'])) $item['image'] = 'example.png';
             $item['name'] = $item['variation_name'];
@@ -173,8 +184,7 @@ class ProductRepository extends BaseRepository
             }
 
             $item = array_replace($item, [
-                'product_id' => $product->id,
-                'ins' => $product->ins,
+                'parent_id' => $product->id,
             ]);
             $new_item = ProductVariation::firstOrNew(['id' => $item['v_id']]);
             $new_item->fill($item);
@@ -182,10 +192,6 @@ class ProductRepository extends BaseRepository
             unset($new_item->v_id);
             $new_item->save();
         }
-
-        // update units            
-        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
-        $product->units()->sync(array_merge([$product->unit_id], $compound_unit_ids));        
 
         DB::commit();
         if ($result) return $result;
@@ -239,12 +245,10 @@ class ProductRepository extends BaseRepository
     /**
      * LIFO (Last in First Out) Inventory valuation method
      * accounting principle
-     * @param int $id
-     * @param float $qty
-     * @param float $rate
+     * 
      * @return float
      */
-    public function compute_purchase_price($id, $qty, $rate)
+    public function compute_purchase_price(float $id, float $qty, float $rate)
     {
         if ($qty == 0) return $rate;
         
