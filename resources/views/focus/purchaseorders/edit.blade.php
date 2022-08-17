@@ -178,24 +178,31 @@
             calcStock();
         }    
     })
-    $('#stockTbl').on('change', '.qty, .price, .rowtax', function() {
-        const $tr = $(this).parents('tr:first');
-        const qty = $tr.find('.qty').val();
-        const price = $tr.find('.price').val().replace(/,/g, '') || 0;
-        const rowtax = $tr.find('.rowtax').val()/100 + 1;
+    $('#stockTbl').on('change', '.qty, .price, .rowtax, .uom', function() {
+        const el = $(this);
+        const row = el.parents('tr:first');
+
+        const qty = accounting.unformat(row.find('.qty').val());
+        const price = accounting.unformat(row.find('.price').val());
+
+        const rowtax = 1 + row.find('.rowtax').val()/100;
         const amount = qty * price * rowtax;
         const taxable = amount - (qty * price);
 
-        $tr.find('.price').val((price*1).toLocaleString());
-        $tr.find('.amount').text(amount.toLocaleString());
-        $tr.find('.taxable').val(taxable.toLocaleString());
-        $tr.find('.stocktaxr').val(taxable.toLocaleString());
-        $tr.find('.stockamountr').val(amount.toLocaleString());
+        row.find('.price').val(accounting.formatNumber(price));
+        row.find('.amount').text(accounting.formatNumber(amount));
+        row.find('.taxable').val(accounting.formatNumber(taxable));
+        row.find('.stocktaxr').val(accounting.formatNumber(taxable));
+        row.find('.stockamountr').val(accounting.formatNumber(amount));
         calcStock();
 
         if ($(this).is('.price')) {
-            $tr.find('.uom').attr('required', true);
-            $tr.next().find('.descr').attr('required', true);
+            row.find('.uom').attr('required', true);
+            row.next().find('.descr').attr('required', true);
+        }
+        if ($(this).is('.uom')) {
+            const purchasePrice = el.find('option:selected').attr('purchase_price');
+            row.find('.price').val(purchasePrice).change();
         }
     });
     $('#qty-0').change();
@@ -227,8 +234,16 @@
         const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
-        const price = data.purchase_price.replace(/,/g, '') * 1;
-        $('#price-'+i).val(price.toLocaleString()).change();
+
+        const purchasePrice = parseFloat(data.purchase_price);
+        $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
+
+        $('#uom-'+i).html('');
+        data.units.forEach(v => {
+            const rate = parseFloat(v.base_ratio) * purchasePrice;
+            const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
+            $('#uom-'+i).append(option);
+        });
     }
     $('#stockTbl').on('mouseup', '.stockname', function() {
         const id = $(this).attr('id').split('-')[1];
