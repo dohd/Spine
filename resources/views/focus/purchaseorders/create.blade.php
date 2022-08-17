@@ -175,7 +175,7 @@
 
         const rowtax = 1 + row.find('.rowtax').val()/100;
         const amount = qty * price * rowtax;
-        const taxable = amount - (qty * price);
+        const taxable = qty * price * (rowtax - 1);
 
         row.find('.price').val(accounting.formatNumber(price));
         row.find('.amount').text(accounting.formatNumber(amount));
@@ -184,11 +184,10 @@
         row.find('.stockamountr').val(accounting.formatNumber(amount));
         calcStock();
 
-        if ($(this).is('.price')) {
-            row.find('.uom').attr('required', true);
+        if (el.is('.price')) {
             row.next().find('.descr').attr('required', true);
         }
-        if ($(this).is('.uom')) {
+        if (el.is('.uom')) {
             const purchasePrice = el.find('option:selected').attr('purchase_price');
             row.find('.price').val(purchasePrice).change();
         }
