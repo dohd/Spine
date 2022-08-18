@@ -176,5 +176,6 @@ class BillPaymentRepository extends BaseRepository
             'debit' => $billpayment->allocate_ttl,
         ]);    
         Transaction::create($cr_data);
+        aggregate_account_transactions();
     }
 }

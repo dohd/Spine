@@ -232,7 +232,7 @@
 
         const qty = accounting.unformat(row.find('.qty').val());
         const price = accounting.unformat(row.find('.price').val());
-        const rowtax = 1 + row.find('.rowtax').val()/100;
+        const rowtax = 1 + row.find('.rowtax').val() / 100;
 
         let amount = 0;
         let taxable = 0;
@@ -240,8 +240,8 @@
             amount = qty * price * rowtax;
             taxable = qty * price * (rowtax - 1);
         } else {
-            amount = (qty * price) / rowtax;
-            taxable = amount * (rowtax - 1);
+            amount = qty * price;
+            taxable = (amount / rowtax) * (rowtax - 1);
         }
 
         row.find('.price').val(accounting.formatNumber(price));

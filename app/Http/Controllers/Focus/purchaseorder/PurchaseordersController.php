@@ -27,7 +27,6 @@ use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\RedirectResponse;
-use App\Models\items\GrnItem;
 use Request;
 
 /**
@@ -98,11 +97,7 @@ class PurchaseordersController extends Controller
 
         $result = $this->repository->create(compact('order', 'order_items'));
 
-        $msg = ['flash_success' => 'Purchase Order created successfully'];
-        if ($result->omission_error) 
-            $msg = ['flash_error' => 'Something went wrong! Please update Purchase Order ' . gen4tid('PO-', $result->tid)];
-
-        return new RedirectResponse(route('biller.purchaseorders.index'), $msg);
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
     }
 
     /**

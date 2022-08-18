@@ -199,5 +199,6 @@ class GoodsreceivenoteRepository extends BaseRepository
             'debit' => $grn->total,
         ]);    
         Transaction::create($dr_data);
+        aggregate_account_transactions();
     }
 }

@@ -46,7 +46,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -60,8 +60,10 @@ class PurchaseRepository extends BaseRepository
             if (in_array($key, $rate_keys, 1)) 
                 $data[$key] = numberClean($val);
         }
+
         $tid = Purchase::max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
+
         $result = Purchase::create($data);
 
         $data_items = $input['data_items'];
@@ -72,6 +74,8 @@ class PurchaseRepository extends BaseRepository
                 if (isset($item['itemproject_id'])) $item['warehouse_id'] = null;
                 if (isset($item['warehouse_id'])) $item['itemproject_id'] = null;
             }
+
+            // append modified data_items
             $data_items[$i] = array_replace($item, [
                 'ins' => $result->ins,
                 'user_id' => $result->user_id,
@@ -81,6 +85,7 @@ class PurchaseRepository extends BaseRepository
             // increase product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 $product = ProductVariation::find($item['item_id']);
+
                 if ($product->warehouse_id != $item['warehouse_id']) {
                     $is_similar = false;
                     $similar_products = ProductVariation::where('id', '!=', $product->id)
@@ -117,15 +122,8 @@ class PurchaseRepository extends BaseRepository
         $this->post_transaction($result);
 
         DB::commit();
-
-        // proof check line item totals against parent totals
-        $grandtax = $result->items->sum('taxrate');
-        $subtotal = $result->items->sum('amount') - $result->items->sum('taxrate');
-        if (round($result->grandtax) != round($grandtax) || round($result->paidttl) != round($subtotal)) {
-            $result['omission_error'] = true;
-        }
-
         if ($result) return $result;        
+        
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -156,7 +154,8 @@ class PurchaseRepository extends BaseRepository
         $purchase->update($data);
 
         $data_items = $input['data_items'];
-        // remove omitted items
+
+        // delete omitted items
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $purchase->items()->whereNotIn('id', $item_ids)->delete();
 
@@ -239,10 +238,10 @@ class PurchaseRepository extends BaseRepository
 
             $purchase->transactions()->where('note', $purchase->note)->delete();
             aggregate_account_transactions();
-            $purchase->delete();
-
+            $result = $purchase->delete();
+            
             DB::commit();
-            return true;
+            return $result;
         } catch (\Throwable $th) {
             DB::rollBack();
             throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));

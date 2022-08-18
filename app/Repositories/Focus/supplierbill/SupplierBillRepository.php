@@ -162,5 +162,6 @@ class SupplierBillRepository extends BaseRepository
             ]);
             Transaction::create($cr_data);
         }
+        aggregate_account_transactions();
     }
 }

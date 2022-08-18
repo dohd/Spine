@@ -79,14 +79,6 @@ class PurchaseorderRepository extends BaseRepository
         PurchaseorderItem::insert($order_items);
 
         DB::commit();
-        
-        // proof check line item totals against parent totals
-        $grandtax = $result->items->sum('taxrate');
-        $subtotal = $result->items->sum('amount') - $result->items->sum('taxrate');
-        if (round($result->grandtax) != round($grandtax) || round($result->paidttl) != round($subtotal)) {
-            $result['omission_error'] = true;
-        }
-
         if ($result) return $result;   
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
