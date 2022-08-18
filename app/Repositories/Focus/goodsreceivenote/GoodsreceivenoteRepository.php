@@ -144,6 +144,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             // stock subtotal amount
             $goodsreceivenote->subtotal += ($item->qty * $po_item->rate / $po_item->qty);
 
+            // apply unit conversion
             $prod_variation = $po_item->productvariation;
             $units = $prod_variation->product->units;
             foreach ($units as $unit) {

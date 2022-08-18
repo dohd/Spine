@@ -8,6 +8,11 @@ use App\Models\warehouse\Warehouse;
 
 trait ProjectstockItemRelationship
 {
+    public function productvariation()
+    {
+        return $this->belongsTo(ProductVariation::class, 'product_id');
+    }
+
     public function product()
     {
         return $this->belongsTo(ProductVariation::class, 'product_id');
