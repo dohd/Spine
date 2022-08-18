@@ -5,6 +5,7 @@ namespace App\Models\items\Traits;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
 use App\Models\items\GrnItem;
+use App\Models\product\ProductVariation;
 use App\Models\project\Project;
 
 trait PurchaseorderItemRelationship
@@ -27,6 +28,11 @@ trait PurchaseorderItemRelationship
     public function project()
     {
         return $this->belongsTo(Project::class, 'itemproject_id');
+    }
+
+    public function productvariation()
+    {
+        return $this->belongsTo(ProductVariation::class, 'item_id');
     }
 
     public function product()

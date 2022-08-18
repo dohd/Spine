@@ -26,6 +26,10 @@ trait PurchaseItemRelationship
         return $this->belongsTo(Project::class, 'itemproject_id');
     }
 
+    public function productvariation() {
+        return $this->belongsTo('App\Models\product\ProductVariation', 'item_id');
+    }
+
     public function product()
     {
         return $this->belongsTo('App\Models\product\ProductVariation', 'item_id');

@@ -76,17 +76,23 @@ class GoodsreceivenoteRepository extends BaseRepository
         foreach ($result->items as $item) {
             $po_item = $item->purchaseorder_item;
             $po_item->increment('qty_received', $item->qty);
+
             // stock subtotal amount
             $result->subtotal += ($item->qty * $po_item->rate / $po_item->qty);
+
             // apply unit conversion
-            $variation = $item->productvariation;
-            $unit = $variation->product->unit;
-            if ($unit->base_unit == $po_item->uom) {
-                $variation->increment('qty', $item->qty);
-            } elseif ($unit->compound_unit == $po_item->uom) {
-                $qty = $unit->bas_ratio * $po_item->qty;
-                $variation->increment('qty', $qty);
-            } 
+            $prod_variation = $po_item->productvariation;
+            $units = $prod_variation->product->units;
+            foreach ($units as $unit) {
+                if ($unit->code == $po_item['uom']) {
+                    if ($unit->unit_type == 'base') {
+                        $prod_variation->increment('qty', $po_item['qty']);
+                    } else {
+                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                        $prod_variation->increment('qty', $converted_qty);
+                    }
+                }
+            }   
         }
 
         // update purchase order status
@@ -137,15 +143,19 @@ class GoodsreceivenoteRepository extends BaseRepository
             $po_item->decrement('qty_received', $item->qty);
             // stock subtotal amount
             $goodsreceivenote->subtotal += ($item->qty * $po_item->rate / $po_item->qty);
-            // apply unit conversion
-            $variation = $item->productvariation;
-            $unit = $variation->product->unit;
-            if ($unit->base_unit == $po_item->uom) {
-                $variation->decrement('qty', $item->qty);
-            } elseif ($unit->compound_unit == $po_item->uom) {
-                $qty = $unit->bas_ratio * $po_item->qty;
-                $variation->decrement('qty', $qty);
-            } 
+
+            $prod_variation = $po_item->productvariation;
+            $units = $prod_variation->product->units;
+            foreach ($units as $unit) {
+                if ($unit->code == $po_item['uom']) {
+                    if ($unit->unit_type == 'base') {
+                        $prod_variation->decrement('qty', $po_item['qty']);
+                    } else {
+                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                        $prod_variation->decrement('qty', $converted_qty);
+                    }
+                }
+            }   
         }
 
         // update purchase order status

@@ -84,36 +84,42 @@ class PurchaseRepository extends BaseRepository
 
             // increase product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
-                $product = ProductVariation::find($item['item_id']);
-
-                if ($product->warehouse_id != $item['warehouse_id']) {
-                    $is_similar = false;
-                    $similar_products = ProductVariation::where('id', '!=', $product->id)
-                        ->where('name', 'LIKE', '%'. $product->name .'%')->get();
-                    foreach ($similar_products as $s_product) {
-                        if ($product->warehouse_id == $item['warehouse_id']) {
-                            $is_similar = true;
-                            $product = $s_product;
-                            break;
+                $prod_variation = Prod_Variation::find($item['item_id']);
+                if ($prod_variation) {
+                    if ($prod_variation->warehouse_id != $item['warehouse_id']) {
+                        $is_similar = false;
+                        $similar_products = Prod_Variation::where('id', '!=', $prod_variation->id)
+                            ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
+                        foreach ($similar_products as $s_product) {
+                            if ($prod_variation->warehouse_id == $item['warehouse_id']) {
+                                $is_similar = true;
+                                $prod_variation = $s_product;
+                                break;
+                            }
+                        }
+                        if (!$is_similar) {
+                            // new warehouse product variation
+                            $new_wh_product = clone $prod_variation;
+                            $new_wh_product->warehouse_id = $item['warehouse_id'];
+                            unset($new_wh_product->id, $new_wh_product->qty);
+                            $new_wh_product->save();
+                            $prod_variation = $new_wh_product;
                         }
                     }
-                    if (!$is_similar) {
-                        // new warehouse product variation
-                        $new_wh_product = clone $product;
-                        $new_wh_product->warehouse_id = $item['warehouse_id'];
-                        unset($new_wh_product->id, $new_wh_product->qty);
-                        $new_wh_product->save();
-                        $product = $new_wh_product;
+
+                    // apply unit conversion
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->increment('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->increment('qty', $converted_qty);
+                            }
+                        }
                     }
-                }
-                // apply quantity conversion
-                $product_unit = $product->unit;
-                if ($product_unit->base_unit == $item['uom']) {
-                    $product->increment('qty', $item['qty']);
-                } elseif ($product_unit->compound_unit == $item['uom']) {
-                    $qty = $product_unit->bas_ratio * $item['qty'];
-                    $product->increment('qty', $qty);
-                } 
+                }                
             }
         }
         PurchaseItem::insert($data_items);
@@ -165,38 +171,44 @@ class PurchaseRepository extends BaseRepository
 
             // update product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
-                $product = $purchase_item->product;
-                if ($product) $product->decrement('qty', $purchase_item->qty);
-                else $product = ProductVariation::find($item['item_id']);
+                $prod_variation = $purchase_item->product;
+                if ($prod_variation) $prod_variation->decrement('qty', $purchase_item->qty);
+                else $prod_variation = ProductVariation::find($item['item_id']);
             
-                if ($product->warehouse_id != $item['warehouse_id']) {   
-                    $is_similar = false;
-                    $similar_products = ProductVariation::where('id', '!=', $product->id)
-                        ->where('name', 'LIKE', '%'. $product->name .'%')->get();
-                    foreach ($similar_products as $s_product) {
-                        if ($product->warehouse_id == $item['warehouse_id']) {
-                            $is_similar = true;
-                            $product = $s_product;
-                            break;
+                if ($prod_variation) {
+                    if ($prod_variation->warehouse_id != $item['warehouse_id']) {   
+                        $is_similar = false;
+                        $similar_products = ProductVariation::where('id', '!=', $prod_variation->id)
+                            ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
+                        foreach ($similar_products as $s_product) {
+                            if ($prod_variation->warehouse_id == $item['warehouse_id']) {
+                                $is_similar = true;
+                                $prod_variation = $s_product;
+                                break;
+                            }
+                        }
+                        if (!$is_similar) {
+                            $new_product = clone $prod_variation;
+                            $new_product->warehouse_id = $item['warehouse_id'];
+                            unset($new_product->id, $new_product->qty);
+                            $new_product->save();
+                            $prod_variation = $new_product;
                         }
                     }
-                    if (!$is_similar) {
-                        $new_product = clone $product;
-                        $new_product->warehouse_id = $item['warehouse_id'];
-                        unset($new_product->id, $new_product->qty);
-                        $new_product->save();
-                        $product = $new_product;
-                    }
-                }
 
-                // apply quantity conversion
-                $product_unit = $product->unit;
-                if ($product_unit->base_unit == $item['uom']) {
-                    $product->increment('qty', $item['qty']);
-                } elseif ($product_unit->compound_unit == $item['uom']) {
-                    $qty = $product_unit->bas_ratio * $item['qty'];
-                    $product->increment('qty', $qty);
-                } 
+                    // apply unit conversion
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->increment('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->increment('qty', $converted_qty);
+                            }
+                        }
+                    }                    
+                }
             }    
 
             $item = array_replace($item, [
@@ -235,13 +247,32 @@ class PurchaseRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-
+            // decrease stock
+            foreach ($purchase->items as $item) {
+                if ($item->type != 'Stock') continue;
+                $prod_variation = $item->productvariation;
+                // apply unit conversion
+                $units = $prod_variation->product->units;
+                foreach ($units as $unit) {
+                    if ($unit->code == $item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->decrement('qty', $item['qty']);
+                        } else {
+                            $converted_qty = $item['qty'] * $unit->base_ratio;
+                            $prod_variation->decrement('qty', $converted_qty);
+                        }
+                    }
+                }     
+            }
+            // delete transactions
             $purchase->transactions()->where('note', $purchase->note)->delete();
             aggregate_account_transactions();
             $result = $purchase->delete();
-            
-            DB::commit();
-            return $result;
+
+            if ($result) {
+                DB::commit();
+                return $result;
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
@@ -331,7 +362,6 @@ class PurchaseRepository extends BaseRepository
                 'debit' => $bill['grandtax'],
             ]);
         }
-        
         Transaction::insert($dr_data); 
         aggregate_account_transactions();
     }
