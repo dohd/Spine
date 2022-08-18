@@ -61,10 +61,9 @@ class ProjectStockRepository extends BaseRepository
 
         $data_items = Arr::only($input, ['budget_item_id', 'product_id', 'unit', 'warehouse_id', 'qty']);
         $data_items = array_filter(modify_array($data_items), function ($v) { return $v['qty'] > 0; });
-        $data_items = array_map(function ($v) use($result) {
-            $v['project_stock_id'] = $result->id;
-            return $v;
-        }, $data_items);
+        foreach ($data_items as $i => $item) {
+            $data_items[$i] = array_replace($item, ['project_stock_id' => $result->id]);
+        }
         ProjectstockItem::insert($data_items);
 
         $product_repository = new ProductRepository;
@@ -73,16 +72,23 @@ class ProjectStockRepository extends BaseRepository
             $budget_item = $issue_item->budget_item;
             $budget_item->increment('issue_qty', $issue_item->qty);
 
-            // reduce stock qty
-            $product = $issue_item->product;
-            $product->decrement('qty', $issue_item->qty);
-
-            // convert buying and issuance unit to base unit
-            // 
+            // apply unit conversion
+            $prod_variation = $issue_item->productvariation;
+            $units = $prod_variation->product->units;
+            foreach ($units as $unit) {
+                if ($unit->code == $issue_item->unit) {
+                    if ($unit->unit_type == 'base') {
+                        $prod_variation->decrement('qty', $issue_item->qty);
+                    } else {
+                        $converted_qty = $issue_item->qty * $unit->base_ratio;
+                        $prod_variation->decrement('qty', $converted_qty);
+                    }
+                }
+            }   
 
             // update stock worth based on last in first out purchase price
             $purchase_price = $product_repository->compute_purchase_price(
-                $product->id, $product->qty, $product->purchase_price
+                $prod_variation->id, $prod_variation->qty, $prod_variation->purchase_price
             );
             $subtotal = $issue_item->qty * $purchase_price;
             $result->subtotal += $subtotal;
@@ -130,9 +136,19 @@ class ProjectStockRepository extends BaseRepository
             $budget_item = $issue_item->budget_item;
             $budget_item->decrement('issue_qty', $issue_item->qty);
 
-            // increase stock qty
-            $product = $issue_item->product;
-            $product->increment('qty', $issue_item->qty);
+            // apply unit conversion
+            $prod_variation = $issue_item->productvariation;
+            $units = $prod_variation->product->units;
+            foreach ($units as $unit) {
+                if ($unit->code == $issue_item->unit) {
+                    if ($unit->unit_type == 'base') {
+                        $prod_variation->decrement('qty', $issue_item->qty);
+                    } else {
+                        $converted_qty = $issue_item->qty * $unit->base_ratio;
+                        $prod_variation->decrement('qty', $converted_qty);
+                    }
+                }
+            }   
         }
 
         $result = $projectstock->delete();
