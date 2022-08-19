@@ -265,14 +265,6 @@ Route::group(['namespace' => 'projectstocktransfer'], function () {
     Route::post('projectstocktransfers/get', 'ProjectstocktransfersTableController')->name('projectstocktransfers.get');
 });
 
-Route::group(['namespace' => 'issuance'], function () {
-    Route::post('issuance/update_status', 'IssuanceController@update_status')->name('issuance.update_status');
-    Route::get('issuance/issuance_items', 'IssuanceController@get_items')->name('issuance.get_items');
-    Route::resource('issuance', 'IssuanceController');
-    // for dataTable
-    Route::post('issuance/get', 'IssuanceTableController')->name('issuance.get');
-});
-
 Route::group(['namespace' => 'lpo'], function () {
     Route::post('lpo/update_lpo', 'LpoController@update_lpo')->name('lpo.update_lpo');
     Route::get('lpo/delete_lpo/{id}', 'LpoController@delete_lpo')->name('lpo.delete_lpo');
@@ -293,16 +285,6 @@ Route::group(['namespace' => 'purchase'], function () {
 
     //For Datatable
     Route::post('purchases/get', 'PurchasesTableController')->name('purchases.get');
-});
-
-Route::group(['namespace' => 'bill'], function () {
-    Route::get('bills/create_kra', 'BillsController@create_kra')->name('bills.create_kra');
-    Route::post('bills/store_kra', 'BillsController@store_kra')->name('bills.store_kra');
-    Route::get('bills/supplier_bills', 'BillsController@supplier_bills')->name('bills.supplier_bills');
-    Route::resource('bills', 'BillsController');
-
-    //For Datatable
-    Route::post('bills/get', 'BillsTableController')->name('bills.get');
 });
 
 Route::group(['namespace' => 'projectequipment'], function () {
