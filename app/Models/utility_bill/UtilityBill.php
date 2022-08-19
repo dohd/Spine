@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models\supplierbill;
+namespace App\Models\utility_bill;
 
 use App\Models\ModelTrait;
-use App\Models\supplierbill\Traits\SupplierbillAttribute;
-use App\Models\supplierbill\Traits\SupplierbillRelationship;
+use App\Models\utility_bill\Traits\UtilityBillAttribute;
+use App\Models\utility_bill\Traits\UtilityBillRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Supplierbill extends Model
+class UtilityBill extends Model
 {
-    use ModelTrait, SupplierbillAttribute, SupplierbillRelationship;
+    use ModelTrait, UtilityBillAttribute, UtilityBillRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -21,15 +21,15 @@ class Supplierbill extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'supplier_bills';
+    protected $table = 'utility_bills';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
     protected $fillable = [
-        'tid', 'date', 'due_date', 'subtotal', 'tax', 'total', 'note', 'status', 'supplier_id', 
-        'tax_pin', 'term_id', 'validity', 'amount_id', 'user_id', 'ins'      
+        'tid', 'supplier_id', 'reference', 'document_type', 'ref_id', 'date', 'due_date', 'subtotal', 
+        'tax', 'total', 'note', 'status', 'amount_paid', 'user_id', 'ins'      
     ];
 
     /**

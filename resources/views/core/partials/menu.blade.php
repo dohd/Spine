@@ -400,14 +400,6 @@
                 <ul class="dropdown-menu">
                     {{-- stock issuance --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cubes" aria-hidden="true"></i> Stock Issuance</a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('biller.issuance.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Issuance Management</a>
-                            </li>                            
-                        </ul>
-                    </li>
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cubes" aria-hidden="true"></i> Project Stock Issuance</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.projectstock.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Project Stock </a></li>   
@@ -599,31 +591,16 @@
                             <li><a class="dropdown-item" href="{{ route('biller.lpo.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Client LPO</a></li>                           
                         </ul>
                     </li>
-                    @endauth
-
-                    @permission('invoice-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i>Bill Management
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Bills
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.create_kra') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create KRA Bill
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.bills.create') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Make Bill Payment
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endauth
+                    @endauth                    
 
                     @permission('invoice-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Bills Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Bills</a></li>
-                            <li><a class="dropdown-item" href="{{ route('biller.supplierbills.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create Bill</a></li> 
+                            <li><a class="dropdown-item" href="{{ route('biller.utility-bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Bills</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.utility-bills.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create Bill</a></li> 
+                            <li><a class="dropdown-item" href="{{ route('biller.utility-bills.create_kra_bill') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create KRA Bill</a> </li>
+                            
                             <li><a class="dropdown-item" href="{{ route('biller.billpayments.index') }}"><i class="fa fa-money"></i> Manage Payments</a></li>
                             <li><a class="dropdown-item" href="{{ route('biller.billpayments.create') }}"><i class="fa fa-plus-circle"></i> Make Payment</a></li>                           
                         </ul>

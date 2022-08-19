@@ -2,12 +2,12 @@
 
 namespace App\Models\items\Traits;
 
-use App\Models\supplierbill\Supplierbill;
+use App\Models\utility_bill\UtilityBill;
 
 trait BillpaymentItemRelationship
 {
     public function supplier_bill()
     {
-        return $this->belongsTo(Supplierbill::class, 'bill_id');
+        return $this->belongsTo(UtilityBill::class, 'bill_id');
     }
 }

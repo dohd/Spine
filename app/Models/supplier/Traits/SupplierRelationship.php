@@ -5,7 +5,7 @@ namespace App\Models\supplier\Traits;
 use App\Models\bill\Bill;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\purchaseorder\Purchaseorder;
-use App\Models\supplierbill\Supplierbill;
+use App\Models\utility_bill\UtilityBill;
 
 /**
  * Class SupplierRelationship
@@ -14,7 +14,7 @@ trait SupplierRelationship
 {
     public function due_bills()
     {
-        return $this->hasMany(Supplierbill::class);
+        return $this->hasMany(UtilityBill::class);
     }
 
     public function goodsreceivenotes()

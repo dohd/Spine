@@ -4,7 +4,7 @@ namespace App\Models\items\Traits;
 
 use App\Models\goodsreceivenote\Goodsreceivenote;
 
-trait SupplierbillItemRelationship
+trait UtilityBillItemRelationship
 {
     public function grn()
     {

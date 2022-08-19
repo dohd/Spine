@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models\supplierbill\Traits;
+namespace App\Models\utility_bill\Traits;
 
-use App\Models\items\SupplierbillItem;
+use App\Models\items\UtilityBillItem;
 use App\Models\supplier\Supplier;
 
-trait SupplierbillRelationship
+trait UtilityBillRelationship
 {
     public function items()
     {
-        return $this->hasMany(SupplierbillItem::class, 'supplier_bill_id');
+        return $this->hasMany(UtilityBillItem::class, 'supplier_bill_id');
     }
 
     public function supplier()

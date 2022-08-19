@@ -4,6 +4,25 @@
  * FocusRoutes
  *
  */
+
+// Utility bills
+Route::group(['namespace' => 'utility_bill'], function () {
+    Route::get('utility-bills/create-kra', 'UtilityBillController@create_kra_bill')->name('utility-bills.create_kra_bill');
+    Route::post('utility-bills/store-kra', 'UtilityBillController@store_kra_bill')->name('utility-bills.store_kra_bill');
+    Route::resource('utility-bills', 'UtilityBillController');
+    // data table
+    Route::post('utility-bills/get', 'UtilityBillTableController')->name('utility-bills.get');
+});
+
+// supplier bill payment
+Route::group(['namespace' => 'billpayment'], function () {
+    Route::resource('billpayments', 'BillPaymentController');
+    // data table
+    Route::post('billpayments/get', 'BillPaymentTableController')->name('billpayments.get');
+  });
+  
+
+//  Accounts
 Route::group(['namespace' => 'account'], function () {
     Route::get('accounts/profit_and_loss/{type}', 'AccountsController@profit_and_loss')->name('accounts.profit_and_loss');
     Route::get('accounts/balancesheet/{type}', 'AccountsController@balance_sheet')->name('accounts.balance_sheet');
@@ -122,7 +141,7 @@ Route::group(['namespace' => 'event'], function () {
 
 Route::group(['namespace' => 'djc'], function () {
     Route::delete('djcs/delete_item/{id}', 'DjcsController@delete_item')->name('djcs.delete_item');
-    
+
     Route::resource('djcs', 'DjcsController');
     //For Datatable
     Route::post('djcs/get', 'DjcsTableController')->name('djcs.get');
@@ -281,7 +300,7 @@ Route::group(['namespace' => 'bill'], function () {
     Route::post('bills/store_kra', 'BillsController@store_kra')->name('bills.store_kra');
     Route::get('bills/supplier_bills', 'BillsController@supplier_bills')->name('bills.supplier_bills');
     Route::resource('bills', 'BillsController');
-    
+
     //For Datatable
     Route::post('bills/get', 'BillsTableController')->name('bills.get');
 });
@@ -295,7 +314,7 @@ Route::group(['namespace' => 'projectequipment'], function () {
 Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/convert', 'QuotesController@convert')->name('quotes.convert');
     Route::post('quotes/approve_quote/{quote}', 'QuotesController@approve_quote')->name('quotes.approve_quote');
-   
+
     Route::post('quotes/close_quote/{quote}', 'QuotesController@close_quote')->name('quotes.close_quote');
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
     Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');

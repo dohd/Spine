@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.supplierbills.partials.supplierbills-header-buttons')
+                @include('focus.utility_bills.partials.utility_bills-header-buttons')
             </div>
         </div>
     </div>
@@ -21,7 +21,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            {{ Form::open(['route' => 'biller.supplierbills.create', 'method' => 'GET', 'id' => 'grnSelectForm']) }}
+                            {{ Form::open(['route' => 'biller.utility_bills.create', 'method' => 'GET', 'id' => 'grnSelectForm']) }}
                                 <div class="form-group row">
                                     <div class="col-2">
                                         {{ Form::hidden('row_ids', null, ['id' => 'rowId']) }}
@@ -144,7 +144,7 @@
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.supplierbills.get_goodsreceivenote') }}",
+                    url: "{{ route('biller.utility_bills.get_goodsreceivenote') }}",
                     type: 'POST',
                     data: {supplier_id: Index.supplier_id}
                 },

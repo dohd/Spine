@@ -15,27 +15,27 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
-namespace App\Http\Controllers\Focus\supplierbill;
+namespace App\Http\Controllers\Focus\utility_bill;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Focus\goodsreceivenote\GoodsreceivenoteRepository;
+use App\Repositories\Focus\utility_bill\UtilityBillRepository;
 use Request;
 use Yajra\DataTables\Facades\DataTables;
 
 
-class SupplierBillGrnTableController extends Controller
+class UtilityBillTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var GoodsreceivenoteRepository
+     * @var UtilityBillRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param GoodsreceivenoteRepository $repository ;
+     * @param UtilityBillRepository $repository ;
      */
-    public function __construct(GoodsreceivenoteRepository $repository)
+    public function __construct(UtilityBillRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -52,30 +52,27 @@ class SupplierBillGrnTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('mass_select', function ($grn) {
-                return  '<input type="checkbox"  class="check-row" value="'. $grn->id .'">';
+            ->addColumn('tid', function ($utility_bill) {
+                return gen4tid('BILL-', $utility_bill->tid);
             })
-            ->addColumn('tid', function ($grn) {
-                return gen4tid('GRN-', $grn->tid);
-            })
-            ->addColumn('supplier', function ($grn) {
-                if ($grn->supplier)
-                return $grn->supplier->name;
+            ->addColumn('supplier', function ($utility_bill) {
+                if ($utility_bill->supplier)
+                return $utility_bill->supplier->name;
             })        
-            ->addColumn('purchase_type', function ($grn) {
-                $purchaseorder = $grn->purchaseorder;
-                if ($purchaseorder) {
-                    $lpo_no = gen4tid('PO-', $purchaseorder->tid);
-                    $note = $purchaseorder->note;
-
-                    return $lpo_no . ' - ' . $note;
-                }
+            ->addColumn('total', function ($utility_bill) {
+                return numberFormat($utility_bill->total);
             })
-            ->addColumn('dnote', function ($grn) {
-                return $grn->dnote;
+            ->addColumn('balance', function ($utility_bill) {
+                return numberFormat($utility_bill->total - $utility_bill->amountpaid);
             })
-            ->addColumn('date', function ($grn) {
-                return dateFormat($grn->date);
+            ->addColumn('status', function ($utility_bill) {
+                return $utility_bill->status;
+            })
+            ->addColumn('due_date', function ($utility_bill) {
+                return dateFormat($utility_bill->due_date);
+            })
+            ->addColumn('actions', function ($utility_bill) {
+                return $utility_bill->action_buttons;
             })
             ->make(true);
     }

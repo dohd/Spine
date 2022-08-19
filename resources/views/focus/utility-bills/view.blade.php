@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.supplierbills.partials.supplierbills-header-buttons')
+                @include('focus.utility-bills.partials.utility-bills-header-buttons')
             </div>
         </div>
     </div>
@@ -22,16 +22,16 @@
                     <table class="table table-bordered table-sm">
                         @php
                             $details = [ 
-                                'Bill No' => gen4tid('BILL-', $supplierbill->tid),
-                                'Supplier' => $supplierbill->supplier? $supplierbill->supplier->name : '', 
-                                'Date' => dateFormat($supplierbill->date),
-                                'Due Date' => dateFormat($supplierbill->due_date),
-                                'Subtotal' => numberFormat($supplierbill->subtotal),
-                                'Tax' => numberFormat($supplierbill->tax),
-                                'Total' => numberFormat($supplierbill->total),
-                                'Amount Paid' => numberFormat($supplierbill->amountpaid),
-                                'Balance' => numberFormat($supplierbill->total - $supplierbill->amountpaid),
-                                'Note' => $supplierbill->note,
+                                'Bill No' => gen4tid('BILL-', $utility_bill->tid),
+                                'Supplier' => $utility_bill->supplier? $utility_bill->supplier->name : '', 
+                                'Date' => dateFormat($utility_bill->date),
+                                'Due Date' => dateFormat($utility_bill->due_date),
+                                'Subtotal' => numberFormat($utility_bill->subtotal),
+                                'Tax' => numberFormat($utility_bill->tax),
+                                'Total' => numberFormat($utility_bill->total),
+                                'Amount Paid' => numberFormat($utility_bill->amountpaid),
+                                'Balance' => numberFormat($utility_bill->total - $utility_bill->amountpaid),
+                                'Note' => $utility_bill->note,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
@@ -56,7 +56,7 @@
                                 </tr>
                             </thead>
                             <tbody>   
-                                @foreach ($supplierbill->items as $i => $item)
+                                @foreach ($utility_bill->items as $i => $item)
                                     @if ($item->grn)
                                         <tr>
                                             <td>{{ $i+1 }}</td>

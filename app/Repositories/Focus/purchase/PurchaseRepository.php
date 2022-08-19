@@ -7,9 +7,11 @@ use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
 use App\Models\items\PurchaseItem;
+use App\Models\items\UtilityBillItem;
 use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
+use App\Models\utility_bill\UtilityBill;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
@@ -60,9 +62,6 @@ class PurchaseRepository extends BaseRepository
             if (in_array($key, $rate_keys, 1)) 
                 $data[$key] = numberClean($val);
         }
-
-        $tid = Purchase::max('tid');
-        if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
 
         $result = Purchase::create($data);
 
@@ -124,6 +123,9 @@ class PurchaseRepository extends BaseRepository
         }
         PurchaseItem::insert($data_items);
 
+        // generate bill
+        $this->generate_bill($result);
+
         /** accounting **/
         $this->post_transaction($result);
 
@@ -160,7 +162,6 @@ class PurchaseRepository extends BaseRepository
         $purchase->update($data);
 
         $data_items = $input['data_items'];
-
         // delete omitted items
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $purchase->items()->whereNotIn('id', $item_ids)->delete();
@@ -226,6 +227,10 @@ class PurchaseRepository extends BaseRepository
             $purchase_item->save();
         }
 
+        // update bill
+        UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
+        $this->generate_bill($purchase);
+
         /** accounts */
         $purchase->transactions()->where('note', $purchase->note)->delete();
         $this->post_transaction($purchase);
@@ -247,7 +252,8 @@ class PurchaseRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-            // decrease stock
+
+            // reduce stock
             foreach ($purchase->items as $item) {
                 if ($item->type != 'Stock') continue;
                 $prod_variation = $item->productvariation;
@@ -264,11 +270,15 @@ class PurchaseRepository extends BaseRepository
                     }
                 }     
             }
+
+            // delete bill
+            UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
+
             // delete transactions
             $purchase->transactions()->where('note', $purchase->note)->delete();
             aggregate_account_transactions();
-            $result = $purchase->delete();
 
+            $result = $purchase->delete();
             if ($result) {
                 DB::commit();
                 return $result;
@@ -279,8 +289,50 @@ class PurchaseRepository extends BaseRepository
         }
     }
 
-    // Account transaction
-    private function post_transaction($bill) 
+    /**
+     * Generate Bill
+     * @param Purchase $purchase
+     * @return void
+     */
+    public function generate_bill($purchase)
+    {
+        $tid = UtilityBill::max('tid') + 1;
+        $bill_data = [
+            'tid' => $tid,
+            'supplier_id' => $purchase->supplier_id,
+            'reference' => $purchase->doc_ref,
+            'document_type' => 'direct_purchase',
+            'ref_id' => $purchase->id,
+            'date' => $purchase->date,
+            'due_date' => $purchase->due_date,
+            'subtotal' => $purchase->paidttl,
+            'tax' => $purchase->grandtax,
+            'total' => $purchase->grandttl,
+            'note' => $purchase,
+        ];
+        $bill = UtilityBill::create($bill_data);
+
+        $bill_items_data = [];
+        foreach ($purchase->items as $i => $item) {
+            $bill_item_data[$i] = [
+                'bill_id' => $bill->id,
+                'ref_id' => $item->id,
+                'note' => $item->type . ' - ' . $item->description,
+                'qty' => $item->qty,
+                'subtotal' => $item->rate,
+                'tax' => $item->taxrate,
+                'total' => $item->amount, 
+            ];
+        }
+        UtilityBillItem::insert($bill_items_data);
+    }
+
+    /**
+     * Direct Purchase Transaction
+     * @param Purchase $purchase
+     * @return void
+     */
+    public function post_transaction($purchase) 
     {
         // credit Accounts Payable (Creditors)
         $account = Account::where('system', 'payable')->first(['id']);
@@ -290,14 +342,14 @@ class PurchaseRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $bill->grandttl,
-            'tr_date' => $bill->date,
-            'due_date' => $bill->due_date,
-            'user_id' => $bill->user_id,
-            'note' => $bill->note,
-            'ins' => $bill->ins,
+            'credit' => $purchase->grandttl,
+            'tr_date' => $purchase->date,
+            'due_date' => $purchase->due_date,
+            'user_id' => $purchase->user_id,
+            'note' => $purchase->note,
+            'ins' => $purchase->ins,
             'tr_type' => $tr_category->code,
-            'tr_ref' => $bill->id,
+            'tr_ref' => $purchase->id,
             'user_type' => 'supplier',
             'is_primary' => 1,
         ];
@@ -308,26 +360,26 @@ class PurchaseRepository extends BaseRepository
 
         // debit Stock
         $wip_account = Account::where('system', 'wip')->first(['id']);
-        $stock_exists = $bill->items()->where('type', 'Stock')->count();
+        $stock_exists = $purchase->items()->where('type', 'Stock')->count();
         if ($stock_exists) {
             // if project stock, WIP account else Stock account
-            $is_project_stock = $bill->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
+            $is_project_stock = $purchase->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
             if ($is_project_stock) {
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $wip_account->id,
-                    'debit' => $bill['stock_subttl'],
+                    'debit' => $purchase['stock_subttl'],
                 ]);    
             } else {
                 $account = Account::where('system', 'stock')->first(['id']);
                 $dr_data[] = array_replace($cr_data, [
                     'account_id' => $account->id,
-                    'debit' => $bill['stock_subttl'],
+                    'debit' => $purchase['stock_subttl'],
                 ]);    
             }
         }
 
         // debit Expense and Asset account
-        foreach ($bill->items as $item) {
+        foreach ($purchase->items as $item) {
             $subttl = $item['amount'] - $item['taxrate'];
             // debit Expense 
             if ($item['type'] == 'Expense') {
@@ -355,11 +407,11 @@ class PurchaseRepository extends BaseRepository
         }
 
         // debit tax (VAT)
-        if ($bill['grandtax'] > 0) {
+        if ($purchase['grandtax'] > 0) {
             $account = Account::where('system', 'tax')->first(['id']);
             $dr_data[] = array_replace($cr_data, [
                 'account_id' => $account->id, 
-                'debit' => $bill['grandtax'],
+                'debit' => $purchase['grandtax'],
             ]);
         }
         Transaction::insert($dr_data); 

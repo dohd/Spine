@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Supplier Bill Management')
+@section('title', 'Bill Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Supplier Bill Management</h4>
+            <h4 class="content-header-title">Bill Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.supplierbills.partials.supplierbills-header-buttons')
+                @include('focus.utility-bills.partials.utility-bills-header-buttons')
             </div>
         </div>
     </div>
@@ -24,7 +24,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Bill No.</th>
-                                <th>Supplier</th>
                                 <th>Note</th>                                
                                 <th>Amount</th>
                                 <th>Balance</th>  
@@ -69,13 +68,12 @@
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.supplierbills.get') }}",
+                    url: "{{ route('biller.utility-bills.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'tid', name: 'tid'},
-                    {data: 'supplier', name: 'supplier'},
                     {data: 'note', name: 'note'},                    
                     {data: 'total', name: 'total'},
                     {data: 'balance', name: 'balance'},
