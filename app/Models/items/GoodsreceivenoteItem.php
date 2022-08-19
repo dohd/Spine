@@ -25,7 +25,9 @@ class GoodsreceivenoteItem extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = ['goods_receive_note_id', 'purchaseorder_item_id', 'item_id', 'subtotal', 'tax', 'total', 'qty'];
+    protected $fillable = [
+        'goods_receive_note_id', 'purchaseorder_item_id', 'item_id', 'qty', 'rate', 'tax_rate'
+    ];
 
     /**
      * Default values for model fields

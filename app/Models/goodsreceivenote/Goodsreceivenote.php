@@ -28,8 +28,8 @@ class Goodsreceivenote extends Model
      * @var array
      */
     protected $fillable = [
-        'tid', 'supplier_id', 'purchaseorder_id', 'subtotal', 'tax', 'total', 'date', 'note', 
-        'dnote', 'user_id', 'ins'
+        'tid', 'supplier_id', 'purchaseorder_id', 'tax_rate', 'subtotal', 'tax', 'total', 'date', 'note', 
+        'dnote', 'invoice_no', 'user_id', 'ins'
     ];
 
     /**
@@ -63,9 +63,21 @@ class Goodsreceivenote extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
         static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
         });
