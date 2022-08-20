@@ -42,7 +42,7 @@ class UtilityBillRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
         // sanitize
         foreach ($input as $key => $val) {

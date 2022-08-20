@@ -3,12 +3,11 @@
         <label for="tid" class="caption">Bill No.</label>
         {{ Form::text('tid', @$utility_bill ? $utility_bill->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
     </div>  
-    
-    <div class="col-3">
-        <label for="type">Document Type</label>
+    <div class="col-2">
+        <label for="type">Bill Document Type</label>
         <select name="document_type" id="document_type" class="custom-select">
-            <option value="">-- Select Document --</option>
-            @foreach (['goods_receive_note', 'kra'] as $val)
+            <option value="">-- Select Type --</option>
+            @foreach (['goods_receive_note'] as $val)
                 <option value="{{ $val }}">{{ strtoupper(str_replace('_', ' ', $val)) }}</option>
             @endforeach
         </select>
@@ -25,11 +24,18 @@
         <label for="date">Due Date</label>
         {{ Form::text('due_date', null, ['class' => 'form-control datepicker', 'id' => 'due_date']) }}
     </div> 
-    
+    <div class="col-2">
+        <label for="tax_rate">TAX %</label>
+        <select name="tax_rate" id="tax_rate" class="custom-select">
+            @foreach ([0, 8, 16] as $val)
+                <option value="{{ $val }}">{{ $val? $val . '% VAT' : 'OFF' }}</option>
+            @endforeach
+        </select>
+    </div> 
 </div> 
 
 <div class="form-group row">  
-    <div class="col-5">
+    <div class="col-4">
         <label for="supplier">Supplier</label>
         <select name="supplier_id" id="supplier" class="custom-select" data-placeholder="Choose Supplier" disabled>
             @foreach ($suppliers as $row)
@@ -90,7 +96,7 @@
     const config = {
         ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         datepicker: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        goodsReceiveNoteUrl: @json(route('biller.suppliers.goodsreceivenote')),
+        goodsReceiveNoteUrl: @json(route('biller.utility-bills.goods_receive_note')),
     };
 
     const Form = {
@@ -98,6 +104,7 @@
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#supplier').select2({allowClear: true}).change(this.supplierChange);
             $('#document_type').change(this.documentTypeChange);
+            $('#tax_rate').change(() => Form.columnTotals());
         },
 
         documentTypeChange() {
@@ -109,9 +116,12 @@
 
         supplierChange() {
             const el = $(this);
+            if (!el.val()) return;
+
             const supplier_id = el.val();
             $.post(config.goodsReceiveNoteUrl, {supplier_id}, (data) => {
                 data = data.map(v => ({
+                    id: v.id,
                     date: v.date, 
                     note: `DN-${v.dnote} - ${v.note}`, 
                     qty: 1,
@@ -146,19 +156,19 @@
 
         columnTotals() {
             colSubtotal = 0;
-            colTaxTotal = 0;
             colTotal = 0;
+            const tax_rate = 1 + $('#tax_rate').val() / 100;
             $('#documentsTbl tbody tr').each(function() {
                 const row = $(this);
                 const subtotal = accounting.unformat(row.find('.rate').val());
-                const tax = accounting.unformat(row.find('.tax').val());
-                const total = accounting.unformat(row.find('.total').val());
+                const total = tax_rate * subtotal;
                 colSubtotal += subtotal;
-                colTaxTotal += tax;
                 colTotal += total;
+                row.find('.tax').val(accounting.formatNumber(total - subtotal));
+                row.find('.total').val(accounting.formatNumber(total));
             });
             $('#subtotal').val(accounting.formatNumber(colSubtotal));
-            $('#tax').val(accounting.formatNumber(colTaxTotal));
+            $('#tax').val(accounting.formatNumber(colTotal - colSubtotal));
             $('#total').val(accounting.formatNumber(colTotal));            
         },
     }

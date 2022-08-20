@@ -250,20 +250,20 @@ class SuppliersController extends Controller
     /**
      * Get Goods receive note
      */
-    public function goodsreceivenote()
+    public function goods_receive_note()
     {
         $supplier = Supplier::find(request('supplier_id'));
 
-        return response()->json($supplier->goodsreceivenotes);
+        return response()->json($supplier->goods_receive_notes);
     }
 
     /**
      * Get due bills
      */
-    public function due_bills()
+    public function bills()
     {
         $supplier = Supplier::find(request('supplier_id'));
 
-        return response()->json($supplier->due_bills);
+        return response()->json($supplier->bills);
     }
 }

@@ -2,8 +2,8 @@
 
 // supplier
 Route::group(['namespace' => 'supplier'], function () {
-  Route::post('suppliers/due_bills', 'SuppliersController@due_bills')->name('suppliers.due_bills');
-  Route::post('suppliers/goodsreceivenote', 'SuppliersController@goodsreceivenote')->name('suppliers.goodsreceivenote');
+  Route::post('suppliers/bills', 'SuppliersController@bills')->name('suppliers.bills');
+  Route::post('suppliers/goods_receive_note', 'SuppliersController@goods_receive_note')->name('suppliers.goods_receive_note');
   Route::post('suppliers/purchaseorders', 'SuppliersController@purchaseorders')->name('suppliers.purchaseorders');
   Route::post('suppliers/search', 'SuppliersController@search')->name('suppliers.search');
   Route::post('suppliers/select', 'SuppliersController@select')->name('suppliers.select');

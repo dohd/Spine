@@ -110,7 +110,7 @@ class UtilityBillController extends Controller
 
     /**
      * Create KRA Bill
-     * 
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function create_kra_bill(Request $request)
@@ -123,12 +123,26 @@ class UtilityBillController extends Controller
 
     /**
      * Store KRA Bill in storage
-     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function store_kra_bill(Request $request)
     {
         $this->respository->create_kra($request->except('_token'));
 
         return new RedirectResponse(route('biller.utility-bills.index'), ['flash_success' => 'KRA Bill Created Successfully']);
+    }
+
+    /**
+     * Store KRA Bill in storage
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function goods_receive_note(Request $request)
+    {
+        $supplier = Supplier::find($request->supplier_id);
+        $grn = $supplier->goods_receive_notes()->whereNull('invoice_no')->get();
+
+        return response()->json($grn);
     }
 }

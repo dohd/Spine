@@ -8,6 +8,9 @@
 // Utility bills
 Route::group(['namespace' => 'utility_bill'], function () {
     Route::get('utility-bills/create-kra', 'UtilityBillController@create_kra_bill')->name('utility-bills.create_kra_bill');
+
+    Route::post('utility-bills/goods-receive-note', 'UtilityBillController@goods_receive_note')->name('utility-bills.goods_receive_note');
+    Route::post('utility-bills/store-kra', 'UtilityBillController@store_kra_bill')->name('utility-bills.store_kra_bill');
     Route::post('utility-bills/store-kra', 'UtilityBillController@store_kra_bill')->name('utility-bills.store_kra_bill');
     Route::resource('utility-bills', 'UtilityBillController');
     // data table

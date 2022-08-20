@@ -87,7 +87,7 @@
 </div>
 <hr class="mb-3">
 
-{{-- Product Variation --}}
+{{-- Standard Product Variation --}}
 <h4>Standard Product Variation Details</h4>
 <div id="main_product">
     <div class="product round">
@@ -209,7 +209,8 @@
     @endforeach
 @endif
 
-@if($product->standard)
+{{-- Additional Product Variations --}}
+@if(isset($product->standard))
     <h4 class="card-title mt-3">{{trans('products.variation')}}</h4>
     <div id="product_sub">
         @foreach($product->variations as $i => $row)
