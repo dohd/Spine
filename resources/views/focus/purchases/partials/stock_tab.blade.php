@@ -89,7 +89,7 @@
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
                         <tr>
-                            <td colspan=2>
+                            <td colspan=3>
                                 <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
                             </td>
                             <td>

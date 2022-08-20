@@ -31,7 +31,7 @@
 
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
-@include('focus.purchases.form_jscript')
+@include('focus.purchases.form-js')
 <script>
     // reference and tax
     $('#ref_type').val("{{ $purchase->doc_ref_type }}");

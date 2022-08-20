@@ -81,7 +81,7 @@
                             <input type="hidden" name="warehouse_id[]">
                         </tr>
                         <tr>
-                            <td colspan="3">
+                            <td colspan="4">
                                 <textarea id="expdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Enter Description">{{ $item->description }}</textarea>
                             </td>
                             <td colspan="4">
