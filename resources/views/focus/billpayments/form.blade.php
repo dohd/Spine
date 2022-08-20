@@ -47,7 +47,7 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table tfr my_stripe_single text-center" id="grnTbl">
+    <table class="table tfr my_stripe_single text-center" id="documentsTbl">
         <thead>
             <tr class="bg-gradient-directional-blue white">
                 <th>Due Date</th>
@@ -117,7 +117,7 @@
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#supplier').select2(config.supplierSelect2).change(this.supplierChange);  
             $('#amount').keyup(this.allocateAmount).focusout(this.amountFocusOut).focus(this.amountFocus);
-            $('#grnTbl').on('change', '.paid', () => Form.columnTotals());
+            $('#documentsTbl').on('change', '.paid', () => Form.columnTotals());
         },
 
         amountFocusOut() {
@@ -134,7 +134,7 @@
             let amount = accounting.unformat(el.val());
             let dueTotal = 0;
             let allocateTotal = 0;
-            $('#grnTbl tbody tr').each(function() {
+            $('#documentsTbl tbody tr').each(function() {
                 const due = accounting.unformat($(this).find('.due').text());
                 if (due > amount) $(this).find('.paid').val(accounting.formatNumber(amount));
                 else if (amount > due) $(this).find('.paid').val(accounting.formatNumber(due));
@@ -151,10 +151,10 @@
 
         supplierChange() {
             const el = $(this);
-            $('#grnTbl tbody').html('');
+            $('#documentsTbl tbody').html('');
             if (!el.val()) return;
             config.fetchSupplierBill(el.val()).done(data => {
-                data.forEach((v,i) => $('#grnTbl tbody').append(Form.billRow(v,i)));
+                data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
             });
         },
 
@@ -179,7 +179,7 @@
         columnTotals() {
             let dueTotal = 0;
             let allocateTotal = 0;
-            $('#grnTbl tbody tr').each(function(i) {
+            $('#documentsTbl tbody tr').each(function(i) {
                 const due = accounting.unformat($(this).find('.due').text());
                 const paid = accounting.unformat($(this).find('.paid').val());
                 dueTotal += due;
