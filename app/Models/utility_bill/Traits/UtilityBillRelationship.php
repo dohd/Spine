@@ -9,7 +9,7 @@ trait UtilityBillRelationship
 {
     public function items()
     {
-        return $this->hasMany(UtilityBillItem::class, 'supplier_bill_id');
+        return $this->hasMany(UtilityBillItem::class, 'bill_id');
     }
 
     public function supplier()
