@@ -305,16 +305,17 @@ class PurchaseRepository extends BaseRepository
             'ref_id' => $purchase->id,
             'date' => $purchase->date,
             'due_date' => $purchase->due_date,
+            'tax_rate' => $purchase->tax,
             'subtotal' => $purchase->paidttl,
             'tax' => $purchase->grandtax,
             'total' => $purchase->grandttl,
-            'note' => $purchase,
+            'note' => $purchase->note,
         ];
         $bill = UtilityBill::create($bill_data);
 
         $bill_items_data = [];
-        foreach ($purchase->items as $i => $item) {
-            $bill_item_data[$i] = [
+        foreach ($purchase->items as $item) {
+            $bill_items_data[] = [
                 'bill_id' => $bill->id,
                 'ref_id' => $item->id,
                 'note' => $item->type . ' - ' . $item->description,
