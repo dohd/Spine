@@ -174,7 +174,8 @@
         productRow(v,i) {
             const qty = accounting.formatNumber(v.qty);
             const received = accounting.formatNumber(v.qty_received);
-            const due = accounting.formatNumber(v.qty - v.qty_received);
+            const due = v.qty - v.qty_received;
+            const balance = accounting.formatNumber(due > 0? due : 0);
             return `
                 <tr>
                     <td>${i+1}</td>    
@@ -182,7 +183,7 @@
                     <td>${v.uom}</td>    
                     <td>${qty}</td>    
                     <td>${received}</td>    
-                    <td>${due}</td>    
+                    <td>${balance}</td>    
                     <td><input name="qty[]" id="qty" class="form-control qty"></td>    
                     <input type="hidden" name="purchaseorder_item_id[]" value="${v.id}">
                     <input type="hidden" name="rate[]" value="${parseFloat(v.rate)}" class="rate">

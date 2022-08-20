@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Supplier Bill Management')
+@section('title', 'Bill Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Supplier Bill Management</h4>
+            <h4 class="content-header-title">Bill Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -21,53 +21,54 @@
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
+                            $bill = $utility_bill;
                             $details = [ 
-                                'Bill No' => gen4tid('BILL-', $utility_bill->tid),
-                                'Supplier' => $utility_bill->supplier? $utility_bill->supplier->name : '', 
-                                'Date' => dateFormat($utility_bill->date),
-                                'Due Date' => dateFormat($utility_bill->due_date),
-                                'Subtotal' => numberFormat($utility_bill->subtotal),
-                                'Tax' => numberFormat($utility_bill->tax),
-                                'Total' => numberFormat($utility_bill->total),
-                                'Amount Paid' => numberFormat($utility_bill->amountpaid),
-                                'Balance' => numberFormat($utility_bill->total - $utility_bill->amountpaid),
-                                'Note' => $utility_bill->note,
+                                'Bill No' => gen4tid('BILL-', $bill->tid),
+                                'Supplier' => $bill->supplier? $bill->supplier->name : '', 
+                                'Reference' => $bill->reference,
+                                'Bill Document Type' => $bill->document_type,
+                                'Date' => dateFormat($bill->date),
+                                'Due Date' => dateFormat($bill->due_date),
+                                'Tax %' => $bill->tax_rate,
+                                'Subtotal' => numberFormat($bill->subtotal),
+                                'Tax' => numberFormat($bill->tax),
+                                'Total' => numberFormat($bill->total),
+                                'Amount Paid' => numberFormat($bill->amountpaid),
+                                'Balance' => numberFormat($bill->total - $bill->amountpaid),
+                                'Status' => ucfirst($bill->status),
+                                'Note' => $bill->note,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
-                                <th width="30%">{{ $key }}</th>
+                                <th>{{ $key }}</th>
                                 <td>{{ $val }}</td>
                             </tr>
                         @endforeach
                     </table>
-                    {{-- goods receive note --}}
+                    {{-- bill items --}}
                     <div class="table-responsive mt-3">
                         <table class="table tfr my_stripe_single text-center" id="invoiceTbl">
                             <thead>
                                 <tr class="bg-gradient-directional-blue white">
                                     <th>#</th>
-                                    <th>Date</th>
-                                    <th>GRN No.</th>
-                                    <th>Purchase Type</th>
-                                    <th>Dnote</th>
-                                    <th>Note</th>
-                                    <th>Rate</th>                                         
+                                    <th>Description</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Tax</th>
+                                    <th>Amount</th>                                      
                                 </tr>
                             </thead>
                             <tbody>   
-                                @foreach ($utility_bill->items as $i => $item)
-                                    @if ($item->grn)
-                                        <tr>
-                                            <td>{{ $i+1 }}</td>
-                                            <td>{{ dateFormat($item->grn->date) }}</td>
-                                            <td>{{ gen4tid('GRN-', $item->grn->tid) }}</td>
-                                            <td>{{ $item->grn->purchaseorder? gen4tid('PO-', $item->grn->purchaseorder->tid) . ' - ' . $item->grn->purchaseorder->note : '' }}</td>
-                                            <td>{{ $item->grn->dnote }}</td>
-                                            <td>{{ $item->grn->note }}</td>
-                                            <td>{{ numberFormat($item->grn->total) }}</td>                                        
-                                        </tr>    
-                                    @endif
+                                @foreach ($bill->items as $i => $item)
+                                    <tr>
+                                        <td>{{ $i+1 }}</td>
+                                        <td>{{ $item->note }}</td>
+                                        <td>{{ +$item->qty }}</td>
+                                        <td>{{ numberFormat($item->subtotal) }}</td>
+                                        <td>{{ numberFormat($item->tax) }}</td>
+                                        <td>{{ numberFormat($item->total) }}</td>                                  
+                                    </tr>    
                                 @endforeach
                             </tbody>                
                         </table>

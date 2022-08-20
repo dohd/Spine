@@ -60,9 +60,14 @@
                                                     <td>{{ $i+1 }}</td>
                                                     <td>{{ $po_item->description }}</td>
                                                     <td>{{ $po_item->uom }}</td>
-                                                    <td>{{ numberFormat($po_item->qty) }}</td>
-                                                    <td>{{ numberFormat($po_item->qty_received) }}</td>
-                                                    <td>{{ numberFormat($po_item->qty - $po_item->qty_received) }}</td>                                                                                            
+                                                    <td>{{ +$po_item->qty }}</td>
+                                                    <td>{{ +$po_item->qty_received }}</td>
+                                                    <td>
+                                                        @php
+                                                            $due = $po_item->qty - $po_item->qty_received;
+                                                        @endphp
+                                                        {{ $due > 0? +$due : 0 }}
+                                                    </td>                                                                                            
                                                 </tr>
                                             @endif
                                         @endforeach
