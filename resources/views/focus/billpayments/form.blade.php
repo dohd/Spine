@@ -104,7 +104,7 @@
         },
         fetchSupplierBill: (supplier_id) => {
             return $.ajax({
-                url: "{{ route('biller.suppliers.due_bills') }}",
+                url: "{{ route('biller.suppliers.bills') }}",
                 type: 'POST',
                 quietMillis: 50,
                 data: {supplier_id},
@@ -117,7 +117,7 @@
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#supplier').select2(config.supplierSelect2).change(this.supplierChange);  
             $('#amount').keyup(this.allocateAmount).focusout(this.amountFocusOut).focus(this.amountFocus);
-            $('#grnTbl').on('change', '.paid', () => this.columnTotals());
+            $('#grnTbl').on('change', '.paid', () => Form.columnTotals());
         },
 
         amountFocusOut() {
@@ -139,7 +139,8 @@
                 if (due > amount) $(this).find('.paid').val(accounting.formatNumber(amount));
                 else if (amount > due) $(this).find('.paid').val(accounting.formatNumber(due));
                 else $(this).find('.paid').val(0);
-                const paid = accounting.formatNumber($(this).find('.paid').val());
+
+                const paid = accounting.unformat($(this).find('.paid').val());
                 amount -= paid;
                 dueTotal += due;
                 allocateTotal += paid;
@@ -158,7 +159,8 @@
         },
 
         billRow(v,i) {
-            const balance = accounting.formatNumber(v.total - v.amount_paid);
+            const diff = v.total - v.amount_paid;
+            const balance = accounting.formatNumber(diff > 0? diff : 0);
             return `
                 <tr>
                     <td class="text-center">${new Date(v.due_date).toDateString()}</td>
@@ -182,7 +184,6 @@
                 const paid = accounting.unformat($(this).find('.paid').val());
                 dueTotal += due;
                 allocateTotal += paid;
-
                 $(this).find('.due').text(accounting.formatNumber(due));
                 $(this).find('.paid').val(accounting.formatNumber(paid));
             });
