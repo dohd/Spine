@@ -5,7 +5,6 @@ namespace App\Models\quote\Traits;
 use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
-use App\Models\issuance\Issuance;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\lead\Lead;
@@ -31,11 +30,6 @@ trait QuoteRelationship
     public function projects()
     {
         return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
-    }
-
-    public function issuance()
-    {
-        return $this->hasMany(Issuance::class);
     }
 
     public function skill_items()

@@ -8,7 +8,6 @@ use App\Models\charge\Charge;
 use App\Models\creditnote\CreditNote;
 use App\Models\hrm\Hrm;
 use App\Models\invoice\PaidInvoice;
-use App\Models\issuance\Issuance;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
 use App\Models\manualjournal\Journal;
@@ -37,11 +36,6 @@ trait TransactionRelationship
     public function withholding()
     {
         return $this->belongsTo(Withholding::class, 'tr_ref');
-    }
-
-    public function issuance()
-    {
-        return $this->belongsTo(Issuance::class, 'tr_ref');
     }
 
     public function charge()
