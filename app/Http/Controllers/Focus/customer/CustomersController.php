@@ -183,12 +183,12 @@ class CustomersController extends Controller
         // extract invoice from customer statement
         $invoices = collect();
         $statement = $this->repository->getStatementForDataTable($customer->id);
-        foreach ($statement as $i => $row) {
-            if ($row->type == 'invoice') {
-                $invoices->add($row);
-            } elseif (in_array($row->type, ['payment', 'withholding', 'credit-note'])) {
-                if ($invoices->last()->invoice_id == $row->invoice_id) {
-                    $invoices->last()->credit += $row->credit;
+        foreach ($statement as $row) {
+            if ($row->type == 'invoice') $invoices->add($row);
+            else {
+                $last_invoice = $invoices->last();
+                if ($last_invoice->invoice_id == $row->invoice_id) {
+                    $last_invoice->credit += $row->credit;
                 }
             }
         }
