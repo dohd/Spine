@@ -92,8 +92,8 @@
                     </tr>
                     <tr><td style="border-left: 1px solid white; border-right: 1px solid white;" colspan="6">&nbsp;</td></tr>
                     <tr>
-                        <th colspan="3">On Account</th>
-                        <th colspan="3">Total</th>
+                        <th colspan="3">Unallocated</th>
+                        <th colspan="3">Outstanding</th>
                     </tr>
                     <tr>
                         <td colspan="3">{{ numberFormat($customer->on_account) }}</td>
