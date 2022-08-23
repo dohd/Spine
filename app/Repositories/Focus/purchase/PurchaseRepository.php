@@ -313,19 +313,16 @@ class PurchaseRepository extends BaseRepository
         ];
         $bill = UtilityBill::create($bill_data);
 
-        $bill_items_data = [];
-        foreach ($purchase->items as $item) {
-            $bill_items_data[] = [
-                'bill_id' => $bill->id,
-                'ref_id' => $item->id,
-                'note' => $item->type . ' - ' . $item->description,
-                'qty' => $item->qty,
-                'subtotal' => $item->rate,
-                'tax' => $item->taxrate,
-                'total' => $item->amount, 
-            ];
-        }
-        UtilityBillItem::insert($bill_items_data);
+        $bill_items_data = [
+            'bill_id' => $bill->id,
+            'ref_id' => $purchase->id,
+            'note' => $purchase->note,
+            'qty' => 1,
+            'subtotal' => $purchase->paidttl,
+            'tax' => $purchase->grandtax,
+            'total' => $purchase->grandttl, 
+        ];
+        UtilityBillItem::create($bill_items_data);
     }
 
     /**
