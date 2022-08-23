@@ -297,47 +297,50 @@
 
 {{-- Edit Form --}}
 <script>
-    // default skill row
-    skillIndx = 0;
-    $('#skill-item tbody tr').remove();
-    const skillsets = @json($budget->skillsets);
-    skillsets.forEach(v => {
-        const i = skillIndx;
-        $('#skill-item tbody').append(skillRow(i));
-        $('#skillitemid-'+i).val(v.id);
-        $('#skill-'+i).val(v.skill);
-        $('#charge-'+i).val(v.charge);
-        $('#hours-'+i).val(v.hours);
-        $('#notech-'+i).val(v.no_technician).change();
-        skillIndx++;
-    });
+    const budget = @json(@$budget);
+    if (budget) {
+        // default skill row
+        skillIndx = 0;
+        $('#skill-item tbody tr').remove();
+        const skillsets = @json(@$budget->skillsets);
+        skillsets.forEach(v => {
+            const i = skillIndx;
+            $('#skill-item tbody').append(skillRow(i));
+            $('#skillitemid-'+i).val(v.id);
+            $('#skill-'+i).val(v.skill);
+            $('#charge-'+i).val(v.charge);
+            $('#hours-'+i).val(v.hours);
+            $('#notech-'+i).val(v.no_technician).change();
+            skillIndx++;
+        });
 
-    // set default product rows
-    productIndx = 0;
-    $('#productsTbl tbody tr').remove();
-    const budgetItems = @json($budget_items);
-    budgetItems.forEach(v => {
-        const i = productIndx;
-        if (v.a_type == 1) {
-            // product type
-            $('#productsTbl tbody').append(productRow(i));
-            $('#itemname-'+i).autocomplete(autocompleteProp(i));
+        // set default product rows
+        productIndx = 0;
+        $('#productsTbl tbody tr').remove();
+        const budgetItems = @json(@$budget_items);
+        budgetItems.forEach(v => {
+            const i = productIndx;
+            if (v.a_type == 1) {
+                // product type
+                $('#productsTbl tbody').append(productRow(i));
+                $('#itemname-'+i).autocomplete(autocompleteProp(i));
 
-            $('#numbering-'+i).val(v.numbering);
-            $('#itemid-'+i).val(v.id);
-            $('#productid-'+i).val(v.product_id);
-            $('#itemname-'+i).val(v.product_name);
-            $('#amount-'+i).val(parseFloat(v.product_qty));
-            $('#newqty-'+i).val(parseFloat(v.new_qty));
-            $('#unit-'+i).val(v.unit).change();
-            $('#price-'+i).val(accounting.formatNumber(v.buy_price)).change();
-        } else if (v.a_type == 2) {
-            // title type
-            $('#productsTbl tbody').append(titleRow(i));
-            $('#numbering-'+i).val(v.numbering);
-            $('#itemname-'+i).val(v.product_name);
-            $('#itemid-'+i).val(v.id);
-        }
-        productIndx++;
-    });
+                $('#numbering-'+i).val(v.numbering);
+                $('#itemid-'+i).val(v.id);
+                $('#productid-'+i).val(v.product_id);
+                $('#itemname-'+i).val(v.product_name);
+                $('#amount-'+i).val(parseFloat(v.product_qty));
+                $('#newqty-'+i).val(parseFloat(v.new_qty));
+                $('#unit-'+i).val(v.unit).change();
+                $('#price-'+i).val(accounting.formatNumber(v.buy_price)).change();
+            } else if (v.a_type == 2) {
+                // title type
+                $('#productsTbl tbody').append(titleRow(i));
+                $('#numbering-'+i).val(v.numbering);
+                $('#itemname-'+i).val(v.product_name);
+                $('#itemid-'+i).val(v.id);
+            }
+            productIndx++;
+        });
+    }
 </script>
