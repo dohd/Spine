@@ -165,18 +165,19 @@ class InvoicesController extends Controller
                 ->with(compact('customers', 'lpos', 'projects'));
     
         }
-
         $quotes = Quote::whereIn('id', $quote_ids)->get();
         $customer = Customer::find($customer_id);
-        $accounts = Account::whereHas('accountType', function ($query) {
-            $query->whereIn('name', ['Income', 'Other Income']);
-        })->with(['accountType' => function ($query) {
-            $query->select('id', 'name');
+
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->whereIn('name', ['Income', 'Other Income']);
+        })->with(['accountType' => function ($q) {
+            $q->select('id', 'name');
         }])->get();
+
+        // invoice terms
+        $terms = Term::where('type', 1)->get();
         $banks = Bank::all();
         $last_tid = Invoice::max('tid');
-        // invoice type
-        $terms = Term::where('type', 1)->get();
 
         $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms');
         return new ViewResponse('focus.invoices.create_project_invoice', $params);
@@ -345,7 +346,7 @@ class InvoicesController extends Controller
     }    
 
     /**
-     * Delete Payment from storage
+     * Delete payment from storage
      */
     public function delete_payment($id)
     {
@@ -366,7 +367,7 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Fetch unallocated payment
+     * Fetch unallocated payments
      */
     public function unallocated_payment(Request $request)
     {
@@ -379,7 +380,7 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Print payment
+     * Print invoice payment receipt
      */
     public function print_payment(PaidInvoice $paidinvoice)
     {
@@ -395,251 +396,4 @@ class InvoicesController extends Controller
 
         return Response::stream($pdf->Output('payment.pdf', 'I'), 200, $headers);
     }        
-
-
-    
-    public function print_document(Invoice $invoice, ManageInvoiceRequest $request)
-    {
-        $invoice = $this->repository->find($request->id);
-        switch ($request->type) {
-            case 1:
-                //delivery note
-                $general = array(
-                    'bill_type' => trans('invoices.delivery_note'),
-                    'lang_bill_number' => trans('invoices.delivery_note'),
-                    'lang_bill_date' => trans('invoices.invoice_date'),
-                    'lang_bill_due_date' => trans(
-                        'invoices.invoice_due_date'
-                    ), 'direction' => 'rtl',
-                    'person' => trans('customers.customer'),
-                    'prefix' => 1
-                );
-                $html = view('focus.bill.delivery', compact('invoice', 'general'))->render();
-                $name = 'delivery_note_' . $invoice->tid . '.pdf';
-                break;
-            case 2:
-                //delivery note
-                $general = array(
-                    'bill_type' => trans('invoices.delivery_note'),
-                    'lang_bill_number' => trans('invoices.delivery_note'),
-                    'lang_bill_date' => trans('invoices.invoice_date'),
-                    'lang_bill_due_date' => trans(
-                        'invoices.invoice_due_date'
-                    ), 'direction' => 'rtl',
-                    'person' => trans('customers.customer'),
-                    'prefix' => 2
-                );
-
-                $html = view('focus.bill.proforma', compact('invoice', 'general'))->render();
-                $name = 'delivery_note_' . $invoice->tid . '.pdf';
-                break;
-        }
-        $pdf = new \Mpdf\Mpdf(config('pdf'));
-        $pdf->WriteHTML($html);
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
-    }
-
-    public function update_status(Request $request)
-    {
-        switch ($request->bill_type) {
-            case 1:
-                $result = Invoice::where('id', $request->bill_id)->update(array('status' => $request->status));
-                if ($result) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.bills.updated'), 'bill_status' => trans('payments.' . $request->status)));
-                break;
-            case 2:
-                $result = Invoice::where('id', $request->bill_id)->update(array('i_class' => $request->status));
-                if ($result) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.bills.updated'), 'bill_status' => trans('payments.' . $request->status)));
-                break;
-        }
-    }
-
-    public function pos(ManagePosRequest $request, RegistersController $register)
-    {
-        if ($register->status()) {
-            $input = $request->only(['sub', 'p']);
-            $customer = Customer::first();
-            $accounts = Account::all();
-
-            $input['sub'] = false;
-            $last_invoice = Invoice::where('i_class', '=', 1)->latest()->first();
-
-            return view('focus.invoices.pos.create')->with(array('last_invoice' => $last_invoice, 'sub' => $input['sub'], 'p' => $request->p, 'accounts' => $accounts, 'customer' => $customer))->with(bill_helper(1, 2))->with(product_helper());
-        } else {
-            return view('focus.invoices.pos.open_register');
-        }
-    }
-
-    public function pos_store(ManagePosRequest $request, PrinterController $printer)
-    {
-
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'recur_after', 'sub', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'term_id', 'tax_id', 'p']);
-
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'serial', 'unit_m']);
-
-        $invoice_payment = $request->only(['p_amount', 'p_method', 'p_account', 'b_change']);
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $invoice['i_class'] = 1;
-        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
-        if ($result) {
-            if (isset($result['id'])) $pay = $this->repository->payment($result, $invoice_payment);
-            //return with successfull message
-            $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-            $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-            $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-            $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-            $lk = '';
-            $out = '';
-            if (feature(19)->feature_value == 1) $out = $printer->thermal_print($result);
-            if (session('d_id')) {
-                Draft::find(session('d_id'))->delete();
-                session()->forget('d_id');
-            }
-            if (isset($result['p'])) $lk .= '<a href="' . route('biller.projects.show', [$result['p']]) . '" class="btn btn-info btn-md"><span class="fa fa-repeat" aria-hidden="true"></span> ' . trans('invoices.return_project') . '  </a> ';
-            if ($pay) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-info btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . $link . '" class="btn btn-purple btn-md"><span class="fa fa-print" aria-hidden="true"></span> ' . trans('general.print') . '  </a> <a href="' . $link_download . '" class="btn btn-warning btn-md"><span class="fa fa-file-pdf-o" aria-hidden="true"></span> ' . trans('general.pdf') . '  </a> <a href="' . $link_preview . '" class="btn btn-purple btn-md"><span class="fa fa-globe" aria-hidden="true"></span> ' . trans('general.preview') . '  </a> <a href="' . route('biller.invoices.pos') . '" class="btn btn-blue-grey btn-md"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a> ' . $lk . ' &nbsp; &nbsp;<br>' . $out, 'd_id' => $result['id']));
-            $feature = feature(11);
-            $alert = json_decode($feature->value2, true);
-            if ($alert['new_invoice'] or $alert['cust_new_invoice']) {
-                $template = Template::all()->where('category', '=', 1)->where('other', '=', 1)->first();
-                $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-                $link = route('biller.view_bill', [$result->id, 1, $valid_token, 0]);
-                $data = array(
-                    'Company' => config('core.cname'),
-                    'BillNumber' => $result->tid,
-                    'BillType' => trans('invoices.invoice'),
-                    'URL' => "<a href='$link'>$link</a>",
-                    'Name' => $result->customer->name,
-                    'CompanyDetails' => '<h6><strong>' . config('core.cname') . ',</strong></h6>
-<address>' . config('core.address') . '<br>' . config('core.city') . '</address>
-            ' . config('core.region') . ' : ' . config('core.country') . '<br>  ' . trans('general.email') . ' : ' . config('core.email'),
-                    'DueDate' => dateFormat(date('Y-m-d')),
-                    'Amount' => amountFormat($result->total)
-                );
-                $replaced_body = parse($template['body'], $data, true);
-                $subject = parse($template['title'], $data, true);
-                $mail = array();
-                if ($alert['new_invoice'] and !$alert['cust_new_invoice']) {
-                    $mail['mail_to'] = $feature->value1;
-                } elseif ($alert['cust_new_invoice'] and !$alert['new_invoice']) {
-                    $mail['mail_to'] = $result->customer->email;
-                } else {
-                    $mail['mail_to'][] = $result->customer->email;
-                    $mail['mail_to'][] = $feature->value1;
-                }
-                $mail['customer_name'] = trans('transactions.transaction');
-                $mail['subject'] = $subject;
-                $mail['text'] = $replaced_body;
-                business_alerts($mail);
-            }
-            if ($alert['sms_new_invoice']) {
-                $template = Template::all()->where('category', '=', 2)->where('other', '=', 11)->first();
-                $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-                $link = route('biller.view_bill', [$result->id, 1, $valid_token, 0]);
-                $short_url = ConfigMeta::where('feature_id', '=', 7)->first(array('feature_value', 'value2'));
-                $data['URL'] = $link;
-                if ($short_url['feature_value']) {
-                    config([
-                        'bitly.accesstoken' => $short_url['value2']
-                    ]);
-                    $data['URL'] = Bitly::getUrl($link);
-                }
-                $replaced_body = parse($template['body'], $data, true);
-                $mailer = new \App\Repositories\Focus\general\RosesmsRepository();
-                return $mailer->send_bill_sms($result->customer->phone, $replaced_body, false);
-            }
-        } else {
-            echo json_encode(array('status' => 'Error', 'message' => trans('exceptions.backend.invoices.create_error')));
-        }
-    }
-
-    public function pos_update(ManagePosRequest $request, PrinterController $printer)
-    {
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'recur_after', 'sub', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'term_id', 'tax_id', 'p', 'id']);
-
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'serial', 'unit_m']);
-
-        $invoice_payment = $request->only(['p_amount', 'p_method', 'p_account', 'b_change']);
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $invoice_ins = Invoice::find($invoice['id']);
-        $result = $this->repository->update($invoice_ins, compact('invoice', 'invoice_items', 'data2'));
-        if (isset($result['id'])) $pay = $this->repository->payment($result, $invoice_payment);
-        //return with successfull message
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-        $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-        $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-        $lk = '';
-        $out = '';
-        if (feature(19)->feature_value == 1) $out = $printer->thermal_print($result);
-        if (isset($result['p'])) $lk .= '<a href="' . route('biller.projects.show', [$result['p']]) . '" class="btn btn-info btn-md"><span class="fa fa-repeat" aria-hidden="true"></span> ' . trans('invoices.return_project') . '  </a> ';
-        if ($pay) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-info btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . $link . '" class="btn btn-purple btn-md"><span class="fa fa-print" aria-hidden="true"></span> ' . trans('general.print') . '  </a> <a href="' . $link_download . '" class="btn btn-warning btn-md"><span class="fa fa-file-pdf-o" aria-hidden="true"></span> ' . trans('general.pdf') . '  </a> <a href="' . $link_preview . '" class="btn btn-purple btn-md"><span class="fa fa-globe" aria-hidden="true"></span> ' . trans('general.preview') . '  </a> <a href="' . route('biller.invoices.pos') . '" class="btn btn-blue-grey btn-md"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a> ' . $lk . ' &nbsp; &nbsp;<br>' . $out, 'd_id' => $result['id']));
-    }
-
-    public function draft_store(ManagePosRequest $request)
-    {
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'recur_after', 'sub', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'term_id', 'tax_id', 'p']);
-
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'serial', 'unit_m']);
-
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create_draft(compact('invoice', 'invoice_items', 'data2'));
-
-        //return with successfull message
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-        $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-        $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-        $lk = '';
-        $out = '';
-
-        echo json_encode(array('status' => 'Done', 'message' => trans('alerts.backend.invoices.draft_created')));
-    }
-
-    public function drafts_load(ManagePosRequest $request)
-    {
-        $drafts = Draft::where('user_id', '=', auth()->user()->id)->orderBy('id', 'desc')->take(20)->get();
-        foreach ($drafts as $draft) {
-            echo '<tr><td>' . $draft->tid . '#' . $draft->id . '<a href="' . route('biller.invoices.draft_view', [$draft->id]) . '"><i class="fa fa-eye" </a></td><td>' . dateTimeFormat($draft->created_at) . '</td><td>' . $draft->user->first_name . '</td></tr>';
-        }
-    }
-
-    public function draft_view(ManagePosRequest $request)
-    {
-        $invoice = Draft::find($request->id);
-        $customer = Customer::first();
-        $accounts = Account::all();
-
-        $input['sub'] = false;
-        $last_invoice = Invoice::orderBy('id', 'desc')->where('i_class', '=', 1)->first();
-        $invoice['tid'] = $last_invoice['tid'] + 1;
-        $action = route('biller.invoices.pos_store');
-        session(['d_id' => $invoice['id']]);
-        return view('focus.invoices.pos.edit')->with(array('last_invoice' => $last_invoice, 'sub' => $input['sub'], 'p' => $request->p, 'accounts' => $accounts, 'customer' => $customer, 'invoices' => $invoice, 'action' => $action))->with(bill_helper(1, 2));
-    }
 }
