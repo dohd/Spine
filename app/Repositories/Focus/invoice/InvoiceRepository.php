@@ -14,6 +14,7 @@ use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use App\Models\quote\Quote;
 use App\Models\transactioncategory\Transactioncategory;
+use App\Repositories\Focus\customer\CustomerRepository;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
@@ -36,16 +37,6 @@ class InvoiceRepository extends BaseRepository
     {
         $q = $this->query();
 
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
-        });
-
-        if (request('project_id')) {
-            $q->whereHas('project', function ($sq) {
-                return $sq->where('project_id', request('project_id', 0));
-            });
-        }
-        
         if (request('start_date') && request('end_date')) {
             $q->whereBetween('invoicedate', [
                 date_for_database(request('start_date')), 
@@ -53,7 +44,50 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
-        return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes', 'amountpaid']);
+        // rectify invoice amount paid and status incase of misreport 
+        // return $this->correct_invoice_amountpaid($q);
+
+        return $q->get([
+            'id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes', 'amountpaid'
+        ]);
+    }
+
+    /**
+     * Rectify Invoice Amount Paid amount and status columns incase of misreport
+     * by extracting balances from customer statement report
+     */
+    public function correct_invoice_amountpaid($q)
+    {
+        return $q->get()->map(function ($v) {
+            $customer_statement = (new CustomerRepository)->getStatementForDataTable($v->customer_id);
+            $invoices = collect();
+            foreach ($customer_statement as $row) {
+                if ($row->type == 'invoice') $invoices->add($row);
+                else {
+                    $last_invoice = $invoices->last();
+                    if ($last_invoice->invoice_id == $row->invoice_id) {
+                        $last_invoice->credit += $row->credit;
+                    }
+                }
+            }
+
+            // update amount paid
+            $update_amount = null;
+            foreach ($invoices as $invoice) {
+                if ($invoice->invoice_id == $v->id) {
+                    $update_amount = $invoice->credit;
+                    break;
+                }
+            }
+            $v->update(['amountpaid' => $update_amount]);
+
+            // update invoice status
+            if ($v->amountpaid == 0) $v->update(['status' => 'due']);
+            elseif ($v->total > $v->amountpaid) $v->update(['status' => 'partial']);
+            elseif ($v->total == $v->amountpaid) $v->update(['status' => 'paid']);
+
+            return $v;
+        });
     }
 
     /**
@@ -207,22 +241,24 @@ class InvoiceRepository extends BaseRepository
         // fetch query results
         $quotes = $q->get();
 
-        // stock issued from store to project
+        // stock amount of items issued from inventory
         $store_inventory_amount = 0;
-        // direct purchase items issued directly to project
+
+        // direct purchase item amounts of items issued directly to project
         $dirpurch_inventory_amount = 0;
         $dirpurch_expense_amount = 0;
         $dirpurch_asset_amount = 0;
         foreach ($quotes as $quote) {
-            $store_inventory_amount += $quote->issuance->sum('total');
+            $store_inventory_amount  = $quote->projectstock->sum('subtotal');
+
+            // direct purchase items issued to project
             if (isset($quote->project_quote->project)) {
                 foreach ($quote->project_quote->project->purchase_items as $item) {
-                    $subttl = $item['amount'] - $item['taxrate'];
-                    // project items
-                    if ($item['itemproject_id']) {
-                        if ($item['type'] == 'Expense') $dirpurch_expense_amount += $subttl;
-                        elseif ($item['type'] == 'Stock') $dirpurch_inventory_amount += $subttl;
-                        elseif ($item['type'] == 'Asset') $dirpurch_asset_amount += $subttl;
+                    if ($item->itemproject_id) {
+                        $subtotal = $item->amount - $item->taxrate;
+                        if ($item->type == 'Expense') $dirpurch_expense_amount += $subtotal;
+                        elseif ($item->type == 'Stock') $dirpurch_inventory_amount += $subtotal;
+                        elseif ($item->type == 'Asset') $dirpurch_asset_amount += $subtotal;
                     }
                     
                 }
