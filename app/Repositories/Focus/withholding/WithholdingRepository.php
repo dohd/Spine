@@ -161,9 +161,11 @@ class WithholdingRepository extends BaseRepository
     public function delete($withholding)
     {
         DB::beginTransaction();
+        
         // reverse client unallocated amount
         $unallocated = $withholding->amount - $withholding->allocate_ttl;
         $withholding->customer->decrement('on_account', $unallocated);
+
         // reverse invoice amount paid and update status
         foreach ($withholding->items as $item) {
             if ($item->invoice) {
@@ -174,12 +176,15 @@ class WithholdingRepository extends BaseRepository
                 elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
             }
         }
+
         $withholding->transactions()->delete();
         aggregate_account_transactions();
+
         $result = $withholding->delete();
- 
-        DB::commit();
-        if ($result) return true;
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.withholdings.delete_error'));
     }
