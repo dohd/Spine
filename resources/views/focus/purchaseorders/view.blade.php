@@ -16,16 +16,14 @@
             </div>
         </div>
     </div>
-    @php
-        $po = $purchaseorder;
-        $valid_token = token_validator('', 'po' . $po->id, true);
-        $link = route('biller.print_purchaseorder', [$po->id, 9, $valid_token, 1]);
-    @endphp
+    
     <div class="card">
         <h5 class="card-header">
-            <a href="{{ route('biller.purchaseorders.create_grn', $po) }}" class="btn btn-primary btn-sm">
-                <i class="fa fa-cubes"></i> Receive Goods
-            </a>
+            @php
+                $po = $purchaseorder;
+                $valid_token = token_validator('', 'po' . $po->id, true);
+                $link = route('biller.print_purchaseorder', [$po->id, 9, $valid_token, 1]);
+            @endphp
             <a href="{{ $link }}" class="btn btn-purple btn-sm" target="_blank">
                 <i class="fa fa-print" aria-hidden="true"></i> Print
             </a>
@@ -86,30 +84,7 @@
                                 </td>
                             </tr>                              
                         </tbody>
-                    </table>
-                    <h4 class="mt-2"><b>Received Goods</b></h4>
-                    <div class="table-responsive">
-                        <table class="table tfr my_stripe_single text-center" cellspacing="0" width="100%">
-                            <tr class="bg-gradient-directional-blue white">
-                                <th>Product Type</th>
-                                <th>Product Description</th>
-                                <th>Quantity</th>
-                                <th>DNote</th>
-                                <th>Date</th>
-                            </tr>
-                            <tbody>
-                                @foreach ($po->grn_items as $item)
-                                    <tr>
-                                        <td>{{ $item->purchaseorder_item->type }}</td>
-                                        <td>{{ $item->purchaseorder_item->description }}</td>
-                                        <td>{{ number_format($item->qty, 1) }}</td>
-                                        <td>{{ $item->dnote }}</td>
-                                        <td>{{ dateFormat($item->date) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>                 
+                    </table>            
                 </div>
 
                 <!-- Inventory/stock -->
