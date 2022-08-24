@@ -25,6 +25,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>PMT No</th>
                                         <th>Customer</th>
                                         <th>Account</th>
                                         <th>Date</th>
@@ -66,7 +67,7 @@
     .datepicker('setDate', new Date())
 
     function draw_data() {
-        const cols = ['customer', 'account','date', 'amount', 'allocate_ttl', 'payment_mode', 'reference', 'invoice_tid', 'payment_type']
+        const cols = ['tid', 'customer', 'account','date', 'amount', 'allocate_ttl', 'payment_mode', 'reference', 'invoice_tid', 'payment_type']
         .map(v => ({data: v, name: v}));
         const language = {@lang('datatable.strings')};
         var dataTable = $('#paymentTbl').dataTable({

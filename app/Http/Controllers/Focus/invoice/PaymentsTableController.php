@@ -55,6 +55,9 @@ class PaymentsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
+            ->addColumn('tid', function ($payment) {
+                return gen4tid('pmt-', $payment->tid);
+            })
             ->addColumn('customer', function ($payment) {
                 if ($payment->customer) return $payment->customer->company;
             })

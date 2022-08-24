@@ -51,7 +51,7 @@
                 const option = $(document.createElement('option'));
                 option.val(v.id).text(
                     `${new Date(v.date).toDateString()} - ${v.payment_mode} - ${v.reference} - 
-                    ${parseFloat(v.amount).toLocaleString()} - ${v.payment_type}`
+                    ${accounting.formatNumber(v.amount)} - ${v.payment_type}`
                 )
                 .attr('amount', v.amount)
                 .attr('allocateTotal', v.allocate_ttl)
@@ -69,11 +69,11 @@
 
     // On allocation 
     $('#invoiceTbl').on('change', '.paid', function() {
-        const paid = parseFloat($(this).val().replace(/,/g, ''));
-        $(this).val(paid.toLocaleString());
+        const paid = accounting.unformat($(this).val());
+        $(this).val(accounting.formatNumber(paid));
         calcTotal();
-        const amount = parseFloat($('#amount').val().replace(/,/g, ''));
-        const allocateTotal = parseFloat($('#allocate_ttl').val().replace(/,/g, ''));
+        const amount = accounting.unformat($('#amount').val());
+        const allocateTotal = accounting.unformat($('#allocate_ttl').val());
         if (allocateTotal > amount) {
             alert('Cannot allocate more than payment amount!');
             $(this).val(0);
@@ -85,21 +85,21 @@
     $('#amount').keyup(function() {
         let dueTotal = 0;
         let allocateTotal = 0;
-        let amount = parseFloat($(this).val().replace(/,/g, ''));
+        let amount = accounting.unformat($(this).val());
         const lastCount = $('#invoiceTbl tbody tr').length - 1;
         $('#invoiceTbl tbody tr').each(function(i) {
             if (i == lastCount) return;
-            const due = parseFloat($(this).find('.due').text().replace(/,/g, ''));
-            if (due > amount) $(this).find('.paid').val(amount.toLocaleString());
-            else if (amount > due) $(this).find('.paid').val(due.toLocaleString());
+            const due = accounting.unformat($(this).find('.due').text());
+            if (due > amount) $(this).find('.paid').val(accounting.formatNumber(amount));
+            else if (amount > due) $(this).find('.paid').val(accounting.formatNumber(due));
             else $(this).find('.paid').val(0);
-            const paid = parseFloat($(this).find('.paid').val().replace(/,/g, ''));
+            const paid = accounting.unformat($(this).find('.paid').val());
             amount -= paid;
             dueTotal += due;
             allocateTotal += paid;
         });
-        $('#allocate_ttl').val(parseFloat(allocateTotal.toFixed(2)).toLocaleString());
-        $('#balance').val(parseFloat(dueTotal - allocateTotal).toLocaleString());
+        $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
+        $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
     }).focusout(function() { 
         if (!$(this).val()) return;
         $(this).val(parseFloat($(this).val().replace(/,/g, '')).toLocaleString());
@@ -122,16 +122,16 @@
             $('#account').val(opt.attr('accountId')).attr('disabled', true);
             $('#payment_mode').val(opt.attr('paymentMode')).attr('disabled', true);
             // execute after ajax async call
-            const balance = parseFloat(opt.attr('amount') - opt.attr('allocateTotal'));
+            const balance = accounting.unformat(opt.attr('amount') - opt.attr('allocateTotal'));
             setTimeout(() => $('#amount').val(balance).keyup().focusout().attr('readonly', true), 100);
         }
     });      
 
     // invoice row
     function invoiceRow(v, i) {
-        const amount = parseFloat(v.total).toLocaleString();
-        const paid = parseFloat(v.amountpaid).toLocaleString();
-        const balance = parseFloat(v.total - v.amountpaid).toLocaleString();
+        const amount = accounting.formatNumber(v.total);
+        const paid = accounting.formatNumber(v.amountpaid);
+        const balance = accounting.formatNumber(v.total - v.amountpaid);
         return `
             <tr>
                 <td class="text-center">${new Date(v.invoiceduedate).toDateString()}</td>
@@ -154,12 +154,12 @@
         const lastCount = $('#invoiceTbl tbody tr').length - 1;
         $('#invoiceTbl tbody tr').each(function(i) {
             if (i == lastCount) return;
-            const due = parseFloat($(this).find('.due').text().replace(/,/g, '')) || 0;
-            const paid = parseFloat($(this).find('.paid').val().replace(/,/g, '')) || 0;
+            const due = accounting.unformat($(this).find('.due').text());
+            const paid = accounting.unformat($(this).find('.paid').val());
             dueTotal += due;
             allocateTotal += paid;
         });
-        $('#allocate_ttl').val(parseFloat(allocateTotal.toFixed(2)).toLocaleString());
-        $('#balance').val(parseFloat(dueTotal - allocateTotal).toLocaleString());
+        $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
+        $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
     }
 </script>

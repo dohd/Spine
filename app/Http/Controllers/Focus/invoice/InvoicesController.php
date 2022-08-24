@@ -296,7 +296,7 @@ class InvoicesController extends Controller
 
         // modify and filter paid data items 
         $data_items = modify_array($data_items);
-        $data_items = array_filter($data_items, function ($item) { return $item['paid']; });
+        $data_items = array_filter($data_items, function ($item) { return $item['paid'] > 0; });
 
         $result = $this->repository->create_invoice_payment(compact('data', 'data_items'));
 

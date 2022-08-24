@@ -32,5 +32,5 @@
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
-@include('focus/invoices/form_js')
+@include('focus/invoices/payment_form_js')
 @endsection
