@@ -127,8 +127,7 @@ class CustomersTableController extends Controller
     public function invoke_statement()
     {
         $core = $this->customer->getStatementForDataTable();
-        printlog($core->toArray());
-
+        
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
