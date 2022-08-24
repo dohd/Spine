@@ -84,8 +84,8 @@ class WithholdingRepository extends BaseRepository
                 $invoice = $item->invoice;
                 $invoice->increment('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
             }
         }
         
@@ -172,8 +172,8 @@ class WithholdingRepository extends BaseRepository
                 $invoice = $item->invoice;
                 $invoice->decrement('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
-                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
             }
         }
 

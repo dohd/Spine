@@ -153,8 +153,9 @@ class LoanRepository extends BaseRepository
         // update payment status in loans
         foreach ($result->items as $item) {
             $loan = $item->loan;
-            if ($loan->amount == $loan->amountpaid) $loan->update(['status' => 'paid']);
-            if ($loan->amount > $loan->amountpaid) $loan->update(['status' => 'partial']);
+            if ($loan->amountpaid == 0) $loan->update(['status' => 'pending']);
+            elseif (round($loan->amount) > round($loan->amountpaid)) $loan->update(['status' => 'partial']);
+            else $loan->update(['status' => 'paid']);
         }
 
         /** accounts */

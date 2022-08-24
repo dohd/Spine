@@ -99,7 +99,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         $received_goods_qty = $result->items->sum('qty');
         $order_goods_qty = $result->purchaseorder->items->sum('qty');
         if ($received_goods_qty == 0) $result->purchaseorder->update(['status' => 'pending']);
-        elseif ($received_goods_qty < $order_goods_qty) $result->purchaseorder->update(['status' => 'partial']);
+        elseif (round($received_goods_qty) < round($order_goods_qty)) $result->purchaseorder->update(['status' => 'partial']);
         else $result->purchaseorder->update(['status' => 'complete']);
 
         /**accounting */
@@ -160,11 +160,21 @@ class GoodsreceivenoteRepository extends BaseRepository
             }   
         }
 
+        $current = $goodsreceivenote;
+        $goodsreceivenotes = GoodsreceivenoteItem::whereHas('goodsreceivenote', function ($q) use($current) {
+            $q->where('purchaseorder_id', $current->purchaseorder_id)->whereNotIn('id', $current->id);
+        });
+        $received_goods_qty = 0;
+        foreach ($goodsreceivenotes as $row) {
+            $received_goods_qty += $row->items->sum('qty');
+        }
+
         // update purchase order status
-        $received_goods_qty = $goodsreceivenote->items->sum('qty');
-        $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
-        if ($order_goods_qty > $received_goods_qty) $goodsreceivenote->purchaseorder->update(['status' => 'open']);
-        else $goodsreceivenote->purchaseorder->update(['status' => 'close']);
+        $purchaseorder = $goodsreceivenote->purchaseorder;
+        $order_goods_qty = $purchaseorder->items->sum('qty');
+        if ($received_goods_qty == 0) $purchaseorder->update(['status' => 'pending']);
+        elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'partial']);
+        else $purchaseorder->update(['status' => 'complete']);
 
         $result = $goodsreceivenote->delete();
         if ($result) {

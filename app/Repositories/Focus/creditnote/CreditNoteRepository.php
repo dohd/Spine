@@ -61,8 +61,8 @@ class CreditNoteRepository extends BaseRepository
 
         // update invoicce status
         if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-        elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-        elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+        elseif (round($invoice->total) == round($invoice->amountpaid)) $invoice->update(['status' => 'paid']);
+        elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
 
 
         /** accounts  */
@@ -107,9 +107,9 @@ class CreditNoteRepository extends BaseRepository
             }
         }
         // update invoice status
-        if ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
-        elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-        elseif ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+        if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+        elseif (round($invoice->total) == round($invoice->amountpaid)) $invoice->update(['status' => 'paid']);
+        elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
         
         $result = $creditnote->update($input);
 
@@ -227,13 +227,14 @@ class CreditNoteRepository extends BaseRepository
         else $invoice->decrement('amountpaid', $creditnote->total);
         // update invoicce status
         if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-        elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);    
-        elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
+        elseif (round($invoice->total) == round($invoice->amountpaid)) $invoice->update(['status' => 'paid']);    
+        elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
         
         // delete respective transactions
         if ($creditnote->is_debit) $creditnote->debitnote_transactions()->delete();
         else $creditnote->creditnote_transactions()->delete();
         aggregate_account_transactions();
+        
         $result = $creditnote->delete();
         
         DB::commit();

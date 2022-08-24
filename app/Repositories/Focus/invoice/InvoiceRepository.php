@@ -3,7 +3,6 @@
 namespace App\Repositories\Focus\invoice;
 
 use App\Models\account\Account;
-use App\Models\items\CustomEntry;
 use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
@@ -83,8 +82,8 @@ class InvoiceRepository extends BaseRepository
 
             // update invoice status
             if ($v->amountpaid == 0) $v->update(['status' => 'due']);
-            elseif ($v->total > $v->amountpaid) $v->update(['status' => 'partial']);
-            elseif ($v->total == $v->amountpaid) $v->update(['status' => 'paid']);
+            elseif (round($v->total) > round($v->amountpaid)) $v->update(['status' => 'partial']);
+            else $v->update(['status' => 'paid']);
 
             return $v;
         });
@@ -351,8 +350,8 @@ class InvoiceRepository extends BaseRepository
                 $invoice = $item->invoice;
                 $invoice->increment('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
             }
         }
         
@@ -410,8 +409,8 @@ class InvoiceRepository extends BaseRepository
                 $invoice = $item->invoice;
                 $invoice->increment('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
             }
             // delete items with zero payment
             if ($item->paid == 0) $item->delete();
@@ -444,8 +443,8 @@ class InvoiceRepository extends BaseRepository
                 $invoice = $item->invoice;
                 $invoice->decrement('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif ($invoice->total > $invoice->amountpaid) $invoice->update(['status' => 'partial']);
-                elseif ($invoice->total == $invoice->amountpaid) $invoice->update(['status' => 'paid']);
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
             }            
         }
         $payment->transactions()->delete();

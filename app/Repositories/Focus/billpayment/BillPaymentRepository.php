@@ -77,8 +77,8 @@ class BillPaymentRepository extends BaseRepository
             $bill = $item->supplier_bill;
             $bill->increment('amount_paid', $item->paid);
             if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
-            elseif ($bill->total > $bill->amount_paid) $bill->update(['status' => 'partial']);
-            elseif ($bill->total == $bill->amount_paid) $bill->update(['status' => 'paid']);
+            elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+            else  $bill->update(['status' => 'paid']);
         }
 
         /**accounting */
@@ -126,8 +126,8 @@ class BillPaymentRepository extends BaseRepository
             $bill = $item->supplier_bill;
             $bill->decrement('amount_paid', $item->paid);
             if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
-            elseif ($bill->total > $bill->amount_paid) $bill->update(['status' => 'partial']);
-            elseif ($bill->total == $bill->amount_paid) $bill->update(['status' => 'paid']);
+            elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+            else $bill->update(['status' => 'paid']);
         }
 
         Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
