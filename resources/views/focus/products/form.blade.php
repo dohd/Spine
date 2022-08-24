@@ -40,23 +40,14 @@
     <div class="col-2">
         {{ Form::label('unit', trans('products.stock_type'),['class' => 'control-label']) }}
         <select class="custom-select" name="stock_type">
-            @foreach (['service', 'general'] as $i => $val)
-                <option value="{{ $i }}" {{ (@$product && @$product->stock_type == $val? 'selected' : $val)? 'selected' : '' }}>
+            @foreach (['general', 'consumable', 'service', ] as $i => $val)
+                <option value="{{ $i }}" {{ @$product->stock_type == $val? 'selected' : '' }}>
                     {{ ucfirst($val) }}
                 </option>
             @endforeach
         </select>
     </div>
-    <div class="col-2">
-        <label for="material_type">Material Type</label>
-        <select class="custom-select" name="material_type">
-            @foreach(['direct', 'indirect'] as $val)
-                <option value="{{ $val }}" {{ $val == @$product->material_type ? 'selected' : '' }}>
-                    {{ $val == 'indirect'? 'Indirect e.g Office Consumables' : 'Direct'  }}
-                </option>                        
-            @endforeach
-        </select>
-    </div>
+
     <div class="col-2">
         {{ Form::label('unit', 'Base Unit', ['class' => 'control-label']) }}
         <select class="custom-select" name="unit_id" id="unit">

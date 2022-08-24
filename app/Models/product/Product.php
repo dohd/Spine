@@ -28,7 +28,7 @@ class Product extends Model
      */
     protected $fillable = [
         'productcategory_id', 'name', 'taxrate', 'product_des', 'unit_id', 'code_type',
-        'sub_cat_id', 'brand_id', 'stock_type', 'material_type', 'ins'
+        'sub_cat_id', 'brand_id', 'stock_type', 'ins'
     ];
 
     /**
