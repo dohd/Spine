@@ -127,6 +127,7 @@ class CustomersTableController extends Controller
     public function invoke_statement()
     {
         $core = $this->customer->getStatementForDataTable();
+        printlog($core->toArray());
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
@@ -135,7 +136,23 @@ class CustomersTableController extends Controller
             return dateFormat($statement->date);
         })
         ->addColumn('type', function ($statement) {
-            return $statement->type;
+            $record = $statement->type;
+            switch ($record) {
+                case 'invoice': 
+                    $record = '<a href="'. route('biller.invoices.show', $statement->invoice_id) .'">'. $record .'</a>';
+                    break;
+                case 'payment': 
+                    // $type = '<a href="'. route('biller.invoices.show', $statement->invoice_id) .'">'. $type .'</a>';
+                    break;
+                case 'credit-note': 
+                    // $type = '<a href="'. route('biller.creditnotes.show', $statement->creditnote_id) .'">'. $type .'</a>';
+                    break;
+                case 'debit-note': 
+                    // $type = '<a href="'. route('biller.creditnotes.show', [$statement->debitnote_id, 'is_debit=1']) .'">'. $type .'</a>';
+                    break;    
+            }
+            
+            return $record;
         })
         ->addColumn('note', function ($statement) {
             return $statement->note;
