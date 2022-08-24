@@ -154,7 +154,7 @@
                 <div class='form-group'>
                     {{ Form::label('expense_account', 'Recognise Expense on Account',['class' => 'col-lg-3 control-label']) }}
                     <div class='col-lg-10'>
-                        <select name="expense_account_id" class="custom-select" id="expense_account">
+                        <select name="expense_account_id" class="custom-select" id="expense_account" required>
                             <option value="">-- Select Expense Account --</option>
                             @foreach ($accounts as $row) 
                                 <option value="{{ $row->id }}" {{ $row->id == @$customer->expense_account_id? 'selected' : '' }}>

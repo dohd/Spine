@@ -228,7 +228,7 @@
                 <div class='form-group'>
                     {{ Form::label('sale_account', 'Recognise Sale on Account',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        <select name="sale_account_id" class="custom-select" id="sale_account">
+                        <select name="sale_account_id" class="custom-select" id="sale_account" required>
                             <option value="">-- Select Sale Account --</option>
                             @foreach ($accounts as $row) 
                                 <option value="{{ $row->id }}" {{ $row->id == @$customer->sale_account_id? 'selected' : '' }}>
