@@ -64,7 +64,7 @@
     });
     function select(event, ui, i) {
         const {data} = ui.item;
-        $('#id-'+i).val(data.product_id);
+        $('#id-'+i).val(data.id);
         $('#name-'+i).val(data.name);
     }
 

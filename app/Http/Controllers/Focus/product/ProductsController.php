@@ -190,7 +190,8 @@ class ProductsController extends Controller
             // set customer selling price or supplier purchase price
             if ($pricegroup) {
                 foreach ($pricegroup->pricelist as $item) {
-                    if ($item->product_id == $row->product_id) {
+                    // pricelist product item same as product variation item
+                    if ($item->product_id == $row->id) {
                         $product['name'] = $item->name;
                         if ($pricegroup->is_client) $product['price'] = numberFormat($item->price);                            
                         else $product['purchase_price'] = numberFormat($item->price);
