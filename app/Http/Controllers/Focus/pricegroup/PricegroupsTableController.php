@@ -59,10 +59,10 @@ class PricegroupsTableController extends Controller
             ->addColumn('name', function ($pricegroup) {
                 return '<a class="font-weight-bold" href="' . route('biller.spvariations.index') . '?rel_id=' . $pricegroup->id . '">' . $pricegroup->name . '</a>';
             })->addColumn('total', function ($pricegroup) {
-                return numberFormat($pricegroup->products->sum('items'));
+                // return numberFormat($pricegroup->products->sum('items'));
             })
             ->addColumn('worth', function ($pricegroup) {
-                return numberFormat($pricegroup->products->sum('total_value'));
+                // return numberFormat($pricegroup->products->sum('total_value'));
             })
             ->addColumn('created_at', function ($pricegroup) {
                 return $pricegroup->created_at->format('d-m-Y');
