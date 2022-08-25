@@ -299,7 +299,7 @@
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
         
-        const purchasePrice = parseFloat(data.purchase_price);
+        const purchasePrice = accounting.unformat(data.purchase_price);
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
 
         $('#uom-'+i).html('');
