@@ -17,7 +17,7 @@
             <tr>
                 <td><input type="text" class="form-control assetname" name="name[]" id="assetname-0" placeholder="Asset Or Equipment" autocomplete="off"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
-                <td><input type="text" class="form-control asset_uom" name="uom[]" id="assetuom-0" value=""></td>
+                <td><input type="text" class="form-control asset_uom" name="uom[]" id="assetuom-0"></td>
                 <td><input type="text" class="form-control asset_price" name="rate[]" id="assetprice-0"></td>
                 <td>
                     <select class="form-control asset_vat" name="itemtax[]" id="assetvat-0">

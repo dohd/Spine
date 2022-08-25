@@ -97,17 +97,12 @@ class PurchasesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        dd($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
         if (!$data_items) throw ValidationException::withMessages(['Please select system-generated row items as line items!']);
 
         $result = $this->repository->create(compact('data', 'data_items'));
 
-        $msg = ['flash_success' => 'Direct Purchase posted successfully'];
-        if ($result->omission_error) 
-            $msg = ['flash_error' => 'Something went wrong! Please update Direct Purchase ' . gen4tid('DP-', $result->tid)];
-
-        return new RedirectResponse(route('biller.purchases.index'), $msg);
+        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase posted successfully']);
     }
 
     /**

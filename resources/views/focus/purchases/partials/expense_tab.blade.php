@@ -20,7 +20,7 @@
                     <input type="hidden" id="expitemid-0" name="item_id[]">
                 </td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
-                <td><input type="text" class="form-control exp_uom" name="uom[]" id="uom-0" value=""></td>
+                <td><input type="text" class="form-control exp_uom" name="uom[]" id="expuom-0"></td>
                 <td><input type="text" class="form-control exp_price" name="rate[]" id="expprice-0"></td>
                 <td>
                     <select class="form-control exp_vat" name="itemtax[]" id="expvat-0">
