@@ -43,10 +43,11 @@ class LpoController extends Controller
         $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
 
         // check for duplicate lpo number per client
-        $lpo = Lpo::where(['customer_id' => $input['customer_id'], 'lpo_no' => $input['lpo_no']])->first();
-        if ($lpo) return response()->noContent();
+        $lpo_exists = Lpo::where(['customer_id' => $input['customer_id'], 'lpo_no' => $input['lpo_no']])->count();
+        if ($lpo_exists) return redirect(route('biller.lpo.index'))->with(['flash_error' => 'Duplicate Customer LPO Number!']);
 
-        $input['amount'] = (float) $input['amount'];
+        $input['date'] = date_for_database($input['date']);
+        $input['amount'] = numberClean($input['amount']);
         Lpo::create($input);
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO created successfully']);

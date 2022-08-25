@@ -50,20 +50,22 @@
         </div>
     </div>
 </div>    
-@include('focus.lpo.modal.lpo_edit')
-@include('focus.lpo.modal.lpo_new')
+@include('focus.lpo.partials.edit-lpo')
+@include('focus.lpo.partials.create-lpo')
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}
 {{ Html::script('focus/js/select2.min.js') }}
-
 <script>
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajaxSetup: { headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} },
+        datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    };
 
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
+    $.ajaxSetup(config.ajaxSetup);
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     // Delete LPO
     $(document).on('click', 'a.delete-lpo', function(e) {
@@ -103,21 +105,30 @@
             $(formId+'#lpo_id').val(lpo.id);
             $(formId+'#person').append(new Option(customer.name, customer.id, 'selected', true));
             $(formId+'#branch_id').append(new Option(branch.name, branch.id, 'selected', true));
-            $(formId+'#date').val(lpo.date);
+
             $(formId+'#lpo_no').val(lpo.lpo_no);
-            $(formId+'#amount').val(lpo.amount);
+            $(formId+'#amount').val(accounting.formatNumber(lpo.amount));
             $(formId+'#remark').val(lpo.remark);
+
+            setTimeout(() => {
+                $(formId+'#date').datepicker('setDate', new Date(lpo.date));;
+            }, 500);
         });
     });
     
     // On modal open
     $(document).on('shown.bs.modal', '#updateLpoModal, #AddLpoModal', function() {
-        $person = $(this).find("#person");
-        $branch =  $(this).find("#branch_id");
+        const modal = $(this);
+
+        // init datepicker
+        modal.find('.datepicker')
+        .datepicker(config.datepicker)
+        .datepicker('setDate', new Date());
 
         // initialize customer select2
-        $person.select2({
-            dropdownParent: $(this),
+        const person = modal.find("#person");
+        person.select2({
+            dropdownParent: modal,
             ajax: {
                 url: "{{ route('biller.customers.select') }}",
                 dataType: 'json',
@@ -140,15 +151,15 @@
         });
 
         // on selecting customer fetch branches
-        $modal = $(this);
-        $person.on('change', function() {
-            $branch.html('').select2({
-                dropdownParent: $modal,
+        const branch =  modal.find("#branch_id");
+        person.on('change', function() {
+            branch.html('').select2({
+                dropdownParent: modal,
                 ajax: {
                     url: "{{ route('biller.branches.select') }}",
                     type: 'POST',
                     quietMillis: 50,
-                    data: ({term}) => ({search: term, customer_id: $person.val()}),
+                    data: ({term}) => ({search: term, customer_id: person.val()}),
                     processResults: function(data) {
                         return {
                             results: $.map(data, function(item) {
@@ -162,16 +173,23 @@
                 }
             });
         }); 
+
+        // LPO amount change
+        const amount =  modal.find("#amount");
+        amount.change(function() {
+            const el = $(this);
+            const value = accounting.unformat(el.val());
+            el.val(accounting.formatNumber(value));
+        });
     });
     
     // fetch table data
     function draw_data() {
-        const tableLang = { @lang('datatable.strings') };
         var dataTable = $('#lpo-table').dataTable({
             processing: true,
             responsive: true,
             stateSave: true,
-            language: tableLang,
+            language: {@lang('datatable.strings')},
             ajax: {
                 url: "{{ route('biller.lpo.get') }}",
                 type: 'post',
@@ -221,32 +239,7 @@
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print']
         });
     }
 </script>
