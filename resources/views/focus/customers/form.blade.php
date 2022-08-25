@@ -228,7 +228,7 @@
                 <div class='form-group'>
                     {{ Form::label('sale_account', 'Recognise Sale on Account',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        <select name="sale_account_id" class="custom-select" id="sale_account" required>
+                        <select name="sale_account_id" class="custom-select" id="sale_account">
                             <option value="">-- Select Sale Account --</option>
                             @foreach ($accounts as $row) 
                                 <option value="{{ $row->id }}" {{ $row->id == @$customer->sale_account_id? 'selected' : '' }}>
@@ -287,11 +287,20 @@
                         
     const customer = @json(@$customer);
     if (customer) {
-        if (customer.open_balance_date) 
+        if (customer.open_balance_date) {
             $('#open_balance_date').datepicker('setDate', new Date(customer.open_balance_date));
-        const balance = customer.open_balance.replace(/,/g, '');
-        $('#open_balance').val(parseFloat(balance).toLocaleString());
+        }
+        const balance = parseFloat(customer.open_balance);
+        $('#open_balance').val(accounting.formatNumber(balance));
     }
+
+    $('#open_balance').change(function() {
+        const value = accounting.unformat($(this).val());
+        if (value > 0) $('#sale_account').attr('required', true);
+        else $('#sale_account').attr('required', false);
+        $(this).val(accounting.formatNumber(value));
+    });
+
     
     $(document).ready(function() {
         $("#groups").select2();

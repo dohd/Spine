@@ -154,7 +154,7 @@
                 <div class='form-group'>
                     {{ Form::label('expense_account', 'Recognise Expense on Account',['class' => 'col-lg-3 control-label']) }}
                     <div class='col-lg-10'>
-                        <select name="expense_account_id" class="custom-select" id="expense_account" required>
+                        <select name="expense_account_id" class="custom-select" id="expense_account">
                             <option value="">-- Select Expense Account --</option>
                             @foreach ($accounts as $row) 
                                 <option value="{{ $row->id }}" {{ $row->id == @$customer->expense_account_id? 'selected' : '' }}>
@@ -204,16 +204,18 @@
     $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date());
     
+    // default supplier
     const supplier = @json(@$supplier);
     if (supplier) {
-        if (supplier.open_balance_date) 
+        if (supplier.open_balance_date) {
             $('#open_balance_date').datepicker('setDate', new Date(supplier.open_balance_date));
-        const balance = supplier.open_balance.replace(/,/g, '');
-        $('#open_balance').val(parseFloat(balance).toLocaleString());
+        }
+        const balance = parseFloat(supplier.open_balance);
+        $('#open_balance').val(accounting.numberFormat(balance));
     }
 
+    // on selecting groups
     $("#groups").select2({multiple: true});
-    
     $("#groups").on("select2:select", function (evt) {
         var element = evt.params.data.element;
         var $element = $(element);
@@ -222,11 +224,15 @@
         $(this).trigger("change");
     });
 
-    $("#balance").change(function() {
-        const input_val = $(this).val();
-        $("#balance").val(accounting.formatNumber(input_val));
+    // on changing opening balance
+    $("#open_balance").change(function() {
+        const value = accounting.unformat($(this).val());
+        if (value > 0) $('#expense_account').attr('required', true);
+        else $('#expense_account').attr('required', false);
+        $(this).val(accounting.formatNumber(value));
     });
 
+    // on chnaging credit limit 
     $("#credit_limit").change(function() {
         const input_val = $(this).val();
         $("#credit_limit").val(accounting.formatNumber(input_val));
