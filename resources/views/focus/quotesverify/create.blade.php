@@ -239,7 +239,7 @@
         for (let prop in item) {
             let keys = ['product_price', 'product_qty', 'product_subtotal'];
             if (keys.includes(prop) && item[prop]) {
-                item[prop] = parseFloat(item[prop].replace(/,/g, ''));
+                item[prop] = accounting.unformat(item[prop]);
             }
         }
         // check if item type is product
@@ -253,10 +253,10 @@
             $('#itemname-'+i).val(item.product_name);
             $('#unit-'+i).val(item.unit); 
             $('#remark-'+i).val(item.remark);
-            $('#amount-'+i).val(item.product_qty.toFixed(2));
-            $('#price-'+i).val(item.product_subtotal.toFixed(2));
-            $('#rateinclusive-'+i).val(item.product_price.toFixed(2));                
-            $('#result-'+i).text((item.product_qty * item.product_price).toFixed(2));
+            $('#amount-'+i).val(accounting.formatNumber(item.product_qty));
+            $('#price-'+i).val(accounting.formatNumber(item.product_subtotal)).attr('readonly', true);
+            $('#rateinclusive-'+i).val(accounting.formatNumber(item.product_price));                
+            $('#result-'+i).text(accounting.formatNumber(item.product_qty * item.product_price));
         } else {
             $('#quotation tbody').append(productTitleRow(rowIndx));
             // set default values
@@ -314,17 +314,15 @@
     function priceChange(e) {
         // change value to float
         e.target.value = Number(e.target.value).toFixed(2);
-
         const id = e.target.id;
         indx = id.split('-')[1];
-        const productQty = $('#amount-'+indx).val();
-        let productPrice = $('#'+id).val();
-        productPrice = parseFloat(productPrice.replace(/,/g, ''));
 
-        const rateInclusive = taxRate * productPrice;
+        const qty = accounting.unformat($('#amount-'+indx).val());
+        const price = accounting.unformat($('#'+id).val());
+        const rateInclusive = taxRate * price;
+
         $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
+        $('#result-'+indx).text(accounting.formatNumber(qty * rateInclusive));
         calcTotals();
     }
 
@@ -338,17 +336,17 @@
             if (qty) {
                 let price = $(this).find('td').eq(4).children().val();
                 let rate = $(this).find('td').eq(5).children().val();
-                price = parseFloat(price.replace(/,/g, ''));
-                rate = parseFloat(rate.replace(/,/g, ''));
+                price = accounting.unformat(price);
+                rate = accounting.unformat(rate);
                 subTotal += qty * price;
                 grandTotal += qty * rate;
             }
             // update row_index
             $(this).find('input[name="row_index[]"]').val($(this).index());
         });
-        $('#subtotal').val(parseFloat(subTotal.toFixed(2)).toLocaleString());
-        $('#total').val(parseFloat(grandTotal.toFixed(2)).toLocaleString()).change();
-        $('#tax').val(parseFloat((grandTotal - subTotal).toFixed(2)).toLocaleString());        
+        $('#subtotal').val(accounting.formatNumber(subTotal));
+        $('#tax').val(accounting.formatNumber(grandTotal - subTotal));        
+        $('#total').val(accounting.formatNumber(grandTotal)).change();
     }
 
     // product autocomplete
@@ -375,10 +373,12 @@
                 $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
 
-                let price = parseFloat(data.price.replace(/,/g,''));
-                $('#price-'+i).val(price.toLocaleString());
-                $('#rateinclusive-'+i).val((taxRate * price).toLocaleString());                
-                $('#result-'+i).text((taxRate * price).toLocaleString());
+                const price = accounting.unformat(data.price);
+                const amount = price * taxRate;
+
+                $('#price-'+i).val(accounting.formatNumber(price)).attr('readonly', true);
+                $('#rateinclusive-'+i).val(accounting.formatNumber(amount));                
+                $('#result-'+i).text(accounting.formatNumber(amount));
                 calcTotals();
             }
         };
