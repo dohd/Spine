@@ -25,6 +25,7 @@ use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\transactioncategory\Transactioncategory;
 use Illuminate\Support\Facades\DB;
 
 
@@ -42,52 +43,65 @@ class CoreDashboard extends Controller
             //  dd($data['customers']->pluck('customer_id')->toArray());
             $transactions = Transaction::with(['account'])->whereBetween('due_date', [date_for_database($start_date), date_for_database($today)])->orderBy('id', 'desc')->take(10)->get();
 
-            $data['stock_alert'] = ProductVariation::whereRaw('qty<=alert')->whereHas('product', function ($query) {
+            $data['stock_alert'] = ProductVariation::whereRaw('qty <= alert')->whereHas('product', function ($query) {
                 return $query->where('stock_type', '=', 1);
             })->orderBy('id', 'desc')->get();
+
             return view('focus.dashboard.index', compact('data', 'transactions'));
         }
-        if (access()->allow('product-manage')) {
-            return new RedirectResponse(route('biller.products.index'), ['']);
-        }
+        if (access()->allow('product-manage')) 
+            return new RedirectResponse(route('biller.products.index'), []);
+            
         return view('focus.dashboard.no_data');
     }
 
 
     public function mini_dash()
     {
-        $today = date('Y-m-d');
         $start_date = date('Y-m') . '-01';
+        $today = date('Y-m-d');
 
-        $data['sales_chart'] = Invoice::whereBetween('invoicedate', [date_for_database($start_date), date_for_database($today)])->groupBy('invoicedate')->select('invoicedate', DB::raw('count(id) as items'), DB::raw('sum(total) as total'))->get();
-        $data['today_invoices'] = Invoice::whereBetween('invoicedate', [date_for_database($start_date), date_for_database($today)])->where('invoicedate', '=', $today)->select('invoicedate', DB::raw('count(id) as items'), DB::raw('sum(total) as total'))->get()->first();
-        $data['month_invoices'] = Invoice::whereBetween('invoicedate', [date_for_database($start_date), date_for_database($today)])->select('invoicedate', DB::raw('count(id) as items'), DB::raw('sum(total) as total'))->get()->first();
+        $data['sales_chart'] = Invoice::whereBetween('invoicedate', [$start_date, $today])
+        ->groupBy('invoicedate')
+        ->select(DB::raw('invoicedate, COUNT(id) as items, SUM(total) as total'))->get();
+        
+        $data['today_invoices'] = Invoice::whereBetween('invoicedate', [$start_date, $today])
+        ->where('invoicedate', $today)
+        ->select(DB::raw('invoicedate, COUNT(id) as items, SUM(total) as total'))->get()->first();
 
-        $transactions = Transaction::whereRaw("(DATE(due_date) between '$start_date' AND '$today') AND relation_id!=-1");
-        $data['transactions'] = $transactions->where('due_date', '=', $today)->select('due_date', DB::raw('sum(credit) as credit'))->get()->first();
-        $income_category = ConfigMeta::where('feature_id', '=', 8)->first('feature_value');
-        $purchase_category = ConfigMeta::where('feature_id', '=', 10)->first('feature_value');
-        $transactions_today = Transaction::whereIn('trans_category_id', [$income_category['feature_value'], $purchase_category['feature_value']])->where('due_date', date_for_database($today))->select(DB::raw('sum(credit) as credit'), DB::raw('sum(debit) as debit'))->get()->first();
-        $transactions = Transaction::whereIn('trans_category_id', [$income_category['feature_value'], $purchase_category['feature_value']])->whereBetween('due_date', [date_for_database($start_date), date_for_database($today)])->get();
+        $data['month_invoices'] = Invoice::whereBetween('invoicedate', [$start_date, $today])
+        ->select(DB::raw('invoicedate, COUNT(id) as items, SUM(total) as total'))->get()->first();
+        
+        $data['transactions'] = Transaction::whereBetween('due_date', [$start_date, $today])->where('due_date', $today)
+        ->select(DB::raw('due_date, SUM(credit) as credit'))->get()->first();
+        
+        $sale_categ = Transactioncategory::where('code', 'inv')->first();
+        $purchase_categ = Transactioncategory::where('code', 'bill')->first();
+        $transactions_today = Transaction::whereIn('trans_category_id', [$sale_categ->id, $purchase_categ->id])
+        ->where('due_date', $today)
+        ->select(DB::raw('SUM(credit) as credit, SUM(debit) as debit'))->get()->first();
 
-        $transactions_chart['income'] = $transactions->where('trans_category_id', $income_category['feature_value']);
-        $transactions_chart['expenses'] = $transactions->where('trans_category_id', $purchase_category['feature_value']);
-        $transactions_chart['income_total'] = $transactions->where('trans_category_id', $income_category['feature_value'])->sum('credit');
-        $transactions_chart['expenses_total'] = $transactions->where('trans_category_id', $purchase_category['feature_value'])->sum('debit');
-        $income_chart = array();
+        $transactions = Transaction::whereIn('trans_category_id', [$sale_categ->id, $purchase_categ->id])
+        ->whereBetween('due_date', [$start_date, $today])->get();
+        $transactions_chart['income'] = $transactions->where('trans_category_id', $sale_categ->id);
+        $transactions_chart['expenses'] = $transactions->where('trans_category_id', $purchase_categ->id);
+        $transactions_chart['income_total'] = $transactions->where('trans_category_id', $sale_categ->id)->sum('credit');
+        $transactions_chart['expenses_total'] = $transactions->where('trans_category_id', $purchase_categ->id)->sum('debit');
+
+        $income_chart = [];
         foreach ($transactions_chart['income'] as $row_i) {
-            $income_chart[] = array('x' => $row_i['due_date'], 'y' => (int)$row_i['credit']);
+            $income_chart[] = array('x' => $row_i['due_date'], 'y' => (int) $row_i['credit']);
         }
-        $expense_chart = array();
+        $expense_chart = [];
         foreach ($transactions_chart['expenses'] as $row_i) {
             $expense_chart[] = array('x' => $row_i['due_date'], 'y' => (int)$row_i['debit']);
         }
-        $sales_chart = array();
+        $sales_chart = [];
         foreach ($data['sales_chart'] as $row) {
             $sales_chart[] = array('y' => $row['invoicedate'], 'sales' => intval(numberClean($row['total'])), 'invoices' => intval($row['items']));
         }
 
-        return json_encode(array(
+        return response()->json([
             'dash' => array(
                 numberFormat($data['today_invoices']['items'], 0, 1),
                 amountFormat($data['today_invoices']['total'], 0, 1),
@@ -100,9 +114,12 @@ class CoreDashboard extends Controller
             ),
             'income_chart' => $income_chart,
             'expense_chart' => $expense_chart,
-            'inv_exp' => array('income' => (int)$transactions_chart['income_total'], 'expense' => (int)$transactions_chart['expenses_total']),
+            'inv_exp' => array(
+                'income' => (int) $transactions_chart['income_total'], 
+                'expense' => (int)$transactions_chart['expenses_total']
+            ),
             'sales' => $sales_chart,
-        ));
+        ]);
     }
 
     public function todo()
