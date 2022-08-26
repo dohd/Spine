@@ -79,6 +79,9 @@ class QuoteVerifyTableController extends Controller
                 if (isset($quote->project_quote->project)) 
                 return gen4tid('Prj-', $quote->project_quote->project->tid);
             })
+            ->addColumn('date', function($quote) {
+                return dateFormat($quote->date);
+            })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
                 if ($quote->verified == 'No') {

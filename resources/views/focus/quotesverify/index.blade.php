@@ -29,9 +29,9 @@
                         <div class="card-content">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-2">
+                                    <div class="col-3">
                                         <select name="verify_state" id="verify_state" class="custom-select">
-                                            <option value="">-- Verification State--</option>
+                                            <option value="">-- Verification Status--</option>
                                             @foreach (['yes' => 'verified', 'no' => 'unverified'] as $key => $val)
                                                 <option value="{{ ucfirst($key) }}">{{ ucfirst($val) }}</option>
                                             @endforeach
@@ -57,8 +57,9 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>{{ trans('customers.customer') }}</th>
+                                            <th>Date</th>
                                             <th># Quote / PI</th>
+                                            <th>{{ trans('customers.customer') }}</th>
                                             <th>Title</th>                                            
                                             <th>{{ trans('general.amount') }} (Ksh.)</th>
                                             <th>Verified (Ksh.)</th>
@@ -113,13 +114,17 @@
         },
 
         searchDateClick() {
-            const start_date = $('#start_date').val();
-            const end_date = $('#end_date').val();
-            if (start_date && end_date) {
-                $('#quotesTbl').DataTable().destroy();
-                return Index.drawDataTable({start_date, end_date});
-            } 
-            alert("Date range required!");    
+            const startDate = $('#start_date').val();
+            const endDate = $('#end_date').val();
+            const verifyState = $('#verify_state').val();
+            if (!startDate || !endDate) return alert("Date range required!"); 
+
+            $('#quotesTbl').DataTable().destroy();
+            return Index.drawDataTable({
+                start_date: startDate, 
+                end_date: endDate,
+                verify_state: verifyState
+            });
         },
 
         drawDataTable(params={}) {
@@ -141,12 +146,16 @@
                         name: 'id'
                     },
                     {
-                        data: 'customer',
-                        name: 'customer'
+                        data: 'date',
+                        name: 'date'
                     },
                     {
                         data: 'tid',
                         name: 'tid'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
                     },
                     {
                         data: 'notes',
@@ -168,6 +177,7 @@
                         data: 'lpo_number',
                         name: 'lpo_number'
                     },
+                    
                     {
                         data: 'client_ref',
                         name: 'client_ref'
