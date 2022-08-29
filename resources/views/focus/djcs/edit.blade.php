@@ -43,7 +43,7 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Ticket </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round" name="lead_id" id="lead_id" data-placeholder="{{trans('tasks.assign')}}" required>
+                                                <select class="form-control  round" name="lead_id" id="lead_id" required>
                                                     <option value="">-- Select Ticket --</option>
                                                     @foreach ($leads as $lead)
                                                         @php
@@ -53,10 +53,12 @@
                                                             if ($name && $branch) $name .= ' - ' . $branch;  
                                                         @endphp
                                                         <option 
-                                                            {{ $lead->id == $djc->lead_id ? 'selected' : '' }}
                                                             value="{{ $lead->id }}" 
-                                                            branchId="{{ $lead->branch? $lead->branch->id : 0 }}"
-                                                            clientId="{{ $lead->customer? $lead->customer->id : 0 }}"
+                                                            {{ $lead->id == $djc->lead_id ? 'selected' : '' }}
+                                                            title="{{ $lead->title }}"
+                                                            client_ref="{{ $lead->client_ref }}"
+                                                            branch_id="{{ $lead->branch? $lead->branch->id : 0 }}"
+                                                            client_id="{{ $lead->customer? $lead->customer->id : 0 }}"
                                                             >
                                                             {{ $tid }} - {{ $name }} - {{ $lead->title }}
                                                         </option>
@@ -83,7 +85,7 @@
                                         <div class="col-sm-3">
                                             <label for="jobcard" class="jobcard">Job Card Date</label>
                                             <div class="input-group">
-                                                {{ Form::text('jobcard_date', null, ['class' => 'form-control', 'data-toggle' => 'jc-datepicker']) }}
+                                                {{ Form::text('jobcard_date', null, ['class' => 'form-control datepicker', 'id' => 'jobcard_date']) }}
                                             </div>
                                         </div>
                                     </div>                                    <div class="form-group row">
@@ -98,7 +100,7 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span>
                                                 </div>
-                                                {{ Form::text('report_date', null, ['class' => 'form-control round', 'data-toggle'=>'rd-datepicker']) }}
+                                                {{ Form::text('report_date', null, ['class' => 'form-control datepicker round', 'id' => 'report_date']) }}
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
@@ -264,21 +266,36 @@
 @section('extra-scripts')
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
+{{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
+    const config = {
+        ajax: { 
+            headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}"}
+        },
+        date: {format: "{{config('core.user_date_format')}}", autoHide: true},
+    };
+
+
     // initialize html editor
     editor();
-
+    // ajax setup
+    $.ajaxSetup(config.ajax);
     // initialize datepicker
-    $('[data-toggle="rd-datepicker"]')
-    .datepicker({format: "{{ config('core.user_date_format') }}"})
-    .datepicker('setDate', new Date("{{ $djc->report_date }}"));
-
-    $('[data-toggle="jc-datepicker"]')
-    .datepicker({format: "{{ config('core.user_date_format') }}"})
-    .datepicker('setDate', new Date("{{ $djc->jobcard_date }}"));
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+    $('#report_date').datepicker('setDate', new Date("{{ $djc->report_date }}"));
+    $('#jobcard_date').datepicker('setDate', new Date("{{ $djc->jobcard_date }}"));
+    // select2
+    $('#lead_id').select2({
+        allowClear: true,
+        placeholder: 'Search by No, Client, Branch, Title'
+    }).change(function() {
+        const opt = $(this).find('option:selected');
+        $("#subject").val(opt.attr('title'));
+        $("#client_id").val(opt.attr('client_id'));
+        $("#branch_id").val(opt.attr('branch_id'));
+        $("#client_ref").val(opt.attr('client_ref'));
+    });
     
-
     // product (equipment) row
     function equipmentRow(cvalue) {
         return `
@@ -287,10 +304,10 @@
                 <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${cvalue}" autocomplete="off"></td>
                 <td><input type="text" class="form-control r" name="make[]" id="make-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${cvalue}" data-toggle="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${cvalue}" data-toggle="datepicker"></td>
+                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${cvalue}"></td>
+                <td><input type="text" class="form-control req" name="location[]" id="location-${cvalue}"></td>
+                <td><input type="text" class="form-control datepicker req" name="last_service_date[]" id="last_service_date-${cvalue}"></td>
+                <td><input type="text" class="form-control datepicker req" name="next_service_date[]" id="next_service_date-${cvalue}"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -319,7 +336,6 @@
 
     // equipment row counter;
     var counter = 1;
-    // set default djc items rows
     const djcItems = @json($items);
     djcItems.forEach(v => {
         const i = counter;
@@ -336,20 +352,37 @@
         $('#make-'+i).val(v.make);
         $('#capacity-'+i).val(v.capacity);
         $('#location-'+i).val(v.location);
-
-        $('[data-toggle="datepicker"]').datepicker({ format: "{{ config('core.user_date_format') }}" });
-        $('#last_service_date-'+i).datepicker('setDate', new Date(v.last_service_date));
-        $('#next_service_date-'+i).datepicker('setDate', new Date(v.next_service_date));
-
+        $('#last_service_date-'+i).datepicker(config.date).datepicker('setDate', new Date(v.last_service_date));
+        $('#next_service_date-'+i).datepicker(config.date).datepicker('setDate', new Date(v.next_service_date));
         assignIndex();
         counter++;
     });
 
-    // ajax setup
-    $.ajaxSetup({ 
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+    // on clicking addproduct (equipment) button
+    $('#addqproduct').on('click', function() {
+        const i = counter++;
+        const row = equipmentRow(i);
+        $('#equipment tr:last').after(row);
+        $('#tag_number-' + i).autocomplete(autocompleteProp(i));
+
+        $('#joc_card-'+i).val($("#jobcard").val());
+        $('#last_service_date-'+ i).datepicker(config.date).datepicker('setDate', new Date());
+        $('#next_service_date-'+ i).datepicker(config.date).datepicker('setDate', new Date());
+        assignIndex();
     });
 
+    // on clicking equipment drop down options
+    $("#equipment").on("click", ".up,.down,.removeProd", function() {
+        var row = $(this).parents("tr:first");
+        if ($(this).is('.up')) row.insertBefore(row.prev());
+        if ($(this).is('.down')) row.insertAfter(row.next());
+        if ($(this).is('.removeProd')) {
+            if (window.confirm('Are you sure to delete this item ?'))
+            $(this).closest('tr').remove();
+        }
+        assignIndex();
+    });
+    
     // autocompleteProp returns autocomplete object properties
     function autocompleteProp(i = 0) {
         return {
@@ -381,74 +414,13 @@
                 $('#make-'+i).val(data.make_type);
                 $('#capacity-'+i).val(data.capacity);
                 $('#location-'+i).val(data.location);
-
-                $('[data-toggle="datepicker"]').datepicker({ format: "{{ config('core.user_date_format') }}" });
-                $('#last_service_date-'+i).datepicker('setDate', new Date(data.last_maint_date));
-                $('#next_service_date-'+i).datepicker('setDate', new Date(data.next_maintenance_date));
+                
+                const lastDate = data.last_maintenance_date? new Date(data.last_maintenance_date) : '';
+                const nextDate = data.next_maintenance_date? new Date(data.next_maintenance_date) : '';
+                $('#last_service_date-'+i).datepicker('setDate', lastDate);
+                $('#next_service_date-'+i).datepicker('setDate', nextDate);
             }
         };
     }
-
-    // on clicking addproduct (equipment) button
-    $('#addqproduct').on('click', function() {
-        const i = counter++;
-        // product (equipment) row
-        const row = equipmentRow(i);
-        // add poduct row to equipment table
-        $('#equipment tr:last').after(row);
-        // add jobcard value   
-        $('#joc_card-'+i).val($("#jobcard").val());
-        // initialize date picker with php parsed date
-        $('[data-toggle="datepicker"]')
-        .datepicker({ format: "{{ config('core.user_date_format') }}" })
-        .datepicker('setDate', new Date());
-
-        // autocomplete on added product row
-        $('#tag_number-' + i).autocomplete(autocompleteProp(i));
-
-        assignIndex();
-    });
-
-    // on clicking equipment drop down options
-    $("#equipment").on("click", ".up,.down,.removeProd", function() {
-        var row = $(this).parents("tr:first");
-        // move row up 
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        // move row down 
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        // remove row
-        if ($(this).is('.removeProd')) {
-            const response = window.confirm('Are you sure to delete this item ?');
-            if (response) {
-                const row = $(this).closest('tr');
-                row.remove();
-                const itemId = row.find('input[name="item_id[]"]').val();
-                // delete item api call 
-                $.ajax({
-                    url: baseurl + 'djcs/delete_item/' + itemId,
-                    dataType: "json",
-                    method: 'DELETE',
-                });
-            }
-        }
-
-        assignIndex();
-    });
-    
-    // on selecting lead
-    $('#lead_id').change(function() {
-        // fetch lead details from the server
-        $.ajax({
-            type: "POST",
-            url: baseurl + 'leads/lead_search',
-            data: 'keyword=' + $(this).val(),
-            success: function(data) {
-                $("#subject").val(data.title);
-                $("#client_id").val(data.client_id);
-                $("#branch_id").val(data.branch_id);
-                $('#client_ref').val(data.client_ref);
-            }
-        });
-    });
 </script>
 @endsection

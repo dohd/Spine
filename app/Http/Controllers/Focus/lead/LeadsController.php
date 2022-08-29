@@ -173,18 +173,20 @@ class LeadsController extends Controller
     public function lead_load(Request $request)
     {
         $id = $request->get('id');
-        $result = Lead::all()->where('rel_id', $id);
+        
+        $leads = Lead::all()->where('rel_id', $id);
 
-        return json_encode($result);
+        return response()->json($leads);
     }
     
     // search specific lead with defined parameters
     public function lead_search(ManageLeadRequest $request)
     {
         $q = $request->post('keyword');
-        $lead = Lead::where('id', $q)->first();
-        if (!isset($lead)) return false;
-        return $lead;        
+
+        $leads = Lead::where('title', 'LIKE', '%'. $q .'%')->limit(6)->get();
+
+        return response()->json($leads);        
     }
 
     /**

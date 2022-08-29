@@ -35,23 +35,24 @@
                                         <div class="col-sm-12"><label for="ref_type" class="caption">Ticket </label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                                                <select class="form-control  round" name="lead_id" id="lead_id" required>
-                                                    <option value="">-- Select Ticket --</option>
-                                                        @foreach ($leads as $lead)
-                                                            @php
-                                                                $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
-                                                                $branch = isset($lead->branch) ? $lead->branch->name : '';
-                                                                if ($name && $branch) $name .= ' - ' . $branch;                                                                
-                                                            @endphp
-                                                            <option 
-                                                                value="{{ $lead->id }}" 
-                                                                branchId="{{ $lead->branch? $lead->branch->id : 0 }}"
-                                                                clientId="{{ $lead->customer? $lead->customer->id : 0 }}"
-                                                                >
-                                                                {{ 'Tkt-'.sprintf('%04d', @$lead->reference) }} - {{ $name }} - {{ $lead->title }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>                                     
+                                                <select class="form-control round" name="lead_id" id="lead_id" required>
+                                                    @foreach ($leads as $lead)
+                                                        @php
+                                                            $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
+                                                            $branch = isset($lead->branch) ? $lead->branch->name : '';
+                                                            if ($name && $branch) $name .= ' - ' . $branch;                                                                
+                                                        @endphp
+                                                        <option 
+                                                            value="{{ $lead->id }}" 
+                                                            title="{{ $lead->title }}"
+                                                            client_ref="{{ $lead->client_ref }}"
+                                                            branch_id="{{ $lead->branch? $lead->branch->id : 0 }}"
+                                                            client_id="{{ $lead->customer? $lead->customer->id : 0 }}"
+                                                        >
+                                                            {{ gen4tid('Tkt-', @$lead->reference) }} - {{ $name }} - {{ $lead->title }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>                                     
                                                 <input type="hidden" name="client_id" value="0" id="client_id">
                                                 <input type="hidden" name="branch_id" value="0" id="branch_id">                                                
                                             </div>
@@ -72,7 +73,7 @@
                                         <div class="col-sm-3">
                                             <label for="jobcard" class="jobcard">Job Card Date</label>
                                             <div class="input-group">
-                                                {{ Form::text('jobcard_date', null, ['class' => 'form-control', 'data-toggle'=>'datepicker', 'id'=>'jobcard_date']) }}
+                                                {{ Form::text('jobcard_date', null, ['class' => 'form-control datepicker', 'id'=>'jobcard_date']) }}
                                             </div>
                                         </div>
                                     </div>
@@ -87,7 +88,7 @@
                                         <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                                {{ Form::text('report_date', null, ['class' => 'form-control round', 'data-toggle'=>'datepicker']) }}
+                                                {{ Form::text('report_date', null, ['class' => 'form-control datepicker round']) }}
                                             </div>
                                         </div>
                                         <div class="col-sm-4"><label for="reference" class="caption">Client Ref / Callout ID</label>
@@ -251,34 +252,35 @@
 
 @section('extra-scripts')
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
- 
+{{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
+    const config = {
+        ajax: { 
+            headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}"}
+        },
+        date: {format: "{{config('core.user_date_format')}}", autoHide: true},
+    };
+
+    // select2
+    $('#lead_id').select2({
+        allowClear: true,
+        placeholder: 'Search by No, Client, Branch, Title'
+    }).val('').change();
+
     // initialize html editor
     editor();
-
     // initialize date picker 
-    $('[data-toggle="datepicker"]')
-        .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date());
-
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
     // ajax setup
-    $.ajaxSetup({ 
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
-    });
+    $.ajaxSetup(config.ajax);
 
     // on selecting lead fetch lead details from the server
     $('#lead_id').change(function() {
-        $.ajax({
-            type: "POST",
-            url: baseurl + 'leads/lead_search',
-            data: 'keyword=' + $(this).val(),
-            success: function(data) {
-                $("#subject").val(data.title);
-                $("#client_id").val(data.client_id);
-                $("#branch_id").val(data.branch_id);
-                $("#client_ref").val(data.client_ref);
-            }
-        });
+        const opt = $(this).find('option:selected');
+        $("#subject").val(opt.attr('title'));
+        $("#client_id").val(opt.attr('client_id'));
+        $("#branch_id").val(opt.attr('branch_id'));
+        $("#client_ref").val(opt.attr('client_ref'));
     });
 
     // add jobcard value to default equipment row
@@ -292,12 +294,12 @@
             <tr>
                 <td><input type="text" class="form-control"  required name="tag_number[]" placeholder="Search Equipment" id="tag_number-${n}" autocomplete="off"></td>
                 <td><input type="text" class="form-control req amnt" name="joc_card[]" id="joc_card-${n}"></td>
-                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${n}" autocomplete="off"></td>
+                <td><input type="text" class="form-control req prc" name="equipment_type[]" id="equipment_type-${n}"></td>
                 <td><input type="text" class="form-control r" name="make[]" id="make-${n}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${n}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="location[]" id="location-${n}" autocomplete="off"></td>
-                <td><input type="text" class="form-control req" name="last_service_date[]" id="last_service_date-${n}" autocomplete="off" data-toggle-${n}="datepicker"></td>
-                <td><input type="text" class="form-control req" name="next_service_date[]" id="next_service_date-${n}" autocomplete="off" data-toggle-${n}="datepicker"></td>
+                <td><input type="text" class="form-control req" name="capacity[]" id="capacity-${n}"></td>
+                <td><input type="text" class="form-control req" name="location[]" id="location-${n}"></td>
+                <td><input type="text" class="form-control datepicker req" name="last_service_date[]" id="last_service_date-${n}"></td>
+                <td><input type="text" class="form-control datepicker req" name="next_service_date[]" id="next_service_date-${n}"></td>
                 <td class="text-center">
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -326,9 +328,7 @@
     // equipment row counter;
     let eqmntIndx = 0;
     $('#equipment tr:last').after(productRow(0));
-    $('[data-toggle-0="datepicker"]')
-        .datepicker({format: "{{config('core.user_date_format')}}"})
-        .datepicker('setDate', new Date());
+    $('#equipment .datepicker').datepicker(config.date).datepicker('setDate', new Date());
     $('#tag_number-0').autocomplete(autocompleteProp(0));
     assignIndex();
     
@@ -338,11 +338,11 @@
         const i = eqmntIndx;
         const row = productRow(i);
         $('#equipment tr:last').after(row);
-        $('input[name="joc_card[]"]').val($("#jobcard").val());     
-        $(`[data-toggle-${i}="datepicker"]`)
-            .datepicker({format: "{{config('core.user_date_format')}}"})
-            .datepicker('setDate', new Date());
         $('#tag_number-' + i).autocomplete(autocompleteProp(i));
+
+        $('input[name="joc_card[]"]').val($("#jobcard").val());  
+        $('#last_service_date-'+ i).datepicker(config.date).datepicker('setDate', new Date());
+        $('#next_service_date-'+ i).datepicker(config.date).datepicker('setDate', new Date());
         assignIndex();
     });
 
@@ -386,8 +386,11 @@
                 $('#make-'+i).val(data.make_type);
                 $('#capacity-'+i).val(data.capacity);
                 $('#location-'+i).val(data.location);
-                $('#last_service_date-'+i).val(data.last_maint_date);
-                $('#next_service_date-'+i).val(data.next_maintenance_date);
+
+                const lastDate = data.last_maintenance_date? new Date(data.last_maintenance_date) : '';
+                const nextDate = data.next_maintenance_date? new Date(data.next_maintenance_date) : '';
+                $('#last_service_date-'+i).datepicker('setDate', lastDate);
+                $('#next_service_date-'+i).datepicker('setDate', nextDate);
             }
         };
     }
