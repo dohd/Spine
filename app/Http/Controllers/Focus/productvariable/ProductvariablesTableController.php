@@ -56,8 +56,15 @@ class ProductvariablesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('base_ratio', function ($productvariable) {
-                return numberFormat($productvariable->base_ratio);
+            ->addColumn('base_ratio', function ($productvariable) use($core) {
+                $ratio = numberFormat($productvariable->base_ratio);
+                if ($productvariable->unit_type == 'base') return $ratio;
+
+                $base_unit = $core->filter(function ($v) use($productvariable) {
+                    return $v->id == $productvariable->base_unit_id;
+                })->first();
+
+                return $ratio . ' / ' . $base_unit->code; 
             })
             ->addColumn('actions', function ($productvariable) {
                 return $productvariable->action_buttons;

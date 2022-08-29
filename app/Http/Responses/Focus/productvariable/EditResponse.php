@@ -29,9 +29,9 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $categories = Productvariable::select('category')->distinct()->pluck('category')->toArray();
+        $base_units = Productvariable::whereNull('base_unit_id')->get(['id', 'title', 'code']);
 
-        return view('focus.productvariables.edit', compact('categories'))->with([
+        return view('focus.productvariables.edit', compact('base_units'))->with([
             'productvariable' => $this->productvariable
         ]);
     }

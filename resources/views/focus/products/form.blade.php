@@ -55,7 +55,7 @@
             @foreach($productvariables as $item)
                 @if ($item->unit_type == 'base')
                     <option value="{{ $item->id }}" {{ $item->id == @$product->unit_id ? 'selected' : '' }} >
-                        {{ $item->title }} ({{ $item->code }})
+                        {{ $item->code }} ({{ $item->title }})
                     </option>    
                 @endif
             @endforeach
@@ -66,13 +66,15 @@
     <div class="col-6">
         {{ Form::label('unit', 'Compound Unit', ['class' => 'control-label']) }}
         <select class="custom-select" name="compound_unit_id" id="compound_unit" data-placeholder="Choose Compound Units" multiple>
-            @foreach($productvariables as $item)
-                @if ($item->unit_type == 'compound')
-                    <option value="{{ $item->id }}" {{ @$compound_unit_ids && in_array($item->id, $compound_unit_ids)? 'selected' : '' }}>
-                        {{ $item->title }} ({{ $item->code }}) - {{ +$item->base_ratio }} units
-                    </option> 
-                @endif
-            @endforeach
+            @isset($compound_unit_ids)
+                @foreach($productvariables as $item)
+                    @if (in_array($item->id, $compound_unit_ids))
+                        <option  value="{{ $item->id }}"  selected >
+                            {{ $item->code }} ({{ +$item->base_ratio }} units)
+                        </option> 
+                    @endif
+                @endforeach
+            @endisset
         </select>
     </div>
 </div>
@@ -355,13 +357,25 @@
     };
    
     const Form = {
+        units: @json($productvariables),
+
         init() {
             $('.datepicker').datepicker(config.datepicker);
             $('#compound_unit').select2();
 
+            $('#unit').change(this.unitChange);
+
             const events = [".add_more", ".add_serial", ".v_delete", ".v_delete_temp", ".v_delete_serial"];
             const handlers = [this.addMore, this.addSerial, this.delVariableProduct, this.delProduct, this.delSerial];
             events.forEach((v,i) => $(document).on('click', v, handlers[i]));
+        },
+
+        unitChange() {
+            const el = $(this);
+            const compoundUnits = Form.units.filter(v => v.base_unit_id == el.val())
+            .map(v => ({id: v.id, text: `${v.code} (${parseFloat(v.base_ratio)} units)`}));
+
+            $('#compound_unit').html('').select2({data: compoundUnits});
         },
 
         addMore(e) {

@@ -27,7 +27,7 @@ class Productvariable extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'code', 'unit_type', 'base_ratio', 'count_type'
+        'title', 'code', 'unit_type', 'base_unit_id', 'base_ratio', 'count_type', 'ins'
     ];
 
     /**

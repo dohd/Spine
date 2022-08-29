@@ -38,7 +38,6 @@ class ProductvariableRepository extends BaseRepository
     {
         // dd($input);
         $input['base_ratio'] = numberClean($input['base_ratio']);
-
         $result = Productvariable::create($input);
         if ($result) return $result;
 
@@ -55,7 +54,7 @@ class ProductvariableRepository extends BaseRepository
      */
     public function update($productvariable, array $input)
     {
-        dd($input);
+        // dd($input);
         $input['base_ratio'] = numberClean($input['base_ratio']);
         $result = $productvariable->update($input);
     	if ($result) return $result;

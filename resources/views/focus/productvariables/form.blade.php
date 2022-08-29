@@ -11,8 +11,19 @@
         <label for="type">Unit Type</label>
         <select name="unit_type" id="unit_type" class="custom-select">
             @foreach (['base', 'compound'] as $val)
-                <option value="{{ $val }}" {{ $val == @$productvariable->unit_type? 'sselected' : '' }}>
+                <option value="{{ $val }}" {{ $val == @$productvariable->unit_type? 'selected' : '' }}>
                     {{ ucfirst($val) }}
+                </option>    
+            @endforeach          
+        </select>
+    </div>
+
+    <div class='col-2'>
+        <label for="type">Related Base Unit</label>
+        <select name="base_unit_id" id="base_unit_id" class="custom-select" disabled>
+            @foreach ($base_units as $unit)
+                <option value="{{ $unit->id }}" {{ $val == @$productvariable->base_unit_id? 'selected' : '' }}>
+                    {{ ucfirst($unit->title) }} ({{ $unit->code }})
                 </option>    
             @endforeach          
         </select>
@@ -20,9 +31,11 @@
     
     <div class='col-2'>
         <label for="rate">Ratio (per base unit)</label>
-        {{ Form::text('base_ratio', '1.00', ['class' => 'form-control', 'id' => 'base_ratio', 'readonly']) }}
+        {{ Form::text('base_ratio', null, ['class' => 'form-control', 'id' => 'base_ratio', 'readonly']) }}
     </div>
+</div>
 
+<div class="form-group row">
     <div class='col-2'>
         <label for="count_type">Count Type</label>
         <select name="count_type" id="count_type" class="custom-select">
@@ -34,17 +47,27 @@
 </div>
 
 @section("after-scripts")
+{{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
     const Form = {
         init() {
             $('#unit_type').change(this.unitTypeChange);
             $('#base_ratio').focusout(this.baseRatioChange);
+            $('#base_unit_id').select2({allowClear: true}).val('').change();
+
+            const unit = @json(@$productvariable);
+            if (unit) {
+                $('#base_unit_id').val(unit.base_unit_id).attr('selected', true).change();
+                $('#unit_type').change();
+                const ratio = $('#base_ratio').val();
+                $('#base_ratio').val(accounting.formatNumber(ratio));                
+            }
         },
 
         baseRatioChange() {
             const el = $(this);
-            const val = accounting.formatNumber(el.val()); 
-            el.val(val);
+            if (el.val()) el.val(accounting.formatNumber(el.val()));
+            else el.val(1);
         },
 
         unitTypeChange() {
@@ -54,11 +77,19 @@
                     readonly: false,
                     required: true
                 });
+                $('#base_unit_id').attr({
+                    disabled: false,
+                    required: true
+                });
             } else {
                 $('#base_ratio').val('1.00').attr({
                     readonly: true,
                     required: false
                 });
+                $('#base_unit_id').attr({
+                    disabled: true,
+                    required: false
+                }).val('').change();
             }
         }
     }
