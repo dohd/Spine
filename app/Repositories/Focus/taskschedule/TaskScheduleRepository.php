@@ -48,7 +48,7 @@ class TaskScheduleRepository extends BaseRepository
         if ($schedule->status == 'pending') $schedule->update(['status' => 'loaded']);
         if (!$schedule->actual_startdate || !$schedule->actual_enddate)
             $schedule->update([
-                'actual_startdate' => date_for_database($data['actual_stardate']),
+                'actual_startdate' => date_for_database($data['actual_startdate']),
                 'actual_enddate' => date_for_database($data['actual_enddate']),
             ]);
 
