@@ -369,12 +369,12 @@
                         branch_id: $('#lead_id option:selected').attr('branchId')
                     },
                     success: function(data) {
-                        const equips = data.map(v => ({
-                            label: `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`,
-                            value: v.name,
-                            data: v
+                        response($.map(data, function(v) {
+                            const label = `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`
+                            const value = v.unique_id;
+                            const data = v;
+                            return {label, value, data};
                         }));
-                        response(equips);
                     }
                 });
             },

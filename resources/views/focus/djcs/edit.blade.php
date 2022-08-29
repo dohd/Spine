@@ -352,8 +352,12 @@
         $('#make-'+i).val(v.make);
         $('#capacity-'+i).val(v.capacity);
         $('#location-'+i).val(v.location);
-        $('#last_service_date-'+i).datepicker(config.date).datepicker('setDate', new Date(v.last_service_date));
-        $('#next_service_date-'+i).datepicker(config.date).datepicker('setDate', new Date(v.next_service_date));
+        
+        const lastDate = v.last_service_date? new Date(v.last_service_date) : '';
+        const nextDate = v.next_service_date? new Date(v.next_service_date) : '';
+        $('#last_service_date-'+i).datepicker(config.date).datepicker('setDate', lastDate);
+        $('#next_service_date-'+i).datepicker(config.date).datepicker('setDate', nextDate);
+        
         assignIndex();
         counter++;
     });
@@ -397,12 +401,12 @@
                         branch_id: $('#lead_id option:selected').attr('branchId')
                     },
                     success: function(data) {
-                        const equips = data.map(v => ({
-                            label: `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`,
-                            value: v.name,
-                            data: v
+                        response($.map(data, function(v) {
+                            const label = `${v.customer} ${v.name} ${v.make_type} ${v.capacity} ${v.location}`
+                            const value = v.unique_id;
+                            const data = v;
+                            return {label, value, data};
                         }));
-                        response(equips);
                     }
                 });
             },
