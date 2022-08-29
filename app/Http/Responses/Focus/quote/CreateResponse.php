@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\quote;
 
+use App\Models\additional\Additional;
 use App\Models\bank\Bank;
 use App\Models\quote\Quote;
 use Illuminate\Contracts\Support\Responsable;
@@ -18,9 +19,11 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
-        $leads = Lead::where('status', 0)->orderBy('id', 'desc') ->get();
         $words = ['title' => 'Create Quote'];
+
+        $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
+        $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
+        $additionals = Additional::all();
 
         // create proforma invoice
         if (request('page') == 'pi') {
@@ -28,13 +31,11 @@ class CreateResponse implements Responsable
             $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
             $words['title'] = 'Create Proforma Invoice';
 
-            return view('focus.quotes.create')
-                ->with(compact('lastquote','leads', 'words', 'banks'))
+            return view('focus.quotes.create', compact('lastquote','leads', 'words', 'banks', 'additionals'))
                 ->with(bill_helper(2, 4));
         }
         // create default quote
-        return view('focus.quotes.create')
-            ->with(compact('lastquote','leads', 'words'))
+        return view('focus.quotes.create', compact('lastquote','leads', 'words', 'additionals'))
             ->with(bill_helper(2, 4));
     }
 }

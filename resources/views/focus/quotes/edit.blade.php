@@ -42,8 +42,14 @@
 @endsection
 
 @section('extra-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
 <script>   
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
+
+    $('#lead_id').select2({
+        allowClear: true,
+        placeholder: 'Search by No, Client, Branch, Title'
+    });
 
     // default edit values
     $('#branch_id').val("{{ $quote->branch_id }}");

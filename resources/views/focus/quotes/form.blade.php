@@ -4,7 +4,7 @@
         <h3 class="form-group">{{ $words['title'] }}</h3>
         <div class="form-group row">
             <div class="col-12">
-                <label for="ticket" >Search Ticket</label>
+                <label for="ticket">Ticket</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="form-control" name="lead_id" id="lead_id" required>                                                 
@@ -52,7 +52,7 @@
                 <label for="pricing" >Pricing</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    <select id="pricegroup_id" name="pricegroup_id" class="form-control round">
+                    <select id="pricegroup_id" name="pricegroup_id" class="custom-select round">
                         <option value="0" selected>Default </option>
                         @foreach($selling_prices as $price)
                             <option value="{{$price->id}}">{{$price->name}}</option>
@@ -125,7 +125,7 @@
             <div class="col-4"><label for="validity" >Validity Period</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                    <select class="form-control round" name="validity" id="validity">
+                    <select class="custom-select round" name="validity" id="validity">
                         @foreach ([0, 14, 30, 45, 60, 90] as $val)
                             <option value="{{ $val }}" {{ $val == @$quote->validity? 'selected' : '' }}>
                                 {{ $val ? 'Valid For '.$val.' Days' : 'On Receipt' }}
@@ -138,7 +138,7 @@
                 <label for="currency" >Currency <span class="text-danger">*</span></label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                    <select class="form-control" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
+                    <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
                         @foreach($currencies as $curr)
                             <option value="{{ $curr->id }}" {{ $curr->id === 1? 'selected' : '' }}>
                                 {{ $curr->symbol }} - {{ $curr->code }}
@@ -157,7 +157,7 @@
         <div class="form-group row">
             <div class="col-4">
                 <label for="terms">Terms <span class="text-danger">*</span></label>
-                <select id="term_id" name="term_id" class="form-control" required>
+                <select id="term_id" name="term_id" class="custom-select" required>
                     <option value="">-- Select Term --</option>
                     @foreach($terms as $term)
                         <option value="{{ $term->id }}" {{ $term->id == @$quote->term_id ? 'selected' : '' }}>
@@ -167,11 +167,11 @@
                 </select>               
             </div>
             <div class="col-4">
-                <label for="taxFormat" >{{ trans('general.tax') }}</label>
-                <select class="form-control" name='tax_id' id="tax_id">
-                    @foreach ([16, 8, 0] as $val)
-                        <option value="{{ $val }}" {{ @$quote && $val == @$quote->tax_id ? 'selected' : '' }}>
-                            {{ $val ? $val .'% VAT' : 'Off' }}
+                <label for="taxFormat">Tax</label>
+                <select class="custom-select" name='tax_id' id="tax_id">
+                    @foreach ($additionals as $row)
+                        <option value="{{ +$row->value }}" {{ @$quote && round($row->value) == @$quote->tax_id ? 'selected' : '' }}>
+                            {{ $row->name }}
                         </option>
                     @endforeach                                            
                 </select>
@@ -180,7 +180,7 @@
             @if (isset($banks))
                 <div class="col-4">
                     <label for="bank" >Bank</label>
-                    <select class="form-control" name='bank_id' id="bank_id" required>
+                    <select class="custom-select" name='bank_id' id="bank_id" required>
                         <option value="">-- Select Bank --</option>
                         @foreach ($banks as $bank)
                         <option value="{{ $bank->id }}" {{ $bank->id == @$quote->bank_id ? 'selected' : '' }}>
@@ -201,7 +201,7 @@
         </div>
         <div class="col-2">
             <label for="revision" >Revision</label>
-            <select class="form-control" name='revision' id="rev">
+            <select class="custom-select" name='revision' id="rev">
                 <option value="">-- Select Revision --</option>
                 @foreach ($revisions as $val)
                     <option value="_r{{ $val }}" {{ @$quote->revision == '_r'.$val ? 'selected' : '' }}>

@@ -163,13 +163,17 @@ class ProjectRepository extends BaseRepository
         $result = $budget->update($data);
 
         $data_items = $input['data_items'];
-        // delete omitted budget items
+        // remove omitted items
         $budget->items()->whereNotIn('id', array_map(function ($v) { 
             return $v['item_id']; 
         }, $data_items))->delete();
-        // create or update 
+
+        // dd($data_items);
+        // new or update item
         foreach($data_items as $item) {
             $item['price'] = numberClean($item['price']);
+            $item['new_qty'] = numberClean($item['new_qty']);
+
             $new_item = BudgetItem::firstOrNew([
                 'id' => $item['item_id'],
                 'budget_id' => $budget->id,
@@ -183,11 +187,10 @@ class ProjectRepository extends BaseRepository
         }
 
         $data_skillset = $input['data_skillset'];
-        // delete omitted skillset
         $budget->skillsets()->whereNotIn('id', array_map(function ($v) { 
             return $v['skillitem_id'];
         }, $data_skillset))->delete();
-        //create or update
+
         foreach($data_skillset as $item) {
             $item['charge'] = numberClean($item['charge']);
             $new_item = BudgetSkillset::firstOrNew([

@@ -243,29 +243,6 @@ class ProjectsController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Delete Project Quote Budget item in storage
-     * 
-     * @param int $id
-     */
-    public function delete_budget_item($id)
-    {
-        BudgetItem::find($id)->delete();
-
-        return response()->noContent();
-    }
-
-    /**
-     * Delete Project Quote Budget skillset in storage
-     * 
-     * @param int $id
-     */
-    public function delete_budget_skillset($id)
-    {
-        BudgetSkillset::find($id)->delete();
-
-        return response()->noContent();
-    }
 
     public function store_meta(ManageProjectRequest $request)
     {

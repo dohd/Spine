@@ -332,7 +332,7 @@
                 $('#amount-'+i).val(parseFloat(v.product_qty));
                 $('#newqty-'+i).val(parseFloat(v.new_qty));
                 $('#unit-'+i).val(v.unit).change();
-                $('#price-'+i).val(accounting.formatNumber(v.buy_price)).change();
+                $('#price-'+i).val(accounting.formatNumber(v.price)).change();
             } else if (v.a_type == 2) {
                 // title type
                 $('#productsTbl tbody').append(titleRow(i));
