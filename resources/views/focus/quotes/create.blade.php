@@ -223,50 +223,6 @@
         calcProfit();        
     }
 
-    // autocomplete function
-    function autoComp(i) {
-        return {
-            source: function(request, response) {
-                // stock product
-                let term = request.term;
-                let url = "{{ route('biller.products.quote_product_search') }}";
-                let data = {keyword: term, pricegroup_id: $('#pricegroup_id').val()};
-                // equipment service product 
-                if (term.charAt(0) == '#') {
-                    term = term.replace('#', '');
-                    url = "{{ route('biller.contractservices.service_product_search') }}";
-                    data = {term};
-                } 
-                $.ajax({
-                    url, data,
-                    method: 'POST',
-                    success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
-                });
-            },
-            autoFocus: true,
-            minLength: 0,
-            select: function(event, ui) {
-                const {data} = ui.item;
-
-                $('#productid-'+i).val(data.id);
-                $('#name-'+i).val(data.name);
-                $('#unit-'+i).val(data.unit);                
-                $('#qty-'+i).val(1);                
-                $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
-                $('#estqty-'+i).val(1);
-
-                const rate = parseFloat(data.price);
-                let price = rate * ($('#tax_id').val()/100 + 1);
-                $('#price-'+i).val(accounting.formatNumber(price));                
-                $('#amount-'+i).text(accounting.formatNumber(price));
-                $('#rate-'+i).val(accounting.formatNumber(rate)).change();
-
-                let units = data.units.filter(v => v.unit_type == 'base');
-                if (units.length) $('#unit-'+i).val(units[0].code);
-            }
-        };
-    }
-
 
     /**
      * Skillset modal logic
@@ -316,5 +272,49 @@
         profitState.skill_total = total;
         calcProfit();
     }
+
+    // autocomplete function
+    function autoComp(i) {
+        return {
+            source: function(request, response) {
+                // stock product
+                let term = request.term;
+                let url = "{{ route('biller.products.quote_product_search') }}";
+                let data = {keyword: term, pricegroup_id: $('#pricegroup_id').val()};
+                // equipment service product 
+                if (term.charAt(0) == '#') {
+                    term = term.replace('#', '');
+                    url = "{{ route('biller.contractservices.service_product_search') }}";
+                    data = {term};
+                } 
+                $.ajax({
+                    url, data,
+                    method: 'POST',
+                    success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+
+                $('#productid-'+i).val(data.id);
+                $('#name-'+i).val(data.name);
+                $('#unit-'+i).val(data.unit);                
+                $('#qty-'+i).val(1);                
+                $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
+                $('#estqty-'+i).val(1);
+
+                const rate = parseFloat(data.price);
+                let price = rate * ($('#tax_id').val()/100 + 1);
+                $('#price-'+i).val(accounting.formatNumber(price));                
+                $('#amount-'+i).text(accounting.formatNumber(price));
+                $('#rate-'+i).val(accounting.formatNumber(rate)).change();
+
+                let units = data.units.filter(v => v.unit_type == 'base');
+                if (units.length) $('#unit-'+i).val(units[0].code);
+            }
+        };
+    }    
 </script>
 @endsection
