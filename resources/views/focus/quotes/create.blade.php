@@ -43,7 +43,7 @@
     $('#lead_id').select2({
         allowClear: true,
         placeholder: 'Search by No, Client, Branch, Title'
-    });
+    }).val('').change();
 
     // initialize datepicker
     $('.datepicker')
