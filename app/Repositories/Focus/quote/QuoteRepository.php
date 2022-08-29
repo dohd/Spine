@@ -85,6 +85,25 @@ class QuoteRepository extends BaseRepository
                         });
                     });
                     break;
+                case 'Invoiced & Partially Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'partial');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'paid');
+                        });
+                    });
+                    break;
+                case 'Cancelled':
+                    $q->where('status', 'cancelled');
+                    break;
             }
         }
 
