@@ -40,15 +40,15 @@ class LpoController extends Controller
     public function store(Request $request)
     {
         // extract input fields
-        $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
+        $data = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
 
         // check for duplicate lpo number per client
-        $lpo_exists = Lpo::where(['customer_id' => $input['customer_id'], 'lpo_no' => $input['lpo_no']])->count();
+        $lpo_exists = Lpo::where(['customer_id' => $data['customer_id'], 'lpo_no' => $data['lpo_no']])->count();
         if ($lpo_exists) return redirect(route('biller.lpo.index'))->with(['flash_error' => 'Duplicate Customer LPO Number!']);
 
-        $input['date'] = date_for_database($input['date']);
-        $input['amount'] = numberClean($input['amount']);
-        Lpo::create($input);
+        $data['date'] = date_for_database($data['date']);
+        $data['amount'] = numberClean($data['amount']);
+        Lpo::create($data);
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO created successfully']);
     }
@@ -90,10 +90,16 @@ class LpoController extends Controller
     {
         // extract input fields
         $lpo_id = request('lpo_id');
-        $input = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
+        $data = $request->only('customer_id', 'branch_id', 'date', 'lpo_no', 'amount', 'remark');
 
-        $input['amount'] = (float) $input['amount'];
-        Lpo::find($lpo_id)->update($input);
+        // check for duplicate lpo number per client
+        $lpo_exists = Lpo::where('id', '!=', $lpo_id)
+        ->where(['customer_id' => $data['customer_id'], 'lpo_no' => $data['lpo_no']])->count();
+        if ($lpo_exists) return redirect(route('biller.lpo.index'))->with(['flash_error' => 'Duplicate Customer LPO Number!']);
+
+        $data['date'] = date_for_database($data['date']);
+        $data['amount'] = numberClean($data['amount']);
+        Lpo::find($lpo_id)->update($data);
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO updated successfully']);
     }
