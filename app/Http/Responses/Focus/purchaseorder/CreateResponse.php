@@ -5,6 +5,7 @@ namespace App\Http\Responses\Focus\purchaseorder;
 use App\Models\additional\Additional;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\purchaseorder\Purchaseorder;
+use App\Models\term\Term;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -21,7 +22,9 @@ class CreateResponse implements Responsable
         $last_tid = Purchaseorder::max('tid');
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
+        // Purchase order
+        $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups'));
+        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups', 'terms'));
     }
 }

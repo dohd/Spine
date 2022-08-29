@@ -33,7 +33,9 @@ class EditResponse implements Responsable
         $po = $this->purchaseorder;
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
+        // Purchase order
+        $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.edit', compact('po', 'additionals', 'pricegroups'));
+        return view('focus.purchaseorders.edit', compact('po', 'additionals', 'pricegroups', 'terms'));
     }
 }

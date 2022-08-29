@@ -27,18 +27,6 @@
             </div>
 
             <div class="form-group row">
-                <div class="col-4">
-                    <label for="pricing" >Pricing</label>                    
-                    <select id="pricegroup_id" name="pricegroup_id" class="form-control">
-                        <option value="0" selected>Default </option>
-                        @foreach($pricegroups as $group)
-                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                        @endforeach
-                    </select>                    
-                </div>
-            </div>
-
-            <div class="form-group row">
                 <table class="table-responsive tfr" id="transxnTbl">
                     <thead>
                         <tr class="item_header bg-gradient-directional-blue white">
@@ -85,7 +73,7 @@
             <h3 class="title">{{trans('purchaseorders.properties')}}</h3>
             <div class="form-group row">
                 <div class="col-sm-4">
-                    <label for="tid" class="caption">Transaction ID*</label>
+                    <label for="tid" class="caption">Order No.</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                         {{ Form::number('tid', @$po? $po->tid : $last_tid+1, ['class' => 'form-control round', 'readonly']) }}
@@ -104,31 +92,37 @@
             </div>
 
             <div class="form-group row">
-                <div class="col-sm-4"><label for="ref_type" class="caption">Document Type*</label>
-                    <div class="input-group">                                            
-                        <select class="form-control" name="doc_ref_type" id="ref_type" required>
-                            <option value="">-- Select Type --</option>
-                            @foreach (['Voucher'] as $val)
-                                <option value="{{ $val }}">{{ $val }}</option>
-                            @endforeach                                                        
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <label for="refer_no" class="caption">{{trans('general.reference')}} No.</label>
-                    <div class="input-group">
-                        <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>                                            
-                        {{ Form::text('doc_ref', null, ['class' => 'form-control round', 'placeholder' => trans('general.reference'), 'required']) }}
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <label for="taxFormat" class="caption">{{trans('general.tax')}}*</label>
-                    <select class="form-control" name="tax" id="tax">
-                        @foreach ($additionals as $tax)
-                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
-                                {{ $tax->name }} 
+                <div class="col-4">
+                    <label for="taxFormat" class="caption">Tax</label>
+                    <select class="custom-select" name="tax" id="tax">
+                        @foreach ($additionals as $row)
+                            <option value="{{ +$row->value }}" {{ $row->is_default ? 'selected' : ''}}>
+                                {{ $row->name }} 
                             </option>
                         @endforeach                                                    
+                    </select>
+                </div>
+
+                <div class="col-4">
+                    <label for="pricing" >Pricing</label>                    
+                    <select id="pricegroup_id" name="pricegroup_id" class="custom-select">
+                        <option value="0" selected>Default </option>
+                        @foreach($pricegroups as $group)
+                            @if (!$group->is_client)
+                                <option value="{{ $group->id }}">{{ $group->name }}</option>
+                            @endif
+                        @endforeach
+                    </select>                    
+                </div>
+
+                <div class="col-4">
+                    <label for="terms">Terms</label>
+                    <select name="term_id" class="form-control">
+                        @foreach ($terms as $term)
+                            <option value="{{ $term->id }}" {{ $term->id == @$po->term_id ? 'selected' : ''}}>
+                                {{ $term->title }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
             </div>

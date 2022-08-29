@@ -81,7 +81,7 @@ class PurchaseordersController extends Controller
     {
         // extract input fields
         $order = $request->only([
-            'supplier_id', 'tid', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 'project_id', 'note', 'tax',
+            'supplier_id', 'tid', 'date', 'due_date', 'term_id', 'project_id', 'note', 'tax',
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
@@ -123,7 +123,7 @@ class PurchaseordersController extends Controller
     {
         // extract input fields
         $order = $request->only([
-            'supplier_id', 'tid', 'date', 'due_date', 'doc_ref_type', 'doc_ref', 'project_id', 'note', 'tax',
+            'supplier_id', 'tid', 'date', 'due_date', 'term_id', 'project_id', 'note', 'tax',
             'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
