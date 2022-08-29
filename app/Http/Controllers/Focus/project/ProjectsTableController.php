@@ -31,15 +31,15 @@ class ProjectsTableController extends Controller
      * variable to store the repository object
      * @var ProjectRepository
      */
-    protected $project;
+    protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param ProjectRepository $project ;
+     * @param ProjectRepository $repository ;
      */
-    public function __construct(ProjectRepository $project)
+    public function __construct(ProjectRepository $repository)
     {
-        $this->project = $project;
+        $this->repository = $repository;
     }
 
     /**
@@ -48,24 +48,28 @@ class ProjectsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->project->getForDataTable();
+        $core = $this->repository->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function($project) {
                 if ($project->customer_project)
-                    return $project->customer_project->company;
+                return $project->customer_project->company;
             })
             ->addColumn('tid', function($project) {
                 return gen4tid('Prj-', $project->tid);
             })
-            ->addColumn('quote_tid', function($project) {
-                if ($project->quote) {
-                    $quote = $project->quote;
-                    $tid = $quote->bank_id ? gen4tid('PI-', $quote->tid) : gen4tid('QT-', $quote->tid);
-                    return '<a href="'.route('biller.projects.create_project_budget', $quote).'" data-toggle="tooltip" title="Budget"><b>'. $tid .'</b></a>';
+            ->addColumn('quote_budget', function($project) {
+                $links = '';
+                foreach ($project->quotes as $quote) {
+                    $tid = gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid);
+                    $status = $quote->budget? 'budgeted' : 'pending';
+                    $links .= '<a href="'. route('biller.projects.create_project_budget', $quote). '" data-toggle="tooltip" title="Budget">
+                        <b>'. $tid . '</b></a> :'. $status .'<br>';
                 }
+                
+                return $links;
             })
             ->addColumn('lead_tid', function($project) {
                 $tids = array();                
@@ -73,11 +77,6 @@ class ProjectsTableController extends Controller
                     $tids[] = gen4tid('Tkt-', $quote->lead->reference);
                 }
                 return implode(', ', $tids);
-            })
-            ->addColumn('budget_status', function ($project) {
-                if ($project->quote && $project->quote->budget)
-                    return 'budgeted:';
-                return 'pending:';
             })
             ->addColumn('start_date', function ($project) {
                 return dateFormat($project->start_date);

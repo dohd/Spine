@@ -29,9 +29,8 @@
                             <th>#Project No</th>
                             <th>Name</th>
                             <th>Customer</th>
-                            <th>#Quote / PI No</th>
-                            <th>Ticket No</th>
-                            <th>Budget Status</th>  
+                            <th>#Quote / PI Budget (status)</th>
+                            <th>Ticket No</th>                           
                             <th>Start Date</th>
                             <th>{{ trans('general.action') }}</th>
                         </tr>
@@ -67,89 +66,6 @@
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
-
-    function draw_data() {
-        const language = {@lang('datatable.strings')};
-        var dataTable = $('#projects-table').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            stateSave: true,
-            language,
-            ajax: {
-                url: "{{ route('biller.projects.get') }}",
-                type: 'post'
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'name',
-                    name: 'name'
-                },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'quote_tid',
-                    name: 'quote_tid'
-                },
-                {
-                    data: 'lead_tid',
-                    name: 'lead_tid'
-                },
-                {
-                    data: 'budget_status',
-                    name: 'budget_status'
-                },
-                {
-                    data: 'start_date',
-                    name: 'start_date'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
-        });
-    }
 
     // On Create Modal click
     $('#AddProjectModal').on('shown.bs.modal', function() {
@@ -223,6 +139,59 @@
             const quoteTitle = $(this).find(':selected').text().split(' - ')[2];
             $('#project-name').val(quoteTitle);
         });
-    });
+    });    
+
+    function draw_data() {
+        const dataTable = $('#projects-table').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            stateSave: true,
+            language: {@lang('datatable.strings')},
+            ajax: {
+                url: "{{ route('biller.projects.get') }}",
+                type: 'post'
+            },
+            columns: [{
+                    data: 'DT_Row_Index',
+                    name: 'id'
+                },
+                {
+                    data: 'tid',
+                    name: 'tid'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'customer',
+                    name: 'customer'
+                },
+                {
+                    data: 'quote_budget',
+                    name: 'quote_budget'
+                },
+                {
+                    data: 'lead_tid',
+                    name: 'lead_tid'
+                },
+                {
+                    data: 'start_date',
+                    name: 'start_date'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    searchable: false,
+                    sortable: false
+                }
+            ],
+            order: [[0, "desc"]],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons: ['csv', 'excel', 'print'] 
+        });
+    }
 </script>
 @endsection
