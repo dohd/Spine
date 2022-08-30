@@ -504,35 +504,7 @@
                         </ul>
                     </li>
                     @endauth
-                    
-                    @permission('stockreturn-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-exchange"></i> Project Stock Transfer</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.projectstocktransfers.index')}}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Project Stock Transfer
-                                </a>
-                            </li>
-                            @permission('stockreturn-data')
-                            <li><a class="dropdown-item" href="{{ route('biller.projectstocktransfers.create')}}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Stock Transfer
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
-                    @permission('stockreturn-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-puzzle-piece"></i> {{ trans('orders.stock_returns') }}</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=stockreturn" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.stock_return_manage')}}
-                                </a>
-                            </li>
-                            @permission('stockreturn-data')
-                            <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=stockreturn" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.stock_return_create') }}
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
+                   
                     @permission('creditnote-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.stock_return_customer') }}</a>
                         <ul class="dropdown-menu">
@@ -546,6 +518,7 @@
                         </ul>
                     </li>
                     @endauth
+                    
                     @permission('product-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-barcode"></i> {{ trans('products.product_label_print') }}
                         </a>

@@ -17,7 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\warehouse;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\warehouse\WarehouseRepository;
@@ -62,10 +61,10 @@ class WarehousesTableController extends Controller
                 return numberFormat($warehouse->products->sum('qty'));
             })
             ->addColumn('worth', function ($warehouse) {
-                return amountFormat($warehouse->products->sum('total_value'));
+                return numberFormat($warehouse->products->sum('purchase_price'));
             })
             ->addColumn('created_at', function ($warehouse) {
-                return dateFormat($warehouse->created_at);
+                return $warehouse->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($warehouse) {
                 return '<a class="btn btn-purple round" href="' . route('biller.products.index') . '?rel_type=2&rel_id=' . $warehouse->id . '" title="List"><i class="fa fa-list"></i></a>' . $warehouse->action_buttons;
