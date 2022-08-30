@@ -4,6 +4,7 @@ namespace App\Http\Responses\Focus\purchaseorder;
 
 use App\Models\additional\Additional;
 use App\Models\pricegroup\Pricegroup;
+use App\Models\term\Term;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
