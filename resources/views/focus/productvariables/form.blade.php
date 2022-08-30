@@ -69,7 +69,7 @@
             const ratio = accounting.unformat(el.val());
             if (!ratio) el.val(1);
             if ($('#unit_type').val() == 'compound') {
-                if (ratio < 2)  el.val(2);
+                if (ratio <= 1) el.val(2);
             }
                
             el.val(accounting.formatNumber(el.val()));
