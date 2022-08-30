@@ -54,9 +54,12 @@ class QuoteRepository extends BaseRepository
         }
 
         // client filter
-        if (request('client_id')) $q->where('customer_id', request('client_id'));
+        if (request('client_id')) {
+            $q->where('customer_id', request('client_id'));
+        }
 
         // status criteria filter
+        $status = true;
         if (request('status_filter')) {
             switch (request('status_filter')) {
                 case 'Unapproved':
@@ -102,13 +105,15 @@ class QuoteRepository extends BaseRepository
                     });
                     break;
                 case 'Cancelled':
+                    $status = false;
                     $q->where('status', 'cancelled');
                     break;
             }
         }
 
-        if (request('client_id') || request('status_filter')) 
+        $q->when($status, function ($q) {
             $q->where('status', '!=', 'cancelled');
+        });
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
