@@ -52,8 +52,8 @@
     const Form = {
         init() {
             $('#unit_type').change(this.unitTypeChange);
-            $('#base_ratio').focusout(this.baseRatioChange);
             $('#base_unit_id').select2({allowClear: true}).val('').change();
+            $('#base_ratio').focusout(this.baseRatioChange).focusout();
 
             const unit = @json(@$productvariable);
             if (unit) {
@@ -66,8 +66,13 @@
 
         baseRatioChange() {
             const el = $(this);
-            if (el.val()) el.val(accounting.formatNumber(el.val()));
-            else el.val(1);
+            const ratio = accounting.unformat(el.val());
+            if (!ratio) el.val(1);
+            if ($('#unit_type').val() == 'compound') {
+                if (ratio < 2)  el.val(2);
+            }
+               
+            el.val(accounting.formatNumber(el.val()));
         },
 
         unitTypeChange() {
@@ -91,6 +96,7 @@
                     required: false
                 }).val('').change();
             }
+            $('#base_ratio').focusout();
         }
     }
 

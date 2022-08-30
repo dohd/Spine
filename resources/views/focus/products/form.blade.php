@@ -65,11 +65,11 @@
 <div class="form-group row">
     <div class="col-6">
         {{ Form::label('unit', 'Compound Unit', ['class' => 'control-label']) }}
-        <select class="custom-select" name="compound_unit_id" id="compound_unit" data-placeholder="Choose Compound Units" multiple>
+        <select class="custom-select" name="compound_unit_id[]" id="compound_unit" data-placeholder="Choose Compound Units" multiple>
             @isset($compound_unit_ids)
                 @foreach($productvariables as $item)
                     @if (in_array($item->id, $compound_unit_ids))
-                        <option  value="{{ $item->id }}"  selected >
+                        <option  value="{{ $item->id }}"  selected>
                             {{ $item->code }} ({{ +$item->base_ratio }} units)
                         </option> 
                     @endif
@@ -375,7 +375,8 @@
             const compoundUnits = Form.units.filter(v => v.base_unit_id == el.val())
             .map(v => ({id: v.id, text: `${v.code} (${parseFloat(v.base_ratio)} units)`}));
 
-            $('#compound_unit').html('').select2({data: compoundUnits});
+            $('#compound_unit option').remove();
+            $('#compound_unit').select2({data: compoundUnits});
         },
 
         addMore(e) {

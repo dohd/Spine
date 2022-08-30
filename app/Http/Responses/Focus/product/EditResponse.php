@@ -34,10 +34,11 @@ class EditResponse implements Responsable
         $productvariables = Productvariable::all();
         $warehouses = Warehouse::all();
         $product_categories = Productcategory::all();
+        $compound_units = $this->product->units()->where('unit_type', 'compound')->get();
 
         return view('focus.products.edit', compact('product_categories', 'productvariables', 'warehouses'))->with([
             'product' => $this->product,
-            'compound_unit_ids' => $this->product->units->map(function ($v) { return $v->id; })->toArray()
+            'compound_unit_ids' => $compound_units->map(function ($v) { return $v->id; })->toArray()
         ]);
     }
 }

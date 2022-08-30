@@ -146,8 +146,7 @@ class ProductRepository extends BaseRepository
         $result = $product->update($input);
 
         // update units            
-        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
-        $product->units()->sync(array_merge([$product->unit_id], $compound_unit_ids));   
+        $product->units()->sync(array_merge([$product->unit_id], $input['compound_unit_id']));   
 
         // variations data
         $data_items = Arr::only($input, [
