@@ -57,13 +57,16 @@ class PurchaseordersTableController extends Controller
             ->addIndexColumn()
             ->addColumn('tid', function ($po) {
                 $tid = 'PO-'.sprintf('%04d', $po->tid);
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' 
+                . $tid . '</a>';
             })
             ->addColumn('supplier', function ($po) {
-                return $po->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '"><i class="ft-eye"></i></a>';
+                return $po->supplier->name . 
+                ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '">
+                <i class="ft-eye"></i></a>';
             })
             ->addColumn('qty', function ($po) {
-                return number_format($po->items->sum('qty'));
+                return $po->items->count();
             })
             ->addColumn('date', function ($po) {
                 return dateFormat($po->date);
@@ -72,10 +75,10 @@ class PurchaseordersTableController extends Controller
                 return amountFormat($po->grandttl);
             })
             ->addColumn('status', function ($po) {
-                return '<span class="st-' . $po->status . '">' . $po->status . '</span>';
+                return $po->status;
             })
             ->addColumn('grn_qty', function ($po) {
-                return number_format($po->grn_items->sum('qty'));
+                return $po->grn_items->count();
             })
             ->addColumn('actions', function ($po) {
                 return $po->action_buttons;

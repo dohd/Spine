@@ -30,9 +30,9 @@
                                         <th>#Order No</th>
                                         <th>{{ trans('suppliers.supplier') }}</th>
                                         <th>Note</th>
-                                        <th>Order Qty</th>
+                                        <th>Item Count</th>
                                         <th>{{ trans('general.amount') }} (VAT Inc)</th>
-                                        <th>Order date</th>
+                                        <th>Date</th>
                                         <th>{{ trans('general.status') }}</th>
                                         <th>Received Qty</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
