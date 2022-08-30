@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\lead;
 use App\Models\lead\Lead;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -52,7 +53,7 @@ class LeadRepository extends BaseRepository
     /**
      * For updating the respective Model in storage
      *
-     * @param Productcategory $productcategory
+     * @param \App\Models\Lead $lead
      * @param  $input
      * @throws GeneralException
      * return bool
@@ -68,14 +69,18 @@ class LeadRepository extends BaseRepository
     /**
      * For deleting the respective model from storage
      *
-     * @param Productcategory $productcategory
+     * @param \App\Models\lead\Lead $lead
      * @throws GeneralException
      * @return bool
      */
     public function delete(Lead $lead)
     {
-        if ($lead->quotes->count() || $lead->djcs->count())
-            return false;          
+        if ($lead->djcs->count()) 
+            throw ValidationException::withMessages(['Ticket is attached to DJC Report!']);
+
+        if ($lead->quotes->count()) 
+            throw ValidationException::withMessages(['Ticket is attached to Quote!']);
+            
         if ($lead->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));

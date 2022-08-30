@@ -18,7 +18,6 @@
 
 namespace App\Http\Controllers\Focus\lead;
 
-use App\Models\lead\Lead;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -27,6 +26,7 @@ use App\Http\Responses\Focus\lead\CreateResponse;
 use App\Http\Responses\Focus\lead\EditResponse;
 use App\Repositories\Focus\lead\LeadRepository;
 use App\Http\Requests\Focus\lead\ManageLeadRequest;
+use App\Models\lead\Lead;
 
 /**
  * ProductcategoriesController
@@ -56,7 +56,10 @@ class LeadsController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.leads.index');
+        $leads_open = Lead::where('status', 0)->count();
+        $leads_closed = Lead::where('status', 1)->count();
+
+        return new ViewResponse('focus.leads.index', compact('leads_open', 'leads_closed'));
     }
 
     /**
@@ -101,7 +104,7 @@ class LeadsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param App\Models\Lead $lead
+     * @param \App\Models\lead\Lead $lead
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
@@ -113,7 +116,7 @@ class LeadsController extends Controller
     /**
      * Update the specified resource.
      *
-     * @param App\Models\Lead $lead
+     * @param \App\Models\lead\Lead $lead
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
@@ -142,26 +145,21 @@ class LeadsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param DeleteProductcategoryRequestNamespace $request
-     * @param App\Models\Lead $lead
+     * @param \App\Models\lead\Lead $lead
      * @return \App\Http\Responses\RedirectResponse
      */
     public function destroy(Lead $lead)
     {
         $resp = $this->repository->delete($lead);
-
-        $params = array('flash_success' => 'Ticket Successfully Deleted');
-        if (!$resp) 
-            $params = ['flash_error' => 'Tkt-'.sprintf('%04d', $lead->reference).' is attached to a Quote / PI or Djc.'];
-        
-        return new RedirectResponse(route('biller.leads.index'), $params);
+            
+        return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Deleted']);
     }
 
     /**
      * Show the view for the specific resource
      *
      * @param DeleteProductcategoryRequestNamespace $request
-     * @param App\Models\Lead $lead
+     * @param \App\Models\lead\Lead $lead
      * @return \App\Http\Responses\RedirectResponse
      */
     public function show(Lead $lead, Request $request)
