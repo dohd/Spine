@@ -26,14 +26,13 @@ class EquipmentRepository extends BaseRepository
     {
         $q = $this->query();
 
-        if (request('customer_id') && request('branch_id')) {
-            $q->where([
-                'customer_id' => request('customer_id'),
-                'branch_id' => request('branch_id')
-            ]);
-        } elseif (request('customer_id')) {
+        $q->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));
-        } else return $q->limit(100)->get();
+        })->when(request('branch_id'), function ($q) {
+            $q->where('branch_id', request('branch_id'));
+        });
+
+        printlog($this->query()->find(1));
             
         return $q->get();
     }
@@ -49,7 +48,6 @@ class EquipmentRepository extends BaseRepository
     {
         // dd($input);
         $input['service_rate'] = numberClean($input['service_rate']);
-
         $result = Equipment::create($input);
         if ($result) return $result;
 

@@ -30,18 +30,18 @@ class EquipmentsTableController extends Controller
 {
   /**
    * variable to store the repository object
-   * @var ProductcategoryRepository
+   * @var EquipmentRepository
    */
-  protected $equipment;
+  protected $repository;
 
   /**
    * contructor to initialize repository object
-   * @param ProductcategoryRepository $productcategory ;
+   * @param EquipmentRepository $repository ;
    */
-  public function __construct(EquipmentRepository $equipment)
+  public function __construct(EquipmentRepository $repository)
   {
 
-    $this->equipment = $equipment;
+    $this->repository = $repository;
   }
 
   /**
@@ -52,7 +52,7 @@ class EquipmentsTableController extends Controller
    */
   public function __invoke(ManageEquipmentRequest $request)
   {
-    $core = $this->equipment->getForDataTable();
+    $core = $this->repository->getForDataTable();
 
     return Datatables::of($core)
       ->escapeColumns(['id'])
@@ -62,7 +62,7 @@ class EquipmentsTableController extends Controller
       })
       ->addColumn('branch', function ($equipment) {
         if ($equipment->branch)
-        return $equipment->branch->name;
+          return $equipment->branch->name;
       })
       ->addColumn('capacity', function ($equipment) {
         return $equipment->capacity;

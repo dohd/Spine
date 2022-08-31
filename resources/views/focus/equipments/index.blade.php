@@ -42,7 +42,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>System ID</th>
+                                        <th>Equipment No</th>
                                         <th>Tag ID</th>
                                         <th>Size</th>
                                         <th>Make</th>

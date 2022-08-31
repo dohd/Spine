@@ -11,9 +11,8 @@ class Equipment extends Model
 {
     use ModelTrait,
         EquipmentAttribute,
-    	EquipmentRelationship {
-
-        }
+        EquipmentRelationship {
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +29,13 @@ class Equipment extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +62,12 @@ class Equipment extends Model
     {
         parent::__construct($attributes);
     }
+    
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
