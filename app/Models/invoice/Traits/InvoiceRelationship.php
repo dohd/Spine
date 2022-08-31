@@ -55,7 +55,7 @@ trait InvoiceRelationship
 
     public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref')->where('tr_type', 'inv');
+        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref')->whereIn('tr_type', ['inv', 'endprj']);
     }
 
     public function attachment()
