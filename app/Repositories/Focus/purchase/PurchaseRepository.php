@@ -84,41 +84,39 @@ class PurchaseRepository extends BaseRepository
             // increase product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 $prod_variation = Prod_Variation::find($item['item_id']);
-                if ($prod_variation) {
-                    if ($prod_variation->warehouse_id != $item['warehouse_id']) {
-                        $is_similar = false;
-                        $similar_products = Prod_Variation::where('id', '!=', $prod_variation->id)
-                            ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
-                        foreach ($similar_products as $s_product) {
-                            if ($prod_variation->warehouse_id == $item['warehouse_id']) {
-                                $is_similar = true;
-                                $prod_variation = $s_product;
-                                break;
-                            }
-                        }
-                        if (!$is_similar) {
-                            // new warehouse product variation
-                            $new_wh_product = clone $prod_variation;
-                            $new_wh_product->warehouse_id = $item['warehouse_id'];
-                            unset($new_wh_product->id, $new_wh_product->qty);
-                            $new_wh_product->save();
-                            $prod_variation = $new_wh_product;
+                if ($prod_variation->warehouse_id != $item['warehouse_id']) {
+                    $is_similar = false;
+                    $similar_products = Prod_Variation::where('id', '!=', $prod_variation->id)
+                        ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
+                    foreach ($similar_products as $s_product) {
+                        if ($prod_variation->warehouse_id == $item['warehouse_id']) {
+                            $is_similar = true;
+                            $prod_variation = $s_product;
+                            break;
                         }
                     }
+                    if (!$is_similar) {
+                        // new warehouse product variation
+                        $new_wh_product = clone $prod_variation;
+                        $new_wh_product->warehouse_id = $item['warehouse_id'];
+                        unset($new_wh_product->id, $new_wh_product->qty);
+                        $new_wh_product->save();
+                        $prod_variation = $new_wh_product;
+                    }
+                }
 
-                    // apply unit conversion
-                    $units = $prod_variation->product->units;
-                    foreach ($units as $unit) {
-                        if ($unit->code == $item['uom']) {
-                            if ($unit->unit_type == 'base') {
-                                $prod_variation->increment('qty', $item['qty']);
-                            } else {
-                                $converted_qty = $item['qty'] * $unit->base_ratio;
-                                $prod_variation->increment('qty', $converted_qty);
-                            }
+                // apply unit conversion
+                $units = $prod_variation->product->units;
+                foreach ($units as $unit) {
+                    if ($unit->code == $item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->increment('qty', $item['qty']);
+                        } else {
+                            $converted_qty = $item['qty'] * $unit->base_ratio;
+                            $prod_variation->increment('qty', $converted_qty);
                         }
                     }
-                }                
+                }             
             }
         }
         PurchaseItem::insert($data_items);
@@ -176,40 +174,38 @@ class PurchaseRepository extends BaseRepository
                 if ($prod_variation) $prod_variation->decrement('qty', $purchase_item->qty);
                 else $prod_variation = ProductVariation::find($item['item_id']);
             
-                if ($prod_variation) {
-                    if ($prod_variation->warehouse_id != $item['warehouse_id']) {   
-                        $is_similar = false;
-                        $similar_products = ProductVariation::where('id', '!=', $prod_variation->id)
-                            ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
-                        foreach ($similar_products as $s_product) {
-                            if ($prod_variation->warehouse_id == $item['warehouse_id']) {
-                                $is_similar = true;
-                                $prod_variation = $s_product;
-                                break;
-                            }
-                        }
-                        if (!$is_similar) {
-                            $new_product = clone $prod_variation;
-                            $new_product->warehouse_id = $item['warehouse_id'];
-                            unset($new_product->id, $new_product->qty);
-                            $new_product->save();
-                            $prod_variation = $new_product;
+                if ($prod_variation->warehouse_id != $item['warehouse_id']) {   
+                    $is_similar = false;
+                    $similar_products = ProductVariation::where('id', '!=', $prod_variation->id)
+                        ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
+                    foreach ($similar_products as $s_product) {
+                        if ($prod_variation->warehouse_id == $item['warehouse_id']) {
+                            $is_similar = true;
+                            $prod_variation = $s_product;
+                            break;
                         }
                     }
-
-                    // apply unit conversion
-                    $units = $prod_variation->product->units;
-                    foreach ($units as $unit) {
-                        if ($unit->code == $item['uom']) {
-                            if ($unit->unit_type == 'base') {
-                                $prod_variation->increment('qty', $item['qty']);
-                            } else {
-                                $converted_qty = $item['qty'] * $unit->base_ratio;
-                                $prod_variation->increment('qty', $converted_qty);
-                            }
-                        }
-                    }                    
+                    if (!$is_similar) {
+                        $new_product = clone $prod_variation;
+                        $new_product->warehouse_id = $item['warehouse_id'];
+                        unset($new_product->id, $new_product->qty);
+                        $new_product->save();
+                        $prod_variation = $new_product;
+                    }
                 }
+
+                // apply unit conversion
+                $units = $prod_variation->product->units;
+                foreach ($units as $unit) {
+                    if ($unit->code == $item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->increment('qty', $item['qty']);
+                        } else {
+                            $converted_qty = $item['qty'] * $unit->base_ratio;
+                            $prod_variation->increment('qty', $converted_qty);
+                        }
+                    }
+                }     
             }    
 
             $item = array_replace($item, [
