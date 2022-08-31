@@ -72,8 +72,11 @@ class ProjectStockRepository extends BaseRepository
             $budget_item = $issue_item->budget_item;
             $budget_item->increment('issue_qty', $issue_item->qty);
 
-            // apply unit conversion
             $prod_variation = $issue_item->productvariation;
+            // skip service product
+            if ($prod_variation->product->stock_type == 'service') continue;
+                
+            // apply unit conversion
             $units = $prod_variation->product->units;
             foreach ($units as $unit) {
                 if ($unit->code == $issue_item->unit) {
@@ -130,14 +133,15 @@ class ProjectStockRepository extends BaseRepository
     public function delete(Projectstock $projectstock)
     {     
         DB::beginTransaction();
-        dd($projectstock);
+
         foreach ($projectstock->items as $issue_item) {
             // decrease budget item issuance qty
             $budget_item = $issue_item->budget_item;
             $budget_item->decrement('issue_qty', $issue_item->qty);
 
-            // apply unit conversion
             $prod_variation = $issue_item->productvariation;
+
+            // apply unit conversion
             $units = $prod_variation->product->units;
             foreach ($units as $unit) {
                 if ($unit->code == $issue_item->unit) {
