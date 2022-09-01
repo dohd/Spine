@@ -83,9 +83,9 @@ class ProductRepository extends BaseRepository
         // create product
         $result = Product::create($input);
 
-        // units            
-        $compound_unit_ids = isset($input['compound_unit_id'])? explode(',', $input['compound_unit_id']) : array();
-        $result->units()->attach(array_merge([$result->unit_id], $compound_unit_ids));
+        // units        
+        if (empty($input['compound_unit_id'])) $input['compound_unit_id'] = array();    
+        $result->units()->attach(array_merge([$result->unit_id], $input['compound_unit_id']));
 
         // product variations
         $variations = [];
@@ -145,7 +145,8 @@ class ProductRepository extends BaseRepository
         $input['taxrate'] = numberClean($input['taxrate']);
         $result = $product->update($input);
 
-        // update units            
+        // update units        
+        if (empty($input['compound_unit_id'])) $input['compound_unit_id'] = array();
         $product->units()->sync(array_merge([$product->unit_id], $input['compound_unit_id']));   
 
         // variations data
