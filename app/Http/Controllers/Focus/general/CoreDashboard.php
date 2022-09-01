@@ -53,7 +53,7 @@ class CoreDashboard extends Controller
             $q->where('stock_type', 'general');
         })->orderBy('id', 'desc')->get();
 
-        $transactions = Transaction::whereBetween('due_date', [$start_date, $today])
+        $transactions = Transaction::whereBetween('tr_date', [$start_date, $today])
         ->orderBy('id', 'desc')
         ->with(['account'])->take(10)->get();
 
@@ -82,26 +82,26 @@ class CoreDashboard extends Controller
         ->whereHas('category', function ($q) {
             $q->whereIn('code', ['inv', 'bill']);
         })
-        ->where('due_date', $today)
-        ->groupBy('due_date')->first();
+        ->where('tr_date', $today)
+        ->groupBy('tr_date')->first();
         if (!$transactions_today) $transactions_today = new Transaction;
 
-        $income_transactions = Transaction::whereBetween('due_date', [$start_date, $today])
+        $income_transactions = Transaction::whereBetween('tr_date', [$start_date, $today])
         ->whereHas('category', function ($q) {
             $q->whereIn('code', ['inv']);
         })->get();
-        $expense_transactions = Transaction::whereBetween('due_date', [$start_date, $today])
+        $expense_transactions = Transaction::whereBetween('tr_date', [$start_date, $today])
         ->whereHas('category', function ($q) {
             $q->whereIn('code', ['bill']);
         })->get();
         
 
         $income_chart = array_map(function ($v) {
-            return array('x' => $v['due_date'], 'y' => (int) $v['credit']);
+            return array('x' => $v['tr_date'], 'y' => (int) $v['credit']);
         }, $income_transactions->toArray());
 
         $expense_chart = array_map(function ($v) {
-            return array('x' => $v['due_date'], 'y' => (int) $v['debit']);
+            return array('x' => $v['tr_date'], 'y' => (int) $v['debit']);
         }, $expense_transactions->toArray());
 
         $sales_chart = [];
