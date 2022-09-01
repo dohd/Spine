@@ -37,6 +37,7 @@
         {{ Form::label('product_des', trans('products.product_des'),['class' => 'control-label']) }}
         {{ Form::textarea('product_des', null, ['class' => 'form-control col', 'rows'=>2, 'placeholder' => trans('products.product_des')]) }}
     </div>
+    
     <div class="col-2">
         {{ Form::label('unit', trans('products.stock_type'),['class' => 'control-label']) }}
         <select class="custom-select" name="stock_type">
@@ -46,6 +47,11 @@
                 </option>
             @endforeach
         </select>
+    </div>
+
+    <div class="col-2">
+        <label for="sku">Stock Keeping Unit (SKU)</label>
+        {{ Form::text('sku', null, ['class' => 'form-control']) }}
     </div>
 
     <div class="col-2">

@@ -77,10 +77,14 @@ class ProductRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
-        // sanitize
+
+        // validate stock keeping unit
+        $sku_exists = Product::where('sku', $input['sku'])->count();
+        if (empty($input['sku']) || $sku_exists) {
+            $input['sku'] = substr($input['name'], 0, 1) . substr($input['name'], -1) . rand(1, 10000);
+        }
+
         $input['taxrate'] = numberClean($input['taxrate']);
-        
-        // create product
         $result = Product::create($input);
 
         // units        
@@ -141,6 +145,12 @@ class ProductRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
+
+        // validate stock keeping unit
+        $sku_exists = Product::where('sku', $input['sku'])->where('id', '!=', $product->id)->count();
+        if (empty($input['sku']) || $sku_exists) {
+            $input['sku'] = substr($input['name'], 0, 1) . substr($input['name'], -1) . rand(1, 10000);
+        }
 
         $input['taxrate'] = numberClean($input['taxrate']);
         $result = $product->update($input);

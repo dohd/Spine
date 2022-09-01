@@ -17,70 +17,7 @@
                     </div>
                 </div>
             </div>
-            @if ($segment)
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <p>
-                                    @if (request('rel_type') == 2) 
-                                        {{trans('warehouses.title')}}
-                                    @else 
-                                        {{trans('productcategories.title')}} 
-                                    @endif 
-                                </p>
-                            </div>
-                            <div class="col-sm-6">
-                                <p>{{$segment['title']}}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <p>{{trans('productcategories.extra')}}</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <p>{{$segment['extra']}}</p>
-                            </div>
-                        </div> 
-                            @if (!$segment['c_type'])
-                                <div class="row">
-                                    <div class="col-sm-2">
-                                        <p>{{trans('productcategories.total_products')}}</p>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <p>{{ number_format($segment->products->sum('qty'))}}</p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-2">
-                                        <p>{{trans('productcategories.total_worth')}}</p>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <p>{{amountFormat($segment->products->sum('total_value'))}}</p>
-                                    </div>
-                                </div>
-                            @endif
-                    </div>
-                </div>
-                @isset ($segment->subcategories[0])
-                    <div class="card p-1 bg-lighten-5">
-                        <h4 class="mb-0">{{ trans('productcategories.sub_categories') }}</h4>
-                        <table id="productcategories-table"
-                            class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                            width="100%">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>{{ trans('productcategories.title') }}</th>
-                                <th>{{ trans('general.createdat') }}</th>
-                                <th>{{ trans('labels.general.actions') }}</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                @endisset
-            @endif
+            
 
             <div class="content-body">
                 <div class="row">
