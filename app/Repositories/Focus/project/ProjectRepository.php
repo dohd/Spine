@@ -102,6 +102,20 @@ class ProjectRepository extends BaseRepository
     }
 
     /**
+     * For delete respective model from storage
+     * 
+     *  @param \App\Models\project\Project $project 
+     */
+    public function delete($project)
+    {  
+        if ($project->quotes)
+            throw ValidationException::withMessages(['Project is attached to Quote / Proforma Invoice!']);
+        if ($project->delete()) return true;
+
+        throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
+    }    
+
+    /**
      * store a newly created Project Quote Budget
      * @param Request request
      */
@@ -207,5 +221,5 @@ class ProjectRepository extends BaseRepository
         
         DB::commit();
         if ($result) return $result;
-    }             
+    }   
 }

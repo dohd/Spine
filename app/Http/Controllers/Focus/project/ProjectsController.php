@@ -134,7 +134,7 @@ class ProjectsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param DeleteProjectRequestNamespace $request
-     * @param App\Models\project\Project $project
+     * @param \App\Models\project\Project $project
      * @return \App\Http\Responses\RedirectResponse
      */
     public function destroy(Project $project)
