@@ -104,9 +104,13 @@ class CoreDashboard extends Controller
             return array('x' => $v['due_date'], 'y' => (int) $v['debit']);
         }, $expense_transactions->toArray());
 
-        $sales_chart = array_map(function ($v) {
-            return array('y' => $v['invoicedate'], 'sales' => (int) $v['total'], 'invoices' => (int) $v['items']);
-        }, [$this_month_invoices->toArray()]);
+        $sales_chart = [];
+        $this_month_invoices_array = $this_month_invoices->toArray();
+        if ($this_month_invoices_array) {
+            $sales_chart = array_map(function ($v) {
+                return array('y' => $v['invoicedate'], 'sales' => (int) $v['total'], 'invoices' => (int) $v['items']);
+            }, [$this_month_invoices_array]);    
+        }
 
         return response()->json([
             'dash' => array(
