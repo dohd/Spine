@@ -74,11 +74,6 @@ trait ProjectRelationship
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-    public function customer()
-    {
-        return $this->hasOneThrough(Customer::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 8)->withoutGlobalScopes();
-    }
-
     public function tasks()
     {
         return $this->hasOneThrough(Task::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 4)->withoutGlobalScopes();

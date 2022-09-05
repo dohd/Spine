@@ -30,11 +30,14 @@ Route::group(['namespace' => 'account'], function () {
     Route::get('accounts/profit_and_loss/{type}', 'AccountsController@profit_and_loss')->name('accounts.profit_and_loss');
     Route::get('accounts/balancesheet/{type}', 'AccountsController@balance_sheet')->name('accounts.balance_sheet');
     Route::get('accounts/trialbalance/{type}', 'AccountsController@trial_balance')->name('accounts.trial_balance');
+    Route::get('accounts/project_gross_profit', 'AccountsController@project_gross_profit')->name('accounts.project_gross_profit');
+
+    Route::post('accounts/search_next_account_no', 'AccountsController@search_next_account_no')->name('accounts.search_next_account_no');
+    Route::post('accounts/search', 'AccountsController@account_search')->name('accounts.account_search');
     Route::resource('accounts', 'AccountsController');
     //For Datatable
+    Route::post('accounts/project_gross_profit/get', 'ProjectGrossProfitTableController')->name('accounts.get_project_gross_profit');
     Route::post('accounts/get', 'AccountsTableController')->name('accounts.get');
-    Route::post('accounts/search', 'AccountsController@account_search')->name('accounts.account_search');
-    Route::post('accounts/search_next_account_no', 'AccountsController@search_next_account_no')->name('accounts.search_next_account_no');
 });
 
 Route::group(['namespace' => 'additional'], function () {

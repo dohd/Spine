@@ -161,6 +161,20 @@ class AccountsController extends Controller
     }
 
     /**
+     * Search next account number
+     */
+    public function search_next_account_no(Request $request)
+    {
+        $account_type = $request->account_type;
+        $number = Account::where('account_type', $account_type)->max('number');
+
+        $series = accounts_numbering($account_type);
+        if ($number) $series = $number + 1;
+            
+        return response()->json(['account_number' => $series]);
+    }    
+
+    /**
      * Search Expense accounts 
      */
     public function account_search(Request $request)
@@ -171,10 +185,9 @@ class AccountsController extends Controller
         
         if ($request->type == 'Expense') {
             $accounts = Account::where('account_type', 'Expense')
-                ->where('holder', 'LIKE', '%' . $k . '%')
-                ->orWhere('account_type', 'Expense')
-                ->where('number', 'LIKE', '%' . $k . '%')
-                ->limit(6)->get(['id', 'holder AS name', 'number']);
+            ->where(function ($q) use($k) {
+                $q->where('holder', 'LIKE', '%' . $k . '%')->orWhere('number', 'LIKE', '%' . $k . '%');
+            })->limit(6)->get(['id', 'holder AS name', 'number']);
 
             return response()->json($accounts);
         }
@@ -186,6 +199,9 @@ class AccountsController extends Controller
         return response()->json($accounts);
     }
 
+    /**
+     * Profit and Loss (Income)
+     */
     public function profit_and_loss(Request $request)
     {
         $dates = $request->only('start_date', 'end_date');
@@ -209,6 +225,9 @@ class AccountsController extends Controller
         return new ViewResponse('focus.accounts.profit_&_loss', compact('accounts', 'bg_styles', 'dates'));
     }
 
+    /**
+     * Balance Sheet
+     */
     public function balance_sheet(Request $request)
     {
         $date = date_for_database(request('end_date'));
@@ -257,7 +276,9 @@ class AccountsController extends Controller
         return new ViewResponse('focus.accounts.balance_sheet', compact('accounts', 'bg_styles', 'net_profit', 'date'));
     }
 
-
+    /**
+     * Trial Balance
+     */
     public function trial_balance(Request $request)
     {
         $q = Account::query();
@@ -273,20 +294,6 @@ class AccountsController extends Controller
             return $this->print_document('trial_balance', $accounts, [0, $date], 0);
 
         return new ViewResponse('focus.accounts.trial_balance', compact('accounts', 'date'));
-    }
-
-    /**
-     * Search next account number
-     */
-    public function search_next_account_no(Request $request)
-    {
-        $account_type = $request->account_type;
-
-        $account = Account::where('account_type', $account_type)->max('number');
-        $netx_account = accounts_numbering($account_type);
-        if ($account > 0) $netx_account = $account + 1;
-            
-        return response()->json(['account_number' => $netx_account]);
     }
 
     /**
@@ -306,5 +313,13 @@ class AccountsController extends Controller
             "Expires" => "0"
         );
         return Response::stream($pdf->Output($name . '.pdf', 'I'), 200, $headers);
+    }
+
+    /**
+     * Project Gross Profit Index
+     */
+    public function project_gross_profit()
+    {
+        return new ViewResponse('focus.accounts.project_gross_profit');
     }
 }
