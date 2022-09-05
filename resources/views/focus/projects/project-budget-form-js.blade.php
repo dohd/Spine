@@ -272,7 +272,7 @@
         });
         $('#skill-item tbody tr').each(function() {
             const spanText = $(this).find('td').eq(5).children().text();
-            const amount = parseFloat(spanText.replace(/,/g, ''));
+            const amount = accounting.unformat(spanText);
             total += amount;
             labourTotal += amount;
         });
@@ -288,7 +288,7 @@
 
         // budget limit
         $('.budget-alert').addClass('d-none');
-        if (total > (quoteTotal * 0.7)) {
+        if (total >= (quoteTotal * 0.7)) {
             $('.budget-alert').removeClass('d-none');
             scroll(0, 0);
         }
