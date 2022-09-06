@@ -186,8 +186,7 @@
 
         if (el.is('.price')) {
             row.next().find('.descr').attr('required', true);
-        }
-        if (el.is('.uom')) {
+        } else if (el.is('.uom')) {
             const purchasePrice = el.find('option:selected').attr('purchase_price');
             row.find('.price').val(purchasePrice).change();
         }
@@ -197,19 +196,19 @@
         let grandTotal = 0;
         $('#stockTbl tbody tr').each(function() {
             if (!$(this).find('.qty').val()) return;
-            const qty = $(this).find('.qty').val();
-            const price = $(this).find('.price').val().replace(/,/g, '') || 0;
+            const qty = accounting.unformat($(this).find('.qty').val());
+            const price = accounting.unformat($(this).find('.price').val());
             const rowtax = $(this).find('.rowtax').val()/100 + 1;
 
             const amount = qty * price * rowtax;
             const taxable = amount - qty * price;
-            tax += parseFloat(taxable.toFixed(2));
-            grandTotal += parseFloat(amount.toFixed(2));
+            tax += taxable;
+            grandTotal += amount;
         });
-        $('#invtax').text(tax.toLocaleString());
-        $('#stock_tax').val(tax.toLocaleString());
-        $('#stock_grandttl').val(grandTotal.toLocaleString());
-        $('#stock_subttl').val((grandTotal - tax).toLocaleString());
+        $('#invtax').text(accounting.formatNumber(tax));
+        $('#stock_tax').val(accounting.formatNumber(tax));
+        $('#stock_grandttl').val(accounting.formatNumber(grandTotal));
+        $('#stock_subttl').val(accounting.formatNumber(grandTotal - tax));
         transxnCalc();
     }
 
@@ -221,12 +220,12 @@
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
 
-        const purchasePrice = parseFloat(data.purchase_price);
+        const purchasePrice = accounting.unformat(data.purchase_price);
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
 
         $('#uom-'+i).html('');
         data.units.forEach(v => {
-            const rate = parseFloat(v.base_ratio) * purchasePrice;
+            const rate = accounting.unformat(v.base_ratio) * purchasePrice;
             const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
             $('#uom-'+i).append(option);
         });
