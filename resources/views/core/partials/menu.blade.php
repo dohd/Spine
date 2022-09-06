@@ -586,7 +586,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Project Invoice
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.project_invoice') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Project Invoice
+                            <li><a class="dropdown-item" href="{{ route('biller.invoices.uninvoiced_quote') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Project Invoice
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.index_payment') }}"><i class="fa fa-money"></i> Manage Payments</a></li>

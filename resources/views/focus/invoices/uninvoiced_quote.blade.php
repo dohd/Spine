@@ -59,7 +59,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="quotes-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="quotesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th><input type="checkbox" id="select-all-row"></th>
@@ -101,7 +101,7 @@
         var start_date = $('#start_date').val();
         var end_date = $('#end_date').val();
         if (start_date && end_date) {
-            $('#quotes-table').DataTable().destroy();
+            $('#quotesTbl').DataTable().destroy();
             return draw_data(start_date, end_date);
         }
         alert("Date range is Required");
@@ -113,7 +113,7 @@
         var lpo_number = $('#lpo_number').val()
         var project_id = $('#project_id').val()
         $('#customer').val(customer_id);
-        $('#quotes-table').DataTable().destroy();
+        $('#quotesTbl').DataTable().destroy();
         return draw_data(customer_id, lpo_number, project_id);
     });
 
@@ -159,15 +159,14 @@
     });
 
     function draw_data(customer_id = '', lpo_number = '', project_id = '') {
-        const tableLang = {@lang('datatable.strings')};
-        const table = $('#quotes-table').dataTable({
+        const table = $('#quotesTbl').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLang,
+            language: {@lang('datatable.strings')},
             ajax: {
-                url: "{{ route('biller.quotes.get_univoiced_quote') }}",
+                url: "{{ route('biller.invoices.get_uninvoiced_quote') }}",
                 type: 'POST',
                 data: { customer_id, lpo_number, project_id },
             },

@@ -30,13 +30,14 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::post('invoices/update_project_invoice/{invoice}', 'InvoicesController@update_project_invoice')->name('invoices.update_project_invoice');
     Route::get('filter_invoice_quotes', 'InvoicesController@filter_invoice_quotes')->name('invoices.filter_invoice_quotes');
     Route::post('store_project_invoice', 'InvoicesController@store_project_invoice')->name('invoices.store_project_invoice');
-    Route::get('project_invoice', 'InvoicesController@project_invoice')->name('invoices.project_invoice');
-    Route::resource('invoices', 'InvoicesController');
+    Route::get('invoices/print_document/{id}/{type}', 'InvoicesController@print_document')->name('invoices.print_document');
 
+    Route::get('uninvoiced_quote', 'InvoicesController@uninvoiced_quote')->name('invoices.uninvoiced_quote');
+    Route::resource('invoices', 'InvoicesController');
     //For Datatable
+    Route::post('quotes/get_uninvoiced_quote', 'UninvoicedQuoteTableController')->name('invoices.get_uninvoiced_quote');
     Route::post('invoices/get', 'InvoicesTableController')->name('invoices.get');
     Route::post('invoices/get_payments', 'PaymentsTableController')->name('invoices.get_payments');
-    Route::get('invoices/print_document/{id}/{type}', 'InvoicesController@print_document')->name('invoices.print_document');
 });
 
 Route::group(['namespace' => 'printer'], function () {

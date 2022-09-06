@@ -321,7 +321,6 @@ Route::group(['namespace' => 'quote'], function () {
     //For Datatable
     Route::post('quotes/get_project', 'QuoteVerifyTableController')->name('quotes.get_project');
     Route::post('quotes/get', 'QuotesTableController')->name('quotes.get');
-    Route::post('quotes/get_univoiced_quote', 'QuoteInvoiceTableController')->name('quotes.get_univoiced_quote');
 });
 
 Route::group(['namespace' => 'region'], function () {

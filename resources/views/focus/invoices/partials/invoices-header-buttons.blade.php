@@ -3,7 +3,7 @@
         <i class="fa fa-list-alt"></i> {{trans('general.list')}}
     </a>
     @permission( 'invoice-create' )
-    <a href="{{ route('biller.invoices.project_invoice') }}" class="btn btn-pink btn-lighten-3">
+    <a href="{{ route('biller.invoices.uninvoiced_quote') }}" class="btn btn-pink btn-lighten-3">
         <i class="fa fa-plus-circle"></i> {{trans('general.create')}}
     </a>
     @endauth

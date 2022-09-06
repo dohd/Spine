@@ -15,7 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
-namespace App\Http\Controllers\Focus\quote;
+namespace App\Http\Controllers\Focus\invoice;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
@@ -24,21 +24,21 @@ use App\Repositories\Focus\quote\QuoteRepository;
 /**
  * Class QuotesTableController.
  */
-class QuoteInvoiceTableController extends Controller
+class UninvoicedQuoteTableController extends Controller
 {
     /**
      * variable to store the repository object
      * @var QuoteRepository
      */
-    protected $quote;
+    protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param QuoteRepository $quote ;
+     * @param QuoteRepository $repository ;
      */
-    public function __construct(QuoteRepository $quote)
+    public function __construct(QuoteRepository $repository)
     {
-        $this->quote = $quote;
+        $this->repository = $repository;
     }
 
     /**
@@ -47,30 +47,27 @@ class QuoteInvoiceTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->quote->getForVerifyNotInvoicedDataTable();
+        $core = $this->repository->getForVerifyNotInvoicedDataTable();
         
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('mass_select', function ($quote) {
-                return  '<input type="checkbox"  class="row-select" value="'.$quote->id.'">';
+                return  '<input type="checkbox"  class="row-select" value="'. $quote->id .'">';
             })
             ->addColumn('title', function($quote) {
                 return $quote->notes;
             })
             ->addColumn('tid', function ($quote) {
-                $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $tid = 'PI-'.$tid;
-                else $tid = 'QT-'.$tid;
-
-                return '<a class="font-weight-bold" href="'.route('biller.quotes.show', [$quote->id]).'">' . $tid . $quote->revision .'</a>';
+                $tid = gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid);
+                return '<a class="font-weight-bold" href="'. route('biller.quotes.show', $quote) .'">' . $tid . $quote->revision .'</a>';
             })
             ->addColumn('customer', function ($quote) {
                 $customer = isset($quote->customer) ? $quote->customer->company : '';
                 $branch  = isset($quote->branch) ? $quote->branch->name : '';
                 if ($customer && $branch) 
                     return $customer.' - '.$branch
-                        .'&nbsp;<a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
+                        .'&nbsp;<a class="font-weight-bold" href="'.route('biller.customers.show', $quote->customer).'"><i class="ft-eye"></i></a>';
             })
             ->addColumn('created_at', function ($quote) {
                 return dateFormat($quote->invoicedate);
@@ -86,17 +83,13 @@ class QuoteInvoiceTableController extends Controller
             })
             ->addColumn('project_tid', function($quote) {
                 if ($quote->project_quote_id) 
-                    return 'Prj-'.sprintf('%04d', $quote->project_quote->project->tid);
+                return gen4tid('Prj-', $quote->project_quote->project->tid);
             })
             ->addColumn('lpo_number', function($quote) {
-                if ($quote->lpo)
-                    return $quote->lpo->lpo_no . '<br> Kes: ' . numberFormat($quote->lpo->amount);
+                if (!$quote->lpo)  return 'Null:';
 
-                return 'Null:';
+                return $quote->lpo->lpo_no . '<br> Kes: ' . numberFormat($quote->lpo->amount);
             })
-            ->addColumn('lead_tid', function($quote) {
-                // return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
-            })          
             ->make(true);
     }
 }

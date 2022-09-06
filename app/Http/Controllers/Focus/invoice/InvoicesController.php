@@ -135,16 +135,15 @@ class InvoicesController extends Controller
     }    
 
     /**
-     * Project Invoice index page
+     * Uninvoiced quotes
      */
-    public function project_invoice(ManageInvoiceRequest $request)
+    public function uninvoiced_quote(ManageInvoiceRequest $request)
     {
-
-        $customers = Customer::where('active', '1')->pluck('company', 'id');
+        $customers = Customer::where('active', 1)->pluck('company', 'id');
         $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
         $projects = Project::pluck('name', 'id');
 
-        return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
+        return new ViewResponse('focus.invoices.uninvoiced_quote', compact('customers', 'lpos', 'projects'));
     }
 
     /**
