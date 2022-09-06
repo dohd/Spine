@@ -59,7 +59,7 @@ class ProjectGrossProfitTableController extends Controller
                 return $project->customer_project->company;
             })
             ->addColumn('tid', function($project) {
-                return gen4tid('Prj-', $project->tid);
+                return '<a href="'. route('biller.projects.show', $project) .'">'. gen4tid('Prj-', $project->tid) .'</a>';
             })
             ->addColumn('status', function($project) {
                 return 'Active';

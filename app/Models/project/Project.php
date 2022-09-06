@@ -11,9 +11,9 @@ class Project extends Model
 {
     use ModelTrait,
         ProjectAttribute,
-    	ProjectRelationship {
-            // ProjectAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        ProjectRelationship {
+        // ProjectAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,13 @@ class Project extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +63,23 @@ class Project extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }

@@ -34,6 +34,8 @@ use App\Repositories\Focus\project\ProjectRepository;
 use App\Http\Requests\Focus\project\ManageProjectRequest;
 use App\Http\Requests\Focus\project\CreateProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
+use App\Models\Access\User\User;
+use App\Models\misc\Misc;
 use App\Models\project\Budget;
 use App\Models\project\BudgetItem;
 use App\Models\project\BudgetSkillset;
@@ -156,7 +158,16 @@ class ProjectsController extends Controller
         $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
         $last_tid = Project::max('tid');
 
-        return new ViewResponse('focus.projects.view', compact('project', 'accounts', 'last_tid'));
+        // temp properties
+        $project->customer = $project->customer_project;
+        $project->creator = auth()->user();
+
+        $mics = Misc::all();
+        $employees = User::all();
+
+        $params = ['mics', 'employees'];
+
+        return new ViewResponse('focus.projects.view', compact('project', 'accounts', 'last_tid', ...$params));
     }
 
     /**
