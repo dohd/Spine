@@ -5,12 +5,18 @@ namespace App\Models\items\Traits;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
 use App\Models\project\Project;
+use App\Models\purchase\Purchase;
 
 /**
  * Class CustomerRelationship
  */
 trait PurchaseItemRelationship
 {
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class, 'bill_id');
+    }
+
     public function asset()
     {
         return $this->belongsTo(Assetequipment::class, 'item_id');
