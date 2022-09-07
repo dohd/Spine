@@ -33,7 +33,6 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
-use App\Models\transaction\Transaction;
 use DateTime;
 
 /**
@@ -219,8 +218,7 @@ class CustomersController extends Controller
         }
 
         // customer debt balance
-        $transactions = $this->repository->getTransactionsForDataTable($customer->id);
-        $account_balance = $transactions->sum('debit') - $transactions->sum('credit');
+        $account_balance = collect($aging_cluster)->sum() - $customer->on_account;
 
         return new ViewResponse('focus.customers.view', compact('customer', 'aging_cluster', 'account_balance'));
     }
