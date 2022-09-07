@@ -1,4 +1,12 @@
 <script>
+    const config = {
+        ajax: {
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            }
+        }
+    };
+
     $('#AddMileStoneModal').on('shown.bs.modal', function() {
         $('[data-toggle="datepicker"]').datepicker({
             autoHide: true,
@@ -92,7 +100,7 @@
                     notes();
                     break;
                 case '#tab_data7':
-                    invoices();
+                    drawInvoiceDataTable();
                     break;
             }
 
@@ -208,95 +216,6 @@
                 break;
         }
 
-    }
-
-    function invoices() {
-        if ($('#invoices-table_p tbody').is(":empty")) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            var dataTable = $('#invoices-table_p').dataTable({
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                language: {
-                    @lang('datatable.strings')
-                },
-                ajax: {
-                    url: '{{ route('biller.projects.invoices') }}?project_id={{ $project->id }}',
-                    type: 'post',
-                },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'invoicedate',
-                        name: 'invoicedate'
-                    },
-                    {
-                        data: 'total',
-                        name: 'total'
-                    },
-                    {
-                        data: 'status',
-                        name: 'status'
-                    },
-                    {
-                        data: 'invoiceduedate',
-                        name: 'invoiceduedate'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
-                    }
-                ],
-                order: [
-                    [0, "asc"]
-                ],
-                searchDelay: 500,
-                dom: 'Blfrtip',
-                buttons: {
-                    buttons: [
-
-                        {
-                            extend: 'csv',
-                            footer: true,
-                            exportOptions: {
-                                columns: [0, 1]
-                            }
-                        },
-                        {
-                            extend: 'excel',
-                            footer: true,
-                            exportOptions: {
-                                columns: [0, 1]
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            footer: true,
-                            exportOptions: {
-                                columns: [0, 1]
-                            }
-                        }
-                    ]
-                }
-            });
-            $('#invoices-table_p_wrapper').removeClass('form-inline');
-        }
     }
 
     function notes() {

@@ -67,17 +67,25 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
                             role="tab" aria-selected="true"><i class="icon-note"></i>
                             {{ trans('general.notes') }}</a>
                     </li>
-                    @if ($project->creator->id == auth()->user()->id)
-                        <li class="nav-item">
-                            <a class="nav-link" id="tab7" data-toggle="tab" href="#tab_data7"
-                                aria-controls="tab_data7" role="tab" aria-selected="true"><i
-                                    class="ft-file-text"></i> {{ trans('invoices.invoices') }}</a>
-                        </li>
-                    @endif
+                    
+                    
                     <li class="nav-item">
-                        <a class="nav-link" id="tab8" data-toggle="tab" href="#tab_data8" aria-controls="tab_data8"
+                        <a class="nav-link" id="tab7" data-toggle="tab" href="#tab_data7" aria-controls="tab_data8"
                             role="tab" aria-selected="true"><i class="ft-users"></i>
                             {{ trans('projects.users') }}</a>
+                    </li>
+                    {{-- income --}}
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab8" data-toggle="tab" href="#tab_data8" aria-controls="tab_data8" role="tab" aria-selected="true">
+                            <i class="fa fa-money"></i>Income
+                        </a>                           
+                    </li>
+
+                    {{-- expense --}}
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab9" data-toggle="tab" href="#tab_data9" aria-controls="tab_data9" role="tab" aria-selected="true">
+                            <i class="fa fa-money"></i>Expense
+                        </a>                           
                     </li>
                 </ul>
                 <div class="tab-content px-1 pt-1">
@@ -87,8 +95,9 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
                     @include('focus.projects.tabs.activity')
                     @include('focus.projects.tabs.file')
                     @include('focus.projects.tabs.note')
-                    @include('focus.projects.tabs.invoice')
                     @include('focus.projects.tabs.user')
+                    @include('focus.projects.tabs.income')
+                    @include('focus.projects.tabs.expense')
                 </div>
             </div>
         </div>
