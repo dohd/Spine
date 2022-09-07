@@ -18,9 +18,7 @@
 
 namespace App\Http\Controllers\Focus\quote;
 
-use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
 use App\Models\quote\Quote;
-use App\Repositories\Focus\invoice\InvoiceRepository;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
