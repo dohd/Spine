@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\communication;
 
 use App\Http\Requests\Focus\general\CommunicationRequest;
@@ -35,42 +36,41 @@ use Bitly;
 
 class CommunicationsController extends Controller
 {
-    //
     public function load(Request $request)
-    {
+    {        
         $input = $request->only('bill_id', 'template_type', 'template_category');
 
         $template = Template::all()->where('category', '=', $input['template_category'])->where('other', '=', $input['template_type'])->first();
         switch ($input['template_category']) {
-            case 1 :
+            case 1:
                 if (!access()->allow('invoice-manage')) return '';
                 $bill = Invoice::find($input['bill_id']);
                 $valid_token = hash_hmac('ripemd160', 'i' . $bill->id . $bill->tid, config('master.key'));
                 $link = route('biller.view_bill', [$bill->id, 1, $valid_token, 0]);
                 $bill_type = trans('invoices.invoice');
                 break;
-            case 2 :
+            case 2:
                 if (!access()->allow('invoice-manage')) return '';
                 $bill = Invoice::find($input['bill_id']);
                 $valid_token = hash_hmac('ripemd160', 'i' . $bill->id . $bill->tid, config('master.key'));
                 $link = route('biller.view_bill', [$bill->id, 1, $valid_token, 0]);
                 $bill_type = trans('invoices.invoice');
                 break;
-            case 4 :
+            case 4:
                 if (!access()->allow('quote-manage')) return '';
                 $bill = Quote::find($input['bill_id']);
                 $valid_token = hash_hmac('ripemd160', 'q' . $bill->id . $bill->tid, config('master.key'));
                 $link = route('biller.view_bill', [$bill->id, 4, $valid_token, 0]);
                 $bill_type = trans('quotes.quote');
                 break;
-            case 5 :
+            case 5:
                 if (!access()->allow('quote-manage')) return '';
                 $bill = Order::find($input['bill_id']);
                 $valid_token = hash_hmac('ripemd160', 'o' . $bill->id . $bill->tid, config('master.key'));
                 $link = route('biller.view_bill', [$bill->id, 5, $valid_token, 0]);
                 $bill_type = trans('orders.credit_note');
                 break;
-            case 9 :
+            case 9:
                 if (!access()->allow('purchaseorder-manage')) return '';
                 $bill = Purchaseorder::find($input['bill_id']);
                 $valid_token = hash_hmac('ripemd160', 'po' . $bill->id . $bill->tid, config('master.key'));
@@ -86,8 +86,8 @@ class CommunicationsController extends Controller
             'URL' => "<a href='$link'>$link</a>",
             'Name' => $bill->customer->name,
             'CompanyDetails' => '<h6><strong>' . config('core.cname') . ',</strong></h6>
-<address>' . config('core.address') . '<br>' . config('core.city') . '</address>
-            ' . config('core.region') . ' : ' . config('core.country') . '<br>  ' . trans('general.email') . ' : ' . config('core.email'),
+                <address>' . config('core.address') . '<br>' . config('core.city') . '</address>
+                ' . config('core.region') . ' : ' . config('core.country') . '<br>  ' . trans('general.email') . ' : ' . config('core.email'),
             'DueDate' => dateFormat(date('Y-m-d')),
             'Amount' => amountFormat($bill->total)
         );
@@ -96,14 +96,14 @@ class CommunicationsController extends Controller
             $data['URL'] = $link;
             if ($short_url['feature_value']) {
                 config([
-                    'bitly.accesstoken' => $short_url['value2']]);
+                    'bitly.accesstoken' => $short_url['value2']
+                ]);
                 $data['URL'] = Bitly::getUrl($link);
             }
         }
         $replaced_body = parse($template['body'], $data, true);
         $subject = parse($template['title'], $data, true);
         return json_encode(array('subject' => $subject, 'body' => $replaced_body));
-
     }
 
     public function send_bill(CommunicationRequest $request)
@@ -111,7 +111,6 @@ class CommunicationsController extends Controller
         $input = $request->only('text', 'subject', 'mail_to', 'customer_name');
         $mailer = new RosemailerRepository;
         return $mailer->send($input['text'], $input);
-
     }
 
 
@@ -127,7 +126,6 @@ class CommunicationsController extends Controller
         $input['email'] = $meta;
         $mailer = new RosemailerRepository;
         return $mailer->send_group($input['text'], $input);
-
     }
 
 
@@ -142,8 +140,5 @@ class CommunicationsController extends Controller
         $input = $request->only('mail_to', 'text', 'subject', 'bill_id');
         $mailer = new RosemailerRepository;
         return $mailer->send($input['text'], $input);
-
     }
-
-
 }
