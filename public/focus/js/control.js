@@ -114,25 +114,23 @@ function addObject(action, trigger_n = false) {
 
 function farmCheck(form_name = false) {
     var errorNum = 0;
+    $(".required").each(function () {
+        $(this).parent().removeClass("has-error");
+        if (!$(this).val()) {
+            $(this).parent().addClass("has-error");
+            errorNum++;
+        } 
+    });
     if (form_name) {
-        $('#' + form_name + " .required").each(function (i, obj) {
-            if ($(this).val() === '') {
+        $('#' + form_name + " .required").each(function () {
+            $(this).parent().removeClass("has-error");
+            if (!$(this).val()) {
                 $(this).parent().addClass("has-error");
                 errorNum++;
-            } else {
-                $(this).parent().removeClass("has-error");
             }
         });
-    } else {
-        $(".required").each(function (i, obj) {
-            if ($(this).val() === '') {
-                $(this).parent().addClass("has-error");
-                errorNum++;
-            } else {
-                $(this).parent().removeClass("has-error");
-            }
-        });
-    }
+    } 
+
     return errorNum;
 }
 
@@ -373,7 +371,7 @@ function loadTemplateObject(action) {
 
 $('#sendEmail').on('click', '#sendNow', function (e) {
     $("#sendEmail").modal('hide');
-    var action = [];
+    var action = {};
     action['url'] = $("#action_url_send").val();
     action['form'] = $("#send_bill").serialize();
     send_mail(action)
@@ -401,43 +399,33 @@ $('#sendSMS').on('click', '#sms_sendNow', function (e) {
 });
 
 function send_mail(action) {
-    var errorNum = farmCheck();
-    if ($("#notify").length == 0) {
+    if (!$("#notify").length) {
         $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
     }
-    if (errorNum > 0) {
-        $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
-        $("#notify .message").html("<strong>Error</strong>: It appears you have forgotten to complete something!");
-        $("html, body").scrollTop($("body").offset().top);
-    } else {
+    
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        $.ajax({
-            url: action['url'],
-            type: 'POST',
-            data: action['form'],
-            dataType: 'json',
-            success: function (data) {
-                $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
-                $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
-                $("html, body").scrollTop($("body").offset().top);
-
-            },
-            error: function (data) {
-                if (!data.message) {
-                    data.message = data.statusText;
-                }
-                $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
-                $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
-                $("html, body").scrollTop($("body").offset().top);
-            }
-        });
-    }
+    $.ajax({
+        url: action['url'],
+        type: 'POST',
+        data: action['form'],
+        dataType: 'json',
+        success: function (data) {
+            $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+            $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
+            $("html, body").scrollTop($("body").offset().top);
+        },
+        error: function (data) {
+            if (!data.message) data.message = data.statusText;
+            $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
+            $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
+            $("html, body").scrollTop($("body").offset().top);
+        }
+    });
 }
 
 
