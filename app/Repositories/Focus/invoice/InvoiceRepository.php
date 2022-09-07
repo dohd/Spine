@@ -43,12 +43,7 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
-        // rectify invoice amount paid and status incase of misreport 
-        // return $this->correct_invoice_amountpaid($q);
-
-        return $q->get([
-            'id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status', 'notes', 'amountpaid'
-        ]);
+        return $q->get();
     }
 
     /**
