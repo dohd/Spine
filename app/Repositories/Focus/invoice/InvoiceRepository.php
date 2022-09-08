@@ -537,14 +537,18 @@ class InvoiceRepository extends BaseRepository
         // dd($invoice);
         DB::beginTransaction();
 
-        $quote_ids = $invoice->products()->pluck('quote_id')->toArray();
-        Quote::whereIn('id', $quote_ids)->update(['invoiced' => 'No']);
+        // revert invoiced quotes
+        foreach ($invoice->products as $inv_poduct) {
+            $quote = $inv_poduct->quote;
+            if ($quote) $quote->update(['invoiced' => 'No']);
+        }
+
         $invoice->transactions()->delete();
         aggregate_account_transactions();
-        $result = $invoice->delete();
-
-        DB::commit();
-        if ($result) return true;
+        if ($invoice->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
     }
