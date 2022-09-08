@@ -15,10 +15,10 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\warehouse;
 
 use App\Models\warehouse\Warehouse;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -27,7 +27,7 @@ use App\Http\Responses\Focus\warehouse\EditResponse;
 use App\Repositories\Focus\warehouse\WarehouseRepository;
 use App\Http\Requests\Focus\warehouse\ManageWarehouseRequest;
 use App\Http\Requests\Focus\warehouse\StoreWarehouseRequest;
-
+use App\Models\product\ProductVariation;
 
 /**
  * WarehousesController
@@ -57,7 +57,10 @@ class WarehousesController extends Controller
      */
     public function index(ManageWarehouseRequest $request)
     {
-        return new ViewResponse('focus.warehouses.index');
+        $product_count = ProductVariation::where('qty', '>', 0)->groupBy('parent_id')->get()->count();
+        $product_worth = ProductVariation::where('qty', '>', 0)->sum('purchase_price');
+
+        return new ViewResponse('focus.warehouses.index', compact('product_count', 'product_worth'));
     }
 
     /**
@@ -145,5 +148,4 @@ class WarehousesController extends Controller
         //returning with successfull message
         return new ViewResponse('focus.warehouses.view', compact('warehouse'));
     }
-
 }

@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\warehouse;
 
 use App\Http\Controllers\Controller;
@@ -31,15 +32,15 @@ class WarehousesTableController extends Controller
      * variable to store the repository object
      * @var WarehouseRepository
      */
-    protected $warehouse;
+    protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param WarehouseRepository $warehouse ;
+     * @param WarehouseRepository $repository ;
      */
-    public function __construct(WarehouseRepository $warehouse)
+    public function __construct(WarehouseRepository $repository)
     {
-        $this->warehouse = $warehouse;
+        $this->repository = $repository;
     }
 
     /**
@@ -50,18 +51,19 @@ class WarehousesTableController extends Controller
      */
     public function __invoke(ManageWarehouseRequest $request)
     {
-        //
-        $core = $this->warehouse->getForDataTable();
+        $core = $this->repository->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($warehouse) {
                 return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=2&rel_id=' . $warehouse->id . '">' . $warehouse->title . '</a>';
-            })->addColumn('total', function ($warehouse) {
-                return numberFormat($warehouse->products->sum('qty'));
+            })
+            ->addColumn('total', function ($warehouse) {
+                return  $warehouse->products()->groupBy('parent_id')->where('qty', '>', 0)->get()->count();
             })
             ->addColumn('worth', function ($warehouse) {
-                return numberFormat($warehouse->products->sum('purchase_price'));
+                return numberFormat($warehouse->products()->where('qty', '>', 0)->get()->sum('purchase_price'));
             })
             ->addColumn('created_at', function ($warehouse) {
                 return $warehouse->created_at->format('d-m-Y');
