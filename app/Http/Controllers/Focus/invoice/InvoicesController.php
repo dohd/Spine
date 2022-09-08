@@ -261,7 +261,9 @@ class InvoicesController extends Controller
      */
     public function index_payment(Request $request)
     {
-        return new ViewResponse('focus.invoices.index_payment');
+        $customers = Customer::get(['id', 'company']);
+
+        return new ViewResponse('focus.invoices.index_payment', compact('customers'));
     }    
 
     /**

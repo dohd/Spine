@@ -89,7 +89,13 @@ class InvoiceRepository extends BaseRepository
      */
     public function getPaymentsForDataTable()
     {
-        return PaidInvoice::all();
+        $q = PaidInvoice::query();
+
+        $q->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        });
+
+        return $q->get();
     }
 
 

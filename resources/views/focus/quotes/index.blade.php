@@ -138,11 +138,9 @@
                         ...params,
                         page: location.href.includes('page=pi') ? 'pi' : 'qt'
                     },
-                    dataSrc: res => {
-                        const {data} = res;
+                    dataSrc: ({data}) => {
                         $('#amount_total').val('');
-                        if (data.length) 
-                            $('#amount_total').val(data[0].sum_total);
+                        if (data.length) $('#amount_total').val(data[0].sum_total);                            
                         return data;
                     },
                 },

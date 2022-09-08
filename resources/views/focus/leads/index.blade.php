@@ -23,14 +23,14 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-2 h5">Open Tickets</div>
-                            <div class="col-1">{{ $leads_open }}</div>
-                            <div class="col-1">{{ numberFormat($leads_open/($leads_open + $leads_closed) * 100) }} %</div>
+                            <div class="col-2 h4">Open Tickets</div>
+                            <div class="col-1 h4">{{ $open_lead }}</div>
+                            <div class="col-1 h4">{{ numberFormat($open_lead/$total_lead * 100) }} %</div>
                         </div>
                         <div class="row">
-                            <div class="col-2 h5">Closed Tickets</div>
-                            <div class="col-1">{{ $leads_closed }}</div>
-                            <div class="col-1">{{ numberFormat($leads_closed/($leads_open + $leads_closed) * 100) }} %</div>
+                            <div class="col-2 h4">Closed Tickets</div>
+                            <div class="col-1 h4 text-success">{{ $closed_lead }}</div>
+                            <div class="col-1 h4 text-success">{{ numberFormat($closed_lead/$total_lead * 100) }} %</div>
                         </div>
                     </div>
                 </div>

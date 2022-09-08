@@ -56,10 +56,11 @@ class LeadsController extends Controller
      */
     public function index()
     {
-        $leads_open = Lead::where('status', 0)->count();
-        $leads_closed = Lead::where('status', 1)->count();
+        $open_lead = Lead::where('status', 0)->count();
+        $closed_lead = Lead::where('status', 1)->count();
+        $total_lead = Lead::count();
 
-        return new ViewResponse('focus.leads.index', compact('leads_open', 'leads_closed'));
+        return new ViewResponse('focus.leads.index', compact('open_lead', 'closed_lead', 'total_lead'));
     }
 
     /**

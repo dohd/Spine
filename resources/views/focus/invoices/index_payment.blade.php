@@ -19,35 +19,59 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">                           
-                            <table id="paymentTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>PMT No</th>
-                                        <th>Customer</th>
-                                        <th>Account</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Allocate</th>
-                                        <th>Mode</th>
-                                        <th>Reference</th>
-                                        <th>Invoice</th>
-                                        <th>Payment Type</th>
-                                        <th>{{ trans('labels.general.actions') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="100%" class="text-center text-success font-large-1">
-                                            <i class="fa fa-spinner spinner"></i>
-                                        </td>
-                                    </tr>
-                                </tbody>                                
-                            </table>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <label for="customer">Customer</label>
+                                <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Customer">
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="amount">Total Amount (Ksh.)</label>
+                                <input type="text" id="amount_total" class="form-control" readonly>
+                            </div>                            
+                            <div class="col-2">
+                                <label for="unallocate">Total Unallocated (Ksh.)</label>
+                                <input type="text" id="unallocated_total" class="form-control" readonly>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">                           
+                        <table id="paymentTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>PMT No</th>                                    
+                                    <th>Account</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Unallocated</th>
+                                    <th>Mode</th>
+                                    <th>Reference</th>
+                                    <th>Inv No</th>
+                                    <th>Type</th>
+                                    <th>{{ trans('labels.general.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="100%" class="text-center text-success font-large-1">
+                                        <i class="fa fa-spinner spinner"></i>
+                                    </td>
+                                </tr>
+                            </tbody>                                
+                        </table>
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -57,50 +81,75 @@
 
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajax: { headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    };
 
-    // Initialize datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-    .datepicker('setDate', new Date())
+    const Index = {
+        init() {
+            this.drawDataTable();
+            $('#customer').select2({allowClear: true}).change(this.customerChange);
+            $('#customer').val('').change();           
+        },
 
-    function draw_data() {
-        const cols = ['tid', 'customer', 'account','date', 'amount', 'allocate_ttl', 'payment_mode', 'reference', 'invoice_tid', 'payment_type']
-        .map(v => ({data: v, name: v}));
-        const language = {@lang('datatable.strings')};
-        var dataTable = $('#paymentTbl').dataTable({
-            processing: true,
-            stateSave: true,
-            responsive: true,
-            deferRender: true,
-            language,
-            ajax: {
-                url: "{{ route('biller.invoices.get_payments') }}",
-                type: 'POST',
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
+        customerChange() {
+            $('#paymentTbl').DataTable().destroy();
+            return Index.drawDataTable($(this).val());
+        },
+
+        drawDataTable(customer_id = '') {
+            $('#paymentTbl').dataTable({
+                processing: true,
+                stateSave: true,
+                responsive: true,
+                deferRender: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.invoices.get_payments') }}",
+                    type: 'POST',
+                    data: {customer_id},
+                    dataSrc: ({data}) => {
+                        $('#amount_total').val('');
+                        $('#unallocated_total').val('');
+                        if (data.length) {
+                            const aggregate = data[0].aggregate;
+                            $('#amount_total').val(aggregate.amount_total);
+                            $('#unallocated_total').val(aggregate.unallocated_total);
+                        }
+                        return data;
+                    },
                 },
-                ...cols,
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            columnDefs: [
-                { type: "custom-number-sort", targets: [4, 5] },
-                { type: "custom-date-sort", targets: 3 }
-            ],
-            orderBy: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    ...[
+                        'tid', 'account', 'date', 'amount', 
+                        'unallocated', 'payment_mode', 'reference', 'invoice_tid', 
+                        'payment_type'
+                    ].map(v => ({data: v, name: v})),
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [4, 5] },
+                    { type: "custom-date-sort", targets: 3 }
+                ],
+                orderBy: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection

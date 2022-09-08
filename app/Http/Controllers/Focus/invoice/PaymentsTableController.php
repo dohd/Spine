@@ -31,15 +31,15 @@ class PaymentsTableController extends Controller
      * variable to store the repository object
      * @var InvoiceRepository
      */
-    protected $payment;
+    protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param InvoiceRepository $payment ;
+     * @param InvoiceRepository $repository ;
      */
-    public function __construct(InvoiceRepository $payment)
+    public function __construct(InvoiceRepository $repository)
     {
-        $this->payment = $payment;
+        $this->repository = $repository;
     }
 
     /**
@@ -50,16 +50,21 @@ class PaymentsTableController extends Controller
      */
     public function __invoke(ManageInvoiceRequest $request)
     {
-        $core = $this->payment->getPaymentsForDataTable();
+        $core = $this->repository->getPaymentsForDataTable();
+
+        // aggregate
+        $amount_total = $core->sum('amount');
+        $unallocated_total = $amount_total - $core->sum('allocate_ttl');
+        $aggregate = [
+            'amount_total' => numberFormat($amount_total),
+            'unallocated_total' => numberFormat($unallocated_total),
+        ];
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('tid', function ($payment) {
-                return gen4tid('pmt-', $payment->tid);
-            })
-            ->addColumn('customer', function ($payment) {
-                if ($payment->customer) return $payment->customer->company;
+                return gen4tid('PMT-', $payment->tid);
             })
             ->addColumn('account', function ($payment) {
                 if ($payment->account)
@@ -71,18 +76,19 @@ class PaymentsTableController extends Controller
             ->addColumn('amount', function ($payment) {
                 return numberFormat($payment->amount);
             })
-            ->addColumn('allocate_ttl', function ($payment) {
-                return numberFormat($payment->allocate_ttl);
+            ->addColumn('unallocated', function ($payment) {
+                return numberFormat($payment->amount - $payment->allocate_ttl);
             })
             ->addColumn('invoice_tid', function ($payment) {
-                if ($payment->items->count()) {
-                    $invoice_tids = array();
-                    foreach ($payment->items as $item) {
-                        if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
-                    }
-                    
-                    return implode(', ', $invoice_tids);
+                if (!$payment->items->count()) return;
+                $invoice_tids = array();
+                foreach ($payment->items as $item) {
+                    if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
                 }
+                return implode(', ', $invoice_tids);
+            })
+            ->addColumn('aggregate', function ($payment) use($aggregate) {
+                return $aggregate;
             })
             ->addColumn('actions', function ($payment) {
                 return $this->action_buttons($payment);
