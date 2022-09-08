@@ -23,7 +23,7 @@
                         <div class="row">
                             <div class="col-4">
                                 <label for="supplier">Supplier</label>
-                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose Customer">
+                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose Supplier">
                                     @foreach ($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                     @endforeach
