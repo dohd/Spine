@@ -49,6 +49,14 @@ class BillPaymentTableController extends Controller
     {
         $core = $this->repository->getForDataTable();
 
+        // aggregate
+        $amount_total = $core->sum('amount');
+        $unallocated_total = $amount_total - $core->sum('allocate_ttl');
+        $aggregate = [
+            'amount_total' => numberFormat($amount_total),
+            'unallocated_total' => numberFormat($unallocated_total),
+        ];
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
@@ -66,11 +74,14 @@ class BillPaymentTableController extends Controller
             ->addColumn('amount', function ($billpayment) {
                 return numberFormat($billpayment->amount);
             })
-            ->addColumn('allocate', function ($billpayment) {
-                return numberFormat($billpayment->allocate_ttl);
+            ->addColumn('unallocated', function ($billpayment) {
+                return numberFormat($billpayment->amount - $billpayment->allocate_ttl);
             })
             ->addColumn('bill_no', function ($billpayment) {
                 return gen4tid('BILL-', $billpayment->tid);
+            })
+            ->addColumn('aggregate', function ($billpayment) use($aggregate) {
+                return $aggregate;
             })
             ->addColumn('actions', function ($billpayment) {
                 return $billpayment->action_buttons;

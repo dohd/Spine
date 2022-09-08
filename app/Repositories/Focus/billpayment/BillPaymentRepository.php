@@ -31,7 +31,13 @@ class BillPaymentRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        $q->when(request('supplier_id'), function ($q) {
+            $q->where('supplier_id', request('supplier_id'));
+        });
+        
+        return $q->get();
     }
 
     /**

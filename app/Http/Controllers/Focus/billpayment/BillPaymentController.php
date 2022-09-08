@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\account\Account;
 use App\Models\billpayment\Billpayment;
+use App\Models\supplier\Supplier;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
 use Illuminate\Http\Request;
 
@@ -30,7 +31,9 @@ class BillPaymentController extends Controller
      */
     public function index()
     {
-        return view('focus.billpayments.index');
+        $suppliers = Supplier::get(['id', 'name']);
+        
+        return view('focus.billpayments.index', compact('suppliers'));
     }
 
     /**
