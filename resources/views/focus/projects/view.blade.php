@@ -34,54 +34,61 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
         <div class="card-content">
             <div class="card-body" id="pro_tabs">
                 <ul class="nav nav-tabs nav-top-border no-hover-bg" role="tablist">
+                    {{-- project summary --}}
                     <li class="nav-item">
                         <a class="nav-link active" id="tab1" data-toggle="tab" href="#tab_data1" aria-controls="tab_data1" role="tab" aria-selected="true">                                
                             <i class="fa fa-lightbulb-o"></i> {{ trans('projects.project_summary') }}
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" id="tab2" data-toggle="tab" href="#tab_data2" aria-controls="tab_data2" role="tab" aria-selected="true">
-                            <i class="fa fa-flag-checkered"></i>{{ trans('projects.milestones') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="tab3" data-toggle="tab" href="#tab_data3" aria-controls="tab_data3" role="tab" aria-selected="true">
-                            <i class="icon-directions"></i>
-                            {{ trans('tasks.tasks') }}</a>
-                    </li>
-                    @if ($project->creator->id == auth()->user()->id)
+                    @php
+                        /**
+                        {{-- project milestone --}}
                         <li class="nav-item">
-                            <a class="nav-link" id="tab4" data-toggle="tab" href="#tab_data4"
-                                aria-controls="tab_data4" role="tab" aria-selected="true"><i
-                                    class="fa fa-list-ol"></i> {{ trans('projects.activity') }}</a>
+                            <a class="nav-link" id="tab2" data-toggle="tab" href="#tab_data2" aria-controls="tab_data2" role="tab" aria-selected="true">
+                                <i class="fa fa-flag-checkered"></i>{{ trans('projects.milestones') }}
+                            </a>
                         </li>
-                    @endif
-                    <li class="nav-item">
-                        <a class="nav-link" id="tab5" data-toggle="tab" href="#tab_data5" aria-controls="tab_data5"
-                            role="tab" aria-selected="true"><i class="fa fa-paperclip"></i>
-                            {{ trans('general.files') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="tab6" data-toggle="tab" href="#tab_data6" aria-controls="tab_data6"
-                            role="tab" aria-selected="true"><i class="icon-note"></i>
-                            {{ trans('general.notes') }}</a>
-                    </li>
+                        {{-- project tasks --}}
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab3" data-toggle="tab" href="#tab_data3" aria-controls="tab_data3" role="tab" aria-selected="true">
+                                <i class="icon-directions"></i>
+                                {{ trans('tasks.tasks') }}</a>
+                        </li>
+                        {{-- project activity --}}
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab4" data-toggle="tab" href="#tab_data4"
+                                    aria-controls="tab_data4" role="tab" aria-selected="true"><i
+                                        class="fa fa-list-ol"></i> {{ trans('projects.activity') }}</a>
+                            </li>
+                        {{-- project files --}}
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab5" data-toggle="tab" href="#tab_data5" aria-controls="tab_data5"
+                                role="tab" aria-selected="true"><i class="fa fa-paperclip"></i>
+                                {{ trans('general.files') }}</a>
+                        </li>
+                        {{-- project notes --}}
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab6" data-toggle="tab" href="#tab_data6" aria-controls="tab_data6"
+                                role="tab" aria-selected="true"><i class="icon-note"></i>
+                                {{ trans('general.notes') }}</a>
+                        </li>
+                        {{-- project users --}}
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab7" data-toggle="tab" href="#tab_data7" aria-controls="tab_data8"
+                                role="tab" aria-selected="true"><i class="ft-users"></i>
+                                {{ trans('projects.users') }}</a>
+                        </li>
+                        */
+                    @endphp                    
                     
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" id="tab7" data-toggle="tab" href="#tab_data7" aria-controls="tab_data8"
-                            role="tab" aria-selected="true"><i class="ft-users"></i>
-                            {{ trans('projects.users') }}</a>
-                    </li>
-                    {{-- income --}}
+                    {{-- project income --}}
                     <li class="nav-item">
                         <a class="nav-link" id="tab8" data-toggle="tab" href="#tab_data8" aria-controls="tab_data8" role="tab" aria-selected="true">
                             <i class="fa fa-money"></i>Income
                         </a>                           
                     </li>
-
-                    {{-- expense --}}
+                    {{-- project expense --}}
                     <li class="nav-item">
                         <a class="nav-link" id="tab9" data-toggle="tab" href="#tab_data9" aria-controls="tab_data9" role="tab" aria-selected="true">
                             <i class="fa fa-money"></i>Expense
@@ -90,12 +97,14 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     @include('focus.projects.tabs.summary')
+                    {{-- 
                     @include('focus.projects.tabs.milestone')
                     @include('focus.projects.tabs.task')
                     @include('focus.projects.tabs.activity')
                     @include('focus.projects.tabs.file')
                     @include('focus.projects.tabs.note')
                     @include('focus.projects.tabs.user')
+                     --}}
                     @include('focus.projects.tabs.income')
                     @include('focus.projects.tabs.expense')
                 </div>
