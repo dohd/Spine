@@ -36,12 +36,34 @@ class InvoiceRepository extends BaseRepository
     {
         $q = $this->query();
 
+        // date filter
         if (request('start_date') && request('end_date')) {
             $q->whereBetween('invoicedate', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
         }
+
+        // customer and status filter
+        $q->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        })->when(request('status'), function ($q) {
+            $status = request('status');
+            switch ($status) {
+                case 'not yet due': 
+                    $q->where('invoiceduedate', '>', date('Y-m-d'));
+                    break;
+                case 'due':    
+                    $q->where('invoiceduedate', '<=', date('Y-m-d'))->whereColumn('amountpaid', '<', 'total');
+                    break; 
+                case 'partially paid':
+                    $q->whereColumn('amountpaid', '<', 'total')->where('amountpaid', '>', 0);
+                    break; 
+                case 'fully paid':
+                    $q->whereColumn('amountpaid', '>=', 'total');
+                    break; 
+            }         
+        });
 
         return $q->get();
     }

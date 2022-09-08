@@ -52,17 +52,24 @@ class InvoicesTableController extends Controller
     {
         $core = $this->invoice->getForDataTable();
 
+        // aggregate
+        $amount_total = $core->sum('total');
+        $balance_total = $amount_total - $core->sum('amountpaid');
+        $aggregate = [
+            'amount_total' => numberFormat($amount_total),
+            'balance_total' => numberFormat($balance_total),
+        ];        
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
-                $tid = 'Inv-'.sprintf('%04d', $invoice->tid);
-                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' 
+                    . gen4tid('Inv-', $invoice->tid) .'</a>';
             })
             ->addColumn('customer', function ($invoice) {
-                return $invoice->customer->name . 
-                    ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '">
-                        <i class="ft-eye"></i></a>';
+                return ' <a class="font-weight-bold" href="'. route('biller.customers.show', [$invoice->customer->id]) .'">'
+                    . $invoice->customer->name .'</a>';                    
             })
             ->addColumn('invoicedate', function ($invoice) {
                 return dateFormat($invoice->invoicedate);
@@ -83,18 +90,12 @@ class InvoicesTableController extends Controller
                 $tids = array();
                 foreach ($invoice->products as $item) {
                     if (!$item->quote) continue;
-                    $tid = sprintf('%04d', $item->quote->tid);
-                    $tids[] = $item->quote->bank_id ? 'PI-'.$tid : 'QT-'.$tid;
+                    $tids[] = gen4tid($item->quote->bank_id ? 'PI-' : 'QT-', $item->quote->tid);
                 }
                 return implode(', ', $tids);
             })
-            ->addColumn('lead_tid', function ($invoice) {
-                $tids = array();
-                foreach ($invoice->products as $item) {
-                    if (!$item->quote) continue;
-                    $tids[] = 'Tkt-'.sprintf('%04d',$item->quote->lead->reference);                        
-                }
-                return implode(', ', $tids); 
+            ->addColumn('aggregate', function ($invoice) use($aggregate) {
+                return $aggregate;
             })
             ->addColumn('actions', function ($invoice) {
                 return $invoice->action_buttons;

@@ -30,19 +30,16 @@ class QuotesTableController extends Controller
      * variable to store the repository object
      * @var QuoteRepository
      */
-    protected $quote;
+    protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param QuoteRepository $quote ;
+     * @param QuoteRepository $repository ;
      */
-    public function __construct(QuoteRepository $quote)
+    public function __construct(QuoteRepository $repository)
     {
-        $this->quote = $quote;
+        $this->repository = $repository;
     }
-
-    // sum total quotes worth
-    protected $sum_total;
 
     /**
      * This method return the data of the model
@@ -50,31 +47,28 @@ class QuotesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->quote->getForDataTable();
+        $core = $this->repository->getForDataTable();
 
-        $this->sum_total = $core->sum('total');
+        $sum_total = numberFormat($core->sum('total'));
     
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('lead_tid', function($quote) {
-                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+                if ($quote->lead)
+                return gen4tid('Tkt-', $quote->lead->reference);
             })
-            ->addColumn('tid', function ($quote) {
-                $tid = sprintf('%04d', $quote->tid);
-                $tid = ($quote->bank_id) ? 'PI-'.$tid : 'QT-'.$tid;
-                if ($quote->revision) $tid .= $quote->revision; 
-                              
+            ->addColumn('tid', function ($quote) {               
                 $link = route('biller.quotes.show', [$quote->id]);
                 if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
-
-                return '<a class="font-weight-bold" href="' . $link . '">' . $tid . '</a>';
+                return '<a class="font-weight-bold" href="' . $link . '">' . gen4tid($quote->bank_id? 'PI-': 'QT-', $quote->tid) . '</a>';
             })
             ->addColumn('customer', function ($quote) {
                 $client_name = $quote->customer ? $quote->customer->name : '';
                 $branch_name = $quote->branch ? $quote->branch->name : '';
                 if ($client_name && $branch_name) 
-                    return $client_name . ' - ' . $branch_name . ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
+                    return ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'">'
+                        . $client_name . ' - ' . $branch_name . '</a>';
 
                 return $quote->lead->client_name;
             })
@@ -83,25 +77,13 @@ class QuotesTableController extends Controller
             })
             ->addColumn('total', function ($quote) {
                 return numberFormat($quote->total);
+            })                   
+            ->addColumn('invoice_tid', function ($quote) {
+                $inv_product = $quote->invoice_product;
+                if ($inv_product) return gen4tid('Inv-', $inv_product->invoice->tid);
             })
-            ->addColumn('sum_total', function ($quote) {
-                return numberFormat($this->sum_total);
-            })
-            ->addColumn('status', function ($quote) {
-                $statuses = array('approved', 'client_approved', 'cancelled', 'pending');
-                $backgrds = array('bg-primary', 'bg-success', 'bg-danger', 'bg-secondary');
-                $backgrd = $backgrds[array_search($quote->status, $statuses)];
-                $lpo = $quote->lpo ? 'LPO: ' . $quote->lpo->lpo_no : 'NULL:';
-
-                return '<span class="badge ' . $backgrd . '">' . $quote->status . ':</span><br>'. $lpo;
-            })
-            ->addColumn('verified', function ($quote) {
-                $tid = 'NIL:';
-                if (isset($quote->invoice_product->invoice)) {
-                    $tid = gen4tid('Inv-', $quote->invoice_product->invoice->tid);
-                }
-                
-                return $quote->verified . ':; <br>' . $tid;
+            ->addColumn('sum_total', function ($quote) use($sum_total) {
+                return $sum_total;
             })
             ->addColumn('actions', function ($quote) {
                 $action_buttons = $quote->action_buttons;

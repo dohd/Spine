@@ -19,6 +19,42 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <label for="customer">Customer</label>
+                                <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Customer">
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="status">Status</label>
+                                <select name="status" id="status" class="form-control">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['not yet due', 'due', 'partially paid', 'fully paid'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="amount">Total Amount (Ksh.)</label>
+                                <input type="text" id="amount_total" class="form-control" readonly>
+                            </div>                            
+                            <div class="col-2">
+                                <label for="unallocate">Outstanding (Ksh.)</label>
+                                <input type="text" id="balance_total" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="row">
@@ -38,14 +74,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#Invoice No</th>
-                                        <th>{{ trans('customers.customer') }}</th>
+                                        <th>#Invoice No</th>                                        
                                         <th>Subject</th>
                                         <th>Date</th>
-                                        <th>{{ trans('general.amount') }}</th>
-                                        <th>Balance</th>
-                                        <th>{{ trans('general.status') }}</th>
                                         <th>Due Date</th>
+                                        <th>{{ trans('general.amount') }}</th>
+                                        <th>Outstanding</th>                                       
                                         <th>#Quote / PI No</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -69,117 +103,129 @@
 
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-    
-    $('#search').click(function() {
-        var start_date = $('#start_date').val();
-        var end_date = $('#end_date').val();
-        if (start_date && end_date) {
+    const config = {
+        ajax: { headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    };
+
+    const Index = {
+        startDate: '',
+        endDate: '',
+        customerId: '',
+        status: '',
+
+        init() {
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            this.drawDataTable();
+
+            $('#search').click(this.searchClick);
+            $('#status').click(this.statusChange);
+            $('#customer').select2({allowClear: true}).change(this.customerChange);
+            $('#customer').val('').change();
+        },
+
+        searchClick() {
+            Index.startDate = $('#start_date').val();
+            Index.endDate =  $('#end_date').val();
+            if (!Index.startDate || !Index.endDate ) 
+                return alert("Date range is Required");
+
             $('#invoiceTbl').DataTable().destroy();
-            return draw_data(start_date, end_date);
-        } 
-        alert("Date range is Required");
-    });
+            return Index.drawDataTable();
+        },
 
-    // Initialize datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-    .datepicker('setDate', new Date())
+        statusChange() {
+            Index.status = $(this).val();
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
 
-    function draw_data(start_date = '', end_date = '') {
-        const language = {@lang('datatable.strings')};
-        var dataTable = $('#invoiceTbl').dataTable({
-            processing: true,
-            stateSave: true,
-            responsive: true,
-            deferRender: true,
-            language,
-            ajax: {
-                url: "{{ route('biller.invoices.get') }}",
-                type: 'post',
-                data: {start_date, end_date},
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'notes',
-                    name: 'notes'
-                },
-                {
-                    data: 'invoicedate',
-                    name: 'invoicedate'
-                },
-                {
-                    data: 'total',
-                    name: 'total'
-                },
-                {
-                    data: 'balance',
-                    name: 'balance'
-                },
-                {
-                    data: 'status',
-                    name: 'status'
-                },
-                {
-                    data: 'invoiceduedate',
-                    name: 'invoiceduedate'
-                },
-                {
-                    data: 'quote_tid',
-                    name: 'quote_tid'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            columnDefs: [
-                { type: "custom-number-sort", targets: [5, 6] },
-                { type: "custom-date-sort", targets: [4, 8] }
-            ],
-            orderBy: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: {
-                buttons: [{
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5]
+        customerChange() {
+            Index.customerId = $(this).val();
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#invoiceTbl').dataTable({
+                processing: true,
+                stateSave: true,
+                responsive: true,
+                deferRender: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.invoices.get') }}",
+                    type: 'post',
+                    data: {
+                        start_date: this.startDate, 
+                        end_date: this.endDate, 
+                        customer_id: this.customerId,
+                        status: this.status
+                    },
+                    dataSrc: ({data}) => {
+                        $('#amount_total').val('');
+                        $('#balance_total').val('');
+                        if (data.length) {
+                            const aggregate = data[0].aggregate;
+                            $('#amount_total').val(aggregate.amount_total);
+                            $('#balance_total').val(aggregate.balance_total);
                         }
+                        return data;
+                    },
+                },
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
                     },
                     {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5]
-                        }
+                        data: 'tid',
+                        name: 'tid'
                     },
                     {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5]
-                        }
+                        data: 'notes',
+                        name: 'notes'
+                    },
+                    {
+                        data: 'invoicedate',
+                        name: 'invoicedate'
+                    },
+                    {
+                        data: 'invoiceduedate',
+                        name: 'invoiceduedate'
+                    },
+                    {
+                        data: 'total',
+                        name: 'total'
+                    },
+                    {
+                        data: 'balance',
+                        name: 'balance'
+                    },                    
+                    {
+                        data: 'quote_tid',
+                        name: 'quote_tid'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
                     }
-                ]
-            }
-        });
-    }
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [5, 6] },
+                    { type: "custom-date-sort", targets: [3, 4] }
+                ],
+                orderBy: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+    
+    $(() => Index.init());
 </script>
 @endsection

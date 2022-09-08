@@ -72,6 +72,7 @@
                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
                                 <th>Client Ref</th>                                
                                 <th>Ticket No</th>
+                                <th>Invoice No</th>
                                 <th>{{ trans('labels.general.actions') }}</th>
                             </tr>
                         </thead>
@@ -175,6 +176,10 @@
                     {
                         data: 'lead_tid',
                         name: 'lead_tid'
+                    },
+                    {
+                        data: 'invoice_tid',
+                        name: 'invoice_tid'
                     },
                     {
                         data: 'actions',
