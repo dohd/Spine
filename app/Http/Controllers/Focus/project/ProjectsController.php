@@ -206,7 +206,7 @@ class ProjectsController extends Controller
     public function store_project_budget(Request $request)
     {
         // extract request input
-        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
+        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'note');
         $data_items = $request->only(
             'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 
             'new_qty', 'price'
@@ -229,7 +229,7 @@ class ProjectsController extends Controller
     public function update_project_budget(Request $request, Budget $budget)
     {
         // extract request input
-        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'tool');
+        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'note');
         $data_items = $request->only(
             'item_id', 'numbering', 'row_index', 'a_type', 'product_id', 'product_name', 'product_qty', 'unit', 
             'new_qty', 'price'

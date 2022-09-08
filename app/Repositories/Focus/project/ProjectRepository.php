@@ -182,7 +182,6 @@ class ProjectRepository extends BaseRepository
             return $v['item_id']; 
         }, $data_items))->delete();
 
-        // dd($data_items);
         // new or update item
         foreach($data_items as $item) {
             $item['price'] = numberClean($item['price']);
@@ -192,9 +191,7 @@ class ProjectRepository extends BaseRepository
                 'id' => $item['item_id'],
                 'budget_id' => $budget->id,
             ]);
-            foreach($item as $key => $value) {
-                $new_item[$key] = $value;
-            }
+            $new_item->fill($item);
             if (!$new_item->id) unset($new_item->id);
             unset($new_item->item_id);
             $new_item->save();
@@ -211,9 +208,7 @@ class ProjectRepository extends BaseRepository
                 'id' => $item['skillitem_id'],
                 'budget_id' => $budget->id,
             ]);
-            foreach($item as $key => $value) {
-                $new_item[$key] = $value;
-            }
+            $new_item->fill($item);
             if (!$new_item->id) unset($new_item->id);
             unset($new_item->skillitem_id);
             $new_item->save();

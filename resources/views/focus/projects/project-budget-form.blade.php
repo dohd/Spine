@@ -99,8 +99,12 @@
     </div>  
     <div class="col-4">
         <div class="form-group">
-            <div><label for="tool">Tools Required & Notes</label></div>
-            <textarea name="tool" id="tool" cols="45" rows="6" class="form-control html_editor"></textarea>   
+            <div><label for="tool">Extra Note</label></div>
+            <textarea name="note" id="note" cols="45" rows="6" class="form-control html_editor">
+                @isset($budget)
+                    {{ $budget->note }}
+                @endisset
+            </textarea>   
         </div>                        
         <div class="form-group">
             <div>
