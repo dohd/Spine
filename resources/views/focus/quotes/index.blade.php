@@ -50,7 +50,7 @@
                             </select>
                         </div>
                         <div class="col-3">
-                            <label for="total">Amount Total (Ksh):</label>                             
+                            <label for="total">Total Amount (Ksh):</label>                             
                             <input type="text" name="amount_total" class="form-control" id="amount_total" readonly>
                         </div>
                     </div>                    
