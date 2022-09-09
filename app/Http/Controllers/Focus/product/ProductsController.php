@@ -154,50 +154,51 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        $pricegroup = Pricegroup::whereHas('pricelist')->find($request->pricegroup_id);
-
         $productvariations = ProductVariation::whereHas('product', function ($q) {
             $q->where('name', 'LIKE', '%' . request('keyword') . '%');
         })->with(['warehouse' => function ($q) {
             $q->select(['id', 'title']);
-        }])->with('product')->limit(6)->get();
+        }])->with('product')->limit(6)->get()->unique('name');
+        
+        $pricegroup = Pricegroup::whereHas('pricelist')->find($request->pricegroup_id);
 
-        // modify price properties of products
         $products = array();
         foreach ($productvariations as $row) {
-            $product = $row;
-            $product = array_intersect_key($product->toArray(), 
-                array_flip(['id', 'product_id', 'name', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'])
-            );
+            $product = array_intersect_key($row->toArray(), array_flip([
+                'id', 'product_id', 'name', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'
+            ]));
             $product = $product + [
                 'product_des' => $row->product->product_des,
                 'units' => $row->product->units,
                 'warehouse' => $row->warehouse->toArray()
             ];
             
-            // set purchase price using LIFO algorithm
+            // set purchase price using LIFO Inventory valuation method
             $purchase_price = $this->repository->compute_purchase_price($row->id, $row->qty, $row->purchase_price);
-            $product['purchase_price'] = numberFormat($purchase_price);      
+            $product['purchase_price'] = numberFormat($purchase_price);  
 
-            // set customer selling price or supplier purchase price
-            if ($pricegroup) {
-                foreach ($pricegroup->pricelist as $item) {
-                    // pricelist product item same as product variation item
-                    if ($item->product_id == $row->id) {
-                        $product['name'] = $item->name;
-                        if ($pricegroup->is_client) $product['price'] = numberFormat($item->price);                            
-                        else $product['purchase_price'] = numberFormat($item->price);
-                        $products[] =  $product;
-                    }
-                }
+            // default prices
+            if (!$pricegroup) {
+                $products[] =  $product;
                 continue;
             }
-            $products[] =  $product;
+            
+            // use pricelist prices
+            foreach ($pricegroup->pricelist as $list_item) {
+                if ($list_item->product_id == $row->id) {
+                    $product['name'] = $list_item->name;
+                    // customer selling price else, supplier purchase price 
+                    if ($pricegroup->is_client) $product['price'] = numberFormat($list_item->price);                            
+                    else $product['purchase_price'] = numberFormat($list_item->price);
+                    $products[] =  $product;
+                }
+            }
         }
-        
+
         return response()->json($products);
     }
 
+    // 
     public function product_sub_load(Request $request)
     {
         $q = $request->get('id');
@@ -206,6 +207,7 @@ class ProductsController extends Controller
         return json_encode($result);
     }
 
+    // 
     public function quick_add(CreateProductRequest $request)
     {
         return new CreateModalResponse('focus.modal.product');
