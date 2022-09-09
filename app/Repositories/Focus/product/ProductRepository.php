@@ -52,7 +52,7 @@ class ProductRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-
+        
         $q->when(request('warehouse_id'), function ($q) {
             $q->whereHas('variations', function ($q) {
                 $q->where('warehouse_id', request('warehouse_id'));

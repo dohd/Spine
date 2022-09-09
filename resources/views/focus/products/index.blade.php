@@ -108,16 +108,23 @@
     };
     
     const Index = {
+        status: 'in stock',
         warehouseId: '',
         categoryId: '',
-        status: '',
 
         init() {
+            this.fromWarehouseRedirect();
             this.drawDataTable();
             $('#warehouse').change(this.warehouseChange);
             $('#category').change(this.categoryChange);
-            $('#status').change(this.statusChange);
-            $('#status').val('in stock').change();
+            $('#status').change(this.statusChange).val('in stock');
+        },
+
+        fromWarehouseRedirect() {
+            const queryString = window.location.search.substring(1);
+            const warehouseId = new URLSearchParams(queryString).get('warehouse_id');
+            $('#warehouse').val(warehouseId);
+            this.warehouseId = warehouseId;
         },
 
         categoryChange() {

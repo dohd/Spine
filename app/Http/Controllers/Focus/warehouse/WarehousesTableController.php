@@ -69,7 +69,8 @@ class WarehousesTableController extends Controller
                 return $warehouse->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($warehouse) {
-                return '<a class="btn btn-purple round" href="' . route('biller.products.index') . '?rel_type=2&rel_id=' . $warehouse->id . '" title="List"><i class="fa fa-list"></i></a>' . $warehouse->action_buttons;
+                return '<a class="btn btn-purple round" href="'. route('biller.products.index', ['warehouse_id' => $warehouse->id]) .'" title="products"><i class="fa fa-list"></i></a>' 
+                    . $warehouse->action_buttons;
             })
             ->make(true);
     }
