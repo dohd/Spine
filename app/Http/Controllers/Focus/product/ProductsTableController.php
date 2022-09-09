@@ -19,11 +19,9 @@
 namespace App\Http\Controllers\Focus\product;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Focus\product\ProductVariationRepository;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\product\ProductRepository;
 use App\Http\Requests\Focus\product\ManageProductRequest;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Class ProductsTableController.
@@ -34,70 +32,72 @@ class ProductsTableController extends Controller
      * variable to store the repository object
      * @var ProductRepository
      */
-    protected $product;
-    protected $product_variation;
+    protected $repository;
+
+    // standard product
+    protected $standard_product;
 
     /**
      * contructor to initialize repository object
-     * @param ProductRepository $product ;
+     * @param ProductRepository $repository ;
      */
-    public function __construct(ProductRepository $product, ProductVariationRepository $product_variation)
+    public function __construct(ProductRepository $repository)
     {
-        $this->product = $product;
-        $this->product_variation = $product_variation;
+        $this->repository = $repository;
     }
 
     /**
      * This method return the data of the model
      * @param ManageProductRequest $request
-     *
      * @return mixed
      */
     public function __invoke()
     {
-        // warehouse products
-        if (request('p_rel_id') && request('p_rel_type') == 2) {
-            $core = $this->product_variation->getForDataTable();
-        }  else $core = $this->product->getForDataTable();
+        $core = $this->repository->getForDataTable();
+
+        // aggregate
+        $product_count = 0;
+        $product_worth = 0;
+        foreach ($core as $product) {
+            $std_product = $product->standard;
+            if ($std_product && $std_product->qty) {
+                $product_count++;
+                $product_worth += $std_product->purchase_price;
+            }
+        }
+        $product_worth = amountFormat($product_worth);
+        $aggregate = compact('product_count', 'product_worth');
        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('name', function ($item) {
-                return '<a class="font-weight-bold" href="' . route('biller.products.show', [$item->id]) . '">' . $item->name . '</a>';
+            ->addColumn('name', function ($product) {
+                $this->standard_product = $product->standard ?: $product;
+                return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product->name . '</a>';
             })
-            ->addColumn('code', function ($item) {
-                return  $item->standard ? $item->standard->code : $item->code;
+            ->addColumn('code', function ($product) {
+                return  $this->standard_product->code;
             })
-            ->addColumn('warehouse', function ($item) {
-                $title = '';
-                if (isset($item->standard->warehouse)) $title = $item->standard->warehouse->title;
-                if ($item->warehouse) $title = $item->warehouse->title;
-                $image = $item->standard ? $item->standard->image : $item->image;
-
-                if ($title && $image)
-                    return $title . '<img class="media-object img-lg border" src="'.Storage::disk('public')->url('app/public/img/products/' . $image).'" alt="Product Image">';
+            ->addColumn('qty', function ($product) {
+                return $product->variations->sum('qty');       
             })
-            ->addColumn('category', function ($item) {
-                $title = '';
-                if (isset($item->category)) $title = $item->category->title;
-                if (isset($item->product->category)) $title = $item->product->category->title;
-
-                return $title;
+            ->addColumn('unit', function ($product) {
+                $unit = $this->standard_product->unit;
+                if ($unit) return $unit->code;  
             })
-            ->addColumn('qty', function ($item) {
-                return $item->standard ? intval($item->standard->qty) : intval($item->qty);
+            ->addColumn('price', function ($product) {
+                return NumberFormat($this->standard_product->purchase_price);
             })
-            ->addColumn('created_at', function ($item) {
-                return dateFormat($item->created_at);
+            ->addColumn('created_at', function ($product) {
+                return $product->created_at->format('d-m-Y');
             })
-            ->addColumn('price', function ($item) {
-                return $item->standard ? amountFormat($item->standard->price) : amountFormat($item->price);
+            ->addColumn('aggregate', function ($product) use($aggregate) {
+                return $aggregate;
             })
-            ->addColumn('actions', function ($item) {
+            ->addColumn('actions', function ($product) {
                 $buttons = '';
-                if ($item->action_buttons) $buttons = $item->action_buttons;
-                if (isset($item->product->action_buttons)) $buttons = $item->product->action_buttons;
+                if ($product->action_buttons) $buttons = $product->action_buttons;
+                if (isset($product->product->action_buttons)) $buttons = $product->product->action_buttons;
 
                 return $buttons;
             })

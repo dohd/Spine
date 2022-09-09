@@ -66,18 +66,10 @@ class ProductsController extends Controller
      */
     public function index(ManageProductRequest $request)
     {
-        $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 2:
-                    $segment = Warehouse::find($input['rel_id']);
-                    break;
-                default:
-                    $segment = Productcategory::find($input['rel_id']);
-            }
-        }
-        return new ViewResponse('focus.products.index', compact('input', 'segment'));
+        $warehouses = Warehouse::get(['id', 'title']);
+        $categories = Productcategory::get(['id', 'title']);
+
+        return new ViewResponse('focus.products.index', compact('warehouses', 'categories'));
     }
 
     /**

@@ -19,21 +19,29 @@ use Illuminate\Validation\ValidationException;
 class ProductRepository extends BaseRepository
 {
     /**
-     *file_path .
-     *
-     * @var string
-     */
-    protected $file_path;
-    /**
-     * Storage Class Object.
-     *
-     * @var \Illuminate\Support\Facades\Storage
-     */
-    protected $storage;
-    /**
      * Associated Repository Model.
      */
     const MODEL = Product::class;
+
+    /**
+     *file_path .
+     * @var string
+     */
+    protected $file_path = 'img' . DIRECTORY_SEPARATOR . 'products' . DIRECTORY_SEPARATOR;
+
+    /**
+     * Storage Class Object.
+     * @var \Illuminate\Support\Facades\Storage
+     */
+    protected $storage;
+
+    /**
+     * Constructor to initialize class objects
+     */
+    public function __construct()
+    {
+        $this->storage = Storage::disk('public');
+    }
 
     /**
      * This method is used by Table Controller
@@ -41,29 +49,33 @@ class ProductRepository extends BaseRepository
      * the grid
      * @return mixed
      */
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->file_path = 'img' . DIRECTORY_SEPARATOR . 'products' . DIRECTORY_SEPARATOR;
-        $this->storage = Storage::disk('public');
-    }
-
     public function getForDataTable()
     {
         $q = $this->query();
 
-        $q->when(request('p_rel_id') and !request('p_rel_type'), function ($q) {
-            $q->where('sub_cat_id', '=', 0);
-            return $q->where('productcategory_id', '=', request('p_rel_id', 0));
+        $q->when(request('warehouse_id'), function ($q) {
+            $q->whereHas('variations', function ($q) {
+                $q->where('warehouse_id', request('warehouse_id'));
+            });
+        })->when(request('category_id'), function ($q) {
+            $q->whereHas('category', function ($q) {
+                $q->where('productcategory_id', request('category_id'));
+            });
+        })->when(request('status'), function ($q) {
+            if (request('status') == 'in stock') {
+                $q->whereHas('variations', function ($q) {
+                    $q->where('qty', '>', 0);
+                });
+            } else {
+                $q->whereHas('variations', function ($q) {
+                    $q->where('qty', 0);
+                });
+            }            
         });
 
-        $q->when(request('p_rel_id') and (request('p_rel_type') == 1), function ($q) {
-            return $q->where('sub_cat_id', '=', request('p_rel_id', 0));
-        });
+        $q->with('standard');
 
-        return $q->get(['id', 'productcategory_id', 'name', 'sub_cat_id', 'created_at']);
+        return $q->get();
     }
 
     /**

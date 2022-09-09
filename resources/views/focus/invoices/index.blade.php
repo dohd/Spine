@@ -31,7 +31,7 @@
                             </div>
                             <div class="col-2">
                                 <label for="status">Status</label>
-                                <select name="status" id="status" class="form-control">
+                                <select name="status" id="status" class="custom-select">
                                     <option value="">-- select status --</option>
                                     @foreach (['not yet due', 'due', 'partially paid', 'fully paid'] as $status)
                                         <option value="{{ $status }}">{{ ucfirst($status) }}</option>
