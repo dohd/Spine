@@ -270,24 +270,22 @@ class ProductRepository extends BaseRepository
      * 
      * @return float
      */
-    public function compute_purchase_price(float $id, float $qty, float $rate)
+    public function compute_purchase_price(int $id, float $qty, float $rate)
     {
         if ($qty == 0) return $rate;
         
-        $rate_groups = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
-            ->where('item_id', $id)
-            ->orderBy('created_at', 'ASC')
-            ->groupBy('rate')
-            ->get();
+        $price_cluster = PurchaseItem::select(DB::raw('rate, COUNT(*) as count'))
+            ->where(['type' => 'Stock', 'item_id' => $id])
+            ->groupBy('rate')->orderBy('updated_at', 'asc')->get();
 
-        $set = range(1, $qty);
-        foreach ($rate_groups as $group) {
-            $subset = array_splice($set, 0, $group->count);
-            $last_indx = count($subset) - 1;
-            if ($subset && $qty >= $subset[0] && $qty <= $subset[$last_indx]) {
-                $rate = $group->rate;
+        $qty_range = range(1, $qty);
+        foreach ($price_cluster as $cluster) {
+            $subset = array_splice($qty_range, 0, $cluster->count);
+            if (!$subset) $subset = $qty_range;
+            if ($qty >= current($subset) && $qty <= end($subset)) {
+                $rate = $cluster->rate;
                 break;
-            }
+            } 
         }
 
         return $rate;
