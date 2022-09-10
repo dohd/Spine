@@ -65,8 +65,12 @@ class ProjectGrossProfitTableController extends Controller
                 return 'Active';
             })
             ->addColumn('quote_amount', function($project) {
-                $quote_amount = $project->quotes->sum('subtotal');
-                return NumberFormat($quote_amount);
+                $quotes = array();
+                foreach ($project->quotes as $quote) {
+                    $tid = gen4tid($quote->bank_id? 'PI-': 'QT-', $quote->tid);
+                    $quotes[] = '<a href="'. route('biller.quotes.show', $quote->id) .'">'. $tid .'</a>' . ' : ' . numberFormat($quote->subtotal) . '<br>';
+                }
+                return implode($quotes);
             })
             ->addColumn('income', function($project) {
                 $income = 0;
@@ -76,20 +80,20 @@ class ProjectGrossProfitTableController extends Controller
                 }
                 $this->income = $income;
 
-                return NumberFormat($income);
+                return numberFormat($income);
             })
             ->addColumn('expense', function($project) {
                 $expense = $project->purchase_items->sum('amount');
                 $this->expense = $expense;
 
-                return NumberFormat($expense);
+                return numberFormat($expense);
             })
             ->addColumn('gross_profit', function($project) {
                 $profit = 0;
                 if ($this->income > 0) 
                     $profit = $this->income  - $this->expense;
                 
-                return NumberFormat($profit);
+                return numberFormat($profit);
             })
             ->make(true);
     }

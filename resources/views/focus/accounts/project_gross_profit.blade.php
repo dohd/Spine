@@ -24,7 +24,7 @@
                                         <th>Customer</th>
                                         <th>Title</th>   
                                         <th>Status</th>  
-                                        <th>Quote/PI Amount</th>  
+                                        <th>Quote/PI (Amount)</th>  
                                         <th>Income</th>    
                                         <th>Exp</th>   
                                         <th>G.P</th>                          
@@ -51,11 +51,7 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     config = {
-        ajax: {
-            headers: {
-                'X-CSRF-TOKEN': "{{ csrf_token() }}"
-            }
-        },
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
     };
 
     const Index = {
