@@ -65,6 +65,8 @@ class CoreDashboard extends Controller
     {
         $start_date = date('Y-m') . '-01';
         $today = date('Y-m-d');
+        // yesterday
+        $today = date_for_database($today . ' -1 days');
         
         // invoices
         $today_invoices = Invoice::select(DB::raw('invoicedate, COUNT(*) as items, SUM(total) as total'))
