@@ -89,8 +89,11 @@ class InvoicesTableController extends Controller
             ->addColumn('quote_tid', function ($invoice) {
                 $tids = array();
                 foreach ($invoice->products as $item) {
-                    if (!$item->quote) continue;
-                    $tids[] = gen4tid($item->quote->bank_id ? 'PI-' : 'QT-', $item->quote->tid);
+                    $quote = $item->quote;
+                    if ($quote) {
+                        $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'">'
+                            . gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid) .'</a>';
+                    }
                 }
                 return implode(', ', $tids);
             })
