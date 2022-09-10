@@ -20,7 +20,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row form-group">
                             <div class="col-4">
                                 <label for="customer">Customer</label>
                                 <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Customer">
@@ -30,14 +30,25 @@
                                 </select>
                             </div>
                             <div class="col-2">
-                                <label for="status">Status</label>
-                                <select name="status" id="status" class="custom-select">
+                                <label for="invoice_status">Invoice Status</label>
+                                <select name="invoice_status" id="inv_status" class="custom-select">
                                     <option value="">-- select status --</option>
-                                    @foreach (['not yet due', 'due', 'partially paid', 'fully paid'] as $status)
+                                    @foreach (['not yet due', 'due'] as $status)
                                         <option value="{{ $status }}">{{ ucfirst($status) }}</option>
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-2">
+                                <label for="payment_status">Payment Status</label>
+                                <select name="payment_status" id="pmt_status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['unpaid', 'partially paid', 'paid'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>                            
+                        </div>
+                        <div class="row">
                             <div class="col-2">
                                 <label for="amount">Total Amount (Ksh.)</label>
                                 <input type="text" id="amount_total" class="form-control" readonly>
@@ -74,6 +85,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Customer</th>
                                         <th>#Invoice No</th>                                        
                                         <th>Subject</th>
                                         <th>Date</th>
@@ -81,6 +93,7 @@
                                         <th>{{ trans('general.amount') }}</th>
                                         <th>Outstanding</th>                                       
                                         <th>#Quote / PI No</th>
+                                        <th>Last PMT Date</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -114,14 +127,16 @@
         startDate: '',
         endDate: '',
         customerId: '',
-        status: '',
+        invoiceStatus: '',
+        paymentStatus: '',
 
         init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             this.drawDataTable();
 
             $('#search').click(this.searchClick);
-            $('#status').click(this.statusChange);
+            $('#inv_status').click(this.invoiceStatusChange);
+            $('#pmt_status').click(this.paymentStatusChange);
             $('#customer').select2({allowClear: true}).change(this.customerChange);
             $('#customer').val('').change();
         },
@@ -136,8 +151,24 @@
             return Index.drawDataTable();
         },
 
-        statusChange() {
-            Index.status = $(this).val();
+        invoiceStatusChange() {
+            const lastOpt = $('#pmt_status option:eq(-1)');
+            if ($(this).val() == 'due') {
+                lastOpt.addClass('d-none');
+            } else lastOpt.removeClass('d-none');
+                
+            Index.invoiceStatus = $(this).val();
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        paymentStatusChange() {
+            const lastOpt = $('#inv_status option:eq(-1)');
+            if ($(this).val() == 'paid') {
+                lastOpt.addClass('d-none');
+            } else lastOpt.removeClass('d-none');
+
+            Index.paymentStatus = $(this).val();
             $('#invoiceTbl').DataTable().destroy();
             return Index.drawDataTable();
         },
@@ -162,7 +193,8 @@
                         start_date: this.startDate, 
                         end_date: this.endDate, 
                         customer_id: this.customerId,
-                        status: this.status
+                        invoice_status: this.invoiceStatus,
+                        payment_status: this.paymentStatus
                     },
                     dataSrc: ({data}) => {
                         $('#amount_total').val('');
@@ -178,6 +210,10 @@
                 columns: [{
                         data: 'DT_Row_Index',
                         name: 'id'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
                     },
                     {
                         data: 'tid',
@@ -208,6 +244,10 @@
                         name: 'quote_tid'
                     },
                     {
+                        data: 'last_pmt',
+                        name: 'last_pmt'
+                    },
+                    {
                         data: 'actions',
                         name: 'actions',
                         searchable: false,
@@ -215,8 +255,8 @@
                     }
                 ],
                 columnDefs: [
-                    { type: "custom-number-sort", targets: [5, 6] },
-                    { type: "custom-date-sort", targets: [3, 4] }
+                    { type: "custom-number-sort", targets: [6, 7] },
+                    { type: "custom-date-sort", targets: [4, 5, 9] }
                 ],
                 orderBy: [[0, "desc"]],
                 searchDelay: 500,

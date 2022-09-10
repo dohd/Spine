@@ -47,19 +47,26 @@ class InvoiceRepository extends BaseRepository
         // customer and status filter
         $q->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));
-        })->when(request('status'), function ($q) {
-            $status = request('status');
+        })->when(request('invoice_status'), function ($q) {
+            $status = request('invoice_status');
             switch ($status) {
                 case 'not yet due': 
                     $q->where('invoiceduedate', '>', date('Y-m-d'));
                     break;
                 case 'due':    
-                    $q->where('invoiceduedate', '<=', date('Y-m-d'))->whereColumn('amountpaid', '<', 'total');
+                    $q->where('invoiceduedate', '<=', date('Y-m-d'));
+                    break;                 
+            }         
+        })->when(request('payment_status'), function ($q) {
+            $status = request('payment_status');
+            switch ($status) {
+                case 'unpaid':
+                    $q->where('amountpaid', 0);
                     break; 
                 case 'partially paid':
                     $q->whereColumn('amountpaid', '<', 'total')->where('amountpaid', '>', 0);
                     break; 
-                case 'fully paid':
+                case 'paid':
                     $q->whereColumn('amountpaid', '>=', 'total');
                     break; 
             }         
