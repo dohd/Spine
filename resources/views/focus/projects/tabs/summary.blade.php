@@ -12,14 +12,21 @@
                         <span class="badge" style="background-color:{{ $row['color'] }}">{{ $row['name'] }}</span>
                     @endforeach
                 </div>
-                <ul class="list-inline list-inline-pipe text-center p-1 border-bottom-grey border-bottom-lighten-3">
+                <ul class="list-inline list-inline-pipe text-center p-1 border-bottom-grey border-bottom-lighten-3 h5">
                     <li>{{ trans('projects.owner') }}: 
                         <span class="text-muted text-bold-600 blue">{{ $project->creator->first_name . ' ' . $project->creator->last_name }}</span>
                     </li>
                     <li>{{ trans('customers.customer') }}: 
                         <span class="text-bold-600 primary">
-                            <a href="{{ route('biller.customers.show', [$project->customer->id]) }}">
-                                {{ $project->customer->name }} ({{ $project->customer->company }})
+                            <a href="{{ route('biller.customers.show', $project->customer) }}">
+                                {{ $project->customer->company }}
+                            </a>
+                        </span>                               
+                    </li>
+                    <li>Branch: 
+                        <span class="text-bold-600 primary">
+                            <a href="{{ route('biller.branches.show', $project->branch) }}">
+                                {{ $project->branch->name }}
                             </a>
                         </span>                               
                     </li>
@@ -29,7 +36,7 @@
                         </li>
                     @endif
                 </ul>
-                <ul class="list-inline list-inline-pipe text-center p-1 border-bottom-grey border-bottom-lighten-3">
+                <ul class="list-inline list-inline-pipe text-center p-1 border-bottom-grey border-bottom-lighten-3 h5">
                     <li>{{ trans('projects.start_date') }}: 
                         <span class=" text-bold-600 purple">{{ dateTimeFormat($project['start_date']) }}</span>
                     </li>
