@@ -63,13 +63,13 @@ class InvoicesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function ($invoice) {
-                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' 
-                    . gen4tid('Inv-', $invoice->tid) .'</a>';
-            })
             ->addColumn('customer', function ($invoice) {
                 return ' <a class="font-weight-bold" href="'. route('biller.customers.show', [$invoice->customer->id]) .'">'
                     . $invoice->customer->name .'</a>';                    
+            })
+            ->addColumn('tid', function ($invoice) {
+                return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' 
+                    . gen4tid('Inv-', $invoice->tid) .'</a>';
             })
             ->addColumn('invoicedate', function ($invoice) {
                 return dateFormat($invoice->invoicedate);
@@ -93,6 +93,14 @@ class InvoicesTableController extends Controller
                     $tids[] = gen4tid($item->quote->bank_id ? 'PI-' : 'QT-', $item->quote->tid);
                 }
                 return implode(', ', $tids);
+            })
+            ->addColumn('last_pmt', function ($invoice) {
+                if ($invoice->payments->count()) {
+                    $last_pmt_item = $invoice->payments()->orderBy('id', 'desc')->first();
+                    return dateFormat($last_pmt_item->paid_invoice->date);
+                } 
+
+                return '';
             })
             ->addColumn('aggregate', function ($invoice) use($aggregate) {
                 return $aggregate;
