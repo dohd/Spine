@@ -86,9 +86,9 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Customer</th>
-                                        <th>#Invoice No</th>                                        
+                                        <th>#Inv No</th>                                        
                                         <th>Subject</th>
-                                        <th>Date</th>
+                                        <th>Inv Date</th>
                                         <th>Due Date</th>
                                         <th>{{ trans('general.amount') }}</th>
                                         <th>Outstanding</th>                                       
