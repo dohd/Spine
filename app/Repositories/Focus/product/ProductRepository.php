@@ -256,10 +256,12 @@ class ProductRepository extends BaseRepository
      */
     public function removePicture(Product $product, $field)
     {
-        if ($product->type && $this->storage->exists($this->file_path . $product->type))
-            $this->storage->delete($this->file_path . $product->type);
+        $file = $this->file_path . $product->type;
+        if ($product->type && $this->storage->exists($file))
+            $this->storage->delete($file);
 
-        if ($product->update([$field => null])) return true;
+        if ($product->update([$field => null]))
+            return true;
 
         throw new GeneralException(trans('exceptions.backend.settings.update_error'));
     }
