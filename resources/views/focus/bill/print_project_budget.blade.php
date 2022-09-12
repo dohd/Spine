@@ -288,7 +288,7 @@
 			</div>
 			<div style="float: left; margin-left: 5%">
 				<b>Tools Required & Notes :</b><br>
-				{!! $budget->tool !!}
+				{!! $budget->note !!}
 			</div>		
 		</div>	
 	@endisset
