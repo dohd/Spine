@@ -406,7 +406,7 @@
                             <li><a class="dropdown-item" href="{{ route('biller.projectstock.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Stock Issuance </a></li> 
                         </ul>
                     </li>
-                    {{-- Goods receive note --}}
+                    {{-- Goods Receive Note --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-puzzle-piece"></i> Goods Receive Note</a>
                         <ul class="dropdown-menu">
@@ -418,7 +418,7 @@
                             </li>                            
                         </ul>
                     </li>
-
+                    {{-- Product Management --}}
                     @permission('product-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i> {{ trans('labels.backend.products.management') }}</a>
                         <ul class="dropdown-menu">
@@ -433,20 +433,21 @@
                         </ul>
                     </li>
                     @endauth
+                    {{-- Product Opening Stock --}}
                     @permission('stockreturn-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Product Opening Balance</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Product Opening Stock</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.openingbalances.index')}}?section=stockreturn" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Opening Balance
-                                </a>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('biller.opening_stock.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Opening Stock</a>
                             </li>
-                            @permission('stockreturn-data')
-                            <li><a class="dropdown-item" href="{{ route('biller.openingbalances.create')}}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Opening Balance
-                                </a>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('biller.opening_stock.create')}}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Opening Stock</a>
                             </li>
-                            @endauth
                         </ul>
                     </li>
                     @endauth
+                    {{-- Price Group Management --}}
                     @permission('product-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Price Group Management</a>
                         <ul class="dropdown-menu">

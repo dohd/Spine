@@ -1,5 +1,11 @@
 <?php
 
+Route::group(['namespace' => 'opening_stock'], function () {
+    Route::post('opening_stock/product_variation', 'OpeningStockController@product_variation')->name('opening_stock.product_variation');
+    Route::resource('opening_stock', 'OpeningStockController');
+    // data table
+    Route::post('opening_stock/get', 'OpeningStockTableController')->name('opening_stock.get');
+});
 
 Route::group(['namespace' => 'goodsreceivenote'], function () {
     Route::resource('goodsreceivenote', 'GoodsReceiveNoteController');
