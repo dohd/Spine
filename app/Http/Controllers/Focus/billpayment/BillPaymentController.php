@@ -65,17 +65,6 @@ class BillPaymentController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\billpayment\Billpayment $billpayment
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Billpayment $billpayment)
-    {
-        return view('focus.billpayments.view', compact('billpayment'));
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\billpayment\Billpayment $billpayment
@@ -115,5 +104,16 @@ class BillPaymentController extends Controller
         $this->respository->delete($billpayment);
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Deleted Successfully']);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\billpayment\Billpayment $billpayment
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Billpayment $billpayment)
+    {
+        return view('focus.billpayments.view', compact('billpayment'));
     }
 }
