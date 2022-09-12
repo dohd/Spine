@@ -30,11 +30,11 @@
                                         <th>#Order No</th>
                                         <th>{{ trans('suppliers.supplier') }}</th>
                                         <th>Note</th>
-                                        <th>Item Count</th>
-                                        <th>{{ trans('general.amount') }} (VAT Inc)</th>
+                                        <th>Order Item Count</th>
+                                        <th>{{ trans('general.amount') }}</th>
                                         <th>Date</th>
                                         <th>{{ trans('general.status') }}</th>
-                                        <th>Received Qty</th>
+                                        <th>Goods Received Count</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -92,8 +92,8 @@
                 name: 'note'
             },
             {
-                data: 'qty',
-                name: 'qty'
+                data: 'count',
+                name: 'count'
             },
             {
                 data: 'amount',
@@ -108,8 +108,8 @@
                 name: 'status'
             },
             {
-                data: 'grn_qty',
-                name: 'grn_qty'
+                data: 'grn_count',
+                name: 'grn_count'
             },
             {
                 data: 'actions',
