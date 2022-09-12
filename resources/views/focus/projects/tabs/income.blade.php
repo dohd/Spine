@@ -11,6 +11,7 @@
                             <th>#</th>
                             <th>{{ trans('invoices.invoice') }} No.</th>                    
                             <th>{{ trans('invoices.invoice_date') }}</th>
+                            <th>Quote / PI No.</th>
                             <th>Quote Subject</th>
                             <th>Quote Date</th>
                             <th>{{ trans('general.amount') }}</th>
@@ -27,6 +28,7 @@
                                     </a>
                                 </td>                    
                                 <td>{{ dateFormat($quote->invoice_product->invoice->invoicedate) }}</td>
+                                <td><a href="{{ route('biller.quotes.show', $quote) }}">{{ gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid) }}</a></td>
                                 <td>{{ $quote->notes }}</td>
                                 <td>{{ dateFormat($quote->date) }}</td>
                                 <td>{{ numberFormat($quote->subtotal) }}</td>                   
