@@ -56,28 +56,25 @@ class PurchaseordersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($po) {
-                $tid = 'PO-'.sprintf('%04d', $po->tid);
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$po->id]) . '">' 
-                . $tid . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', $po) . '">' . gen4tid('PO-', $po->tid) . '</a>';
             })
             ->addColumn('supplier', function ($po) {
-                return $po->supplier->name . 
-                ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$po->supplier->id]) . '">
-                <i class="ft-eye"></i></a>';
+                if ($po->supplier)
+                return ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', $po->supplier) . '">'. $po->supplier->name . '</a>';
             })
-            ->addColumn('qty', function ($po) {
+            ->addColumn('count', function ($po) {
                 return $po->items->count();
             })
             ->addColumn('date', function ($po) {
                 return dateFormat($po->date);
             })
             ->addColumn('amount', function ($po) {
-                return amountFormat($po->grandttl);
+                return numberFormat($po->grandttl);
             })
             ->addColumn('status', function ($po) {
                 return $po->status;
             })
-            ->addColumn('grn_qty', function ($po) {
+            ->addColumn('grn_count', function ($po) {
                 return $po->grn_items->count();
             })
             ->addColumn('actions', function ($po) {
