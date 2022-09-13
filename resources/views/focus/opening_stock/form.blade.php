@@ -1,15 +1,15 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="tid">Transaction No</label>
-        {{ Form::text('tid', null, ['class' => 'form-control']) }}
+        {{ Form::text('tid', $tid+1, ['class' => 'form-control', 'readonly']) }}
     </div>
     <div class="col-2">
         <label for="date">Date</label>
-        {{ Form::text('date', null, ['class' => 'form-control datepicker']) }}
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
     </div>
     <div class="col-8">
         <label for="note">Note</label>
-        {{ Form::text('note', null, ['class' => 'form-control']) }}
+        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note', 'required']) }}
     </div>
 </div>
 
@@ -32,10 +32,9 @@
             <tr class="bg-gradient-directional-blue white">
                 <th>#</th>
                 <th>Description</th>
-                <th width="10%">Unit Qty Alert</th>
+                <th width="10%">Base Unit</th>
                 <th width="16%">Purchase Price</th>
                 <th width="12%">Unit Qty</th>
-                <th width="10%">Base Unit</th>
                 <th width="16%">Amount</th>
             </tr>
         </thead>
@@ -59,7 +58,8 @@
 @section('extra-scripts')
 <script type="text/javascript">
     config = {
-        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}}
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
     };
 
     const Index = {
@@ -67,6 +67,8 @@
 
         init() {
             $.ajaxSetup(config.ajax);
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+
             $('#warehouse').change(this.warehouseChange);
             $('#productsTbl').on('change', '.qty, .buy-price', this.tableChange);
         },
@@ -102,13 +104,13 @@
             return `
                 <tr>
                     <td><span id="index-${i}" class="index">${i+1}</span></td>
-                    <td><span id="prodname-${i}" class="prod-name">${v.name}</span></td>
-                    <td><input type="text" id="qtyalert-${i}" name="qty_alert[]" value="0.00" class="form-control qty-alert"></td>
+                    <td><span id="prodname-${i}" class="prod-name">${v.name}</span></td>                    
+                    <td><span id="unit-${i}" class="unit">${v.unit}</span></td>
                     <td><input type="text" id="buyprice-${i}" name="purchase_price[]" class="form-control buy-price"></td>
                     <td><input type="text" id="qty-${i}" name="qty[]" class="form-control qty"></td>
-                    <td><span id="unit-${i}" class="unit">${v.unit}</span></td>
                     <td><input type="text" id="amount-${i}" name="amount[]" value="0.00" class="form-control amount" readonly></td>
-                    <input type="hidden" name="variation_id[]" id="varid-${i}" value="${v.id}" class="var-id">
+                    <input type="hidden" name="product_id[]" id="prodid-${i}" value="${v.id}" class="prod-id">
+                    <input type="hidden" name="parent_id[]" id="parentid-${i}" value="${v.parent_id}" class="parent-id">
                 </tr>
             `;            
         },

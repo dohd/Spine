@@ -18,6 +18,7 @@
 namespace App\Http\Controllers\Focus\opening_stock;
 
 use App\Http\Controllers\Controller;
+use App\Repositories\Focus\opening_stock\OpeningStockRepository;
 use Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -51,25 +52,18 @@ class OpeningStockTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('supplier', function ($opening_stock) {
-                if ($opening_stock->supplier)
-                return $opening_stock->supplier->name;
+            ->addColumn('tid', function ($opening_stock) {
+                return $opening_stock->tid;
             })    
-            ->addColumn('account', function ($opening_stock) {
-                if ($opening_stock->account)
-                return $opening_stock->account->holder;
-            })
             ->addColumn('date', function ($opening_stock) {
                 return dateFormat($opening_stock->date);
             })
             ->addColumn('amount', function ($opening_stock) {
-                return numberFormat($opening_stock->amount);
+                return numberFormat($opening_stock->total);
             })
-            ->addColumn('unallocated', function ($opening_stock) {
-                return numberFormat($opening_stock->amount - $opening_stock->allocate_ttl);
-            })
-            ->addColumn('bill_no', function ($opening_stock) {
-                return gen4tid('BILL-', $opening_stock->tid);
+            ->addColumn('warehouse', function ($opening_stock) {
+                if ($opening_stock->warehouse)
+                return $opening_stock->warehouse->title;
             })
             // ->addColumn('aggregate', function ($opening_stock) use($aggregate) {
             //     return $aggregate;

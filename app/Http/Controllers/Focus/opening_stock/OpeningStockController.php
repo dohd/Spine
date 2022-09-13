@@ -18,7 +18,9 @@
 namespace App\Http\Controllers\Focus\opening_stock;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\opening_stock\OpeningStock;
 use App\Models\product\ProductVariation;
 use App\Models\warehouse\Warehouse;
 use App\Repositories\Focus\opening_stock\OpeningStockRepository;
@@ -56,9 +58,10 @@ class OpeningStockController extends Controller
      */
     public function create()
     {
+        $tid = OpeningStock::max('tid');
         $warehouses = Warehouse::get(['id', 'title']);
 
-        return view('focus.opening_stock.create', compact('warehouses'));
+        return view('focus.opening_stock.create', compact('warehouses', 'tid'));
     }
 
     /**
@@ -130,10 +133,12 @@ class OpeningStockController extends Controller
     {
         $products = ProductVariation::where([
             'warehouse_id' => request('warehouse_id')
-        ])->with('product')->get()->map(function ($v) {
+        ])->with('product')->get()
+        ->map(function ($v) {
             return [
                 'id' => $v->id, 
                 'name' => $v->name, 
+                'parent_id' => $v->product->id,
                 'unit' => $v->product->unit? $v->product->unit->code : ''
             ];
         });

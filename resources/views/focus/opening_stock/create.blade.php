@@ -2,12 +2,11 @@
 
 @section('title', 'Create | Product Opening Stock')
 
-
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Manage Product Opening Stock</h4>
+            <h4 class="content-header-title">Product Opening Stock</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">

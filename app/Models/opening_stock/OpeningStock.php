@@ -27,7 +27,7 @@ class OpeningStock extends Model
      * @var array
      */
     protected $fillable = [
-        'tid', 'date', 'note', 'user_id', 'ins'
+        'tid', 'date', 'note', 'warehouse_id', 'total', 'user_id', 'ins'
     ];
 
     /**
