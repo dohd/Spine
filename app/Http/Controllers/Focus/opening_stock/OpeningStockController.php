@@ -84,7 +84,9 @@ class OpeningStockController extends Controller
      */
     public function edit(OpeningStock $opening_stock)
     {
-        return view('focus.opening_stock.edit', compact('opening_stock'));
+        $warehouses = Warehouse::get(['id', 'title']);
+
+        return view('focus.opening_stock.edit', compact('opening_stock', 'warehouses'));
     }
 
     /**

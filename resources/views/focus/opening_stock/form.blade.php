@@ -1,7 +1,7 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="tid">Transaction No</label>
-        {{ Form::text('tid', $tid+1, ['class' => 'form-control', 'readonly']) }}
+        {{ Form::text('tid', @$opening_stock? $opening_stock->tid : $tid+1, ['class' => 'form-control', 'readonly']) }}
     </div>
     <div class="col-2">
         <label for="date">Date</label>
@@ -20,7 +20,9 @@
         <select name="warehouse_id" id="warehouse" class="custom-select">
             <option value="">-- select warehouse --</option>
             @foreach ($warehouses as $row)                
-                <option value="{{ $row->id }}">{{ $row->title }}</option>
+                <option value="{{ $row->id }}" {{ @$opening_stock->warehouse_id == $row->id? 'selected' : '' }}>
+                    {{ $row->title }}
+                </option>
             @endforeach
         </select>
     </div>
@@ -39,6 +41,20 @@
             </tr>
         </thead>
         <tbody>
+            @isset($opening_stock)
+                @foreach ($opening_stock->items as $i => $item)                   
+                    <tr>
+                        <td><span id="index-${i}" class="index">{{ $i+1 }}</span></td>
+                        <td><span id="prodname-${i}" class="prod-name">{{ $item->productvariation->name }}</span></td>                    
+                        <td><span id="unit-${i}" class="unit">{{ $item->product->unit? $item->product->unit->code : ''}}</span></td>
+                        <td><input type="text" id="buyprice-${i}" name="purchase_price[]" value="{{ numberFormat($item->purchase_price) }}" class="form-control buy-price"></td>
+                        <td><input type="text" id="qty-${i}" name="qty[]" value="{{ +$item->qty }}" class="form-control qty"></td>
+                        <td><input type="text" id="amount-${i}" name="amount[]" value="{{ numberFormat($item->amount) }}" class="form-control amount" readonly></td>
+                        <input type="hidden" name="product_id[]" id="prodid-${i}" value="${v.id}" class="prod-id">
+                        <input type="hidden" name="parent_id[]" id="parentid-${i}" value="${v.parent_id}" class="parent-id">
+                    </tr>
+                @endforeach       
+            @endisset
         </tbody>
     </table>
 </div>
@@ -51,7 +67,7 @@
 </div>
 <div class="row">
     <div class="col-2 ml-auto">
-        {{ Form::submit('Create', ['class' => 'btn btn-primary btn-lg block']) }}
+        {{ Form::submit('Generate', ['class' => 'btn btn-primary btn-lg block']) }}
     </div>
 </div>
 
@@ -64,6 +80,7 @@
 
     const Index = {
         warehouseId: '',
+        openingStock: @json(@$opening_stock),
 
         init() {
             $.ajaxSetup(config.ajax);
@@ -71,6 +88,10 @@
 
             $('#warehouse').change(this.warehouseChange);
             $('#productsTbl').on('change', '.qty, .buy-price', this.tableChange);
+
+            if (this.openingStock.id) {
+                this.calcTotals();
+            }
         },
 
         tableChange() {
