@@ -67,7 +67,6 @@ class OpeningStockRepository extends BaseRepository
         OpeningStockItem::insert($data_items);
 
         // update inventory stock
-        // dd($result->items);
         foreach ($result->items as $item) {
             $item->productvariation->update([
                 'purchase_price' => $item->purchase_price,
@@ -110,7 +109,22 @@ class OpeningStockRepository extends BaseRepository
      */
     public function delete(OpeningStock $opening_stock)
     {
-        if ($opening_stock->delete()) return true;
+        DB::beginTransaction();
+
+        // revert stock state
+        foreach ($opening_stock->items as $item) {
+            $item->productvariation->update([
+                'purchase_price' => 0,
+            ]);
+            $item->productvariation->decrement('qty', $item->qty);
+        }
+
+        Transaction::where(['tr_ref' => $opening_stock->id, 'note' => $opening_stock->note])->delete();
+
+        if ($opening_stock->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.OpeningStocks.delete_error'));
     }
