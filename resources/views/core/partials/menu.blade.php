@@ -505,7 +505,7 @@
                         </ul>
                     </li>
                     @endauth
-                   
+                   {{-- Stock Return
                     @permission('creditnote-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.stock_return_customer') }}</a>
                         <ul class="dropdown-menu">
@@ -519,7 +519,9 @@
                         </ul>
                     </li>
                     @endauth
+                     --}}
                     
+                     {{-- Print Product Labels
                     @permission('product-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-barcode"></i> {{ trans('products.product_label_print') }}
                         </a>
@@ -533,9 +535,15 @@
                         </ul>
                     </li>
                     @endauth
+                     --}}
+
+                     {{-- Stock Transfer --}}
                     @permission('stocktransfer')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item " href="{{route('biller.products.stock_transfer')}}"><i class="ft-wind"></i> {{ trans('products.stock_transfer') }}</a>
-                    </li> @endauth
+                    </li> 
+                    @endauth
+
+                    {{--  --}}
                     @permission('purchaseorder-manage')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-target"></i> Assets & Equipments
                         </a>
