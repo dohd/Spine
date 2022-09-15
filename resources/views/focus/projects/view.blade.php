@@ -94,6 +94,12 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
                             <i class="fa fa-money"></i>Expense
                         </a>                           
                     </li>
+                    {{-- project percentage profit --}}
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab10" data-toggle="tab" href="#tab_data10" aria-controls="tab_data10" role="tab" aria-selected="true">
+                            <i class="font-weight-bold">%</i>Percentage Profit
+                        </a>                           
+                    </li>
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     @include('focus.projects.tabs.summary')
@@ -107,6 +113,7 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
                      --}}
                     @include('focus.projects.tabs.income')
                     @include('focus.projects.tabs.expense')
+                    @include('focus.projects.tabs.percentage_profit')
                 </div>
             </div>
         </div>
