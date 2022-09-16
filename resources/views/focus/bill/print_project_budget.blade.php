@@ -219,6 +219,7 @@
 		<tr><td colspan="2">Ref : <b>{{ $resource->notes }}</b></td></tr>
 	</table>
 	<br>
+	{{-- budget items --}}
 	@php
 		$budget = $resource->budgets()->first();                
 	@endphp
@@ -237,7 +238,7 @@
 					<tr>
 						<td>{{ $item->numbering }}</td>
 						<td>{{ $item->product_name }}</td>
-						<td class="align-c">{{ (int) $item->new_qty }}</td>
+						<td class="align-c">{{ +$item->new_qty }}</td>
 						<td class="align-c">{{ $item->unit }}</td>						
 					</tr>
 				@else

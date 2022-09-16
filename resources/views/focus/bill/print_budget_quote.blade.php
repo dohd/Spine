@@ -219,6 +219,7 @@
 		<tr><td colspan="2">Ref : <b>{{ $resource->notes }}</b></td></tr>
 	</table>
 	<br>
+	{{-- quote items --}}
 	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
@@ -234,7 +235,7 @@
 					<tr>
 						<td>{{ $item->numbering }}</td>
 						<td>{{ $item->product_name }}</td>
-						<td class="align-c">{{ (int) $item->product_qty }}</td>
+						<td class="align-c">{{ +$item->product_qty }}</td>
 						<td class="align-c">{{ $item->unit }}</td>						
 					</tr>
 				@else
