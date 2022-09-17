@@ -98,46 +98,6 @@ class WithholdingRepository extends BaseRepository
         throw new GeneralException(trans('exceptions.backend.withholdings.create_error'));
     }
 
-    // 
-    public function post_transaction($result)
-    {
-        // credit Accounts Receivable (Debtors)
-        $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'withholding')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
-        $cr_data = [
-            'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $result->amount,
-            'tr_date' => $result->tr_date,
-            'due_date' => $result->tr_date,
-            'user_id' => $result->user_id,
-            'note' => $result->note,
-            'ins' => $result->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $result->id,
-            'user_type' => 'customer',
-            'is_primary' => 1,
-        ];
-        Transaction::create($cr_data);
-
-        // debit Withholding Account
-        $account = Account::when($result->certificate == 'vat', function ($q) {
-            $q->where('system', 'withholding_vat');
-        })->when($result->certificate == 'tax', function ($q) {
-            $q->where('system', 'withholding_inc');
-        })->first();
-
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $account->id,
-            'debit' => $result->amount
-        ]);
-        Transaction::create($dr_data);
-        aggregate_account_transactions();            
-    }
-
     /**
      * For updating the respective Model in storage
      *
@@ -148,6 +108,8 @@ class WithholdingRepository extends BaseRepository
      */
     public function update($withholding, array $input)
     {
+        dd($input);
+        
         throw new GeneralException(trans('exceptions.backend.withholdings.update_error'));
     }
 
@@ -187,5 +149,47 @@ class WithholdingRepository extends BaseRepository
         }
 
         throw new GeneralException(trans('exceptions.backend.withholdings.delete_error'));
+    }
+
+    /**
+     * Withholding Transaction
+     */
+    public function post_transaction($result)
+    {
+        // credit Accounts Receivable (Debtors)
+        $account = Account::where('system', 'receivable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'withholding')->first(['id', 'code']);
+        $tid = Transaction::max('tid') + 1;
+        $cr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $result->amount,
+            'tr_date' => $result->tr_date,
+            'due_date' => $result->tr_date,
+            'user_id' => $result->user_id,
+            'note' => $result->note,
+            'ins' => $result->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result->id,
+            'user_type' => 'customer',
+            'is_primary' => 1,
+        ];
+        Transaction::create($cr_data);
+
+        // debit Withholding Account
+        $account = Account::when($result->certificate == 'vat', function ($q) {
+            $q->where('system', 'withholding_vat');
+        })->when($result->certificate == 'tax', function ($q) {
+            $q->where('system', 'withholding_inc');
+        })->first();
+
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $account->id,
+            'debit' => $result->amount
+        ]);
+        Transaction::create($dr_data);
+        aggregate_account_transactions();            
     }
 }

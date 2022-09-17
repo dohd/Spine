@@ -23,15 +23,15 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="withholdings-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="withholdingsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#TID</th>
+                                        <th>#Cert No</th>
                                         <th>Customer</th>
                                         <th>Note</th>
-                                        <th>Certificate / Serial</th>
-                                        <th>Amount (Ksh.)</th>
+                                        <th>Certificate - Serial</th>
+                                        <th>Amount</th>
                                         <th>Date</th>
                                         <th>Invoice</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -56,11 +56,13 @@
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
     });
-    const language = {@lang('datatable.strings')};
-    const dataTable = $('#withholdings-table').dataTable({
+    
+    const dataTable = $('#withholdingsTbl').dataTable({
         processing: true,
+        serverSide: true,
         responsive: true,
-        language,
+        stateSave: true,
+        language: {@lang('datatable.strings')},
         ajax: {
             url: '{{ route("biller.withholdings.get") }}',
             type: 'post'
@@ -83,13 +85,7 @@
         order: [[0, "desc"]],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-                {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
-                {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
-                {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
-            ]
-        }
+        buttons: ['csv', 'excel', 'print'],
     });
 </script>
 @endsection

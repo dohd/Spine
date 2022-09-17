@@ -92,7 +92,7 @@ class WithholdingsController extends Controller
 
         $this->repository->create(compact('data', 'data_items'));
 
-       return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding certificate created successfully']);
+       return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Created Successfully']);
     }
 
     /**
@@ -102,8 +102,10 @@ class WithholdingsController extends Controller
      * @param EditBankRequestNamespace $request
      * @return \App\Http\Responses\Focus\bank\EditResponse
      */
-    public function edit(Withholding $withholding, StoreWithholdingRequest $request)
+    public function edit(Withholding $withholding)
     {
+        return redirect(route('biller.withholdings.index'));
+
         return new EditResponse($withholding);
     }
 
@@ -116,12 +118,9 @@ class WithholdingsController extends Controller
      */
     public function update(StoreWithholdingRequest $request, Withholding $withholding)
     {
-        //extract input fields
-        $input = $request->except(['_token', 'ins']);
+        $this->repository->update($withholding, $request->except('_token'));
 
-        $this->repository->update($withholding, $input);
-
-        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding certificate updated successfully']);
+        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Updated Successfully']);
     }
 
     /**
@@ -135,7 +134,7 @@ class WithholdingsController extends Controller
     {
         $this->repository->delete($withholding);
 
-        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding certificate deleted successfully']);
+        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Deleted Successfully']);
     }
 
     /**

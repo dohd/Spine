@@ -72,9 +72,10 @@ class WithholdingsTableController extends Controller
                 return numberFormat($withholding->amount);
             })
             ->addColumn('invoice_tid', function ($withholding) {
-                if ($withholding->items->count()) {
+                $items = $withholding->items;
+                if ($items->count()) {
                     $invoice_tids = array();
-                    foreach ($withholding->items as $item) {
+                    foreach ($items as $item) {
                         if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
                     }
                     return implode(', ', $invoice_tids);

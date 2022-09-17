@@ -2,9 +2,6 @@
 
 namespace App\Models\withholding\Traits;
 
-/**
- * Class ProductcategoryAttribute.
- */
 trait WithholdingAttribute
 {
     // Make your attributes functions here
@@ -15,10 +12,10 @@ trait WithholdingAttribute
      * Action Button Attribute to show in grid
      * @return string
      */
-     public function getActionButtonsAttribute()
+    public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("transaction-manage", "biller.withholdings.show")
-        //  .' '.$this->getEditButtonAttribute("transaction-data", "biller.charges.edit")
-         .' '.$this->getDeleteButtonAttribute("transaction-data", "biller.withholdings.destroy");
+        return $this->getViewButtonAttribute("project-manage", "biller.withholdings.show")
+             .' '.$this->getEditButtonAttribute("project-edit", "biller.withholdings.edit")
+             .' '.$this->getDeleteButtonAttribute("project-delete", "biller.withholdings.destroy");
     }
 }
