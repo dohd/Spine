@@ -20,14 +20,14 @@ class HolidayList extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'holiday_lists';
+    protected $table = 'holidays';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
     protected $fillable = [
-        'tid', 'title', 'note', 'date_list', 'user_id', 'ins'
+        'title', 'note', 'date', 'is_recurrent', 'user_id', 'ins'
     ];
 
     /**

@@ -904,12 +904,12 @@
 
                     {{-- holiday list --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Holiday List</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Holiday Management</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.holiday_list.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Holiday List Management
+                            <li><a class="dropdown-item" href="{{ route('biller.holiday_list.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Holiday
                                 </a>
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.holiday_list.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Holiday List
+                            <li><a class="dropdown-item" href="{{ route('biller.holiday_list.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Holiday
                                 </a>
                             </li>
                         </ul>

@@ -37,15 +37,12 @@ class HolidayListRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        DB::beginTransaction();
 
+        $input['date'] = date_for_database($input['date']);
         $result = HolidayList::create($input);
 
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
-
+        if ($result) return $result;
+            
         throw new GeneralException(trans('exceptions.backend.HolidayLists.create_error'));
     }
 
@@ -59,7 +56,9 @@ class HolidayListRepository extends BaseRepository
      */
     public function update(HolidayList $holiday_list, array $input)
     {
-        dd($input);
+        // dd($input);
+        $input['date'] = date_for_database($input['date']);
+        if ($holiday_list->update($input)) return $holiday_list;
 
         throw new GeneralException(trans('exceptions.backend.HolidayLists.update_error'));
     }

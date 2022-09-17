@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Holiday List Management</h4>
+            <h4 class="content-header-title">Holiday Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -20,7 +20,7 @@
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::model($holiday_list, ['route' => array('biller.holiday_list.update', $holiday_list), 'method' => 'PATCH']) }}
-                        @include('focus.opening_stock.form')
+                        @include('focus.holiday_list.form')
                     {{ Form::close() }}
                 </div>
             </div>

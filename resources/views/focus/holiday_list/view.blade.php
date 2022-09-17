@@ -1,16 +1,14 @@
-@extends ('core.layouts.app')
-
-@section('title', 'Product Opening Stock')
+@section('title', 'Holiday Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Product Opening Stock</h4>
+            <h4 class="content-header-title">Holiday Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.opening_stock.partials.opening-stock-header-buttons')
+                @include('focus.holiday_list.partials.holiday-list-header-buttons')
             </div>
         </div>
     </div>
@@ -22,11 +20,9 @@
                     <table class="table table-bordered table-sm">
                         @php
                             $details = [
-                                'Transaction No' => $opening_stock->tid,
-                                'Date' => dateFormat($opening_stock->date),
-                                'Note' => $opening_stock->note,
-                                'Warehouse' => $opening_stock->warehouse->title,
-                                'Amount' => numberFormat($opening_stock->total)
+                                'Title' => $holiday_list->title,
+                                'Date' => dateFormat() $holiday_list->date
+                                'Note' => 
                             ];
                         @endphp
                         @foreach ($details as $key => $val)

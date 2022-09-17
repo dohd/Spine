@@ -57,9 +57,7 @@ class HolidayListController extends Controller
      */
     public function create()
     {
-        $tid = HolidayList::max('tid');
-
-        return view('focus.holiday_list.create', compact('tid'));
+        return view('focus.holiday_list.create');
     }
 
     /**

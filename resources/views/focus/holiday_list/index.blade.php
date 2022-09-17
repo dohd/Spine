@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Holiday List')
+@section('title', 'Holiday Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Holiday List Management</h4>
+            <h4 class="content-header-title">Holiday Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -25,7 +25,6 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>List No</th>
                                         <th>Title</th>
                                         <th>Date</th>
                                         <th>Note</th>
@@ -75,7 +74,6 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'tid', name: 'tid'},
                     {data: 'title', name: 'title'},
                     {data: 'date', name: 'date'},                    
                     {data: 'note', name: 'note'},
