@@ -30,9 +30,10 @@ class ProjectGrossProfitTableController extends Controller
      */
     protected $repository;
 
-    // income & expense
+    // income, expense, profit
     protected $income = 0;
     protected $expense = 0;
+    protected $profit = 0;
 
     /**
      * contructor to initialize repository object
@@ -65,12 +66,21 @@ class ProjectGrossProfitTableController extends Controller
                 return 'Active';
             })
             ->addColumn('quote_amount', function($project) {
-                $quotes = array();
+                $quotes = '';
                 foreach ($project->quotes as $quote) {
                     $tid = gen4tid($quote->bank_id? 'PI-': 'QT-', $quote->tid);
-                    $quotes[] = '<a href="'. route('biller.quotes.show', $quote->id) .'">'. $tid .'</a>' . ' : ' . numberFormat($quote->subtotal) . '<br>';
+                    $quotes .= '<a href="'. route('biller.quotes.show', $quote->id) .'">'. $tid .'</a>' . ' : ' . numberFormat($quote->subtotal) . '<br>';
                 }
-                return implode($quotes);
+                return $quotes;
+            })
+            ->addColumn('verify_date', function($project) {
+                $verification_dates = '';
+                foreach ($project->quotes as $quote) {
+                    if ($quote->verified_amount > 0) {
+                        $verification_dates .= dateFormat($quote->verification_date) . '<br>';
+                    }
+                }
+                return $verification_dates;
             })
             ->addColumn('income', function($project) {
                 $income = 0;
@@ -90,10 +100,15 @@ class ProjectGrossProfitTableController extends Controller
             })
             ->addColumn('gross_profit', function($project) {
                 $profit = 0;
-                if ($this->income > 0) 
+                if ($this->income > 0) {
                     $profit = $this->income  - $this->expense;
+                }
+                $this->profit = $profit;
                 
                 return numberFormat($profit);
+            })
+            ->addColumn('percent_profit', function($project) {                
+                return round(div_num($this->profit, $this->expense) * 100);
             })
             ->make(true);
     }
