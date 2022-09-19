@@ -27,7 +27,7 @@
                             <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($estimated_amount) }}</td>
                             <td>{{ numberFormat($balance) }}</td>
-                            <td>{{ round($balance / $estimated_amount * 100) }} %</td>
+                            <td>{{ round(div_num($balance, $estimated_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -59,7 +59,7 @@
                             <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($estimated_amount) }}</td>
                             <td>{{ numberFormat($balance) }}</td>
-                            <td>{{ round($balance / $estimated_amount * 100) }} %</td>
+                            <td>{{ round(div_num($balance, $estimated_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -91,7 +91,7 @@
                             <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($expense_amount) }}</td>
                             <td>{{ numberFormat($balance) }}</td>
-                            <td>{{ round($balance / $expense_amount * 100) }} %</td>
+                            <td>{{ round(div_num($balance, $expense_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -123,7 +123,7 @@
                             <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($expense_amount) }}</td>
                             <td>{{ numberFormat($balance) }}</td>
-                            <td>{{ round($balance / $expense_amount * 100) }} %</td>
+                            <td>{{ round(div_num($balance, $expense_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
                 </tbody>
