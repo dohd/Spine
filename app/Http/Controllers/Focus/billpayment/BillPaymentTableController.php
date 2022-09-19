@@ -61,8 +61,9 @@ class BillPaymentTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('supplier', function ($billpayment) {
-                if ($billpayment->supplier)
-                return $billpayment->supplier->name;
+                $supplier = $billpayment->supplier;
+                if ($supplier) 
+                return $supplier->name;
             })    
             ->addColumn('account', function ($billpayment) {
                 if ($billpayment->account)
