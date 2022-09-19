@@ -26,9 +26,9 @@ use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\supplier\Supplier;
+use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\supplier\SupplierRepository;
 use DateTime;
-use Request;
 
 /**
  * SuppliersController
@@ -262,8 +262,12 @@ class SuppliersController extends Controller
      */
     public function bills()
     {
-        $supplier = Supplier::find(request('supplier_id'));
-
-        return response()->json($supplier->bills);
+        $bills = UtilityBill::where('supplier_id', request('supplier_id'))
+            ->with(['purchase' => function ($q) {
+                $q->select('id', 'suppliername');
+            }])
+            ->orderBy('due_date', 'desc')->get(); 
+        
+        return response()->json($bills);
     }
 }
