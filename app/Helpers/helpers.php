@@ -899,3 +899,7 @@ function double_entry(
 
     return true;
 }
+// handle division by zero
+function div_num($numerator, $denominator) {
+    return $denominator == 0? 0 : ($numerator / $denominator);
+}
