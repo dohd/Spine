@@ -20,7 +20,7 @@ class HolidayList extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'holidays';
+    protected $table = 'leave_holidays';
 
     /**
      * Mass Assignable fields of model
