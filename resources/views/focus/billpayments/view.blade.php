@@ -48,6 +48,7 @@
                                     <th>#</th>
                                     <th>Due Date</th>
                                     <th>Bill No</th>
+                                    <th>Supplier Name</th>
                                     <th>Note</th>
                                     <th>Status</th>
                                     <th>Amount</th>
@@ -62,6 +63,7 @@
                                             <td>{{ $i+1 }}</td>
                                             <td>{{ dateFormat($bill->due_date) }}</td>
                                             <td>{{ gen4tid('BILL-', $bill->tid) }}</td>
+                                            <td>{{ $bill->purchase? $bill->purchase->suppliername : $pmt->supplier->name }}</td>
                                             <td>{{ $bill->note }}</td>
                                             <td>{{ $bill->status }}</td>
                                             <td>{{ numberFormat($bill->total) }}</td>

@@ -52,6 +52,7 @@
             <tr class="bg-gradient-directional-blue white">
                 <th>Due Date</th>
                 <th>Bill No</th>
+                <th>Supplier Name</th>
                 <th>Note</th>
                 <th>Status</th>
                 <th>Amount</th>
@@ -165,6 +166,7 @@
                 <tr>
                     <td class="text-center">${new Date(v.due_date).toDateString()}</td>
                     <td>${v.tid}</td>
+                    <td>${v.purchase? v.purchase.suppliername : ''}</td>
                     <td class="text-center">${v.note}</td>
                     <td>${v.status}</td>
                     <td>${accounting.formatNumber(v.total)}</td>
