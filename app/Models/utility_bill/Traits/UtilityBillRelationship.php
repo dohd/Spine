@@ -3,10 +3,16 @@
 namespace App\Models\utility_bill\Traits;
 
 use App\Models\items\UtilityBillItem;
+use App\Models\purchase\Purchase;
 use App\Models\supplier\Supplier;
 
 trait UtilityBillRelationship
-{
+{   
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class, 'ref_id');
+    }
+
     public function items()
     {
         return $this->hasMany(UtilityBillItem::class, 'bill_id');
