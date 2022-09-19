@@ -14,6 +14,26 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-2">
+                                <label for="status">Project Status</label>
+                                <select name="status" id="status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['active', 'complete'] as $val)
+                                        <option value="{{ $val }}">{{ ucfirst($val) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <table id="projectsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -21,13 +41,14 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Project No</th>  
-                                        <th>Customer</th>
+                                        <th>Client</th>
                                         <th>Title</th>   
-                                        <th>Status</th>  
-                                        <th>Quote/PI (Amount)</th>  
+                                        <th>QT/PI Amount</th>  
+                                        <th>Verification</th>
                                         <th>Income</th>    
-                                        <th>Exp</th>   
-                                        <th>G.P</th>                          
+                                        <th>Expense</th>   
+                                        <th>G.P</th>   
+                                        <th>%P</th>                       
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -55,8 +76,17 @@
     };
 
     const Index = {
+        status: '',
+
         init() {
             this.drawDataTable();
+            $('#status').change(this.statusChange);
+        },
+
+        statusChange() {
+            Index.status = $(this).val();
+            $('#projectsTbl').DataTable().destroy();
+            return Index.drawDataTable();
         },
 
         drawDataTable() {
@@ -67,7 +97,8 @@
                 stateSave: true,
                 ajax: {
                     url: "{{ route('biller.accounts.get_project_gross_profit') }}",
-                    type: 'post'
+                    type: 'post',
+                    data: {status: this.status}
                 },
                 columns: [{
                         data: 'DT_Row_Index',
@@ -86,12 +117,12 @@
                         name: 'name'
                     },
                     {
-                        data: 'status',
-                        name: 'status'
-                    },
-                    {
                         data: 'quote_amount',
                         name: 'quote_amount'
+                    },
+                    {
+                        data: 'verify_date',
+                        name: 'verify_date'
                     },
                     {
                         data: 'income',
@@ -105,6 +136,14 @@
                         data: 'gross_profit',
                         name: 'gross_profit'
                     },
+                    {
+                        data: 'percent_profit',
+                        name: 'percent_profit'
+                    },
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [6, 7, 8, 9] },
+                    { type: "custom-date-sort", targets: [5] }
                 ],
                 order: [
                     [0, "desc"]
