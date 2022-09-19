@@ -1,3 +1,5 @@
+@extends ('core.layouts.app')
+
 @section('title', 'Holiday Management')
 
 @section('content')
@@ -21,8 +23,9 @@
                         @php
                             $details = [
                                 'Title' => $holiday_list->title,
-                                'Date' => dateFormat() $holiday_list->date
-                                'Note' => 
+                                'Date' => dateFormat($holiday_list->date),
+                                'Note' => $holiday_list->note,
+                                'Is Recurrent' => $holiday_list->is_recurrent? 'Yes' : 'No'
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
@@ -32,33 +35,6 @@
                             </tr>
                         @endforeach
                     </table>
-
-                    <div class="table-responsive">
-                        <table class="table table-sm tfr my_stripe_single" id="invoiceTbl">
-                            <thead>
-                                <tr class="bg-gradient-directional-blue white">
-                                    <th>#</th>
-                                    <th>Description</th>
-                                    <th width="10%">Base Unit</th>
-                                    <th width="16%">Purchase Price</th>
-                                    <th width="12%">Unit Qty</th>
-                                    <th width="16%">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>   
-                                @foreach ($opening_stock->items as $i => $item)
-                                    <tr>
-                                        <td>{{ $i+1 }}</td>
-                                        <td>{{ $item->productvariation->name }}</td>
-                                        <td>{{ $item->product->unit? $item->product->unit->code : ''}}</td>
-                                        <td>{{ numberFormat($item->purchase_price) }}</td>
-                                        <td>{{ +$item->qty }}</td>
-                                        <td>{{ numberFormat($item->amount) }}</td>
-                                    </tr>
-                                @endforeach                                
-                            </tbody>                
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
