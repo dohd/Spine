@@ -55,12 +55,9 @@ class HolidayListTableController extends Controller
             ->addColumn('tid', function ($holiday_list) {
                 return $holiday_list->tid;
             })    
-            ->addColumn('date_list', function ($holiday_list) {
-                return $holiday_list->date_list;
+            ->addColumn('date', function ($holiday_list) {
+                return dateFormat($holiday_list->date);
             })
-            // ->addColumn('aggregate', function ($holiday_list) use($aggregate) {
-            //     return $aggregate;
-            // })
             ->addColumn('actions', function ($holiday_list) {
                 return $holiday_list->action_buttons;
             })
