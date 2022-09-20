@@ -914,6 +914,19 @@
                             </li>
                         </ul>
                     </li>
+
+                    {{-- leave category  --}}
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Leave Category Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.leave_category.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Leave Category
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.leave_category.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Leave Category
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     
                     {{-- attendance --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa ft-activity"></i> {{ trans('hrms.attendance') }}</a>

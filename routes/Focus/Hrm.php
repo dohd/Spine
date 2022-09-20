@@ -1,11 +1,16 @@
 <?php
 
+Route::group(['namespace' => 'leave_category'], function () {
+    Route::resource('leave_category', 'LeaveCategoryController');
+    // data table
+    Route::post('leave_category/get', 'LeaveCategoryTableController')->name('leave_category.get');
+});
+
 Route::group(['namespace' => 'holiday_list'], function () {
     Route::resource('holiday_list', 'HolidayListController');
     // data table
     Route::post('holiday_list/get', 'HolidayListTableController')->name('holiday_list.get');
 });
-
 
 Route::group(['namespace' => 'hrm'], function () {
     Route::post('hrms/set_permission', 'HrmsController@set_permission')->name('hrms.set_permission');
