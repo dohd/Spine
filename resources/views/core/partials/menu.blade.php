@@ -901,7 +901,6 @@
                     @permission('department-manage')
                     <li><a class="dropdown-item" href="{{ route('biller.departments.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('departments.departments') }}</a>
                     </li>
-
                     {{-- holiday list --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Holiday Management</a>
@@ -914,7 +913,6 @@
                             </li>
                         </ul>
                     </li>
-
                     {{-- leave category  --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Leave Category Management</a>
@@ -927,7 +925,18 @@
                             </li>
                         </ul>
                     </li>
-                    
+                    {{-- leave  --}}
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Leave Application</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.leave.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Leave Application
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.leave.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Leave
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     {{-- attendance --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa ft-activity"></i> {{ trans('hrms.attendance') }}</a>
                         <ul class="dropdown-menu">
@@ -939,7 +948,6 @@
                             </li>
                         </ul>
                     </li>
-
                     {{-- payroll --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> {{ trans('hrms.payroll') }}</a>
                         <ul class="dropdown-menu">

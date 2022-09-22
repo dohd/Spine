@@ -44,7 +44,7 @@
         {{ Form::text('policy', null, ['class' => 'form-control', 'id' => 'policy', 'required']) }}
     </div>
     <div class="col-2">
-        <label for="days">No. of Days</label>
+        <label for="days">Leave Duration (days)</label>
         {{ Form::number('qty', null, ['class' => 'form-control', 'min' => '1']) }}
     </div>
 </div>

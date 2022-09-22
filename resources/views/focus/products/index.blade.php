@@ -104,7 +104,7 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
     const config = {
-        ajax: {headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }}
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }}
     };
     
     const Index = {

@@ -1,5 +1,12 @@
 <?php
 
+Route::group(['namespace' => 'leave'], function () {
+    Route::post('leave/leave_categories', 'LeaveController@leave_categories')->name('leave.leave_categories');
+    Route::resource('leave', 'LeaveController');
+    // data table
+    Route::post('leave/get', 'LeaveTableController')->name('leave.get');
+});
+
 Route::group(['namespace' => 'leave_category'], function () {
     Route::resource('leave_category', 'LeaveCategoryController');
     // data table
