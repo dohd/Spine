@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Models\hrm;
+namespace App\Models\attendance;
 
-use App\Models\hrm\Traits\AttendanceRelationship;
+use App\Models\attendance\Traits\AttendanceAttribute;
+use App\Models\attendance\Traits\AttendanceRelationship;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
-    use ModelTrait, AttendanceRelationship;
+    use ModelTrait, AttendanceRelationship, AttendanceAttribute;
          
     /**
      * NOTE : If you want to implement Soft Deletes in this model,

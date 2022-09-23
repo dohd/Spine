@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Models\hrm\Traits;
+namespace App\Models\attendance\Traits;
+
+use App\Models\Access\User\User;
 
 trait AttendanceRelationship
 {

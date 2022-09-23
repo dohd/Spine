@@ -1,5 +1,12 @@
 <?php
 
+Route::group(['namespace' => 'attendance'], function () {
+    Route::post('attendances/day_attendance', 'AttendanceController@day_attendance')->name('attendances.day_attendance');
+    Route::resource('attendances', 'AttendanceController');
+    // data table
+    Route::post('attendances/get', 'AttendanceTableController')->name('attendances.get');
+});
+
 Route::group(['namespace' => 'leave'], function () {
     Route::post('leave/leave_categories', 'LeaveController@leave_categories')->name('leave.leave_categories');
     Route::resource('leave', 'LeaveController');
