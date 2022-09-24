@@ -134,20 +134,24 @@ class AttendanceController extends Controller
     {
         $attendances = Attendance::whereMonth('date', $request->month)
             ->get(['employee_id', 'date'])->toArray();
-        // group employees by day of month
-        $day_group = array_reduce($attendances, function ($init, $curr) {
+
+        $day_employee_group = array_reduce($attendances, function ($init, $curr) {
             $d = (int) (new DateTime($curr['date']))->format('d');
             if (!in_array($d, array_keys($init))) $init[$d] = [];
             $init[$d][] = $curr['employee_id'];
 
             return $init;
         }, []);
-        // count unique employees for each day
-        foreach ($day_group as $key => $val) {
-            $day_group[$key] = count(array_unique($val));
+
+        $day_attendance = [];
+        foreach ($day_employee_group as $key => $val) {
+            $day_attendance[] = array(
+                'day' => $key,
+                'count' => count(array_unique($val))
+            );
         }
-        // employee count
+
         $employee_count = User::count();
-        return response()->json([compact('employee_count', 'day_group')]);
+        return response()->json(compact('employee_count', 'day_attendance'));
     }
 }

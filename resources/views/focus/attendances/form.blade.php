@@ -8,7 +8,7 @@
                 </option>
             @endfor
         </select>
-        {{ Form::hidden('day', null, ['id' => 'day']) }}
+        {{ Form::text('day', null, ['class' => 'form-control mt-1', 'id' => 'day', 'required']) }}
     </div>
     <div class="col-10">
         <h3 class="calendar-title text-center font-weight-bold"></h3>
@@ -44,8 +44,8 @@
                         <tr>
                             <td>{{ $i+1 }}</td>
                             <td>{{ $row->first_name }} {{ $row->last_name }}</td>
-                            <td><input type="time" name="clock_in[]" placeholder="HH:MM" class="form-control clock-in"></td>
-                            <td><input type="time" name="clock_out[]" placeholder="HH:MM" class="form-control clock-out"></td>
+                            <td><input type="time" name="clock_in[]" placeholder="HH:MM" class="form-control clock-in" required></td>
+                            <td><input type="time" name="clock_out[]" placeholder="HH:MM" class="form-control clock-out" required></td>
                             <td>
                                 <select name="status[]" class="custom-select status">
                                     @foreach (['present', 'absent', 'on_leave'] as $val)
@@ -84,6 +84,7 @@
         init() {
             $.ajaxSetup(config.ajax);
             $('#month').change(this.monthChange).trigger('change');
+            $('#day').focus(() => alert('Please, select day from calendar!'));
             $('#weeksTbl').on('click', '.day-btn', this.dayBtnClick);
         },
 
@@ -109,47 +110,47 @@
                     init[i].push(curr);
                     init.push([]);
                 } else init[i].push(curr);
-    
                 return init;
             }, [[]]);
 
-            const tbody = Index.loadCalendar(weeks);
-            $('#weeksTbl').html('').append(tbody);
-            Index.loadUnmarked();
-            Index.fetchDayAttendance();
+            const rows = Index.loadWeekRow(weeks);
+            $('#weeksTbl tbody').html('').append(rows);
+            Index.attendanceCount();
         },  
 
-        fetchDayAttendance() {
+        attendanceCount() {
             const url = "{{ route('biller.attendances.day_attendance') }}";
             $.post(url, {month: $('#month').val()}, data => {
-                console.log(data)
-            });
+                const dayAttendance = data.day_attendance;
+                const employeeCount = data.employee_count;
 
-        },
-
-        loadCalendar(weeks = []) {
-            const tbody = document.createElement('tbody');
-            weeks.forEach(week => {
-                const row = document.createElement('tr');
-                week.forEach(day => {
-                    const td = document.createElement('td');
-                    const span = document.createElement('span');
-                    span.innerText = day;
-                    span.classList.add('day-btn', 'btn', 'btn-primary', 'round');
-                    td.append(span);
-                    row.append(td);
+                $('#weeksTbl').find('td').each(function () {
+                    const day = $(this).find('.day-btn').text();
+                    let count = 0;
+                    dayAttendance.forEach(v => {
+                        if (v.day == day) count = v.count;
+                    });
+                    if (count) $(this).find('.attendance-ratio').text(`${count}/${employeeCount}`);
                 });
-                tbody.append(row);
             });
-            return tbody;
         },
 
-        loadUnmarked() {
-            $('#weeksTbl tbody tr').each(function() {
-                $(this).find('td').each(function() {
-                    $(this).append(`<sub class="text-success pl-1">${'10/50'}</sub>`);
-                })
+        loadWeekRow(weeks = []) {
+            const trList = [];
+            weeks.forEach(week => {
+                const tdList = [];
+                week.forEach(day => {
+                    const td = `
+                        <td>
+                            <span class="day-btn btn btn-primary round">${day}</span>
+                            <sub class="attendance-ratio text-success pl-1"></sub>
+                        </td>
+                    `;
+                    tdList.push(td);
+                });
+                trList.push(`<tr>${tdList.join('')}</tr>`)
             });
+            return trList.join('');
         },
     };
 

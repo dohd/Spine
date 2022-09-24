@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Leave Management')
+@section('title', 'Attendance Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Leave Management</h4>
+            <h4 class="content-header-title">Attendance Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.leave.partials.leave-header-buttons')
+                @include('focus.attendances.partials.attendances-header-buttons')
             </div>
         </div>
     </div>
@@ -18,38 +18,31 @@
     <div class="content-body">
         <div class="card">
             <div class="card-content">
-                <div class="card-header">
+                {{-- <div class="card-header">
                     <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="#leaveStatusModal">
                         <i class="fa fa-pencil" aria-hidden="true"></i> Status
                     </a>
-                </div>
+                </div> --}}
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
                             $employee_name = '';
-                            $employee = $leave->employee;
+                            $employee = $attendance->employee;
                             if ($employee) $employee_name = $employee->first_name . ' ' . $employee->last_name;
                         
                             $details = [
+                                'Date' => dateFormat($attendance->date),
                                 'Employee' => $employee_name,
-                                'Leave Category' => $leave->leave_category? $leave->leave_category->title : '',
-                                'Leave Status' => $leave->status,
-                                'Leave Reason' => $leave->reason,
-                                'Leave Duration' => $leave->qty . ' days',
-                                'Start Date' => dateFormat($leave->start_date),
-                                'End Date' => dateFormat($leave->end_date),
+                                'Clock In' => $attendance->clock_in,
+                                'Clock Out' => $attendance->clock_out,
+                                'Hours' => +$attendance->hrs,
+                                'Attendance Status' => $attendance->status,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
-                                <th width="30%">{{ $key }}</th>
-                                <td>
-                                    @if ($key == 'Leave Status')
-                                        <span class="text-success">{{ $val }}</span>
-                                    @else
-                                        {{ $val }}
-                                    @endif
-                                </td>
+                                <th>{{ $key }}</th>
+                                <td>{{ $val }}</td>
                             </tr>
                         @endforeach
                     </table>
@@ -58,5 +51,5 @@
         </div>
     </div>
 </div>
-@include('focus.leave.partials.leave-status-modal')
+{{-- @include('focus.leave.partials.leave-status-modal') --}}
 @endsection

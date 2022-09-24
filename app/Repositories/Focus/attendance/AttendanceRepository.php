@@ -37,7 +37,7 @@ class AttendanceRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+        dd($input);
         $data_items = Arr::only($input, ['clock_in', 'clock_out', 'status', 'employee_id']);
         $data_items = array_filter(modify_array($data_items), function ($v) { 
             return $v['clock_in'] && $v['clock_out'];
@@ -48,13 +48,40 @@ class AttendanceRepository extends BaseRepository
             $c1 = new DateTime($v['clock_in']);
             $c2 = new DateTime($v['clock_out']);
             $hrs = $c2->diff($c1)->format('%h');
-
             return array_replace($v, compact('date', 'hrs'));
         }, $data_items);
-        // dd($data_items);
-        $result = Attendance::create($data_items[1]);
-        if ($result) return $result;
-            
+
+        $employee_ids = array_map(function ($v) { return $v['employee_id']; }, $data_items);
+        $attendances = Attendance::whereMonth('date', $input['month'])
+            ->whereIn('employee_id', $employee_ids)
+            ->where('is_overtime', 0)
+            ->get();
+
+        if ($attendances->count()) {
+            $updated_employee_ids = [];
+            foreach ($attendances as $attendance) {
+                foreach ($data_items as $item) {
+                    $d = (int) (new DateTime($attendance['date']))->format('d');
+                    $same_day = $input['day'] == $d;
+                    $same_employee = $attendance->employee_id == $item['employee_id'];
+                    if ($same_employee && $same_day) {
+                        $attendance->update($item);
+                        $updated_employee_ids[] = $item['employee_id'];
+                        break;
+                    } 
+                }
+            }
+            // exclude updated data
+            $data_items = array_filter($data_items, function ($v) use($updated_employee_ids) { 
+                return !in_array($v['employee_id'], $updated_employee_ids);
+            });
+        } 
+        
+        foreach ($data_items as $item) {
+            Attendance::create($item);
+        }
+        if ($data_items) return true;
+                    
         throw new GeneralException(trans('exceptions.backend.leave_category.create_error'));
     }
 
