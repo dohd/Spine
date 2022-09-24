@@ -2,13 +2,13 @@
     <div class="col-2">
         <label for="month">Monthly Calendar Days</label>
         <select name="month" id="month" class="custom-select">
-            @for ($i = 1; $i < 13; $i++)
-                <option value="{{ $i }}">
-                    {{ DateTime::createFromFormat('!m', $i)->format('F') }}
+            @foreach (range(1,12) as $v)
+                <option value="{{ $v }}">
+                    {{ DateTime::createFromFormat('!m', $v)->format('F') }}
                 </option>
-            @endfor
+            @endforeach
         </select>
-        {{ Form::text('day', null, ['class' => 'form-control mt-1', 'id' => 'day', 'required']) }}
+        {{ Form::text('day', null, ['class' => 'form-control mt-1', 'placeholder' => 'attendance day', 'id' => 'day', 'required']) }}
     </div>
     <div class="col-10">
         <h3 class="calendar-title text-center font-weight-bold"></h3>
@@ -18,7 +18,7 @@
 <div class="form-group row">
     <div class="col-12">
         <div class="table-responsive">
-            <table id="weeksTbl" class="table table-bordered text-center" style="cursor:pointer;">
+            <table id="weeksTbl" class="table table-bordered text-center">
                 <tbody>
                 </tbody>
             </table>
@@ -36,7 +36,7 @@
                         <th width="50%">Employee Name</th>
                         <th>Clock In</th>
                         <th>Clock Out</th>
-                            <th>Status</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -125,8 +125,8 @@
                 const employeeCount = data.employee_count;
 
                 $('#weeksTbl').find('td').each(function () {
-                    const day = $(this).find('.day-btn').text();
                     let count = 0;
+                    const day = $(this).find('.day-btn').text();
                     dayAttendance.forEach(v => {
                         if (v.day == day) count = v.count;
                     });
