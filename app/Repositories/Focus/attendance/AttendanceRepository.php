@@ -37,7 +37,7 @@ class AttendanceRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
         $data_items = Arr::only($input, ['clock_in', 'clock_out', 'status', 'employee_id']);
         $data_items = array_filter(modify_array($data_items), function ($v) { 
             return $v['clock_in'] && $v['clock_out'];
@@ -59,6 +59,7 @@ class AttendanceRepository extends BaseRepository
 
         if ($attendances->count()) {
             $updated_employee_ids = [];
+            // update attendance
             foreach ($attendances as $attendance) {
                 foreach ($data_items as $item) {
                     $d = (int) (new DateTime($attendance['date']))->format('d');
@@ -76,7 +77,7 @@ class AttendanceRepository extends BaseRepository
                 return !in_array($v['employee_id'], $updated_employee_ids);
             });
         } 
-        
+        // save new attendance
         foreach ($data_items as $item) {
             Attendance::create($item);
         }
