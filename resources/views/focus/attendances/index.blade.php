@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Edit | Attendance Management')
+@section('title', 'Attendance Management')
 
 @section('content')
 <div class="content-wrapper">

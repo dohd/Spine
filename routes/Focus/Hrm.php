@@ -1,6 +1,7 @@
 <?php
 
 Route::group(['namespace' => 'attendance'], function () {
+    Route::post('attendances/employees_attendance', 'AttendanceController@employees_attendance')->name('attendances.employees_attendance');
     Route::post('attendances/day_attendance', 'AttendanceController@day_attendance')->name('attendances.day_attendance');
     Route::resource('attendances', 'AttendanceController');
     // data table
