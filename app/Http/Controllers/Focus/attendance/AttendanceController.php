@@ -128,7 +128,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Day attendances
+     * Day Attendance Count
      */
     public function day_attendance(Request $request)
     {
@@ -153,5 +153,20 @@ class AttendanceController extends Controller
 
         $employee_count = User::count();
         return response()->json(compact('employee_count', 'day_attendance'));
+    }
+
+    /**
+     * Attendance employees
+     */
+    public function employees_attendance(Request $request)
+    {
+        $attendances = Attendance::whereMonth('date', $request->month)
+            ->whereDay('date', $request->day)
+            ->with(['employee' => function ($q) {
+                $q->select('id', 'first_name', 'last_name');
+            }])
+            ->get();
+
+        return response()->json($attendances);
     }
 }
