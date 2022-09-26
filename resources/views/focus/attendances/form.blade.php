@@ -29,7 +29,7 @@
 <div class="form-group row">
     <div class="col-12">
         <div class="table-responsive">
-            <table class="table tfr my_stripe_single text-center">
+            <table id="employeeTbl" class="table tfr my_stripe_single text-center">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -41,11 +41,11 @@
                 </thead>
                 <tbody>
                     @foreach ($employees as $i => $row)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td>{{ $row->first_name }} {{ $row->last_name }}</td>
-                            <td><input type="time" name="clock_in[]" placeholder="HH:MM" class="form-control clock-in" required></td>
-                            <td><input type="time" name="clock_out[]" placeholder="HH:MM" class="form-control clock-out" required></td>
+                        <tr class="hidden">
+                            <td class="index">{{ $i+1 }}</td>
+                            <td class="employee-name">{{ $row->first_name }} {{ $row->last_name }}</td>
+                            <td><input type="time" name="clock_in[]" placeholder="HH:MM" class="form-control clock-in"></td>
+                            <td><input type="time" name="clock_out[]" placeholder="HH:MM" class="form-control clock-out"></td>
                             <td>
                                 <select name="status[]" class="custom-select status">
                                     @foreach (['present', 'absent', 'on_leave'] as $val)
@@ -53,7 +53,7 @@
                                     @endforeach
                                 </select>
                             </td>
-                            {{ Form::hidden('employee_id[]', $row->id) }}
+                            {{ Form::hidden('employee_id[]', $row->id, ['class' => 'employee-id']) }}
                         </tr>
                     @endforeach
                 </tbody>
@@ -67,7 +67,7 @@
         <a href="{{ route('biller.attendances.index') }}" class="btn btn-danger block">Cancel</a>    
     </div>
     <div class="col-1 ml-1">
-        {{ Form::submit(@$attendance? 'Update' : 'Generate', ['class' => 'form-control btn btn-primary text-white']) }}
+        {{ Form::submit(@$attendance? 'Update' : 'Generate', ['class' => 'form-control btn btn-primary text-white hidden']) }}
     </div>
 </div>
 
@@ -80,12 +80,15 @@
     };
 
     const Index = {
+        defaultEmployeeRows: '',
 
         init() {
             $.ajaxSetup(config.ajax);
-            $('#month').change(this.monthChange).trigger('change');
-            $('#day').focus(() => alert('Please, select day from calendar!'));
+            Index.defaultEmployeeRows = $('#employeeTbl tbody').html().replace(/class="hidden"/g, '');
+
             $('#weeksTbl').on('click', '.day-btn', this.dayBtnClick);
+            $('#month').change(this.monthChange).trigger('change');
+            $('#day').focus(() => alert('Please, click on day from calendar!'));
         },
 
         dayBtnClick() {
@@ -93,11 +96,14 @@
             const monthLabel = $('#month option:selected').text().replace(/\s+/g, '');
             $('.calendar-title').text(`Attendance for ${monthLabel}, day ${day}`);
             $('#day').val(day);
+            $('input:submit').removeClass('hidden');
+            Index.loadAttendanceEmployees();
         },
 
         monthChange() {
             $('.calendar-title').text('');
             $('#day').val('');
+            $('input:submit').addClass('hidden');
 
             const monthIndx = $(this).val();
             const year = new Date().getFullYear();
@@ -119,18 +125,33 @@
         },  
 
         attendanceCount() {
+            const month =  $('#month').val();
             const url = "{{ route('biller.attendances.day_attendance') }}";
-            $.post(url, {month: $('#month').val()}, data => {
+            $.post(url, {month}, data => {
                 const dayAttendance = data.day_attendance;
                 const employeeCount = data.employee_count;
 
                 $('#weeksTbl').find('td').each(function () {
+                    const td = $(this);
                     let count = 0;
-                    const day = $(this).find('.day-btn').text();
+                    const monthDay = td.find('.day-btn').text();
                     dayAttendance.forEach(v => {
-                        if (v.day == day) count = v.count;
+                        if (v.day == monthDay) count = v.count;
                     });
-                    if (count) $(this).find('.attendance-ratio').text(`${count}/${employeeCount}`);
+                    if (count) td.find('.attendance-ratio').text(`${count}/${employeeCount}`);
+                    // disable future dates
+                    const today = new Date().getDate()
+                    const thisMonth = new Date().getMonth() + 1;
+                    if (month > thisMonth) {
+                        td.find('.day-btn').prop('disabled', true);
+                        td.addClass('bg-light')
+                    } else if (month == thisMonth && monthDay > today) {
+                        td.find('.day-btn').prop('disabled', true);
+                        td.addClass('bg-light')
+                    }  else {
+                        td.find('.day-btn').prop('disabled', false);
+                        td.removeClass('bg-light')
+                    }
                 });
             });
         },
@@ -151,6 +172,31 @@
                 trList.push(`<tr>${tdList.join('')}</tr>`)
             });
             return trList.join('');
+        },
+
+        loadAttendanceEmployees() {
+            const day = $('#day').val();
+            const month = $('#month').val();
+            $('#employeeTbl tbody').html('').append(Index.defaultEmployeeRows);
+
+            const url = "{{ route('biller.attendances.employees_attendance') }}";
+            $.post(url, {day, month}, data => {
+                data.forEach((v, i) => {
+                    $('#employeeTbl tbody tr').each(function () {
+                        const row = $(this);
+                        const employeeId = row.find('.employee-id').val();
+                        for (let i = 0; i < data.length; i++) {
+                            const v = data[i];
+                            if (employeeId == v.employee?.id) {
+                                row.find('.clock-in').val(v.clock_in);
+                                row.find('.clock-out').val(v.clock_out);
+                                row.find('.status').val(v.status);
+                                break;
+                            }
+                        }
+                    });
+                });
+            })
         },
     };
 
