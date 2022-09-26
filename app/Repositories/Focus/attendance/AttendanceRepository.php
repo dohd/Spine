@@ -4,6 +4,7 @@ namespace App\Repositories\Focus\attendance;
 
 use App\Exceptions\GeneralException;
 use App\Models\attendance\Attendance;
+use App\Models\leave\Leave;
 use App\Repositories\BaseRepository;
 use DateTime;
 use Illuminate\Support\Arr;
@@ -39,17 +40,21 @@ class AttendanceRepository extends BaseRepository
     {
         // dd($input);
         $data_items = Arr::only($input, ['clock_in', 'clock_out', 'status', 'employee_id']);
-        $data_items = array_filter(modify_array($data_items), function ($v) { 
-            return $v['clock_in'] && $v['clock_out'];
-        });
-
         $date = date_for_database(implode('-', [date('Y'), $input['month'], $input['day']]));
+
         $data_items = array_map(function ($v) use($date) {
-            $c1 = new DateTime($v['clock_in']);
-            $c2 = new DateTime($v['clock_out']);
-            $hrs = $c2->diff($c1)->format('%h');
+            $hrs = '';
+            if ($v['clock_in'] && $v['clock_out']) {
+                $c1 = new DateTime($v['clock_in']);
+                $c2 = new DateTime($v['clock_out']);
+                $hrs = $c2->diff($c1)->format('%h');    
+                if ($v['status'] != 'present') 
+                    $v['status'] = 'present';
+            } elseif ($v['status'] != 'on_leave') {
+                $v['status'] = 'absent';
+            }
             return array_replace($v, compact('date', 'hrs'));
-        }, $data_items);
+        }, modify_array($data_items));
 
         $employee_ids = array_map(function ($v) { return $v['employee_id']; }, $data_items);
         $attendances = Attendance::whereMonth('date', $input['month'])
@@ -77,10 +82,32 @@ class AttendanceRepository extends BaseRepository
                 return !in_array($v['employee_id'], $updated_employee_ids);
             });
         } 
-        // save new attendance
+        // save attendances
         foreach ($data_items as $item) {
             Attendance::create($item);
         }
+
+        // update employee leave status on attendance
+        $attendances = Attendance::whereMonth('date', $input['month'])
+            ->whereIn('employee_id', $employee_ids)
+            ->where('is_overtime', 0)
+            ->get();
+        $leaves = Leave::whereIn('employee_id', $employee_ids)->where('status', 'approved')
+            ->get(['id', 'employee_id', 'start_date', 'end_date']);
+        foreach ($attendances as $attendance) {
+            foreach ($leaves as $leave) {
+                if ($leave->employee_id == $attendance->employee_id) {
+                    $attendance_date = new DateTime($attendance->date);
+                    $leave_start = new DateTime($leave->start_date);
+                    $leave_end = new DateTime($leave->end_date);
+                    if ($attendance_date >= $leave_start && $attendance_date <= $leave_end) {
+                        $attendance->update(['status' => 'on_leave']);
+                        break;
+                    }
+                }
+            }
+        }
+
         if ($data_items) return true;
                     
         throw new GeneralException(trans('exceptions.backend.leave_category.create_error'));
