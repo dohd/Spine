@@ -263,6 +263,7 @@ class SuppliersController extends Controller
     public function bills()
     {
         $bills = UtilityBill::where('supplier_id', request('supplier_id'))
+            ->whereColumn('amount_paid', '<', 'total')
             ->with(['purchase' => function ($q) {
                 $q->select('id', 'suppliername');
             }])

@@ -413,6 +413,7 @@ class InvoiceRepository extends BaseRepository
         $payment->customer->decrement('on_account', $unallocated);
 
         $result = $payment->update($data);
+        
         // update customer unallocated amount
         $unallocated = $payment->amount - $payment->allocate_ttl;        
         $payment->customer->increment('on_account', $unallocated);

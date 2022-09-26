@@ -1,7 +1,13 @@
 <div class="form-group row">
     <div class="col-4">
         <label for="supplier">Supplier</label>
-        <select name="supplier_id" id="supplier" class="form-control"></select>
+        <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose supplier" required>
+            @foreach ($suppliers as $row)
+                <option value="{{ $row->id }}" {{ @$billpayment && $billpayment->supplier_id == $row->id? 'selected' : '' }}>
+                    {{ $row->name }}
+                </option>
+            @endforeach
+        </select>
     </div>
     <div class="col-2">
         <label for="tid" class="caption">Payment No.</label>
@@ -15,13 +21,13 @@
         <label for="payment_mode">Payment Mode</label>
         <select name="payment_mode" id="payment_mode" class="custom-select">
             @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
-                <option value="{{ $val }}">{{ strtoupper($val) }}</option>
+                <option value="{{ $val }}" {{ @$billpayment->payment_mode == $val? 'selected' : '' }}>{{ strtoupper($val) }}</option>
             @endforeach
         </select>
     </div>  
     <div class="col-2">
         <label for="reference">Reference</label>
-        {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference']) }}
+        {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference', 'required']) }}
     </div> 
 </div> 
 
@@ -31,7 +37,7 @@
             {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
     </div>  
     <div class="col-2">
-        <label for="account">From Account (Credit)</label>
+        <label for="account">Pay From Account</label>
         <select name="account_id" id="account" class="custom-select">                                   
             @foreach ($accounts as $row)
                 <option value="{{ $row->id }}" {{ $row->id == @$billpayment->account_id? 'selected' : '' }}>
@@ -62,6 +68,27 @@
             </tr>
         </thead>
         <tbody>   
+            @isset ($billpayment)
+                @foreach ($billpayment->items as $item)
+                    @php
+                        $bill = $item->supplier_bill;
+                        if (!$bill) continue;
+                    @endphp
+                    <tr>
+                        <td class="text-center">{{ dateFormat($bill->due_date) }}</td>
+                        <td>{{ $bill->tid }}</td>
+                        <td>{{ $bill->purchase? $bill->purchase->suppliername : $bill->supplier->name }}</td>
+                        <td class="text-center">{{ $bill->name }}</td>
+                        <td>{{ $bill->status }}</td>
+                        <td>{{ numberFormat($bill->total) }}</td>
+                        <td>{{ numberFormat($bill->amount_paid) }}</td>
+                        <td class="text-center due"><b>{{ numberFormat($bill->total - $bill->amount_paid) }}</b></td>
+                        <td><input type="text" class="form-control paid" name="paid[]" value="{{ numberFormat($item->paid) }}" required></td>
+                        <input type="hidden" name="bill_id[]" value="{{ $bill->id }}">
+                        <input type="hidden" name="id[]" value="{{ $item->id }}">
+                    </tr>
+                @endforeach
+            @endisset      
         </tbody>                
     </table>
 </div>
@@ -79,7 +106,7 @@
 </div>
 <div class="row mt-1">                            
     <div class="col-2 ml-auto">  
-        {{ Form::submit(@$payment? 'Update Payment' : 'Make Payment', ['class' =>'btn btn-primary btn-lg']) }}
+        {{ Form::submit(@$billpayment? 'Update Payment' : 'Make Payment', ['class' =>'btn btn-primary btn-lg']) }}
     </div>
 </div>
 
@@ -90,58 +117,51 @@
     const config = {
         ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         datepicker: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        supplierSelect2: {
-            placeholder: 'Choose Supplier',
-            allowClear: true,
-            ajax: {
-                url: "{{ route('biller.suppliers.select') }}",
-                type: 'POST',
-                quietMillis: 50,
-                data: ({term}) => ({q: term, keyword: term}),
-                processResults: data => {
-                    return {results: data.map(v => ({id: v.id, text: v.name + ' : ' + v.email}))}; 
-                }
-            }
-        },
-        fetchSupplierBill: (supplier_id) => {
-            return $.ajax({
-                url: "{{ route('biller.suppliers.bills') }}",
-                type: 'POST',
-                quietMillis: 50,
-                data: {supplier_id},
-            });
-        }
     };
 
     const Form = {
+        billPayment: @json(@$billpayment),
+
         init() {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
-            $('#supplier').select2(config.supplierSelect2).change(this.supplierChange);  
-            $('#amount').keyup(this.allocateAmount).focusout(this.amountFocusOut).focus(this.amountFocus);
-            $('#documentsTbl').on('change', '.paid', () => Form.columnTotals());
+            $('#supplier').select2({allowClear: true}); 
+
+            $('#amount').keyup(this.allocateAmount).focusout(this.amountFocusOut).trigger('focusout');
+            $('#documentsTbl').on('focusout', '.paid', this.tablePaidChange);
+            this.columnTotals();
+
+            if (!this.billPayment) {
+                $('#supplier').val('').change().attr('disabled', false);  
+            } else {
+                $('#supplier').attr('disabled', true);
+            }
+            $('#supplier').change(this.supplierChange);  
         },
 
         amountFocusOut() {
-            const el = $(this);
-            el.val(accounting.formatNumber(el.val()));
+            $(this).val(accounting.formatNumber($(this).val()));
         },
 
-        amountFocus() {
-            if (!$('#supplier').val()) $(this).blur();
+        tablePaidChange() {
+            const tr = $(this).parents('tr:first');
+            const val = accounting.unformat($(this).val());
+            const due = accounting.unformat(tr.find('.due').text());
+            if (val > due) $(this).val(accounting.formatNumber(due));
+            Form.columnTotals();
         },
 
         allocateAmount() {
-            const el = $(this);
-            let amount = accounting.unformat(el.val());
             let dueTotal = 0;
             let allocateTotal = 0;
+            let amount = accounting.unformat($(this).val());
             $('#documentsTbl tbody tr').each(function() {
                 const due = accounting.unformat($(this).find('.due').text());
-                if (due > amount) $(this).find('.paid').val(accounting.formatNumber(amount));
-                else if (amount > due) $(this).find('.paid').val(accounting.formatNumber(due));
-                else $(this).find('.paid').val(0);
+                const paidInput = $(this).find('.paid');
+                if (due > amount) paidInput.val(accounting.formatNumber(amount));
+                else if (amount > due) paidInput.val(accounting.formatNumber(due));
+                else paidInput.val(accounting.formatNumber(due));
 
-                const paid = accounting.unformat($(this).find('.paid').val());
+                const paid = accounting.unformat(paidInput.val());
                 amount -= paid;
                 dueTotal += due;
                 allocateTotal += paid;
@@ -154,7 +174,8 @@
             const el = $(this);
             $('#documentsTbl tbody').html('');
             if (!el.val()) return;
-            config.fetchSupplierBill(el.val()).done(data => {
+
+            $.post("{{ route('biller.suppliers.bills') }}", {supplier_id: el.val()}, data => {
                 data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
             });
         },
@@ -172,7 +193,7 @@
                     <td>${accounting.formatNumber(v.total)}</td>
                     <td>${accounting.formatNumber(v.amount_paid)}</td>
                     <td class="text-center due"><b>${balance}</b></td>
-                    <td><input type="text" class="form-control paid" name="paid[]"></td>
+                    <td><input type="text" class="form-control paid" name="paid[]" required></td>
                     <input type="hidden" name="bill_id[]" value="${v.id}">
                 </tr>
             `;

@@ -12,6 +12,7 @@ use App\Repositories\BaseRepository;
 use DB;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class ProductcategoryRepository.
@@ -51,7 +52,6 @@ class BillPaymentRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
-        // sanitize
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
@@ -61,12 +61,12 @@ class BillPaymentRepository extends BaseRepository
                 }, $val);
             }
         }
-        if($input['amount'] == 0) throw ValidationException::withMessages(['amount required!']);
+        if($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
         $result = Billpayment::create($input);
 
         $data_items = Arr::only($input, ['bill_id', 'paid']);
         $data_items = array_filter(modify_array($data_items), function ($v) { return $v['paid'] > 0; });
-        if (!$data_items) throw ValidationException::withMessages(['Allocate amount on bill!']);
+        if (!$data_items) throw ValidationException::withMessages(['Allocate amount on payment line items!']);
 
         foreach ($data_items as $key => $val) {
             $val['bill_payment_id'] = $result->id;
@@ -90,9 +90,10 @@ class BillPaymentRepository extends BaseRepository
         /**accounting */
         $this->post_transaction($result);
 
-        DB::commit();
-        if ($result) return $result;
-
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Lead');
     }
@@ -107,7 +108,66 @@ class BillPaymentRepository extends BaseRepository
      */
     public function update(Billpayment $billpayment, array $input)
     {
-        dd($input);
+        // dd($input);
+        foreach ($input as $key => $val) {
+            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
+            if (in_array($key, ['paid'])) {
+                $input[$key] = array_map(function ($v) { 
+                    return numberClean($v); 
+                }, $val);
+            }
+        }
+        if($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+
+        // reverse supplier unallocated amount
+        $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
+        $billpayment->supplier->decrement('on_account', $unallocated);
+
+        $result = $billpayment->update($input);
+
+        // update supplier unallocated amount
+        $unallocated = $billpayment->amount - $billpayment->allocate_ttl;        
+        $billpayment->supplier->increment('on_account', $unallocated);
+
+        // allocated items
+        $data_items = Arr::only($input, ['id', 'bill_id', 'paid']);
+        $data_items = modify_array($data_items);
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $payment_items = BillpaymentItem::whereIn('id', $item_ids)->get();
+        // reverse bill amount paid
+        foreach ($payment_items as $item) {
+            if ($item->supplier_bill) $item->supplier_bill->decrement('amount_paid', $item->paid);
+        }
+        // update payment items
+        $data_items = array_map(function ($v) {
+            return array_replace($v, [
+                'paid' => numberClean($v['paid'])
+            ]);
+        }, $data_items);
+        Batch::update(new BillpaymentItem, $data_items, 'id');
+
+        foreach ($billpayment->items as $item) {
+            // update bill amount paid
+            $bill = $item->supplier_bill;
+            if ($bill) {
+                $bill->increment('amount_paid', $item->paid);
+                if ($bill->amountpaid == 0) $bill->update(['status' => 'due']);
+                elseif (round($bill->total) > round($bill->amountpaid)) $bill->update(['status' => 'partial']);
+                else $bill->update(['status' => 'paid']);
+            }
+            // delete items with zero payment
+            if ($item->paid == 0) $item->delete();
+        }
+
+        /** accounting */
+        Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
+        $this->post_transaction($billpayment);
+
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
