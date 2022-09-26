@@ -940,7 +940,7 @@
                     {{-- attendance --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa ft-activity"></i> {{ trans('hrms.attendance') }}</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.attendances.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('attendances.attendance') }}
+                            <li><a class="dropdown-item" href="{{ route('biller.attendances.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage {{ trans('attendances') }}
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.attendances.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('hrms.attendance_add') }}
