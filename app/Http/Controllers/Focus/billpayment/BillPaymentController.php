@@ -44,9 +44,10 @@ class BillPaymentController extends Controller
     public function create(Request $request)
     {
         $tid = Billpayment::max('tid');
-        $accounts = Account::whereHas('accountType', function ($q) {
-            $q->where('system', 'bank');
-        })->get(['id', 'holder']);
+        $accounts = Account::whereNull('system')
+            ->whereHas('accountType', function ($q) {
+                $q->where('system', 'bank');
+            })->get(['id', 'holder']);
         $suppliers = Supplier::get(['id', 'name']);
 
         return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers'));
@@ -74,7 +75,8 @@ class BillPaymentController extends Controller
     public function edit(Billpayment $billpayment)
     {
         $suppliers = Supplier::get(['id', 'name']);
-        $accounts = Account::whereHas('accountType', function ($q) {
+        $accounts = Account::whereNull('system')
+        ->whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
 

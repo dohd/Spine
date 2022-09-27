@@ -52,6 +52,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>RMT No.</th>
                                         <th>Supplier</th>
                                         <th>Account</th>
                                         <th>Date</th>
@@ -92,8 +93,8 @@
     const Index = {
         init() {
             this.drawDataTable();
-            $('#supplier').select2({allowClear: true}).change(this.supplierChange);
-            $('#supplier').val('').change();    
+            $('#supplier').select2({allowClear: true}).val('').trigger('change');  
+            $('#supplier').change(this.supplierChange);  
         },
 
         supplierChange() {
@@ -124,6 +125,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
+                    {data: 'tid', name: 'tid'},
                     {data: 'supplier', name: 'supplier'},
                     {data: 'account', name: 'account'},                    
                     {data: 'date', name: 'date'},

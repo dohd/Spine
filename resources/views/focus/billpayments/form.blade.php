@@ -10,7 +10,7 @@
         </select>
     </div>
     <div class="col-2">
-        <label for="tid" class="caption">Payment No.</label>
+        <label for="tid" class="caption">RMT No.</label>
         {{ Form::text('tid', @$billpayment ? $billpayment->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
     </div>  
     <div class="col-2">
@@ -38,7 +38,8 @@
     </div>  
     <div class="col-2">
         <label for="account">Pay From Account</label>
-        <select name="account_id" id="account" class="custom-select">                                   
+        <select name="account_id" id="account" class="custom-select" required>  
+            <option value="">-- select account --</option>                                 
             @foreach ($accounts as $row)
                 <option value="{{ $row->id }}" {{ $row->id == @$billpayment->account_id? 'selected' : '' }}>
                     {{ $row->holder }}

@@ -60,6 +60,9 @@ class BillPaymentTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
+            ->addColumn('tid', function ($billpayment) {
+                return gen4tid('RMT-', $billpayment->tid);
+            })
             ->addColumn('supplier', function ($billpayment) {
                 $supplier = $billpayment->supplier;
                 if ($supplier) 
