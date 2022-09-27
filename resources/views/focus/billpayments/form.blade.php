@@ -130,11 +130,9 @@
             $('#documentsTbl').on('focusout', '.paid', this.tablePaidChange);
             this.columnTotals();
 
-            if (!this.billPayment) {
-                $('#supplier').val('').change().attr('disabled', false);  
-            } else {
+            if (this.billPayment) {
                 $('#supplier').attr('disabled', true);
-            }
+            } else $('#supplier').val('').change();  
             $('#supplier').change(this.supplierChange);  
         },
 
@@ -144,9 +142,9 @@
 
         tablePaidChange() {
             const tr = $(this).parents('tr:first');
-            const val = accounting.unformat($(this).val());
+            const paid = accounting.unformat($(this).val());
             const due = accounting.unformat(tr.find('.due').text());
-            if (val > due) $(this).val(accounting.formatNumber(due));
+            if (paid > due) $(this).val(due);
             Form.columnTotals();
         },
 
@@ -171,13 +169,12 @@
         },
 
         supplierChange() {
-            const el = $(this);
             $('#documentsTbl tbody').html('');
-            if (!el.val()) return;
-
-            $.post("{{ route('biller.suppliers.bills') }}", {supplier_id: el.val()}, data => {
-                data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
-            });
+            const supplierId = $(this).val();
+            if (supplierId) 
+                $.post("{{ route('biller.suppliers.bills') }}", {supplier_id: supplierId}, data => {
+                    data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
+                });
         },
 
         billRow(v,i) {
