@@ -843,10 +843,10 @@ function aggregate_account_transactions()
     })->update(['debit' => 0, 'credit' => 0]);
 }
 // auto-generate a 4 digit number prefixed with a string e.g ID-0001 
-function gen4tid($str='', $n=0)
+function gen4tid($prefix='', $num=0, $count=4)
 {
-    if ($str) return $str . sprintf('%04d', $n);
-    return sprintf('%04d', $n);
+    if ($prefix && $num) return $prefix . sprintf('%0'.$count.'d', $num);
+    return sprintf('%0'.$count.'d', $num);
 }
 // account numbering
 function accounts_numbering($account)
