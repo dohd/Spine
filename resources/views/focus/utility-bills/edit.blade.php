@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Bill Management')
+@section('title', 'Edit | Bill Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -19,7 +19,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::model($utility_bill, ['route' => array('biller.utility-bills.store', $utility_bill), 'method' => 'PATCH']) }}
+                    {{ Form::model($utility_bill, ['route' => array('biller.utility-bills.update', $utility_bill), 'method' => 'PATCH']) }}
                         @include('focus.utility-bills.form')
                     {{ Form::close() }}
                 </div>

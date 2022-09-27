@@ -83,10 +83,10 @@ class PurchaseRepository extends BaseRepository
 
             // increase product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
-                $prod_variation = Prod_Variation::find($item['item_id']);
+                $prod_variation = ProductVariation::find($item['item_id']);
                 if ($prod_variation->warehouse_id != $item['warehouse_id']) {
                     $is_similar = false;
-                    $similar_products = Prod_Variation::where('id', '!=', $prod_variation->id)
+                    $similar_products = ProductVariation::where('id', '!=', $prod_variation->id)
                         ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
                     foreach ($similar_products as $s_product) {
                         if ($prod_variation->warehouse_id == $item['warehouse_id']) {
@@ -127,9 +127,11 @@ class PurchaseRepository extends BaseRepository
         /** accounting **/
         $this->post_transaction($result);
 
-        DB::commit();
-        if ($result) return $result;        
-        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
+                
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -297,6 +299,7 @@ class PurchaseRepository extends BaseRepository
             'tid' => $tid,
             'supplier_id' => $purchase->supplier_id,
             'reference' => $purchase->doc_ref,
+            'reference_type' => strtolower($purchase->doc_ref_type),
             'document_type' => 'direct_purchase',
             'ref_id' => $purchase->id,
             'date' => $purchase->date,

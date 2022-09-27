@@ -53,20 +53,52 @@ class UtilityBillTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('tid', function ($utility_bill) {
-                return gen4tid('BILL-', $utility_bill->tid);
+                $tid = gen4tid('BILL-', $utility_bill->tid);
+                $doc_type = $utility_bill->document_type;
+                if ($doc_type == 'direct_purchase') {
+                    $purchase = $utility_bill->purchase;
+                    $tid = '<a href="'. ($purchase? route('biller.purchases.edit', $purchase) : '') .'">'. $tid .'</a>';
+                } elseif ($doc_type == 'goods_receive_note') {
+                    $grn = $utility_bill->ref_id;
+                    $tid = '<a href="'. ($grn? route('biller.goodsreceivenote.edit', $grn) : '') .'">'. $tid .'</a>';
+                }
+                
+                return $tid;
             })
             ->addColumn('supplier', function ($utility_bill) {
-                if ($utility_bill->supplier)
-                return $utility_bill->supplier->name;
+                $supplier = $utility_bill->supplier;
+                $purchase = $utility_bill->purchase;
+                if ($purchase && $purchase->suppliername) {
+                    return $purchase->suppliername;
+                } 
+                if ($supplier) return $supplier->name;
             })        
+            ->addColumn('note', function ($utility_bill) {
+                $note = $utility_bill->note;
+                $doc_type = $utility_bill->document_type;
+                if ($doc_type == 'direct_purchase') {
+                    $purchase = $utility_bill->purchase;
+                    if ($purchase) {
+                        $tid = '(' . gen4tid('DP-', $purchase->tid) . ')';
+                        $note = implode(' - ', [$tid, $note]);
+                    }
+                } elseif ($doc_type == 'goods_receive_note') {
+                    $grn = $utility_bill->ref_id;
+                    if ($grn) $note = '(GRN) - ' . $note;
+                } elseif ($doc_type == 'kra_bill') {
+                    $note = '(KRA) - ' . $note;
+                }                 
+
+                return $note;
+            })
             ->addColumn('total', function ($utility_bill) {
                 return numberFormat($utility_bill->total);
             })
             ->addColumn('balance', function ($utility_bill) {
                 return numberFormat($utility_bill->total - $utility_bill->amountpaid);
             })
-            ->addColumn('status', function ($utility_bill) {
-                return $utility_bill->status;
+            ->addColumn('date', function ($utility_bill) {
+                return dateFormat($utility_bill->date);
             })
             ->addColumn('due_date', function ($utility_bill) {
                 return dateFormat($utility_bill->due_date);

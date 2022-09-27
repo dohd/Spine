@@ -124,6 +124,7 @@ class BillPaymentRepository extends BaseRepository
         $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
         $billpayment->supplier->decrement('on_account', $unallocated);
 
+        $prev_note = $billpayment->note;
         $result = $billpayment->update($input);
 
         // update supplier unallocated amount
@@ -161,7 +162,7 @@ class BillPaymentRepository extends BaseRepository
         }
 
         /** accounting */
-        Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
+        Transaction::where(['tr_type' => 'pmt', 'note' => $prev_note, 'tr_ref' => $billpayment->id])->delete();
         $this->post_transaction($billpayment);
 
         if ($result) {

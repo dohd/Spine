@@ -80,13 +80,13 @@ class UtilityBillController extends Controller
     {
         $suppliers = Supplier::get(['id', 'name']);
 
-        $msg = '';
-        switch ($utility_bill->document_type) {
-            case 'direct_purchase': $msg = 'Edit Bill through Direct Purchase'; break;
-            case 'goods_receive_note': $msg = 'Edit Bill through Goods Receive Note'; break;
-            case 'opening_balance': $msg = 'Edit Bill through Supplier'; break;
-        }
-        if ($msg) return redirect(route('biller.utility-bills.index'))->with(['flash_error' => $msg . ' Component!']);
+        $doc_type = $utility_bill->document_type;
+        if ($doc_type == 'direct_purchase') 
+            return response()->redirectTo(route('biller.purchases.edit', $utility_bill->ref_id));
+        elseif ($doc_type == 'opening_balance') 
+            return response()->redirectTo(route('biller.suppliers.edit', $utility_bill->supplier));
+        elseif ($doc_type == 'goods_receive_note' && $utility_bill->ref_id) 
+            return response()->redirectTo(route('biller.goodsreceivenote.edit', $utility_bill->ref_id));
 
         return view('focus.utility-bills.edit', compact('utility_bill', 'suppliers'));
     }

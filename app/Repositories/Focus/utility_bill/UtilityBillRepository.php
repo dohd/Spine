@@ -11,6 +11,9 @@ use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use DB;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
+use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
+
 
 /**
  * Class ProductcategoryRepository.
@@ -42,43 +45,42 @@ class UtilityBillRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
-        // sanitize
+
         foreach ($input as $key => $val) {
             if (in_array($key, ['date', 'due_date'])) $input[$key] = date_for_database($val);
             if (in_array($key, ['subtotal', 'tax', 'total'])) $input[$key] = numberClean($val);
-            if (in_array($key, ['row_subtotal', 'row_tax', 'row_total'])) {
+            if (in_array($key, ['item_subtotal', 'item_tax', 'item_total'])) {
                 $input[$key] = array_map(function ($v) { 
                     return numberClean($v); 
                 }, $val);
             }
         }
-
         $result = UtilityBill::create($input);
 
-        $data_items = Arr::only($input, ['row_ref_id', 'row_note', 'row_qty', 'row_subtotal', 'row_tax', 'row_total']);
+        $data_items = Arr::only($input, ['item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
         $data_items = array_map(function ($v) use($result) {
             return [
                 'bill_id' => $result->id,
-                'ref_id' => $v['row_ref_id'],
-                'note' => $v['row_note'],
-                'qty' => $v['row_qty'],
-                'subtotal' => $v['row_subtotal'],
-                'tax' => $v['row_tax'],
-                'total' => $v['row_total']
+                'ref_id' => $v['item_ref_id'],
+                'note' => $v['item_note'],
+                'qty' => $v['item_qty'],
+                'subtotal' => $v['item_subtotal'],
+                'tax' => $v['item_tax'],
+                'total' => $v['item_total']
             ];
         }, modify_array($data_items));
         UtilityBillItem::insert($data_items);
 
         /**accounting */
-        switch ($result->document_type) {
-            case 'goods_receive_note': $this->goods_receive_note_transaction($result); break;
-            case 'kra': $this->kra_transaction($result); break;
-        }
+        if ($result->document_type == 'goods_receive_note')
+            $this->goods_receive_note_transaction($result);
 
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Lead');
     }
@@ -93,7 +95,45 @@ class UtilityBillRepository extends BaseRepository
      */
     public function update(UtilityBill $utility_bill, array $input)
     {
-        dd($input);
+        // dd($input);
+        DB::beginTransaction();
+
+        foreach ($input as $key => $val) {
+            if (in_array($key, ['date', 'due_date'])) $input[$key] = date_for_database($val);
+            if (in_array($key, ['subtotal', 'tax', 'total'])) $input[$key] = numberClean($val);
+            if (in_array($key, ['item_subtotal', 'item_tax', 'item_total'])) {
+                $input[$key] = array_map(function ($v) { 
+                    return numberClean($v); 
+                }, $val);
+            }
+        }
+        $prev_note = $utility_bill->note;
+        $result = $utility_bill->update($input);
+
+        $data_items = Arr::only($input, ['id', 'item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
+        $data_items = array_map(function ($v) {
+            return [
+                'id' => $v['id'],
+                'ref_id' => $v['item_ref_id'],
+                'note' => $v['item_note'],
+                'qty' => $v['item_qty'],
+                'subtotal' => $v['item_subtotal'],
+                'tax' => $v['item_tax'],
+                'total' => $v['item_total']
+            ];
+        }, modify_array($data_items));
+        Batch::update(new UtilityBillItem, $data_items, 'id');
+
+        /**accounting */
+        if ($utility_bill->document_type == 'goods_receive_note') {
+            Transaction::where(['tr_type' => 'bill', 'note' => $prev_note, 'tr_ref' => $utility_bill->id])->delete();
+            $this->goods_receive_note_transaction($utility_bill);
+        }
+            
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
@@ -133,14 +173,12 @@ class UtilityBillRepository extends BaseRepository
             if ($key == 'reg_date') $input[$key] = date_for_database($val);
             if ($key == 'total') $input[$key] = numberClean($val);
             if ($key == 'amount') {
-                $input[$key] = array_map(function ($n) { return numberClean($n); }, $val); 
+                $input[$key] = array_map(function ($n) { 
+                    return numberClean($n); 
+                }, $val); 
             }                
         }
-        $data = Arr::only($input, ['supplier_id', 'tid', 'reg_date', 'reg_no', 'note', 'total']);
-        $data_items = Arr::only($input, ['payment_type', 'tax_type', 'tax_period', 'amount']);
-        if (!$data_items) throw ValidationException::withMessages(['Payment Details line items required!']);
-
-        $data = (object) $data;
+        $data = (object) Arr::only($input, ['supplier_id', 'tid', 'reg_date', 'reg_no', 'note', 'total']);
         $bill_data = [
             'tid' => $data->tid,
             'supplier_id' => $data->supplier_id,
@@ -154,6 +192,8 @@ class UtilityBillRepository extends BaseRepository
         ];
         $result = UtilityBill::create($bill_data);
 
+        $data_items = Arr::only($input, ['payment_type', 'tax_type', 'tax_period', 'amount']);
+        if (!$data_items) throw ValidationException::withMessages(['Payment Details line items required!']);
         // dd($data_items);
         $bill_items_data = array_map(function ($v) use($result) {
             return [

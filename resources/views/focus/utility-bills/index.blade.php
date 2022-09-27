@@ -24,10 +24,11 @@
                             <tr>
                                 <th>#</th>
                                 <th>Bill No.</th>
+                                <th>Supplier</th>
                                 <th>Note</th>                                
                                 <th>Amount</th>
-                                <th>Balance</th>  
-                                <th>Status</th>   
+                                <th>Outstanding</th>  
+                                <th>Date</th>   
                                 <th>Due Date</th>                                        
                                 <th>Action</th>
                             </tr>
@@ -74,10 +75,11 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'tid', name: 'tid'},
+                    {data: 'supplier', name: 'supplier'},
                     {data: 'note', name: 'note'},                    
                     {data: 'total', name: 'total'},
                     {data: 'balance', name: 'balance'},
-                    {data: 'status', name: 'status'},
+                    {data: 'date', name: 'date'},
                     {data: 'due_date', name: 'due_date'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
