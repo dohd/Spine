@@ -19,6 +19,40 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-4">
+                                <label for="employee">Employee</label>
+                                <select name="employee_id" id="employee" class="form-control" data-placeholder="Choose Employee">
+                                    @foreach ($employees as $employee)
+                                        <option value="{{ $employee->id }}">
+                                            {{ $employee->first_name }} {{ $employee->last_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="date">Attendance Date (month - year)</label>
+                                {{ Form::text('date', null, ['class' => 'form-control datepicker']) }}
+                            </div>
+                            <div class="col-2">
+                                <label for="status">Attendance Status</label>
+                                <select name="status" id="status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['present', 'absent', 'on_leave'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <table id="attendanceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -61,9 +95,50 @@
     };
 
     const Index = {
+        employeeId: '',
+        status: '',
+        date: '',
+
         init() {
+            // month picker
+            $('.datepicker').datepicker({
+                autoHide: true,
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                format: 'MM - yyyy',
+                onClose: function(dateText, inst) { 
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            }).change(this.dateChange);
+
+
+            $('#employee').select2({allowClear: true}).val('').trigger('change')
+            .change(this.employeeChange);
+
+            $('#status').change(this.statusChange);
+            $('#date').change(this.dateChange);
             this.drawDataTable();
         },
+
+        employeeChange() {
+            Index.employeeId = $(this).val();
+            $('#attendanceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        statusChange() {
+            Index.status = $(this).val();
+            $('#attendanceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        dateChange() {
+            Index.date = $(this).val();
+            $('#attendanceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
 
         drawDataTable() {
             $('#attendanceTbl').dataTable({
@@ -74,6 +149,11 @@
                 ajax: {
                     url: "{{ route('biller.attendances.get') }}",
                     type: 'POST',
+                    data: {
+                        employee_id: this.employeeId, 
+                        status: this.status, 
+                        date: this.date
+                    }
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},

@@ -51,7 +51,9 @@ class AttendanceController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.attendances.index');
+        $employees = User::get(['id', 'first_name', 'last_name']);
+        
+        return new ViewResponse('focus.attendances.index', compact('employees'));
     }
 
     /**

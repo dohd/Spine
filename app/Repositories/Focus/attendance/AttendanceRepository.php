@@ -26,6 +26,17 @@ class AttendanceRepository extends BaseRepository
     {
         $q = $this->query();
 
+        $q->when(request('employee_id'), function ($q) {
+            $q->where('employee_id', request('employee_id'));
+        })->when(request('status'), function ($q) {
+            $q->where('status', request('status'));
+        })->when(request('date'), function ($q) {
+            $date = explode('-', request('date'));
+            $month = intval($date[0]);
+            $year = intval($date[1]);
+            $q->whereYear('date', $year)->whereMonth('date', $month);
+        });
+
         return $q->get();
     }
 
