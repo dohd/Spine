@@ -5,9 +5,7 @@
 		body {
 			font-family: "Times New Roman", Times, serif;
 			font-size: 10pt;
-		}
-		p {
-			margin: 0pt;
+			width: 100%;
 		}
 		table {
 			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -28,15 +26,6 @@
 		.items td {
 			border-left: 0.1mm solid #000000;
 			border-right: 0.1mm solid #000000;
-		}
-		.items td.mytotalss {
-			text-align: center;
-		}
-		.items td.totalss {
-			text-align: right;
-		}
-		.items td.cost {
-			text-align: center;
 		}
 		.dotted td {
 			border-bottom: none;
@@ -114,48 +103,51 @@
 		</tr>
 	</table><br>
 
-	<table class="items items-table" cellpadding=8>
+	<table class="items items-table" cellpadding=8 width="100%" style="text-align: center">
 		<thead>
 			<tr>
-				<th width="5%">No</th>				
-				<th width="10%">Payment Reference</th>
-				<th width="10%">Payment Mode</th>
-				<th width="10%">Invoice No</th>
-				<th width="10%">Amount</th>			
+				<th>#</th>				
+				<th>PMT Reference</th>
+				<th>PMT Mode</th>
+				<th>Inv No</th>
+				<th>Inv Description</th>
+				<th>Amount</th>			
 			</tr>
 		</thead>
 		<tbody>
 			@if ($resource->items->count())
 				@foreach($resource->items as $k => $item)
 					<tr class="dotted">
-						<td class="mytotalss">{{ $k+1 }}</td>						
-						<td class="mytotalss">{{ $resource->reference }}</td>
-						<td class="mytotalss">{{ $resource->payment_mode }}</td>
-						<td class="mytotalss">{{ $item->invoice? $item->invoice->tid : '' }}</td>
-						<td class="mytotalss">{{ numberFormat($item->paid) }}</td>                           
+						<td width="50">{{ $k+1 }}</td>						
+						<td>{{ $resource->reference }}</td>
+						<td>{{ $resource->payment_mode }}</td>
+						<td>{{ $item->invoice? gen4tid('Inv-',$item->invoice->tid) : '' }}</td>
+						<td>{{ $item->invoice? $item->invoice->notes : '' }}</td>
+						<td>{{ numberFormat($item->paid) }}</td>                           
 					</tr>
 				@endforeach
 			@else
 				<tr class="dotted">
-					<td class="mytotalss">1.</td>					
-					<td class="mytotalss">{{ $resource->reference }}</td>
-					<td class="mytotalss">{{ $resource->payment_mode }}</td>
-					<td class="mytotalss"></td>
-					<td class="mytotalss">{{ numberFormat($resource->deposit) }}</td>                           
+					<td width="50">1.</td>					
+					<td>{{ $resource->reference }}</td>
+					<td>{{ $resource->payment_mode }}</td>
+					<td></td>
+					<td></td>
+					<td>{{ numberFormat($resource->amount) }}</td>                           
 				</tr>
 			@endif
             <!-- dynamic empty rows -->
-			@for ($i = 0; $i < 30; $i++)
+			@foreach (range(1,30) as $i)
 				<tr>
-					@for($j = 0; $j < 5; $j++) 
+					@foreach (range(1,6) as $j) 
 						<td></td>
-					@endfor
+					@endforeach
 				</tr>
-			@endfor
+			@endforeach
             <tr class="dotted">
-                <td colspan="3" style="border-top: solid 1px black;"></td>
-                <td class="totalss" style="border-top: solid 1px black;"><b>Grand Total: </b></td>
-                <td class="totalss" style="border-top: solid 1px black; text-align: center">{{ numberFormat($resource->deposit) }}</td>
+                <td colspan="4" style="border-top: solid 1px black;"></td>
+                <td style="border-top: solid 1px black; text-align: right"><b>Grand Total: </b></td>
+                <td style="border-top: solid 1px black; text-align: center">{{ numberFormat($resource->amount) }}</td>
             </tr>
 		</tbody>
 	</table>
