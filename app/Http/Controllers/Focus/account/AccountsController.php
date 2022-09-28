@@ -28,6 +28,7 @@ use App\Http\Responses\Focus\account\EditResponse;
 use App\Repositories\Focus\account\AccountRepository;
 use App\Http\Requests\Focus\account\ManageAccountRequest;
 use App\Http\Requests\Focus\account\StoreAccountRequest;
+use App\Models\transaction\Transaction;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
 
@@ -154,9 +155,10 @@ class AccountsController extends Controller
      * @param App\Models\account\Account $account
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Account $account, ManageAccountRequest $request)
+    public function show(Account $account)
     {
         $params =  ['rel_type' => 9, 'rel_id' => $account->id, 'system' => $account->system];
+
         return new RedirectResponse(route('biller.transactions.index', $params), '');
     }
 
@@ -205,18 +207,25 @@ class AccountsController extends Controller
     public function profit_and_loss(Request $request)
     {
         $dates = $request->only('start_date', 'end_date');
-        $dates = array_map(function ($v) { return date_for_database($v); }, $dates);
+        $dates = array_map(function ($v) { 
+            return date_for_database($v); 
+        }, $dates);
 
-        $q = Account::query();
-        if ($dates) {
-            $q->whereHas('transactions', function ($q) use($dates) {
-                $q->whereBetween('tr_date', $dates);
-            });
-        } else $q->whereHas('transactions');
+        $q = Account::whereHas('transactions', function ($q) use($dates) {
+                $q->when($dates, function ($q) use($dates) {
+                    $q->whereBetween('tr_date', $dates);
+                });
+            })->with(['transactions' => function ($q) use($dates) {
+                $q->when($dates, function ($q) use($dates) {
+                    $q->whereBetween('tr_date', $dates);
+                });
+            }]);
 
         $accounts = $q->get();
-        if ($request->type == 'p')             
+
+        if ($request->type == 'p') {
             return $this->print_document('profit_and_loss', $accounts, $dates, 0);
+        } 
 
         $bg_styles = [
             'bg-gradient-x-info', 'bg-gradient-x-purple', 'bg-gradient-x-grey-blue', 'bg-gradient-x-danger',
@@ -236,13 +245,19 @@ class AccountsController extends Controller
         $profit_loss_q = Account::query();
         if (request('end_date')) {
             // balance sheet accounts
-            $bal_sheet_q->whereHas('transactions', function ($q) use($date) {
-                $q->where('tr_date', '<=', $date);
-            })->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
+            $bal_sheet_q->whereIn('account_type', ['Asset', 'Equity', 'Liability'])
+                ->whereHas('transactions', function ($q) use($date) {
+                    $q->whereDate('tr_date', '<=', $date);
+                })->with(['transactions' => function ($q) use($date) {
+                    $q->whereDate('tr_date', '<=', $date);
+                }]);
             // profit & loss accounts
-            $profit_loss_q->whereHas('transactions', function ($q) use($date) {
-                $q->where('tr_date', '<=', $date);
-            })->whereIn('account_type', ['Income', 'Expense']);
+            $profit_loss_q->whereIn('account_type', ['Income', 'Expense'])
+                ->whereHas('transactions', function ($q) use($date) {
+                    $q->where('tr_date', '<=', $date);
+                })->with(['transactions' => function ($q) use($date) {
+                    $q->whereDate('tr_date', '<=', $date);
+                }]);
         } else {
             // balance sheet accounts
             $bal_sheet_q->whereHas('transactions')->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
@@ -281,17 +296,22 @@ class AccountsController extends Controller
      */
     public function trial_balance(Request $request)
     {
-        $q = Account::query();
-        $date = date_for_database(request('end_date'));
-        if (request('end_date')) {
-            $q->whereHas('transactions', function($q) use($date) {
-                $q->where('tr_date', '<=', $date);
+        $q = Account::whereHas('transactions', function ($q)  {
+            $q->when(request('end_date'), function ($q) {
+                $q->whereDate('tr_date', '<=', date_for_database(request('end_date')));
             });
-        } else $q->whereHas('transactions');
+        })->with(['transactions' => function ($q)  {
+            $q->when(request('end_date'), function ($q) {
+                $q->whereDate('tr_date', '<=', date_for_database(request('end_date')));
+            });
+        }]);
         
         $accounts = $q->orderBy('number', 'asc')->get();
-        if ($request->type == 'p')
+
+        $date = date_for_database(request('end_date'));
+        if ($request->type == 'p') {
             return $this->print_document('trial_balance', $accounts, [0, $date], 0);
+        }
 
         return new ViewResponse('focus.accounts.trial_balance', compact('accounts', 'date'));
     }
