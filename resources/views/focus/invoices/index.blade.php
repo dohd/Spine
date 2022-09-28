@@ -134,11 +134,12 @@
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             this.drawDataTable();
 
+            $('#inv_status').change(this.invoiceStatusChange);
+            $('#pmt_status').change(this.paymentStatusChange);
+            $('#customer').select2({allowClear: true}).val('').trigger('change')
+            .change(this.customerChange);
+
             $('#search').click(this.searchClick);
-            $('#inv_status').click(this.invoiceStatusChange);
-            $('#pmt_status').click(this.paymentStatusChange);
-            $('#customer').select2({allowClear: true}).change(this.customerChange);
-            $('#customer').val('').change();
         },
 
         searchClick() {
