@@ -23,9 +23,9 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\Access\User\User;
 use App\Models\attendance\Attendance;
+use App\Models\Company\Company;
 use App\Repositories\Focus\attendance\AttendanceRepository;
 use DateTime;
-use DB;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
@@ -63,8 +63,9 @@ class AttendanceController extends Controller
     public function create()
     {
         $employees = User::get(['id', 'first_name', 'last_name']);
+        $company = Company::find(auth()->user()->ins);
 
-        return view('focus.attendances.create', compact('employees'));
+        return view('focus.attendances.create', compact('employees', 'company'));
     }
 
     /**
@@ -87,7 +88,9 @@ class AttendanceController extends Controller
      */
     public function edit(Attendance $attendance)
     {
-        return view('focus.attendances.edit', compact('attendance'));
+        $company = Company::find(auth()->user()->ins);
+
+        return view('focus.attendances.edit', compact('employees', 'company'));
     }
 
     /**

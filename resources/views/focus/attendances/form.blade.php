@@ -44,8 +44,8 @@
                         <tr class="hidden">
                             <td class="index">{{ $i+1 }}</td>
                             <td class="employee-name">{{ $row->first_name }} {{ $row->last_name }}</td>
-                            <td><input type="time" name="clock_in[]" placeholder="HH:MM" class="form-control clock-in"></td>
-                            <td><input type="time" name="clock_out[]" placeholder="HH:MM" class="form-control clock-out"></td>
+                            <td><input type="time" name="clock_in[]" value="{{ $company->clock_in }}" placeholder="HH:MM" class="form-control clock-in"></td>
+                            <td><input type="time" name="clock_out[]" value="{{ $company->clock_out }}" placeholder="HH:MM" class="form-control clock-out"></td>
                             <td>
                                 <select name="status[]" class="custom-select status">
                                     @foreach (['present', 'absent', 'on_leave'] as $val)
@@ -87,8 +87,19 @@
             Index.defaultEmployeeRows = $('#employeeTbl tbody').html().replace(/class="hidden"/g, '');
 
             $('#weeksTbl').on('click', '.day-btn', this.dayBtnClick);
+            $('#employeeTbl').on('change', '.status', this.statusChange);
+
             $('#month').change(this.monthChange).trigger('change');
             $('#day').focus(() => alert('Please, click on day from calendar!'));
+        },
+
+        statusChange() {
+            const row = $(this).parents('tr');
+            const status = $(this).val();
+            if (['absent', 'on_leave'].includes(status)) {
+                row.find('.clock-in').val('');
+                row.find('.clock-out').val('');
+            }
         },
 
         dayBtnClick() {

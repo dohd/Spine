@@ -49,36 +49,40 @@ class CompanyRepository extends BaseRepository
      */
     public function update(array $data)
     {
-        $input = $data['data'];
-        if (!empty($input['logo'])) {
+        $input = array_map('strip_tags', $data['data']);
+        // dd($input);
+
+        if (isset($input['logo'])) 
             $input['logo'] = $this->uploadPicture($input['logo'], $this->file_picture_path);
-        }
-        if (!empty($input['icon'])) {
+        if (isset($input['icon'])) 
             $input['icon'] = $this->uploadPicture($input['icon'], $this->file_icon_path);
-        }
-
-        if (!empty($input['theme_logo'])) {
+        if (isset($input['theme_logo'])) 
             $input['theme_logo'] = $this->uploadPicture($input['theme_logo'], $this->file_header_path);
-        }
-        $input = array_map( 'strip_tags', $input);
-        $company = Company::where('id', auth()->user()->ins)->update($input);
+        
+        $company = Company::find(auth()->user()->ins);
+        if (!$company) return false;
 
-           if (@$company) {
-                $fields = array();
-                $ids=array();
-                if (isset($data['data2']['custom_field'])) {
-
-                    foreach ($data['data2']['custom_field'] as $key => $value) {
-                        $ids[]=$key;
-                        $fields[] = array('custom_field_id' => $key, 'rid' => auth()->user()->ins, 'module' => 6, 'data' => strip_tags($value), 'ins' =>auth()->user()->ins);
-                    }
-                    CustomEntry::whereIn('custom_field_id', $ids)->where('rid', '=', auth()->user()->ins)->delete();
-                    CustomEntry::insert($fields);
-                }
+        $result = $company->update($input);
+        if (isset($data['data2']['custom_field'])) {
+            $fields = [];
+            $ids = [];    
+            foreach ($data['data2']['custom_field'] as $key => $value) {
+                $ids[] = $key;
+                $fields[] = [
+                    'custom_field_id' => $key, 
+                    'rid' => $company->ins, 
+                    'module' => 6, 
+                    'data' => strip_tags($value), 
+                    'ins' => $company->ins
+                ];
             }
 
-        return $company;
-
+            CustomEntry::whereIn('custom_field_id', $ids)->where('rid', $company->ins)->delete();
+            CustomEntry::insert($fields);
+        }
+        
+        if ($result) return true;
+        
         throw new GeneralException(trans('exceptions.backend.hrms.update_error'));
     }
 
@@ -150,7 +154,6 @@ class CompanyRepository extends BaseRepository
         ConfigMeta::where('feature_id', '=', 7)->update(['feature_value' => $data['url_shorten_enable'], 'value2' => $data['url_token']]);
 
         return trans('business.email_settings_update');
-
     }
 
 
@@ -171,19 +174,18 @@ class CompanyRepository extends BaseRepository
                 $update_data[] = array('feature_id' => 8, 'feature_value' => $data['sales_transaction_category']);
                 $update_data[] = array('feature_id' => 10, 'feature_value' => $data['purchase_transaction_category']);
             }
-
         }
         if (isset($data['file_format'])) $update_data[] = array('feature_id' => 9, 'value1' => strip_tags($data['file_format']));
 
         if (isset($data['new_invoice'])) {
-            $update_data[] = array('feature_id' => 11, 'value1' => strip_tags($data['sender']), 'value2' => strip_tags('{"new_invoice":"'.$data['new_invoice'].'","new_trans":"'.$data['new_trans'].'","cust_new_invoice":"'.$data['cust_new_invoice'].'","del_invoice":"'.$data['del_invoice'].'","del_trans":"'.$data['del_trans'].'","sms_new_invoice":"'.$data['sms_new_invoice'].'","task_new":"'.$data['task_new'].'"}'));
+            $update_data[] = array('feature_id' => 11, 'value1' => strip_tags($data['sender']), 'value2' => strip_tags('{"new_invoice":"' . $data['new_invoice'] . '","new_trans":"' . $data['new_trans'] . '","cust_new_invoice":"' . $data['cust_new_invoice'] . '","del_invoice":"' . $data['del_invoice'] . '","del_trans":"' . $data['del_trans'] . '","sms_new_invoice":"' . $data['sms_new_invoice'] . '","task_new":"' . $data['task_new'] . '"}'));
         }
 
-     //   if (isset($data['delete_invoice_alert'])) $update_data[] = array('feature_id' => 12, 'feature_value' => $data['delete_invoice_alert']);
+        //   if (isset($data['delete_invoice_alert'])) $update_data[] = array('feature_id' => 12, 'feature_value' => $data['delete_invoice_alert']);
 
         if (isset($data['dual_entry'])) $update_data[] = array('feature_id' => 13, 'feature_value' => $data['dual_entry'], 'value1' => strip_tags($data['sales_payment_account']), 'value2' => strip_tags($data['purchase_payment_account']));
-  //      if (isset($data['auto_email'])) $update_data[] = array('feature_id' => 14, 'feature_value' => $data['auto_email']);
-//        if (isset($data['auto_sms'])) $update_data[] = array('feature_id' => 14, 'value1' => $data['auto_sms']);
+        //      if (isset($data['auto_email'])) $update_data[] = array('feature_id' => 14, 'feature_value' => $data['auto_email']);
+        //        if (isset($data['auto_sms'])) $update_data[] = array('feature_id' => 14, 'value1' => $data['auto_sms']);
         if (isset($data['theme_direction'])) {
             $update_data[] = array('feature_id' => 15, 'value1' => strip_tags($data['theme_direction']));
             $update_data[] = array('feature_id' => 5, 'value2' => $data['bill_style']);
@@ -200,7 +202,7 @@ class CompanyRepository extends BaseRepository
         if (isset($data['printer'])) {
             $update_data[] = array('feature_id' => 19, 'feature_value' => $data['printer'], 'value1' => strip_tags('{"address":"' . $data['network_address'] . '","port":"' . $data['network_port'] . '","mode":"' . $data['print_mode'] . '"}'));
         }
-       if (isset($data['base_currency'])) {
+        if (isset($data['base_currency'])) {
             $update_data[] = array('feature_id' => 2, 'value2' => '{"key":"' . $data['key'] . '","base_currency":"' . $data['base_currency'] . '","endpoint":"' . $data['endpoint'] . '","enable":"' . $data['enable'] . '"}');
         }
 
@@ -217,7 +219,7 @@ class CompanyRepository extends BaseRepository
         $update_variation = new ConfigMeta;
         $where = ' AND ins=' . auth()->user()->ins;
         $index = 'feature_id';
-        if(isset(auth()->valid)) Batch::update($update_variation, $update_data, $index, false, '', $where);
+        if (isset(auth()->valid)) Batch::update($update_variation, $update_data, $index, false, '', $where);
         $company = Company::find(auth()->user()->ins);
         if (isset($data['date_format'])) $company->main_date_format = $data['date_format'];
         if (isset($data['date_format_user'])) $company->user_date_format = $data['date_format_user'];
@@ -227,5 +229,4 @@ class CompanyRepository extends BaseRepository
         return array('w' => @$data['currency'], 'a' => @$data['new_transaction_alert']);
         throw new GeneralException(trans('exceptions.backend.additionals.update_error'));
     }
-
 }
