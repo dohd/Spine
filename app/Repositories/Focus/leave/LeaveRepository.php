@@ -23,6 +23,9 @@ class LeaveRepository extends BaseRepository
     {
         $q = $this->query();
 
+        if (!access()->allow('department-manage'))
+            $q->where('employee_id', auth()->user()->id);
+            
         return $q->get();
     }
 

@@ -24,7 +24,6 @@ use App\Http\Responses\ViewResponse;
 use App\Models\Access\User\User;
 use App\Models\leave\Leave;
 use App\Models\leave_category\LeaveCategory;
-use App\Repositories\Focus\leave\LeaveRepository as LeaveLeaveRepository;
 use App\Repositories\Focus\leave\LeaveRepository;
 use DB;
 use Illuminate\Http\Request;
@@ -41,7 +40,7 @@ class LeaveController extends Controller
      * contructor to initialize repository object
      * @param LeaveRepository $repository ;
      */
-    public function __construct(LeaveLeaveRepository $repository)
+    public function __construct(LeaveRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -62,7 +61,10 @@ class LeaveController extends Controller
     public function create()
     {
         $leave_categories = LeaveCategory::get(['id', 'title', 'qty']);
-        $users = User::get(['id', 'first_name', 'last_name']);
+        
+        $users = collect();
+        if (access()->allow('department-manage'))  $users = User::get(['id', 'first_name', 'last_name']);
+        else $users->add(User::find(auth()->user()->id, ['id', 'first_name', 'last_name']));
 
         return view('focus.leave.create', compact('leave_categories', 'users'));
     }

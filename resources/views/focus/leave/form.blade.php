@@ -1,7 +1,7 @@
 <div class="form-group row">
     <div class="col-3">
         <label for="employee">Leave Applicant</label>
-        <select name="employee_id" id="user" class="form-control" data-placeholder="Search Employee">
+        <select name="employee_id" id="user" class="form-control" data-placeholder="Search Employee" required>
             @foreach ($users as $user)
                 <option value="{{ $user->id }}" {{ @$leave && $leave->employee_id == $user->id? 'selected' : '' }}>
                     {{ $user->first_name }} {{ $user->last_name }}

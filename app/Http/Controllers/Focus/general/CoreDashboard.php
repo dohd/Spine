@@ -32,13 +32,9 @@ class CoreDashboard extends Controller
     public function index()
     {
         if (!access()->allow('dashboard-owner')) {
-            if (access()->allow('product-manage')) 
-                return new RedirectResponse(route('biller.products.index'), []);
-
-            return view('focus.dashboard.no_data');
+            return view('focus.dashboard.common');
         }
             
-
         $start_date = date('Y-m') . '-01';
         $today = date('Y-m-d');
 
