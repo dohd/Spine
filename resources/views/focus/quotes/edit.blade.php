@@ -116,17 +116,6 @@
         }
     });
 
-    // on clicking action drop down
-    $("#quoteTbl").on("click", ".up, .down, .remv", function() {
-        var row = $(this).parents("tr:first");
-        if ($(this).is('.up')) row.insertBefore(row.prev());
-        if ($(this).is('.down')) row.insertAfter(row.next());
-        if ($(this).is('.remv')) {
-            if (confirm('Are you sure?')) $(this).closest('tr').remove();
-        }
-        calcTotal();
-    });
-
     // add title
     const titleHtml = $("#titleRow").html();
     $("#titleRow").remove();
@@ -167,6 +156,36 @@
         rowId++;
         calcTotal();
     });
+
+    // On clicking action drop down
+    $("#quoteTbl").on("click", ".up, .down, .delete, .add-title, .add-product, .add-misc", function() {
+        const menu = $(this);
+        const row = menu.parents("tr:first");
+        if (menu.is('.up')) row.insertBefore(row.prev());
+        if (menu.is('.down')) row.insertAfter(row.next());
+        if (menu.is('.delete') && confirm('Are you sure?')) {
+            menu.closest('tr').remove();
+        }
+           
+        if (menu.is('.add-title')) {
+            $('#addTitle').click();
+            const titleRow = $("#quoteTbl tbody tr:last");
+            $("#quoteTbl tbody tr:last").remove();
+            row.before(titleRow);
+        } else if (menu.is('.add-product')) {
+            $('#addProduct').click();
+            const productRow = $("#quoteTbl tbody tr:last");
+            $("#quoteTbl tbody tr:last").remove();
+            row.after(productRow);
+        } else if (menu.is('.add-misc')) {
+            $('#addMisc').click();
+            const miscRow = $("#quoteTbl tbody tr:last");
+            $("#quoteTbl tbody tr:last").remove();
+            row.after(miscRow);
+        }
+
+        calcTotal();
+    });    
 
     // on change qty and rate
     $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty", function() {

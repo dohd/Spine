@@ -31,16 +31,7 @@
                 <span class="lineprofit text-info" id="lineprofit-p0">0%</span>
             </td>
             <td class="text-center">
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Action
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item up" href="javascript:">Up</a>
-                        <a class="dropdown-item down" href="javascript:">Down</a>
-                        <a class="dropdown-item text-danger remv" href="javascript:">Remove</a>
-                    </div>
-                </div> 
+                @include('focus.quotes.partials.action-dropdown')
             </td>
             <input type="hidden" name="misc[]" value="0" id="misc-p0">
             <input type="hidden" name="product_id[]" value="0" id="productid-p0">
@@ -56,16 +47,7 @@
                 <input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading" id="name-t1" required>
             </td>
             <td class="text-center">
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Action
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item up" href="javascript:void(0);">Up</a>
-                        <a class="dropdown-item down" href="javascript:void(0);">Down</a>
-                        <a class="dropdown-item text-danger remv" href="javascript:void(0);">Remove</a>
-                    </div>
-                </div> 
+                @include('focus.quotes.partials.action-dropdown')
             </td>
             <input type="hidden" name="misc[]" value="0" id="misc-t1">
             <input type="hidden" name="product_id[]" value="0" id="productid-t1">
@@ -102,16 +84,7 @@
                             <span class="lineprofit text-info" id="lineprofit-p{{$k}}">0%</span>
                         </td>
                         <td class="text-center">
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Action
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item up" href="javascript:void(0);">Up</a>
-                                    <a class="dropdown-item down" href="javascript:void(0);">Down</a>
-                                    <a class="dropdown-item text-danger remv" href="javascript:void(0);">Remove</a>
-                                </div>
-                            </div> 
+                            @include('focus.quotes.partials.action-dropdown')
                         </td>
                         <input type="hidden" name="misc[]" value="{{ $item->misc }}" id="misc-p{{$k}}">
                         <input type="hidden" name="product_id[]" value="{{ $item->product_id }}" id="productid-p{{$k}}">
@@ -127,16 +100,7 @@
                             <input type="text"  class="form-control" name="product_name[]" value="{{ $item->product_name }}" placeholder="Enter Title Or Heading" id="name-t{{$k}}" required>
                         </td>
                         <td class="text-center">
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Action
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item up" href="javascript:">Up</a>
-                                    <a class="dropdown-item down" href="javascript:">Down</a>
-                                    <a class="dropdown-item text-danger remv" href="javascript:">Remove</a>
-                                </div>
-                            </div> 
+                            @include('focus.quotes.partials.action-dropdown')
                         </td>
                         <input type="hidden" name="misc[]" value="{{ $item->misc }}" id="misc-t{{$k}}">
                         <input type="hidden" name="product_id[]" value="0" id="productid-t{{$k}}">
