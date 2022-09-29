@@ -18,6 +18,7 @@
                         <option value="" class="text-center">-- Select Skill Type --</option>                        
                         <option value="casual">Casual</option>
                         <option value="contract">Contract</option>
+                        <option value="attachee">Attachee</option>
                         <option value="outsourced">Outsourced</option>
                     </select>
                 </td>
@@ -96,25 +97,20 @@
 
     // On skill-item update
     $('#skill-item').on('change', '.update', function() {
-        if (!$(this).val()) $(this).val(0);
-
         const id = $(this).attr('id');
         const rowIndx = id.split('-')[1]; 
 
-        const $input = $('#charge-'+rowIndx).attr('readonly', true);
-        switch ($('#skill-'+rowIndx).val()) {
-            case 'casual': $input.val(200); break;
-            case 'contract': $input.val(350); break;
-            case 'outsourced': $input.attr('readonly', false); break;
+        const labourCharge = $('#charge-'+rowIndx);
+        const labourType = $('#skill-'+rowIndx);
+        switch (labourType.val()) {
+            case 'casual': labourCharge.val(200).attr('readonly', true); break;
+            case 'contract': labourCharge.val(350).attr('readonly', true); break;
+            case 'attachee': labourCharge.val(150).attr('readonly', true); break;
+            case 'outsourced': labourCharge.val('').attr('readonly', false); break;
         }
-        const hr = $('#hours-'+rowIndx).val();
-        const notech = $('#notech-'+rowIndx).val();
-        const charge = $('#charge-'+rowIndx).val();
 
-        const amount = charge * hr * notech;
-        const amountStr = amount.toLocaleString();
-        $(this).parents('tr:first').find('span').text(amountStr);
-
+        const amount = $('#hours-'+rowIndx).val() * $('#notech-'+rowIndx).val() * $('#charge-'+rowIndx).val();
+        $(this).parents('tr:first').find('span').text(accounting.formatNumber(amount));
         budgetTotal();
     });
 
