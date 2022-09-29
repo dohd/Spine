@@ -54,7 +54,7 @@
 		.dotted td {
 			border-bottom: dotted 1px black;
 		}
-		.dottedt th {
+		.dotted th {
 			border-bottom: dotted 1px black;
 		}
 		h5 {
@@ -198,14 +198,17 @@
 		<h5><span>e.</span> Recommendation</h5>
 		<p>{!! $resource->recommendations !!}</p>
 	</div>
+
 	@php
-		$is_image = isset($resource->image_one) || isset($resource->image_two) || isset($resource->image_three) || isset($resource->image_four)
+		$images = [$resource->image_one, $resource->image_two, $resource->image_three, $resource->image_four];
+		$images = array_filter($images, function ($v) { return $v; });
 	@endphp
-	@if($is_image)
+	@if($images)
+		<div style="height: 3em;"></div>
 		<h5><span>f.</span> Pictorials</h5>
 		<table class="items items-table" cellpadding="8">		
-			<tr class="dottedt">				
-				@for ($i = 0; $i < 4; $i++)
+			<tr class="dotted">				
+				@for ($i = 0; $i < 2; $i++)
 					<th width="25%"></th>
 				@endfor		
 			</tr>
@@ -220,6 +223,12 @@
 						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_two) }}" alt="image_two" border=3 height=300 width=300></img>
 					@endisset
 				</td>
+			</tr>
+			<tr>
+				<td class="cost">{{ $resource->caption_one }}</td>
+				<td class="cost">{{ $resource->caption_two }}</td>
+			</tr>
+			<tr class="dotted">
 				<td>
 					@isset($resource->image_three)
 						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_three) }}" alt="image_three" border=3 height=300 width=300></img>
@@ -232,8 +241,6 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="cost">{{ $resource->caption_one }}</td>
-				<td class="cost">{{ $resource->caption_two }}</td>
 				<td class="cost">{{ $resource->caption_three }}</td>
 				<td class="cost">{{ $resource->caption_four }}</td>
 			</tr>
