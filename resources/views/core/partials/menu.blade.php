@@ -14,146 +14,146 @@
                 <ul class="nav navbar-nav mr-auto float-left">
                     <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu"></i></a></li>
                     @permission('business_settings')
-                    <li class="dropdown nav-item mega-dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown">{{trans('business.business_admin')}}</a>
-                        <ul class="mega-dropdown-menu dropdown-menu row">
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase mb-1"><i class="fa fa-building-o"></i> {{trans('business.general_preference')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.business.settings')}}"><i class="ft-feather"></i>{{trans('business.company_settings')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.localization')}}"><i class="fa fa-globe"></i> {{trans('business.business_localization')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.transactioncategories.index')}}"><i class="ft-align-center"></i> {{trans('transactioncategories.transactioncategories')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.status')}}"><i class="fa fa-flag-o"></i> {{trans('meta.default_status')}}
-                                                </a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-random"></i> {{trans('business.billing_settings')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.billing_preference')}}"><i class="fa fa-files-o"></i> {{trans('business.billing_settings_preference')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.additionals.index')}}"><i class="fa fa-floppy-o"></i> {{trans('business.tax_discount_management')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.prefixes.index')}}"><i class="fa fa-bookmark-o"></i> {{trans('business.prefix_management')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.terms.index')}}"><i class="fa fa-gavel"></i> {{trans('business.terms_management')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.pos_preference')}}"><i class="fa fa-shopping-cart"></i> {{trans('pos.preference')}}
-                                                </a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-money"></i> {{trans('business.payment_account_settings')}}
-                                </h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.payment_preference')}}"><i class="fa fa-credit-card"></i> {{trans('business.payment_preferences')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.currencies.index')}}"><i class="fa fa-money"></i> {{trans('business.currency_management')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.banks.index')}}"><i class="ft-server"></i> {{trans('business.bank_accounts')}}
-                                                </a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.usergatewayentries.index')}}"><i class="fa fa-server"></i> {{trans('usergatewayentries.usergatewayentries')}}
-                                                </a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.accounts')}}"><i class="ft-compass"></i> {{trans('business.accounts_settings')}}
-                                                </a>
-                                            </li>
-                                            <li>&nbsp;</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="ft-at-sign"></i> {{trans('business.communication_settings')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.business.email_sms_settings')}}"><i class="ft-minimize-2"></i> {{trans('meta.email_sms_settings')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.notification_email')}}"><i class="ft-activity"></i> {{trans('meta.notification_email')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.templates.index')}}"><i class="fa fa-comments"></i> {{trans('templates.manage')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.currency_exchange')}}"><i class="fa fa-retweet"></i> {{trans('currencies.currency_exchange')}}
-                                                </a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-random"></i> {{trans('business.miscellaneous_settings')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.customfields.index')}}"><i class="ft-anchor"></i> {{trans('customfields.customfields')}}
-                                                </a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.productvariables.index')}}"><i class="ft-package"></i> {{trans('business.product_units')}}
-                                                </a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-cogs"></i> {{trans('business.advanced_settings')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.cron')}}"><i class="fa fa-terminal"></i> {{trans('meta.cron')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.web_update_wizard')}}"><i class="fa fa-magic"></i> {{trans('update.web_updater')}}
-                                                </a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-asterisk"></i> {{trans('business.crm_hrm_settings')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.crm_hrm_section')}}"><i class="fa fa-indent"></i> {{trans('meta.self_attendance')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.crm_hrm_section')}}"><i class="fa fa-key"></i> {{trans('meta.customer_login')}}
-                                                </a>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="col-md-3 col-sm-6">
-                                <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-camera-retro"></i> {{trans('business.visual_settings')}}</h6>
-                                <ul>
-                                    <li class="menu-list">
-                                        <ul>
-                                            <li><a class="dropdown-item" href="{{route('biller.settings.theme')}}"><i class="fa fa-columns"></i> {{trans('meta.employee_panel_theme')}}
-                                                </a></li>
-                                            <li><a class="dropdown-item" href="{{route('biller.about')}}"><i class="fa fa-info-circle"></i> {{trans('update.about_system')}}
-                                                </a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
+                        <li class="dropdown nav-item mega-dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown">{{trans('business.business_admin')}}</a>
+                            <ul class="mega-dropdown-menu dropdown-menu row">
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase mb-1"><i class="fa fa-building-o"></i> {{trans('business.general_preference')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.business.settings')}}"><i class="ft-feather"></i>{{trans('business.company_settings')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.localization')}}"><i class="fa fa-globe"></i> {{trans('business.business_localization')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.transactioncategories.index')}}"><i class="ft-align-center"></i> {{trans('transactioncategories.transactioncategories')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.status')}}"><i class="fa fa-flag-o"></i> {{trans('meta.default_status')}}
+                                                    </a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-random"></i> {{trans('business.billing_settings')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.billing_preference')}}"><i class="fa fa-files-o"></i> {{trans('business.billing_settings_preference')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.additionals.index')}}"><i class="fa fa-floppy-o"></i> {{trans('business.tax_discount_management')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.prefixes.index')}}"><i class="fa fa-bookmark-o"></i> {{trans('business.prefix_management')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.terms.index')}}"><i class="fa fa-gavel"></i> {{trans('business.terms_management')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.pos_preference')}}"><i class="fa fa-shopping-cart"></i> {{trans('pos.preference')}}
+                                                    </a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-money"></i> {{trans('business.payment_account_settings')}}
+                                    </h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.payment_preference')}}"><i class="fa fa-credit-card"></i> {{trans('business.payment_preferences')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.currencies.index')}}"><i class="fa fa-money"></i> {{trans('business.currency_management')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.banks.index')}}"><i class="ft-server"></i> {{trans('business.bank_accounts')}}
+                                                    </a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.usergatewayentries.index')}}"><i class="fa fa-server"></i> {{trans('usergatewayentries.usergatewayentries')}}
+                                                    </a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.accounts')}}"><i class="ft-compass"></i> {{trans('business.accounts_settings')}}
+                                                    </a>
+                                                </li>
+                                                <li>&nbsp;</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="ft-at-sign"></i> {{trans('business.communication_settings')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.business.email_sms_settings')}}"><i class="ft-minimize-2"></i> {{trans('meta.email_sms_settings')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.notification_email')}}"><i class="ft-activity"></i> {{trans('meta.notification_email')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.templates.index')}}"><i class="fa fa-comments"></i> {{trans('templates.manage')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.currency_exchange')}}"><i class="fa fa-retweet"></i> {{trans('currencies.currency_exchange')}}
+                                                    </a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-random"></i> {{trans('business.miscellaneous_settings')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.customfields.index')}}"><i class="ft-anchor"></i> {{trans('customfields.customfields')}}
+                                                    </a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.productvariables.index')}}"><i class="ft-package"></i> {{trans('business.product_units')}}
+                                                    </a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-cogs"></i> {{trans('business.advanced_settings')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.cron')}}"><i class="fa fa-terminal"></i> {{trans('meta.cron')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.web_update_wizard')}}"><i class="fa fa-magic"></i> {{trans('update.web_updater')}}
+                                                    </a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-asterisk"></i> {{trans('business.crm_hrm_settings')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.crm_hrm_section')}}"><i class="fa fa-indent"></i> {{trans('meta.self_attendance')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.crm_hrm_section')}}"><i class="fa fa-key"></i> {{trans('meta.customer_login')}}
+                                                    </a>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="col-md-3 col-sm-6">
+                                    <h6 class="dropdown-menu-header text-uppercase"><i class="fa fa-camera-retro"></i> {{trans('business.visual_settings')}}</h6>
+                                    <ul>
+                                        <li class="menu-list">
+                                            <ul>
+                                                <li><a class="dropdown-item" href="{{route('biller.settings.theme')}}"><i class="fa fa-columns"></i> {{trans('meta.employee_panel_theme')}}
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="{{route('biller.about')}}"><i class="fa fa-info-circle"></i> {{trans('update.about_system')}}
+                                                    </a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
                     @endauth
                     @permission('pos')
-                    <li class="nav-item ">
-                        <a href="{{route('biller.invoices.pos')}}" class="btn  btn-success round mt_6">
-                            <i class="ficon ft-shopping-cart"></i>{{trans('pos.pos')}} </a>
-                    </li>
+                        <li class="nav-item ">
+                            <a href="{{route('biller.invoices.pos')}}" class="btn  btn-success round mt_6">
+                                <i class="ficon ft-shopping-cart"></i>{{trans('pos.pos')}} </a>
+                        </li>
                     @endauth
                     <li class="nav-item d-none d-md-block"><a class="nav-link nav-link-expand" href="#"><i class="ficon ft-maximize"></i></a></li>
                     <li class="dropdown">
@@ -167,13 +167,13 @@
                 </ul>
                 <ul class="nav navbar-nav float-right">
                     @if (config('locale.status') && count(config('locale.languages')) > 1)
-                    <li class="dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                            {{ trans('menus.language-picker.language') }}
-                            <span class="caret"></span>
-                        </a>
-                        @include('includes.partials.lang_focus')
-                    </li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                {{ trans('menus.language-picker.language') }}
+                                <span class="caret"></span>
+                            </a>
+                            @include('includes.partials.lang_focus')
+                        </li>
                     @endif
                     <li class="dropdown dropdown-notification nav-item"><a class="nav-link nav-link-label" href="#" data-toggle="dropdown" onclick="loadNotifications()"><i class="ficon ft-bell"></i><span class="badge badge-pill badge-danger badge-up" id="n_count">{{ auth()->user()->unreadNotifications->count() }}</span></a>
                         <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right" id="user_notifications">
@@ -228,7 +228,7 @@
             </li>
 
             {{-- sales module --}}
-            @if(access()->allow('invoice-manage', 'quote-manage'))
+            @if(access()->allowMultiple(['invoice-manage', 'quote-manage']))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-basket"></i><span>{{trans('features.sales')}}</span></a>
                     <ul class="dropdown-menu">
                         @permission('project-manage')
@@ -315,7 +315,7 @@
             @endif
 
             {{-- crm module --}}
-            @if(access()->allow('manage-customer', 'manage-customergroup'))
+            @if(access()->allowMultiple(['manage-customer', 'manage-customergroup']))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-diamond"></i><span>{{trans('features.crm')}}</span></a>
                     <ul class="dropdown-menu">
                         @permission('manage-customer')
@@ -402,7 +402,7 @@
             @endif
             
             {{-- stock manager module --}}
-            @if(access()->allow('product-manage', 'purchaseorder-manage', 'manage-warehouse', 'supplier-manage'))
+            @if(access()->allowMultiple(['product-manage', 'purchaseorder-manage', 'manage-warehouse', 'supplier-manage']))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="ft-layers"></i><span>{{trans('features.stock')}}</span></a>
                     <ul class="dropdown-menu">
                         {{-- stock issuance --}}
@@ -571,7 +571,7 @@
             @endif
             
             {{-- finance module --}}
-            @if(access()->allow('transaction-manage', 'account-manage'))
+            @if(access()->allowMultiple(['transaction-manage', 'account-manage']))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-calculator"></i><span>{{trans('general.finance')}}</span></a>
                     <ul class="dropdown-menu">
                         @permission('invoice-manage')
@@ -760,7 +760,7 @@
             @endif
 
             {{-- project & tasks module --}}
-            @if(access()->allow('project-manage', 'task-manage'))
+            @if(access()->allowMultiple(['project-manage', 'task-manage']))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-briefcase"></i><span>{{trans('features.project_tasks')}}</span></a>
                     <ul class="dropdown-menu">
                         @permission('project-manage')
@@ -918,185 +918,181 @@
                 </li>   
             @endif
             
-            @if(access()->allow('note-manage') || access()->allow('manage-event'))
-            <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-star"></i><span>{{trans('features.misc')}}</span></a>
-                <ul class="dropdown-menu">
-                    @permission('note-manage')
-                    <li><a class="dropdown-item" href="{{route('biller.notes.index')}}" data-toggle="dropdown"><i class="icon-note"></i> {{trans('general.notes')}}</a>
-                    </li>
-                    @endauth
-                    @permission('manage-event')
-                    <li><a class="dropdown-item" href="{{route('biller.events.index')}}" data-toggle="dropdown"><i class="icon-calendar"></i> {{trans('features.calendar')}}</a>
-                    </li>
-                    @endauth
+            @if(access()->allowMultiple(['note-manage', 'manage-event']))
+                <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-star"></i><span>{{trans('features.misc')}}</span></a>
+                    <ul class="dropdown-menu">
+                        @permission('note-manage')
+                        <li><a class="dropdown-item" href="{{route('biller.notes.index')}}" data-toggle="dropdown"><i class="icon-note"></i> {{trans('general.notes')}}</a>
+                        </li>
+                        @endauth
+                        @permission('manage-event')
+                        <li><a class="dropdown-item" href="{{route('biller.events.index')}}" data-toggle="dropdown"><i class="icon-calendar"></i> {{trans('features.calendar')}}</a>
+                        </li>
+                        @endauth
 
-                    @permission('project-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> IRD Jobcard</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> IRD Report</a></li>
-                            <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create IRD Report</a></li>
-                        </ul>
-                    </li>
-                    @endauth
+                        @permission('project-manage')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> IRD Jobcard</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> IRD Report</a></li>
+                                <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create IRD Report</a></li>
+                            </ul>
+                        </li>
+                        @endauth
 
-                    @permission('invoice-manage')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-umbrella"></i> {{ trans('invoices.subscriptions') }}</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{route('biller.invoices.index')}}?md=sub" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('invoices.subscriptions')}}
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}?sub=true" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('invoices.create_subscription') }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endauth
-                    
-                    
-                </ul>
-            </li>
+                        @permission('invoice-manage')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-umbrella"></i> {{ trans('invoices.subscriptions') }}</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{route('biller.invoices.index')}}?md=sub" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('invoices.subscriptions')}}
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('biller.invoices.create') }}?sub=true" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('invoices.create_subscription') }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endauth
+                    </ul>
+                </li>
             @endif
             @permission('reports-statements')
-            <li class="dropdown mega-dropdown nav-item" data-menu="megamenu"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-pie-chart"></i><span>{{trans('features.reports')}}</span></a>
-                <ul class="mega-dropdown-menu dropdown-menu row">
-                    <li class="col-md-3" data-mega-col="col-md-3">
-                        <ul class="drilldown-menu">
-                            <li class="menu-list">
-                                <ul class="mega-menu-sub">
-                                    <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('meta.statements')}}
-                                    </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa fa-book"></i>{{trans('meta.finance_account_statement')}}
-                                        </a>
-                                        <ul class="mega-menu-sub">
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['account'])}}"><i class="icon-doc"></i> {{trans('meta.finance_account_statement')}}
-                                                </a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['income'])}}"><i class="icon-doc"></i> {{trans('meta.income_statement')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['expense'])}}"><i class="icon-doc"></i> {{trans('meta.expense_statement')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['pos_statement'])}}"><i class="icon-doc"></i> {{trans('meta.pos_statement')}}</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa fa-smile-o"></i>{{trans('customers.customer')}}</a>
-                                        <ul class="mega-menu-sub">
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['customer'])}}" data-toggle="dropdown">{{trans('meta.customer_statements')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_customer_statement'])}}" data-toggle="dropdown">{{trans('meta.product_customer_statement')}}</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa fa-truck"></i>{{trans('suppliers.supplier')}}</a>
-                                        <ul class="mega-menu-sub">
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['supplier'])}}" data-toggle="dropdown">{{trans('meta.supplier_statements')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_supplier_statement'])}}" data-toggle="dropdown">{{trans('meta.product_supplier_statement')}}</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#"><i class="icon-doc"></i>{{trans('meta.tax_statements')}}</a>
-                                        <ul class="mega-menu-sub">
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['tax'])}}" data-toggle="dropdown">{{trans('meta.tax_statements')}} {{trans('meta.sales')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['tax'])}}?s=purchase" data-toggle="dropdown">{{trans('meta.tax_statements')}} {{trans('meta.purchase')}}</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa fa-th"></i>{{trans('meta.product_statement')}}</a>
-                                        <ul class="mega-menu-sub">
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_statement'])}}" data-toggle="dropdown">{{trans('meta.product_statement')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_category_statement'])}}" data-toggle="dropdown">{{trans('meta.product_category_statement')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_warehouse_statement'])}}" data-toggle="dropdown">{{trans('meta.product_warehouse_statement')}}</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa fa-road"></i>{{trans('products.stock_transfer')}}</a>
-                                        <ul class="mega-menu-sub">
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['stock_transfer'])}}" data-toggle="dropdown">{{trans('meta.stock_transfer_statement_warehouse')}}</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="{{route('biller.reports.statements',['stock_transfer_product'])}}" data-toggle="dropdown">{{trans('meta.stock_transfer_statement_product')}}</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="col-md-3" data-mega-col="col-md-3">
-                        <ul class="drilldown-menu">
-                            <li class="menu-list">
-                                <ul class="mega-menu-sub">
-                                    <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('meta.graphical_reports')}}
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['customer'])}}"><i class="fa fa-bar-chart"></i> {{trans('meta.customer_graphical_overview')}}
-                                        </a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['supplier'])}}"><i class="fa fa-sun-o"></i> {{trans('meta.supplier_graphical_overview')}}
-                                        </a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['product'])}}"><i class="ft-trending-up"></i> {{trans('meta.product_graphical_overview')}}
-                                        </a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['income_vs_expenses'])}}"><i class="icon-pie-chart"></i> {{trans('meta.income_vs_expenses_overview')}}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="col-md-3" data-mega-col="col-md-3">
-                        <ul class="drilldown-menu">
-                            <li class="menu-list">
-                                <ul class="mega-menu-sub">
-                                    <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('meta.summary_reports')}}
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['income'])}}"><i class="ft-check-circle"></i> {{trans('meta.income_summary')}}</a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['expense'])}}"><i class="fa fa fa-bullhorn"></i> {{trans('meta.expense_summary')}}</a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['sale'])}}"><i class="ft-aperture"></i> {{trans('meta.sale_summary')}}</a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['purchase'])}}"><i class="ft-disc"></i> {{trans('meta.purchase_summary')}}</a>
-                                    </li>
-                                    <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['products'])}}"><i class="ft-layers"></i> {{trans('meta.products_summary')}}</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="col-md-3" data-mega-col="col-md-3">
-                        <ul class="drilldown-menu">
-                            <li class="menu-list">
-                                <ul class="mega-menu-sub">
-                                    <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('import.import')}}
-                                    </li>
-                                    <li><a class="dropdown-item" href="{{route('biller.import.general',['customer'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_customers')}}
-                                        </a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="{{route('biller.import.general',['products'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_products')}}
-                                        </a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="{{route('biller.import.general',['accounts'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_accounts')}}
-                                        </a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="{{route('biller.import.general',['transactions'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_transactions')}}
-                                        </a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="{{route('biller.import.general',['equipments'])}}"><i class="fa fa-file-excel-o"></i> Import Equipments
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
+                <li class="dropdown mega-dropdown nav-item" data-menu="megamenu"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-pie-chart"></i><span>{{trans('features.reports')}}</span></a>
+                    <ul class="mega-dropdown-menu dropdown-menu row">
+                        <li class="col-md-3" data-mega-col="col-md-3">
+                            <ul class="drilldown-menu">
+                                <li class="menu-list">
+                                    <ul class="mega-menu-sub">
+                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('meta.statements')}}
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fa fa-book"></i>{{trans('meta.finance_account_statement')}}
+                                            </a>
+                                            <ul class="mega-menu-sub">
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['account'])}}"><i class="icon-doc"></i> {{trans('meta.finance_account_statement')}}
+                                                    </a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['income'])}}"><i class="icon-doc"></i> {{trans('meta.income_statement')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['expense'])}}"><i class="icon-doc"></i> {{trans('meta.expense_statement')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['pos_statement'])}}"><i class="icon-doc"></i> {{trans('meta.pos_statement')}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fa fa-smile-o"></i>{{trans('customers.customer')}}</a>
+                                            <ul class="mega-menu-sub">
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['customer'])}}" data-toggle="dropdown">{{trans('meta.customer_statements')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_customer_statement'])}}" data-toggle="dropdown">{{trans('meta.product_customer_statement')}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fa fa-truck"></i>{{trans('suppliers.supplier')}}</a>
+                                            <ul class="mega-menu-sub">
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['supplier'])}}" data-toggle="dropdown">{{trans('meta.supplier_statements')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_supplier_statement'])}}" data-toggle="dropdown">{{trans('meta.product_supplier_statement')}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="icon-doc"></i>{{trans('meta.tax_statements')}}</a>
+                                            <ul class="mega-menu-sub">
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['tax'])}}" data-toggle="dropdown">{{trans('meta.tax_statements')}} {{trans('meta.sales')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['tax'])}}?s=purchase" data-toggle="dropdown">{{trans('meta.tax_statements')}} {{trans('meta.purchase')}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fa fa-th"></i>{{trans('meta.product_statement')}}</a>
+                                            <ul class="mega-menu-sub">
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_statement'])}}" data-toggle="dropdown">{{trans('meta.product_statement')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_category_statement'])}}" data-toggle="dropdown">{{trans('meta.product_category_statement')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['product_warehouse_statement'])}}" data-toggle="dropdown">{{trans('meta.product_warehouse_statement')}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fa fa-road"></i>{{trans('products.stock_transfer')}}</a>
+                                            <ul class="mega-menu-sub">
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['stock_transfer'])}}" data-toggle="dropdown">{{trans('meta.stock_transfer_statement_warehouse')}}</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="{{route('biller.reports.statements',['stock_transfer_product'])}}" data-toggle="dropdown">{{trans('meta.stock_transfer_statement_product')}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="col-md-3" data-mega-col="col-md-3">
+                            <ul class="drilldown-menu">
+                                <li class="menu-list">
+                                    <ul class="mega-menu-sub">
+                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('meta.graphical_reports')}}
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['customer'])}}"><i class="fa fa-bar-chart"></i> {{trans('meta.customer_graphical_overview')}}
+                                            </a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['supplier'])}}"><i class="fa fa-sun-o"></i> {{trans('meta.supplier_graphical_overview')}}
+                                            </a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['product'])}}"><i class="ft-trending-up"></i> {{trans('meta.product_graphical_overview')}}
+                                            </a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.charts',['income_vs_expenses'])}}"><i class="icon-pie-chart"></i> {{trans('meta.income_vs_expenses_overview')}}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="col-md-3" data-mega-col="col-md-3">
+                            <ul class="drilldown-menu">
+                                <li class="menu-list">
+                                    <ul class="mega-menu-sub">
+                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('meta.summary_reports')}}
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['income'])}}"><i class="ft-check-circle"></i> {{trans('meta.income_summary')}}</a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['expense'])}}"><i class="fa fa fa-bullhorn"></i> {{trans('meta.expense_summary')}}</a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['sale'])}}"><i class="ft-aperture"></i> {{trans('meta.sale_summary')}}</a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['purchase'])}}"><i class="ft-disc"></i> {{trans('meta.purchase_summary')}}</a>
+                                        </li>
+                                        <li data-menu=""><a class="dropdown-item" href="{{route('biller.reports.summary',['products'])}}"><i class="ft-layers"></i> {{trans('meta.products_summary')}}</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="col-md-3" data-mega-col="col-md-3">
+                            <ul class="drilldown-menu">
+                                <li class="menu-list">
+                                    <ul class="mega-menu-sub">
+                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('import.import')}}
+                                        </li>
+                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['customer'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_customers')}}
+                                            </a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['products'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_products')}}
+                                            </a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['accounts'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_accounts')}}
+                                            </a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['transactions'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_transactions')}}
+                                            </a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['equipments'])}}"><i class="fa fa-file-excel-o"></i> Import Equipments
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
             @endauth
         </ul>
     </div>
-    <!-- /horizontal menu content-->
 </div>
-<!-- END: Main Menu-->
