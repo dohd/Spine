@@ -682,22 +682,7 @@
                             </ul>
                         </li>
                         @endauth
-                        @permission('transaction-manage')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-briefcase"></i>Loan Management
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.loans.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Loans
-                                    </a>
-                                </li>   
-                                <li><a class="dropdown-item" href="{{ route('biller.loans.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Loan
-                                    </a>
-                                </li>                         
-                                <li><a class="dropdown-item" href="{{ route('biller.loans.pay_loans') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Pay Loans
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        @endauth
+                        
                         @permission('transaction-manage')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-handshake-o"></i>Reconciliation
                             </a>
@@ -866,12 +851,12 @@
                             </li>
 
                             <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Leave Category Management</a>
+                                <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Leave Category</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('biller.leave_category.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Leave Category
+                                    <li><a class="dropdown-item" href="{{ route('biller.leave_category.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Category
                                         </a>
                                     </li>
-                                    <li><a class="dropdown-item" href="{{ route('biller.leave_category.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Leave Category
+                                    <li><a class="dropdown-item" href="{{ route('biller.leave_category.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Category
                                         </a>
                                     </li>
                                 </ul>
@@ -900,6 +885,31 @@
                                     </li>
                                     <li><a class="dropdown-item" href="{{ route('biller.attendances.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('hrms.attendance_add') }}
                                         </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-briefcase"></i>Loan Management
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('biller.loans.index') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Loans
+                                        </a>
+                                    </li>   
+                                    <li><a class="dropdown-item" href="{{ route('biller.loans.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Loan
+                                        </a>
+                                    </li>                         
+                                    <li><a class="dropdown-item" href="{{ route('biller.loans.pay_loans') }}" data-toggle="dropdown"> <i class="fa fa-money"></i> Pay Loans
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Advance Payment</a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('biller.advance_payments.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Payments</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('biller.advance_payments.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Payment </a>
                                     </li>
                                 </ul>
                             </li>
