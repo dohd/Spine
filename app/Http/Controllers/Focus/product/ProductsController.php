@@ -33,10 +33,7 @@ use App\Repositories\Focus\product\ProductRepository;
 use App\Http\Requests\Focus\product\ManageProductRequest;
 use App\Http\Requests\Focus\product\CreateProductRequest;
 use App\Http\Requests\Focus\product\EditProductRequest;
-use App\Models\items\PurchaseItem;
-use App\Models\pricegroup\Pricegroup;
-use App\Models\productvariable\Productvariable;
-use Illuminate\Support\Facades\DB;
+use App\Models\client_product\ClientProduct;
 
 /**
  * ProductsController
@@ -154,14 +151,29 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
+        // fetch customer products
+        if ($request->price_customer_id) {
+            $products = ClientProduct::where('customer_id', request('price_customer_id'))
+                ->where('descr', 'LIKE', '%'. request('keyword') .'%')->get()
+                ->map(function ($v) {
+                    return $v->fill([
+                        'name' => $v->descr,
+                        'unit' => $v->uom,
+                        'price' => $v->rate,
+                        'purchase_price' => 0,
+                    ]);
+                });
+
+            return response()->json($products);
+        }
+
+        // fetch inventory products
         $productvariations = ProductVariation::whereHas('product', function ($q) {
             $q->where('name', 'LIKE', '%' . request('keyword') . '%');
         })->with(['warehouse' => function ($q) {
             $q->select(['id', 'title']);
         }])->with('product')->limit(6)->get()->unique('name');
         
-        $pricegroup = Pricegroup::whereHas('pricelist')->find($request->pricegroup_id);
-
         $products = array();
         foreach ($productvariations as $row) {
             $product = array_intersect_key($row->toArray(), array_flip([
@@ -172,27 +184,11 @@ class ProductsController extends Controller
                 'units' => $row->product->units,
                 'warehouse' => $row->warehouse->toArray()
             ];
-            
-            // set purchase price using LIFO Inventory valuation method
-            $purchase_price = $this->repository->compute_purchase_price($row->id, $row->qty, $row->purchase_price);
-            $product['purchase_price'] = numberFormat($purchase_price);  
-
-            // default prices
-            if (!$pricegroup) {
-                $products[] =  $product;
-                continue;
-            }
-            
-            // use pricelist prices
-            foreach ($pricegroup->pricelist as $list_item) {
-                if ($list_item->product_id == $row->id) {
-                    $product['name'] = $list_item->name;
-                    // customer selling price else, supplier purchase price 
-                    if ($pricegroup->is_client) $product['price'] = numberFormat($list_item->price);                            
-                    else $product['purchase_price'] = numberFormat($list_item->price);
-                    $products[] =  $product;
-                }
-            }
+            // purchase price set by inventory valuation (LIFO) method
+            $product['purchase_price'] = $this->repository->compute_purchase_price(
+                $row->id, $row->qty, $row->purchase_price
+            );  
+            $products[] =  $product;
         }
 
         return response()->json($products);

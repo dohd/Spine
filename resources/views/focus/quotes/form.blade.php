@@ -47,18 +47,20 @@
                     </div>
                 </div>
             </div>
+            
             <div class="col-3">
-                <label for="pricing" >Pricing</label>
+                <label for="customer">Customer Pricing</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    <select id="pricegroup_id" name="pricegroup_id" class="custom-select round">
-                        <option value="0" selected>Default </option>
-                        @foreach($selling_prices as $price)
-                            <option value="{{$price->id}}">{{$price->name}}</option>
+                    <select id="price_customer" name="price_customer_id" class="custom-select">
+                        <option value="">Default </option>
+                        @foreach($price_customers as $row)
+                            <option value="{{ $row->id }}">{{ $row->company }}</option>
                         @endforeach
                     </select>
                 </div>
             </div>
+
             <div class="col-3">
                 <label for="serial_no" >{{ trans('general.serial_no') }}.</label>
                 <div class="input-group">

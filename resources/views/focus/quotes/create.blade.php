@@ -67,6 +67,15 @@
             $('#branch_id').val(opt.attr('branch_id'));
             $('#customer_id').val(opt.attr('customer_id'));
             subject.title = opt.attr('title');
+
+            // update price customer based on selected lead
+            let priceCustomer = '';
+            $('#price_customer option').each(function () {
+                if (opt.attr('customer_id') == $(this).val())
+                priceCustomer = $(this).val();
+            });
+            $('#price_customer').val(priceCustomer);
+            
         } else subject.djc = $(this).val();
         // subject
         if (subject.title && subject.djc) $('#subject').val(subject.title + ' ; Djc-' + subject.djc);
@@ -299,7 +308,10 @@
                 // stock product
                 let term = request.term;
                 let url = "{{ route('biller.products.quote_product_search') }}";
-                let data = {keyword: term, pricegroup_id: $('#pricegroup_id').val()};
+                let data = {
+                    keyword: term, 
+                    price_customer_id: $('#price_customer').val()
+                };
                 // equipment service product 
                 if (term.charAt(0) == '#') {
                     term = term.replace('#', '');
@@ -330,8 +342,10 @@
                 $('#amount-'+i).text(accounting.formatNumber(price));
                 $('#rate-'+i).val(accounting.formatNumber(rate)).change();
 
-                let units = data.units.filter(v => v.unit_type == 'base');
-                if (units.length) $('#unit-'+i).val(units[0].code);
+                if (data.units) {
+                    let units = data.units.filter(v => v.unit_type == 'base');
+                    if (units.length) $('#unit-'+i).val(units[0].code);
+                }
             }
         };
     }    

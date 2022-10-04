@@ -3,6 +3,7 @@
 namespace App\Models\customer\Traits;
 
 use App\Models\branch\Branch;
+use App\Models\client_product\ClientProduct;
 use App\Models\lead\Lead;
 use App\Models\transaction\Transaction;
 use App\Models\project\Project;
@@ -13,6 +14,11 @@ use App\Models\project\Project;
  */
 trait CustomerRelationship
 {
+    public function products()
+    {
+        return $this->hasMany(ClientProduct::class);
+    }
+
     public function leads()
     {
         return $this->hasMany(Lead::class, 'client_id');
