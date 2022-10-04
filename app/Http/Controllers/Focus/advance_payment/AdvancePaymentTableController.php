@@ -57,11 +57,14 @@ class AdvancePaymentTableController extends Controller
                 if ($employee) 
                 return $employee->first_name . ' ' . $employee->last_name;
             })
+            ->addColumn('date', function ($advance_payment) {
+                return dateFormat($advance_payment->date);
+            })
             ->addColumn('amount', function ($advance_payment) {
                 return numberFormat($advance_payment->amount);
             })
-            ->addColumn('date', function ($advance_payment) {
-                return dateFormat($advance_payment->date);
+            ->addColumn('approve_amount', function ($advance_payment) {
+                return numberFormat($advance_payment->approve_amount);
             })
             ->addColumn('actions', function ($advance_payment) {
                 return $advance_payment->action_buttons;

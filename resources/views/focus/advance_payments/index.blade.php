@@ -26,8 +26,9 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Employee</th>
-                                        <th>Amount</th>
                                         <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Approved Amount</th>
                                         <th>Status</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -76,8 +77,9 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'employee', name: 'employee'},
-                    {data: 'amount', name: 'amount'},
                     {data: 'date', name: 'date'},
+                    {data: 'amount', name: 'amount'},
+                    {data: 'approve_amount', name: 'approve_amount'},
                     {data: 'status', name: 'status'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
