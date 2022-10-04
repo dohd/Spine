@@ -19,8 +19,8 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.leave.store', 'method' => 'POST']) }}
-                        @include('focus.leave.form')
+                    {{ Form::open(['route' => 'biller.advance_payments.store', 'method' => 'POST']) }}
+                        @include('focus.advance_payments.form')
                     {{ Form::close() }}
                 </div>
             </div>

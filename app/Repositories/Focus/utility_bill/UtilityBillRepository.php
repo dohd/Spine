@@ -148,14 +148,18 @@ class UtilityBillRepository extends BaseRepository
     public function delete(UtilityBill $utility_bill)
     {     
         DB::beginTransaction();
-        
+
+        $is_manual_bill = in_array($utility_bill->document_type, ['kra_bill', 'goods_receive_note']) && !$utility_bill->ref_id;
+        if (!$is_manual_bill) throw ValidationException::withMessages(['Please delete resource from parent record!']);
+    
         Transaction::where(['tr_type' => 'bill', 'note' => $utility_bill->note, 'tr_ref' => $utility_bill->id])->delete();
         $result = $utility_bill->delete();
+
         if ($result) {
             DB::commit(); 
             return true;
         }
-                
+       
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 

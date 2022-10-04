@@ -87,6 +87,8 @@ class UtilityBillController extends Controller
             return response()->redirectTo(route('biller.suppliers.edit', $utility_bill->supplier));
         elseif ($doc_type == 'goods_receive_note' && $utility_bill->ref_id) 
             return response()->redirectTo(route('biller.goodsreceivenote.edit', $utility_bill->ref_id));
+        elseif ($doc_type == 'advance_payment') 
+            return response()->redirectTo(route('biller.advance_payments.edit', $utility_bill->ref_id));
 
         return view('focus.utility-bills.edit', compact('utility_bill', 'suppliers'));
     }

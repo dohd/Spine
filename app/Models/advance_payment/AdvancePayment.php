@@ -2,8 +2,8 @@
 
 namespace App\Models\advance_payment;
 
+use App\Models\advance_payment\Traits\AdvancePaymentAttribute;
 use App\Models\advance_payment\Traits\AdvancePaymentRelationship;
-use App\Models\leave\Traits\AdvancePaymentAttribute;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,7 +27,7 @@ class AdvancePayment extends Model
      * @var array
      */
     protected $fillable = [
-       
+       'employee_id', 'amount', 'date', 'status', 'approve_date', 'approve_amount', 'approve_note'
     ];
 
     /**

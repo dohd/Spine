@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\leave\Traits;
+namespace App\Models\advance_payment\Traits;
 
 trait AdvancePaymentAttribute
 {

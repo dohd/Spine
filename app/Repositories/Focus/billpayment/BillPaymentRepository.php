@@ -215,7 +215,7 @@ class BillPaymentRepository extends BaseRepository
      */
     public function post_transaction($billpayment)
     {
-        // credit Accounts Payable (creditor)
+        // debit Accounts Payable (creditor)
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
@@ -223,7 +223,7 @@ class BillPaymentRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $billpayment->allocate_ttl,
+            'debit' => $billpayment->allocate_ttl,
             'tr_date' => $billpayment->date,
             'due_date' => $billpayment->date,
             'user_id' => $billpayment->user_id,
@@ -236,11 +236,11 @@ class BillPaymentRepository extends BaseRepository
         ];
         Transaction::create($cr_data);
 
-        // debit bank
-        unset($cr_data['credit'], $cr_data['is_primary']);
+        // credit bank
+        unset($cr_data['debit'], $cr_data['is_primary']);
         $cr_data = array_replace($cr_data, [
             'account_id' => $billpayment->account_id,
-            'debit' => $billpayment->allocate_ttl,
+            'credit' => $billpayment->allocate_ttl,
         ]);    
         Transaction::create($cr_data);
         aggregate_account_transactions();

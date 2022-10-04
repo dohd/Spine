@@ -2,12 +2,18 @@
 
 namespace App\Models\utility_bill\Traits;
 
+use App\Models\advance_payment\AdvancePayment;
 use App\Models\items\UtilityBillItem;
 use App\Models\purchase\Purchase;
 use App\Models\supplier\Supplier;
 
 trait UtilityBillRelationship
 {   
+    public function advance_payment()
+    {
+        return $this->belongsTo(AdvancePayment::class, 'ref_id');
+    }
+
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'ref_id');

@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\advance_payment;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\Access\User\User;
 use App\Models\advance_payment\AdvancePayment;
 use App\Repositories\Focus\advance_payment\AdvancePaymentRepository;
 use Illuminate\Http\Request;
@@ -57,7 +58,9 @@ class AdvancePaymentController extends Controller
      */
     public function create()
     {
-        return view('focus.advance_payments.create');
+        $users = User::get(['id', 'first_name', 'last_name']);
+
+        return view('focus.advance_payments.create', compact('users'));
     }
 
     /**
@@ -80,7 +83,9 @@ class AdvancePaymentController extends Controller
      */
     public function edit(AdvancePayment $advance_payment)
     {
-        return view('focus.advance_payments.edit', compact('advance_payment'));
+        $users = User::get(['id', 'first_name', 'last_name']);
+
+        return view('focus.advance_payments.edit', compact('advance_payment', 'users'));
     }
 
     /**

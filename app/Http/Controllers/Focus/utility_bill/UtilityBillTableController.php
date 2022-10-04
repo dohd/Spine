@@ -57,21 +57,34 @@ class UtilityBillTableController extends Controller
                 $doc_type = $utility_bill->document_type;
                 if ($doc_type == 'direct_purchase') {
                     $purchase = $utility_bill->purchase;
-                    $tid = '<a href="'. ($purchase? route('biller.purchases.edit', $purchase) : '') .'">'. $tid .'</a>';
+                    $tid = '<a href="'. ($purchase? route('biller.purchases.edit', $purchase) : '#') .'">'. $tid .'</a>';
                 } elseif ($doc_type == 'goods_receive_note') {
                     $grn = $utility_bill->ref_id;
-                    $tid = '<a href="'. ($grn? route('biller.goodsreceivenote.edit', $grn) : '') .'">'. $tid .'</a>';
+                    $tid = '<a href="'. ($grn? route('biller.goodsreceivenote.edit', $grn) : '#') .'">'. $tid .'</a>';
+                } elseif ($doc_type == 'advance_payment') {
+                    $adv_pmt = $utility_bill->ref_id;
+                    $tid = '<a href="'. ($adv_pmt? route('biller.advance_payments.show', $adv_pmt) : '#') .'">'. $tid .'</a>';
                 }
                 
                 return $tid;
             })
             ->addColumn('supplier', function ($utility_bill) {
-                $supplier = $utility_bill->supplier;
-                $purchase = $utility_bill->purchase;
-                if ($purchase && $purchase->suppliername) {
-                    return $purchase->suppliername;
-                } 
-                if ($supplier) return $supplier->name;
+                $name = '';
+                $doc_type = $utility_bill->document_type;
+                if ($doc_type == 'direct_purchase') {
+                    $purchase = $utility_bill->purchase;
+                    if ($purchase->suppliername)
+                        $name = $purchase->suppliername;
+                } elseif ($doc_type == 'advance_payment') {
+                    $payment = $utility_bill->advance_payment;
+                    if ($payment->employee)
+                        $name = $payment->employee->first_name . ' ' . $payment->employee->last_name;
+                }
+
+                if ($utility_bill->supplier && !$name) 
+                    return $utility_bill->supplier->name;
+                    
+                return $name;
             })        
             ->addColumn('note', function ($utility_bill) {
                 $note = $utility_bill->note;
@@ -87,7 +100,9 @@ class UtilityBillTableController extends Controller
                     if ($grn) $note = '(GRN) - ' . $note;
                 } elseif ($doc_type == 'kra_bill') {
                     $note = '(KRA) - ' . $note;
-                }                 
+                } elseif ($doc_type == 'advance_payment') {
+                    $note = '(Advance PMT) - ' . $note;
+                }             
 
                 return $note;
             })
