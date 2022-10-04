@@ -52,6 +52,7 @@ class BillPaymentRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
+
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
@@ -61,7 +62,9 @@ class BillPaymentRepository extends BaseRepository
                 }, $val);
             }
         }
-        if($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+        if($input['amount'] == 0) 
+            throw ValidationException::withMessages(['amount is required!']);
+
         $result = Billpayment::create($input);
 
         $data_items = Arr::only($input, ['bill_id', 'paid']);
@@ -75,9 +78,11 @@ class BillPaymentRepository extends BaseRepository
         BillpaymentItem::insert($data_items);
 
         // increment supplier on account balance
-        $unallocated = $result->amount - $result->allocate_ttl;
-        $result->supplier->increment('on_account', $unallocated);
-
+        if ($result->supplier) {
+            $unallocated = $result->amount - $result->allocate_ttl;
+            $result->supplier->increment('on_account', $unallocated);
+        }
+        
         // increment bill amount paid and update status
         foreach ($result->items as $item) {
             $bill = $item->supplier_bill;
@@ -121,15 +126,19 @@ class BillPaymentRepository extends BaseRepository
         if($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
 
         // reverse supplier unallocated amount
-        $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
-        $billpayment->supplier->decrement('on_account', $unallocated);
+        if ($billpayment->supplier_id) {
+            $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
+            $billpayment->supplier->decrement('on_account', $unallocated);    
+        }
 
         $prev_note = $billpayment->note;
         $result = $billpayment->update($input);
 
         // update supplier unallocated amount
-        $unallocated = $billpayment->amount - $billpayment->allocate_ttl;        
-        $billpayment->supplier->increment('on_account', $unallocated);
+        if ($billpayment->supplier_id) {
+            $unallocated = $billpayment->amount - $billpayment->allocate_ttl;        
+            $billpayment->supplier->increment('on_account', $unallocated);    
+        }
 
         // allocated items
         $data_items = Arr::only($input, ['id', 'bill_id', 'paid']);
@@ -151,12 +160,13 @@ class BillPaymentRepository extends BaseRepository
         foreach ($billpayment->items as $item) {
             // update bill amount paid
             $bill = $item->supplier_bill;
-            if ($bill) {
-                $bill->increment('amount_paid', $item->paid);
-                if ($bill->amountpaid == 0) $bill->update(['status' => 'due']);
-                elseif (round($bill->total) > round($bill->amountpaid)) $bill->update(['status' => 'partial']);
-                else $bill->update(['status' => 'paid']);
-            }
+            if (!$bill) continue;
+
+            $bill->increment('amount_paid', $item->paid);
+            if ($bill->amountpaid == 0) $bill->update(['status' => 'due']);
+            elseif (round($bill->total) > round($bill->amountpaid)) $bill->update(['status' => 'partial']);
+            else $bill->update(['status' => 'paid']);
+            
             // delete items with zero payment
             if ($item->paid == 0) $item->delete();
         }
@@ -185,8 +195,10 @@ class BillPaymentRepository extends BaseRepository
         DB::beginTransaction();
        
         // decrement supplier on account balance
-        $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
-        $billpayment->supplier->decrement('on_account', $unallocated);
+        if ($billpayment->supplier_id) {
+            $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
+            $billpayment->supplier->decrement('on_account', $unallocated);
+        }
 
         // decrement bill amount paid and update status
         foreach ($billpayment->items as $item) {
@@ -199,8 +211,7 @@ class BillPaymentRepository extends BaseRepository
 
         Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
         aggregate_account_transactions();
-        $result = $billpayment->delete();
-        if ($result) {
+        if ($billpayment->delete()) {
             DB::commit(); 
             return true;
         }
@@ -215,8 +226,14 @@ class BillPaymentRepository extends BaseRepository
      */
     public function post_transaction($billpayment)
     {
-        // debit Accounts Payable (creditor)
-        $account = Account::where('system', 'payable')->first(['id']);
+        // for supplier, debit Accounts Payable (creditor)
+        // for employee, debit Advance Salary Account
+        $account = null;
+        if ($billpayment->supplier_id)
+            $account = Account::where('system', 'payable')->first(['id']);
+        if ($billpayment->employee_id)  
+            $account = Account::where('system', 'adv_salary')->first(['id']);
+            
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
         $cr_data = [

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Focus\billpayment;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\Access\User\User;
 use App\Models\account\Account;
 use App\Models\billpayment\Billpayment;
 use App\Models\supplier\Supplier;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
+use DB;
 use Illuminate\Http\Request;
 
 class BillPaymentController extends Controller
@@ -44,13 +46,14 @@ class BillPaymentController extends Controller
     public function create(Request $request)
     {
         $tid = Billpayment::max('tid');
-        $accounts = Account::whereNull('system')
-            ->whereHas('accountType', function ($q) {
-                $q->where('system', 'bank');
-            })->get(['id', 'holder']);
+        $accounts = Account::whereNull('system')->whereHas('accountType', function ($q) {
+            $q->where('system', 'bank');
+        })->get(['id', 'holder']);
+            
         $suppliers = Supplier::get(['id', 'name']);
+        $employees = User::get();
 
-        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers'));
+        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees'));
     }
 
     /**

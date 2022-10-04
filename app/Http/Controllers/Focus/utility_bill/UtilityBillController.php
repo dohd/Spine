@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\utility_bill;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\bill\Bill;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\utility_bill\UtilityBillRepository;
@@ -156,5 +157,18 @@ class UtilityBillController extends Controller
         $grn = $supplier->goods_receive_notes()->whereNull('invoice_no')->get();
 
         return response()->json($grn);
+    }
+
+    /**
+     * Employee bills
+     */
+    public function employee_bills()
+    {
+        $bills = UtilityBill::where('document_type', 'advance_payment')
+            ->whereIn('ref_id', function ($q) {
+                $q->select('employee_id')->from('advance_payments')->where('employee_id', request('employee_id'));
+            })->get();
+
+        return response()->json($bills);
     }
 }

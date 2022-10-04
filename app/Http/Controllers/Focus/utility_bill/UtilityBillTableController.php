@@ -110,7 +110,7 @@ class UtilityBillTableController extends Controller
                 return numberFormat($utility_bill->total);
             })
             ->addColumn('balance', function ($utility_bill) {
-                return numberFormat($utility_bill->total - $utility_bill->amountpaid);
+                return numberFormat($utility_bill->total - $utility_bill->amount_paid);
             })
             ->addColumn('date', function ($utility_bill) {
                 return dateFormat($utility_bill->date);

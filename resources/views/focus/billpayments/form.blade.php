@@ -9,6 +9,16 @@
             @endforeach
         </select>
     </div>
+    <div class="col-4">
+        <label for="employee">Employee</label>
+        <select name="employee_id" id="employee" class="form-control" data-placeholder="Choose Employee" required>
+            @foreach ($employees as $row)
+                <option value="{{ $row->id }}" {{ @$billpayment && $billpayment->supplier_id == $row->id? 'selected' : '' }}>
+                    {{ $row->fullname }}
+                </option>
+            @endforeach
+        </select>
+    </div>
     <div class="col-2">
         <label for="tid" class="caption">RMT No.</label>
         {{ Form::text('tid', @$billpayment ? $billpayment->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
@@ -17,6 +27,10 @@
         <label for="date">Date</label>
         {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
     </div> 
+   
+</div> 
+
+<div class="form-group row">
     <div class="col-2">
         <label for="payment_mode">Payment Mode</label>
         <select name="payment_mode" id="payment_mode" class="custom-select">
@@ -29,7 +43,11 @@
         <label for="reference">Reference</label>
         {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference', 'required']) }}
     </div> 
-</div> 
+    <div class="col-8">
+        <label for="note">Note</label>    
+        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note', 'required']) }}
+    </div>    
+</div>
 
 <div class="form-group row">  
     <div class="col-2">
@@ -46,11 +64,7 @@
                 </option>
             @endforeach
         </select>
-    </div>  
-    <div class="col-8">
-        <label for="note">Note</label>    
-        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note', 'required']) }}
-    </div>                          
+    </div>              
 </div>
 
 <div class="table-responsive">
@@ -126,6 +140,7 @@
         init() {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#supplier').select2({allowClear: true}); 
+            $('#employee').select2({allowClear: true});
 
             $('#amount').keyup(this.allocateAmount).focusout(this.amountFocusOut).trigger('focusout');
             $('#documentsTbl').on('focusout', '.paid', this.tablePaidChange);
@@ -133,8 +148,12 @@
 
             if (this.billPayment) {
                 $('#supplier').attr('disabled', true);
-            } else $('#supplier').val('').change();  
+            } else {
+                $('#supplier').val('').change();  
+                $('#employee').val('').change();  
+            }
             $('#supplier').change(this.supplierChange);  
+            $('#employee').change(this.employeeChange);  
         },
 
         amountFocusOut() {
@@ -147,6 +166,49 @@
             const due = accounting.unformat(tr.find('.due').text());
             if (paid > due) $(this).val(due);
             Form.columnTotals();
+        },
+
+        supplierChange() {
+            const supplier_id = $(this).val();
+            $('#documentsTbl tbody').html('');
+            $('#employee').attr({required: true, disabled: false});
+            if (!supplier_id) return; 
+            
+            $('#employee').attr({required: false, disabled: true});
+            $.post("{{ route('biller.suppliers.bills') }}", {supplier_id}, data => {
+                data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
+            });
+        },
+
+        employeeChange() {
+            const employee_id = $(this).val();
+            $('#documentsTbl tbody').html('');
+            $('#supplier').attr({required: true, disabled: false});
+            if (!employee_id) return; 
+            
+            $('#supplier').attr({required: false, disabled: true});
+            $.post("{{ route('biller.utility-bills.employee_bills') }}", {employee_id}, data => {
+                data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
+            });
+        },
+
+        billRow(v,i) {
+            const diff = v.total - v.amount_paid;
+            const balance = accounting.formatNumber(diff > 0? diff : 0);
+            return `
+                <tr>
+                    <td class="text-center">${new Date(v.due_date).toDateString()}</td>
+                    <td>${v.tid}</td>
+                    <td>${v.purchase? v.purchase.suppliername : ''}</td>
+                    <td class="text-center">${v.note}</td>
+                    <td>${v.status}</td>
+                    <td>${accounting.formatNumber(v.total)}</td>
+                    <td>${accounting.formatNumber(v.amount_paid)}</td>
+                    <td class="text-center due"><b>${balance}</b></td>
+                    <td><input type="text" class="form-control paid" name="paid[]" required></td>
+                    <input type="hidden" name="bill_id[]" value="${v.id}">
+                </tr>
+            `;
         },
 
         allocateAmount() {
@@ -167,34 +229,6 @@
             });
             $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
-        },
-
-        supplierChange() {
-            $('#documentsTbl tbody').html('');
-            const supplierId = $(this).val();
-            if (supplierId) 
-                $.post("{{ route('biller.suppliers.bills') }}", {supplier_id: supplierId}, data => {
-                    data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
-                });
-        },
-
-        billRow(v,i) {
-            const diff = v.total - v.amount_paid;
-            const balance = accounting.formatNumber(diff > 0? diff : 0);
-            return `
-                <tr>
-                    <td class="text-center">${new Date(v.due_date).toDateString()}</td>
-                    <td>${v.tid}</td>
-                    <td>${v.purchase? v.purchase.suppliername : ''}</td>
-                    <td class="text-center">${v.note}</td>
-                    <td>${v.status}</td>
-                    <td>${accounting.formatNumber(v.total)}</td>
-                    <td>${accounting.formatNumber(v.amount_paid)}</td>
-                    <td class="text-center due"><b>${balance}</b></td>
-                    <td><input type="text" class="form-control paid" name="paid[]" required></td>
-                    <input type="hidden" name="bill_id[]" value="${v.id}">
-                </tr>
-            `;
         },
 
         columnTotals() {

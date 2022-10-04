@@ -33,8 +33,8 @@
                                 'Subtotal' => numberFormat($bill->subtotal),
                                 'Tax' => numberFormat($bill->tax),
                                 'Total' => numberFormat($bill->total),
-                                'Amount Paid' => numberFormat($bill->amountpaid),
-                                'Balance' => numberFormat($bill->total - $bill->amountpaid),
+                                'Amount Paid' => numberFormat($bill->amount_paid),
+                                'Balance' => numberFormat($bill->total - $bill->amount_paid),
                                 'Status' => ucfirst($bill->status),
                                 'Note' => $bill->note,
                             ];
