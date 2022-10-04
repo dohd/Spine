@@ -28,7 +28,7 @@
                             <th>#</th>
                             <th>#Project No</th>
                             <th>Name</th>
-                            <th>Customer</th>
+                            <th>Customer-Branch</th>
                             <th>#Quote / PI Budget (status)</th>
                             <th>Ticket No</th>                           
                             <th>Start Date</th>

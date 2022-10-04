@@ -54,8 +54,13 @@ class ProjectsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function($project) {
-                if ($project->customer_project)
-                return $project->customer_project->company;
+                $name = '';
+                $customer = $project->customer_project;
+                $branch = $project->branch;
+                if ($customer && $branch) $name = "{$customer->company} - {$branch->name}";
+                elseif ($customer) $name = $customer->company;
+                
+                return $name;
             })
             ->addColumn('tid', function($project) {
                 return gen4tid('Prj-', $project->tid);
