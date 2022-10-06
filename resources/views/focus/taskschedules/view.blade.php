@@ -22,11 +22,15 @@
                     <div class="card-content">
                         <div class="card-body">
                             @php
+                                $contract = $taskschedule->contract;
                                 $details = [
-                                    'Contract' => $taskschedule->contract? $taskschedule->contract->tid . ' - ' . $taskschedule->contract->title : '',
+                                    'Customer' => $contract->customer? $contract->customer->company : '', 
+                                    'Contract' => $contract? $contract->title : '',
                                     'Schedule Title' => $taskschedule->title,
-                                    'Start Date' => dateFormat($taskschedule->start_date),
-                                    'End Date' => dateFormat($taskschedule->end_date),
+                                    'Schedule Start Date' => dateFormat($taskschedule->start_date),
+                                    'Schedule End Date' => dateFormat($taskschedule->end_date),
+                                    'Actual Start Date' => dateFormat($taskschedule->actual_startdate),
+                                    'Actual End Date' => dateFormat($taskschedule->actual_enddate),
                                     'Service Rate' => numberFormat($taskschedule->equipments->sum('service_rate'))
                                 ];
                             @endphp
@@ -45,7 +49,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Serial No</th>
+                                            <th>System ID</th>
                                             <th>Type</th>
                                             <th>Branch</th>
                                             <th>Location</th>
@@ -56,7 +60,7 @@
                                         @foreach ($taskschedule->equipments as $i => $row)                                            
                                             <tr>
                                                 <td>{{ $i+1 }}</td>
-                                                <td>{{ $row->unique_id }}</td>
+                                                <td>{{ gen4tid('Eq-', $row->tid) }}</td>
                                                 <td>{{ $row->make_type }}</td>
                                                 <td>{{ $row->branch->name }}</td>
                                                 <td>{{ $row->location }}</td>

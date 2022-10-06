@@ -155,6 +155,6 @@
 </div>
 <div class="form-group row mt-1">
     <div class="col-12">
-        {{ Form::submit('Submit', ['class' => 'btn btn-primary btn-lg float-right']) }}
+        {{ Form::submit('Generate', ['class' => 'btn btn-primary btn-lg float-right']) }}
     </div>
 </div>

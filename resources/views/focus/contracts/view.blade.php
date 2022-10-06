@@ -80,9 +80,7 @@
                                                         <td>{{ dateFormat($row->start_date) }}</td>
                                                         <td>{{ dateFormat($row->end_date) }}</td>
                                                         <td>{{ $row->status }} - {{ $row->equipments->count() }}</td>
-                                                        <td>
-                                                            0
-                                                        </td>
+                                                        <td>{{ $row->contractservice? $row->contractservice->items->count() : 0 }}</td>
                                                     </tr>
                                                 @endforeach                                                    
                                             </tbody>

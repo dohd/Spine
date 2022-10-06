@@ -1,12 +1,12 @@
 @extends('core.layouts.app')
 
-@section('title', 'View | Contract Service Management')
+@section('title', 'PM Report Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Contract Service Management</h4>
+            <h4 class="content-header-title">PM Report Management</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -48,28 +48,22 @@
                                 <table class="table">
                                     <thead>
                                         <tr class="bg-gradient-directional-blue white">
+                                            <th>#</th>
                                             <th>System ID</th>
                                             <th>Description</th>    
                                             <th>Location</th>   
                                             <th>Rate</th> 
                                             <th width="10%">Status</th>                                                                              
-                                            <th>Bill</th>
+                                            <th>Billed</th>
                                             <th width="12%">Note</th>
                                         </tr>
                                     </thead>
                                     <tbody>                                            
                                         @foreach ($contractservice->items as $i => $row)                                            
-                                            <tr>                                                
+                                            <tr> 
+                                                <td>{{ $i+1 }}</td>                                               
                                                 <td>{{ gen4tid('Eq-', $row->equipment->tid) }}</td>
-                                                <td>
-                                                    @php
-                                                        $descr = array_intersect_key(
-                                                            $row->equipment->toArray(), 
-                                                            array_flip(['make_type', 'equip_serial', 'unique_id', 'capacity', 'machine_gas'])
-                                                        );
-                                                        echo implode('; ', array_values($descr));
-                                                    @endphp                                                                                          
-                                                </td>       
+                                                <td>{{ $row->equipment->make_type }} {{ $row->equipment->capacity }} </td>                                                                                     
                                                 <td>{{ $row->equipment->location }}</td>    
                                                 <td>{{ numberFormat($row->equipment->service_rate) }}</td>                                       
                                                 <td>{{ ucfirst($row->status) }}</td>

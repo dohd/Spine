@@ -108,8 +108,9 @@ class ProjectRepository extends BaseRepository
      */
     public function delete($project)
     {  
-        if ($project->quotes)
-            throw ValidationException::withMessages(['Project is attached to Quote / Proforma Invoice!']);
+        $budgeted_quotes = $project->quotes()->whereHas('budget')->get();
+        if ($budgeted_quotes->count())
+            throw ValidationException::withMessages(['Project has been budgeted on!']);
         if ($project->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.projects.delete_error'));

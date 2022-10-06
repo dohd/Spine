@@ -7,6 +7,7 @@
 
     // customer select2
     $('#customer').select2({
+        allowClear: true,
         ajax: {
             url: "{{ route('biller.customers.select') }}",
             dataType: 'json',
@@ -17,7 +18,6 @@
                 return { results: result.map(v => ({text: `${v.company}`, id: v.id }))};
             }      
         },
-        allowClear: true
     }).change(function() {
         $("#branch").html('').select2({
             ajax: {
@@ -96,9 +96,9 @@
                         branch_id: $('#branch').val()
                     },
                     success: data => {
-                        if (!$('#customer').val()) return;
                         return response(data.map(v => ({
-                            label: `Eq-${v.tid} - ${[v.make_type, v.capacity, v.location].join('; ')}`,
+                            label: `Eq-${(''+v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid} - 
+                                ${[v.make_type, v.capacity, v.location].join('; ')}`,
                             value: `${[v.make_type, v.capacity].join('; ')}`,
                             data: v
                         })))
@@ -115,8 +115,7 @@
                 let tid = (''+data.tid).length < 4 ? ('000'+data.tid).slice(-4) : data.tid;
                 $('#tid-'+i).text('Eq-' + tid);
                 
-                let rate = parseFloat(data.service_rate);
-                $('#rate-'+i).text(rate.toLocaleString());
+                $('#rate-'+i).text(accounting.formatNumber(data.service_rate));
                 calcTotal();
             }
         };
@@ -128,12 +127,11 @@
         let billTotal = 0;
         $('#equipTbl tbody tr').each(function() {
             let isBill = $(this).find('.bill').val(); 
-            let rate = $(this).find('.rate').text().replace(/,/g, '');
-            rate = parseFloat(rate);
+            let rate = accounting.unformat($(this).find('.rate').text());
             if (isBill == 1) billTotal += rate;
             rateTotal += rate;
         });
-        $('#rate_ttl').val(parseFloat(rateTotal.toFixed(2)).toLocaleString());
-        $('#bill_ttl').val(parseFloat(billTotal.toFixed(2)).toLocaleString());
+        $('#rate_ttl').val(accounting.formatNumber(rateTotal));
+        $('#bill_ttl').val(accounting.formatNumber(billTotal));
     }
 </script>

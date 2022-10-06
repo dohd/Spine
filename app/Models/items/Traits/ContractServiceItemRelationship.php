@@ -2,7 +2,7 @@
 
 namespace App\Models\items\Traits;
 
-use App\Models\contract_service\ContractService;
+use App\Models\contractservice\ContractService;
 use App\Models\equipment\Equipment;
 
 trait ContractServiceItemRelationship

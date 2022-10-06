@@ -800,7 +800,7 @@
                         </li>
                         <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-wrench"></i> PM Report Management</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Serviced Equipments
+                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.serviced_equipment') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Serviced Equipments
                                     </a>                                
                                 </li>
                                 <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage PM Report 

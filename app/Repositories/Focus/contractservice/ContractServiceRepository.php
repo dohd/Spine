@@ -29,6 +29,13 @@ class ContractServiceRepository extends BaseRepository
         return $this->query()->get();
     }
 
+    public function getServiceReportItemsForDataTable()
+    {
+        $q = ContractServiceItem::query();
+
+        return $q->get();
+    }
+
     /**
      * For Creating the respective model in storage
      *
@@ -83,19 +90,23 @@ class ContractServiceRepository extends BaseRepository
         $result = $contractservice->update($data);
 
         $data_items = $input['data_items'];
+        $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
+        // delete omitted service items
+        $contractservice->items()->whereNotIn('id', $item_ids)->delete();
+        // create or update service items
         foreach ($data_items as $item) {
-            $item = array_replace($item, [
-                'contractservice_id' => $contractservice->id,
-            ]);
             $new_item = ContractServiceItem::firstOrNew(['id' => $item['item_id']]);
             $new_item->fill($item);
+            $new_item->contractservice_id = $contractservice->id;
             if (!$new_item->id) unset($new_item->id);
             unset($new_item->item_id);
             $new_item->save();
         }
-
-        DB::commit();
-        if ($result) return true;
+        
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }

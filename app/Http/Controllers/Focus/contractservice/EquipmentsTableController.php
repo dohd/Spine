@@ -25,7 +25,7 @@ use Yajra\DataTables\Facades\DataTables;
 /**
  * Class BranchTableController.
  */
-class ContractServicesTableController extends Controller
+class EquipmentsTableController extends Controller
 {
     /**
      * variable to store the repository object
@@ -48,37 +48,35 @@ class ContractServicesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->contractservice->getForDataTable();
-
+        $core = $this->contractservice->getServiceReportItemsForDataTable();
+        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('client', function ($contractservice) {
-                $customer = $contractservice->customer;
-                $branch = $contractservice->branch;
-                if ($customer && $branch)
-                    return "{$customer->company} - {$branch->name}";
+            ->addColumn('jobcard_no', function ($item) {
+                $service = $item->contractservice;
+                if ($service)
+                return $service->jobcard_no;
             })
-            ->addColumn('contract', function ($contractservice) {
-                $contract = $contractservice->contract;
-                $schedule = $contractservice->task_schedule;
-                if ($contract && $schedule)
-                    return "{$contract->title} - {$schedule->title}";
+            ->addColumn('tid', function ($item) {
+                if ($item->equipment)
+                return '<a href="'. route('biller.equipments.edit', $item->equipment) .'">'. gen4tid('Eq-', $item->equipment->tid) .'</a>';
             })
-            ->addColumn('bill', function ($contractservice) {
-                return amountFormat($contractservice->bill_ttl);
+            ->addColumn('descr', function ($item) {
+                if ($item->equipment)
+                return "{$item->equipment->make_type} {$item->equipment->capacity}";
             })
-            ->addColumn('unit', function ($contractservice) {
-                return $contractservice->items->count();
+            ->addColumn('location', function ($item) {
+                if ($item->equipment)
+                return $item->equipment->location;
             })
-            ->addColumn('jobcard_no', function ($contractservice) {
-                return 'Jc-' . $contractservice->jobcard_no;
+            ->addColumn('rate', function ($item) {
+                if ($item->equipment)
+                return numberFormat($item->equipment->service_rate);
             })
-            ->addColumn('date', function ($contractservice) {
-                return dateFormat($contractservice->date);
-            })
-            ->addColumn('actions', function ($contractservice) {
-                return $contractservice->action_buttons;
+            ->addColumn('is_bill', function ($item) {
+                if (!$item->is_bill) return 'No';
+                return 'Yes';
             })
             ->make(true);
     }

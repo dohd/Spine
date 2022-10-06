@@ -1,16 +1,18 @@
 @extends('core.layouts.app')
 
-@section('title', 'Schedule Management')
+@section('title', 'PM Report Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Schedule Management</h4>
+            <h4 class="content-header-title">PM Report Equipments</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.taskschedules.partials.taskschedule-header-buttons')
+                <div class="media-body media-right text-right">
+                    @include('focus.contractservices.partials.contractservices-header-buttons')
+                </div>
             </div>
         </div>
     </div>
@@ -21,18 +23,18 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="scheduleTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="serviceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Client Contract</th>
-                                        <th>Title</th>
-                                        <th>Loaded Units</th>
-                                        <th>Total Cost</th>
-                                        <th>Total Bill Cost</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Action</th>
+                                        <th>Jobcard</th>
+                                        <th>System ID</th>
+                                        <th>Description</th>
+                                        <th>Location</th>
+                                        <th>Rate</th>
+                                        <th>Status</th>
+                                        <th>Billed</th>
+                                        <th>Note</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -56,68 +58,72 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-$.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        }
+    });
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     function draw_data() {
-        const language = { @lang("datatable.strings") };
-        const dataTable = $('#scheduleTbl').dataTable({
+        const language = {
+            @lang("datatable.strings")
+        };
+        const dataTable = $('#serviceTbl').dataTable({
             processing: true,
             responsive: true,
             language,
             ajax: {
-                url: '{{ route("biller.taskschedules.get") }}',
+                url: '{{ route("biller.contractservices.get_equipments") }}',
                 type: 'POST',
             },
-            columns: [
-                {
+            columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
                 },
                 {
-                    data: 'contract',
-                    name: 'contract'
+                    data: 'jobcard_no',
+                    name: 'jobcard_no'
                 },
                 {
-                    data: 'title',
-                    name: 'title'
+                    data: 'tid',
+                    name: 'tid'
                 },
                 {
-                    data: 'loaded',
-                    name: 'loaded'
+                    data: 'descr',
+                    name: 'descr'
                 },
                 {
-                    data: 'total_rate',
-                    name: 'total_rate'
+                    data: 'location',
+                    name: 'location'
                 },
                 {
-                    data: 'total_charged',
-                    name: 'total_charged'
+                    data: 'rate',
+                    name: 'rate'
                 },
                 {
-                    data: 'start_date',
-                    name: 'start_date'
+                    data: 'status',
+                    name: 'status'
                 },
                 {
-                    data: 'end_date',
-                    name: 'end_date'
+                    data: 'is_bill',
+                    name: 'is_bill'
                 },
                 {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
+                    data: 'note',
+                    name: 'note'
+                },
+                
             ],
             columnDefs: [
-                { type: "custom-number-sort", targets: [5, 6] },
-                { type: "custom-date-sort", targets: [7, 8] }
+                { type: "custom-number-sort", targets: [3] },
+                { type: "custom-date-sort", targets: [6] }
             ],
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons:  [ 'csv', 'excel', 'print'],
+            buttons: ['csv', 'excel', 'print'],
         });
-    }        
+    }
 </script>
 @endsection

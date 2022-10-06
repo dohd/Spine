@@ -128,4 +128,12 @@ class ContractServicesController extends Controller
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report deleted successfully']);
     }
+
+    /**
+     * Display listing of serviced equipments
+     */
+    public function serviced_equipment()
+    {
+        return view('focus.contractservices.serviced_equipment');
+    }
 }
