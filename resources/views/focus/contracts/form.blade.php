@@ -31,7 +31,7 @@
     </div>
     <div class="col-2">
         <label for="amount">Amount</label>
-        {{ Form::text('amount', numberFormat(@$contract->amount), ['class' => 'form-control', 'required']) }}
+        {{ Form::text('amount', numberFormat(@$contract->amount), ['class' => 'form-control', 'id' => 'amount', 'required']) }}
     </div>
     <div class="col-2">
         <label for="period">Duration (Years)</label>
@@ -105,7 +105,7 @@
 </div>
 
 <legend>Customer Equipments</legend><hr>
-<div class="form-inline mb-2">
+<div class="form-inline mb-2 filter-block">
     <label for="branch" class="mr-1">Filter</label>
     <div class="col-2">
         <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose branch"></select>
@@ -154,8 +154,8 @@
                                 <input type="checkbox" class="form-check-input ml-1 select">
                             </div>
                         </td>
-                        <input type="hidden" class="equipId" name="equipment_id[]" value="{{ $row->equipment_id }}" disabled>
-                        <input type="hidden" class="contEquipId" name="contracteq_id[]" value="{{ $row->id }}" disabled>
+                        <input type="hidden" class="equipId" name="equipment_id[]" value="{{ $row->id }}" disabled>
+                        <input type="hidden" class="contEquipId" name="contracteq_id[]" value="{{ $row->pivot->id }}" disabled>
                     </tr>
                 @endforeach
             @endisset

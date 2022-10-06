@@ -1,12 +1,12 @@
 @extends('core.layouts.app')
 
-@section('title', 'Load Machine | Task Schedule Management')
+@section('title', 'Load Machine | Schedule Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Task Schedule Management</h4>
+            <h4 class="content-header-title">Schedule Management</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -42,30 +42,42 @@
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
 
+    $('#schedule').change(function () {
+        const opt = $(this).find(':selected');
+        const startDate = $(this).val()? new Date(opt.attr('actual_start')) : new Date();
+        const endDate = $(this).val()? new Date(opt.attr('actual_end')) : new Date();
+        $('#actual_startdate').datepicker('setDate', startDate);
+        $('#actual_enddate').datepicker('setDate', endDate);
+    });
+
     // on contract select
     const equipRow =  $('#equipmentTbl tbody tr').html();
     $('#contract').change(function() {
+        const contract_id = $(this).val();
+        $('#equipmentTbl tbody tr').remove();
+        $('#schedule option:not(:first)').remove();
         // load task schedules
         $.ajax({
             url: "{{ route('biller.contracts.task_schedules')  }}",
             type: 'POST',
-            data: {contract_id: $(this).val()},
+            data: {contract_id},
             success: data => {
-               $('#schedule').html('').append(new Option('-- Select Schedule --', ''));
-                data.forEach(v => {                    
-                    $('#schedule').append(new Option(v.title, v.id));
-                });
+                data.forEach(v => $('#schedule').append(
+                    `<option value="${v.id}" 
+                        actual_start="${v.actual_startdate ? v.actual_startdate : v.start_date}" 
+                        actual_end="${v.actual_enddate ? v.actual_enddate : v.end_date}"
+                    >
+                        ${v.title}
+                    </option>`
+                ));               
             }
         });
         // load equipments
         $.ajax({
-            url: "{{ route('biller.contracts.contract_equipment')  }}",
+            url: "{{ route('biller.contracts.contract_equipment') }}",
             type: 'POST',
-            data: {contract_id: $(this).val()},
-            success: data => {
-                $('#equipmentTbl tbody tr').remove();
-                data.forEach(fillTable);
-            }
+            data: {contract_id, is_schedule: 1},
+            success: data => data.forEach(fillTable)
         })
     });
     function fillTable(obj) {

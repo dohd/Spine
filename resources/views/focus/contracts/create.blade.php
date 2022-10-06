@@ -43,9 +43,15 @@
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());   
 
+    $('#amount').focusout(function () {
+        const value = accounting.unformat($(this).val());
+        $(this).val(accounting.formatNumber(value));
+    });
+
     // select2 config
     function select2Config(url, callback, extraData) {
         return {
+            allowClear: true,
             ajax: {
                 url,
                 dataType: 'json',

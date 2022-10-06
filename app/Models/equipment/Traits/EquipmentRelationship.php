@@ -2,11 +2,23 @@
 
 namespace App\Models\equipment\Traits;
 
+use App\Models\contract\Contract;
+
 /**
  * Class EquipmentRelationship
  */
 trait EquipmentRelationship
 {
+    public function contracts()
+    {
+        return $this->belongsToMany(Contract::class, 'contract_equipment');
+    }
+
+    public function task_schedules()
+    {
+        return $this->belongsToMany(Contract::class, 'contract_equipment')->whereNotNull('schedule_id');
+    }
+
     public function customer()
     {
         return $this->belongsTo('App\Models\customer\Customer');
@@ -16,12 +28,11 @@ trait EquipmentRelationship
     {
         return $this->hasOne('App\Models\region\Region', 'id', 'region_id')->withoutGlobalScopes();
     }
+
     public function project_section()
     {
         return $this->hasOne('App\Models\section\Section', 'id', 'section_id')->withoutGlobalScopes();
     }
-
-
 
     public function category()
     {
@@ -55,10 +66,6 @@ trait EquipmentRelationship
     public function term()
     {
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
-    }
-    public function transactions()
-    {
-        return $this->hasMany('App\Models\transaction\Transaction', 'bill_id')->where('relation_id', '=', 5)->withoutGlobalScopes();
     }
 
     public function attachment()

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
-use App\Models\equipment\Equipment;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\taskschedule\TaskScheduleRepository;
 use Illuminate\Http\Request;

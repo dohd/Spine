@@ -773,24 +773,24 @@
                         </li>
                         @endauth
                         @permission('project-manage')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file-text-o"></i> Contract Management</a>
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file-text-o"></i>PM Contract Management</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.contracts.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Contracts
+                                <li><a class="dropdown-item" href="{{ route('biller.contracts.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage PM Contracts
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.contracts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Contract
+                                <li><a class="dropdown-item" href="{{ route('biller.contracts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create PM Contract
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.contracts.create_add_equipment') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Add Contract Equipment
+                                <li><a class="dropdown-item" href="{{ route('biller.contracts.create_add_equipment') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Add PM Equipment
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         @endauth
                         @permission('project-manage')
-                        <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Task Schedule Management </a>
+                        <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-calendar"></i> Schedule Management </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Task Schedule 
+                                <li><a class="dropdown-item" href="{{ route('biller.taskschedules.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Schedule 
                                     </a>                                
                                 </li>
                                 <li><a class="dropdown-item" href="{{ route('biller.taskschedules.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Load Equipment
@@ -798,15 +798,15 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-wrench"></i> Contract Service Management</a>
+                        <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-wrench"></i> PM Report Management</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Service Equipment
+                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Serviced Equipments
                                     </a>                                
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Service Report 
+                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage PM Report 
                                     </a>                                
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Service Report
+                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PM Report
                                     </a>
                                 </li>
                             </ul>

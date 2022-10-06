@@ -7,6 +7,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
 use App\Models\equipment\Equipment;
+use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\contract\ContractRepository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -118,10 +119,10 @@ class ContractsController extends Controller
         $contract_data['user_id'] = auth()->user()->id;
         
         $schedule_data = modify_array($schedule_data);
-        $equipment_data = modify_array($equipment_data);
-        
-        if (!$schedule_data || !$equipment_data) 
-            throw ValidationException::withMessages(['Task Schedule or Equipment required!']);
+        if (!$schedule_data) throw ValidationException::withMessages(['contract schedules required!']);
+
+        $equipment_data = modify_array($equipment_data); 
+        if (!$equipment_data) throw ValidationException::withMessages(['contract equipments required!']);
             
         $this->repository->update($contract, compact('contract_data', 'schedule_data', 'equipment_data'));
 
@@ -160,15 +161,15 @@ class ContractsController extends Controller
 
         $this->repository->add_equipment($data_items);
 
-        return new ViewResponse('focus.contracts.index', ['flash_success' => 'Contract Equipment added successfully']);
+        return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract Equipment Added Successfully']);
     }
 
     /**
      * Customer Contracts
      */
-    public function customer_contracts(Request $request)
+    public function customer_contracts()
     {
-        $contracts = Contract::where(['customer_id' => $request->customer_id])->get();
+        $contracts = Contract::where('customer_id', request('customer_id'))->get();
 
         return response()->json($contracts);
     }
@@ -176,39 +177,32 @@ class ContractsController extends Controller
     /**
      * Contract task schedules
      */
-    public function task_schedules(Request $request)
+    public function task_schedules()
     {
-        $contract = Contract::find($request->contract_id);
+        $schedules = TaskSchedule::where('contract_id', request('contract_id'))->get();
 
-        return response()->json($contract->task_schedules);
+        return response()->json($schedules);
     }
 
     /**
      * Customer equipments
      */
-    public function customer_equipment(Request $request)
+    public function customer_equipment()
     {
-        $customer = $request->only('customer_id');
-        $branch = $request->only('branch_id');
-
-        printlog($customer, $branch);
-
-        $equipments = Equipment::when($customer, function ($q) use($customer) {
-            $q->where($customer);
-        })->when($branch, function ($q) use($branch) {
-            $q->where($branch);
-        })->with(['branch' => function($q) {
-            $q->get(['id', 'name']);
-        }])->get()
-        ->map(function ($v) {
-            return [
-                'id' => $v->id, 
-                'unique_id' => $v->unique_id, 
-                'branch' => $v->branch, 
-                'location' => $v->location, 
-                'make_type' => $v->make_type
-            ];
-        });
+        $equipments = Equipment::when(request('branch_id'), function ($q) {
+            $q->where('branch_id', request('branch_id'));
+        })
+        ->where('customer_id', request('customer_id'))
+        ->doesntHave('contracts')
+        ->with(['branch' => fn($q) => $q->get(['id', 'name'])])
+        ->get()
+        ->map(fn($v) => [
+            'id' => $v->id, 
+            'unique_id' => $v->unique_id, 
+            'branch' => $v->branch, 
+            'location' => $v->location, 
+            'make_type' => $v->make_type
+        ]);
         
         return response()->json($equipments);
     }
@@ -216,20 +210,21 @@ class ContractsController extends Controller
     /**
      * Contract equipments
      */
-    public function contract_equipment(Request $request)
+    public function contract_equipment()
     {
-        $contract = Contract::find($request->contract_id);
-        $equipments = $contract->equipments()->get()->map(function ($v) {
-            return [
-                'id' => $v->id, 
-                'unique_id' => $v->unique_id, 
-                'branch' => $v->branch, 
-                'location' => $v->location, 
-                'make_type' => $v->make_type,
-                'service_rate' => $v->service_rate
-            ];
-        });
-
+        $equipments = Equipment::doesntHave('task_schedules')
+        ->whereHas('contracts', function ($q) {
+            $q->where('contract_id', request('contract_id'));
+        })->get()
+        ->map(fn($v) => [
+            'id' => $v->id, 
+            'unique_id' => $v->unique_id, 
+            'branch' => $v->branch, 
+            'location' => $v->location, 
+            'make_type' => $v->make_type,
+            'service_rate' => $v->service_rate
+        ]);
+        
         return response()->json($equipments);
     }    
 }

@@ -8,6 +8,7 @@ use App\Models\contract_equipment\ContractEquipment;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\BaseRepository;
 use DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -48,10 +49,10 @@ class ContractRepository extends BaseRepository
         DB::beginTransaction();
 
         $contract_data = $input['contract_data'];
-        foreach ($contract_data as $k => $val) {
-            if ($k == 'amount') $contract_data[$k] = numberClean($val);
-            if (in_array($k, ['start_date', 'end_date'])) 
-                $contract_data[$k] = date_for_database($val);
+        foreach ($contract_data as $key => $val) {
+            if ($key == 'amount') $contract_data[$key] = numberClean($val);
+            if (in_array($key, ['start_date', 'end_date'])) 
+                $contract_data[$key] = date_for_database($val);
         }
         $result = Contract::create($contract_data);
 
@@ -72,8 +73,10 @@ class ContractRepository extends BaseRepository
         }, $equipment_data);
         ContractEquipment::insert($equipment_data);
         
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Contract');
     }
@@ -92,47 +95,41 @@ class ContractRepository extends BaseRepository
         DB::beginTransaction();
 
         $contract_data = $input['contract_data'];
-        foreach ($contract_data as $k => $val) {
-            if (in_array($k, ['amount', 'start_date', 'end_date'])) {
-                if ($k == 'amount') $contract_data[$k] = numberClean($val);
-                else $contract_data[$k] = date_for_database($val);
-            }
+        foreach ($contract_data as $key => $val) {
+            if ($key == 'amount') $contract_data[$key] = numberClean($val);
+            if (in_array($key, ['start_date', 'end_date'])) 
+                $contract_data[$key] = date_for_database($val);
         }
         $result = $contract->update($contract_data);
 
         $schedule_data = $input['schedule_data'];        
-        // delete omitted items
-        $item_ids = array_map(function ($v) { return $v['s_id']; }, $schedule_data);
+        $item_ids = array_map(fn($v) => $v['s_id'], $schedule_data);
+        // delete omitted schedules
         $contract->task_schedules()->whereNotIn('id', $item_ids)->where('status', 'pending')->delete();
-        // create or update item
+        // create or update schedule item
         foreach ($schedule_data as $item) {
-            $item = [
-                'id' => $item['s_id'],
+            $new_item = TaskSchedule::firstOrNew(['id' => $item['s_id']]);
+            $new_item->fill([
                 'contract_id' => $contract->id,
                 'title' => $item['s_title'],
                 'start_date' => date_for_database($item['s_start_date']),
                 'end_date' => date_for_database($item['s_end_date'])
-            ];
-            $new_item = TaskSchedule::firstOrNew(['id' => $item['id']]);
-            $new_item->fill($item);
+            ]);
             if (!$new_item->id) unset($new_item->id);
             $new_item->save();
         }
 
-        $equipment_data = $input['equipment_data'];
-        // delete omitted items
-        $item_ids = array_map(function ($v) { return $v['contracteq_id']; }, $equipment_data);
-        $contract->contract_equipment()->whereNotIn('equipment_id', $item_ids)->delete();
-        // create or update item
+        $equipment_data = $input['equipment_data'];        
+        $item_ids = array_map(fn($v) => $v['contracteq_id'], $equipment_data);
+        // delete omitted equipment items
+        $contract->contract_equipments()->whereNotIn('id', $item_ids)->delete();
+        // create or update equipment items
         foreach ($equipment_data as $item) {
-            $item = [
-                'id' => $item['contracteq_id'],
+            $new_item = ContractEquipment::firstOrNew(['id' => $item['contracteq_id']]);
+            $new_item->fill([
                 'contract_id' => $contract->id, 
                 'equipment_id' => $item['equipment_id']
-            ];
-            $new_item = ContractEquipment::firstOrNew(['id' => $item['id']]);
-            $new_item->fill($item);
-            if (!$new_item->id) unset($new_item->id);
+            ]);
             $new_item->save();
         }
 
@@ -150,13 +147,12 @@ class ContractRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        foreach ($input as $equiment) {
-            $item = ContractEquipment::firstOrNew($equiment);
-            $item->save();            
-        }
+        $result = ContractEquipment::insert($input);
         
-        DB::commit();
-        if ($input) return true;
+        if ($result) {
+            DB::commit();
+            return true;
+        }
         
         throw new GeneralException('Error Creating Contract');
     }

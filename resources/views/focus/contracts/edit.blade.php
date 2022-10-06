@@ -41,14 +41,23 @@
 <script>
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
+    $('.filter-block').addClass('d-none');
+
     const contract = @json($contract);
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true});
     $('#start_date').datepicker('setDate', new Date(contract.start_date));
-    $('#end_date').datepicker('setDate', new Date(contract.end_date));    
+    $('#end_date').datepicker('setDate', new Date(contract.end_date));   
+
+    
+    $('#amount').focusout(function () {
+        const value = accounting.unformat($(this).val());
+        $(this).val(accounting.formatNumber(value));
+    });
 
     // select2 config
     function select2Config(url, callback, extraData) {
         return {
+            allowClear: true,
             ajax: {
                 url,
                 dataType: 'json',

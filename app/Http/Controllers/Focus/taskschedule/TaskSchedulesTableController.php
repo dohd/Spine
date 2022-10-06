@@ -53,11 +53,16 @@ class TaskSchedulesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('contract', function ($schedule) {        
-                if (isset($schedule->contract->customer)) 
-                return  $schedule->contract->title . ' - ' . $schedule->contract->customer->company;
-            })
-            ->addColumn('loaded', function ($schedule) {
+            ->addColumn('contract', function ($schedule) {   
+                $link = '';
+                $contract = $schedule->contract;
+                if ($contract && $contract->customer) {
+                    $name = "{$contract->title} - {$contract->customer->company}";
+                    $link = '<a href="'. route('biller.contracts.edit', $contract).'">'.$name.'</a>';
+                }
+                return $link;
+                
+            })->addColumn('loaded', function ($schedule) {
                 return $schedule->equipments->count();
             })
             ->addColumn('unserviced', function ($schedule) {

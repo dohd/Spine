@@ -115,6 +115,7 @@
     // select2 config
     function select2Config(url, callback, extraData) {
         return {
+            allowClear: true,
             ajax: {
                 url,
                 dataType: 'json',
@@ -136,41 +137,33 @@
 
     // on change customer or branch load equipments
     const equipRow =  $('#equipmentTbl tbody tr').html();
-    $('form').on('change', '#customer, #branch', function() {
-        if ($(this).is('#customer')) {
+    $('form').on('change', '#customer, #branch, #contract', function() {
+        if ($(this).is('#customer')) {            
             const customer_id = $(this).val();
             $('#branch').select2(select2Config(branchUrl, branchCb, {customer_id}));
+            $('#contract option:not(:eq(0))').remove();
+            $('#equipmentTbl tbody tr').remove();
+            if (!customer_id) return;
+
+            // load customer contracts
+            $.ajax({
+                url: "{{ route('biller.contracts.customer_contracts') }}",
+                type: 'POST',
+                data: {customer_id},
+                success: data => data.forEach(v => $('#contract').append(new Option(v.title, v.id)))
+            });
+        } else {
+            // load contract equipments
+            $('#equipmentTbl tbody tr').remove();
             $.ajax({
                 url: "{{ route('biller.contracts.customer_equipment')  }}",
                 type: 'POST',
-                data: {id: customer_id},
-                success: data => {
-                    $('#equipmentTbl tbody tr').remove();
-                    data.forEach(fillTable);
-                }
-            });
-            // load customer contracts
-            $.ajax({
-                url: "{{ route('biller.contracts.customer_contracts')  }}",
-                type: 'POST',
-                data: {customer_id},
-                success: data => {
-                    $('#contract option:not(:eq(0))').remove();
-                    data.forEach(v => $('#contract').append(new Option(v.title, v.id)));
-                }
-            });
-        } else {
-            // load branches
-            const customer_id = $('#customer').val();
-            const branch_id = $(this).val();
-            $.ajax({
-                url: "{{ route('biller.contracts.customer_equipment')  }}?branch_id=" + branch_id,
-                type: 'POST',
-                data: {id: customer_id},
-                success: data => {
-                    $('#equipmentTbl tbody tr').remove();
-                    data.forEach(fillTable);
-                }
+                data: {
+                    customer_id: $('#customer').val(), 
+                    branch_id: $('#branch').val(),
+                    contract_id: $('#contract').val(),
+                },
+                success: data => data.forEach(fillTable),
             });
         }
     });

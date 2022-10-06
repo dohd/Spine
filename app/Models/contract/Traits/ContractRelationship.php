@@ -14,14 +14,16 @@ trait ContractRelationship
         return $this->hasMany(TaskSchedule::class);
     }
 
-    public function contract_equipment() 
+    public function contract_equipments() 
     {
         return $this->hasMany(ContractEquipment::class)->whereNull('schedule_id');
     }
     
     public function equipments()
     {
-        return $this->belongsToMany(Equipment::class, 'contract_equipment')->whereNull('schedule_id');
+        return $this->belongsToMany(Equipment::class, 'contract_equipment')
+            ->whereNull('schedule_id')
+            ->withPivot('id');
     }
 
     public function customer()

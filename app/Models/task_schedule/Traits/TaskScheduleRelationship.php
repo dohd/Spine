@@ -14,7 +14,7 @@ trait TaskScheduleRelationship
         return $this->hasOne(ContractService::class, 'schedule_id');
     }
 
-    public function contract_equipment()
+    public function contract_equipments()
     {
         return $this->hasMany(ContractEquipment::class, 'schedule_id');
     }
