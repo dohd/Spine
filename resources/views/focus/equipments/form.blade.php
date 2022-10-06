@@ -81,14 +81,14 @@
     </div>
     <div class='col-md-4'>
         {{ Form::label('floor', 'Building Floor',['class' => 'col-12 control-label']) }}
-        {{ Form::text('floor', null, ['class' => 'col form-control ', 'placeholder' => 'Building*', 'required']) }}
+        {{ Form::text('floor', null, ['class' => 'col form-control ', 'placeholder' => 'Building Floor*', 'required']) }}
     </div>
 </div>
 
 <div class="form-group row">
     <div class='col-md-4'>
         {{ Form::label('unique_id', 'Tag ID',['class' => 'col-12 control-label']) }}
-        {{ Form::text('unique_id', null, ['class' => 'col form-control ', 'placeholder' => 'Building*', 'required']) }}
+        {{ Form::text('unique_id', null, ['class' => 'col form-control ', 'placeholder' => 'Tag Number*', 'required']) }}
     </div>
     <div class='col-md-4'>
         {{ Form::label('service_rate', 'Maintanance Rate (VAT Exc)',['class' => 'col-12 control-label']) }}
