@@ -20,7 +20,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $words = ['title' => 'Create Quote'];
+        $words = ['title' => 'Repair Quote'];
+        if (request('doc_type') == 'maintenance') 
+            $words['title'] = 'Maintenance Quote';
 
         $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
         $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
@@ -31,7 +33,9 @@ class CreateResponse implements Responsable
         if (request('page') == 'pi') {
             $banks = Bank::all();
             $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
-            $words['title'] = 'Create Proforma Invoice';
+            $words['title'] = 'Repair Proforma Invoice';
+            if (request('doc_type') == 'maintenance') 
+                $words['title'] = 'Maintenance Proforma Invoice';
 
             return view('focus.quotes.create', compact('lastquote','leads', 'words', 'banks', 'additionals', 'price_customers'))
                 ->with(bill_helper(2, 4));

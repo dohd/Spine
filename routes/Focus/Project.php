@@ -28,6 +28,7 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
 
 // project task schedules
 Route::group(['namespace' => 'taskschedule'], function () {
+  Route::post('taskschedules/quote_product_search', 'TaskSchedulesController@quote_product_search')->name('taskschedules.quote_product_search');
   Route::resource('taskschedules', 'TaskSchedulesController');
   // data table
   Route::post('taskschedules/get', 'TaskSchedulesTableController')->name('taskschedules.get');

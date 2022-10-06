@@ -252,15 +252,17 @@
                             </ul>
                         </li>
                         @endauth
-
+                        {{-- quote --}}
                         @permission('quote-manage')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('quotes.management') }}</a>
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('quotes.management') }}</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Quote  
-                                    </a>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Quote  </a>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.quotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}
-                                    </a>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.quotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}</a>
+                                    <a class="dropdown-item" href="{{ route('biller.quotes.create', 'doc_type=maintenance') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Maintenance Quote</a>
                                 </li>                            
                             </ul>
                         </li>
@@ -268,9 +270,12 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.quotes.index', 'page=pi') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage PI
                                     </a>
-                                </li>                            
-                                <li><a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI
-                                    </a>
+                                </li>       
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI</a>
+                                </li>                     
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi&doc_type=maintenance') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Maintenance PI</a>
                                 </li>
                             </ul>
                         </li>

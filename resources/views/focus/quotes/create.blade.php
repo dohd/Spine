@@ -156,7 +156,8 @@
         if (menu.is('.delete') && confirm('Are you sure?')) {
             menu.closest('tr').remove();
         }
-           
+
+        // dropdown menus
         if (menu.is('.add-title')) {
             $('#addTitle').click();
             const titleRow = $("#quoteTbl tbody tr:last");
@@ -212,10 +213,10 @@
         $('#quoteTbl tbody tr').each(function() {
             const qty = $(this).find('.qty').val() * 1;
             if (qty > 0) {
-                const rate = $(this).find('.rate').val().replace(/,/g, '');
+                const rate = accounting.unformat($(this).find('.rate').val());
                 let price = rate * tax;
 
-                $(this).find('.price').val(parseFloat(price.toFixed(2)).toLocaleString());
+                $(this).find('.price').val(accounting.formatNumber(price));
                 $(this).find('.rate').change();
             }
         });
@@ -231,21 +232,21 @@
             const qty = $(this).find('.qty').val() * 1;
             if (qty > 0) {
                 if (!isMisc) {
-                    const amount = $(this).find('.amount').text().replace(/,/g, '');
-                    const rate = $(this).find('.rate').val().replace(/,/g, '');
+                    const amount = accounting.unformat($(this).find('.amount').text());
+                    const rate = accounting.unformat($(this).find('.rate').val());
                     total += amount * 1;
                     subtotal += qty * rate;
                 }
                 // profit variables
-                const buyprice = $(this).find('.buyprice').val().replace(/,/g, '');
+                const buyprice = accounting.unformat($(this).find('.buyprice').val());
                 const estqty = $(this).find('.estqty').val();
                 bp_subtotal += estqty * buyprice;
             }
             $(this).find('.index').val(i);
         });
-        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
-        $('#tax').val(parseFloat((total - subtotal).toFixed(2)).toLocaleString());
+        $('#total').val(accounting.formatNumber(total));
+        $('#subtotal').val(accounting.formatNumber(subtotal));
+        $('#tax').val(accounting.formatNumber((total - subtotal)));
         profitState.bp_total = bp_subtotal;
         profitState.sp_total = subtotal;
         calcProfit();        
@@ -312,16 +313,21 @@
                     keyword: term, 
                     price_customer_id: $('#price_customer').val()
                 };
-                // equipment service product 
-                if (term.charAt(0) == '#') {
-                    term = term.replace('#', '');
-                    url = "{{ route('biller.contractservices.service_product_search') }}";
-                    data = {term};
+                let success = result => response(result.map(v => ({label: v.name, value: v.name, data: v})));
+                //  maintenance service product 
+                const queryString = window.location.search.substring(1);
+                const docType = new URLSearchParams(queryString).get('doc_type');
+                if (docType == 'maintenance') {
+                    data.customer_id = $('#lead_id option:selected').attr('customer_id');
+
+                    url = "{{ route('biller.taskschedules.quote_product_search') }}";
+                    success = result => response(result.map(v => ({label: v.name, value: v.name, data: v})));
                 } 
                 $.ajax({
-                    url, data,
+                    url, 
+                    data,
                     method: 'POST',
-                    success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
+                    success,
                 });
             },
             autoFocus: true,

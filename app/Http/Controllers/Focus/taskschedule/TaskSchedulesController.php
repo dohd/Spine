@@ -125,4 +125,22 @@ class TaskSchedulesController extends Controller
 
         return new RedirectResponse(route('biller.taskschedules.index'), $msg);
     }
+
+    /**
+     * Display dropdown liasting for Quote / PI
+     */
+    public function quote_product_search()
+    {
+        $taskschedules = TaskSchedule::whereHas('equipments')
+        ->whereHas('contract', fn($q) => $q->where('customer_id', request('customer_id')))
+        ->get()->map(fn($v) => [
+            'id' => $v->id,
+            'name' => "{$v->title} - {$v->contract->title}",
+            'unit' => 'Lot',
+            'purchase_price' => 0,
+            'price' => $v->equipments->sum('service_rate'),
+        ]);
+
+        return response()->json($taskschedules);
+    }
 }
