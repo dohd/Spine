@@ -26,12 +26,10 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Account</th>
+                                            <th>Account (Credit-Debit)</th>
                                             <th>Reference</th>
-                                            <th>Debit</th>
-                                            <th>Credit</th>
+                                            <th>Amount</th>
                                             <th>Transaction Date</th>
-                                            <th>{{ trans('general.createdat') }}</th>                                             
                                             <th>{{ trans('labels.general.actions') }}</th>                                            
                                         </tr>
                                     </thead>
@@ -72,8 +70,8 @@
                 name: 'id'
             },
             {
-                data: 'account_id',
-                name: 'account_id'
+                data: 'account',
+                name: 'account'
             },
             {
                 data: 'note',
@@ -84,16 +82,8 @@
                 name: 'debit'
             },
             {
-                data: 'credit',
-                name: 'credit'
-            },
-            {
                 data: 'transaction_date',
                 name: 'transaction_date'
-            },
-            {
-                data: 'created_at',
-                name: 'created_at'
             },
             {
                 data: 'actions',
@@ -102,37 +92,10 @@
                 sortable: false
             }
         ],
-        order: [
-            [0, "desc"]
-        ],
+        order: [[0, "desc"]],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'excel',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                }
-            ]
-        }
+        buttons: ['csv', 'excel', 'print']
     });
 </script>
 @endsection

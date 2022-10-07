@@ -39,16 +39,14 @@ class BanktransferRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
+        $input['transaction_date'] = date_for_database($input['transaction_date']);
+        $input['amount'] = numberClean($input['amount']);
+        $input['note'] = "{$input['method']} - {$input['refer_no']} {$input['note']}";
         $data = (object) $input;
-        $data->transaction_date = date_for_database($data->transaction_date);
-        $data->amount = numberClean($data->amount);
-        $data->note = $data->method . '-' . $data->refer_no . ' ' . $data->note;
-
-        /**accounting */
-        $tr_data = array();
         
         // credit Transfer Account (Bank)
         $tr_category = Transactioncategory::where('code', 'xfer')->first(['id', 'code']);
+        $tr_data = [];
         $tr_data[] = [
             'tid' => Transaction::max('tid') + 1,
             'account_id' => $data->account_id,
