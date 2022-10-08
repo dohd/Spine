@@ -9,17 +9,8 @@
             @endisset
         </select>
     </div>
-    <div class="col-2">
-        <label for="branch">Branch</label>
-        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose Branch">
-            @isset ($contractservice)
-                <option value="{{ $contractservice->branch_id }}">
-                    {{ $contractservice->branch? $contractservice->branch->name : 'None' }}
-                </option>
-            @endisset
-        </select>
-    </div>
-    <div class="col-4">
+    
+    <div class="col-5">
         <label for="contract">Contract</label>
         <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract">
             @isset ($contractservice)
@@ -29,7 +20,7 @@
             @endisset
         </select>
     </div>
-    <div class="col-2">
+    <div class="col-3">
         <label for="schedule">Schedule</label>
         <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Schedule">
             @isset ($contractservice)
@@ -52,6 +43,22 @@
     <div class="col-2">
         <label for="technician">Technician</label>
         {{ Form::text('technician', null, ['class' => 'form-control', 'id' => 'technician']) }}
+    </div>
+    <div class="col-6">
+        <label for="remark">General Remark</label>
+        {{ Form::text('remark', null, ['class' => 'form-control', 'id' => 'remark']) }}
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-2">
+        <label for="branch">Branch</label>
+        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose Branch">
+            @isset ($contractservice)
+                <option value="{{ $contractservice->branch_id }}">
+                    {{ $contractservice->branch? $contractservice->branch->name : 'None' }}
+                </option>
+            @endisset
+        </select>
     </div>
 </div>
 <div class="table-reponsive">
@@ -96,7 +103,7 @@
                 <input type="hidden" name="equipment_id[]" id="equipmentid-0">        
                 <input type="hidden" name="item_id[]" value="0" id="itemid-0">     
             </tr>   
-            <!-- contract service equipments -->
+            <!-- edit contract service equipments -->
             @isset ($contractservice)
                 @foreach ($contractservice->items as $i => $row)
                     <tr>                                                    
@@ -155,6 +162,6 @@
 </div>
 <div class="form-group row mt-1">
     <div class="col-12">
-        {{ Form::submit('Generate', ['class' => 'btn btn-primary btn-lg float-right']) }}
+        {{ Form::submit(@$contractservice? 'Update' : 'Generate', ['class' => 'btn btn-primary btn-lg float-right']) }}
     </div>
 </div>
