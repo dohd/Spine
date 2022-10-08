@@ -121,15 +121,12 @@ class EquipmentsController extends Controller
 
     public function equipment_load(Request $request)
     {
-
         $q = $request->get('id');
-        if ($q == 1) {
-            $result = Equipment::all()->where('rel_id', '=', $q);
-            return json_encode($result);
-        } else {
-            $result = "";
-            return json_encode($result);
-        }
+
+        if ($q != 1) return response()->json([]);
+        $equipments = Equipment::get();
+        
+        return response()->json($equipments);
     }
 
 
@@ -173,7 +170,7 @@ class EquipmentsController extends Controller
     /**
      * Fetch customer equipments
      */
-    public function equipment_search(Request $request, $id)
+    public function equipment_search(Request $request)
     {
         $k = $request->post('keyword');
         

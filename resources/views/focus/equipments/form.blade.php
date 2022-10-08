@@ -72,11 +72,11 @@
 <div class='form-group row'>
     
     <div class='col-md-4'>
-        {{ Form::label('location', 'Equipent Location',['class' => 'col-12 control-label']) }}
+        {{ Form::label('location', 'Equipment Location',['class' => 'col-12 control-label']) }}
         {{ Form::text('location', null, ['class' => 'col form-control ', 'placeholder' => 'Location*', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label('building', 'Equipent Building',['class' => 'col-12 control-label']) }}
+        {{ Form::label('building', 'Equipment Building',['class' => 'col-12 control-label']) }}
         {{ Form::text('building', null, ['class' => 'col form-control ', 'placeholder' => 'Building*', 'required']) }}
     </div>
     <div class='col-md-4'>
