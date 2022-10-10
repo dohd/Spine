@@ -29,12 +29,15 @@
                 <div class="card-body">
                     <div class="form-group row">
                         <div class="col-4">
-                            <label for="client">Client:</label>                             
+                            <label for="client">Customer</label>                             
                             <select name="client_id" class="custom-select" id="client" data-placeholder="Choose Client">
+                                @foreach ($customers as $customer)
+                                    <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-4">
-                            <label for="filter">Filter Criteria:</label>                             
+                            <label for="filter">Filter Criteria</label>                             
                             @php
                                 $criteria = [
                                     'Unapproved', 'Approved & Unbudgeted', 'Budgeted & Unverified', 'Verified with LPO & Uninvoiced',
@@ -67,7 +70,7 @@
                                 <th>#</th>
                                 <th>Date</th>   
                                 <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
-                                <th>Customer & Branch</th>   
+                                <th>Customer - Branch</th>   
                                 <th>Title</th>                                                                       
                                 <th>{{ trans('general.amount') }} (Ksh.)</th>
                                 <th>Client Ref</th>                                
@@ -106,16 +109,10 @@
         init(config) {
             $.ajaxSetup(config.ajaxSetup);
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
+            $('#client').select2({allowClear: true}).val('').trigger('change');
 
-            $('#client').select2({data: this.clientOptions()});
             $('#filters').on('change', '#status_filter, #client', this.filterCriteriaChange);
             this.drawDataTable();
-        },
-
-        clientOptions() {
-            clients = this.customers.map(v => ({id: v.id, text: v.company}));
-            clients.splice(0, 0, {id: 0, text: 'None'});
-            return clients;
         },
 
         filterCriteriaChange() {

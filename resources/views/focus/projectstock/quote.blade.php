@@ -21,8 +21,7 @@
                 <div class="form-group row">
                     <div class="col-5">
                         <label for="customer">Customer</label>
-                        <select name="customer_id" id="customer" class="form-control">
-                            <option value="">-- search customer --</option>
+                        <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Customer">
                         </select>
                     </div>
                 </div>
@@ -74,6 +73,7 @@
         datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true},
         customerSelect(customers) {
             return {
+                allowClear: true,
                 data: customers.map(v => ({id: v.id, text: v.company}))
             };
         },
@@ -85,7 +85,7 @@
         init(config) {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#quotesTbl').on('change', '.select-row', this.selectRow);
-            $('#customer').select2(config.customerSelect(this.customers)).change(this.customerChange);
+            $('#customer').select2(config.customerSelect(this.customers)).val('').trigger('change').change(this.customerChange);
             this.drawDataTable();
         },
 

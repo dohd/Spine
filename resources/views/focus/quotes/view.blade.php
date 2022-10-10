@@ -76,17 +76,16 @@
                             Client Ref: {{ $quote->client_ref }}
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
-                            @php
-                                $tid = sprintf('%04d', $quote->tid);
-                                $tid = $quote->bank_id ? '#PI-'.$tid : '#QT-'.$tid;
-                            @endphp
-                            <h2>{{ $tid . $quote->revision }}</h2>
-                            <h3>{{ '#Tkt-' . sprintf('%04d', $quote->lead->reference) }}</h3>
+                            <h2>
+                                {{ gen4tid($quote->bank_id? '#PI-' : '#QT-', $quote->tid)}}{{ $quote->revision }}
+                                {{ $quote->is_repair? 'Repair' : 'Maintenance' }}
+                            </h2>
+                            <h3>{{ gen4tid('#Tkt-', $quote->lead->reference) }}</h3>
                             <div class="row">
                                 <div class="col">
-                                    <br><hr>
-                                    <p class="text-danger">{{ $quote->notes }}</p>
-                                    <p>{{ $quote->bank_id ? 'PI' : 'Quote' }} Date: {{ dateFormat($quote->date) }}</p>
+                                    <hr>
+                                    <p class="text-primary h4">{{ $quote->notes }}</p>
+                                    <p>Date: {{ dateFormat($quote->date) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -115,18 +114,18 @@
                                                         <p>{{$item['product_name']}}</p>
                                                         <p class="text-muted"> {!!$item['product_des'] !!} </p>
                                                     </td>
-                                                    <td class="text-right">{{ (int) $item['product_qty'] }} {{$item['unit']}}</td>
+                                                    <td class="text-right">{{ +$item['product_qty'] }} {{$item['unit']}}</td>
                                                     <td class="text-right">{{amountFormat($item->product_subtotal)}}</td>
                                                     <td class="text-right">
                                                         {{ amountFormat(($item->product_price - $item->product_subtotal) * $item->product_qty) }}
                                                         <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
                                                     </td>
-                                                    <td class="text-right">{{ amountFormat(intval($item->product_qty) * $item->product_price) }}</td>
+                                                    <td class="text-right">{{ amountFormat($item->product_qty * $item->product_price) }}</td>
                                                 </tr>
                                             @else
                                                 <tr>
                                                     <td scope="row">{{ $item['numbering'] }}</td>
-                                                    <td><p>{{$item['product_name']}}</p></td>
+                                                    <td><p>{{ $item['product_name'] }}</p></td>
                                                     @for ($i = 0; $i < 4; $i++)
                                                         <td class="text-right"></td>                                                    
                                                     @endfor                                                    

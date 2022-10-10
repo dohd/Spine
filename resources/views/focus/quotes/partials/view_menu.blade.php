@@ -1,7 +1,8 @@
 @php
-    $name = 'biller.quotes.edit';
-    $edit_link = request('page') == 'pi' ? route($name, [$quote, 'page=pi']) : route($name, $quote);
-    $copy_link = $quote->bank_id ? route($name, [$quote, 'task=pi_to_quote']) : route($name, [$quote, 'page=pi&task=quote_to_pi']);
+    $route_name = 'biller.quotes.edit';
+    $doc_type = $quote->is_repair? '' : 'doc_type=maintenance';
+    $edit_link = request('page') == 'pi' ? route($route_name, [$quote, 'page=pi', $doc_type]) : route($route_name, [$quote, $doc_type]);
+    $copy_link = $quote->bank_id ? route($route_name, [$quote, 'task=pi_to_quote']) : route($route_name, [$quote, 'page=pi&task=quote_to_pi']);
     $valid_token = token_validator('', 'q' . $quote->id . $quote->tid, true);
 @endphp
 <div class="row">

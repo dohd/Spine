@@ -1,7 +1,14 @@
 <div class="row">
     <!-- Quote -->
     <div class="col-6">
-        <h3 class="form-group">{{ $words['title'] }}</h3>
+        <h3 class="form-group">
+            @php
+                $doc_type = request('doc_type') == 'maintenance'? 'Maintenance' : 'Repair';
+                $title_arr = explode(' ', $words['title']);
+                $title = implode(' ', [$title_arr[0], $doc_type, ...array_splice($title_arr, 1)]);
+                echo $title;
+            @endphp
+        </h3>
         <div class="form-group row">
             <div class="col-12">
                 <label for="ticket">Ticket</label>
@@ -94,7 +101,6 @@
             </div>
         </div>        
     </div>
-
     <!-- Properties -->
     <div class="col-6">
         <h3 class="form-group">{{ $is_pi ? 'PI Properties' : trans('quotes.properties')}}</h3>
@@ -151,7 +157,7 @@
             <div class="col-4"><label for="client_ref" >Client Ref / Callout ID</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                    {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'required']) }}
+                    {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref']) }}
                 </div>
             </div>                                                                          
         </div>
@@ -247,4 +253,8 @@
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg mt-1']) }}
     </div>
 </div>
+<!-- repair or maintenance type  -->
+@if (request('doc_type') == 'maintenance') 
+    {{ Form::hidden('is_repair', 0) }}
+@endif
 @include('focus.quotes.partials.skillset-modal')

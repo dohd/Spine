@@ -54,10 +54,6 @@ class QuotesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('lead_tid', function($quote) {
-                if ($quote->lead)
-                return gen4tid('Tkt-', $quote->lead->reference);
-            })
             ->addColumn('tid', function ($quote) {               
                 $link = route('biller.quotes.show', [$quote->id]);
                 if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
@@ -67,17 +63,23 @@ class QuotesTableController extends Controller
                 $client_name = $quote->customer ? $quote->customer->name : '';
                 $branch_name = $quote->branch ? $quote->branch->name : '';
                 if ($client_name && $branch_name) 
-                    return ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'">'
-                        . $client_name . ' - ' . $branch_name . '</a>';
-
+                    return "{$client_name} - {$branch_name}";
+                if ($quote->lead)
                 return $quote->lead->client_name;
+            })
+            ->addColumn('notes', function ($quote) {
+                return dateFormat($quote->date);
             })
             ->addColumn('date', function ($quote) {
                 return dateFormat($quote->date);
             })
             ->addColumn('total', function ($quote) {
                 return numberFormat($quote->total);
-            })                   
+            })   
+            ->addColumn('lead_tid', function($quote) {
+                if ($quote->lead)
+                return '<a href="'. route('biller.leads.show', $quote->lead) .'">'.gen4tid('Tkt-', $quote->lead->reference).'</a>';
+            })
             ->addColumn('invoice_tid', function ($quote) {
                 $inv_product = $quote->invoice_product;
                 if ($inv_product) return gen4tid('Inv-', $inv_product->invoice->tid);

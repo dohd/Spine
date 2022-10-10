@@ -96,10 +96,11 @@
     function calcProfit() {
         const {sp_total, bp_total, skill_total} = profitState;
         const profit = parseFloat((sp_total - bp_total - skill_total).toFixed(2));
-        const pcent_profit = Math.round(profit/bp_total * 100);
+        let pcent_profit = Math.round(profit/bp_total * 100);
+        pcent_profit = isFinite(pcent_profit) ? pcent_profit : 0;
 
         const profitText = bp_total > 0 ? 
-            `${profit.toLocaleString()} : ${pcent_profit}%` : profit.toLocaleString();
+            `${accounting.formatNumber(profit)} : ${pcent_profit}%` : accounting.formatNumber(profit);
         $('.profit').text(profitText);
 
         if (profit < 0) $('.profit').removeClass('text-dark').addClass('text-danger');
@@ -175,7 +176,8 @@
         if (menu.is('.delete') && confirm('Are you sure?')) {
             menu.closest('tr').remove();
         }
-           
+        
+        // drop down menus
         if (menu.is('.add-title')) {
             $('#addTitle').click();
             const titleRow = $("#quoteTbl tbody tr:last");
@@ -192,36 +194,29 @@
             $("#quoteTbl tbody tr:last").remove();
             row.after(miscRow);
         }
-
         calcTotal();
     });    
 
     // on change qty and rate
     $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty", function() {
         const id = $(this).attr('id').split('-')[1];
-        const tax = $('#tax_id').val()/100 + 1;
-        const qty = $('#qty-'+id).val() || '0';
-        let buyprice = $('#buyprice-'+id).val() || '0';
-        let estqty = $('#estqty-'+id).val() || '1';
-        let rate = $('#rate-'+id).val() || '0';
 
-        buyprice = buyprice.replace(/,/g, '') * 1;
-        estqty = estqty.replace(/,/g, '') * 1;
-        rate = rate.replace(/,/g, '') * 1;
+        const qty = accounting.unformat($('#qty-'+id).val());
+        let buyprice = accounting.unformat($('#buyprice-'+id).val());
+        let estqty = accounting.unformat($('#estqty-'+id).val() || '1');
+        let rate = accounting.unformat($('#rate-'+id).val());
 
         // row item % profit
-        let price = rate * tax;
+        let price = rate * ($('#tax_id').val()/100 + 1);
         let profit = (qty * rate) - (estqty * buyprice);
-        let pcent_profit = Math.round(profit / (estqty * buyprice) * 100);
+        let pcent_profit = profit / (estqty * buyprice) * 100;
+        pcent_profit = isFinite(pcent_profit)? Math.round(pcent_profit) : 0;
 
-        let amount = parseFloat((qty * price).toFixed(2)).toLocaleString();
-        rate = parseFloat(rate.toFixed(2)).toLocaleString();
-        price = parseFloat(price.toFixed(2)).toLocaleString();
-        $('#rate-'+id).val(rate);
-        $('#price-'+id).val(price);
-        $('#amount-'+id).text(amount);
+        $('#buyprice-'+id).val(accounting.formatNumber(buyprice));
+        $('#rate-'+id).val(accounting.formatNumber(rate));
+        $('#price-'+id).val(accounting.formatNumber(price));
+        $('#amount-'+id).text(accounting.formatNumber(qty * price));
         $('#lineprofit-'+id).text(pcent_profit + '%');
-
         calcTotal();
     });
 
@@ -232,11 +227,11 @@
         $('#quoteTbl tbody tr').each(function() {
             const qty = $(this).find('.qty').val() * 1;
             if (qty > 0) {
-                const rate = $(this).find('.rate').val().replace(/,/g, '');
+                const rate = accounting.unformat($(this).find('.rate').val());
                 let price = rate * ($('#tax_id').val()/100 + 1);
-                price = parseFloat(price.toFixed(2)).toLocaleString();
 
-                if (initTaxChange > 1) $(this).find('.price').val(price);                
+                if (initTaxChange > 1) 
+                    $(this).find('.price').val(accounting.formatNumber(price));                
                 $(this).find('.rate').change();
             }
         });
@@ -253,21 +248,21 @@
             const qty = $(this).find('.qty').val() * 1;
             if (qty > 0) {
                 if (!isMisc) {
-                    const amount = $(this).find('.amount').text().replace(/,/g, '');
-                    const rate = $(this).find('.rate').val().replace(/,/g, '');
+                    const amount = accounting.unformat($(this).find('.amount').text());
+                    const rate = accounting.unformat($(this).find('.rate').val());
                     total += amount * 1;
                     subtotal += qty * rate;
                 }
                 // profit variables
-                const buyprice = $(this).find('.buyprice').val().replace(/,/g, '');
+                const buyprice = accounting.unformat($(this).find('.buyprice').val());
                 const estqty = $(this).find('.estqty').val();
                 bp_subtotal += estqty * buyprice;
             }
             $(this).find('.index').val(i);
         });
-        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
-        $('#tax').val(parseFloat((total - subtotal).toFixed(2)).toLocaleString());
+        $('#total').val(accounting.formatNumber(total));
+        $('#subtotal').val(accounting.formatNumber(subtotal));
+        $('#tax').val(accounting.formatNumber((total - subtotal)));
         profitState.bp_total = bp_subtotal;
         profitState.sp_total = subtotal;
         calcProfit();        
@@ -333,13 +328,14 @@
                 let url = "{{ route('biller.products.quote_product_search') }}";
                 let data = {
                     keyword: term, 
-                    price_customer_id: $('#price_customer').val()
+                    price_customer_id: $('#price_customer').val(),
                 };
-                // equipment service product 
-                if (term.charAt(0) == '#') {
-                    term = term.replace('#', '');
-                    url = "{{ route('biller.contractservices.service_product_search') }}";
-                    data = {term};
+                // maintenance service product 
+                const queryString = window.location.search.substring(1);
+                const docType = new URLSearchParams(queryString).get('doc_type');
+                if (docType == 'maintenance') {
+                    url = "{{ route('biller.taskschedules.quote_product_search') }}";
+                    data.customer_id = $('#lead_id option:selected').attr('customer_id');
                 } 
                 $.ajax({
                     url, data,

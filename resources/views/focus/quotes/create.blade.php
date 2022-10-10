@@ -46,8 +46,7 @@
     }).val('').change();
 
     // initialize datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     $('#referencedate').datepicker('setDate', new Date());
     $('#date').datepicker('setDate', new Date());
 
@@ -87,10 +86,11 @@
     function calcProfit() {
         const {sp_total, bp_total, skill_total} = profitState;
         const profit = parseFloat((sp_total - bp_total - skill_total).toFixed(2));
-        const pcent_profit = Math.round(profit/bp_total * 100);
+        let pcent_profit = Math.round(profit/bp_total * 100);
+        pcent_profit = isFinite(pcent_profit) ? pcent_profit : 0;
 
         const profitText = bp_total > 0 ? 
-            `${profit.toLocaleString()} : ${pcent_profit}%` : profit.toLocaleString();
+            `${accounting.formatNumber(profit)} : ${pcent_profit}%` : accounting.formatNumber(profit);
         $('.profit').text(profitText);
 
         if (profit < 0) $('.profit').removeClass('text-dark').addClass('text-danger');
@@ -138,11 +138,10 @@
         $("#quoteTbl tbody").append(newRowHtml);
         $('#name-'+i).autocomplete(autoComp(i));
         $('#misc-'+i).val(1);
-        $('#qty-'+i).val(1).addClass('invisible');
-        $('#rate-'+i).addClass('invisible');
-        $('#price-'+i).addClass('invisible');
-        $('#amount-'+i).addClass('invisible');
-        $('#lineprofit-'+i).addClass('invisible');
+        $('#qty-'+i).val(1);
+        ['qty', 'rate', 'price', 'amount', 'lineprofit'].forEach(v => {
+            $(`#${v}-${i}`).addClass('invisible');
+        });
         rowId++;
         calcTotal();
     });
@@ -181,29 +180,23 @@
     // on change qty and rate
     $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty", function() {
         const id = $(this).attr('id').split('-')[1];
-        const tax = $('#tax_id').val()/100 + 1;
-        const qty = $('#qty-'+id).val() || '0';
-        let buyprice = $('#buyprice-'+id).val() || '0';
-        let estqty = $('#estqty-'+id).val() || '1';
-        let rate = $('#rate-'+id).val() || '0';
 
-        buyprice = buyprice.replace(/,/g, '') * 1;
-        estqty = estqty.replace(/,/g, '') * 1;
-        rate = rate.replace(/,/g, '') * 1;
+        const qty = accounting.unformat($('#qty-'+id).val());
+        let buyprice = accounting.unformat($('#buyprice-'+id).val());
+        let estqty = accounting.unformat($('#estqty-'+id).val() || '1');
+        let rate = accounting.unformat($('#rate-'+id).val());
 
         // row item % profit
-        let price = rate * tax;
+        let price = rate * ($('#tax_id').val()/100 + 1);
         let profit = (qty * rate) - (estqty * buyprice);
-        let pcent_profit = Math.round(profit / (estqty * buyprice) * 100);
+        let pcent_profit = profit / (estqty * buyprice) * 100;
+        pcent_profit = isFinite(pcent_profit)? Math.round(pcent_profit) : 0;
 
-        let amount = parseFloat((qty * price).toFixed(2)).toLocaleString();
-        rate = parseFloat(rate.toFixed(2)).toLocaleString();
-        price = parseFloat(price.toFixed(2)).toLocaleString();
-        $('#rate-'+id).val(rate);
-        $('#price-'+id).val(price);
-        $('#amount-'+id).text(amount);
+        $('#buyprice-'+id).val(accounting.formatNumber(buyprice));
+        $('#rate-'+id).val(accounting.formatNumber(rate));
+        $('#price-'+id).val(accounting.formatNumber(price));
+        $('#amount-'+id).text(accounting.formatNumber(qty * price));
         $('#lineprofit-'+id).text(pcent_profit + '%');
-
         calcTotal();
     });
 
@@ -215,7 +208,6 @@
             if (qty > 0) {
                 const rate = accounting.unformat($(this).find('.rate').val());
                 let price = rate * tax;
-
                 $(this).find('.price').val(accounting.formatNumber(price));
                 $(this).find('.rate').change();
             }
@@ -297,7 +289,7 @@
             total += amount;
             $(this).find('.amount').text(amount);
         });
-        $('#skill_total').val(total.toLocaleString());
+        $('#skill_total').val(accounting.formatNumber(total));
         profitState.skill_total = total;
         calcProfit();
     }
@@ -311,23 +303,19 @@
                 let url = "{{ route('biller.products.quote_product_search') }}";
                 let data = {
                     keyword: term, 
-                    price_customer_id: $('#price_customer').val()
+                    price_customer_id: $('#price_customer').val(),
                 };
-                let success = result => response(result.map(v => ({label: v.name, value: v.name, data: v})));
-                //  maintenance service product 
+                // maintenance service product 
                 const queryString = window.location.search.substring(1);
                 const docType = new URLSearchParams(queryString).get('doc_type');
                 if (docType == 'maintenance') {
-                    data.customer_id = $('#lead_id option:selected').attr('customer_id');
-
                     url = "{{ route('biller.taskschedules.quote_product_search') }}";
-                    success = result => response(result.map(v => ({label: v.name, value: v.name, data: v})));
+                    data.customer_id = $('#lead_id option:selected').attr('customer_id');
                 } 
                 $.ajax({
-                    url, 
-                    data,
+                    url, data,
                     method: 'POST',
-                    success,
+                    success: result => response(result.map(v => ({label: v.name, value: v.name, data: v}))),
                 });
             },
             autoFocus: true,
