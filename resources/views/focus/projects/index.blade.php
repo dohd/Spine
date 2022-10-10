@@ -63,135 +63,151 @@
 {{ Html::script('focus/js/bootstrap-colorpicker.min.js') }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajax: { headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} },
+        select: {
+            allowClear: true,
+            dropdownParent: $('#AddProjectModal'),
+        },
+    };
 
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
+    const Index = {
 
-    // On Create Modal click
-    $('#AddProjectModal').on('shown.bs.modal', function() {
-        $("#main_quote").select2();
-        $("#other_quote").select2();
-        $("#branch_id").select2();
-        // fetch customers
-        $("#person").select2({
-            ajax: {
-                url: "{{ route('biller.customers.select') }}",
-                dataType: 'json',
-                type: 'POST',
-                quietMillis: 50,
-                data: ({term}) => ({ search: term }),
-                processResults: (data) => {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
+        init() {
+            $.ajaxSetup(config.ajax);
+            this.drawDataTable();
+            $('#AddProjectModal').on('shown.bs.modal', this.showCreateModal);
+        },
+
+        showCreateModal() {
+            $("#main_quote").select2();
+            $("#other_quote").select2();
+            $("#branch_id").select2();
+            // fetch customers
+            $("#person").select2({
+                ...config.select,
+                ajax: {
+                    url: "{{ route('biller.customers.select') }}",
+                    dataType: 'json',
+                    type: 'POST',
+                    data: ({term}) => ({ search: term }),
+                    processResults: (data) => {
+                        return {
+                            results: $.map(data, (item) => ({
                                 text: `${item.name} - ${item.company}`,
                                 id: item.id
-                            }
-                        })
-                    };
-                },
-            }
-        });
-
-        // on selecting customer fetch branches
-        const quoteData = [];
-        $("#person").on('change', function() {
-            $("#branch_id").html('').select2({
-                ajax: {
-                    url: "{{ route('biller.branches.select') }}",
-                    type: 'POST',
-                    quietMillis: 50,
-                    data: ({term}) => ({ 
-                        search: term, 
-                        customer_id: $("#person").val()
-                    }),
-                    processResults: data => ({ results: data.map(v => ({ text: v.name, id: v.id })) }),
-                }
-            });
-
-            // fetch customer quotes
-            $("#main_quote").html('').select2({
-                ajax: {
-                    url: "{{ route('biller.quotes.customer_quotes') }}?id=" + $(this).val(),
-                    dataType: 'json',
-                    quietMillis: 50,
-                    processResults: function(data) {
-                        const results = data.map(v => {
-                            const tid = (''+v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
-                            const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch.name} - ${v.notes}`;
-                            return {id: v.id, text}; 
-                        });
-                        // replace array data
-                        quoteData.length = 0;
-                        quoteData.push.apply(quoteData, results);
-                        return { results };
+                            }))
+                        };
                     },
                 }
             });
-        });
 
-        // On selecting Main Quote
-        $("#main_quote").change(function() {
-            // set Other Quote select options 
-            $("#other_quote").html('').select2({ 
-                data: quoteData.filter(v => v.id != $(this).val())
+            // on selecting customer fetch branches
+            const quoteData = [];
+            $("#person").on('change', function() {
+                $("#branch_id").html('').select2({
+                    ...config.select,
+                    ajax: {
+                        url: "{{ route('biller.branches.select') }}",
+                        type: 'POST',
+                        data: ({term}) => ({ 
+                            search: term, 
+                            customer_id: $("#person").val(),
+                        }),
+                        processResults: data => {
+                            return { 
+                                results: data.filter(v => v.name != 'All Branches').map(v => ({ text: v.name, id: v.id })),
+                            };
+                        },
+                    }
+                });
+
+                // fetch customer quotes
+                $("#main_quote").html('').select2({
+                    ...config.select,
+                    ajax: {
+                        url: "{{ route('biller.quotes.customer_quotes') }}?id=" + $(this).val(),
+                        processResults: function(data) {
+                            const results = data.map(v => {
+                                const tid = (''+v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
+                                const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch.name} - ${v.notes}`;
+                                return {id: v.id, text}; 
+                            });
+                            // replace array data
+                            quoteData.length = 0;
+                            quoteData.push.apply(quoteData, results);
+                            return { results };
+                        },
+                    }
+                });
             });
-            const quoteTitle = $(this).find(':selected').text().split(' - ')[2];
-            $('#project-name').val(quoteTitle);
-        });
-    });    
 
-    function draw_data() {
-        const dataTable = $('#projects-table').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            stateSave: true,
-            language: {@lang('datatable.strings')},
-            ajax: {
-                url: "{{ route('biller.projects.get') }}",
-                type: 'post'
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
+            // On selecting Main Quote
+            $("#main_quote").change(function() {
+                // set Other Quotes select options 
+                $("#other_quote").html('').select2({ 
+                    allowClear: true,
+                    data: quoteData.filter(v => v.id != $(this).val())
+                });
+                const quoteTitle = $(this).find(':selected').text().split(' - ')[2];
+                $('#project-name').val(quoteTitle);
+            });
+        },
+
+        drawDataTable() {
+            $('#projects-table').dataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                stateSave: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.projects.get') }}",
+                    type: 'post'
                 },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'name',
-                    name: 'name'
-                },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'quote_budget',
-                    name: 'quote_budget'
-                },
-                {
-                    data: 'lead_tid',
-                    name: 'lead_tid'
-                },
-                {
-                    data: 'start_date',
-                    name: 'start_date'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'] 
-        });
-    }
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    {
+                        data: 'tid',
+                        name: 'tid'
+                    },
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
+                    },
+                    {
+                        data: 'quote_budget',
+                        name: 'quote_budget'
+                    },
+                    {
+                        data: 'lead_tid',
+                        name: 'lead_tid'
+                    },
+                    {
+                        data: 'start_date',
+                        name: 'start_date'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'] 
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection

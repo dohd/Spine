@@ -61,9 +61,11 @@ class ProjectRepository extends BaseRepository
             $project_quote_id = ProjectQuote::insertGetId(['quote_id' => $quote_id, 'project_id' => $result->id]);
             Quote::find($quote_id)->update(compact('project_quote_id'));
         }
-
-        DB::commit();
-        if ($result) return $result;
+        
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException(trans('exceptions.backend.projects.create_error'));
     }
@@ -95,8 +97,10 @@ class ProjectRepository extends BaseRepository
             $item->save();
         }
 
-        DB::commit();
-        if ($result) return true;
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.projects.update_error'));
     }
@@ -155,9 +159,11 @@ class ProjectRepository extends BaseRepository
             unset($skillset->skillitem_id);
             $skillset->save();
         }
-
-        DB::commit();
-        if ($result) return $result; 
+        
+        if ($result) {
+            DB::commit();
+            return $result; 
+        }
     }
     
     /**
@@ -172,26 +178,22 @@ class ProjectRepository extends BaseRepository
         $data = $input['data'];
         $keys = array('quote_total', 'budget_total', 'labour_total');
         foreach ($data as $key => $val) {
-            if (in_array($key, $keys, 1)) 
+            if (in_array($key, $keys)) 
                 $data[$key] = numberClean($val);
         }   
         $result = $budget->update($data);
 
         $data_items = $input['data_items'];
-        // remove omitted items
-        $budget->items()->whereNotIn('id', array_map(function ($v) { 
-            return $v['item_id']; 
-        }, $data_items))->delete();
-
+        // delete omitted line items
+        $budget->items()->whereNotIn('id', array_map(fn($v) => $v['item_id'], $data_items))->delete();
         // new or update item
         foreach($data_items as $item) {
-            $item['price'] = numberClean($item['price']);
-            $item['new_qty'] = numberClean($item['new_qty']);
-
-            $new_item = BudgetItem::firstOrNew([
-                'id' => $item['item_id'],
+            $item = array_replace($item, [
+                'price' => numberClean($item['price']),
+                'new_qty' => numberClean($item['new_qty']),
                 'budget_id' => $budget->id,
             ]);
+            $new_item = BudgetItem::firstOrNew(['id' => $item['item_id']]);
             $new_item->fill($item);
             if (!$new_item->id) unset($new_item->id);
             unset($new_item->item_id);
@@ -199,10 +201,9 @@ class ProjectRepository extends BaseRepository
         }
 
         $data_skillset = $input['data_skillset'];
-        $budget->skillsets()->whereNotIn('id', array_map(function ($v) { 
-            return $v['skillitem_id'];
-        }, $data_skillset))->delete();
-
+        // delete omitted labour items
+        $budget->skillsets()->whereNotIn('id', array_map(fn($v) => $v['skillitem_id'], $data_skillset))->delete();
+        // create or update items
         foreach($data_skillset as $item) {
             $item['charge'] = numberClean($item['charge']);
             $new_item = BudgetSkillset::firstOrNew([
@@ -215,7 +216,9 @@ class ProjectRepository extends BaseRepository
             $new_item->save();
         }
         
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
     }   
 }

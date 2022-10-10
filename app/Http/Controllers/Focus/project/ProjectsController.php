@@ -37,8 +37,6 @@ use App\Http\Requests\Focus\project\UpdateProjectRequest;
 use App\Models\Access\User\User;
 use App\Models\misc\Misc;
 use App\Models\project\Budget;
-use App\Models\project\BudgetItem;
-use App\Models\project\BudgetSkillset;
 use App\Models\project\Project;
 use App\Models\quote\Quote;
 
@@ -178,9 +176,8 @@ class ProjectsController extends Controller
     public function create_project_budget(Quote $quote)
     {
         $budget = Budget::where('quote_id', $quote->id)->first();
-        if (isset($budget))
-            return redirect(route('biller.projects.edit_project_budget', [$quote, $budget]));
-
+        if ($budget) return redirect(route('biller.projects.edit_project_budget', [$quote, $budget]));
+        
         return view('focus.projects.create_project_budget', compact('quote'));
     }
 

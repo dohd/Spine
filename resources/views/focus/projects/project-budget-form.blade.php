@@ -18,15 +18,13 @@
                     {{ Form::text('branch', $quote->branch? $quote->branch->name : '', ['class' => 'form-control', 'disabled']) }}
                 </div> 
                 <div class="col-2">
-                    <label for="invoiceno" class="caption">
-                        {{ $quote->bank_id ? '#PI No' : '#QT No'}}
-                    </label>
+                    <label >Serial No</label>
                     <div class="input-group">
                         <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                         {{ Form::text('tid', gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid), ['class' => 'form-control round', 'disabled']) }}
                     </div>
                 </div>
-                <div class="col-2"><label for="invoicedate" class="caption">Quote {{trans('general.date')}}</label>
+                <div class="col-2"><label for="invoicedate" class="caption">{{trans('general.date')}}</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                         {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date', 'disabled']) }}
@@ -44,7 +42,7 @@
     </div>
     <div class="col-2">
         <label for="client_ref" class="caption">Client Ref / Callout ID</label>                                       
-        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'id' => 'client_ref', 'disabled']) }}
+        {{ Form::text('client_ref', null, ['class' => 'form-control', 'id' => 'client_ref', 'disabled']) }}
     </div> 
 </div>
 
@@ -54,7 +52,7 @@
             <tr class="item_header bg-gradient-directional-blue white">
                 <th width="6%" class="text-center">#</th>
                 <th width="38%" class="text-center">Product</th>
-                <th width="8%" class="text-center">QT Qty</th>                                
+                <th width="8%" class="text-center">Approved Qty</th>                                
                 <th width="15%" class="text-center">UoM</th>
                 <th width="8%" class="text-center">Qty</th>     
                 <th width="12%" class="text-center">Buy Price</th>
@@ -67,10 +65,15 @@
 </div>                        
 
 <div class="form-group row">
-    <div class="col-12 payment-method last-item-row sub_c">
-        <button type="button" class="btn btn-success" id="add-product">
-            <i class="fa fa-plus-square"></i> Add Item
-        </button>
+    <div class="col-12">
+        <div class="input-group">
+            <button type="button" class="btn btn-success mr-1" id="add-product">
+                <i class="fa fa-plus-square"></i> Add Product
+            </button>
+            <button type="button" class="btn btn-primary" id="add-title">
+                <i class="fa fa-plus-square"></i> Add Title
+            </button>
+        </div>
     </div>                            
 </div>
 <div class="form-group row">
@@ -108,14 +111,14 @@
         </div>                        
         <div class="form-group">
             <div>
-                <label for="quote_total">Total Quote</label>
+                <label for="quote_total">Quote Total</label>
                 <span class="text-danger">(VAT Exc)</span>
             </div>
             {{ Form::text('quote_total', numberFormat($quote->subtotal), ['class' => 'form-control', 'id' => 'quote_total', 'readonly']) }}
         </div>
         <div class="form-group">
             <div>
-                <label for="budget-total">Total Budget</label>&nbsp;
+                <label for="budget-total">Budget Total</label>&nbsp;
                 <span class="text-primary font-weight-bold">
                     (E.P: &nbsp;<span class="text-dark profit">0</span>)
                 </span>
