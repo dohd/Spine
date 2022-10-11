@@ -6,10 +6,10 @@
                 <thead>
                     <tr>
                         <th>Quote / PI</th>
-                        <th>Actual Amount</th>
-                        <th>Estimated Amount</th>                    
-                        <th>Profit (Estimate - Actual)</th>
-                        <th>% Profit</th>
+                        <th>Purchase Amount</th>
+                        <th>Quoted Amount</th>                    
+                        <th>Gross Profit (Quoted - Purchase)</th>
+                        <th>% Gross Profit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,9 +41,9 @@
                     <tr>
                         <th>Quote / PI (Budget)</th>
                         <th>Projected Sale</th>                    
-                        <th>Estimated Expense</th>
-                        <th>Profit (Sale - Expense)</th>
-                        <th>% Profit</th>
+                        <th>Budgeted Expense</th>
+                        <th>Gross Profit (Sale - Expense)</th>
+                        <th>% Gross Profit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -66,7 +66,7 @@
             </table>
         </div>   
         {{-- direct purchase expense --}}
-        <h5>3. Expense</h5>
+        <h5>3. Job Expense</h5>
         <div class="table-responsive">
             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                 <thead>
@@ -74,8 +74,8 @@
                         <th>Quote / PI (Budget)</th>
                         <th>Projected Sale</th>                    
                         <th>Actual Expense</th>
-                        <th>Profit (Sale - Expense)</th>
-                        <th>% Profit</th>
+                        <th>Gross Profit (Sale - Expense)</th>
+                        <th>% Gross Profit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,7 +98,7 @@
             </table>
         </div>   
         {{-- verification --}}
-        <h5>4. Verification</h5>
+        <h5>4. Job Verification</h5>
         <div class="table-responsive">
             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                 <thead>
