@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote')
+@section ('title', 'Job Verification')
 
 @section('content')
 <div class="content-wrapper">

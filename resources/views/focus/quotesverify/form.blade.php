@@ -92,7 +92,7 @@
                     {{ Form::text('quote_subtotal', numberFormat($quote->subtotal), ['class' => 'form-control', 'id' => 'quote_subtotal',  'disabled']) }}
                 </div>
                 <div class="col-6">
-                    <label for="quote_subtotal">{{ $label }} Amount (Ksh.)</label>
+                    <label for="quote_subtotal">{{ $label }} Total (Ksh.)</label>
                     {{ Form::text('quote_total', numberFormat($quote->total), ['class' => 'form-control', 'id' => 'quote_total', 'disabled']) }}
                 </div>                
             </div>   
@@ -110,7 +110,7 @@
     <table id="quotation" class="table-responsive tfr my_stripe_single pb-2 text-center">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white">
-                <th width="5%">Numbering</th>
+                <th width="5%">#</th>
                 <th width="35%">Item Name</th>
                 <th width="7%">UoM</th>
                 <th width="7%">Qty</th>
@@ -126,9 +126,11 @@
 
     <div class="row">
         <div class="col-10 col-xs-7">
-            <a href="javascript:" class="btn btn-success" aria-label="Left Align" id="add-product"><i class="fa fa-plus-square"></i> Add Product
+            <a href="javascript:" class="btn btn-success mr-1" aria-label="Left Align" id="add-product">
+                <i class="fa fa-plus-square"></i> Product
             </a>
-            <a href="javascript:" class="btn btn-primary" aria-label="Left Align" id="add-title"><i class="fa fa-plus-square"></i> Add Title
+            <a href="javascript:" class="btn btn-primary" aria-label="Left Align" id="add-title">
+                <i class="fa fa-plus-square"></i> Title
             </a>
 
             <div class="form-group row pt-2">
@@ -149,7 +151,7 @@
                         <tbody></tbody>
                     </table>
                     <a href="javascript:" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
-                        <i class="fa fa-plus-square"></i> Add Jobcard / DNote
+                        <i class="fa fa-plus-square"></i>  Jobcard / DNote
                     </a>                                            
                 </div>
             </div>     

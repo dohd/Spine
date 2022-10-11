@@ -1,83 +1,81 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Verification Management')
+@section ('title', 'Job Verification')
 
 @section('content')
-<div>
-    <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Verification Management</h4>
-            </div>   
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right">
-                    <div class="media-body media-right text-right">
-                        <div class="btn-group">
-                            <a href="{{ route('biller.rjcs.index') }}" class="btn btn-success">
-                                <i class="fa fa-list-alt"></i> Rjc
-                            </a>                         
-                        </div>
+<div class="content-wrapper">
+    <div class="content-header row">
+        <div class="content-header-left col-md-6 col-12 mb-2">
+            <h4 class="content-header-title">Verification Management</h4>
+        </div>   
+        <div class="content-header-right col-md-6 col-12">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    <div class="btn-group">
+                        <a href="{{ route('biller.rjcs.index') }}" class="btn btn-success">
+                            <i class="fa fa-list-alt"></i> Rjc
+                        </a>                         
                     </div>
                 </div>
-            </div>                     
-        </div>
-        
-        <div class="content-body">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <select name="verify_state" id="verify_state" class="custom-select">
-                                            <option value="">-- Verification Status--</option>
-                                            @foreach (['yes' => 'verified', 'no' => 'unverified'] as $key => $val)
-                                                <option value="{{ ucfirst($key) }}">{{ ucfirst($val) }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+            </div>
+        </div>                     
+    </div>
+    
+    <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <select name="verify_state" id="verify_state" class="custom-select">
+                                        <option value="">-- Verification Status--</option>
+                                        @foreach (['yes' => 'verified', 'no' => 'unverified'] as $key => $val)
+                                            <option value="{{ ucfirst($key) }}">{{ ucfirst($val) }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-2">{{ trans('general.search_date')}} </div>
-                                    <div class="col-2">
-                                        <input type="text" name="start_date" id="start_date" class="form-control datepicker date30  form-control-sm" autocomplete="off" />
-                                    </div>
-                                    <div class="col-2">
-                                        <input type="text" name="end_date" id="end_date" class="form-control datepicker form-control-sm" autocomplete="off" />
-                                    </div>
-                                    <div class="col-2">
-                                        <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
-                                    </div>
-                                </div>
-                                
-                                <hr>
-                                <table id="quotesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Date</th>
-                                            <th># Quote / PI</th>
-                                            <th>{{ trans('customers.customer') }}</th>
-                                            <th>Title</th>                                            
-                                            <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                            <th>Verified (Ksh.)</th>
-                                            <th>Project No</th>
-                                            <th>LPO No</th>
-                                            <th>Client Ref</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1">
-                                                <i class="fa fa-spinner spinner"></i>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
                             </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-2">{{ trans('general.search_date')}} </div>
+                                <div class="col-2">
+                                    <input type="text" name="start_date" id="start_date" class="form-control datepicker date30  form-control-sm" autocomplete="off" />
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" name="end_date" id="end_date" class="form-control datepicker form-control-sm" autocomplete="off" />
+                                </div>
+                                <div class="col-2">
+                                    <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            <table id="quotesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th># Quote / PI</th>
+                                        <th>{{ trans('customers.customer') }}</th>
+                                        <th>Title</th>                                            
+                                        <th>{{ trans('general.amount') }} (Ksh.)</th>
+                                        <th>Verified (Ksh.)</th>
+                                        <th>Project No</th>
+                                        <th>LPO No</th>
+                                        <th>Client Ref</th>
+                                        <th>{{ trans('labels.general.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
