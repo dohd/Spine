@@ -203,10 +203,12 @@ class BillPaymentRepository extends BaseRepository
         // decrement bill amount paid and update status
         foreach ($billpayment->items as $item) {
             $bill = $item->supplier_bill;
-            $bill->decrement('amount_paid', $item->paid);
-            if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
-            elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
-            else $bill->update(['status' => 'paid']);
+            if ($bill) {
+                $bill->decrement('amount_paid', $item->paid);
+                if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
+                elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+                else $bill->update(['status' => 'paid']);
+            }
         }
 
         Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
