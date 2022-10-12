@@ -59,7 +59,7 @@
                                 $cell = $quote->lead->client_contact;
                                 if ($quote->client) {
                                     $clientname = $quote->client->company;						
-                                    $branch = $quote->branch->name;
+                                    $branch = $quote->branch? $quote->branch->name : '';
                                     $address = $quote->client->address;
                                     $email = $quote->client->email;
                                     $cell = $quote->client->phone;
