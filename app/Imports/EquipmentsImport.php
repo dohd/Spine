@@ -36,47 +36,44 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
      */
     public function collection(Collection $rows)
     {        
-        $has_customer = isset($this->data['customer_id']);
-        $has_branch = isset($this->data['branch_id']);
-
-        $equipments_data = [];
-        $columns = [];
+        $columns = [
+            'equip_serial','unique_id','capacity','location','machine_gas','make_and_type',
+            'model_and_model_no','equipment_category_id','service_rate','building','floor'
+        ];
         $tid = Equipment::max('tid') + 1;
 
+        $row_count = 0;
         foreach ($rows as $i => $row) {
+            $row = $row->toArray();
             if ($i == 0) {
-                $columns = $row;
+                $omitted_cols = array_diff($columns, $row);
+                if ($omitted_cols) throw new Error('Column label mismatch: ' . implode(', ',$omitted_cols));
                 continue;
             } elseif (count($row) != count($columns)) {
-                throw new Error('Columns mismatch!');
+                throw new Error('Column mismatch on row ' . strval($i+1)  . '!');
             }
-            
-            $new_row = [];
-            foreach ($columns as $j => $col) {
-                $value = $row[$j];
-                if (in_array($col, ['id', 'created_at', 'updated_at'])) $value = null;                
-                $new_row[$col] = $value;
-            }
-            $new_row['ins'] = $this->data['ins'];
-            $new_row['tid'] = $tid;
-            if ($new_row['customer_id'] == $this->data['customer_id']) {
-                $is_invalid_branch = $has_branch && $this->data['branch_id'] != $new_row['branch_id'];
-                if ($is_invalid_branch) throw new Error('Branch does not exist!');
-                $equipments_data[$i] = $new_row;
+
+            $row_data = array_combine($columns, $row);
+            $row_data = array_replace($row_data, [
+                'make_type' => $row_data['make_and_type'],
+                'model' => $row_data['model_and_model_no'],
+                'tid' => $tid,
+                'customer_id' => $this->data['customer_id'],
+                'branch_id' => $this->data['branch_id'],
+                'ins' => auth()->user()->ins,
+            ]);
+            unset($row_data['make_and_type'], $row_data['model_and_model_no']);
+            $row_data['service_rate'] = numberClean($row_data['service_rate']);
+
+            $result = Equipment::create($row_data);
+            if ($result) {
+                $row_count++;
                 $tid++;
             }
         }
 
-        // delete previous data
-        if ($has_customer && $has_branch) {
-            Equipment::where([
-                'customer_id' => $this->data['customer_id'], 
-                'branch_id' => $this->data['branch_id']
-            ])->delete();
-        } else Equipment::where(['customer_id' => $this->data['customer_id']])->delete();
-            
-        $result = Equipment::insert($equipments_data);
-        if ($result) $this->row_count = count($equipments_data);
+        if (!$row_count) throw new Error('Please fill template with required data');
+        $this->row_count = $row_count;
     }
 
     public function rules(): array

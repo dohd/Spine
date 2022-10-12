@@ -56,12 +56,12 @@
 
 <div class='form-group row'>
     <div class='col-md-4'>
-        {{ Form::label('make', 'Make',['class' => 'col-12 control-label']) }}
-        {{ Form::text('make_type', null, ['class' => 'col form-control ', 'placeholder' => 'Make*', 'required']) }}
+        {{ Form::label('make', 'Make - Type',['class' => 'col-12 control-label']) }}
+        {{ Form::text('make_type', null, ['class' => 'col form-control ', 'placeholder' => 'Make - Type', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label( 'model', 'Model/Model No',['class' => 'col-12 control-label']) }}
-        {{ Form::text('model', null, ['class' => 'col form-control ', 'placeholder' => 'Model Name / Number*', 'required']) }}
+        {{ Form::label( 'model', 'Model - Model No',['class' => 'col-12 control-label']) }}
+        {{ Form::text('model', null, ['class' => 'col form-control ', 'placeholder' => 'Model Name - Number*', 'required']) }}
     </div>
     <div class='col-md-4'>
         {{ Form::label('capacity', 'Capacity:',['class' => 'col-12 control-label']) }}
@@ -70,7 +70,6 @@
 </div>
 
 <div class='form-group row'>
-    
     <div class='col-md-4'>
         {{ Form::label('location', 'Equipment Location',['class' => 'col-12 control-label']) }}
         {{ Form::text('location', null, ['class' => 'col form-control ', 'placeholder' => 'Location*', 'required']) }}

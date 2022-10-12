@@ -45,7 +45,7 @@
                                         <th>Equipment No</th>
                                         <th>Tag ID</th>
                                         <th>Size</th>
-                                        <th>Make</th>
+                                        <th>Make - Type</th>
                                         <th>Location</th>                                        
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>

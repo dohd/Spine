@@ -1,4 +1,5 @@
 @extends ('core.layouts.app')
+
 @section ('title', trans('import.import'))
 
 @section('content')
@@ -13,12 +14,16 @@
             <div class="card-body">
                 <div class="card-block">
                     <h4>{{ $data['title'] }}</h4><hr>
-                    <p class="alert alert-light mb-3">{{ trans('import.as_per_template') }}. 
-                        <a href="{{ route('biller.import.sample_template', $data['type']) }}" target="_blank">
+                    <p class="alert alert-light mb-2">
+                        Imported data format should be as per downloaded template file. 
+                        <a href="{{ route('biller.import.sample_template', $data['type']) }}" target="_blank" id="download-btn">
                             <b>{{ trans('import.download_template') }}</b> ({{ $data['title'] }}).
                         </a>
+                        {{-- <a href="#" target="" id="download-btn">
+                            <b>{{ trans('import.download_template') }}</b> ({{ $data['title'] }}).
+                        </a> --}}
                     </p>
-                    <p><strong class="mb-2">File : csv, xls or xlsx</strong></p>
+                    <p><b>Import File: </b>{{ $data['type'] }}.csv or {{ $data['type'] }}.xls or {{ $data['type'] }}.xlsx</p>
                     {{-- Include template import form --}}
                     @include('focus.import.partials.' . $data['type'])
                 </div>
@@ -27,3 +32,18 @@
     </div>
 </div>
 @endsection
+
+<script>
+    window.onload = function() {
+        const dataType = @json($data['type']);
+        $('#download-btn').click(function () {
+            if (dataType == 'equipments') {
+                const anchor = document.createElement('a');
+                const href = @json(route('biller.import.sample_template', 'equipment_categories'));
+                setTimeout(() => {
+                    $(anchor).attr({href, target: '_blank',}).get(0).click();
+                }, 1000);
+            }
+        });
+    }
+</script>

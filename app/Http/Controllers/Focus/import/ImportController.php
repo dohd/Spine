@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
+use App\Models\equipmentcategory\EquipmentCategory;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -67,9 +68,24 @@ class ImportController extends Controller
      */
     public function sample_template($file_name)
     {
-        $file = Storage::disk('public')->get('sample/' . $file_name . '.csv');
+        $file_path = public_path() . '/storage/app/public/sample/' . $file_name . '.csv';
+        $file_exists = file_exists($file_path);
+        if (!$file_exists) throw ValidationException::withMessages(['Template file does not exist!']);
+        
+        // generate equipment_categories csv file
+        if ($file_name == 'equipment_categories') {
+            $fw = fopen($file_path, 'w');
+            fputcsv($fw, ['equipment_category_id', 'name']);
 
-        return response($file, 200, ['Content-Type' => 'text/csv']);
+            $categories = EquipmentCategory::all();
+            foreach ($categories as $row) {
+                fputcsv($fw, [$row->id, $row->name]);
+            }
+
+            fclose($fw);
+        }
+
+        return response(file_get_contents($file_path), 200, ['Content-Type' => 'text/csv']);
     }    
 
     /**
