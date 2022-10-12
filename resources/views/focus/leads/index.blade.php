@@ -76,11 +76,11 @@
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
     function draw_data() {
-        const language = { @lang("datatable.strings") };
         const dataTable = $('#leads-table').dataTable({
+            stateSave: true,
             processing: true,
             responsive: true,
-            language,
+            language: {@lang("datatable.strings")},
             ajax: {
                 url: '{{ route("biller.leads.get") }}',
                 type: 'post',
@@ -131,31 +131,7 @@
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print'],
         });
     }
 </script>
