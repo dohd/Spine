@@ -19,9 +19,6 @@
                         <a href="{{ route('biller.import.sample_template', $data['type']) }}" target="_blank" id="download-btn">
                             <b>{{ trans('import.download_template') }}</b> ({{ $data['title'] }}).
                         </a>
-                        {{-- <a href="#" target="" id="download-btn">
-                            <b>{{ trans('import.download_template') }}</b> ({{ $data['title'] }}).
-                        </a> --}}
                     </p>
                     <p><b>Import File: </b>{{ $data['type'] }}.csv or {{ $data['type'] }}.xls or {{ $data['type'] }}.xlsx</p>
                     {{-- Include template import form --}}

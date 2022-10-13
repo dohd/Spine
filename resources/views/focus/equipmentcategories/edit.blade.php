@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title mb-0">{{ trans('labels.backend.miscs.edit') }}</h4>
+            <h4 class="content-header-title">{{ trans('labels.backend.miscs.edit') }}</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -27,7 +27,7 @@
                             <div class="form-group">
                                 @include("focus.equipmentcategories.form")
                                 <div class="edit-form-btn">
-                                    {{ link_to_route('biller.miscs.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                    {{ link_to_route('biller.equipmentcategories.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                     {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}                                           
                                 </div>
                             </div>

@@ -25,19 +25,20 @@
                             <table class="table table-bordered table-sm">
                                 @php
                                     $details = [ 
-                                        'System ID' => gen4tid('E-', $equipment->tid),
+                                        'System No' => gen4tid('Eq-', $equipment->tid),
                                         'Customer' => $equipment->customer? $equipment->customer->company : '',    
                                         'Branch' => $equipment->branch? $equipment->branch->name : '',
-                                        'Unique ID' => $equipment->unique_id,
+                                        'Equipment Category' => $equipment->category? $equipment->category->name : '',
+                                        'Client Tag' => $equipment->unique_id,
                                         'Serial No' => $equipment->equip_serial,
-                                        'Make' => $equipment->make_type,
+                                        'Make / Type' => $equipment->make_type,
                                         'Model / Model Number' => $equipment->model,
-                                        'Capacity' => numberFormat($equipment->capacity),
-                                        'Gas Type' => $equipment->machine_gas,
+                                        'Capacity' => $equipment->capacity,
+                                        'Gas / Fuel Type' => $equipment->machine_gas,
                                         'Equipment Location' => $equipment->location,
                                         'Equipment Building' => $equipment->building,
                                         'Building Floor' => $equipment->floor,
-                                        'Maintanance Rate (VAT Exc)' => numberFormat($equipment->service_rate)
+                                        'Service Rate (VAT Exc)' => numberFormat($equipment->service_rate)
                                     ];
                                 @endphp
                                 @foreach ($details as $key => $val)

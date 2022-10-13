@@ -60,12 +60,17 @@ class EquipmentsTableController extends Controller
       ->addColumn('tid', function ($equipment) {
         return gen4tid('Eq-', $equipment->tid);
       })
-      ->addColumn('branch', function ($equipment) {
-        if ($equipment->branch)
-          return $equipment->branch->name;
+      ->addColumn('customer', function ($equipment) {
+        $customer = $equipment->customer;
+        $branch = $equipment->branch;
+        if ($customer && $branch)
+          return "{$customer->company} - {$branch->name}";
       })
       ->addColumn('capacity', function ($equipment) {
         return $equipment->capacity;
+      })
+      ->addColumn('service_rate', function ($equipment) {
+        return numberFormat($equipment->service_rate);
       })
       ->addColumn('actions', function ($equipment) {
         return $equipment->action_buttons;

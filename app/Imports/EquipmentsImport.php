@@ -63,7 +63,11 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
                 'ins' => auth()->user()->ins,
             ]);
             unset($row_data['make_and_type'], $row_data['model_and_model_no']);
-            $row_data['service_rate'] = numberClean($row_data['service_rate']);
+            foreach ($row_data as $key => $val) {
+                if ($key == 'service_rate') 
+                    $row_data[$key] = numberClean($row_data['service_rate']);
+                if (strcasecmp($val, 'null') == 0) $row_data[$key] = null;
+            }
 
             $result = Equipment::create($row_data);
             if ($result) {

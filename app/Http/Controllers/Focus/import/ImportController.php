@@ -57,6 +57,7 @@ class ImportController extends Controller
             'accounts' => trans('import.import_accounts'),
             'transactions' => trans('import.import_transactions'),
             'equipments' => 'Import Equipments',
+            'customer_pricelist' => 'Import Customer Pricelist',
         ];
         $data = ['title' => $titles[$type]] + compact('type');
             
@@ -74,14 +75,12 @@ class ImportController extends Controller
         
         // generate equipment_categories csv file
         if ($file_name == 'equipment_categories') {
+            $categories = EquipmentCategory::all();
             $fw = fopen($file_path, 'w');
             fputcsv($fw, ['equipment_category_id', 'name']);
-
-            $categories = EquipmentCategory::all();
             foreach ($categories as $row) {
                 fputcsv($fw, [$row->id, $row->name]);
             }
-
             fclose($fw);
         }
 

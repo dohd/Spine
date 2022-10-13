@@ -1,6 +1,6 @@
 <div class='form-group row'>
     <div class='col-md-4'>
-        {{ Form::label('system_id', 'System ID',['class' => 'col-12 control-label']) }}
+        {{ Form::label('system_id', 'System No',['class' => 'col-12 control-label']) }}
         {{ Form::text('tid', @$equipment->tid ?: @$last_tid+1, ['class' => 'col form-control', 'readonly']) }}
     </div>
     <div class='col-md-4'>
@@ -27,19 +27,12 @@
 
 <div class='form-group row'>
     <div class='col-md-4'>
-        {{ Form::label('equip_serial', 'Equipment Serial',['class' => 'col-12 control-label']) }}
-        {{ Form::text('equip_serial', null, ['class' => 'col form-control ', 'placeholder' => 'Equipment Serial*', 'required']) }}
+        {{ Form::label('equip_serial', 'Equipment Serial No.',['class' => 'col-12 control-label']) }}
+        {{ Form::text('equip_serial', null, ['class' => 'col form-control ', 'placeholder' => 'Serial No*', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label('machine_gas', 'Gas Type',['class' => 'col-12 control-label']) }}
-        <select class="custom-select" id="todo-select" name="machine_gas" required>
-            <option value="">-- Select Gas Type --</option>
-            @foreach (['R22', 'R404a', 'R410a', 'R134a'] as $val)
-                <option value="{{ $val }}" {{ @$equipment->machine_gas == $val? 'selected' : '' }}>
-                    {{ $val }}
-                </option>
-            @endforeach
-        </select>
+        {{ Form::label('machine_gas', 'Gas / Fuel Type',['class' => 'col-12 control-label']) }}
+        {{ Form::text('machine_gas', null, ['class' => 'col form-control ', 'placeholder' => 'Gas / Fuel', 'required']) }}
     </div>
     <div class='col-md-4'>
         {{ Form::label('equipment_category_id', 'Equipment Category',['class' => 'col-12 control-label']) }}
@@ -56,16 +49,16 @@
 
 <div class='form-group row'>
     <div class='col-md-4'>
-        {{ Form::label('make', 'Make - Type',['class' => 'col-12 control-label']) }}
-        {{ Form::text('make_type', null, ['class' => 'col form-control ', 'placeholder' => 'Make - Type', 'required']) }}
+        {{ Form::label('make', 'Make / Type',['class' => 'col-12 control-label']) }}
+        {{ Form::text('make_type', null, ['class' => 'col form-control ', 'placeholder' => 'Make / Type', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label( 'model', 'Model - Model No',['class' => 'col-12 control-label']) }}
-        {{ Form::text('model', null, ['class' => 'col form-control ', 'placeholder' => 'Model Name - Number*', 'required']) }}
+        {{ Form::label( 'model', 'Model / Model No',['class' => 'col-12 control-label']) }}
+        {{ Form::text('model', null, ['class' => 'col form-control ', 'placeholder' => 'Model Name / Number*', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label('capacity', 'Capacity:',['class' => 'col-12 control-label']) }}
-        {{ Form::number('capacity', null, ['class' => 'col form-control ', 'placeholder' => 'Capacity', 'required']) }}
+        {{ Form::label('capacity', 'Capacity / Size',['class' => 'col-12 control-label']) }}
+        {{ Form::text('capacity', null, ['class' => 'col form-control ', 'placeholder' => 'Capacity', 'required']) }}
     </div>
 </div>
 
@@ -86,11 +79,11 @@
 
 <div class="form-group row">
     <div class='col-md-4'>
-        {{ Form::label('unique_id', 'Tag ID',['class' => 'col-12 control-label']) }}
+        {{ Form::label('unique_id', 'Client Tag',['class' => 'col-12 control-label']) }}
         {{ Form::text('unique_id', null, ['class' => 'col form-control ', 'placeholder' => 'Tag Number*', 'required']) }}
     </div>
     <div class='col-md-4'>
-        {{ Form::label('service_rate', 'Maintanance Rate (VAT Exc)',['class' => 'col-12 control-label']) }}
+        {{ Form::label('service_rate', 'Service Rate (VAT Exc)',['class' => 'col-12 control-label']) }}
         {{ Form::text('service_rate', null, ['class' => 'col form-control ', 'placeholder' => 'Rate Exc VAT', 'required']) }}
     </div>
 </div>
