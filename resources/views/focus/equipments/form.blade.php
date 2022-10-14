@@ -79,7 +79,7 @@
 
 <div class="form-group row">
     <div class='col-md-4'>
-        {{ Form::label('unique_id', 'Client Tag',['class' => 'col-12 control-label']) }}
+        {{ Form::label('unique_id', 'Client Tag No',['class' => 'col-12 control-label']) }}
         {{ Form::text('unique_id', null, ['class' => 'col form-control ', 'placeholder' => 'Tag Number*', 'required']) }}
     </div>
     <div class='col-md-4'>
