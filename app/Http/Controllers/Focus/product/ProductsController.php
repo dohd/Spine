@@ -154,7 +154,7 @@ class ProductsController extends Controller
         // fetch customer products
         if ($request->price_customer_id) {
             $products = ClientProduct::where('customer_id', request('price_customer_id'))
-                ->where('descr', 'LIKE', '%'. request('keyword') .'%')->get()
+                ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
                     return $v->fill([
                         'name' => $v->descr,
