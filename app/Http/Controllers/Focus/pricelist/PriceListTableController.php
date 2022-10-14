@@ -54,11 +54,18 @@ class PriceListTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('price', function ($pricelist) {
-                return numberFormat($pricelist->price);
+            ->addColumn('customer', function ($client_product) {
+                $customer = $client_product->customer;
+                if ($customer) return $customer->company;
             })
-            ->addColumn('actions', function ($pricelist) {
-                return $pricelist->action_buttons;
+            ->addColumn('row', function ($client_product) {
+                return $client_product->row_num;
+            })
+            ->addColumn('rate', function ($client_product) {
+                return numberFormat($client_product->rate);
+            })
+            ->addColumn('actions', function ($client_product) {
+                return $client_product->action_buttons;
             })
             ->make(true);
     }

@@ -1,42 +1,66 @@
 <div class="form-group row">
-    <div class="col-6">
-        <label for="pricegroup">Price Group</label>
-        <select name="pricegroup_id" id="pricegroup" class="form-control"required>
-            <option value="">-- Select Price Group --</option>
-            @foreach($pricegroups as $group)
-                <option value="{{ $group->id }}">{{ $group->name }}</option>
+    <div class="col-2">
+        <label for="row_number">Row No.</label>
+        {{ Form::text('row_num', null, ['class' => 'form-control', 'required']) }}
+    </div>
+    <div class="col-4">
+        <label for="customer">Customer</label>
+        <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose-customer" required>
+            @foreach($customers as $row)
+                <option value="{{ $row->id }}" {{ @$client_product && $client_product->customer_id == $row->id? 'selected' : '' }}>
+                    {{ $row->company }}
+                </option>
             @endforeach
         </select>
     </div>
-</div>
-<div class="table-responsive">
-    <table id="listTbl" class="table table-sm tfr my_stripe_single text-center">
-        <thead>
-            <tr class="bg-gradient-directional-blue white">
-                <th>#</th>
-                <th>Product Name</th>
-                <th width="20%">Price</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td><input type="text" class="form-control" name="name[]" id="name-0"></td>
-                <td><input type="text" class="form-control" name="price[]" id="price-0"></td>
-                <td><button class="btn btn-outline-light d-none remove"><i class="fa fa-trash fa-lg text-danger"></i></button></td>
-                <input type="hidden" name="product_id[]" id="id-0">
-            </tr>
-        </tbody>
-    </table>
+    <div class="col-4">
+        <label for="description">Product Description</label>
+        {{ Form::text('descr', null, ['class' => 'form-control', 'required']) }}
+    </div>
+    <div class="col-2">
+        <label for="uom">Unit of Measure (UoM)</label>
+        {{ Form::text('uom', null, ['class' => 'form-control', 'required']) }}
+    </div>
 </div>
 <div class="form-group row">
-    <div class="col-12">
-        <button class="btn btn-success" type="button" id="addRow">
-            <i class="fa fa-plus-square" aria-hidden="true"></i> Add
-        </button>
-    </div>
-    <div class="col-12">
-        {{ Form::submit('Save', ['class' => 'btn btn-primary btn-lg float-right']) }}
+    <div class="col-2">
+        <label for="rate">Rate (Ksh.)</label>
+        {{ Form::text('rate', null, ['class' => 'form-control', 'id' => 'rate', 'required']) }}
     </div>
 </div>
+
+<div class="edit-form-btn">
+    {{ link_to_route('biller.pricelists.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+    {{ Form::submit(@$client_product? 'Update' : 'Create', ['class' => 'btn btn-primary btn-md']) }}                                            
+</div>     
+
+@section('after-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
+<script>
+    const config = {
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+    };
+    
+    const Form = {
+        clientProduct: @json(@$client_product),
+
+        init() {
+            $('#customer').select2({allowClear: true});
+            $('#rate').focusout(this.rateChange);
+
+            if (this.clientProduct) {
+                $('#rate').trigger('focusout');
+            } else {
+                $('#customer').val('').trigger('change');
+            }
+        },
+
+        rateChange() {
+            const value = accounting.unformat($(this).val());
+            $(this).val(accounting.formatNumber(value));
+        },
+    };
+
+    $(() => Form.init());
+</script>
+@endsection

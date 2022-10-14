@@ -3,9 +3,8 @@
 namespace App\Repositories\Focus\pricelist;
 
 use App\Exceptions\GeneralException;
-use App\Models\pricelist\PriceList;
+use App\Models\client_product\ClientProduct;
 use App\Repositories\BaseRepository;
-use DB;
 
 /**
  * Class ProductcategoryRepository.
@@ -15,7 +14,7 @@ class PriceListRepository extends BaseRepository
     /**
      * Associated Repository Model.
      */
-    const MODEL = PriceList::class;
+    const MODEL = ClientProduct::class;
 
     /**
      * This method is used by Table Controller
@@ -25,7 +24,9 @@ class PriceListRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->where('pricegroup_id', request('pricegroup_id'))->get();
+        $q = $this->query();
+
+        return $q->get();
     }
 
     /**
@@ -38,26 +39,9 @@ class PriceListRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        DB::beginTransaction();
-
-        $data = $input['data'];
-        $data_items = $input['data_items'];
-        // update or create
-        foreach ($data_items as $v) {
-            $v = $v + $data;
-            $v['price'] = numberClean($v['price']);
-            $item = PriceList::firstOrNew([
-                'product_id' => $v['product_id'],
-                'pricegroup_id' => $v['pricegroup_id'],
-            ]);
-            foreach($v as $key => $val) {
-                $item[$key] = $val;
-            }
-            $item->save();
-        }
-
-        DB::commit();
-        if ($data) return $data;
+        $input['rate'] = numberClean($input['rate']);
+        $result = ClientProduct::create($input);
+        if ($result) return $result;
 
         throw new GeneralException('Error Creating PriceList');
     }
@@ -70,8 +54,12 @@ class PriceListRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(PriceList $pricelist, array $data)
+    public function update(ClientProduct $client_product, array $input)
     {
+        // dd($input);
+        $input['rate'] = numberClean($input['rate']);
+        if ($client_product->update($input)) return true;
+
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
@@ -82,9 +70,9 @@ class PriceListRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(PriceList $pricelist)
+    public function delete(ClientProduct $client_product)
     {
-        if ($pricelist->delete()) return true;
+        if ($client_product->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }

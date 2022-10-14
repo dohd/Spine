@@ -25,27 +25,29 @@
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-6">
-                                    <select name="pricegroup_id" id="pricegroup" class="form-control"required>
-                                        <option value="">-- Select Price Group --</option>
-                                        @foreach($pricegroups as $group)
-                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    
                                 </div>
                             </div>
                         </div>
                         <div class="card-body">
-                            
                             <table id="listTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Product Name</th>
-                                        <th>Price</th>
+                                        <th>Customer</th>
+                                        <th>Row No.</th>
+                                        <th>Product Description</th>
+                                        <th>UoM</th>
+                                        <th>Rate</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>                                    
+                                <tbody>      
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>                              
                                 </tbody>
                             </table>
                         </div>
@@ -61,53 +63,66 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
-    
-    // on selecting pricegroup
-    $('#pricegroup').change(function() {
-        if (!$(this).val()) return;
-        $('#listTbl').DataTable().destroy();   
-        draw_data($(this).val());
-    });
+    const config = {
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}}
+    };
 
-    // dataTable
-    function draw_data(pricegroup_id = 0) {
-        const language = { @lang("datatable.strings") };
-        const dataTable = $('#listTbl').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            language,
-            ajax: {
-                url: '{{ route("biller.pricelists.get") }}',
-                type: 'post',
-                data: {pricegroup_id}
-            },
-            columns: [
-                {
-                    data: 'DT_Row_Index',
-                    name: 'id'
+    const Index = {
+        init() {
+            $.ajaxSetup(config.ajax);
+            this.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#listTbl').dataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                language: {@lang("datatable.strings")},
+                ajax: {
+                    url: '{{ route("biller.pricelists.get") }}',
+                    type: 'post',
                 },
-                {
-                    data: 'name',
-                    name: 'name'
-                },
-                {
-                    data: 'price',
-                    name: 'price'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'pdf']
-        });
-    }    
+                columns: [
+                    {
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
+                    },
+                    {
+                        data: 'row',
+                        name: 'row'
+                    },
+                    {
+                        data: 'descr',
+                        name: 'descr'
+                    },
+                    {
+                        data: 'uom',
+                        name: 'uom'
+                    },
+                    {
+                        data: 'rate',
+                        name: 'rate'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'pdf']
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection
