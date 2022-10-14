@@ -6,8 +6,8 @@
                 <thead>
                     <tr>
                         <th>Quote / PI</th>
-                        <th>Purchase Amount</th>
                         <th>Quoted Amount</th>                    
+                        <th>Purchase Estimate</th>
                         <th>Gross Profit (Quoted - Purchase)</th>
                         <th>% Gross Profit</th>
                     </tr>
@@ -24,8 +24,8 @@
                         @endphp
                         <tr>
                             <td>{{ gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid) }}</td>
-                            <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($estimated_amount) }}</td>
+                            <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($balance) }}</td>
                             <td>{{ round(div_num($balance, $estimated_amount) * 100) }} %</td>
                         </tr>
