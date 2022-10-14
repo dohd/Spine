@@ -87,7 +87,7 @@ class PriceListRepository extends BaseRepository
                 'contract' => request('contract'),
             ])->delete();
         } elseif (request('customer_id')) {
-            $result = ClientProduct::where(['contract' => request('contract')])->delete();
+            $result = ClientProduct::where(['customer_id' => request('customer_id')])->delete();
         }
 
         return $result;
