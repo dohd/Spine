@@ -4,8 +4,11 @@
     <div class="row form-group">
         <div class="col-4">
             <label for="customer">Customer</label>
-            <select class="form-control" name="customer_id" id="customer" data-placeholder="Choose Customer" required>
-            </select>
+            <select class="form-control" name="customer_id" id="customer" data-placeholder="Choose Customer" required></select>
+        </div>
+        <div class="col-2">
+            <label for="contract">Contract Title</label>
+            {{ Form::text('contract', null, ['class' => 'form-control', 'required']) }}
         </div>
     </div>
     {{ Form::submit(trans('import.upload_import'), ['class' => 'btn btn-primary btn-md']) }}

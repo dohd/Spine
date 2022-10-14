@@ -56,7 +56,7 @@ class PriceListTableController extends Controller
             ->addIndexColumn()
             ->addColumn('customer', function ($client_product) {
                 $customer = $client_product->customer;
-                if ($customer) return $customer->company;
+                if ($customer) return "{$customer->company} - {$client_product->contract}";
             })
             ->addColumn('row', function ($client_product) {
                 return $client_product->row_num;

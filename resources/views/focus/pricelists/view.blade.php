@@ -27,6 +27,7 @@
                                 @php
                                     $details = [ 
                                         'Customer' => $client_product->customer? $client_product->customer->company : '',
+                                        'Contract' => $client_product->contract,
                                         'Row Number' => $client_product->row_num,
                                         'Product Description' => $client_product->descr,
                                         'UoM' => $client_product->uom,
@@ -35,7 +36,7 @@
                                 @endphp
                                 @foreach ($details as $key => $val)
                                 <tr>
-                                    <th width="">{{ $key }}</th>
+                                    <th>{{ $key }}</th>
                                     <td>{{ $val }}</td>
                                 </tr>
                                 @endforeach

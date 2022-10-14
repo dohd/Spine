@@ -13,16 +13,21 @@
             @endforeach
         </select>
     </div>
+    <div class="col-2">
+        <label for="contract">Contract Title</label>
+        {{ Form::text('contract', null, ['class' => 'form-control', 'required']) }}
+    </div>
     <div class="col-4">
         <label for="description">Product Description</label>
         {{ Form::text('descr', null, ['class' => 'form-control', 'required']) }}
     </div>
+   
+</div>
+<div class="form-group row">
     <div class="col-2">
         <label for="uom">Unit of Measure (UoM)</label>
         {{ Form::text('uom', null, ['class' => 'form-control', 'required']) }}
     </div>
-</div>
-<div class="form-group row">
     <div class="col-2">
         <label for="rate">Rate (Ksh.)</label>
         {{ Form::text('rate', null, ['class' => 'form-control', 'id' => 'rate', 'required']) }}

@@ -21,20 +21,50 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-content">
-                        <div class="card-header">
+                    <div class="card-body">
+                        {{ Form::open(['route' => array('biller.pricelists.destroy', 0), 'method' => 'DELETE']) }}
                             <div class="row">
-                                <div class="col-6">
-                                    
+                                <div class="col-4">
+                                    <label for="client">Customer</label>                             
+                                    <select name="customer_id" id="customer" class="custom-select" data-placeholder="Choose Customer" required>
+                                        <option value="">-- select customer --</option>
+                                        @foreach ($customers as $customer)
+                                            <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <label for="client">Contract</label>                             
+                                    <select name="contract" id="contract" class="custom-select" disabled>
+                                        <option value="">-- select contract --</option>
+                                        @foreach ($contracts as $row)
+                                            <option value="{{ $row->contract }}" customer_id={{ $row->customer_id }}>
+                                                {{ $row->contract }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="edit-form-btn">
+                                    <label for="">&nbsp;</label>
+                                    {{ Form::submit('Mass Delete', ['class' => 'form-control btn-danger mass-delete']) }}
                                 </div>
                             </div>
-                        </div>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
                         <div class="card-body">
                             <table id="listTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Customer</th>
+                                        <th>Customer - Contract</th>
                                         <th>Row No.</th>
                                         <th>Product Description</th>
                                         <th>UoM</th>
@@ -71,6 +101,37 @@
         init() {
             $.ajaxSetup(config.ajax);
             this.drawDataTable();
+            $('.mass-delete').click(this.massDelete);
+            $('#customer').change(this.customerChange);
+        },
+
+        massDelete() {
+            event.preventDefault();
+            if (!$('#customer').val()) return alert('customer is required!');
+            const form = $(this).parents('form');
+            swal({
+                title: 'Are You  Sure?',
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+                showCancelButton: true,
+            }, () => form.submit());
+        },
+
+        customerChange() {
+            const customerId = $(this).val();
+            if (customerId) {
+                $('#contract').attr('disabled', false).val('');
+                $('#contract option:not(:first)').each(function() {
+                    if ($(this).attr('customer_id') == customerId) {
+                        $(this).removeClass('d-none');
+                    } else {
+                        $(this).addClass('d-none');
+                    }
+                })
+            } else {
+                $('#contract').attr('disabled', true).val('');
+            }
         },
 
         drawDataTable() {

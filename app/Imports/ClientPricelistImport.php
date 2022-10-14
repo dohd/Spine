@@ -54,6 +54,7 @@ class ClientPricelistImport implements ToCollection, WithBatchInserts, WithValid
             $row_data = array_combine($columns, $row);
             $row_data = array_replace($row_data, [
                 'descr' => $row_data['description'],
+                'contract' => $this->data['contract'],
                 'customer_id' => $this->data['customer_id'],
                 'ins' => auth()->user()->ins,
                 'user_id' => auth()->user()->id
@@ -65,9 +66,7 @@ class ClientPricelistImport implements ToCollection, WithBatchInserts, WithValid
             }
             
             $result = ClientProduct::create($row_data);
-            if ($result) {
-                $row_count++;
-            }
+            if ($result) $row_count++;
         }
 
         if (!$row_count) throw new Error('Please fill template with required data');
