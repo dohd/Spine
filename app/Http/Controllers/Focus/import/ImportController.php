@@ -29,8 +29,10 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
+use App\Imports\ClientPricelistImport;
 use App\Models\equipmentcategory\EquipmentCategory;
 use DB;
+use Error;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -57,7 +59,7 @@ class ImportController extends Controller
             'accounts' => trans('import.import_accounts'),
             'transactions' => trans('import.import_transactions'),
             'equipments' => 'Import Equipments',
-            'customer_pricelist' => 'Import Customer Pricelist',
+            'client_pricelist' => 'Import Client Pricelist',
         ];
         $data = ['title' => $titles[$type]] + compact('type');
             
@@ -119,7 +121,7 @@ class ImportController extends Controller
         $filename = $request->name;
         $path = 'temp' . DIRECTORY_SEPARATOR;
         $file_exists = Storage::disk('public')->exists($path . $filename);
-        if (!$file_exists) throw ValidationException::withMessages(['File does not exist!']);
+        if (!$file_exists) throw new Error('File does not exist');
 
         $models = [
             'customer' => new CustomersImport($data),
@@ -127,6 +129,7 @@ class ImportController extends Controller
             'accounts' => new AccountsImport($data),
             'transactions' => new TransactionsImport($data),
             'equipments' => new EquipmentsImport($data),
+            'client_pricelist' => new ClientPricelistImport($data),
         ];
 
         $storage_path = Storage::disk('public')->path($path . $filename);
@@ -139,17 +142,17 @@ class ImportController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Storage::disk('public')->delete($path . $filename);
-            // printlog($e->getMessage());
-            return response()->json(['status' => 'Error', 'message' => trans('import.import_process_failed')]);
+            printlog($e->getMessage());
+            throw new Error(trans('import.import_process_failed'));
         }
 
-        $rowCount = $model->getRowCount();
-        if (!$rowCount) throw ValidationException::withMessages([trans('import.import_process_failed')]);
-
+        $row_count = $model->getRowCount();
+        if (!$row_count) throw new Error(trans('import.import_process_failed'));
         Storage::disk('public')->delete($path . $filename);
+        
         return response()->json([
             'status' => 'Success', 
-            'message' => trans('import.import_process_success') . ' ' . $rowCount . ' rows imported successfully'
+            'message' => trans('import.import_process_success') . ' ' . $row_count . ' rows imported successfully'
         ]);
     }
 }
