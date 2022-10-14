@@ -76,4 +76,20 @@ class PriceListRepository extends BaseRepository
         
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
+
+    public function mass_delete($input)
+    {
+        // dd($input);
+        $result = null;
+        if (request('customer_id') && request('contract')) {
+            $result = ClientProduct::where([
+                'customer_id' => request('customer_id'),
+                'contract' => request('contract'),
+            ])->delete();
+        } elseif (request('customer_id')) {
+            $result = ClientProduct::where(['contract' => request('contract')])->delete();
+        }
+
+        return $result;
+    }
 }

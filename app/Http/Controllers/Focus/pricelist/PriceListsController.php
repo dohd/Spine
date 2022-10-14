@@ -34,9 +34,10 @@ class PriceListsController extends Controller
      */
     public function index()
     {
-        $customers = Customer::get(['id', 'company']);
+        $customers = Customer::whereHas('products')->get(['id', 'company']);
+        $contracts = ClientProduct::get(['contract', 'customer_id'])->unique('contract');
 
-        return new ViewResponse('focus.pricelists.index', compact('customers'));
+        return new ViewResponse('focus.pricelists.index', compact('customers', 'contracts'));
     }
 
     /**
@@ -111,11 +112,16 @@ class PriceListsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        $client_product = ClientProduct::find($id);
-        $this->repository->delete($client_product);
-
+        if ($id == 0) {
+            $request->validate(['customer_id' => 'required']);
+            $this->repository->mass_delete($request->except('_token'));
+        } else {
+            $client_product = ClientProduct::find($id);
+            $this->repository->delete($client_product);    
+        }
+            
         return new RedirectResponse(route('biller.pricelists.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);
     }
 }
