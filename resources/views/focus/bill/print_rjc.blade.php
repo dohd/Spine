@@ -138,26 +138,26 @@
 	<table class="items items-table" cellpadding=8>
 		<thead>
 			<tr>
-				<th width="10%">Tag No</th>
-				<th width="15%">Type</th>
-				<th width="15%">Make</th>
-				<th width="15%">Capacity</th>
-				<th width="15%">Location</th>
-				<th width="15%">Last Service Date</th>
-				<th width="15%">Next Service Date</th>
+				<th width="20%">Tag Id / Unique No</th>
+				<th>Serial No</th>
+				<th>Make / Type</th>
+				<th>Capacity</th>
+				<th>Location</th>
+				<th>Last Service</th>
+				<th>Next Service</th>
 			</tr>
 		</thead>
 		<tbody>
 			<!-- ITEMS HERE -->
 			@foreach($resource->rjc_items as $item)
 				<tr class="dotted">
-					<td class="mytotalss">{{ $item->tag_number }}</td>
-					<td class="mytotalss">{{ $item->equipment_type }}</td>
-					<td class="mytotalss">{{ $item->make }}</td>
+					<td class="mytotalss">{{ $item->unique_id }}</td>
+					<td class="mytotalss">{{ $item->equip_serial }}</td>
+					<td class="mytotalss">{{ $item->make_type }}</td>
 					<td class="mytotalss">{{ $item->capacity }}</td>
 					<td class="mytotalss">{{ $item->location }}</td>
-					<td class="mytotalss">{{ dateFormat($item->last_service_date, 'd-m-Y') }}</td>
-					<td class="mytotalss">{{ dateFormat($item->next_service_date, 'd-m-Y') }}</td>
+					<td class="mytotalss">{{ dateFormat($item->last_service_date, $company->main_date_format) }}</td>
+					<td class="mytotalss">{{ dateFormat($item->next_service_date, $company->main_date_format) }}</td>
 				</tr>
 			@endforeach
 			<!-- END ITEMS HERE -->
@@ -224,16 +224,18 @@
 		<p>{!! $resource->recommendations !!}</p>
 	</div>
 	@php
-		$is_image = isset($resource->image_one) || isset($resource->image_two) || isset($resource->image_three) || isset($resource->image_four);
+		$images = array_filter([
+			$resource->image_one, $resource->image_two, 
+			$resource->image_three, $resource->image_four
+		], fn($v) => $v);
 	@endphp
-	@if($is_image)
+	@if($images)
 		<h5><span>f.</span> Pictorials</h5>
 		<table class="items items-table" cellpadding="8">		
-			<tr class="dottedt">
-				<th width="25%"></th>
-				<th width="25%"></th>
-				<th width="25%"></th>
-				<th width="25%"></th>
+			<tr class="dotted">				
+				@for ($i = 0; $i < 2; $i++)
+					<th width="25%"></th>
+				@endfor		
 			</tr>
 			<tr class="dotted">
 				<td>
@@ -246,6 +248,12 @@
 						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_two) }}" alt="image_two" border=3 height=300 width=300></img>
 					@endisset
 				</td>
+			</tr>
+			<tr>
+				<td class="cost">{{ $resource->caption_one }}</td>
+				<td class="cost">{{ $resource->caption_two }}</td>
+			</tr>
+			<tr class="dotted">
 				<td>
 					@isset($resource->image_three)
 						<img src="{{ Storage::disk('public')->url('app/public/img/djcreport/' . $resource->image_three) }}" alt="image_three" border=3 height=300 width=300></img>
@@ -258,8 +266,6 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="cost">{{ $resource->caption_one }}</td>
-				<td class="cost">{{ $resource->caption_two }}</td>
 				<td class="cost">{{ $resource->caption_three }}</td>
 				<td class="cost">{{ $resource->caption_four }}</td>
 			</tr>

@@ -67,14 +67,16 @@ class RjcRepository extends BaseRepository
 
         $data = $input['data'];
         foreach($data as $key => $value) {
-            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'])) {
                 if ($value) $data[$key] = $this->uploadFile($value);
             }
             if ($key == 'report_date') 
                 $data[$key] = date_for_database($value);
         }
+        // update tid
         $last_tid =  Rjc::max('tid');
         if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
+
         $result = Rjc::create($data);
 
         $data_items = $input['data_items'];
@@ -87,9 +89,11 @@ class RjcRepository extends BaseRepository
             ]);
         }, $data_items);
         RjcItem::insert($data_items);
-
-        DB::commit();
-        if ($result) return $result;
+        
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Rjc');
     }
@@ -108,19 +112,20 @@ class RjcRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        foreach($data as $key => $value) {
-            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
-                if ($value) $data[$key] = $this->uploadFile($value);
+        foreach($data as $key => $val) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'])) {
+                if ($val) $data[$key] = $this->uploadFile($val);
             }
             if ($key == 'report_date') 
-                $data[$key] = date_for_database($value);
+                $data[$key] = date_for_database($val);
         }
         $result = $rjc->update($data);
 
         $data_items = $input['data_items'];
-        $item_ids = array_map(function ($v) { return $v['item_id']; }, $data_items);
+        // delete omitted rjc items
+        $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
         $rjc->rjc_items()->whereNotIn('id', $item_ids)->delete();
-
+        // create or update 
         foreach($data_items as $item) {
             $item = array_replace($item, [
                 'rjc_id' => $rjc->id, 
@@ -128,18 +133,17 @@ class RjcRepository extends BaseRepository
                 'last_service_date' => date_for_database($item['last_service_date']),
                 'next_service_date' => date_for_database($item['next_service_date']),
             ]);
-
-            $rjc_item = RjcItem::firstOrNew(['id' => $item['item_id']]);
-            foreach($item as $key => $value) {
-                $rjc_item[$key] = $value;
-            }
-            if ($rjc_item->id) unset($rjc_item->id);
-            unset($rjc_item->item_id);
-            $rjc_item->save();
+            $new_item = RjcItem::firstOrNew(['id' => $item['item_id']]);
+            $new_item->fill($item);
+            if (!$new_item->id) unset($new_item->id);
+            unset($new_item->item_id);
+            $new_item->save();
         }
 
-        DB::commit();
-        if ($result) return $rjc;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Updating Rjc');
     }
@@ -153,9 +157,8 @@ class RjcRepository extends BaseRepository
      */
     public function delete(Rjc $rjc)
     {
-        if ($rjc->rjc_items()->delete() && $rjc->delete()) 
-            return true;
-
+        if ($rjc->delete()) return true;
+    
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 

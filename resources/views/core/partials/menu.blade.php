@@ -228,101 +228,112 @@
             </li>
 
             {{-- sales module --}}
-            @if(access()->allowMultiple(['invoice-manage', 'quote-manage']))
+            @if(access()->allow('manage-sale'))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-basket"></i><span>{{trans('features.sales')}}</span></a>
                     <ul class="dropdown-menu">
-                        @permission('project-manage')
+                        {{-- lead --}}
+                        {{-- @permission('manage-lead') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> Tickets</a>
                             <ul class="dropdown-menu">
+                                {{-- @permission('list-lead') --}}
                                 <li><a class="dropdown-item" href="{{ route('biller.leads.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Tickets</a></li>
+                                {{-- @endauth --}}
+                                {{-- @permission('create-lead') --}}
                                 <li><a class="dropdown-item" href="{{ route('biller.leads.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
+                                {{-- @endauth --}}
                             </ul>
                         </li>
-                        @endauth
-
-                        @permission('project-manage')
+                        {{-- @endauth --}}
+                        {{-- diagnosis job card --}}
+                        {{-- @permission('manage-djc') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Djc Report</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.djcs.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Djc Report
-                                    </a>
-                                </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.djcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Djc Report
-                                    </a>
-                                </li>
+                                {{-- @permission('list-djc') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.djcs.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Djc Report</a></li>
+                                {{-- @endauth --}}
+                                {{-- @permission('create-djc') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.djcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Report</a></li>
+                                {{-- @endauth --}}
                             </ul>
                         </li>
-                        @endauth
+                        {{-- @endauth --}}
                         {{-- quote --}}
-                        @permission('quote-manage')
+                        {{-- @permission('manage-quote') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                             <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('quotes.management') }}</a>
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Quote  </a>
-                                </li>
+                                {{-- @permission('list-quote') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.quotes.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Quote  </a></li>
+                                {{-- @endauth --}}
+                                {{-- @permission('create-quote') --}}
                                 <li>
                                     <a class="dropdown-item" href="{{ route('biller.quotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('labels.backend.quotes.create') }}</a>
                                     <a class="dropdown-item" href="{{ route('biller.quotes.create', 'doc_type=maintenance') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Maintenance Quote</a>
-                                </li>                            
+                                </li>  
+                                {{-- @endauth                           --}}
                             </ul>
                         </li>
+                        {{-- @endauth --}}
+                        {{-- proforma-invoice --}}
+                        {{-- @permission('manage-pi') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i>PI Management</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.quotes.index', 'page=pi') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage PI
-                                    </a>
-                                </li>       
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI</a>
-                                </li>                     
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi&doc_type=maintenance') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Maintenance PI</a>
-                                </li>
+                                {{-- @permission('list-pi') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.quotes.index', 'page=pi') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage PI </a></li> 
+                                {{-- @endauth --}}
+                                {{-- @permission('create-pi') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create PI</a></li>     
+                                <li><a class="dropdown-item" href="{{ route('biller.quotes.create', 'page=pi&doc_type=maintenance') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Maintenance PI</a></li>
+                                {{-- @endauth --}}
                             </ul>
                         </li>
-                        @endauth
-
-                        @permission('project-manage')
+                        {{-- @endauth --}}
+                        {{-- project --}}
+                        {{-- @permission('manage-project') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> {{ trans('labels.backend.projects.management') }}</a>
                             <ul class="dropdown-menu">
+                                {{-- @permission('list-project') --}}
                                 <li>
                                     <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown">
                                         <i class="ft-list"></i>{{ trans('projects.projects')}} <span class="badge badge-sm badge-primary">Beta</span>
                                     </a>                                
                                 </li>
+                                {{-- @endauth --}}
                             </ul>
                         </li>
-                        @endauth
-
-                        @permission('quote-manage')
+                        {{-- @endauth --}}
+                        {{-- verification --}}
+                        {{-- @permission('manage-verification') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Job Verification</a>
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.quotes.get_verify_quote') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a>
-                                </li>                            
+                                {{-- @permission('list-verification') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.quotes.get_verify_quote') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a></li>                                                            
+                                {{-- @endauth --}}
                             </ul>                        
                         </li>
-                        @endauth
-
-                        @permission('project-manage')
+                        {{-- @endauth --}}
+                        {{-- repair job card --}}
+                        {{-- @permission('manage-rjc') --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Rjc Report</a>
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.rjcs.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Rjc Report</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.rjcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Rjc Report</a>
-                                </li>
+                                {{-- @permission('list-rjc') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.rjcs.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Rjc Report</a></li>
+                                {{-- @endauth --}}
+                                {{-- @permission('create-rjc') --}}
+                                <li><a class="dropdown-item" href="{{ route('biller.rjcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Report</a></li>
+                                {{-- @endauth --}}
                             </ul>
                         </li>
-                        @endauth
+                        {{-- @endauth --}}
                     </ul>
                 </li>
             @endif
 
-            {{-- crm module --}}
-            @if(access()->allowMultiple(['manage-customer', 'manage-customergroup']))
+            {{-- customer relation management module --}}
+            {{-- @if(access()->allow('manage-crm')) --}}
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-diamond"></i><span>{{trans('features.crm')}}</span></a>
                     <ul class="dropdown-menu">
+                        {{-- customer --}}
                         @permission('manage-customer')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-users"></i></i> {{ trans('labels.backend.customers.management') }}</a>
                             <ul class="dropdown-menu">
@@ -404,7 +415,7 @@
                         @endauth
                     </ul>
                 </li>
-            @endif
+            {{-- @endif --}}
             
             {{-- stock manager module --}}
             @if(access()->allowMultiple(['product-manage', 'purchaseorder-manage', 'manage-warehouse', 'supplier-manage']))
@@ -460,6 +471,7 @@
                         </li>
                         @endauth
                         {{-- Price Group Management --}}
+                        {{-- 
                         @permission('product-manage')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Price Group Management</a>
                             <ul class="dropdown-menu">
@@ -474,14 +486,16 @@
                             </ul>
                         </li>
                         @endauth
+                         --}}
+
                         @permission('product-manage')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Price List Management</a>
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Client Pricelist</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.pricelists.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Price List 
+                                <li><a class="dropdown-item" href="{{ route('biller.pricelists.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Pricelist 
                                     </a>
                                 </li>
                                 @permission('product-create')
-                                <li><a class="dropdown-item" href="{{ route('biller.pricelists.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Price List
+                                <li><a class="dropdown-item" href="{{ route('biller.pricelists.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Pricelist
                                     </a>
                                 </li>
                                 @endauth
@@ -489,10 +503,10 @@
                         </li>
                         @endauth                    
                         @permission('productcategory-manage')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> {{ trans('labels.backend.productcategories.management') }}
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.productcategories.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('labels.backend.productcategories.management') }}
+                                <li><a class="dropdown-item" href="{{ route('biller.productcategories.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Categories Management
                                     </a>
                                 </li>
                                 @permission('productcategory-data')
@@ -757,10 +771,10 @@
                         @permission('project-manage')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Equipment Category</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.equipmentcategories.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Equipment Category
+                                <li><a class="dropdown-item" href="{{ route('biller.equipmentcategories.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Categories
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.equipmentcategories.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Equipment Category
+                                <li><a class="dropdown-item" href="{{ route('biller.equipmentcategories.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Category
                                     </a>
                                 </li>
                             </ul>
@@ -1085,21 +1099,35 @@
                             <ul class="drilldown-menu">
                                 <li class="menu-list">
                                     <ul class="mega-menu-sub">
-                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('import.import')}}
-                                        </li>
-                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['customer'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_customers')}}
+                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('import.import')}}</li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{route('biller.import.general',['customer'])}}">
+                                                <i class="fa fa-file-excel-o"></i> Customers
                                             </a>
                                         </li>
-                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['products'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_products')}}
+                                        <li>
+                                            <a class="dropdown-item" href="{{route('biller.import.general',['products'])}}">
+                                                <i class="fa fa-file-excel-o"></i> Products
                                             </a>
                                         </li>
-                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['accounts'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_accounts')}}
+                                        <li>
+                                            <a class="dropdown-item" href="{{route('biller.import.general',['accounts'])}}">
+                                                <i class="fa fa-file-excel-o"></i> Accounts
                                             </a>
                                         </li>
-                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['transactions'])}}"><i class="fa fa-file-excel-o"></i> {{trans('import.import_transactions')}}
+                                        <li>
+                                            <a class="dropdown-item" href="{{route('biller.import.general',['transactions'])}}">
+                                                <i class="fa fa-file-excel-o"></i> Transactions
                                             </a>
                                         </li>
-                                        <li><a class="dropdown-item" href="{{route('biller.import.general',['equipments'])}}"><i class="fa fa-file-excel-o"></i> Import Equipments
+                                        <li>
+                                            <a class="dropdown-item" href="{{route('biller.import.general',['equipments'])}}">
+                                                <i class="fa fa-file-excel-o"></i> Equipments
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{route('biller.import.general',['client_pricelist'])}}">
+                                                <i class="fa fa-file-excel-o"></i> Client Pricelist
                                             </a>
                                         </li>
                                     </ul>

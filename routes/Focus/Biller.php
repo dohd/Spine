@@ -147,16 +147,13 @@ Route::group(['namespace' => 'event'], function () {
 });
 
 Route::group(['namespace' => 'djc'], function () {
-    Route::delete('djcs/delete_item/{id}', 'DjcsController@delete_item')->name('djcs.delete_item');
-
     Route::resource('djcs', 'DjcsController');
     //For Datatable
     Route::post('djcs/get', 'DjcsTableController')->name('djcs.get');
 });
 
 Route::group(['namespace' => 'rjc'], function () {
-    Route::delete('rjcs/delete_item/{id}', 'RjcsController@delete_item')->name('rjcs.delete_item');
-
+    Route::post('rjcs/project_extra_details', 'RjcsController@project_extra_details')->name('rjcs.project_extra_details');
     Route::resource('rjcs', 'RjcsController');
     //For Datatable
     Route::post('rjcs/get', 'RjcsTableController')->name('rjcs.get');
