@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>DjR-{{ sprintf('%04d', $resource->tid) }}</title>
+	<title>{{ gen4tid('DjR-', $resource->tid) }}</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -138,22 +138,22 @@
 	<table class="items items-table" cellpadding=8>
 		<thead>
 			<tr>
-				<th width="10%">Tag No</th>
-				<th width="15%">Type</th>
-				<th width="15%">Make</th>
-				<th width="15%">Capacity</th>
-				<th width="15%">Location</th>
-				<th width="15%">Last Service Date</th>
-				<th width="15%">Next Service Date</th>
+				<th width="20%">Tag No / Unique Id</th>
+				<th>Serial No</th>
+				<th>Make / Type</th>
+				<th>Capacity</th>
+				<th>Location</th>
+				<th>Last Service</th>
+				<th>Next Service</th>
 			</tr>
 		</thead>
 		<tbody>
 			<!-- ITEMS HERE -->
 			@foreach($resource->items as $item)
 				<tr class="dotted">
-					<td class="mytotalss">{{ $item->tag_number }}</td>
-					<td class="mytotalss">{{ $item->equipment_type }}</td>
-					<td class="mytotalss">{{ $item->make }}</td>
+					<td class="mytotalss">{{ $item->unique_id }}</td>
+					<td class="mytotalss">{{ $item->equip_serial }}</td>
+					<td class="mytotalss">{{ $item->make_type }}</td>
 					<td class="mytotalss">{{ $item->capacity }}</td>
 					<td class="mytotalss">{{ $item->location }}</td>
 					<td class="mytotalss">{{ dateFormat($item->last_service_date, $company->main_date_format) }}</td>
@@ -200,8 +200,10 @@
 	</div>
 
 	@php
-		$images = [$resource->image_one, $resource->image_two, $resource->image_three, $resource->image_four];
-		$images = array_filter($images, function ($v) { return $v; });
+		$images = array_filter([
+			$resource->image_one, $resource->image_two, 
+			$resource->image_three, $resource->image_four
+		], fn($v) => $v);
 	@endphp
 	@if($images)
 		<div style="height: 3em;"></div>

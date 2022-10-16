@@ -50,6 +50,7 @@ class DjcRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+        
         return $q->get();
     }
 
@@ -63,21 +64,23 @@ class DjcRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
+        DB::beginTransaction();
+
         $data = $input['data'];
-        foreach($data as $key => $value) {
-            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
-                if ($value) $data[$key] = $this->uploadFile($value);
+        foreach($data as $key => $val) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'])) {
+                if ($val) $data[$key] = $this->uploadFile($val);
             }
-            if (in_array($key, ['report_date', 'jobcard_date'], 1))
-                $data[$key] = date_for_database($value);
+            if (in_array($key, ['report_date', 'jobcard_date']))
+                $data[$key] = date_for_database($val);
         }
 
-        DB::beginTransaction();
         // close lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         // increament tid
         $last_tid =  Djc::max('tid');
         if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
+
         $result = Djc::create($data);
 
         $data_items = $input['data_items'];
@@ -91,8 +94,10 @@ class DjcRepository extends BaseRepository
         }, $data_items);
         DjcItem::insert($data_items);
 
-        DB::commit();
-        if ($result)  return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
            
         throw new GeneralException('Error Creating Djc');
     }
@@ -108,28 +113,28 @@ class DjcRepository extends BaseRepository
     public function update($djc, array $input)
     {
         // dd($input);
-        $data = $input['data'];
-        foreach($data as $key => $value) {
-            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'], 1)) {
-                if ($value) $data[$key] = $this->uploadFile($value);
-            }
-            if (in_array($key, ['report_date', 'jobcard_date'], 1))
-                $data[$key] = date_for_database($value);
-        }
         DB::beginTransaction();
 
-        // if different lead, open previous lead
-        if ($djc->lead && $djc->lead->status && $djc->lead_id != $data['lead_id']) 
+        $data = $input['data'];
+        foreach($data as $key => $val) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'])) {
+                if ($val) $data[$key] = $this->uploadFile($val);
+            }
+            if (in_array($key, ['report_date', 'jobcard_date']))
+                $data[$key] = date_for_database($val);
+        }
+    
+        // if different lead, open previous lead otherwise close lead
+        if ($djc->lead && $djc->lead->status == 1 && $djc->lead_id != $data['lead_id']) 
             $djc->lead->update(['status' => 0]);
-        // close current lead
-        Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+        else Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+                
         $result = $djc->update($data);
 
         $data_items = $input['data_items'];
-        // remove omitted items
-        $item_ids = array_map(function ($v) { return $v['item_id']; }, $data_items);
+        // remove omitted djc items
+        $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
         $djc->items()->whereNotIn('id', $item_ids)->delete();
-
         // update or create new djc_item
         foreach($data_items as $item) {
             $item = array_replace($item, [
@@ -145,8 +150,10 @@ class DjcRepository extends BaseRepository
             $djc_item->save();
         }
 
-        DB::commit();
-        if ($result) return $djc;
+        if ($result) {
+            DB::commit();
+            return $djc;
+        }
 
         throw new GeneralException('Error Updating Djc');
     }

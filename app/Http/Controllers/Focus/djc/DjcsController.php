@@ -90,7 +90,7 @@ class DjcsController extends Controller
         ]);
         // extract request input
         $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_items = $request->only(['row_index', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data_items = $request->only(['row_index', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 'capacity', 'location', 'last_service_date', 'next_service_date']);
 
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
@@ -115,9 +115,9 @@ class DjcsController extends Controller
         $leads = Lead::where('status', 0)
             ->orderBy('id', 'DESC')->get()
             ->merge(collect([$djc->lead]));
-        $items = $djc->items()->orderBy('row_index', 'ASC')->get();
+        $djc_items = $djc->items()->orderBy('row_index', 'ASC')->get();
 
-        return new EditResponse('focus.djcs.edit', compact('djc', 'leads', 'items'));
+        return new EditResponse('focus.djcs.edit', compact('djc', 'leads', 'djc_items'));
     }
 
     /**
@@ -137,8 +137,8 @@ class DjcsController extends Controller
         ]);
         // extract request input
         $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_items = $request->only(['row_index', 'item_id', 'tag_number', 'joc_card', 'equipment_type', 'make', 'capacity', 'location', 'last_service_date', 'next_service_date']);
-        
+        $data_items = $request->only(['row_index', 'item_id', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+
         $data['ins'] = auth()->user()->ins;
         $data['id'] = $djc->id;
 
