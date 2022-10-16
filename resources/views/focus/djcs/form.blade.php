@@ -58,8 +58,8 @@
                 <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
                     <div class="input-group">
                         <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                        {{ Form::text('tid', 'DjR-' . sprintf('%04d', @$last_djc->tid+1), ['class' => 'form-control round', 'disabled']) }}
-                        <input type="hidden" name="tid" value="{{ @$last_djc->tid+1 }}">
+                        {{ Form::text('tid', gen4tid('DjR-', @$djc? $djc->tid : $tid+1), ['class' => 'form-control round', 'disabled']) }}
+                        <input type="hidden" name="tid" value="{{ @$djc? $djc->tid : $tid+1 }}">
                     </div>
                 </div>                                        
                 <div class="col-sm-4"><label for="report_date" class="caption">Report {{trans('general.date')}}</label>
