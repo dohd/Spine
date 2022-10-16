@@ -176,14 +176,13 @@ class EquipmentsController extends Controller
         
         $equipments = Equipment::when(request('branch_id'), function ($q) {
             $q->where('branch_id', request('branch_id'));
-        })->when(request('client_id'), function ($q) {
-            $q->where('customer_id', request('client_id'));
-        })
-        ->orWhere('tid', 'LIKE', '%' . $k . '%')
+        })->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        })->orWhere('tid', 'LIKE', '%' . $k . '%')
         ->orWhere('make_type', 'LIKE', '%' . $k . '%')
         ->orWhere('location', 'LIKE', '%' . $k . '%')
         ->limit(6)
-        ->get(['id', 'tid', 'unique_id', 'make_type', 'capacity', 'location', 'service_rate']);
+        ->get(['id', 'tid', 'unique_id', 'equip_serial', 'make_type', 'capacity', 'location', 'service_rate']);
         
         return response()->json($equipments);
     }
