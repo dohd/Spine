@@ -37,6 +37,7 @@
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                         {{ Form::text('client', @$quote->client->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
+                        <input type="hidden" name="client_id" value="{{ @$quote->customer_id }}" id="client_id">
                     </div>
                 </div>
                 <div class="col-5">
@@ -44,6 +45,7 @@
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                         {{ Form::text('branch', @$quote->branch->name, ['class' => 'form-control round', 'id' => 'branch', 'disabled']) }}
+                        <input type="hidden" name="branch_id" value="{{ @$quote->branch_id }}" id="branch_id">
                     </div>
                 </div>
             </div> 
