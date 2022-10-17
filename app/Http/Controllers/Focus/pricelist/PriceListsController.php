@@ -35,7 +35,7 @@ class PriceListsController extends Controller
     public function index()
     {
         $customers = Customer::whereHas('products')->get(['id', 'company']);
-        $contracts = ClientProduct::get(['contract', 'customer_id'])->unique('contract');
+        $contracts = ClientProduct::get(['contract', 'customer_id'])->unique('customer_id');
 
         return new ViewResponse('focus.pricelists.index', compact('customers', 'contracts'));
     }

@@ -64,7 +64,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Customer - Contract</th>
+                                        <th>Customer</th>
+                                        <th>Contract</th>
                                         <th>Row No.</th>
                                         <th>Product Description</th>
                                         <th>UoM</th>
@@ -152,6 +153,10 @@
                     {
                         data: 'customer',
                         name: 'customer'
+                    },
+                    {
+                        data: 'contract',
+                        name: 'contract'
                     },
                     {
                         data: 'row',
