@@ -129,6 +129,8 @@
         $('#name-'+i).autocomplete(autoComp(i));
         rowId++;
         calcTotal();
+        // reset to initial pricelist
+        $('#lead_id').change();
     });
 
     // add miscellaneous product

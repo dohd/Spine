@@ -151,13 +151,13 @@ class ProductsController extends Controller
     {
         if (!access()->allow('product_search')) return false;
 
-        // fetch customer products
+        // fetch pricelist customer products
         if ($request->price_customer_id) {
             $products = ClientProduct::where('customer_id', request('price_customer_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
                     return $v->fill([
-                        'name' => $v->descr,
+                        'name' => "{$v->descr} ({$v->row_num})",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => 0,
