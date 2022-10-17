@@ -173,17 +173,18 @@ class EquipmentsController extends Controller
     public function equipment_search(Request $request)
     {
         $k = $request->post('keyword');
+        // printlog($request->only('customer_id', 'branch_id'));
         
         $equipments = Equipment::when(request('branch_id'), function ($q) {
             $q->where('branch_id', request('branch_id'));
         })->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));
-        })->orWhere('tid', 'LIKE', '%' . $k . '%')
-        ->orWhere('make_type', 'LIKE', '%' . $k . '%')
-        ->orWhere('location', 'LIKE', '%' . $k . '%')
-        ->limit(6)
-        ->get(['id', 'tid', 'unique_id', 'equip_serial', 'make_type', 'capacity', 'location', 'service_rate']);
-        
+        })->where(function ($q) use($k) {
+            $q->where('tid', 'LIKE', '%' . $k . '%')
+            ->orWhere('make_type', 'LIKE', '%' . $k . '%')
+            ->orWhere('location', 'LIKE', '%' . $k . '%');
+        })->limit(6)->get();
+
         return response()->json($equipments);
     }
 }

@@ -12,7 +12,12 @@
                     <div class="input-group">
                         <select class="form-control  round  select-box" name="project_id" id="project" required>
                             @foreach ($projects as $project)
-                                <option value="{{ $project->id }}">                                                       
+                                <option 
+                                    value="{{ $project->id }}" 
+                                    customer_id="{{ $project->quote? $project->quote->customer_id : '' }}"
+                                    branch_id="{{ $project->quote? $project->quote->branch_id : '' }}"
+                                    {{ @$rjc && $rjc->project_id == $project->id? 'selected' : '' }}
+                                >                                                       
                                     {{ gen4tid('Prj-', $project->tid) }} 
                                     [ {{ $project->quote_tids }} ] [ {{ $project->lead_tids }} ]                                                         
                                     {{ $project->name }}

@@ -108,15 +108,16 @@
                     method: 'post',
                     data: {
                         keyword: request.term, 
-                        customer_id: $('#lead_id option:selected').attr('clientId'),
-                        branch_id: $('#lead_id option:selected').attr('branchId')
+                        customer_id: $('#lead_id option:selected').attr('client_id'),
+                        branch_id: $('#lead_id option:selected').attr('branch_id')
                     },
                     success: data => {
                         data = data.map(v => {
                             for (const key in v) {
                                 if (!v[key]) v[key] = '';
                             }
-                            const label = `${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.capacity} ${v.location}`;
+                            const label = `${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.model} ${v.machine_gas}
+                                ${v.capacity} ${v.location} ${v.building} ${v.floor}`;
                             const value = v.unique_id;
                             const data = v;
                             return {label, value, data};

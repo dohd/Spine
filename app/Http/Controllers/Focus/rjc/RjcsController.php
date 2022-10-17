@@ -46,11 +46,10 @@ class RjcsController extends Controller
     public function create()
     {
         $tid =  Rjc::max('tid');
-        $projects =  Project::doesntHave('rjc')
-            ->whereHas('quotes', function ($q) {
-                $q->where('verified', 'Yes')->whereIn('invoiced', ['Yes', 'No']);
-            })->get(['id', 'name', 'tid', 'main_quote_id']);
-
+        $projects =  Project::doesntHave('rjc')->whereHas('quotes', function ($q) {
+            $q->where('verified', 'Yes')->whereIn('invoiced', ['Yes', 'No']);
+        })->get(['id', 'name', 'tid', 'main_quote_id']);
+            
         foreach($projects as $project) {
             $lead_tids = [];
             $quote_tids = [];                
@@ -196,10 +195,10 @@ class RjcsController extends Controller
     public function project_extra_details()
     {
         $project = Project::find(request('project_id'));
-        $verified_jobcards = VerifiedJc::where('type', 1)->where('quote_id', $project->main_quote_id)->get();
+        $verified_jobcards = VerifiedJc::where('type', 1)->where('quote_id', $project->main_quote_id)->with('equipment')->get();
 
         $djc = Djc::where('lead_id', $project->quote->lead_id)->get(['id', 'subject', 'job_card'])->last();
-        if ($djc) $djc->link = route('biller.print_djc', [$djc->id, 10, token_validator('', 'd'.$djc->id, true), 1]);
+        if ($djc) $djc->preview_link = route('biller.print_djc', [$djc->id, 10, token_validator('', 'd'.$djc->id, true), 1]);
         
         return response()->json(compact('verified_jobcards', 'djc'));
     }

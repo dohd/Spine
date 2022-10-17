@@ -142,7 +142,7 @@ class RjcRepository extends BaseRepository
 
         if ($result) {
             DB::commit();
-            return $result;
+            return $rjc;
         }
 
         throw new GeneralException('Error Updating Rjc');

@@ -35,26 +35,41 @@
             }
         });
         // fetch extra details
-        if ($(this).val()) {
+        if ($(this).val() && !rjc) {
             const url = "{{ route('biller.rjcs.project_extra_details') }}";
             $.post(url, {project_id: $(this).val()}, data => {
                 // console.log(data)
                 // set djc preview link
-                if (data.djc) 
+                if (data.djc) {
                     $('#djc-link').attr({
-                        href: data.djc.link,
+                        href: data.djc.preview_link,
                         target:"_blank",
                     });
-
-                // assign verified jobcard number to line item
+                }
+                // verified jobcards
                 const jobcards = data.verified_jobcards;
                 if (jobcards && jobcards.length) {
                     $('#equipmentsTbl tbody tr').remove();
                     jobcards.forEach(v => {
                         $('#addqproduct').click();
                         const row = $('#equipmentsTbl tbody tr:last');
+                        // assign jobcard number
                         row.find('.jobcard-row').val(v.reference);
+                        // assign equipment 
+                        const equip = v.equipment;
+                        if (equip) {
+                            for (const key in equip) {
+                                if (!equip[key]) equip[key] = '';
+                            }
+                            row.find('.unique-id').val(equip.unique_id);
+                            row.find('.equip-serial').val(equip.equip_serial);
+                            row.find('.make-type').val(equip.make_type);
+                            row.find('.capacity').val(equip.capacity);
+                            row.find('.location').val(equip.location);
+                        }
                     });
+                    // set rjc technician
+                    $('#technician').val(jobcards[0]['technician']);
                 }
             });
         }
@@ -135,13 +150,16 @@
                     method: 'post',
                     data: {
                         keyword: request.term, 
+                        customer_id: $('#project option:selected').attr('customer_id'), 
+                        branch_id: $('#project option:selected').attr('branch_id'),
                     },
                     success: data => {
                         data = data.map(v => {
                             for (const key in v) {
                                 if (!v[key]) v[key] = '';
                             }
-                            const label = `${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.capacity} ${v.location}`;
+                            const label = `${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.model} ${v.machine_gas}
+                                ${v.capacity} ${v.location} ${v.building} ${v.floor}`;
                             const value = v.unique_id;
                             const data = v;
                             return {label, value, data};
