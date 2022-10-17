@@ -26,6 +26,12 @@ class PriceListRepository extends BaseRepository
     {
         $q = $this->query();
 
+        $q->when(request('customer_id') && request('contract'), function ($q) {
+            $q->where(['customer_id' => request('customer_id'), 'contract' => request('contract')]);
+        })->when(request('customer_id'), function ($q) {
+            $q->where(['customer_id' => request('customer_id')]);
+        });
+
         return $q->get();
     }
 

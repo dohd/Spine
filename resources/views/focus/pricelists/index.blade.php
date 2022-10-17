@@ -34,7 +34,7 @@
                                     </select>
                                 </div>
                                 <div class="col-2">
-                                    <label for="client">Contract</label>                             
+                                    <label for="contract">Contract</label>                             
                                     <select name="contract" id="contract" class="custom-select" disabled>
                                         <option value="">-- select contract --</option>
                                         @foreach ($contracts as $row)
@@ -46,7 +46,7 @@
                                 </div>
                                 <div class="edit-form-btn">
                                     <label for="">&nbsp;</label>
-                                    {{ Form::submit('Mass Delete', ['class' => 'form-control btn-danger mass-delete']) }}
+                                    {{ Form::submit('Mass Delete', ['class' => 'form-control btn-danger mass-delete', 'disabled']) }}
                                 </div>
                             </div>
                         {{ Form::close() }}
@@ -103,7 +103,8 @@
             $.ajaxSetup(config.ajax);
             this.drawDataTable();
             $('.mass-delete').click(this.massDelete);
-            $('#customer').change(this.customerChange);
+            $('#customer').change(this.customerChange).trigger('change');
+            $('#contract').change(this.contractChange);
         },
 
         massDelete() {
@@ -122,6 +123,7 @@
         customerChange() {
             const customerId = $(this).val();
             if (customerId) {
+                $('.mass-delete').attr('disabled', false);
                 $('#contract').attr('disabled', false).val('');
                 $('#contract option:not(:first)').each(function() {
                     if ($(this).attr('customer_id') == customerId) {
@@ -131,11 +133,19 @@
                     }
                 })
             } else {
+                $('.mass-delete').attr('disabled', true);
                 $('#contract').attr('disabled', true).val('');
             }
+            $('#listTbl').DataTable().destroy();
+            return Index.drawDataTable();
         },
 
-        drawDataTable() {
+        contractChange() {
+            $('#listTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        drawDataTable() {            
             $('#listTbl').dataTable({
                 processing: true,
                 serverSide: true,
@@ -144,6 +154,10 @@
                 ajax: {
                     url: '{{ route("biller.pricelists.get") }}',
                     type: 'post',
+                    data: {
+                        customer_id: $('#customer').val(),
+                        contract: $('#contract').val(),
+                    }
                 },
                 columns: [
                     {
