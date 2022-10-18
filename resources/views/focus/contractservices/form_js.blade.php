@@ -96,12 +96,18 @@
                         branch_id: $('#branch').val()
                     },
                     success: data => {
-                        return response(data.map(v => ({
-                            label: `Eq-${(''+v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid} - 
-                                ${[v.make_type, v.capacity, v.location].join('; ')}`,
-                            value: `${[v.make_type, v.capacity].join('; ')}`,
-                            data: v
-                        })))
+                        data = data.map(v => {
+                            for (const key in v) {
+                                if (!v[key]) v[key] = '';
+                            }
+                            return {
+                                label: `${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.model} ${v.machine_gas}
+                                    ${v.capacity} ${v.location} ${v.building} ${v.floor}`,
+                                value: `${[v.make_type, v.capacity].join('; ')}`,
+                                data: v
+                            }
+                        });
+                        return response(data)
                     }
                 });
             },
