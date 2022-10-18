@@ -32,6 +32,7 @@
                             <th>#Quote / PI Budget (status)</th>
                             <th>Ticket No</th>                           
                             <th>Start Date</th>
+                            <th>Project Status</th>
                             <th>{{ trans('general.action') }}</th>
                         </tr>
                     </thead>
@@ -192,6 +193,10 @@
                     {
                         data: 'start_date',
                         name: 'start_date'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
                     },
                     {
                         data: 'actions',

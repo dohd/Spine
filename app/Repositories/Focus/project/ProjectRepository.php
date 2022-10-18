@@ -84,9 +84,24 @@ class ProjectRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        $data_items = $input['data_items'];
-        
-        $data['main_quote_id'] = $data_items[0];
+        if (isset($data['status'])) {
+            if ($data['status'] == 'closed') {
+                $data = array_replace($data, [
+                    'end_date' => date('Y-m-d'),
+                    'ended_by' => auth()->user()->id,
+                ]);
+            } else {
+                $data = array_replace($data, [
+                    'end_date' => null,
+                    'ended_by' => null,
+                ]);
+            }
+        }
+
+        $data_items = array_filter($input['data_items'], fn($v) => $v);
+        if ($data_items) $data['main_quote_id'] = $data_items[0];
+
+        // dd($data, $data_items);
         $result = $project->update($data);
 
         // create or update project quotes

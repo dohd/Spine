@@ -2,6 +2,7 @@
 
 namespace App\Models\project\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\branch\Branch;
 use App\Models\customer\Customer;
 use App\Models\event\Event;
@@ -25,6 +26,11 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'ended_by');
+    }
+    
     public function purchase_items()
     {
         return $this->hasMany(PurchaseItem::class, 'itemproject_id');

@@ -44,6 +44,18 @@
                         <span class="text-bold-600 danger">{{ dateTimeFormat($project['end_date']) }}</span>
                     </li>
                 </ul>
+                <ul class="list-inline list-inline-pipe text-center border-bottom-grey border-bottom-lighten-3 h5">
+                    <li>Project Ended By: 
+                        <span class=" text-bold-600 purple">{{ $project->user? $project->user->full_name : ''  }}</span>
+                    </li>
+                </ul>
+                @if ($project->end_note)
+                    <ul class="list-inline list-inline-pipe text-center border-bottom-grey border-bottom-lighten-3 h5">
+                        <li>Project End Note: 
+                            <span class=" text-bold-600 purple">{{ $project->end_note}}</span>
+                        </li>
+                    </ul>    
+                @endif
             </div>
         </div>
         <!-- project-info -->

@@ -18,7 +18,6 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
                 </div>
             </div>
         </div>
-
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
                 <div class="media-left media-middle">
@@ -29,7 +28,13 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
 
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title">{{ $project['name'] }}</h4>
+            <h4 class="card-title">{{ $project->name }}</h4>
+            <div class="btn-group mt-1">
+                <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                    <i class="fa fa-pencil" aria-hidden="true"></i> Status
+                </a>
+                @include('focus.projects.modal.status_modal')
+            </div>
         </div>
         <div class="card-content">
             <div class="card-body" id="pro_tabs">
