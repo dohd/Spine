@@ -8,6 +8,7 @@ use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
 use App\Models\invoice\PaidInvoice;
 use App\Models\items\PaidInvoiceItem;
+use App\Models\project\Project;
 use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -145,10 +146,9 @@ class InvoiceRepository extends BaseRepository
                 $bill[$key] = numberClean($val);
         }
         // increament tid
-        $last_inv = Invoice::orderBy('id', 'DESC')->first('tid');
-        if ($last_inv && $bill['tid'] <= $last_inv->tid) {
-            $bill['tid'] = $last_inv->tid + 1;
-        }
+        $tid = Invoice::max('tid');
+        if ($bill['tid'] <= $tid) $bill['tid'] = $tid+1;
+
         $result = Invoice::create($bill);
         
         $bill_items = $input['bill_items'];
@@ -160,16 +160,33 @@ class InvoiceRepository extends BaseRepository
         }
         InvoiceItem::insert($bill_items);
 
-        // update Quote or PI invoice status
-        Quote::whereIn('id', function($q) use ($result) {
-            $q->select('quote_id')->from('invoice_items')->where('invoice_id', $result->id);
-        })->update(['invoiced' => 'Yes']);
+        
+        $invoice_items = $result->products;
+        foreach ($invoice_items as $item) {
+            $quote = $item->quote;
+            if ($quote) {
+                // update Quote or PI invoice status
+                $quote->update(['invoiced' => 'Yes']);
+                // close associated projects
+                $project = Project::where('main_quote_id', $quote->id)->first();
+                if ($project) {
+                    // $project->update([
+                    //     'status' => 'closed',
+                    //     'end_note' => 'Invoiced',
+                    //     'end_date' => date('Y-m-d'),
+                    //     'ended_by' => auth()->user()->id,
+                    // ]);
+                }
+            }
+        }
         
         /** accounting */
         $this->post_transaction_project_invoice($result);
 
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Invoice');
     }
@@ -185,13 +202,14 @@ class InvoiceRepository extends BaseRepository
         $bill = $input['bill'];
         foreach ($bill as $key => $val) {
             if ($key == 'invoicedate') $bill[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax'], 1)) 
+            if (in_array($key, ['total', 'subtotal', 'tax'])) 
                 $bill[$key] = numberClean($val);
         }
         $duedate = $bill['invoicedate'] . ' + ' . $bill['validity'] . ' days';
         $bill['invoiceduedate'] = date_for_database($duedate);
         $invoice->update($bill);
 
+        // update invoice items
         $bill_items = $input['bill_items'];
         $bill_items = array_map(function ($v) { 
             return [
@@ -202,12 +220,31 @@ class InvoiceRepository extends BaseRepository
         }, $bill_items);
         Batch::update(new InvoiceItem, $bill_items, 'id');
 
+        $invoice_items = $invoice->products;
+        foreach ($invoice_items as $item) {
+            $quote = $item->quote;
+            if ($quote) {
+                // close associated projects
+                $project = Project::where('main_quote_id', $quote->id)->first();
+                if ($project) {
+                    $project->update([
+                        'status' => 'closed',
+                        'end_note' => 'Invoiced',
+                        'end_date' => date('Y-m-d'),
+                        'ended_by' => auth()->user()->id,
+                    ]);
+                }
+            }
+        }
+
         /**accounting */
         $invoice->transactions()->delete();
         $this->post_transaction_project_invoice($invoice);
 
-        DB::commit();
-        if ($bill) return $invoice;        
+        if ($bill) {
+            DB::commit();
+            return $invoice;        
+        }
     }
 
 
@@ -567,10 +604,23 @@ class InvoiceRepository extends BaseRepository
         // dd($invoice);
         DB::beginTransaction();
 
-        // revert invoiced quotes
-        foreach ($invoice->products as $inv_poduct) {
-            $quote = $inv_poduct->quote;
-            if ($quote) $quote->update(['invoiced' => 'No']);
+        $invoice_items = $invoice->products;
+        foreach ($invoice_items as $item) {
+            $quote = $item->quote;
+            if ($quote) {
+                // reverse invoiced quotes
+                $quote->update(['invoiced' => 'No']);
+                // reverse closed projects
+                $project = Project::where('main_quote_id', $quote->id)->first();
+                if ($project) {
+                    // $project->update([
+                    //     'status' => 'open',
+                    //     'end_note' => null,
+                    //     'end_date' => null,
+                    //     'ended_by' => null,
+                    // ]);
+                }
+            }
         }
 
         $invoice->transactions()->delete();
