@@ -272,14 +272,6 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit Customer Income (intermediary ledger account)
-        // $account = Account::where('system', 'client_income')->first(['id']);
-        // unset($dr_data['debit'], $dr_data['is_primary']);
-        // $inc_cr_data = array_replace($dr_data, [
-        //     'account_id' => $account->id,
-        //     'credit' => $result->subtotal,
-        // ]);
-
         // credit Revenue Account (Income)
         unset($dr_data['debit'], $dr_data['is_primary']);
         $inc_cr_data = array_replace($dr_data, [
@@ -295,28 +287,21 @@ class InvoiceRepository extends BaseRepository
         ]);
         Transaction::insert([$inc_cr_data, $tax_cr_data]);
 
-        // WIP and COG Accounts
-        $tr_data = [];
-        // invoice related quotes and pi query
-        $q = Quote::whereIn('id', function ($q) use($result) {
-            $q->select('quote_id')->from('invoice_items')->where('invoice_id', $result->id);
-        });
-        // update query results
-        $q1 = clone $q;
-        $q1->update(['closed_by' => $result['user_id']]);
-        // fetch query results
-        $quotes = $q->get();
+        // WIP and COG transactions
+        $tr_data = array();
 
-        // stock amount of items issued from inventory
+        // stock amount for items issued from inventory
         $store_inventory_amount = 0;
-
-        // direct purchase item amounts of items issued directly to project
+        // direct purchase item amounts for item directly issued to project
         $dirpurch_inventory_amount = 0;
         $dirpurch_expense_amount = 0;
         $dirpurch_asset_amount = 0;
+
+        // invoice related quotes and pi
+        $quote_ids = $result->products()->pluck('quote_id')->toArray();
+        $quotes = Quote::whereIn('id', $quote_ids)->get();
         foreach ($quotes as $quote) {
             $store_inventory_amount  = $quote->projectstock->sum('subtotal');
-
             // direct purchase items issued to project
             if (isset($quote->project_quote->project)) {
                 foreach ($quote->project_quote->project->purchase_items as $item) {
@@ -336,6 +321,7 @@ class InvoiceRepository extends BaseRepository
         $cog_account = Account::where('system', 'cog')->first(['id']);
         $cr_data = array_replace($dr_data, ['account_id' => $wip_account->id, 'is_primary' => 1]);
         $dr_data = array_replace($dr_data, ['account_id' => $cog_account->id, 'is_primary' => 0]);
+        
         if ($dirpurch_inventory_amount > 0) {
             $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_inventory_amount]);
             $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_inventory_amount]);
@@ -358,6 +344,7 @@ class InvoiceRepository extends BaseRepository
             elseif (isset($v['credit']) && $v['credit'] > 0) $v['debit'] = 0;
             return $v;
         }, $tr_data);
+
         Transaction::insert($tr_data);        
         aggregate_account_transactions();        
     }
