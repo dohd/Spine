@@ -121,7 +121,7 @@ class ImportController extends Controller
         $filename = $request->name;
         $path = 'temp' . DIRECTORY_SEPARATOR;
         $file_exists = Storage::disk('public')->exists($path . $filename);
-        if (!$file_exists) throw new Error('File does not exist');
+        if (!$file_exists) throw new Error('Data processing failed! File import was unsuccessful');
 
         $models = [
             'customer' => new CustomersImport($data),
