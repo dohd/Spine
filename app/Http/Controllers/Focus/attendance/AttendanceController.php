@@ -141,14 +141,15 @@ class AttendanceController extends Controller
             ->get(['employee_id', 'date'])->toArray();
 
         $day_employee_group = array_reduce($attendances, function ($init, $curr) {
-            $d = (int) (new DateTime($curr['date']))->format('d');
-            if (!in_array($d, array_keys($init))) $init[$d] = [];
+            $d = (new DateTime($curr['date']))->format('j');
+            $key_exists = in_array($d, array_keys($init));
+            if (!$key_exists) $init[$d] = array();
             $init[$d][] = $curr['employee_id'];
-
+            
             return $init;
         }, []);
 
-        $day_attendance = [];
+        $day_attendance = array();
         foreach ($day_employee_group as $key => $val) {
             $day_attendance[] = array(
                 'day' => $key,
@@ -157,6 +158,7 @@ class AttendanceController extends Controller
         }
 
         $employee_count = User::count();
+
         return response()->json(compact('employee_count', 'day_attendance'));
     }
 
