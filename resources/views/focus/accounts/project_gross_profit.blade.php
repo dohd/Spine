@@ -36,6 +36,19 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
+                            <div class="row">
+                                <div class="col-2">{{ trans('general.search_date')}} </div>
+                                <div class="col-2">
+                                    <input type="text" name="start_date" id="start_date" class="form-control datepicker date30  form-control-sm" autocomplete="off" />
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" name="end_date" id="end_date" class="form-control datepicker form-control-sm" autocomplete="off" />
+                                </div>
+                                <div class="col-2">
+                                    <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
+                                </div>
+                            </div>
+                            <hr>
                             <table id="projectsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
@@ -73,18 +86,35 @@
 <script>
     config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
     };
 
     const Index = {
         status: '',
+        startDate: '',
+        endDate: '',
 
         init() {
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             this.drawDataTable();
             $('#status').change(this.statusChange);
+            $('#search').click(this.searchDateClick);
         },
 
         statusChange() {
             Index.status = $(this).val();
+            $('#projectsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        searchDateClick() {
+            const startDate = $('#start_date').val();
+            const endDate = $('#end_date').val();
+            const verifyState = $('#verify_state').val();
+            if (!startDate || !endDate) return alert("Date range required!"); 
+
+            Index.startDate = startDate;
+            Index.endDate = endDate;
             $('#projectsTbl').DataTable().destroy();
             return Index.drawDataTable();
         },
@@ -98,7 +128,11 @@
                 ajax: {
                     url: "{{ route('biller.accounts.get_project_gross_profit') }}",
                     type: 'post',
-                    data: {status: this.status}
+                    data: {
+                        status: this.status,
+                        start_date: this.startDate,
+                        end_date: this.endDate
+                    }
                 },
                 columns: [{
                         data: 'DT_Row_Index',

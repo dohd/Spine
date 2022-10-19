@@ -42,18 +42,18 @@ class AccountRepository extends BaseRepository
   {
     $q = Project::query();
 
-    $q->when(request('status'), function ($q) {
-      $status = request('status');
-      if ($status == 'active') {
-        $q->whereHas('quotes', function ($q) {
-          $q->whereHas('budget')->where('verified', 'No');
-        });
-      } else {
-        // complete
-        $q->whereHas('quotes', function ($q) {
-          $q->whereHas('budget')->where('verified', 'Yes');
-        });
-      }
+    $q->when(request('start_date') && request('end_date'), function ($q) {
+      $q->whereBetween('start_date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
+    });
+
+    $q->when(request('status') == 'active', function ($q) {
+      $q->whereHas('quotes', function ($q) {
+        $q->whereHas('budget')->where('verified', 'No');
+      });
+    })->when(request('status') == 'complete', function ($q) {
+      $q->whereHas('quotes', function ($q) {
+        $q->whereHas('budget')->where('verified', 'Yes');
+      });
     });
 
     $q->with(['customer_project', 'quotes', 'purchase_items']);
