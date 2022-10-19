@@ -67,9 +67,6 @@ class QuotesTableController extends Controller
                 if ($quote->lead)
                 return $quote->lead->client_name;
             })
-            ->addColumn('notes', function ($quote) {
-                return dateFormat($quote->date);
-            })
             ->addColumn('date', function ($quote) {
                 return dateFormat($quote->date);
             })
