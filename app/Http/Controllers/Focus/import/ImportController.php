@@ -103,10 +103,17 @@ class ImportController extends Controller
             throw ValidationException::withMessages([trans('import.import_invalid_file')]);
 
         $file = $request->file('import_file');
-        $filename = date('Ymd_his') . rand(9999, 99999) . $file->getClientOriginalName();
+        $file_name = $file->getClientOriginalName();
+
+        if (preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬]/', $file_name))
+            throw ValidationException::withMessages(['Remove special characters from file name!']);
+
+        $file_name = preg_replace('/\s+/', '', $file_name);
+        $filename = date('Ymd_his') . rand(9999, 99999) . $file_name;
+
         $path = 'temp' . DIRECTORY_SEPARATOR;
         $is_success = $this->upload_temp->put($path . $filename, file_get_contents($file->getRealPath()));
-
+        // printlog('****** store template *******', $path . $filename);
         return new ViewResponse('focus.import.import_progress', compact('filename', 'is_success', 'data'));
     }    
 
@@ -121,6 +128,7 @@ class ImportController extends Controller
         $filename = $request->name;
         $path = 'temp' . DIRECTORY_SEPARATOR;
         $file_exists = Storage::disk('public')->exists($path . $filename);
+        // printlog('****** process template *******', $path . $filename);
         if (!$file_exists) throw new Error('Data processing failed! File import was unsuccessful');
 
         $models = [
