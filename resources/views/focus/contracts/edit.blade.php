@@ -126,7 +126,7 @@
         $('#selectAll').prop('checked', false).change();
     });
     function fillTable(obj) {
-        let elements = ['#id', '#unique_id', '#make_type', '#branch', '#location'];
+        let elements = ['#id', '#equip_serial', '#make_type', '#branch', '#location'];
         let html = equipRow.replace('d-none', '');
         elements.forEach(el => {
             for (let p in obj) {

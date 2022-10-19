@@ -66,7 +66,7 @@
                                             @foreach ($taskschedule->equipments as $i => $row)                                            
                                                 <tr>
                                                     <td>{{ $i+1 }}</td>
-                                                    <td>{{ $row->unique_id }}</td>
+                                                    <td>{{ $row->equip_serial }}</td>
                                                     <td>{{ $row->make_type }}</td>
                                                     <td>{{ $row->branch->name }}</td>
                                                     <td>{{ $row->location }}</td>

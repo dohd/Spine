@@ -82,7 +82,7 @@
     });
     function fillTable(obj) {
         let html = equipRow.replace('d-none', '');
-        let elements = ['#id', '#unique_id', '#make_type', '#branch', '#location', '#service_rate'];
+        let elements = ['#id', '#equip_serial', '#make_type', '#branch', '#location', '#service_rate'];
         elements.forEach(el => {
             for (let p in obj) {
                 if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);

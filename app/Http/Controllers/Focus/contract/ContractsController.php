@@ -191,14 +191,14 @@ class ContractsController extends Controller
     {
         $equipments = Equipment::when(request('branch_id'), function ($q) {
             $q->where('branch_id', request('branch_id'));
-        })
-        ->where('customer_id', request('customer_id'))
+        })->where('customer_id', request('customer_id'))
         ->doesntHave('contracts')
         ->with(['branch' => fn($q) => $q->get(['id', 'name'])])
         ->get()
         ->map(fn($v) => [
             'id' => $v->id, 
             'unique_id' => $v->unique_id, 
+            'equip_serial' => $v->equip_serial,
             'branch' => $v->branch, 
             'location' => $v->location, 
             'make_type' => $v->make_type
@@ -219,6 +219,7 @@ class ContractsController extends Controller
         ->map(fn($v) => [
             'id' => $v->id, 
             'unique_id' => $v->unique_id, 
+            'equip_serial' => $v->equip_serial,
             'branch' => $v->branch, 
             'location' => $v->location, 
             'make_type' => $v->make_type,

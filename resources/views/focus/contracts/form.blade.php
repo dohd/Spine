@@ -130,7 +130,7 @@
         <tbody>
             <!-- equipment row template -->
             <tr class="d-none">
-                <td>#unique_id</td>
+                <td>#equip_serial</td>
                 <td>#make_type</td>
                 <td>#branch</td>
                 <td>#location</td>
@@ -145,7 +145,7 @@
             @isset($contract)
                 @foreach ($contract->equipments as $row)
                     <tr>
-                        <td>{{ $row->unique_id }}</td>
+                        <td>{{ $row->equip_serial }}</td>
                         <td>{{ $row->make_type }}</td>
                         <td>{{ $row->branch->name }}</td>
                         <td>{{ $row->location }}</td>

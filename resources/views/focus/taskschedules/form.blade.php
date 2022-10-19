@@ -45,7 +45,7 @@
         </thead>
         <tbody>
             <tr class="d-none">
-                <td>#unique_id</td>
+                <td>#equip_serial</td>
                 <td>#make_type</td>
                 <td>#branch</td>
                 <td>#location</td>
