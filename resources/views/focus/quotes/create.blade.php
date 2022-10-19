@@ -85,9 +85,9 @@
     const profitState = {sp_total: 0, bp_subtotal: 0, skill_total: 0};
     function calcProfit() {
         const {sp_total, bp_total, skill_total} = profitState;
-        const profit = parseFloat((sp_total - bp_total - skill_total).toFixed(2));
-        let pcent_profit = Math.round(profit/bp_total * 100);
-        pcent_profit = isFinite(pcent_profit) ? pcent_profit : 0;
+        const profit = sp_total - (bp_total + skill_total);
+        let pcent_profit = profit/(bp_total + skill_total) * 100;
+        pcent_profit = isFinite(pcent_profit) ? Math.round(pcent_profit) : 0;
 
         const profitText = bp_total > 0 ? 
             `${accounting.formatNumber(profit)} : ${pcent_profit}%` : accounting.formatNumber(profit);
