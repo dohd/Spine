@@ -97,12 +97,16 @@ class PurchasesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
-        if (!$data_items) throw ValidationException::withMessages(['Please select system-generated row items as line items!']);
+        $data_items = array_filter($data_items, fn($v) => $v['item_id']);
+        if (!$data_items) throw ValidationException::withMessages(['Please use suggested options for input within a row!']);
 
-        $result = $this->repository->create(compact('data', 'data_items'));
+        $purchase = $this->repository->create(compact('data', 'data_items'));
+        $payment_params = "src_id={$purchase->id}&src_type=direct_purchase";
 
-        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase posted successfully']);
+        $msg = 'Direct Purchase Created Successfully.';
+        $msg .= ' <span class="pl-5 font-weight-bold h5"><a href="'. route('biller.billpayments.create', $payment_params) .'" target="_blank" class="btn btn-purple"><i class="fa fa-money"></i> Direct Payment</a></span>';
+
+        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => $msg]);
     }
 
     /**
@@ -140,13 +144,16 @@ class PurchasesController extends Controller
         $data['user_id'] = auth()->user()->id;
 
         $data_items = modify_array($data_items);
-        
-        $data_items = array_filter($data_items, function ($v) { return $v['item_id']; });
-        if (!$data_items) throw ValidationException::withMessages(['Please use auto-generated items as line items!']);
+        $data_items = array_filter($data_items, fn($v) => $v['item_id']);
+        if (!$data_items) throw ValidationException::withMessages(['Please use suggested options for input within a row!']);
 
-        $this->repository->update($purchase, compact('data', 'data_items'));
+        $purchase = $this->repository->update($purchase, compact('data', 'data_items'));
+        $payment_params = "src_id={$purchase->id}&src_type=direct_purchase";
 
-        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => 'Direct Purchase updated successfully']);
+        $msg = 'Direct Purchase Updated Successfully.';
+        $msg .= ' <span class="pl-5 font-weight-bold h5"><a href="'. route('biller.billpayments.create', $payment_params) .'" target="_blank" class="btn btn-purple"><i class="fa fa-money"></i> Direct Payment</a></span>';
+
+        return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => $msg]);
     }
 
     /**

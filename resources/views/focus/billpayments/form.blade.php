@@ -136,6 +136,7 @@
 
     const Form = {
         billPayment: @json(@$billpayment),
+        directBill: @json(@$direct_bill),
 
         init() {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
@@ -147,13 +148,32 @@
             this.columnTotals();
 
             if (this.billPayment) {
+                // edit mode
                 $('#supplier').attr('disabled', true);
             } else {
+                // create mode
                 $('#supplier').val('').change();  
                 $('#employee').val('').change();  
             }
             $('#supplier').change(this.supplierChange);  
-            $('#employee').change(this.employeeChange);  
+            $('#employee').change(this.employeeChange);     
+            this.handleDirectPayment();
+        },
+
+        handleDirectPayment() {
+            const bill = this.directBill;
+            if (!bill) return;
+            const amount = parseFloat(bill.amount);
+            $('#amount').val(accounting.formatNumber(amount));
+            $('#supplier').val(bill.supplier_id).change();
+            setTimeout(() => {
+                $('#documentsTbl tbody tr').each(function() {
+                    const billNum = $(this).find('.bill-no').text();
+                    if (billNum == bill.tid) {
+                        $(this).find('.paid').val(amount).focusout();
+                    }
+                });
+            }, 500);
         },
 
         amountFocusOut() {
@@ -198,7 +218,7 @@
             return `
                 <tr>
                     <td class="text-center">${new Date(v.due_date).toDateString()}</td>
-                    <td>${v.tid}</td>
+                    <td class="bill-no">${v.tid}</td>
                     <td>${v.purchase? v.purchase.suppliername : ''}</td>
                     <td class="text-center">${v.note}</td>
                     <td>${v.status}</td>
@@ -206,7 +226,7 @@
                     <td>${accounting.formatNumber(v.amount_paid)}</td>
                     <td class="text-center due"><b>${balance}</b></td>
                     <td><input type="text" class="form-control paid" name="paid[]" required></td>
-                    <input type="hidden" name="bill_id[]" value="${v.id}">
+                    <input type="hidden" name="bill_id[]" value="${v.id}" class="bill-id">
                 </tr>
             `;
         },

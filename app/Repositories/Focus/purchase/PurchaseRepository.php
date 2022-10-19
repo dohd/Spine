@@ -44,7 +44,7 @@ class PurchaseRepository extends BaseRepository
      *
      * @param array $input
      * @throws GeneralException
-     * @return bool
+     * @return \App\Models\purchase\Purchase $purchase
      */
     public function create(array $input)
     {
@@ -159,13 +159,12 @@ class PurchaseRepository extends BaseRepository
             if (in_array($key, $rate_keys, 1)) 
                 $data[$key] = numberClean($val);
         }
-        $purchase->update($data);
+        $result = $purchase->update($data);
 
         $data_items = $input['data_items'];
         // delete omitted items
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $purchase->items()->whereNotIn('id', $item_ids)->delete();
-
         // create or update purchase item
         foreach ($data_items as $item) {         
             $purchase_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
@@ -233,8 +232,10 @@ class PurchaseRepository extends BaseRepository
         $purchase->transactions()->where('note', $purchase->note)->delete();
         $this->post_transaction($purchase);
 
-        DB::commit();
-        if ($purchase) return $purchase;
+        if ($result) {
+            DB::commit();
+            return $purchase;
+        }
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }

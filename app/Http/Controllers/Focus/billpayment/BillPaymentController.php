@@ -8,6 +8,7 @@ use App\Models\Access\User\User;
 use App\Models\account\Account;
 use App\Models\billpayment\Billpayment;
 use App\Models\supplier\Supplier;
+use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
 use DB;
 use Illuminate\Http\Request;
@@ -46,14 +47,37 @@ class BillPaymentController extends Controller
     public function create(Request $request)
     {
         $tid = Billpayment::max('tid');
-        $accounts = Account::whereNull('system')->whereHas('accountType', function ($q) {
-            $q->where('system', 'bank');
-        })->get(['id', 'holder']);
-            
+        $accounts = Account::whereNull('system')
+            ->whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))
+            ->get(['id', 'holder']);
+
         $suppliers = Supplier::get(['id', 'name']);
         $employees = User::get();
 
-        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees'));
+        $direct_bill = [];
+        $params = $request->only(['src_id', 'src_type']);
+        if (count($params) == 2) {
+            $bill = UtilityBill::where([
+                'ref_id' => $params['src_id'],
+                'document_type' => $params['src_type'],
+                'status' => 'due'
+            ])->first();
+            
+            if ($params['src_type'] == 'direct_purchase') {
+                if (!$bill) {
+                    return redirect(route('biller.purchases.index'))
+                    ->with(['flash_error' => 'Bill not available for direct payment.']);
+                }
+            }
+                
+            $direct_bill = [
+                'tid' => $bill->tid,
+                'supplier_id' => $bill->supplier_id,
+                'amount' => $bill->total,
+            ];
+        }
+
+        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees', 'direct_bill'));
     }
 
     /**
