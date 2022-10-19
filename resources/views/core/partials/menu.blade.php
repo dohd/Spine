@@ -228,7 +228,7 @@
             </li>
 
             {{-- sales module --}}
-            @if(access()->allow('manage-sale'))
+            @if(true)
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-basket"></i><span>{{trans('features.sales')}}</span></a>
                     <ul class="dropdown-menu">
                         {{-- lead --}}
