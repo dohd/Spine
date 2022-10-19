@@ -379,33 +379,35 @@ class ProjectsController extends Controller
 
         $k = $request->post('keyword');
 
-        $projects = Project::orwhereHas('quote', function ($q) use($k) {
+        $projects = Project::whereHas('quote', function ($q) use($k) {
             $q->where('tid', $k);
         })->orWhereHas('branch', function ($q) use ($k) {
             $q->where('name', 'LIKE', '%'.$k.'%');
         })->orWhereHas('customer_project', function ($q) use ($k) {
             $q->where('company', 'LIKE', '%'.$k.'%');
-        })->orwhere('name', 'LIKE', '%'.$k.'%')->orWhere('tid', $k)         
+        })->orwhere('name', 'LIKE', '%'.$k.'%')
+        ->orWhere('tid', $k)         
         ->limit(6)->get();
         
         // response format
         $output = array();
         foreach ($projects as $project) {
-            $customer = $project->customer_project->company;
-            $branch = $project->branch->name;
-            $project_tid = gen4tid('Prj-', $project->tid);
-
+            if ($project->status == 'closed') continue;
+            
             $quote_tids = array();
             foreach ($project->quotes as $quote) {
                 if ($quote->bank_id) $quote_tids[] = gen4tid('PI-', $quote->tid);
                 else $quote_tids[] = gen4tid('QT-', $quote->tid);
             }
-            $quote_tids = '[' . implode(', ', $quote_tids) . ']';
+            $quote_tids = implode(', ', $quote_tids);
+            $quote_tids = "[{$quote_tids}]";
 
-            $name = implode(' - ', [$quote_tids, $customer, $branch, $project_tid, $project->name]);
+            $customer = $project->customer_project->company;
+            $branch = $project->branch->name;
+            $project_tid = gen4tid('Prj-', $project->tid);
             $output[] = [
                 'id' => $project->id, 
-                'name' => $name,
+                'name' => implode(' - ', [$quote_tids, $customer, $branch, $project_tid, $project->name]),
                 'client_id' => $project->customer_project->id, 
                 'branch_id' => $project->branch->id
             ];
