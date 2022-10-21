@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\quote\Quote;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\Focus\customer\CustomerRepository;
+use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
@@ -354,7 +355,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_invoice_payment(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -364,7 +365,9 @@ class InvoiceRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
-        $result = (object) array();
+        $result = PaidInvoice::where('tid', $data['tid'])->count();
+        if ($result) throw ValidationException::withMessages(['Similar payment already received!']);
+
         $is_payment = empty($data['payment_id']);
         if ($is_payment) {
             if (isset($data['payment_id'])) unset($data['payment_id']);
@@ -375,7 +378,7 @@ class InvoiceRepository extends BaseRepository
                 $result->customer->increment('on_account', $unallocated);  
             }
         } else {
-            $result = PaidInvoice::find($data['payment_id']);
+            $result = PaidInvoice::find($data['payment_id']);            
             $result->increment('allocate_ttl', $data['allocate_ttl']);
 
             // reduce unallocated, else post Advance Payment Account
