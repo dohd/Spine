@@ -23,8 +23,11 @@ use App\Http\Responses\ViewResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\account\Account;
+use App\Models\lender\Lender;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use Illuminate\Http\Request;
 
 /**
@@ -68,11 +71,18 @@ class LoansController extends Controller
     {
         // loan lender accounts and bank accounts
         $accounts = Account::whereHas('accountType', function ($q) {
-            $q->whereIn('system', ['loan', 'bank']);
-        })->get(['id', 'holder', 'account_type']);
+            $q->where('system', 'bank');
+        })->get(['id', 'holder', 'account_type'])->pluck('holder','id');
+        $lenders=Lender::get(['id','name'])->pluck('name','id');
         $last_tid = Loan::max('tid');
+        $payday=[];
+        for($i=1;$i<=31;$i++){
+            $payday[$i]=$i;
 
-        return new ViewResponse('focus.loans.create', compact('last_tid', 'accounts'));
+        }
+       
+
+        return new ViewResponse('focus.loans.create', compact('last_tid', 'accounts','lenders','payday'));
     }
 
     /**
@@ -84,7 +94,7 @@ class LoansController extends Controller
     public function store(Request $request)
     {
         // extract input fields
-        $data = $request->only(['tid', 'bank_id', 'lender_id', 'amount', 'amount_pm', 'date', 'note', 'time_pm']);
+        $data = $request->except(['_token']);
 
         $data = $data + ['ins' => auth()->user()->ins, 'user_id' => auth()->user()->id];
             
@@ -191,4 +201,117 @@ class LoansController extends Controller
 
         return response()->json($accounts);
     }
+       // Loan transacton
+       public function post_transaction_loan($result)
+       {
+           // debit Accounts Receivable (Debtors)
+           $account = Account::where('system', 'receivable')->first(['id']);
+           $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
+           $tid = Transaction::max('tid') + 1;
+           $dr_data = [
+               'tid' => $tid,
+               'account_id' => $account->id,
+               'trans_category_id' => $tr_category->id,
+               'debit' => $result->total,
+               'tr_date' => $result->invoicedate,
+               'due_date' => $result->invoiceduedate,
+               'user_id' => $result->user_id,
+               'note' => $result->notes,
+               'ins' => $result->ins,
+               'tr_type' => $tr_category->code,
+               'tr_ref' => $result->id,
+               'user_type' => 'customer',
+               'is_primary' => 1,
+           ];
+           Transaction::create($dr_data);
+   
+           // credit Customer Income (intermediary ledger account)
+           // $account = Account::where('system', 'client_income')->first(['id']);
+           // unset($dr_data['debit'], $dr_data['is_primary']);
+           // $inc_cr_data = array_replace($dr_data, [
+           //     'account_id' => $account->id,
+           //     'credit' => $result->subtotal,
+           // ]);
+   
+           // credit Revenue Account (Income)
+           unset($dr_data['debit'], $dr_data['is_primary']);
+           $inc_cr_data = array_replace($dr_data, [
+               'account_id' => $result->account_id,
+               'credit' => $result->subtotal,
+           ]);
+   
+           // credit tax (VAT)
+           $account = Account::where('system', 'tax')->first(['id']);
+           $tax_cr_data = array_replace($dr_data, [
+               'account_id' => $account->id,
+               'credit' => $result->tax,
+           ]);
+           Transaction::insert([$inc_cr_data, $tax_cr_data]);
+   
+           // WIP and COG Accounts
+           $tr_data = [];
+           // invoice related quotes and pi query
+           $q = Quote::whereIn('id', function ($q) use($result) {
+               $q->select('quote_id')->from('invoice_items')->where('invoice_id', $result->id);
+           });
+           // update query results
+           $q1 = clone $q;
+           $q1->update(['closed_by' => $result['user_id']]);
+           // fetch query results
+           $quotes = $q->get();
+   
+           // stock amount of items issued from inventory
+           $store_inventory_amount = 0;
+   
+           // direct purchase item amounts of items issued directly to project
+           $dirpurch_inventory_amount = 0;
+           $dirpurch_expense_amount = 0;
+           $dirpurch_asset_amount = 0;
+           foreach ($quotes as $quote) {
+               $store_inventory_amount  = $quote->projectstock->sum('subtotal');
+   
+               // direct purchase items issued to project
+               if (isset($quote->project_quote->project)) {
+                   foreach ($quote->project_quote->project->purchase_items as $item) {
+                       if ($item->itemproject_id) {
+                           $subtotal = $item->amount - $item->taxrate;
+                           if ($item->type == 'Expense') $dirpurch_expense_amount += $subtotal;
+                           elseif ($item->type == 'Stock') $dirpurch_inventory_amount += $subtotal;
+                           elseif ($item->type == 'Asset') $dirpurch_asset_amount += $subtotal;
+                       }
+                       
+                   }
+               }
+           }
+   
+           // credit WIP account and debit COG
+           $wip_account = Account::where('system', 'wip')->first(['id']);
+           $cog_account = Account::where('system', 'cog')->first(['id']);
+           $cr_data = array_replace($dr_data, ['account_id' => $wip_account->id, 'is_primary' => 1]);
+           $dr_data = array_replace($dr_data, ['account_id' => $cog_account->id, 'is_primary' => 0]);
+           if ($dirpurch_inventory_amount > 0) {
+               $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_inventory_amount]);
+               $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_inventory_amount]);
+           }
+           if ($dirpurch_expense_amount > 0) {
+               $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_expense_amount]);
+               $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_expense_amount]);
+           }
+           if ($dirpurch_asset_amount > 0) {
+               $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_asset_amount]);
+               $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_asset_amount]);
+           }
+           if ($store_inventory_amount > 0) {
+               $tr_data[] = array_replace($cr_data, ['credit' => $store_inventory_amount]);
+               $tr_data[] = array_replace($dr_data, ['debit' => $store_inventory_amount]);
+           }
+   
+           $tr_data = array_map(function ($v) {
+               if (isset($v['debit']) && $v['debit'] > 0) $v['credit'] = 0;
+               elseif (isset($v['credit']) && $v['credit'] > 0) $v['debit'] = 0;
+               return $v;
+           }, $tr_data);
+           Transaction::insert($tr_data);        
+           aggregate_account_transactions();        
+       }
 }

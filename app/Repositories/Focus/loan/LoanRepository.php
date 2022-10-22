@@ -10,6 +10,7 @@ use App\Models\loan\Paidloan;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use Carbon\Carbon;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 /**
  * Class CustomerRepository.
@@ -49,7 +50,12 @@ class LoanRepository extends BaseRepository
             'date' => date_for_database($input['date']),
             'amount' => numberClean($input['amount']),
             'amount_pm' => numberClean($input['amount_pm']),
+            'loan_inst' => numberClean($input['loan_inst']),
+            'loan_fees' => numberClean($input['loan_fees']),
+            'loan_inst' => numberClean($input['loan_inst']),
         ]);
+
+        $input['clear_date']=  Carbon::parse($input['date'])->addMonth()->format('Y-m-d');
         $result = Loan::create($input);
 
         DB::commit();

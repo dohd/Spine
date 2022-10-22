@@ -100,23 +100,12 @@ class HrmsController extends Controller
 
 
         //Input received from the request
-        $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'password', 'role']);
-        $input['profile'] = $request->only(['contact', 'company', 'address_1', 'city', 'state', 'country', 'tax_id', 'postal']);
-        $input['meta'] = $request->only(['department_id', 'salary', 'hra', 'entry_time', 'exit_time', 'sales_commission']);
+        $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
+        //$input['profile'] = $request->only(['contact', 'company', 'address_1', 'city', 'state', 'country', 'tax_id', 'postal']);
+        $input['meta'] = $request->except(['_token','first_name', 'last_name', 'email', 'picture', 'signature', 'role','permission']);
         $input['permission'] = $request->only(['permission']);
         $input['employee']['ins'] = auth()->user()->ins;
-
-        if (!empty($input['employee']['password'])) {
-            $request->validate([
-                'password' => ['required',
-                    'min:6',
-                    'string',
-                    'regex:/[a-z]/',      // must contain at least one lowercase letter
-                    'regex:/[A-Z]/',      // must contain at least one uppercase letter
-                    'regex:/[0-9]/',      // must contain at least one digit
-                    'regex:/[@$!%*#?&]/', // must contain a special character]
-                ]]);
-        }
+       
 
         if (!empty($input['employee']['picture'])) {
             $request->validate([
@@ -126,6 +115,16 @@ class HrmsController extends Controller
         if (!empty($input['employee']['signature'])) {
             $request->validate([
                 'signature' => 'required|mimes:jpeg,png',
+            ]);
+        }
+        if (!empty($input['meta']['id_front'])) {
+            $request->validate([
+                'id_front' => 'required|mimes:jpeg,png',
+            ]);
+        }
+        if (!empty($input['meta']['id_back'])) {
+            $request->validate([
+                'id_back' => 'required|mimes:jpeg,png',
             ]);
         }
 
@@ -162,18 +161,11 @@ class HrmsController extends Controller
 
 
         //Input received from the request
-        $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'password', 'role']);
-        if (!empty($input['employee']['password'])) {
-            $request->validate([
-                'password' => ['required',
-                    'min:6',
-                    'string',
-                    'regex:/[a-z]/',      // must contain at least one lowercase letter
-                    'regex:/[A-Z]/',      // must contain at least one uppercase letter
-                    'regex:/[0-9]/',      // must contain at least one digit
-                    'regex:/[@$!%*#?&]/', // must contain a special character]
-                ]]);
-        }
+        $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
+        $input['meta'] = $request->except(['_token','_method','first_name', 'last_name', 'email', 'picture', 'signature', 'role','permission']);
+        $input['permission'] = $request->only(['permission']);
+        $input['employee']['ins'] = auth()->user()->ins;
+
         if (!empty($input['employee']['picture'])) {
             $request->validate([
                 'picture' => 'required|mimes:jpeg,png',
@@ -184,10 +176,16 @@ class HrmsController extends Controller
                 'signature' => 'required|mimes:jpeg,png',
             ]);
         }
-        $input['profile'] = $request->only(['contact', 'company', 'address_1', 'city', 'state', 'country', 'tax_id', 'postal']);
-        $input['meta'] = $request->only(['salary', 'hra', 'entry_time', 'exit_time', 'commission', 'department_id']);
-        $input['employee']['ins'] = auth()->user()->ins;
-        $input['permission'] = $request->only(['permission']);
+        if (!empty($input['meta']['id_front'])) {
+            $request->validate([
+                'id_front' => 'required|mimes:jpeg,png',
+            ]);
+        }
+        if (!empty($input['meta']['id_back'])) {
+            $request->validate([
+                'id_back' => 'required|mimes:jpeg,png',
+            ]);
+        }
 
         //Update the model using repository update method
         $this->repository->update($hrm, $input);

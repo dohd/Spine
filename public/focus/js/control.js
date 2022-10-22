@@ -392,7 +392,7 @@ $('.modal-footer').on('click', '#sendGeneral', function (e) {
 
 $('#sendSMS').on('click', '#sms_sendNow', function (e) {
     $("#sendSMS").modal('hide');
-    var action = [];
+    var action = {};
     action['url'] = $("#sms_action_url_send").val();
     action['form'] = $("#send_sms").serialize();
     send_mail(action)

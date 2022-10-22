@@ -54,16 +54,22 @@ class LoansTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('lender', function ($loan) {
-                return $loan->lender->holder;
+                return $loan->lender->name;
             })
             ->addColumn('date', function ($loan) {
                 return dateFormat($loan->date);
             })
             ->addColumn('amount', function ($loan) {
-                return number_format($loan->amount, 2);
+                return number_format($loan->amount+$loan->loan_fees, 2);
             })
             ->addColumn('amountpaid', function ($loan) {
                 return number_format($loan->amountpaid, 2);
+            })
+            ->addColumn('installment', function ($loan) {
+                return number_format($loan->loan_inst, 2);
+            })
+            ->addColumn('interest', function ($loan) {
+                return number_format($loan->loan_interest, 2);
             })
             ->addColumn('is_approved', function ($loan) {
                 return $loan->is_approved ? 'Approved' : 'Pending';

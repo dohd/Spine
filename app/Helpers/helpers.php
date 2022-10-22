@@ -3,6 +3,7 @@
 use App\Helpers\uuid;
 use App\Models\account\Account;
 use App\Models\hrm\Hrm;
+use App\Models\nhif\Nhif;
 use App\Models\Settings\Setting;
 use Illuminate\Support\Facades\DB;
 use App\Models\transaction\Transaction;
@@ -644,14 +645,11 @@ function units()
     $u = \App\Models\productvariable\Productvariable::all()->toJson();
     return $u;
 }
-
 function taxes()
 {
     $t = \App\Models\additional\Additional::all()->toJson();
     return $t;
 }
-
-
 function visual()
 {
     if (session()->exists('theme')) {
@@ -802,7 +800,6 @@ function strip_tags_deep($value, $key = null)
         return $value;
     }
 }
-
 // log to the browser console via a view template
 function browserlog(...$logs)
 {
@@ -835,9 +832,10 @@ function aggregate_account_transactions()
         ->groupBy('account_id')
         ->get()->toArray();
     Batch::update(new Account, $tr_totals, 'id');
-
     // reset accounts without transactions
-    $account_ids = array_map(function ($v) { return $v['id']; }, $tr_totals);
+    $account_ids = array_map(function ($v) {
+        return $v['id'];
+    }, $tr_totals);
     Account::whereNotIn('id', $account_ids)->where(function ($q) {
         $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
     })->update(['debit' => 0, 'credit' => 0]);
@@ -852,19 +850,34 @@ function gen4tid($prefix='', $num=0, $count=4)
 function accounts_numbering($account)
 {
     switch ($account) {
-        case 'Asset' :  return 100;
-        case 'Liability' : return 200;
-        case 'Income' : return 400;
-        case 'Expense' : return 500;
-        case 'Equity' : return 300; 
+        case 'Asset':
+            return 100;
+        case 'Liability':
+            return 200;
+        case 'Income':
+            return 400;
+        case 'Expense':
+            return 500;
+        case 'Equity':
+            return 300;
     }
 }
 // transaction double entry (debit, credit)
 function double_entry(
-    $tid, $pr_account_id, $sec_account_id, $opening_balance, $entry_type, $trans_category_id, $user_type, 
-    $user_id, $tr_date, $duedate, $tr_type, $note, $ins
-)
-{
+    $tid,
+    $pr_account_id,
+    $sec_account_id,
+    $opening_balance,
+    $entry_type,
+    $trans_category_id,
+    $user_type,
+    $user_id,
+    $tr_date,
+    $duedate,
+    $tr_type,
+    $note,
+    $ins
+) {
     $data = [
         'tid' => $tid,
         'trans_category_id' => $trans_category_id,
@@ -888,7 +901,7 @@ function double_entry(
         'tr_ref' => $sec_account_id,
         'is_primary' => 0,
     ];
-    if ($entry_type == 'cr') {    
+    if ($entry_type == 'cr') {
         unset($dr_data['debit'], $cr_data['credit']);
         $dr_data['credit'] = $opening_balance;
         $cr_data['debit'] = $opening_balance;
@@ -896,10 +909,67 @@ function double_entry(
     Transaction::create($dr_data);
     Transaction::create($cr_data);
     aggregate_account_transactions();
-
     return true;
 }
 // handle division by zero
 function div_num($numerator, $denominator) {
     return $denominator == 0? 0 : ($numerator / $denominator);
+}
+// Get nhif rates amount 
+function nhif_rates($amount)
+{
+    $rate = Nhif::where('salary_from', '<=', $amount)->where('salary_to', '>=', $amount)->value('monthly_contribution');
+    if ($rate) return $rate;
+    return 0;
+}
+// Get nhif rates amount 
+function calculate_paye($basicpay, $nhif, $nssf, $allowance = 0)
+{
+  
+    if ($basicpay <= 24000){
+        $net_pay = $basicpay -$nssf- $nhif + $allowance;
+        return array('paye'=>0,'net_pay'=>$net_pay); 
+    } 
+    //the tops of each paye brackets
+    $band1_top = 24000.00;
+    $band2_top = 8333.00;
+    $band3_top = 32333.00;
+    //the paye rates of each bracket
+    $band1_rate = 0.1;
+    $band2_rate = 0.25;
+    $band3_rate = 0.30;
+    //initialize brands
+    $band1 = $band2 = $band3 = 0;
+    $basicpay = $basicpay - $nssf;
+    $blance_rate = 0;
+    if ($basicpay > $band1_top) {
+        $band1 = ($band1_top * $band1_rate);
+        $blance_rate = $basicpay - $band1_top;
+    } else {
+        $blance_rate = 0;
+    }
+    if ($blance_rate > 0) {
+        if ($blance_rate >= $band2_top) {
+            $band2 = ($band2_top * $band2_rate);
+        } else {
+            $band2 = ($blance_rate * $band2_rate);
+        }
+        $blance_rate = $basicpay - $band1_top - $band2_top;
+    } else {
+        $blance_rate = 0;
+    }
+    if ($blance_rate > 0) {
+        $band3 = ($blance_rate) * $band3_rate;
+    }
+    $income_tax = $band1 + $band2 + $band3;
+    $paye_relief = 2400;
+    $nhif_relief = 0.15 * $nhif;
+    $total_relief = $paye_relief + $nhif_relief;
+    $paye = $income_tax - $total_relief;
+    if ($income_tax <= $total_relief) {
+        $paye = 0;
+    }
+    $paye_after_tax = $basicpay - $paye;
+    $net_pay = $paye_after_tax - $nhif + $allowance;
+    return array('paye'=>$paye,'net_pay'=>$net_pay); 
 }

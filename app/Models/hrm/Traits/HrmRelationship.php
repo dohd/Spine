@@ -9,6 +9,7 @@ use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\Role\Role;
 use App\Models\Access\User\UserProfile;
 use App\Models\employee\RoleUser;
+use App\Models\employeesalary\EmployeeSalary;
 use App\Models\hrm\HrmMeta;
 use App\Models\project\Project;
 use App\Models\quote\Quote;
@@ -85,6 +86,10 @@ trait HrmRelationship
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, PermissionUser::class, 'user_id', 'permission_id', 'id', 'id')->withoutGlobalScopes();
+    }
+    public function monthlysalary()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'id','user_id')->where('status','Active');
     }
 
 
