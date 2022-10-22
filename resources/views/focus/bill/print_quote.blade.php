@@ -138,33 +138,12 @@
 	<sethtmlpagefooter name="myfooter" value="on" />
 	<table class="header-table">
 		<tr>
+			<td width="23%"></td>
 			<td>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br>
-				<p class="header-table-text"> Supply, Installation, Maintenance & Repair of:</p>
-				<table class="header-table-child">
-					<tr>
-						<td>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Air Conditioners & Refrigerators </div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Coldrooms & Chillers </div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Mechanical Ventilation Systems</div>
-						</td>
-						<td>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Laboratory Fume Cupboards</div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Steam Bath and Saunas</div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Raised Floors / Access Panels</div>
-						</td>
-					</tr>
-					<tr><td>... and General Suppliers</td></tr>
-				</table>								
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/erp.png') }}" style="width:350px;" /><br>
+			
 			</td>
-			<td class="address"><br><br>
-				Lean Aircons Building, Opp NextGen Mall<br>
-				Mombasa Road, Nairobi - Kenya<br>
-				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 713 773 333<br>
-				info@leanventures.co.ke<br>
-				leannventures@gmail.com
-			</td>
+		
 		</tr>
 	</table>
 	<table class="doc-table">

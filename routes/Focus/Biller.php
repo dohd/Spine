@@ -39,6 +39,11 @@ Route::group(['namespace' => 'account'], function () {
     Route::post('accounts/project_gross_profit/get', 'ProjectGrossProfitTableController')->name('accounts.get_project_gross_profit');
     Route::post('accounts/get', 'AccountsTableController')->name('accounts.get');
 });
+Route::group(['namespace' => 'allowance'], function () {
+    Route::resource('allowances', 'AllowancesController');
+    //For Datatable
+    Route::post('allowances/get', 'AllowancesTableController')->name('allowances.get');
+});
 
 Route::group(['namespace' => 'additional'], function () {
     Route::resource('additionals', 'AdditionalsController');
@@ -120,6 +125,12 @@ Route::group(['namespace' => 'deptor'], function () {
     Route::post('deptors/get', 'DeptorsTableController')->name('deptors.get');
 });
 
+Route::group(['namespace' => 'employeesalary'], function () {
+    Route::resource('employeesalaries', 'EmployeeSalariesController');
+    //For Datatable
+    Route::post('salaries/get', 'SalariesTableController')->name('salaries.get');
+    Route::post('employeesalaries/get', 'EmployeeSalariesTableController')->name('employeesalaries.get');
+});
 
 Route::group(['namespace' => 'equipment'], function () {
     Route::resource('equipments', 'EquipmentsController');
@@ -178,6 +189,12 @@ Route::group(['namespace' => 'lead'], function () {
 
     //For Datatable
     Route::post('leads/get', 'LeadsTableController')->name('leads.get');
+});
+Route::group(['namespace' => 'lender'], function () {
+    Route::resource('lenders', 'LendersController');
+
+    //For Datatable
+    Route::post('lenders/get', 'LendersTableController')->name('lenders.get');
 });
 
 Route::group(['namespace' => 'loan'], function () {
@@ -381,3 +398,4 @@ Route::group(['namespace' => 'creditnote'], function () {
     // for DataTable
     Route::post('creditnotes/get', 'CreditNotesTableController')->name('creditnotes.get');
 });
+

@@ -392,6 +392,20 @@
                         </ul>
                     </li>
                     @endauth
+                    @permission('manage-customer')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-percent"></i></i> Manager Lenders</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.lenders.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Lenders
+                                </a>
+                            </li>
+                            @permission('customer-create')
+                            <li><a class="dropdown-item" href="{{ route('biller.lenders.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Lenders
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
                 </ul>
             </li>
             @endif
@@ -873,6 +887,7 @@
                 </ul>
             </li>
             @endif
+            
             @if(access()->allow('manage-hrm') || access()->allow('department-manage'))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-badge"></i><span>{{trans('features.hrm')}}</span></a>
                 <ul class="dropdown-menu">
@@ -894,9 +909,19 @@
                     </li>
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> {{ trans('hrms.payroll') }}</a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.allowances.index') }}" data-toggle="dropdown"> <i class="fa fa-envelope-open-o"></i> Allowance & Deductions Category
+                            </a>
+                        </li>
+                        <li><a class="dropdown-item" href="{{ route('biller.employeesalaries.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Set Salary
+                        </a>
+                    </li>
+                    <li><a class="dropdown-item" href="{{ route('biller.employeesalaries.index') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Manage Salary
+                    </a>
+                    </li>
                             <li><a class="dropdown-item" href="{{ route('biller.hrms.index') }}?rel_type=3" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('hrms.payroll') }}
                                 </a>
                             </li>
+                          
                             <li><a class="dropdown-item" href="{{ route('biller.hrms.payroll') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('hrms.payroll_entry') }}
                                 </a>
                             </li>

@@ -373,7 +373,7 @@ function loadTemplateObject(action) {
 
 $('#sendEmail').on('click', '#sendNow', function (e) {
     $("#sendEmail").modal('hide');
-    var action = [];
+    var action = {};
     action['url'] = $("#action_url_send").val();
     action['form'] = $("#send_bill").serialize();
     send_mail(action)
@@ -394,7 +394,7 @@ $('.modal-footer').on('click', '#sendGeneral', function (e) {
 
 $('#sendSMS').on('click', '#sms_sendNow', function (e) {
     $("#sendSMS").modal('hide');
-    var action = [];
+    var action = {};
     action['url'] = $("#sms_action_url_send").val();
     action['form'] = $("#send_sms").serialize();
     send_mail(action)
@@ -405,11 +405,11 @@ function send_mail(action) {
     if ($("#notify").length == 0) {
         $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
     }
-    if (errorNum > 0) {
+    /*if (errorNum > 0) {
         $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
         $("#notify .message").html("<strong>Error</strong>: It appears you have forgotten to complete something!");
         $("html, body").scrollTop($("body").offset().top);
-    } else {
+    } else {*/
 
         $.ajaxSetup({
             headers: {
@@ -437,7 +437,7 @@ function send_mail(action) {
                 $("html, body").scrollTop($("body").offset().top);
             }
         });
-    }
+   // }
 }
 
 

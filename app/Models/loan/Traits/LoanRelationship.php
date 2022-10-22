@@ -3,6 +3,7 @@
 namespace App\Models\loan\Traits;
 
 use App\Models\account\Account;
+use App\Models\lender\Lender;
 use App\Models\transaction\Transaction;
 
 trait LoanRelationship
@@ -14,7 +15,7 @@ trait LoanRelationship
 
     public function lender()
     {
-        return $this->belongsTo(Account::class, 'lender_id');
+        return $this->belongsTo(Lender::class, 'lender_id');
     }
 
     public function bank()

@@ -5,7 +5,7 @@
  *
  */
 //General Application
-
+ Route::get('testemail', 'Focus\general\TestController@testemail')->name('testemail');
 Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('install')->name('login');
 // Route::get('login', 'Focus\general\CoreController@showLoginForm')->name('login');
 Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {

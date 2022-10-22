@@ -27,13 +27,18 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Lender Type</th>
                                         <th>Lender</th>
                                         <th>Lending Date</th>
-                                        <th>Amount</th>
-                                        <th>Lending period (months)</th>
+                                        <th>Total Loan</th>
                                         <th>Approval</th>
+                                        <th>Period (months)</th>
+                                        <th>Installment(months)</th>
+                                        <th>Interest(months)</th>
+                                       
                                         <th>Amount Paid</th>   
-                                        <th>Actions</th>
+                                        <th>Clear Date</th>
+                                    
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -90,6 +95,10 @@
                 name: 'id'
             },
             {
+                data: 'lender_type',
+                name: 'lender_type'
+            },
+            {
                 data: 'lender',
                 name: 'lender'
             },
@@ -102,13 +111,22 @@
                 name: 'amount'
             },
             {
+                data: 'is_approved',
+                name: 'is_approved'
+            },
+            {
                 data: 'time_pm',
                 name: 'time_pm'
             },
             {
-                data: 'is_approved',
-                name: 'is_approved'
+                data: 'installment',
+                name: 'installment'
             },
+            {
+                data: 'interest',
+                name: 'interest'
+            },
+          
             {
                 data: 'amountpaid',
                 name: 'amountpaid'
@@ -120,12 +138,65 @@
                 sortable: false
             },            
         ],
+        columnDefs: [
+        {
+          // For Responsive
+          className: 'control',
+          orderable: false,
+          responsivePriority: 2,
+          targets: 0,
+          render: function (data, type, full, meta) {
+            return '';
+          }
+        },
+     
+    
+      ],
         order: [
             [0, "desc"]
         ],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: ['csv', 'excel', 'print'],
+        buttons: {
+                    buttons: [
+
+                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 9]}},
+                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 9]}},
+                        {extend: 'print', footer: true, exportOptions: {columns: [0, 9]}}
+                    ]
+                },
+                // For responsive popup
+      responsive: {
+        details: {
+          display: $.fn.dataTable.Responsive.display.modal({
+            header: function (row) {
+              var data = row.data();
+              return 'Loan Details For ' + data['lender'];
+            }
+          }),
+          type: 'column',
+          renderer: function (api, rowIdx, columns) {
+            var data = $.map(columns, function (col, i) {
+              return col.columnIndex !== 6 // ? Do not show row in modal popup if title is blank (for check box)
+                ? '<tr data-dt-row="' +
+                    col.rowIdx +
+                    '" data-dt-column="' +
+                    col.columnIndex +
+                    '">' +
+                    '<td>' +
+                    col.title +
+                    ':' +
+                    '</td> ' +
+                    '<td>' +
+                    col.data +
+                    '</td>' +
+                    '</tr>'
+                : '';
+            }).join('');
+            return data ? $('<table class="table"/>').append('<tbody>' + data + '</tbody>') : false;
+          }
+        }
+      },
     });
 </script>
 @endsection

@@ -17,11 +17,23 @@
  */
 
 namespace App\Http\Controllers\Focus\general;
+use App\Repositories\Focus\general\RosemailerRepository;
+use App\Repositories\Focus\general\RosesmsRepository;
 
 use App\Http\Controllers\Controller;
+use App\Utils\MessageUtil;
 
 class TestController extends Controller
 {
+
+    protected $messageUtil;
+         public function __construct(MessageUtil $messageUtil)
+    {
+        $this->messageUtil = $messageUtil;
+
+       
+    }
+
     /**
      * Test whether the login form displays
      */
@@ -47,4 +59,26 @@ class TestController extends Controller
         
         return view('core.index');
     }
+    public function testemail()
+    {
+        
+        
+        /*$input=array();
+        $input['text']='test Message';
+        $input['subject']='Invoice';
+        $input['mail_to']='osurdancan@gmail.com';
+        $input['customer_name']='Duncan Osur';
+
+
+        $mailer = new RosemailerRepository;
+       $result= $mailer->send($input['text'], $input);*/
+
+      $result= $this->messageUtil->sendMessage('0711292714','Test Mail');
+
+        dd($result);
+
+    }
+
+
+    
 }
