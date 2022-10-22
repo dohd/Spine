@@ -121,7 +121,7 @@ class PurchaseRepository extends BaseRepository
         }
         PurchaseItem::insert($data_items);
 
-        // generate bill
+        // direct purchase bill
         $this->generate_bill($result);
 
         /** accounting **/
@@ -154,11 +154,13 @@ class PurchaseRepository extends BaseRepository
                 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
                 'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
             ];
-            if (in_array($key, ['date', 'due_date'], 1)) 
+            if (in_array($key, ['date', 'due_date'])) 
                 $data[$key] = date_for_database($val);
-            if (in_array($key, $rate_keys, 1)) 
+            if (in_array($key, $rate_keys)) 
                 $data[$key] = numberClean($val);
         }
+
+        $prev_note = $purchase->note;
         $result = $purchase->update($data);
 
         $data_items = $input['data_items'];
@@ -224,12 +226,11 @@ class PurchaseRepository extends BaseRepository
             $purchase_item->save();
         }
 
-        // update bill
-        UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
+        // direct purchase bill 
         $this->generate_bill($purchase);
 
-        /** accounts */
-        $purchase->transactions()->where('note', $purchase->note)->delete();
+        /** accounting */
+        $purchase->transactions()->where('note', $prev_note)->delete();
         $this->post_transaction($purchase);
 
         if ($result) {
@@ -277,10 +278,9 @@ class PurchaseRepository extends BaseRepository
             $purchase->transactions()->where('note', $purchase->note)->delete();
             aggregate_account_transactions();
 
-            $result = $purchase->delete();
-            if ($result) {
+            if ($purchase->delete()) {
                 DB::commit();
-                return $result;
+                return true;
             }
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -295,9 +295,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function generate_bill($purchase)
     {
-        $tid = UtilityBill::max('tid') + 1;
         $bill_data = [
-            'tid' => $tid,
             'supplier_id' => $purchase->supplier_id,
             'reference' => $purchase->doc_ref,
             'reference_type' => strtolower($purchase->doc_ref_type),
@@ -311,18 +309,42 @@ class PurchaseRepository extends BaseRepository
             'total' => $purchase->grandttl,
             'note' => $purchase->note,
         ];
-        $bill = UtilityBill::create($bill_data);
+        $bill = UtilityBill::where([
+            'document_type' => $bill_data['document_type'], 
+            'ref_id' => $bill_data['ref_id']
+        ])->first();
 
-        $bill_items_data = [
-            'bill_id' => $bill->id,
-            'ref_id' => $purchase->id,
-            'note' => $purchase->note,
-            'qty' => 1,
-            'subtotal' => $purchase->paidttl,
-            'tax' => $purchase->grandtax,
-            'total' => $purchase->grandttl, 
-        ];
-        UtilityBillItem::create($bill_items_data);
+        $purchase_items = $purchase->items->toArray();
+        $bill_items_data = array_map(fn($v) => [
+            'ref_id' => $v['id'],
+            'note' => "({$v['type']}) {$v['description']} {$v['uom']}",
+            'qty' => $v['qty'],
+            'subtotal' => $v['qty'] * $v['rate'],
+            'tax' => $v['taxrate'],
+            'total' => $v['amount'], 
+        ], $purchase_items);
+
+        if ($bill) {
+            // update bill
+            $bill->update($bill_data);
+            foreach ($bill_items_data as $item) {
+                $new_item = UtilityBillItem::firstOrNew([
+                    'bill_id' => $bill->id,
+                    'ref_id' => $item['ref_id']
+                ]);
+                $new_item->save();
+            }
+        } else {
+            // create bill
+            $bill_data['tid'] = UtilityBill::max('tid') + 1;
+            $bill = UtilityBill::create($bill_data);
+
+            $bill_items_data = array_map(function ($v) use($bill) {
+                $v['bill_id'] = $bill->id;
+                return $v;
+            }, $bill_items_data);
+            UtilityBillItem::insert($bill_items_data);
+        }
     }
 
     /**

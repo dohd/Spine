@@ -105,7 +105,6 @@
                 processing: true,
                 stateSave: true,
                 responsive: true,
-                deferRender: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
                     url: "{{ route('biller.invoices.get_payments') }}",

@@ -29,7 +29,7 @@
                                 'Bill Document Type' => $bill->document_type,
                                 'Date' => dateFormat($bill->date),
                                 'Due Date' => dateFormat($bill->due_date),
-                                'Tax %' => $bill->tax_rate,
+                                'Tax %' => +$bill->tax_rate,
                                 'Subtotal' => numberFormat($bill->subtotal),
                                 'Tax' => numberFormat($bill->tax),
                                 'Total' => numberFormat($bill->total),

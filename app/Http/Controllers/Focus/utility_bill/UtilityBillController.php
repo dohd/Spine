@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Focus\utility_bill;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
-use App\Models\bill\Bill;
+use App\Models\items\GoodsreceivenoteItem;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\utility_bill\UtilityBillRepository;
@@ -147,16 +147,31 @@ class UtilityBillController extends Controller
     }
 
     /**
-     * Store KRA Bill in storage
+     * Goods Receive Note Items
+     * 
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function goods_receive_note(Request $request)
     {
-        $supplier = Supplier::find($request->supplier_id);
-        $grn = $supplier->goods_receive_notes()->whereNull('invoice_no')->get();
-
-        return response()->json($grn);
+        $grn_items = GoodsreceivenoteItem::whereHas('goodsreceivenote', function ($q) {
+            $q->whereHas('purchaseorder', function ($q) {
+                $q->where('supplier_id', request('supplier_id'))->where('status', '!=', 'complete');
+            });
+        })->with([
+            'purchaseorder_item' => fn($q) => $q->select(['id', 'description', 'uom']),
+            'goodsreceivenote' => fn($q) => $q->select(['id', 'dnote', 'date',]),
+        ])->get()->map(fn($v) => [
+            'id' => $v->id,
+            'date' => $v->goodsreceivenote->date,
+            'note' => "(DN-{$v->goodsreceivenote->dnote}) - {$v->purchaseorder_item->description} ({$v->purchaseorder_item->uom})",
+            'qty' => $v->qty,
+            'rate' => $v->rate,
+            'tax' => $v->tax_rate,
+            'total' => $v->tax_rate == 0? ($v->qty * $v->rate) : (($v->qty * $v->rate) * (1 + $v->tax_rate)),
+        ]);
+        
+        return response()->json($grn_items);
     }
 
     /**

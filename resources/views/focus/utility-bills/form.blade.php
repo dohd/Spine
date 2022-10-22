@@ -14,10 +14,6 @@
         </select>
     </div> 
     <div class="col-2">
-        <label for="reference">Document Reference</label>
-        {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference']) }}
-    </div> 
-    <div class="col-2">
         <label for="reference_type">Reference Type</label>
         <select name="reference_type" id="reference_type" class="custom-select">
             @foreach (['invoice', 'receipt', 'voucher'] as $val)
@@ -26,6 +22,10 @@
                 </option>
             @endforeach
         </select>
+    </div> 
+    <div class="col-2">
+        <label for="reference">Reference No</label>
+        {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference']) }}
     </div> 
     <div class="col-2">
         <label for="date">Date</label>
@@ -67,12 +67,13 @@
         <thead>
             <tr class="bg-gradient-directional-blue white">
                 <th width="5%">#</th>
-                <th width="12%">Date</th>
-                <th>Description</th>
-                <th width="5%">Qty</th>
-                <th width="10%">Rate</th>
-                <th width="10%">Tax</th>
-                <th width="10%">Amount</th>
+                <th>Date</th>
+                <th width="25%">Item Description</th>
+                <th width="10%">Qty</th>
+                <th>Rate</th>
+                <th>Tax</th>
+                <th>Amount</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -86,6 +87,7 @@
                         <td><input type="text" name="item_subtotal[]" value="{{ numberFormat($item->subtotal) }}" class="form-control rate" readonly></td>
                         <td><input type="text" name="item_tax[]" value="{{ numberFormat($item->tax) }}" class="form-control tax" readonly></td>
                         <td><input type="text" name="item_total[]" value="{{ numberFormat($item->total) }}" class="form-control total" readonly></td>
+                        <td><a href="#" class="btn btn-link pt-0 delete"><i class="fa fa-trash fa-2x text-danger"></i></a></td>
                         <input type="hidden" name="item_ref_id[]" value="{{ $item->ref_id }}">
                         <input type="hidden" name="id[]" value="{{ $item->id }}">
                     </tr>
@@ -131,9 +133,8 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     const config = {
-        ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        goodsReceiveNoteUrl: @json(route('biller.utility-bills.goods_receive_note')),
     };
 
     const Form = {
@@ -148,43 +149,49 @@
 
             if (this.utilityBill) {
                 $('#supplier').attr('disabled', true);
-            } else $('#supplier').val('').trigger('change');
+            } else {
+                $('#supplier').val('').change();
+            }
             $('#supplier').change(this.supplierChange);
+            $('#documentsTbl').on('click', '.delete', this.deleteRow);
+        },
+
+        deleteRow() {
+            $(this).parents('tr').remove();
+            const len = $('#documentsTbl tbody tr').length;
+            if (!len) $('#supplier').val('').change();
         },
 
         supplierChange() {
             $('#documentsTbl tbody tr').remove();
             const supplier_id = $(this).val();
-            if (supplier_id)
-                $.post(config.goodsReceiveNoteUrl, {supplier_id}, data => {
-                    data = data.map(v => ({
-                        id: v.id,
-                        date: v.date, 
-                        note: `DN-${v.dnote} - ${v.note}`, 
-                        qty: 1,
-                        rate: v.subtotal,
-                        tax: v.tax,
-                        total: v.total
-                    }));
-                    data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billItemRow(v,i)));
-                    Form.columnTotals();
-                });
+            if (!supplier_id) return;
+
+            const grnUrl = "{{ route('biller.utility-bills.goods_receive_note') }}";
+            $.post(grnUrl, {supplier_id}, data => {
+                data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billItemRow(v,i)));
+                Form.columnTotals();
+            });
         },
 
         billItemRow(v,i) {
             const rate = accounting.formatNumber(v.rate);
             const tax = accounting.formatNumber(v.tax);
-            const total = accounting.formatNumber(v.total);
+            let total = accounting.formatNumber(v.total);
+            if (v.tax > 0) total = accounting.formatNumber(v.total / (1 + v.tax * 0.01));
+
             return `
                 <tr>
                     <td>${i+1}</td>
                     <td>${new Date(v.date).toDateString()}</td>
-                    <td><input type="text" name="item_note[]" value="${v.note}"  class="form-control note" readonly></td>
-                    <td><input type="text" name="item_qty[]" value="${parseFloat(v.qty)}" class="form-control qty" readonly></td>
+                    <td>${v.note}</td>
+                    <td><input type="text" name="item_qty[]" value="${parseFloat(v.qty)}" class="form-control qty"></td>
                     <td><input type="text" name="item_subtotal[]" value="${rate}" class="form-control rate" readonly></td>
                     <td><input type="text" name="item_tax[]" value="${tax}" class="form-control tax" readonly></td>
                     <td><input type="text" name="item_total[]" value="${total}" class="form-control total" readonly></td>
+                    <td><a href="#" class="btn btn-link pt-0 delete"><i class="fa fa-trash fa-2x text-danger"></i></a></td>
                     <input type="hidden" name="item_ref_id[]" value="${v.id}">
+                    <input type="hidden" name="item_note[]" value="${v.note}"  class="note">
                 </tr>
             `;
         },
@@ -194,12 +201,15 @@
             colTotal = 0;
             $('#documentsTbl tbody tr').each(function() {
                 const row = $(this);
-                const subtotal = accounting.unformat(row.find('.rate').val());
-                const total = (1 + $('#tax_rate').val() / 100) * subtotal;
-                colSubtotal += subtotal;
-                colTotal += total;
-                row.find('.tax').val(accounting.formatNumber(total - subtotal));
-                row.find('.total').val(accounting.formatNumber(total));
+                const rate = accounting.unformat(row.find('.rate').val());
+                const qty = accounting.unformat(row.find('.qty').val());
+
+                const amount = qty * rate * (1 + $('#tax_rate').val() * 0.01);
+                colSubtotal += rate * qty;
+                colTotal += amount;
+
+                row.find('.tax').val(accounting.formatNumber(amount - qty * rate));
+                row.find('.total').val(accounting.formatNumber(amount));
             });
             $('#subtotal').val(accounting.formatNumber(colSubtotal));
             $('#tax').val(accounting.formatNumber(colTotal - colSubtotal));

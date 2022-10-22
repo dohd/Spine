@@ -60,12 +60,11 @@ class GoodsReceiveNoteTableController extends Controller
                 return $grn->supplier->name;
             })        
             ->addColumn('purchase_type', function ($grn) {
-                $purchaseorder = $grn->purchaseorder;
-                if ($purchaseorder) {
-                    $lpo_no = gen4tid('PO-', $purchaseorder->tid);
-                    $note = $purchaseorder->note;
-
-                    return $lpo_no . ' - ' . $note;
+                $po = $grn->purchaseorder;
+                if ($po) {
+                    $lpo_no = '<a href="'. route('biller.purchaseorders.show', $po) .'">'. gen4tid('PO-', $po->tid) .'</a>';
+                    $note = $po->note;
+                    return "({$lpo_no}) - {$note}";
                 }
             })
             ->addColumn('dnote', function ($grn) {

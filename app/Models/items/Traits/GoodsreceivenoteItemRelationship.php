@@ -13,12 +13,12 @@ trait GoodsreceivenoteItemRelationship
         return $this->belongsTo(Goodsreceivenote::class, 'goods_receive_note_id');
     }
 
-    public function purchaseorder_item(Type $var = null)
+    public function purchaseorder_item()
     {
         return $this->belongsTo(PurchaseorderItem::class, 'purchaseorder_item_id');
     }
 
-    public function productvariation(Type $var = null)
+    public function productvariation()
     {
         return $this->belongsTo(ProductVariation::class, 'item_id');
     }

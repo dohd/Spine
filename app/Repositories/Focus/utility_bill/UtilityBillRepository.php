@@ -60,6 +60,7 @@ class UtilityBillRepository extends BaseRepository
         $result = UtilityBill::create($input);
 
         $data_items = Arr::only($input, ['item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
+        $data_items = modify_array($data_items);
         $data_items = array_map(function ($v) use($result) {
             return [
                 'bill_id' => $result->id,
@@ -70,11 +71,11 @@ class UtilityBillRepository extends BaseRepository
                 'tax' => $v['item_tax'],
                 'total' => $v['item_total']
             ];
-        }, modify_array($data_items));
+        }, $data_items);
         UtilityBillItem::insert($data_items);
 
         /**accounting */
-        if ($result->document_type == 'goods_receive_note')
+        if ($result->document_type == 'goods_receive_note') 
             $this->goods_receive_note_transaction($result);
 
         if ($result) {
@@ -82,7 +83,7 @@ class UtilityBillRepository extends BaseRepository
             return $result;
         }
 
-        throw new GeneralException('Error Creating Lead');
+        throw new GeneralException('Error Creating Bill');
     }
 
     /**

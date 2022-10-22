@@ -118,7 +118,7 @@
     let skillIndx = 0;
     let skillItems = @json($quote->skill_items);
     let budgetSkillItems = @json(@$budget->skillsets);
-    if (budgetSkillItems.length) skillItems = budgetSkillItems;
+    if (budgetSkillItems) skillItems = budgetSkillItems;
     if (skillItems.length) {
         skillItems.forEach(v => {
             let i = skillIndx;
@@ -181,7 +181,7 @@
     let productIndx = 0;
     let quoteItems = @json($quote->products()->orderByRow()->get());  
     let budgetItems = @json(@$budget_items);
-    if (budgetItems.length) quoteItems = budgetItems;
+    if (budgetItems) quoteItems = budgetItems;
     quoteItems.forEach(v => {
         let i = productIndx;
         if (v.a_type == 1) {

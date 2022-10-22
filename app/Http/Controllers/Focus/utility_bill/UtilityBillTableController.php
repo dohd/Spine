@@ -58,7 +58,7 @@ class UtilityBillTableController extends Controller
                 if ($doc_type == 'direct_purchase') {
                     $purchase = $utility_bill->purchase;
                     $tid = '<a href="'. ($purchase? route('biller.purchases.edit', $purchase) : '#') .'">'. $tid .'</a>';
-                } elseif ($doc_type == 'goods_receive_note') {
+                } elseif ($doc_type == 'goods_receive_note' && $utility_bill->ref_id) {
                     $grn = $utility_bill->ref_id;
                     $tid = '<a href="'. ($grn? route('biller.goodsreceivenote.edit', $grn) : '#') .'">'. $tid .'</a>';
                 } elseif ($doc_type == 'advance_payment') {
@@ -78,7 +78,7 @@ class UtilityBillTableController extends Controller
                 } elseif ($doc_type == 'advance_payment') {
                     $payment = $utility_bill->advance_payment;
                     if ($payment->employee)
-                        $name = $payment->employee->first_name . ' ' . $payment->employee->last_name;
+                        $name = $payment->employee->full_name;
                 }
 
                 if ($utility_bill->supplier && !$name) 
@@ -88,23 +88,27 @@ class UtilityBillTableController extends Controller
             })        
             ->addColumn('note', function ($utility_bill) {
                 $note = $utility_bill->note;
+                $ref_type = $utility_bill->reference_type;
+                $ref = $utility_bill->reference;
+                $reference = $ref && $ref_type? "{$ref_type}:{$ref}" : '';
+
+                $prefix = '';
                 $doc_type = $utility_bill->document_type;
                 if ($doc_type == 'direct_purchase') {
                     $purchase = $utility_bill->purchase;
                     if ($purchase) {
-                        $tid = '(' . gen4tid('DP-', $purchase->tid) . ')';
-                        $note = implode(' - ', [$tid, $note]);
+                        $tid = gen4tid('DP-', $purchase->tid);
+                        $prefix = "({$tid})";
                     }
-                } elseif ($doc_type == 'goods_receive_note') {
-                    $grn = $utility_bill->ref_id;
-                    if ($grn) $note = '(GRN) - ' . $note;
+                } elseif ($doc_type == 'goods_receive_note' && $utility_bill->ref_id) {
+                    $prefix = '(GRN)';
                 } elseif ($doc_type == 'kra_bill') {
-                    $note = '(KRA) - ' . $note;
+                    $prefix = '(KRA)';
                 } elseif ($doc_type == 'advance_payment') {
-                    $note = '(Advance PMT) - ' . $note;
+                    $prefix = '(Advance PMT)';
                 }             
 
-                return $note;
+                return "{$prefix} {$reference} - {$note}";
             })
             ->addColumn('total', function ($utility_bill) {
                 return numberFormat($utility_bill->total);
