@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\hrm;
 
 use App\Http\Controllers\Controller;
@@ -51,8 +52,8 @@ class HrmsTableController extends Controller
      */
     public function __invoke(ManageHrmRequest $request)
     {
-        //
         $core = $this->hrm->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -64,7 +65,6 @@ class HrmsTableController extends Controller
                 return $hrm->email;
             })
             ->addColumn('picture', function ($hrm) {
-
                 return '<img class="media-object img-lg border round"
                                                                       src="' . Storage::disk('public')->url('app/public/img/users/' . @$hrm->picture) . '"
                                                                       alt="Employee Image">';
@@ -74,8 +74,8 @@ class HrmsTableController extends Controller
                 if ($hrm->status) $c = 'checked';
                 return '<div class="user_active icheckbox_flat-aero ' . $c . '" data-cid="' . $hrm->id . '" data-active="' . $hrm->status . '"></div>';
             })->addColumn('role', function ($hrm) {
-
-                return $hrm->role['name'];
+                $role = $hrm->role;
+                if ($role) return $role->name;
             })
             ->addColumn('created_at', function ($hrm) {
                 return dateFormat($hrm->created_at);
