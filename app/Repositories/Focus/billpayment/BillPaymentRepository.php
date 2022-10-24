@@ -211,8 +211,13 @@ class BillPaymentRepository extends BaseRepository
             }
         }
 
-        Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
+        Transaction::where([
+            'tr_type' => 'pmt', 
+            'note' => $billpayment->note, 
+            'tr_ref' => $billpayment->id
+        ])->delete();
         aggregate_account_transactions();
+
         if ($billpayment->delete()) {
             DB::commit(); 
             return true;
@@ -223,6 +228,7 @@ class BillPaymentRepository extends BaseRepository
 
     /**
      * Post Bill payment transactions
+     * 
      * @param \App\Models\billpayment\Billpayment $billpayment
      * @return void
      */
@@ -238,7 +244,7 @@ class BillPaymentRepository extends BaseRepository
             
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
         $tid = Transaction::max('tid') + 1;
-        $cr_data = [
+        $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
@@ -253,11 +259,11 @@ class BillPaymentRepository extends BaseRepository
             'user_type' => 'supplier',
             'is_primary' => 1
         ];
-        Transaction::create($cr_data);
+        Transaction::create($dr_data);
 
         // credit bank
-        unset($cr_data['debit'], $cr_data['is_primary']);
-        $cr_data = array_replace($cr_data, [
+        unset($dr_data['debit'], $dr_data['is_primary']);
+        $cr_data = array_replace($dr_data, [
             'account_id' => $billpayment->account_id,
             'credit' => $billpayment->allocate_ttl,
         ]);    

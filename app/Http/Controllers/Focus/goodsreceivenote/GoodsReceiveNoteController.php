@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\goodsreceivenote;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\goodsreceivenote\Goodsreceivenote;
+use App\Models\supplier\Supplier;
 use App\Repositories\Focus\goodsreceivenote\GoodsreceivenoteRepository;
 use Illuminate\Http\Request;
 
@@ -40,8 +41,9 @@ class GoodsReceiveNoteController extends Controller
     public function create()
     {
         $tid = Goodsreceivenote::max('tid');
+        $suppliers = Supplier::get(['id', 'name']);
 
-        return view('focus.goodsreceivenotes.create', compact('tid'));
+        return view('focus.goodsreceivenotes.create', compact('tid', 'suppliers'));
     }
 
     /**
@@ -76,7 +78,9 @@ class GoodsReceiveNoteController extends Controller
      */
     public function edit(Goodsreceivenote $goodsreceivenote)
     {
-        return view('focus.goodsreceivenotes.edit', compact('goodsreceivenote'));
+        $suppliers = Supplier::get(['id', 'name']);
+
+        return view('focus.goodsreceivenotes.edit', compact('goodsreceivenote', 'suppliers'));
     }
 
     /**
@@ -90,7 +94,7 @@ class GoodsReceiveNoteController extends Controller
     {
         $this->respository->update($goodsreceivenote, $request->except('_token'));
 
-        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Noe Updated Successfully']);
+        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Note Updated Successfully']);
     }
 
     /**

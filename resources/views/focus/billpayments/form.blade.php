@@ -13,7 +13,7 @@
         <label for="employee">Employee</label>
         <select name="employee_id" id="employee" class="form-control" data-placeholder="Choose Employee" required>
             @foreach ($employees as $row)
-                <option value="{{ $row->id }}" {{ @$billpayment && $billpayment->supplier_id == $row->id? 'selected' : '' }}>
+                <option value="{{ $row->id }}" {{ @$billpayment && $billpayment->employee_id == $row->id? 'selected' : '' }}>
                     {{ $row->fullname }}
                 </option>
             @endforeach
@@ -92,7 +92,7 @@
                     <tr>
                         <td class="text-center">{{ dateFormat($bill->due_date) }}</td>
                         <td>{{ $bill->tid }}</td>
-                        <td>{{ $bill->purchase? $bill->purchase->suppliername : $bill->supplier->name }}</td>
+                        <td>{{ ($bill->purchase? $bill->purchase->suppliername : $bill->supplier)? $bill->supplier->name : '' }}</td>
                         <td class="text-center">{{ $bill->name }}</td>
                         <td>{{ $bill->status }}</td>
                         <td>{{ numberFormat($bill->total) }}</td>
@@ -150,6 +150,10 @@
             if (this.billPayment) {
                 // edit mode
                 $('#supplier').attr('disabled', true);
+                if (!this.billPayment.employee_id)
+                    $('#employee').val('').change().attr('disabled', true);
+                if (!this.billPayment.supplier_id)
+                    $('#supplier').val('').change();
             } else {
                 // create mode
                 $('#supplier').val('').change();  

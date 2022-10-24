@@ -309,10 +309,6 @@ class PurchaseRepository extends BaseRepository
             'total' => $purchase->grandttl,
             'note' => $purchase->note,
         ];
-        $bill = UtilityBill::where([
-            'document_type' => $bill_data['document_type'], 
-            'ref_id' => $bill_data['ref_id']
-        ])->first();
 
         $purchase_items = $purchase->items->toArray();
         $bill_items_data = array_map(fn($v) => [
@@ -324,6 +320,11 @@ class PurchaseRepository extends BaseRepository
             'total' => $v['amount'], 
         ], $purchase_items);
 
+        $bill = UtilityBill::where([
+            'document_type' => $bill_data['document_type'], 
+            'ref_id' => $bill_data['ref_id']
+        ])->first();
+        
         if ($bill) {
             // update bill
             $bill->update($bill_data);

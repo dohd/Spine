@@ -102,12 +102,14 @@ class BillPaymentController extends Controller
     public function edit(Billpayment $billpayment)
     {
         $suppliers = Supplier::get(['id', 'name']);
+        $employees = User::get();
         $accounts = Account::whereNull('system')
         ->whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
 
-        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers'));
+
+        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees'));
     }
 
     /**

@@ -1,11 +1,23 @@
 <div class="form-group row">
     <div class="col-6">
         <label for="supplier">Search Supplier</label>
-        <select id="supplier" name="supplier_id" class="form-control" data-placeholder="Choose Supplier" required></select>
+        <select id="supplier" name="supplier_id" class="form-control" data-placeholder="Choose Supplier" required>
+            @foreach ($suppliers as $row)
+                <option value="{{ $row->id }}" {{ @$goodsreceivenote && $goodsreceivenote->supplier_id == $row->id? 'selected' : '' }}>
+                    {{ $row->name }}
+                </option>
+            @endforeach
+        </select>
     </div>
     <div class="col-4">
         <label for="purchaseorder" class="caption">Purchase Order</label>
-        <select name="purchaseorder_id" id="purchaseorder" class="custom-select"></select>
+        <select name="purchaseorder_id" id="purchaseorder" class="custom-select">
+            @isset($goodsreceivenote)
+                <option value="{{ $goodsreceivenote->purchaserder_id }}">
+                    {{ $goodsreceivenote->purchaseorder? $goodsreceivenote->purchaseorder->note : '' }}
+                </option>
+            @endisset
+        </select>
     </div> 
     <div class="col-2">
         <label for="tid" class="caption">GRN No.</label>
@@ -39,7 +51,9 @@
         <label for="tax" class="caption">TAX %</label>
         <select name="tax_rate" id="tax_rate" class="custom-select">
             @foreach ([0, 16, 8] as $val)
-                <option value="{{ $val }}">{{ $val? $val . '% VAT' : 'OFF' }}</option>
+                <option value="{{ $val }}" {{ @$goodsreceivenote && $goodsreceivenote->tax_rate == $val? 'selected' : '' }}>
+                    {{ $val? $val . '% VAT' : 'OFF' }}
+                </option>
             @endforeach
         </select>
     </div>  
@@ -65,7 +79,28 @@
                 <th width="12%">Qty</th>
             </tr>
         </thead>
-        <tbody></tbody>    
+        <tbody>
+            @isset($goodsreceivenote)
+                @php $grn = $goodsreceivenote @endphp
+                @foreach ($grn->items as $i => $item)
+                    @php 
+                        $po_item = $item->purchaseorder_item;
+                        $qty_due = $po_item->qty - $po_item->qty_received;
+                    @endphp
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $po_item->description }}</td>
+                        <td>{{ $po_item->uom }}</td>
+                        <td>{{ +$po_item->qty }}</td>
+                        <td>{{ +$po_item->qty_received }}</td>
+                        <td>{{ $qty_due > 0? +$qty_due : 0 }}</td>
+                        <td><input name="qty[]" value="{{ +$item->qty }}" id="qty" class="form-control qty"></td>
+                        <input type="hidden" name="rate[]" value="{{ +$po_item->rate }}" class="rate">
+                        <input type="hidden" name="id[]" value="{{ $item->id }}">
+                    </tr>
+                @endforeach
+            @endisset
+        </tbody>    
     </table>
 </div>
 
@@ -89,126 +124,10 @@
 </div>
 <div class="row mt-1">                       
     <div class="col-2 ml-auto">  
-        {{ Form::submit(@$payment? 'Update Payment' : 'Receive Goods', ['class' =>'btn btn-primary btn-lg']) }}
+        {{ Form::submit(@$goodsreceivenote? 'Update' : 'Receive Goods', ['class' =>'btn btn-primary btn-lg']) }}
     </div>
 </div>
 
 @section('after-scripts')
-{{ Html::script('focus/js/select2.min.js') }}
-{{ Html::script(mix('js/dataTable.js')) }}
-<script>
-    const config = {
-        ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
-        datepicker: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        supplierSelect2: {
-            allowClear: true,
-            ajax: {
-                url: "{{ route('biller.suppliers.select') }}",
-                type: 'POST',
-                quietMillis: 50,
-                data: ({term}) => ({q: term, keyword: term}),
-                processResults: data => {
-                    return {results: data.map(v => ({id: v.id, text: v.name + ' : ' + v.email}))}; 
-                }
-            }
-        },
-        fetchLpo: (supplier_id) => {
-            return $.ajax({
-                url: "{{ route('biller.suppliers.purchaseorders') }}",
-                type: 'POST',
-                quietMillis: 50,
-                data: {supplier_id},
-            });
-        },
-        fetchLpoGoods: (purchaseorder_id) => {
-            return $.ajax({
-                url: "{{ route('biller.purchaseorders.goods') }}",
-                type: 'POST',
-                quietMillis: 50,
-                data: {purchaseorder_id},
-            });
-        }
-    };
-
-    const Form = {
-        init() {
-            $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
-            $('#supplier').select2(config.supplierSelect2).change(this.supplierChange);
-            $('#purchaseorder').change(this.purchaseorderChange);
-            $('#tax_rate').change(() => Form.columnTotals());
-            $('#productTbl').on('keyup', '.qty', () => Form.columnTotals());
-            $('#invoice_status').change(this.invoiceStatusChange);
-        },
-
-        invoiceStatusChange() {
-            const el = $(this);
-            if (el.val() == 'with_invoice') $('#invoice_no').val('').attr('disabled', false);
-            else $('#invoice_no').val('').attr('disabled', true);
-        },
-
-        supplierChange() {
-            const el = $(this);
-            $('#purchaseorder').html('');
-            $('#productTbl tbody').html('');
-            if (!el.val()) return;
-            config.fetchLpo(el.val()).done(data => {
-                data.forEach(v => {
-                    $('#purchaseorder').append(`
-                        <option value="${v.id}">LPO-${v.tid} - ${v.note}</option>
-                    `);
-                });
-                $('#purchaseorder').change();
-            });
-        },
-
-        purchaseorderChange() {
-            const el = $(this);
-            $('#productTbl tbody').html('');
-            if (!el.val()) return;
-            config.fetchLpoGoods(el.val()).done(data => {
-                console.log(data)
-                data.forEach((v,i) => $('#productTbl tbody').append(Form.productRow(v,i)));
-            });
-        },
-
-        productRow(v,i) {
-            const qty = accounting.formatNumber(v.qty);
-            const received = accounting.formatNumber(v.qty_received);
-            const due = v.qty - v.qty_received;
-            const balance = accounting.formatNumber(due > 0? due : 0);
-            return `
-                <tr>
-                    <td>${i+1}</td>    
-                    <td>${v.description}</td>    
-                    <td>${v.uom}</td>    
-                    <td>${qty}</td>    
-                    <td>${received}</td>    
-                    <td>${balance}</td>    
-                    <td><input name="qty[]" id="qty" class="form-control qty"></td>    
-                    <input type="hidden" name="purchaseorder_item_id[]" value="${v.id}">
-                    <input type="hidden" name="rate[]" value="${parseFloat(v.rate)}" class="rate">
-                    <input type="hidden" name="item_id[]" value="${v.item_id}">
-                </tr>
-            `;
-        },
-
-        columnTotals() {
-            subtotal = 0;
-            total = 0;
-            const tax_rate = 1 + $('#tax_rate').val() / 100;
-            $('#productTbl tbody tr').each(function() {
-                const row = $(this);
-                const qty = accounting.unformat(row.find('.qty').val());
-                const rate = accounting.unformat(row.find('.rate').val());
-                subtotal += qty * rate;
-                total += qty * rate * tax_rate;
-            });
-            $('#subtotal').val(accounting.formatNumber(subtotal));
-            $('#tax').val(accounting.formatNumber(total - subtotal));
-            $('#total').val(accounting.formatNumber(total));
-        },
-    }
-
-    $(() => Form.init());
-</script>
+@include('focus.goodsreceivenotes.form_js')
 @endsection

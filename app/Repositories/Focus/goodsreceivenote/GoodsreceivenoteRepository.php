@@ -55,7 +55,8 @@ class GoodsreceivenoteRepository extends BaseRepository
         // sanitize
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
-            if ($key == 'tax_rate') $input[$key] = numberClean($val);
+            if (in_array($key, ['tax_rate', 'subtotal', 'tax', 'total'])) 
+                $input[$key] = numberClean($val);
             if (in_array($key, ['qty', 'rate'])) $input[$key] = array_map(function ($v) { 
                 return numberClean($v); 
             }, $val);
@@ -64,9 +65,8 @@ class GoodsreceivenoteRepository extends BaseRepository
         $result = Goodsreceivenote::create($input);
 
         $data_items = Arr::only($input, ['qty', 'rate', 'purchaseorder_item_id', 'item_id']);
-        $data_items = array_filter(modify_array($data_items), function ($v) {
-            return $v['qty'] > 0;
-        });
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
         foreach ($data_items as $i => $item) {
             $data_items[$i] = array_replace($item, [
                 'goods_receive_note_id' => $result->id,
@@ -106,8 +106,10 @@ class GoodsreceivenoteRepository extends BaseRepository
         if ($result->invoice_no) $this->generate_bill($result);
         else $this->post_transaction($result);
         
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Lead');
     }
@@ -122,8 +124,98 @@ class GoodsreceivenoteRepository extends BaseRepository
      */
     public function update(Goodsreceivenote $goodsreceivenote, array $input)
     {
-        dd($input);
+        // dd($input);
+        DB::beginTransaction();
+        // sanitize
+        foreach ($input as $key => $val) {
+            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['tax_rate', 'subtotal', 'tax', 'total'])) 
+                $input[$key] = numberClean($val);
+            if (in_array($key, ['qty', 'rate'])) 
+                $input[$key] = array_map(fn($v) => numberClean($v), $val);
+        }
 
+        $prev_note = $goodsreceivenote->note;
+        $result = $goodsreceivenote->update($input);
+
+        // reverse previous stock qty
+        foreach ($goodsreceivenote->items as $item) {
+            $po_item = $item->purchaseorder_item;
+            $po_item->decrement('qty_received', $item->qty);
+
+            // apply unit conversion
+            $prod_variation = $po_item->productvariation;
+            $units = $prod_variation->product->units;
+            foreach ($units as $unit) {
+                if ($unit->code == $po_item['uom']) {
+                    if ($unit->unit_type == 'base') {
+                        $prod_variation->decrement('qty', $po_item['qty']);
+                    } else {
+                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                        $prod_variation->decrement('qty', $converted_qty);
+                    }
+                }
+            }   
+        }
+
+        // goods receive note items
+        $data_items = Arr::only($input, ['qty', 'rate', 'id']);
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
+        foreach ($data_items as $item) {
+            $grn_item = GoodsreceivenoteItem::find($item['id']);
+            // reverse items qty
+            $grn_item->decrement('qty', $grn_item->qty);
+            // update items qty
+            $grn_item->update($item);
+        }
+
+        // increase stock qty with new update 
+        $grn_items = $goodsreceivenote->items()->get();
+        foreach ($grn_items as $item) {
+            $po_item = $item->purchaseorder_item;
+            $po_item->increment('qty_received', $item->qty);
+            
+            // apply unit conversion
+            $prod_variation = $po_item->productvariation;
+            $units = $prod_variation->product->units;
+            foreach ($units as $unit) {
+                if ($unit->code == $po_item['uom']) {
+                    if ($unit->unit_type == 'base') {
+                        $prod_variation->increment('qty', $po_item['qty']);
+                    } else {
+                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                        $prod_variation->increment('qty', $converted_qty);
+                    }
+                }
+            }   
+        }
+
+        // update purchase order status
+        $received_goods_qty = $grn_items->sum('qty');
+        $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
+        if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'pending']);
+        elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'partial']);
+        else $goodsreceivenote->purchaseorder->update(['status' => 'complete']);
+        
+        $goodsreceivenote->prev_note = $prev_note;
+        /**accounting */
+        if ($goodsreceivenote->invoice_no) {
+            $this->generate_bill($goodsreceivenote);
+        } else {
+            Transaction::where([
+                'tr_type' => 'grn', 
+                'tr_ref' => $goodsreceivenote->id, 
+                'note' => $goodsreceivenote->prev_note
+            ])->delete();
+            $this->post_transaction($goodsreceivenote);
+        }
+
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
+        
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
@@ -188,14 +280,13 @@ class GoodsreceivenoteRepository extends BaseRepository
 
     /**
      * Generate Bill For Goods Receive with invoice
+     * 
      * @param Goodsreceivenote $grn
      * @return void
      */
     public function generate_bill($grn)
     {
-        $tid = UtilityBill::max('tid') + 1;
         $bill_data = [
-            'tid' => $tid,
             'supplier_id' => $grn->supplier_id,
             'reference' => $grn->invoice_no,
             'reference_type' => 'invoice',
@@ -208,22 +299,55 @@ class GoodsreceivenoteRepository extends BaseRepository
             'total' => $grn->total,
             'note' => $grn->note,
         ];
-        $bill = UtilityBill::create($bill_data);
 
-        $bill_item_data = [
-            'bill_id' => $bill->id,
-            'note' => $bill->note,
-            'qty' => 1,
-            'subtotal' => $grn->subtotal,
-            'tax' => $grn->tax,
-            'total' => $grn->total,
-        ];
-        UtilityBillItem::create($bill_item_data);
+        $grn_items = $grn->items()->get()->map(fn($v) => [
+            'ref_id' => $v->id,
+            'note' => $v->purchaseorder_item? $v->purchaseorder_item->description : '',
+            'qty' => $v->qty,
+            'subtotal' => $v->qty * $v->rate,
+            'tax' => $v->qty * $v->rate * ($v->tax_rate / 100),
+            'total' => $v->qty * $v->rate * (1 + $v->tax_rate / 100)
+        ])->toArray();       
+        
+        $bill = UtilityBill::where([
+            'ref_id' => $grn->id, 
+            'document_type' => 'goods_receive_note'
+        ])->first();
 
-        /**accounting */
-        $this->invoiced_grn_transaction($bill);
+        if ($bill) {
+            // update bill
+            $bill->update($bill_data);
+            foreach ($grn_items as $item) {
+                $new_item = UtilityBillItem::firstOrNew([
+                    'bill_id' => $bill->id,
+                    'ref_id' => $item['ref_id']
+                ]);
+                $new_item->fill($item);
+                $new_item->save();
+            }
+
+            // accounting
+            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $bill->id, 'note' => $bill->prev_note])->delete();
+            $this->invoiced_grn_transaction($bill);
+        } else {
+            // create bill
+            $bill_data['tid'] = UtilityBill::max('tid') + 1;
+            $bill = UtilityBill::create($bill_data);
+
+            $bill_items_data = array_map(function ($v) use($bill) {
+                $v['bill_id'] = $bill->id;
+                return $v;
+            }, $grn_items);
+            UtilityBillItem::insert($bill_items_data);
+
+            // accounting
+            $this->invoiced_grn_transaction($bill);
+        }        
     }
 
+    /**
+     * Post Goods Received With Invoice Transactions
+     */
     public function invoiced_grn_transaction($utility_bill)
     {
         // debit Inventory Account (liability)
@@ -270,6 +394,7 @@ class GoodsreceivenoteRepository extends BaseRepository
 
     /**
      * Post Goods Received Account transactions
+     * 
      * @param \App\Models\goodsreceivenote\Goodsreceivenote $grn
      * @return void
      */
