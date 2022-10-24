@@ -115,8 +115,7 @@
 		.header-table tr td:first-child {
 			color: #0f4d9b;
 			font-size: 9pt;
-			width: 60%;
-			text-align: left;
+			width: 100%;
 		}
 
 		.address {
@@ -157,12 +156,9 @@
 	<sethtmlpagefooter name="myfooter" value="on" />
 	<table class="header-table">
 		<tr>
-			<td width="23%"></td>
 			<td>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/erp.png') }}" style="width:350px;" /><br>
-			
+				<img src="{{ asset('images/letterhead.png') }}" style="object-fit:contain" width="100%"/>
 			</td>
-		
 		</tr>
 	</table>
 	<table class="doc-table">
