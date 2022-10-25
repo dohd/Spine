@@ -26,8 +26,8 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Account (Credit-Debit)</th>
-                                            <th>Reference</th>
+                                            <th>Account (Credited - Debited)</th>
+                                            <th>Note</th>
                                             <th>Amount</th>
                                             <th>Transaction Date</th>
                                             <th>{{ trans('labels.general.actions') }}</th>                                            
