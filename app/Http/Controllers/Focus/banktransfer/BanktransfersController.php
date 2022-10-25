@@ -67,7 +67,7 @@ class BanktransfersController extends Controller
      * @param CreateBankRequestNamespace $request
      * @return \App\Http\Responses\Focus\bank\CreateResponse
      */
-    public function create(StoreBanktransferRequest $request)
+    public function create()
     {
         return new CreateResponse('focus.banktransfers.create');
     }
@@ -86,11 +86,9 @@ class BanktransfersController extends Controller
             'debit_account_id' => 'required|different:account_id',
         ]);
 
-        $data = $request->except('_token');
+        $this->repository->create($request->except('_token'));
 
-        $this->repository->create($data);
-
-        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Transfer created successfully']);
+        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Transfer Created Successfully']);
     }
 
     /**
@@ -100,7 +98,7 @@ class BanktransfersController extends Controller
      * @param EditBankRequestNamespace $request
      * @return \App\Http\Responses\Focus\bank\EditResponse
      */
-    public function edit(Banktransfer $banktransfer, StoreBanktransferRequest $request)
+    public function edit(Banktransfer $banktransfer)
     {
         return new EditResponse($banktransfer);
     }
@@ -112,19 +110,17 @@ class BanktransfersController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(StoreBanktransferRequest $request, Charge $charge)
+    public function update(StoreBanktransferRequest $request, Banktransfer $banktransfer)
     {
         $request->validate([
-            'name' => 'required|string',
-            'bank' => 'required|string',
-            'number' => 'required'
+            'amount' => 'required',
+            'account_id' => 'required',
+            'debit_account_id' => 'required|different:account_id',
         ]);
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($charge, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => trans('alerts.backend.banktransfers.updated')]);
+
+        $this->repository->update($banktransfer, $request->except('_token'));
+
+        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Updated Successfully']);
     }
 
     /**
@@ -138,7 +134,7 @@ class BanktransfersController extends Controller
     {
         $this->repository->delete($banktransfer);
 
-        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Transfer deleted successfully']);
+        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Deleted Successfully']);
     }
 
     /**
@@ -148,10 +144,8 @@ class BanktransfersController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Charge $charge, ManageBanktransferRequest $request)
+    public function show(Banktransfer $banktransfer)
     {
-
-        //returning with successfull message
-        return new ViewResponse('focus.banktransfers.view', compact('charge'));
+        return new ViewResponse('focus.banktransfers.view', compact('banktransfer'));
     }
 }

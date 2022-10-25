@@ -355,7 +355,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_invoice_payment(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -415,8 +415,10 @@ class InvoiceRepository extends BaseRepository
         /**accounting */
         if ($is_payment) $this->post_transaction_invoice_payment($result);
         
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException('Error Creating Invoice');
     }
@@ -478,8 +480,10 @@ class InvoiceRepository extends BaseRepository
         $payment->transactions()->delete();
         $this->post_transaction_invoice_payment($payment);
 
-        DB::commit();
-        if ($result) return true;
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException('Error Creating Invoice');
     }    
@@ -507,10 +511,11 @@ class InvoiceRepository extends BaseRepository
         }
         $payment->transactions()->delete();
         aggregate_account_transactions();
-        $result = $payment->delete();
 
-        DB::commit();
-        if ($result) return $result;
+        if ($payment->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException('Error Creating Invoice');
     }

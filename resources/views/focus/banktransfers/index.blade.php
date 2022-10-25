@@ -54,13 +54,12 @@
         }
     });
 
-    const language = {@lang('datatable.strings')};
     const dataTable = $('#banktransfers-table').dataTable({
         stateSave: true,
         processing: true,
         serverSide: true,
         responsive: true,
-        language,
+        language: {@lang('datatable.strings')},
         ajax: {
             url: '{{ route("biller.banktransfers.get") }}',
             type: 'post'
