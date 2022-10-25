@@ -110,12 +110,11 @@
                         <td><span id="tid-{{$i}}">{{ gen4tid('Eq-', $row->equipment->tid) }}</span></td>                                                               
                         <td>
                             @php
-                                $descr = array_intersect_key(
-                                    $row->equipment->toArray(), 
-                                    array_flip(['make_type', 'equip_serial', 'unique_id', 'capacity', 'machine_gas'])
-                                );
+                                $extract_keys = ['make_type', 'equip_serial', 'unique_id', 'capacity', 'machine_gas'];
+                                $equip = array_intersect_key($row->equipment->toArray(), array_flip($extract_keys));
+                                $description = implode('; ', array_values($equip))
                             @endphp  
-                            <textarea class="form-control" name="description" id="descr-{{$i}}" cols="20" required>{{ implode('; ', array_values($descr)) }}</textarea>
+                            <textarea class="form-control" name="description" id="descr-{{$i}}" cols="20" required>{{ $description }}</textarea>
                         </td> 
                         <td><span id="location-{{$i}}">{{ $row->equipment->location }}</span></td>     
                         <td><span id="rate-{{$i}}" class="rate">{{ numberFormat($row->equipment->service_rate) }}</span></td>	
