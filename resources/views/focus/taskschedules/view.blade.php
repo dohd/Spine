@@ -19,6 +19,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    
+
                     <div class="card-content">
                         <div class="card-body">
                             @php
@@ -43,7 +45,11 @@
                                 @endforeach
                             </table>
 
-                            <legend>Equipments</legend>
+                            <legend>Equipments
+                                <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="{{ $taskschedule->equipments->count()? '#statusModal' : '' }}">
+                                    <i class="fa fa-clone" aria-hidden="true"></i> Copy
+                                </a>         
+                            </legend>
                             <div class="table-reponsive">
                                 <table class="table">
                                     <thead>
@@ -77,4 +83,5 @@
         </div>
     </div>
 </div>
+@include('focus.taskschedules.partials.copy_modal')
 @endsection

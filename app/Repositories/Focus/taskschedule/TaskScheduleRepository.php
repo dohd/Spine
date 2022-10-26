@@ -60,8 +60,10 @@ class TaskScheduleRepository extends BaseRepository
         }, $data_items);
         ContractEquipment::insert($data_items);
         
-        DB::commit();
-        if ($schedule) return $schedule;
+        if ($schedule) {
+            DB::commit();
+            return $schedule;
+        }
 
         throw new GeneralException('Error Creating Contract');
     }
@@ -84,12 +86,35 @@ class TaskScheduleRepository extends BaseRepository
             $dates = ['start_date', 'end_date', 'actual_startdate', 'actual_enddate'];
             if (in_array($key, $dates)) $data[$key] = date_for_database($val);
         }
-        $result = $taskschedule->update($data);
 
-        // delete omitted equipment items
-        $data_items = $input['data_items'];
-        $item_ids = array_map(fn($v) => $v['id'], $data_items);
-        $taskschedule->contract_equipments()->whereNotIn('equipment_id', $item_ids)->delete();
+        $result = false;
+        if (isset($data['is_copy'])) {
+            $is_loaded = ContractEquipment::where([
+                'contract_id' => $taskschedule->contract_id,
+                'schedule_id' => $data['schedule_id'],
+            ])->count();
+            if ($is_loaded) throw ValidationException::withMessages(['Equipments already loaded!']);
+
+            $prev_schedule_equipments = ContractEquipment::where([
+                'contract_id' => $taskschedule->contract_id,
+                'schedule_id' => $taskschedule->id,
+            ])->get(['contract_id', 'schedule_id', 'equipment_id'])->toArray();
+
+            $schedule = TaskSchedule::find($data['schedule_id']);
+            $copy_schedule_equipments = array_map(function ($v) use($schedule) {
+                $v['schedule_id'] = $schedule->id;
+                return $v;
+            }, $prev_schedule_equipments);
+            
+            ContractEquipment::insert($copy_schedule_equipments);
+            $result = $schedule->update(['status' => 'loaded']);
+        } else {
+            $result = $taskschedule->update($data);
+            // delete omitted equipment items
+            $data_items = $input['data_items'];
+            $item_ids = array_map(fn($v) => $v['id'], $data_items);
+            $taskschedule->contract_equipments()->whereNotIn('equipment_id', $item_ids)->delete();
+        }
 
         if ($result) {
             DB::commit();

@@ -77,7 +77,11 @@ class TaskSchedulesController extends Controller
      */
     public function show(TaskSchedule $taskschedule)
     {    
-        return new ViewResponse('focus.taskschedules.view', compact('taskschedule'));
+        $taskschedules_rel = TaskSchedule::doesntHave('equipments')
+            ->where('contract_id', $taskschedule->contract_id)
+            ->get(['id', 'title']);
+
+        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'taskschedules_rel'));
     }
 
     /**
@@ -100,7 +104,9 @@ class TaskSchedulesController extends Controller
      */
     public function update(Request $request, TaskSchedule $taskschedule)
     {
-        $data = $request->only('title', 'start_date', 'end_date', 'actual_startdate', 'actual_enddate');
+        $data = $request->only([
+            'title', 'start_date', 'end_date', 'actual_startdate', 'actual_enddate', 'schedule_id', 'is_copy'
+        ]);
         $data_items = $request->only('id');
 
         $data_items = modify_array($data_items);
