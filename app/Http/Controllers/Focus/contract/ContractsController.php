@@ -7,6 +7,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
 use App\Models\equipment\Equipment;
+use App\Models\project\BudgetItem;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\contract\ContractRepository;
 use Illuminate\Http\Request;
@@ -179,9 +180,27 @@ class ContractsController extends Controller
      */
     public function task_schedules()
     {
-        $schedules = TaskSchedule::where('contract_id', request('contract_id'))->get();
+        $contract_id = request('contract_id');
+        $is_report = request('is_report');
 
-        return response()->json($schedules);
+        $task_schedules = array();
+
+        if ($is_report) {
+            // fetch schedules in budgeted PI project
+            $contract = Contract::find($contract_id);
+            $budget_item_names = BudgetItem::where('a_type', 1)
+                ->where('product_name', 'LIKE', "%{$contract->title}%")
+                ->pluck('product_name')->toArray();
+            $schedule_titles = array_map(function ($v) {
+                return current(explode(' - ', $v));
+            }, $budget_item_names);
+
+            $task_schedules = TaskSchedule::where('contract_id', $contract_id)->whereIn('title', $schedule_titles)->get();
+        } else {
+            $task_schedules = TaskSchedule::where('contract_id', $contract_id)->get();
+        }
+        
+        return response()->json($task_schedules);
     }
 
     /**

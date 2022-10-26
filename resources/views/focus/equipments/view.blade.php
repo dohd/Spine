@@ -25,11 +25,11 @@
                             <table class="table table-bordered table-sm">
                                 @php
                                     $details = [ 
-                                        'System No' => gen4tid('Eq-', $equipment->tid),
+                                        'Equipment No' => gen4tid('Eq-', $equipment->tid),
                                         'Customer' => $equipment->customer? $equipment->customer->company : '',    
                                         'Branch' => $equipment->branch? $equipment->branch->name : '',
                                         'Equipment Category' => $equipment->category? $equipment->category->name : '',
-                                        'Client Tag' => $equipment->unique_id,
+                                        'Client Tag No' => $equipment->unique_id,
                                         'Serial No' => $equipment->equip_serial,
                                         'Make / Type' => $equipment->make_type,
                                         'Model / Model Number' => $equipment->model,
@@ -38,7 +38,9 @@
                                         'Equipment Location' => $equipment->location,
                                         'Equipment Building' => $equipment->building,
                                         'Building Floor' => $equipment->floor,
-                                        'Service Rate (VAT Exc)' => numberFormat($equipment->service_rate)
+                                        'Service Rate (VAT Exc)' => numberFormat($equipment->service_rate),
+                                        'Installation Date' => $equipment->install_date? dateFormat($equipment->install_date) : '',
+                                        'Remark' => $equipment->note,
                                     ];
                                 @endphp
                                 @foreach ($details as $key => $val)

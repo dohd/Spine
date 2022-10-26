@@ -19,6 +19,8 @@
             }      
         },
     }).change(function() {
+        if (!$(this).val()) return;
+        // fetch branches
         $("#branch").html('').select2({
             ajax: {
                 url: "{{ route('biller.branches.select') }}",
@@ -31,6 +33,7 @@
                 },
             }
         });
+        // fetch customer contracts
         $("#contract").html('').select2({
             ajax: {
                 url: "{{ route('biller.contracts.customer_contracts')  }}",
@@ -48,12 +51,17 @@
     // on contract change
     $('#contract').change(function() {
         // fetch schedules
+        if (!$(this).val()) return;
         $("#schedule").html('').select2({
             ajax: {
                 url: "{{ route('biller.contracts.task_schedules')  }}",
                 type: 'POST',
                 quietMillis: 50,
-                data: ({term}) => ({search: term, contract_id: $(this).val()}),                                
+                data: ({term}) => ({
+                    search: term, 
+                    contract_id: $(this).val(),
+                    is_report: 1
+                }),                             
                 processResults: data => {
                     return { results: data.map(v => ({ text: v.title, id: v.id })) };
                 },

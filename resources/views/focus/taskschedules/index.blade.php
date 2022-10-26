@@ -28,8 +28,8 @@
                                         <th>Client Contract</th>
                                         <th>Title</th>
                                         <th>Unit Status</th>
-                                        <th>Total Cost</th>
-                                        <th>Total Bill Cost</th>
+                                        <th>Total Service Amount</th>
+                                        <th>Total Bill Amount</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Action</th>
