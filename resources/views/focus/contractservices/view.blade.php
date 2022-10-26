@@ -49,7 +49,7 @@
                                     <thead>
                                         <tr class="bg-gradient-directional-blue white">
                                             <th>#</th>
-                                            <th>System ID</th>
+                                            <th>Equipment No</th>
                                             <th>Description</th>    
                                             <th>Location</th>   
                                             <th>Rate</th> 

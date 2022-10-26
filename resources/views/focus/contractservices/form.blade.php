@@ -65,7 +65,7 @@
     <table id="equipTbl" class="table text-center">
         <thead>
             <tr class="bg-gradient-directional-blue white">
-                <th>System ID</th>
+                <th>Equipment No</th>
                 <th>Description</th>                                           
                 <th>Location</th>
                 <th>Rate</th>
@@ -149,13 +149,13 @@
 </a>
 <div class="row">
     <div class="col-2 ml-auto">
-        <label for="total_rate">Total Rate (Ksh.)</label>
+        <label for="total_rate">Total Service Amount</label>
         {{ Form::text('rate_ttl', null, ['class' => 'form-control', 'id' => 'rate_ttl', 'readonly']) }}
     </div>
 </div>
 <div class="row">
     <div class="col-2 ml-auto">
-        <label for="total_bill">Total Bill (Ksh.)</label>
+        <label for="total_bill">Total Service Bill (Ksh.)</label>
         {{ Form::text('bill_ttl', null, ['class' => 'form-control', 'id' => 'bill_ttl', 'readonly']) }}
     </div>
 </div>

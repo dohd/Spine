@@ -47,6 +47,7 @@
 
     // on contract change
     $('#contract').change(function() {
+        // fetch schedules
         $("#schedule").html('').select2({
             ajax: {
                 url: "{{ route('biller.contracts.task_schedules')  }}",
@@ -61,6 +62,7 @@
     });
 
     // on add equipment
+    const loadedIds = new Set();
     let rowIndx = 1;
     const rowHtml = $('#equipTbl tbody tr:eq(0)').html();
     $('#descr-0').autocomplete(completeEquip());
@@ -73,13 +75,14 @@
     });
 
     //  on change bill
-    $('#equipTbl').on('change', '.bill', function() {
-        calcTotal();
-    });    
+    $('#equipTbl').on('change', '.bill', () => calcTotal());    
 
     // on delete row
     $('#equipTbl').on('click', '.del', function() {
-        $(this).parents('tr').remove();
+        const tr = $(this).parents('tr:first');
+        const equipmentId = tr.find('input[name="equipment_id[]"]').val();
+        loadedIds.delete(equipmentId*1);
+        tr.remove();
         calcTotal();
     });
     
@@ -92,16 +95,21 @@
                     method: 'POST',
                     data: {
                         keyword: request.term, 
-                        client_id: $('#customer').val(),
+                        customer_id: $('#customer').val(),
                         branch_id: $('#branch').val()
                     },
                     success: data => {
+                        // filter loaded ids
+                        data = data.filter(v => ![...loadedIds].includes(v.id));
                         data = data.map(v => {
                             for (const key in v) {
                                 if (!v[key]) v[key] = '';
                             }
+                            const tid = `${v.tid}`.length < 4 ? `000${v.tid}`.slice(-4) : v.tid;
+                            v.tid = `Eq-${tid}`;
+                            
                             return {
-                                label: `${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.model} ${v.machine_gas}
+                                label: `${v.tid} ${v.unique_id} ${v.equip_serial} ${v.make_type} ${v.model} ${v.machine_gas}
                                     ${v.capacity} ${v.location} ${v.building} ${v.floor}`,
                                 value: `${[v.make_type, v.capacity].join('; ')}`,
                                 data: v
@@ -117,12 +125,10 @@
                 const {data} = ui.item;
                 $('#equipmentid-'+i).val(data.id);
                 $('#location-'+i).text(data.location);
-
-                let tid = (''+data.tid).length < 4 ? ('000'+data.tid).slice(-4) : data.tid;
-                $('#tid-'+i).text('Eq-' + tid);
-                
+                $('#tid-'+i).text(data.tid);
                 $('#rate-'+i).text(accounting.formatNumber(data.service_rate));
                 calcTotal();
+                loadedIds.add(data.id);
             }
         };
     }    
@@ -139,5 +145,8 @@
         });
         $('#rate_ttl').val(accounting.formatNumber(rateTotal));
         $('#bill_ttl').val(accounting.formatNumber(billTotal));
+    }
+    if (@json(@$contractservice)) {
+        calcTotal();
     }
 </script>
