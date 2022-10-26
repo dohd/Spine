@@ -42,11 +42,17 @@
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
+    const config = {
+        ajax: {
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            }
+        },
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    }
+
+    $.ajaxSetup(config.ajax);
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
 
     // customer config
     $("#person").select2({
@@ -69,7 +75,7 @@
         }
     });
 
-    // on chnage customer
+    // on change customer
     $("#branch").select2();
     $("#person").on('change', function () {
         $("#branch option").remove();

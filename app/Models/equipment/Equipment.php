@@ -29,7 +29,10 @@ class Equipment extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'tid', 'customer_id', 'branch_id', 'equip_serial', 'unique_id', 'capacity', 'location', 'machine_gas',
+        'make_type', 'model', 'equipment_category_id', 'service_rate', 'building', 'floor', 'install_date', 'note'
+    ];
 
     /**
      * Default values for model fields
@@ -62,10 +65,20 @@ class Equipment extends Model
     {
         parent::__construct($attributes);
     }
-    
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
         static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
         });

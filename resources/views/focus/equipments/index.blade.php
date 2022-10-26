@@ -42,9 +42,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>System No</th>
+                                        <th>Equipment No</th>
                                         <th>Customer - Branch</th>
-                                        <th>Client Tag</th>
                                         <th>Capacity</th>
                                         <th>Make - Type</th>
                                         <th>Location</th>   
@@ -131,7 +130,6 @@
                 {data: 'DT_Row_Index', name: 'id'},
                 {data: 'tid', name: 'tid'},
                 {data: 'customer', name: 'customer'},
-                {data: 'unique_id', name: 'unique_id'},
                 {data: 'capacity', name: 'capacity'},
                 {data: 'make_type', name: 'make_type'},
                 {data: 'location', name: 'location'},

@@ -47,7 +47,11 @@ class EquipmentRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        $input['service_rate'] = numberClean($input['service_rate']);
+        foreach ($input as $key => $val) {
+            if ($key == 'install_date') $input[$key] = date_for_database($val);
+            if ($key == 'service_rate') $input[$key] = numberClean($val);
+        }
+
         $result = Equipment::create($input);
         if ($result) return $result;
 
@@ -65,7 +69,10 @@ class EquipmentRepository extends BaseRepository
     public function update(Equipment $equipment, array $input)
     {
         // dd($input);
-        $input['service_rate'] = numberClean($input['service_rate']);
+        foreach ($input as $key => $val) {
+            if ($key == 'install_date') $input[$key] = date_for_database($val);
+            if ($key == 'service_rate') $input[$key] = numberClean($val);
+        }
         
         if ($equipment->update($input)) return true;
             

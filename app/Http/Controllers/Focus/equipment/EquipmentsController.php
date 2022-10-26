@@ -84,19 +84,9 @@ class EquipmentsController extends Controller
      */
     public function store(StoreEquipmentRequest $request)
     {
-        $request->validate([
-            'make_type' => 'required',
-            'location' => 'required',
-            'unit_type' => 'required',
-        ]);
-        // extract request input
-        $input = $request->except(['_token', 'ins']);
+        $this->repository->create($request->except('_token'));
 
-        $input['ins'] = auth()->user()->ins;
-
-        $this->repository->create($input);
-
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment created successfully']);
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment Created Successfully']);
     }
 
     /**
@@ -118,26 +108,11 @@ class EquipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-
-    public function equipment_load(Request $request)
-    {
-        $q = $request->get('id');
-
-        if ($q != 1) return response()->json([]);
-        $equipments = Equipment::get();
-        
-        return response()->json($equipments);
-    }
-
-
     public function update(StoreEquipmentRequest $request, Equipment $equipment)
     {
-        // extract request input
-        $input = $request->except(['_token', 'ins']);
+        $this->repository->update($equipment, $request->except('_token'));
 
-        $this->repository->update($equipment, $input);
-
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment  Successfully Updated']);
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment  Updated Successfully']);
     }
 
     /**
@@ -183,8 +158,18 @@ class EquipmentsController extends Controller
             $q->where('tid', 'LIKE', '%' . $k . '%')
             ->orWhere('make_type', 'LIKE', '%' . $k . '%')
             ->orWhere('location', 'LIKE', '%' . $k . '%');
-        })->limit(6)->get();
+        })->limit(10)->get();
 
+        return response()->json($equipments);
+    }
+
+    // 
+    public function equipment_load()
+    {
+        $equipments = array();
+        if (request('id') != 1) 
+            $equipments = Equipment::get();
+        
         return response()->json($equipments);
     }
 }

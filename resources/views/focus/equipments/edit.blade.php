@@ -42,20 +42,24 @@
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
+    const config = {
+        ajax: {
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            }
+        },
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    }
 
+    $.ajaxSetup(config.ajax);
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
 
-    $('[data-toggle="datepicker"]').datepicker({
-        autoHide: true,
-        format: "{{ config('core.user_date_format')}}"
-    }).datepicker('setDate', new Date());
+    const equipment = @json($equipment);
+    if (equipment.install_date) 
+        $('.datepicker').datepicker('setDate', new Date(equipment.install_date));
 
+    // fetch customers
     $("#person").select2({
-        tags: [],
         ajax: {
             url: "{{ route('biller.customers.select') }}",
             dataType: 'json',
@@ -77,9 +81,9 @@
 
 
     $("#person").on('change', function () {
-        $("#branch").val('').trigger('change');
-        var tips = $('#person :selected').val();
-
+        $("#branch").val('').change();
+        var tips = $('#person').val();
+        // fetch branches
         $("#branch").select2({
             ajax: {
                 url: "{{ route('biller.branches.select') }}?customer_id=" + tips,
@@ -88,33 +92,6 @@
                 quietMillis: 50,
                 params: {'cat_id': tips},
                 data: product => ({product}), 
-                processResults: function (data) {
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.name,
-                                id: item.id
-                            }
-                        })
-                    };
-                },
-            }
-        });
-    });
-
-
-    $("#unit_type").on('change', function () {
-        $("#indoor").val('').trigger('change');
-        var tips = $('#unit_type :selected').val();
-
-        $("#indoor").select2({
-            ajax: {
-                url: "{{ route('biller.equipments.equipment_load') }}?id=" + tips,
-                dataType: 'json',
-                type: 'POST',
-                quietMillis: 50,
-                params: {'cat_id': tips},
-                data: product => ({product}),
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {
