@@ -31,7 +31,7 @@ class ContractServiceRepository extends BaseRepository
 
     public function getServiceReportItemsForDataTable()
     {
-        $q = ContractServiceItem::query();
+        $q = ContractServiceItem::query()->whereHas('equipment');
 
         return $q->get();
     }

@@ -27,7 +27,7 @@
                                         <th>#</th>
                                         <th>Client Contract</th>
                                         <th>Title</th>
-                                        <th>Unit Status</th>
+                                        <th>Unit Service Status</th>
                                         <th>Total Service Amount</th>
                                         <th>Total Bill Amount</th>
                                         <th>Start Date</th>

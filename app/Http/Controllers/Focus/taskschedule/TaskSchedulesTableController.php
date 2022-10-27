@@ -58,7 +58,7 @@ class TaskSchedulesTableController extends Controller
                 $contract = $schedule->contract;
                 if ($contract && $contract->customer) {
                     $name = "{$contract->title} - {$contract->customer->company}";
-                    $link = '<a href="'. route('biller.contracts.edit', $contract).'">'.$name.'</a>';
+                    $link = '<a href="'. route('biller.contracts.show', $contract).'">'.$name.'</a>';
                 }
                 return $link;
                 

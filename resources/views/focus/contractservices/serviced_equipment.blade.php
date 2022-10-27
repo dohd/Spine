@@ -27,6 +27,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Customer - Branch</th>
+                                        <th>Schedule</th>
                                         <th>Jobcard</th>
                                         <th>System ID</th>
                                         <th>Description</th>
@@ -80,6 +82,14 @@
             columns: [{
                     data: 'DT_Row_Index',
                     name: 'id'
+                },
+                {
+                    data: 'customer',
+                    name: 'customer'
+                },
+                {
+                    data: 'task_schedule',
+                    name: 'task_schedule'
                 },
                 {
                     data: 'jobcard_no',

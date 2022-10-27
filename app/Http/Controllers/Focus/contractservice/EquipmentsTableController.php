@@ -53,25 +53,33 @@ class EquipmentsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('customer', function ($item) {
+                $service = $item->contractservice;
+                if ($service) {
+                    $customer = $service->customer;
+                    $branch = $service->branch;
+                    if ($customer && $branch) return "{$customer->company} - {$branch->name}";
+                }
+            })
+            ->addColumn('task_schedule', function ($item) {
+                $service = $item->contractservice;
+                if ($service && $service->task_schedule) 
+                return $service->task_schedule->title;
+            })
             ->addColumn('jobcard_no', function ($item) {
                 $service = $item->contractservice;
-                if ($service)
-                return $service->jobcard_no;
+                if ($service) return $service->jobcard_no;
             })
             ->addColumn('tid', function ($item) {
-                if ($item->equipment)
                 return '<a href="'. route('biller.equipments.edit', $item->equipment) .'">'. gen4tid('Eq-', $item->equipment->tid) .'</a>';
             })
             ->addColumn('descr', function ($item) {
-                if ($item->equipment)
                 return "{$item->equipment->make_type} {$item->equipment->capacity}";
             })
             ->addColumn('location', function ($item) {
-                if ($item->equipment)
                 return $item->equipment->location;
             })
             ->addColumn('rate', function ($item) {
-                if ($item->equipment)
                 return numberFormat($item->equipment->service_rate);
             })
             ->addColumn('is_bill', function ($item) {

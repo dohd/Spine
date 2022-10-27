@@ -20,7 +20,7 @@
         placeholder: 'Search by Project No, Project Title, Qt/PI No, Ticket No'
     });
     // project select on create mode
-    if (!rjc) $('#project').val('').trigger('change');
+    if (!rjc) $('#project').val('').change();
     
     // on project select
     const projects = @json($projects);
@@ -34,8 +34,9 @@
                 });
             }
         });
+
         // fetch extra details
-        if ($(this).val() && !rjc) {
+        if ($(this).val()) {
             const url = "{{ route('biller.rjcs.project_extra_details') }}";
             $.post(url, {project_id: $(this).val()}, data => {
                 // console.log(data)
