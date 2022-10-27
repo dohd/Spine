@@ -64,12 +64,13 @@ class TaskSchedulesTableController extends Controller
                 
             })->addColumn('loaded', function ($schedule) {
                 $serviced_units = 0;
-                $service = $schedule->contractservice;
-                if ($service) $serviced_units = $service->items->count();
-                $equipment_units = $schedule->equipments->count();
-                $diff = $equipment_units - $serviced_units;
+                foreach ($schedule->contractservices as $report) {
+                    $serviced_units += $report->items->count();
+                }
+                $schedule_units = $schedule->equipments->count();
+                $unserviced_units = $schedule_units - $serviced_units;
 
-                return "unserviced: <b>{$diff} / {$equipment_units}</b> <br> serviced: <b>{$serviced_units} / {$equipment_units}</b>";
+                return "unserviced: <b>{$unserviced_units} / {$schedule_units}</b> <br> serviced: <b>{$serviced_units} / {$schedule_units}</b>";
             })
             ->addColumn('total_rate', function ($schedule) {
                 return numberFormat($schedule->equipments->sum('service_rate'));

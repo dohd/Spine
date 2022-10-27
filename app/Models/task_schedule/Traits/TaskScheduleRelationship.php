@@ -9,6 +9,11 @@ use App\Models\equipment\Equipment;
 
 trait TaskScheduleRelationship
 {    
+    public function contractservices()
+    {
+        return $this->hasMany(ContractService::class, 'schedule_id');
+    }
+
     public function contractservice()
     {
         return $this->hasOne(ContractService::class, 'schedule_id');
