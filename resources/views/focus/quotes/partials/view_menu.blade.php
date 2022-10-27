@@ -55,17 +55,6 @@
                     </a>
                 </div>
             </div>
-            {{-- 
-            <a href="{{ route('biller.view_bill', [$quote->id, 4, $valid_token, 0]) }}" class="btn btn-blue-grey mb-1">
-                <i class="fa fa-globe"></i> {{trans('general.preview')}}
-            </a>
-            --}}
         </div>
-        @if ($quote->invoiced == 'Yes')
-            <button type="button" class="btn btn-danger btn-sm float-right" id="closeQuote" {{ $quote->closed_by ? 'disabled' : '' }}>
-                <i class="fa fa-times-circle-o"></i> Close
-                {{ Form::open(['route' => ['biller.quotes.close_quote', $quote], 'method' => 'POST']) }} {{ Form::close() }}               
-            </button>
-        @endif
     </div>
 </div>
