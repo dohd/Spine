@@ -25,16 +25,24 @@
                             <div class="row">
                                 <div class="col-4">
                                     <label for="customer">Customer</label>
-                                    <select name="customer" class="form-control" id="customer" data-placeholder="Choose customer"></select>
+                                    <select name="customer" class="form-control" id="customer" data-placeholder="Choose Customer">
+                                        @foreach ($customers as $row)
+                                            <option value="{{ $row->id }}">
+                                                {{ $row->company }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-4">
                                     <label for="branch">Branch</label>
-                                    <select name="branch" class="form-control" id="branch" data-placeholder="Choose customer"></select>
+                                    <select name="branch" class="form-control" id="branch" data-placeholder="Choose Branch">
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -47,7 +55,9 @@
                                         <th>Capacity</th>
                                         <th>Make - Type</th>
                                         <th>Location</th>   
-                                        <th>Rate (Ksh.)</th>                                     
+                                        <th>Gas</th>  
+                                        <th>Serial</th>                               
+                                        <th>Model</th>    
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -72,75 +82,85 @@
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajax: { headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } },
+        select: {allowClear: true},
 
-    // select2 config
-    function select2Config(url, callback, extraData) {
-        return {
-            ajax: {
-                url,
-                dataType: 'json',
-                type: 'POST',
-                data: ({term}) => ({search: term, ...extraData}),
-                quietMillis: 50,
-                processResults: callback
-            }
-        }
-    }
+    };
 
-    const customerUrl = "{{ route('biller.customers.select') }}";
-    const customerCb = data => ({ results: data.map(v => ({id: v.id, text: v.name + ' - ' + v.company})) });
-    $('#customer').select2(select2Config(customerUrl, customerCb));
+    const Index = {
+        queryString: @json(request()->getQueryString()),
+        branches: @json($branches),
 
-    const branchUrl = "{{ route('biller.branches.select') }}";
-    const branchCb = data => ({ 
-        results: data.filter(v => v.name != 'All Branches').map(v => ({
-            text: v.name,
-            id: v.id
-        }))
-    });
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('#customer').select2(config.select).val('').change();
+            $('#branch').select2(config.select);
 
-    // on change customer and branch 
-    $('#branch').select2();
-    $(document).on('change', '#customer, #branch', function() {
-        if ($(this).is('#customer')) {
+            this.drawDataTable();
+            $('#customer').change(this.customerChange);
+            $('#branch').change(this.branchChange);
+
+            this.parseQueryString();
+        },
+
+        parseQueryString() {
+            const customer_id = @json(request('customer_id'));
+            $('#customer').val(customer_id).change();
+        },
+
+        customerChange() {
             const customer_id = $(this).val();
-            $('#branch').select2(select2Config(branchUrl, branchCb, {customer_id}));
+
+            $('#branch').html('');
+            const branches = Index.branches.filter(v => v.customer_id == customer_id);
+            branches.forEach(v => $('#branch').append(`<option value="${v.id}">${v.name}</option>`));
+            $('#branch').val('').change();
+
+            $('#equipTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        branchChange() {
+            $('#equipTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#equipTbl').dataTable({
+                stateSave: true,
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.equipments.get') }}?" + this.queryString,
+                    type: 'POST',
+                    data: {
+                        customer_id: $('#customer').val(), 
+                        branch_id: $('#branch').val(),
+                    },
+                },
+                columns: [
+                    {data: 'DT_Row_Index', name: 'id'},
+                    {data: 'tid', name: 'tid'},
+                    {data: 'customer', name: 'customer'},
+                    {data: 'capacity', name: 'capacity'},
+                    {data: 'make_type', name: 'make_type'},
+                    {data: 'location', name: 'location'},
+                    {data: 'machine_gas', name: 'machine_gas'},
+                    {data: 'equip_serial', name: 'equip_serial'},
+                    {data: 'model', name: 'model'},
+                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
         }
+    };
 
-        $('#equipTbl tbody tr:first').remove();
-        $('#equipTbl').DataTable().destroy();
-        draw_data($('#customer').val(), $('#branch').val());
-    });
-
-    function draw_data(customer_id='', branch_id='') {
-        const language = {@lang('datatable.strings')};
-        const dataTable = $('#equipTbl').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            language,
-            ajax: {
-                url: "{{ route('biller.equipments.get') }}",
-                type: 'POST',
-                data: {customer_id, branch_id},
-            },
-            columns: [
-                {data: 'DT_Row_Index', name: 'id'},
-                {data: 'tid', name: 'tid'},
-                {data: 'customer', name: 'customer'},
-                {data: 'capacity', name: 'capacity'},
-                {data: 'make_type', name: 'make_type'},
-                {data: 'location', name: 'location'},
-                {data: 'service_rate', name: 'service_rate'},
-                {data: 'actions', name: 'actions', searchable: false, sortable: false}
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
+    $(() => Index.init());
 </script>
 @endsection

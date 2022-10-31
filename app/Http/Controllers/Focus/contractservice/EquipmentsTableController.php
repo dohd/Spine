@@ -49,42 +49,88 @@ class EquipmentsTableController extends Controller
     public function __invoke()
     {
         $core = $this->contractservice->getServiceReportItemsForDataTable();
+
+        $sum_total = 0;
+        foreach ($core as $item) {
+            $sum_total += $item->equipment->service_rate;
+        }
         
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('customer', function ($item) {
+            // ->addColumn('task_schedule', function ($item) {
+            //     $service = $item->contractservice;
+            //     if ($service && $service->task_schedule) 
+            //     return $service->task_schedule->title;
+            // })
+            
+            // ->addColumn('tid', function ($item) {
+            //     return '<a href="'. route('biller.equipments.edit', $item->equipment) .'">'. gen4tid('Eq-', $item->equipment->tid) .'</a>';
+            // })
+            // ->addColumn('descr', function ($item) {
+            //     return "{$item->equipment->make_type} {$item->equipment->capacity}";
+            // })
+            // ->addColumn('is_bill', function ($item) {
+            //     if (!$item->is_bill) return 'No';
+            //     return 'Yes';
+            // })
+            ->addColumn('sum_total', function ($item) use($sum_total) {
+                return numberFormat($sum_total);
+            })
+            ->addColumn('branch', function ($item) {
                 $service = $item->contractservice;
                 if ($service) {
                     $customer = $service->customer;
                     $branch = $service->branch;
-                    if ($customer && $branch) return "{$customer->company} - {$branch->name}";
+                    if ($customer && $branch) return "{$branch->name}";
                 }
-            })
-            ->addColumn('task_schedule', function ($item) {
-                $service = $item->contractservice;
-                if ($service && $service->task_schedule) 
-                return $service->task_schedule->title;
-            })
-            ->addColumn('jobcard_no', function ($item) {
-                $service = $item->contractservice;
-                if ($service) return $service->jobcard_no;
-            })
-            ->addColumn('tid', function ($item) {
-                return '<a href="'. route('biller.equipments.edit', $item->equipment) .'">'. gen4tid('Eq-', $item->equipment->tid) .'</a>';
-            })
-            ->addColumn('descr', function ($item) {
-                return "{$item->equipment->make_type} {$item->equipment->capacity}";
             })
             ->addColumn('location', function ($item) {
                 return $item->equipment->location;
             })
-            ->addColumn('rate', function ($item) {
+            ->addColumn('floor', function ($item) {
+                return $item->equipment->floor;
+            })
+            ->addColumn('building', function ($item) {
+                return $item->equipment->building;
+            })
+            ->addColumn('category', function ($item) {
+                return $item->equipment->category->name;
+            })
+            ->addColumn('make_type', function ($item) {
+                return $item->equipment->make_type;
+            })
+            ->addColumn('model', function ($item) {
+                return $item->equipment->model;
+            })
+            ->addColumn('capacity', function ($item) {
+                return $item->equipment->capacity;
+            })
+            ->addColumn('equip_serial', function ($item) {
+                return $item->equipment->equip_serial;
+            })
+            ->addColumn('unique_id', function ($item) {
+                return $item->equipment->unique_id;
+            })
+            ->addColumn('machine_gas', function ($item) {
+                return $item->equipment->machine_gas;
+            })
+            ->addColumn('service_rate', function ($item) {
                 return numberFormat($item->equipment->service_rate);
             })
-            ->addColumn('is_bill', function ($item) {
-                if (!$item->is_bill) return 'No';
-                return 'Yes';
+            ->addColumn('status', function ($item) {
+                return $item->status;
+            })
+            ->addColumn('note', function ($item) {
+                return $item->note;
+            })
+            ->addColumn('jobcard', function ($item) {
+                $service = $item->contractservice;
+                if ($service) return $service->jobcard_no;
+            })
+            ->addColumn('jobcard_date', function ($item) {
+                $service = $item->contractservice;
+                if ($service) return dateFormat($service->date);
             })
             ->make(true);
     }

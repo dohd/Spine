@@ -53,7 +53,7 @@ class EquipmentsTableController extends Controller
   public function __invoke(ManageEquipmentRequest $request)
   {
     $core = $this->repository->getForDataTable();
-
+    
     return Datatables::of($core)
       ->escapeColumns(['id'])
       ->addIndexColumn()

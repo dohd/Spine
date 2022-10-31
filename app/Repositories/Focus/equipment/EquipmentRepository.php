@@ -25,15 +25,31 @@ class EquipmentRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-
+        
         $q->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));
         })->when(request('branch_id'), function ($q) {
             $q->where('branch_id', request('branch_id'));
+        })->when(request('schedule_id'), function ($q) {
+            // fetch schedule equipments
+            $q->whereHas('contract_equipments', function($q) {
+                $q->where('schedule_id', request('schedule_id'));
+            });
+        })->when(request('is_serviced') == '0', function ($q) {
+            // fetch unserviced equipments
+            $q->whereHas('contract_equipments', function($q) {
+                $q->where('schedule_id', request('schedule_id'));
+            })->where(function ($q) {
+                $q->doesntHave('contract_service_items', 'or', function ($q) {
+                    $q->whereHas('contractservice', function ($q) {
+                        $q->where('schedule_id', request('schedule_id'));
+                    });
+                });
+            });
         });
-
-        printlog($this->query()->find(1));
-            
+        
+        
+        $q->with(['customer', 'branch']);
         return $q->get();
     }
 

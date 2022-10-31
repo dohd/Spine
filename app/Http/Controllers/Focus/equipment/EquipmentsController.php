@@ -28,7 +28,8 @@ use App\Http\Responses\Focus\equipment\EditResponse;
 use App\Repositories\Focus\equipment\EquipmentRepository;
 use App\Http\Requests\Focus\equipment\ManageEquipmentRequest;
 use App\Http\Requests\Focus\equipment\StoreEquipmentRequest;
-
+use App\Models\branch\Branch;
+use App\Models\customer\Customer;
 
 /**
  * ProductcategoriesController
@@ -59,10 +60,10 @@ class EquipmentsController extends Controller
     public function index(ManageEquipmentRequest $request)
     {
 
-        // $core = $this->branch->getForDataTable();
-        // dd($core );
+       $customers = Customer::get(['id', 'company']);
+       $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
 
-        return new ViewResponse('focus.equipments.index');
+        return new ViewResponse('focus.equipments.index', compact('customers', 'branches'));
     }
 
     /**
@@ -148,13 +149,24 @@ class EquipmentsController extends Controller
     public function equipment_search(Request $request)
     {
         $k = $request->post('keyword');
-        // printlog($request->only('customer_id', 'branch_id'));
         
         $equipments = Equipment::when(request('branch_id'), function ($q) {
             $q->where('branch_id', request('branch_id'));
         })->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));
-        })->where(function ($q) use($k) {
+        })->when(request('schedule_id'), function ($q) {
+            // unserviced equipments
+            $q->whereHas('contract_equipments', function ($q) {
+                $q->where('schedule_id', request('schedule_id'));
+            })->where(function ($q) {
+                $q->doesntHave('contract_service_items', 'or', function ($q) {
+                    $q->whereHas('contractservice', function ($q) {
+                        $q->where('schedule_id', request('schedule_id'));
+                    });
+                });
+            });
+        })
+        ->where(function ($q) use($k) {
             $q->where('tid', 'LIKE', '%' . $k . '%')
             ->orWhere('make_type', 'LIKE', '%' . $k . '%')
             ->orWhere('location', 'LIKE', '%' . $k . '%');
