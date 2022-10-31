@@ -23,21 +23,66 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-4">
+                                    <label for="customer">Customer</label>
+                                    <select name="customer_id" class="form-control" id="customer" data-placeholder="Choose Customer">
+                                        @foreach ($customers as $row)
+                                            <option value="{{ $row->id }}">
+                                                {{ $row->company }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <label for="contract">Contract</label>
+                                    <select name="contract_id" class="form-control" id="contract" data-placeholder="Choose Contract">
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <label for="branch">Branch</label>
+                                    <select name="branch_id" class="form-control" id="branch" data-placeholder="Choose Branch">
+                                    </select>
+                                </div>
+                                
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-2">
+                                    <label for="status">Status</label>
+                                    <select name="status" class="form-control custom-select" id="status">
+                                        <option value="">-- select status --</option>
+                                        @foreach (['working', 'faulty', 'cannibalised', 'decommissioned'] as $val)
+                                            <option value="{{ $val }}" {{ $val == $row->status? 'selected' : ''  }}>
+                                                {{ ucfirst($val) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <label for="amount">Total Service Amount</label>
+                                    {{ Form::text('amount_total', null, ['class' => 'form-control', 'id' =>'amount_total',  'readonly']) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
                             <table id="serviceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Customer - Branch</th>
-                                        <th>Schedule</th>
-                                        <th>Jobcard</th>
-                                        <th>System ID</th>
-                                        <th>Description</th>
-                                        <th>Location</th>
-                                        <th>Rate</th>
-                                        <th>Status</th>
-                                        <th>Billed</th>
-                                        <th>Note</th>
-                                    </tr>
+                                    @php
+                                        $col_labels = [
+                                            'Branch', 'Building', 'Floor', 'Location', 'Equipment Category', 'Make / Unit Type',
+                                            'Model & Model No', 'Size / Capacity', 'Serial No', 'Tag No', 'Gas', 'Rate (VAT Exc)',
+                                            'Status', 'Comment', 'Jobcard No', 'Jobcard Date'
+                                        ];
+                                    @endphp
+                                    <th>#</th>
+                                    @foreach ($col_labels as $val)
+                                        <th>{{ $val }}</th>
+                                    @endforeach
                                 </thead>
                                 <tbody>
                                     <tr>
@@ -60,80 +105,105 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        select: {allowClear: true},
+    };
 
-    function draw_data() {
-        const language = {
-            @lang("datatable.strings")
-        };
-        const dataTable = $('#serviceTbl').dataTable({
-            processing: true,
-            responsive: true,
-            language,
-            ajax: {
-                url: '{{ route("biller.contractservices.get_equipments") }}',
-                type: 'POST',
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
+    const Index = {
+        customers: @json($customers),
+        contracts: @json($contracts),
+        branches: @json($branches),
+
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('#customer').select2(config.select).val('').change();
+            $('#branch').select2(config.select);
+            $('#contract').select2(config.select);
+
+            this.drawDataTable();
+            $('#customer').change(this.customerChange);
+            $('#branch').change(this.branchChange);
+            $('#contract').change(this.contractChange);
+            $('#status').change(this.statusChange);
+        },
+
+        customerChange() {
+            const customer_id = $(this).val();
+
+            $('#branch').html('');
+            const branches = Index.branches.filter(v => v.customer_id == customer_id);
+            branches.forEach(v => $('#branch').append(`<option value="${v.id}">${v.name}</option>`));
+            $('#branch').val('').change();
+
+            $('#contract').html('');
+            const contracts = Index.contracts.filter(v => v.customer_id == customer_id);
+            contracts.forEach(v => $('#contract').append(`<option value="${v.id}">${v.title}</option>`));
+            $('#contract').val('').change();
+
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        branchChange() {
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        contractChange() {
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+        
+        statusChange() {
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#serviceTbl').dataTable({
+                stateSave: true,
+                processing: true,
+                responsive: true,
+                language: { @lang("datatable.strings")},
+                ajax: {
+                    url: '{{ route("biller.contractservices.get_equipments") }}',
+                    type: 'POST',
+                    data: {
+                        customer_id: $('#customer').val(),
+                        contract_id: $('#contract').val(),
+                        branch_id: $('#branch').val(),
+                        status: $('#status').val(),
+                    },
+                    dataSrc: ({data}) => {
+                        $('#amount_total').val('');
+                        if (data.length) $('#amount_total').val(data[0].sum_total);                            
+                        return data;
+                    },
                 },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'task_schedule',
-                    name: 'task_schedule'
-                },
-                {
-                    data: 'jobcard_no',
-                    name: 'jobcard_no'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'descr',
-                    name: 'descr'
-                },
-                {
-                    data: 'location',
-                    name: 'location'
-                },
-                {
-                    data: 'rate',
-                    name: 'rate'
-                },
-                {
-                    data: 'status',
-                    name: 'status'
-                },
-                {
-                    data: 'is_bill',
-                    name: 'is_bill'
-                },
-                {
-                    data: 'note',
-                    name: 'note'
-                },
-                
-            ],
-            columnDefs: [
-                { type: "custom-number-sort", targets: [3] },
-                { type: "custom-date-sort", targets: [6] }
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    ...[
+                        'branch', 'building', 'floor', 'location', 'category', 'make_type',
+                        'model', 'capacity', 'equip_serial', 'unique_id', 'machine_gas', 'service_rate',
+                        'status', 'note', 'jobcard', 'jobcard_date'
+                    ].map(v => ({data: v, name: v})),                    
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [3] },
+                    { type: "custom-date-sort", targets: [6] }
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection
