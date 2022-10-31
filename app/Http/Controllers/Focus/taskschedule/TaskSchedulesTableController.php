@@ -63,14 +63,26 @@ class TaskSchedulesTableController extends Controller
                 return $link;
                 
             })->addColumn('loaded', function ($schedule) {
-                $serviced_units = 0;
-                foreach ($schedule->contractservices as $report) {
-                    $serviced_units += $report->items->count();
+                $serviced_equip_ids = array();
+                foreach ($schedule->contractservices as $service) {
+                    $equip_ids = $service->items()->pluck('equipment_id')->toArray();
+                    $serviced_equip_ids = array_merge($serviced_equip_ids, $equip_ids);
                 }
-                $schedule_units = $schedule->equipments->count();
-                $unserviced_units = $schedule_units - $serviced_units;
+                $schedule_equip_ids = $schedule->equipments()->get(['equipments.id'])->pluck('id')->toArray();
+                
+                $schedule_units = count($schedule_equip_ids);
+                $serviced_units = count($serviced_equip_ids);
+                $unserviced_units = count(array_diff($schedule_equip_ids, $serviced_equip_ids));
 
-                return "unserviced: <b>{$unserviced_units} / {$schedule_units}</b> <br> serviced: <b>{$serviced_units} / {$schedule_units}</b>";
+                $params = [
+                    'contract_id' => $schedule->contract? $schedule->contract->id : '',
+                    'customer_id' => $schedule->contract? $schedule->contract->customer_id : '', 
+                    'schedule_id' => $schedule->id,
+                    'is_serviced' => 0,
+                ];
+                $unserviced_link = '<a href="'. route('biller.equipments.index', $params) .'">unserviced:</a>';
+
+                return "{$unserviced_link} <b>{$unserviced_units}/{$schedule_units}</b> <br> serviced: <b>{$serviced_units}/{$schedule_units}</b>";
             })
             ->addColumn('total_rate', function ($schedule) {
                 return numberFormat($schedule->equipments->sum('service_rate'));
@@ -85,7 +97,10 @@ class TaskSchedulesTableController extends Controller
                 return dateFormat($schedule->end_date);
             })
             ->addColumn('actions', function ($schedule) {
-                return $schedule->action_buttons;
+                $params = ['customer_id' => $schedule->contract->customer_id, 'schedule_id' => $schedule->id];
+                return $schedule->action_buttons 
+                    . ' <a class="btn btn-purple round" href="'. route('biller.equipments.index', $params) .'" title="equipments"><i class="fa fa-list"></i></a> '; 
+                    
             })
             ->make(true);
     }

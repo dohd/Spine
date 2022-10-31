@@ -10,7 +10,7 @@
             {{ Form::model($taskschedule, ['route' => ['biller.taskschedules.update', $taskschedule], 'method' => 'PATCH']) }}
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="status">Schedules</label>
+                        <label for="status">Target Schedule</label>
                         <select class="form-control" name="schedule_id" id="schedule">
                             @foreach ($taskschedules_rel as $row)
                                 <option value="{{ $row->id }}">

@@ -19,20 +19,19 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    
-
                     <div class="card-content">
                         <div class="card-body">
                             @php
                                 $contract = $taskschedule->contract;
+                                $contract_title = $contract? $contract->title : '';
+                                $customer_title = $contract->customer? $contract->customer->company : ''; 
+                                
                                 $details = [
-                                    'Customer' => $contract->customer? $contract->customer->company : '', 
-                                    'Contract' => $contract? $contract->title : '',
                                     'Schedule Title' => $taskschedule->title,
-                                    'Schedule Start Date' => dateFormat($taskschedule->start_date),
-                                    'Schedule End Date' => dateFormat($taskschedule->end_date),
-                                    'Actual Start Date' => dateFormat($taskschedule->actual_startdate),
-                                    'Actual End Date' => dateFormat($taskschedule->actual_enddate),
+                                    'Equipments' => '',
+                                    'Customer Contract' => "{$contract_title} - {$customer_title}", 
+                                    'Schedule Date (Start - End)' => dateFormat($taskschedule->start_date) . ' : ' . dateFormat($taskschedule->end_date),
+                                    'Actual Date (Start - End)' => dateFormat($taskschedule->actual_startdate) . ' : ' . dateFormat($taskschedule->actual_enddate),
                                     'Service Rate' => numberFormat($taskschedule->equipments->sum('service_rate'))
                                 ];
                             @endphp
@@ -40,42 +39,21 @@
                                 @foreach ($details as $key => $val)
                                     <tr>
                                         <th width="50%">{{ $key }}</th>
-                                        <td>{{ $val }}</td>
+                                        <td>
+                                            @if ($key == 'Equipments')
+                                                <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="{{ $taskschedule->equipments->count()? '#statusModal' : '' }}">
+                                                    <i class="fa fa-clone" aria-hidden="true"></i> Copy
+                                                </a>      
+                                                <a class="btn btn-purple btn-sm" href="{{ route('biller.equipments.index', ['customer_id' => $contract->customer_id, 'schedule_id' => $taskschedule->id]) }}" title="equipments">
+                                                    <i class="fa fa-list"></i> List
+                                                </a>  
+                                            @else
+                                                {{ $val }}
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </table>
-
-                            <legend>Equipments
-                                <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="{{ $taskschedule->equipments->count()? '#statusModal' : '' }}">
-                                    <i class="fa fa-clone" aria-hidden="true"></i> Copy
-                                </a>         
-                            </legend>
-                            <div class="table-reponsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>System ID</th>
-                                            <th>Type</th>
-                                            <th>Branch</th>
-                                            <th>Location</th>
-                                            <th>Service Rate</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>                                                                                 
-                                        @foreach ($taskschedule->equipments as $i => $row)                                            
-                                            <tr>
-                                                <td>{{ $i+1 }}</td>
-                                                <td>{{ gen4tid('Eq-', $row->tid) }}</td>
-                                                <td>{{ $row->make_type }}</td>
-                                                <td>{{ $row->branch->name }}</td>
-                                                <td>{{ $row->location }}</td>
-                                                <td>{{ numberFormat($row->service_rate) }}</td>
-                                            </tr>                                                        
-                                        @endforeach                                                    
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\contract\Contract;
+use App\Models\customer\Customer;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\taskschedule\TaskScheduleRepository;
 use Illuminate\Http\Request;
@@ -34,7 +35,10 @@ class TaskSchedulesController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.taskschedules.index');        
+        $customers = Customer::get(['id', 'company']);
+        $contracts = Contract::get(['id', 'title', 'customer_id']);
+
+        return new ViewResponse('focus.taskschedules.index', compact('customers', 'contracts'));        
     }
 
     /**

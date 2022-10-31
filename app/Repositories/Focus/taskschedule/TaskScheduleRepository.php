@@ -27,7 +27,13 @@ class TaskScheduleRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        $q->when(request('customer_id'), function ($q) {
+            $q->whereHas('contract', fn($q) => $q->where('customer_id', request('customer_id')));
+        })->when(request('contract_id'), fn($q) => $q->where('contract_id', request('contract_id')));
+
+        return $q->get();
     }
 
     /**
