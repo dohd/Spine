@@ -7,6 +7,7 @@ use App\Models\contractservice\ContractService;
 use App\Models\items\ContractServiceItem;
 use App\Repositories\BaseRepository;
 use DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -26,13 +27,37 @@ class ContractServiceRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        $q->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        })->when(request('contract_id'), function ($q) {
+            $q->where('contract_id', request('contract_id'));
+        })->when(request('schedule_id'), function ($q) {
+            $q->where('schedule_id', request('schedule_id'));
+        })->when(request('branch_id'), function ($q) {
+            $q->where('branch_id', request('branch_id'));
+        });
+
+        return $q->get();
     }
 
     public function getServiceReportItemsForDataTable()
     {
         $q = ContractServiceItem::query()->whereHas('equipment');
 
+        $q->whereHas('contractservice', function ($q) {
+            $q->when(request('customer_id'), function ($q) {
+                $q->where('customer_id', request('customer_id'));
+            })->when(request('contract_id'), function ($q) {
+                $q->where('contract_id', request('contract_id'));
+            })->when(request('branch_id'), function ($q) {
+                $q->where('branch_id', request('branch_id'));
+            });
+        })->when(request('status'), function ($q) {
+            $q->where('status', request('status'));
+        });
+        
         return $q->get();
     }
 
@@ -54,6 +79,10 @@ class ContractServiceRepository extends BaseRepository
             if (in_array($key, ['bill_ttl', 'rate_ttl']))
                 $data[$key] = numberClean($val);
         }
+
+        $is_exist = ContractService::where('jobcard_no', $data['jobcard_no'])->count();
+        if ($is_exist) throw ValidationException::withMessages(["Jobcard No. {$data['jobcard_no']} already used!"]);
+
         $result = ContractService::create($data);
 
         $data_items = $input['data_items'];
@@ -62,8 +91,10 @@ class ContractServiceRepository extends BaseRepository
         }, $data_items);
         ContractServiceItem::insert($data_items);
 
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
         
         throw new GeneralException('Error Creating Contract');
     }
@@ -87,6 +118,12 @@ class ContractServiceRepository extends BaseRepository
             if (in_array($key, ['bill_ttl', 'rate_ttl']))
                 $data[$key] = numberClean($val);
         }
+
+        if ($contractservice->jobcard_no != $data['jobcard_no']) {
+            $is_exist = ContractService::where('jobcard_no', $data['jobcard_no'])->count();
+            if ($is_exist) throw ValidationException::withMessages(["Jobcard No. {$data['jobcard_no']} already used!"]);    
+        }
+
         $result = $contractservice->update($data);
 
         $data_items = $input['data_items'];

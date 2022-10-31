@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Focus\contractservice;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\branch\Branch;
+use App\Models\contract\Contract;
 use App\Models\contractservice\ContractService;
+use App\Models\customer\Customer;
+use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\contractservice\ContractServiceRepository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -34,7 +38,12 @@ class ContractServicesController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.contractservices.index');
+        $customers = Customer::get(['id', 'company']);
+        $contracts = Contract::get(['id', 'title', 'customer_id']);
+        $schedules = TaskSchedule::get(['id', 'title', 'contract_id']);
+        $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
+
+        return new ViewResponse('focus.contractservices.index', compact('customers', 'contracts', 'schedules', 'branches'));
     }
 
     /**
@@ -134,6 +143,10 @@ class ContractServicesController extends Controller
      */
     public function serviced_equipment()
     {
-        return view('focus.contractservices.serviced_equipment');
+        $customers = Customer::get(['id', 'company']);
+        $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
+        $contracts = Contract::get(['id', 'title', 'customer_id']);
+        
+        return view('focus.contractservices.serviced_equipment', compact('customers', 'branches', 'contracts'));
     }
 }

@@ -1,7 +1,7 @@
 <div class="form-group row">
     <div class="col-4">
         <label for="client">Customer</label>
-        <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Client">
+        <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Client" required>
             @isset ($contractservice)
                 <option value="{{ $contractservice->customer_id }}">
                     {{ $contractservice->customer? $contractservice->customer->company : 'None' }}
@@ -12,7 +12,7 @@
     
     <div class="col-5">
         <label for="contract">Contract</label>
-        <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract">
+        <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract" required>
             @isset ($contractservice)
                 <option value="{{ $contractservice->contract_id }}">
                     {{ $contractservice->contract? $contractservice->contract->title : 'None' }}
@@ -22,7 +22,7 @@
     </div>
     <div class="col-3">
         <label for="schedule">Schedule</label>
-        <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Schedule">
+        <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Schedule" required>
             @isset ($contractservice)
                 <option value="{{ $contractservice->schedule_id }}">
                     {{ $contractservice->task_schedule? $contractservice->task_schedule->title : 'None' }}
@@ -52,7 +52,7 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="branch">Branch</label>
-        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose Branch">
+        <select name="branch_id" id="branch" class="form-control" data-placeholder="Choose Branch" required>
             @isset ($contractservice)
                 <option value="{{ $contractservice->branch_id }}">
                     {{ $contractservice->branch? $contractservice->branch->name : 'None' }}

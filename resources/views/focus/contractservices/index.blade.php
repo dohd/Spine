@@ -23,6 +23,46 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="customer">Customer</label>
+                                    <select name="customer_id" class="form-control" id="customer" data-placeholder="Choose Customer">
+                                        @foreach ($customers as $row)
+                                            <option value="{{ $row->id }}">
+                                                {{ $row->company }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-5">
+                                    <label for="contract">Contract</label>
+                                    <select name="contract_id" class="form-control" id="contract">
+                                        <option value="">-- select contract --</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-2">
+                                    <label for="schedule">Schedule</label>
+                                    <select name="schedule_id" class="form-control" id="schedule">
+                                        <option value="">-- select schedule --</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-2">
+                                    <label for="branch">Branch</label>
+                                    <select name="branch_id" class="form-control" id="branch">
+                                        <option value="">-- select branch --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
                             <table id="serviceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
@@ -57,69 +97,134 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    config = {
+        ajax: {
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            }
+        },
+        select: {allowClear: true},
+    };
+    
 
-    function draw_data() {
-        const language = {
-            @lang("datatable.strings")
-        };
-        const dataTable = $('#serviceTbl').dataTable({
-            processing: true,
-            responsive: true,
-            language,
-            ajax: {
-                url: '{{ route("biller.contractservices.get") }}',
-                type: 'POST',
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
+    const Index = {
+        contracts: @json($contracts),
+        schedules: @json($schedules),
+        branches: @json($branches),
+
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('#customer').select2(config.select).val('').change();
+
+            this.drawDataTable();
+            $('#customer').change(this.customerChange);
+            $('#contract').change(this.contractChange);
+            $('#schedule').change(this.scheduleChange);
+            $('#branch').change(this.branchChange);
+        },
+
+        customerChange() {
+            const customer_id = $(this).val();
+
+            $('#contract option:not(:first)').remove();
+            contracts = Index.contracts.filter(v => v.customer_id == customer_id);
+            contracts.forEach(v => $('#contract').append(`<option value="${v.id}">${v.title}</option>`));
+
+            $('#branch option:not(:first)').remove();
+            branches = Index.branches.filter(v => v.customer_id == customer_id);
+            branches.forEach(v => $('#branch').append(`<option value="${v.id}">${v.name}</option>`));
+            
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        contractChange() {
+            const contract_id = $(this).val();
+
+            $('#schedule option:not(:first)').remove();
+            schedules = Index.schedules.filter(v => v.contract_id == contract_id);
+            schedules.forEach(v => $('#schedule').append(`<option value="${v.id}">${v.title}</option>`));
+
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        scheduleChange() {
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        branchChange() {
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#serviceTbl').dataTable({
+                stateSave: true,
+                serverside: true,
+                processing: true,
+                responsive: true,
+                language: {
+                    @lang("datatable.strings")
                 },
-                {
-                    data: 'client',
-                    name: 'client'
+                ajax: {
+                    url: '{{ route("biller.contractservices.get") }}',
+                    type: 'POST',
+                    data: {
+                        customer_id: $('#customer').val(),
+                        contract_id: $('#contract').val(),
+                        schedule_id: $('#schedule').val(),
+                        branch_id: $('#branch').val(),
+                    }
                 },
-                {
-                    data: 'contract',
-                    name: 'contract'
-                },
-                {
-                    data: 'bill',
-                    name: 'bill'
-                },
-                {
-                    data: 'unit',
-                    name: 'unit'
-                },
-                {
-                    data: 'jobcard_no',
-                    name: 'jobcard_no'
-                },
-                {
-                    data: 'date',
-                    name: 'date'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            columnDefs: [
-                { type: "custom-number-sort", targets: [3] },
-                { type: "custom-date-sort", targets: [6] }
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    {
+                        data: 'client',
+                        name: 'client'
+                    },
+                    {
+                        data: 'contract',
+                        name: 'contract'
+                    },
+                    {
+                        data: 'bill',
+                        name: 'bill'
+                    },
+                    {
+                        data: 'unit',
+                        name: 'unit'
+                    },
+                    {
+                        data: 'jobcard_no',
+                        name: 'jobcard_no'
+                    },
+                    {
+                        data: 'date',
+                        name: 'date'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [3] },
+                    { type: "custom-date-sort", targets: [6] }
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection

@@ -104,7 +104,8 @@
                     data: {
                         keyword: request.term, 
                         customer_id: $('#customer').val(),
-                        branch_id: $('#branch').val()
+                        branch_id: $('#branch').val(),
+                        schedule_id: $('#schedule').val(),
                     },
                     success: data => {
                         // filter loaded ids
