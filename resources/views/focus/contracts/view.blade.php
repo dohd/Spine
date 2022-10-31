@@ -68,8 +68,9 @@
                                                     <th>Title</th>
                                                     <th>Start Date</th>
                                                     <th>End Date</th>
-                                                    <th>Unit Status</th>
-                                                    <th>Unit Serviced</th>
+                                                    <th>Actual Start Date</th>
+                                                    <th>Actual End Date</th>
+                                                    <th>Unit Service Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>                                                
@@ -79,8 +80,24 @@
                                                         <td>{{ $row->title }}</td>
                                                         <td>{{ dateFormat($row->start_date) }}</td>
                                                         <td>{{ dateFormat($row->end_date) }}</td>
-                                                        <td>{{ $row->status }} - {{ $row->equipments->count() }}</td>
-                                                        <td>{{ $row->contractservice? $row->contractservice->items->count() : 0 }}</td>
+                                                        <td>{{ $row->actual_startdate? dateFormat($row->actual_startdate) : '' }}</td>
+                                                        <td>{{ $row->actual_enddate? dateFormat($row->actual_enddate) : '' }}</td>
+                                                        <td>
+                                                            @php
+                                                                $serviced_equip_ids = array();
+                                                                foreach ($row->contractservices as $service) {
+                                                                    $equip_ids = $service->items()->pluck('equipment_id')->toArray();
+                                                                    $serviced_equip_ids = array_merge($serviced_equip_ids, $equip_ids);
+                                                                }
+                                                                $schedule_equip_ids = $row->equipments()->get(['equipments.id'])->pluck('id')->toArray();
+                                                                
+                                                                $schedule_units = count($schedule_equip_ids);
+                                                                $serviced_units = count($serviced_equip_ids);
+                                                                $unserviced_units = count(array_diff($schedule_equip_ids, $serviced_equip_ids));
+
+                                                                echo "unserviced: <b>{$unserviced_units} / {$schedule_units}</b> <br> serviced: <b>{$serviced_units} / {$schedule_units}</b>";
+                                                            @endphp
+                                                        </td>
                                                     </tr>
                                                 @endforeach                                                    
                                             </tbody>
