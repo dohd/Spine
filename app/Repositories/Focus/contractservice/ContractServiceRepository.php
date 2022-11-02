@@ -53,6 +53,8 @@ class ContractServiceRepository extends BaseRepository
                 $q->where('contract_id', request('contract_id'));
             })->when(request('branch_id'), function ($q) {
                 $q->where('branch_id', request('branch_id'));
+            })->when(request('schedule_id'), function ($q) {
+                $q->where('schedule_id', request('schedule_id'));
             });
         })->when(request('status'), function ($q) {
             $q->where('status', request('status'));
