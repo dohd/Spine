@@ -40,9 +40,13 @@ class ContractServicesController extends Controller
     {
         $customers = Customer::get(['id', 'company']);
         $contracts = Contract::get(['id', 'title', 'customer_id']);
-        $schedules = TaskSchedule::get(['id', 'title', 'contract_id']);
-        $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
-
+        $schedules = TaskSchedule::whereIn('id', function ($q) {
+            $q->select('schedule_id')->distinct()->from('contract_services');
+        })->get(['id', 'title', 'contract_id']);
+        $branches = Branch::whereIn('id', function ($q) {
+            $q->select('branch_id')->distinct()->from('contract_services');
+        })->where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
+        
         return new ViewResponse('focus.contractservices.index', compact('customers', 'contracts', 'schedules', 'branches'));
     }
 
@@ -65,7 +69,10 @@ class ContractServicesController extends Controller
     public function store(Request $request)
     {
         // extract request input
-        $data = $request->only(['customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 'rate_ttl', 'bill_ttl']);
+        $data = $request->only([
+            'customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 
+            'rate_ttl', 'bill_ttl', 'remark'
+        ]);
         $data_items = $request->only(['equipment_id', 'status', 'is_bill', 'note']);
 
         $data['ins'] = auth()->user()->ins;
@@ -111,7 +118,10 @@ class ContractServicesController extends Controller
     public function update(Request $request, ContractService $contractservice)
     {
         // extract request input
-        $data = $request->only(['customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 'technician', 'rate_ttl', 'bill_ttl']);
+        $data = $request->only([
+            'customer_id', 'branch_id', 'contract_id', 'schedule_id', 'date', 'jobcard_no', 
+            'technician', 'rate_ttl', 'bill_ttl', 'remark'
+        ]);
         $data_items = $request->only(['item_id', 'equipment_id', 'status', 'is_bill', 'note']);
 
         $data['ins'] = auth()->user()->ins;
@@ -144,9 +154,14 @@ class ContractServicesController extends Controller
     public function serviced_equipment()
     {
         $customers = Customer::get(['id', 'company']);
-        $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
         $contracts = Contract::get(['id', 'title', 'customer_id']);
+        $branches = Branch::whereIn('id', function ($q) {
+            $q->select('branch_id')->distinct()->from('contract_services');
+        })->where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
+        $schedules = TaskSchedule::whereIn('id', function ($q) {
+            $q->select('schedule_id')->distinct()->from('contract_services');
+        })->get(['id', 'title', 'contract_id']);
         
-        return view('focus.contractservices.serviced_equipment', compact('customers', 'branches', 'contracts'));
+        return view('focus.contractservices.serviced_equipment', compact('customers', 'branches', 'contracts', 'schedules'));
     }
 }
