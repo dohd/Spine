@@ -39,7 +39,6 @@
         if ($(this).val()) {
             const url = "{{ route('biller.rjcs.project_extra_details') }}";
             $.post(url, {project_id: $(this).val()}, data => {
-                // console.log(data)
                 // set djc preview link
                 if (data.djc) {
                     $('#djc-link').attr({
@@ -49,7 +48,7 @@
                 }
                 // verified jobcards
                 const jobcards = data.verified_jobcards;
-                if (jobcards && jobcards.length) {
+                if (!rjc && jobcards && jobcards.length) {
                     $('#equipmentsTbl tbody tr').remove();
                     jobcards.forEach(v => {
                         $('#addqproduct').click();
@@ -207,7 +206,6 @@
     if (rjcItems) {
         $('#equipmentsTbl tbody tr').remove();
         rjcItems.forEach((data,i) => {
-            // console.log(data)
             i = i+1;
             $('#addqproduct').click();
             $('#itemid-'+i).val(data.id);
