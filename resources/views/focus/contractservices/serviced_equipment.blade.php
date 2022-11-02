@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">PM Report Equipments</h4>
+            <h4 class="content-header-title">PM Report Serviced Equipments</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -47,6 +47,13 @@
                                 
                             </div>
                             <div class="row form-group">
+                                <div class="col-2">
+                                    <label for="schedule">Schedule</label>
+                                    <select name="schedule_id" class="form-control custom-select" id="schedule">
+                                        <option value="">-- select schedule --</option>
+                                    </select>
+                                </div>
+
                                 <div class="col-2">
                                     <label for="status">Status</label>
                                     <select name="status" class="form-control custom-select" id="status">
@@ -115,6 +122,7 @@
         customers: @json($customers),
         contracts: @json($contracts),
         branches: @json($branches),
+        schedules: @json($schedules),
 
         init() {
             $.ajaxSetup(config.ajax);
@@ -126,6 +134,7 @@
             $('#customer').change(this.customerChange);
             $('#branch').change(this.branchChange);
             $('#contract').change(this.contractChange);
+            $('#schedule').change(this.scheduleChange);
             $('#status').change(this.statusChange);
         },
 
@@ -152,11 +161,20 @@
         },
 
         contractChange() {
+            $('#schedule option:not(:first)').remove();
+            const schedules = Index.schedules.filter(v => v.contract_id == $(this).val());
+            schedules.forEach(v => $('#schedule').append(`<option value="${v.id}">${v.title}</option>`));
+
             $('#serviceTbl').DataTable().destroy();
             Index.drawDataTable();
         },
         
         statusChange() {
+            $('#serviceTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        scheduleChange() {
             $('#serviceTbl').DataTable().destroy();
             Index.drawDataTable();
         },
@@ -174,6 +192,7 @@
                         customer_id: $('#customer').val(),
                         contract_id: $('#contract').val(),
                         branch_id: $('#branch').val(),
+                        schedule_id: $('#schedule').val(),
                         status: $('#status').val(),
                     },
                     dataSrc: ({data}) => {
