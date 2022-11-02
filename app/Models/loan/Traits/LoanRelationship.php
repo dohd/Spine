@@ -2,12 +2,18 @@
 
 namespace App\Models\loan\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\account\Account;
 use App\Models\lender\Lender;
 use App\Models\transaction\Transaction;
 
 trait LoanRelationship
 {
+    public function employee()
+    {
+        return $this->belongsTo(User::class, 'employee_id');
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'loan');

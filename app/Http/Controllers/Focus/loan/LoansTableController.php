@@ -19,6 +19,7 @@ namespace App\Http\Controllers\Focus\loan;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\Focus\loan\LoanRepository;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\DataTables\Facades\DataTables;
 
 /**
@@ -54,30 +55,33 @@ class LoansTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('lender', function ($loan) {
-                return $loan->lender->name;
+                if ($loan->lender) return $loan->lender->name;
+                return 'N/A';
+            })
+            ->addColumn('borrower', function ($loan) {
+                if ($loan->employee) return $loan->employee->full_name;
+                return 'N/A';
             })
             ->addColumn('date', function ($loan) {
                 return dateFormat($loan->date);
             })
             ->addColumn('amount', function ($loan) {
-                return number_format($loan->amount+$loan->loan_fees, 2);
+                return NumberFormat($loan->amount + $loan->application_fee);
             })
             ->addColumn('amountpaid', function ($loan) {
-                return number_format($loan->amountpaid, 2);
+                return numberFormat($loan->amountpaid);
             })
             ->addColumn('installment', function ($loan) {
-                return number_format($loan->loan_inst, 2);
+                return numberFormat($loan->month_installment);
             })
             ->addColumn('interest', function ($loan) {
-                return number_format($loan->loan_interest, 2);
+                return numberFormat($loan->interest);
             })
-            ->addColumn('is_approved', function ($loan) {
-                return $loan->is_approved ? 'Approved' : 'Pending';
+            ->addColumn('status', function ($loan) {
+                return $loan->approval_status;
             })
             ->addColumn('actions', function ($loan) {
-                return '<button type="button"  data-url="'. route('biller.loans.approve_loan', $loan) .'" class="btn btn-success round approve" data-toggle="tooltip" title="Approve" data-placement="top"> 
-                        <i class="fa fa-check"></i></button>'
-                    .' '.$loan->action_buttons;
+                return $loan->action_buttons;
             })
             ->make(true);
     }

@@ -18,27 +18,35 @@
     </div>
     
     <div class="card">
+        <div class="card-header">
+            <a href="#" class="btn btn-info btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                <i class="fa fa-pencil" aria-hidden="true"></i> Approve
+            </a>
+        </div>
         <div class="card-body">
-            <table id="loansTbl" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+            <table id="loansTbl" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
                 <tbody>
                     @php
                         $loan_details = [
-                            'Loan ID' => $loan->tid,
-                            'Date' => dateFormat($loan->date),
-                            'Approval' => $loan->is_approved ? 'Approved' : 'Pending',
-                            'Lender' => $loan->lender->holder,
-                            'Bank Account' => $loan->bank->holder,
-                            'Loan Period' => $loan->time_pm . ' months',
-                            'Loan Amount' => number_format($loan->amount, 2),
-                            'Amount Payable (monthly)' => number_format($loan->amount_pm, 2),
-                            'Status' => $loan->status, 
-                            'Amount Paid' => number_format($loan->amountpaid, 2),
+                            'Loan No' => $loan->tid,
+                            'Lender' => $loan->lender? $loan->lender->name : 'N/A',
+                            'Borrower' => $loan->employee? $loan->employee->full_name : 'N/A',
+                            'Application Date' => dateFormat($loan->date),
+                            'Approval Status' => $loan->approval_status,
+                            'Approval Date' => dateFormat($loan->approval_date),
+                            'Approval Note' => $loan->approval_note,
+                            'Bank Account' => $loan->bank? $loan->bank->holder : '',
+                            'Loan Period (Months)' => $loan->month_period,
+                            'Loan Amount' => numberFormat($loan->amount + $loan->fee),
+                            'Monthly Installment' => numberFormat($loan->month_installment),
+                            'Amount Paid' => numberFormat($loan->amountpaid),
+                            'Payment Status' => $loan->paid_status,
                             'Note' => $loan->note,
                         ];
                     @endphp
                     @foreach ($loan_details as $key => $val)
                         <tr>
-                            <th>{{ $key }}</th>
+                            <th width="30%">{{ $key }}</th>
                             <td>{{ $val }}</td>
                         </tr> 
                     @endforeach                                      
@@ -47,4 +55,22 @@
         </div>
     </div>
 </div>
+@include('focus.loans.partials.approval_modal')
+@endsection
+
+@section('after-scripts')
+<script>
+    config = {
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    }
+
+    $('#statusModal').on('shown.bs.modal', function() {
+        $('.datepicker').datepicker({
+            container: '#statusModal',
+            ...config.date
+        }).datepicker('setDate', new Date());
+    });
+
+
+</script>
 @endsection

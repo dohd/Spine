@@ -57,7 +57,7 @@ class TransactionsTableController extends Controller
      *
      * @return mixed
      */
-    public function __invoke(ManageTransactionRequest $request)
+    public function __invoke()
     {
         $core = $this->transaction->getForDataTable();
 
@@ -82,10 +82,9 @@ class TransactionsTableController extends Controller
                 return $tr->category->name;
             })
             ->addColumn('reference', function ($tr) {
-                $result = $this->tax_transaction('reference', $tr);
-                if ($result) return $result;
-                
-                if ($tr->account) return $tr->account->holder . ' - ' . $tr->user_type;
+                $tax_tr = $this->tax_transaction('reference', $tr);
+                if ($tax_tr) return $tax_tr;
+                if ($tr->account) return $tr->account->holder;
             })
             ->addColumn('vat_rate', function ($tr) {
                 return $this->tax_transaction('vat_rate', $tr);                

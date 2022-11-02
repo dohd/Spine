@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title',  'Loans Management')
+@section('title', 'Loans Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -23,22 +23,21 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="loansTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="loansTbl" class="table table-striped table-bordered zero-configuration"
+                                cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Lender Type</th>
                                         <th>Lender</th>
-                                        <th>Lending Date</th>
-                                        <th>Total Loan</th>
-                                        <th>Approval</th>
-                                        <th>Period (months)</th>
-                                        <th>Installment(months)</th>
-                                        <th>Interest(months)</th>
-                                       
-                                        <th>Amount Paid</th>   
-                                        <th>Clear Date</th>
-                                    
+                                        <th>Borrower</th>
+                                        <th>Application Date</th>
+                                        <th>Loan Amount</th>
+                                        <th>Approval Status</th>
+                                        <th>Period (Months)</th>
+                                        <th>Monthly Installment</th>
+                                        <th>Interest</th>
+                                        <th>Amount Paid</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -68,39 +67,27 @@
         }
     });
 
-    // Approve Loan
-    $('#loansTbl').on('click', '.approve', function() {
-        $('#approveForm').attr('action', $(this).attr('data-url'));
-        swal({
-            title: 'Are You  Sure?',
-            icon: "warning",
-            buttons: true,
-            dangerMode: true,
-            showCancelButton: true,
-        }, () => $('#approveLoan').submit());
-    });
-
-    const language = {@lang('datatable.strings') };
     const dataTable = $('#loansTbl').dataTable({
         processing: true,
         serverSide: true,
         responsive: true,
-        language,
+        language: {@lang('datatable.strings')},
         ajax: {
-            url: '{{ route("biller.loans.get") }}',
+            url: '{{ route('biller.loans.get') }}',
             type: 'post'
         },
-        columns: [{
+        columns: [
+            {
                 data: 'DT_Row_Index',
                 name: 'id'
             },
             {
-                data: 'lender_type',
-                name: 'lender_type'
-            },
-            {
                 data: 'lender',
                 name: 'lender'
+            },
+            {
+                data: 'borrower',
+                name: 'borrower'
             },
             {
                 data: 'date',
@@ -111,12 +98,12 @@
                 name: 'amount'
             },
             {
-                data: 'is_approved',
-                name: 'is_approved'
+                data: 'status',
+                name: 'status'
             },
             {
-                data: 'time_pm',
-                name: 'time_pm'
+                data: 'month_period',
+                name: 'month_period'
             },
             {
                 data: 'installment',
@@ -126,7 +113,6 @@
                 data: 'interest',
                 name: 'interest'
             },
-          
             {
                 data: 'amountpaid',
                 name: 'amountpaid'
@@ -136,67 +122,60 @@
                 name: 'actions',
                 searchable: false,
                 sortable: false
-            },            
+            },
         ],
-        columnDefs: [
-        {
-          // For Responsive
-          className: 'control',
-          orderable: false,
-          responsivePriority: 2,
-          targets: 0,
-          render: function (data, type, full, meta) {
-            return '';
-          }
-        },
-     
-    
-      ],
         order: [
             [0, "desc"]
         ],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-                    buttons: [
+        buttons: ['csv', 'excel', 'print'],
+        // columnDefs: [{
+        //         // For Responsive
+        //         className: 'control',
+        //         orderable: false,
+        //         responsivePriority: 2,
+        //         targets: 0,
+        //         render: function(data, type, full, meta) {
+        //             return '';
+        //         }
+        //     },
 
-                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 9]}},
-                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 9]}},
-                        {extend: 'print', footer: true, exportOptions: {columns: [0, 9]}}
-                    ]
-                },
-                // For responsive popup
-      responsive: {
-        details: {
-          display: $.fn.dataTable.Responsive.display.modal({
-            header: function (row) {
-              var data = row.data();
-              return 'Loan Details For ' + data['lender'];
-            }
-          }),
-          type: 'column',
-          renderer: function (api, rowIdx, columns) {
-            var data = $.map(columns, function (col, i) {
-              return col.columnIndex !== 6 // ? Do not show row in modal popup if title is blank (for check box)
-                ? '<tr data-dt-row="' +
-                    col.rowIdx +
-                    '" data-dt-column="' +
-                    col.columnIndex +
-                    '">' +
-                    '<td>' +
-                    col.title +
-                    ':' +
-                    '</td> ' +
-                    '<td>' +
-                    col.data +
-                    '</td>' +
-                    '</tr>'
-                : '';
-            }).join('');
-            return data ? $('<table class="table"/>').append('<tbody>' + data + '</tbody>') : false;
-          }
-        }
-      },
+
+        // ],
+        // // responsive popup
+        // responsive: {
+        //     details: {
+        //         display: $.fn.dataTable.Responsive.display.modal({
+        //             header: (row) => {
+        //                 return `Loan Details For ${row.data()['lender']}`;
+        //             }
+        //         }),
+        //         type: 'column',
+        //         renderer: (api, rowIdx, columns) => {
+        //             var data = $.map(columns, function(col, i) {
+        //                 return col.columnIndex !==
+        //                     6 // ? Do not show row in modal popup if title is blank (for check box)
+        //                     ?
+        //                     '<tr data-dt-row="' +
+        //                     col.rowIdx +
+        //                     '" data-dt-column="' +
+        //                     col.columnIndex +
+        //                     '">' +
+        //                     '<td>' +
+        //                     col.title +
+        //                     ':' +
+        //                     '</td> ' +
+        //                     '<td>' +
+        //                     col.data +
+        //                     '</td>' +
+        //                     '</tr>' :
+        //                     '';
+        //             }).join('');
+        //             return data ? $('<table class="table"/>').append('<tbody>' + data + '</tbody>') : false;
+        //         }
+        //     }
+        // },
     });
 </script>
 @endsection
