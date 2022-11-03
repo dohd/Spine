@@ -30,6 +30,7 @@
     <table id="equipmentTbl" class="table">
         <thead>
             <tr>
+                <th>Equipment No</th>
                 <th>Serial No</th>
                 <th>Type</th>
                 <th>Branch</th>
@@ -45,6 +46,7 @@
         </thead>
         <tbody>
             <tr class="d-none">
+                <td>#tid</td>
                 <td>#equip_serial</td>
                 <td>#make_type</td>
                 <td>#branch</td>

@@ -50,6 +50,7 @@
                                         <thead>
                                             <tr>
                                                 <th>#</th>
+                                                <th>Equipment No.</th>
                                                 <th>Serial No</th>
                                                 <th>Type</th>
                                                 <th>Branch</th>
@@ -66,6 +67,7 @@
                                             @foreach ($taskschedule->equipments as $i => $row)                                            
                                                 <tr>
                                                     <td>{{ $i+1 }}</td>
+                                                    <td>{{ gen4tid('Eq-', $row->tid) }}</td>
                                                     <td>{{ $row->equip_serial }}</td>
                                                     <td>{{ $row->make_type }}</td>
                                                     <td>{{ $row->branch->name }}</td>

@@ -80,17 +80,17 @@
             success: data => data.forEach(fillTable)
         })
     });
-    function fillTable(obj) {
+    function fillTable(equipment) {
         let html = equipRow.replace('d-none', '');
-        let elements = ['#id', '#equip_serial', '#make_type', '#branch', '#location', '#service_rate'];
-        elements.forEach(el => {
-            for (let p in obj) {
-                if ('#'+p == el && p == 'branch') html = html.replace(el, obj.branch.name);
-                else if ('#'+p == el && p == 'service_rate') {
-                    html = html.replace(el, parseFloat(obj.service_rate).toLocaleString())
-                    .replace(el, obj.service_rate);
+        let elementIds = ['#id', '#tid', '#equip_serial', '#make_type', '#branch', '#location', '#service_rate'];
+        elementIds.forEach(id => {
+            for (let prop in equipment) {
+                if ('#'+prop == id && prop == 'branch') html = html.replace(id, equipment.branch.name);
+                else if ('#'+prop == id && prop == 'service_rate') {
+                    html = html.replace(id, parseFloat(equipment.service_rate).toLocaleString())
+                    .replace(id, equipment.service_rate);
                 } 
-                else if ('#'+p == el) html = html.replace(el, obj[p]? obj[p] : '');                
+                else if ('#'+prop == id) html = html.replace(id, equipment[prop]? equipment[prop] : '');                
             }
         });
         $('#equipmentTbl tbody').append('<tr>' + html + '</tr>');

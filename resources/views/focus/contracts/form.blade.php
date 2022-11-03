@@ -115,7 +115,8 @@
     <table id="equipmentTbl" class="table">
         <thead>
             <tr>
-                <th>Serial No</th>
+                <th>Equipment No.</th>
+                <th>Serial No.</th>
                 <th>Type</th>
                 <th>Branch</th>
                 <th>Location</th>
@@ -130,6 +131,7 @@
         <tbody>
             <!-- equipment row template -->
             <tr class="d-none">
+                <td>#tid</td>
                 <td>#equip_serial</td>
                 <td>#make_type</td>
                 <td>#branch</td>
@@ -145,6 +147,7 @@
             @isset($contract)
                 @foreach ($contract->equipments as $row)
                     <tr>
+                        <td>{{ gen4tid('Eq-', $row->tid) }}</td>
                         <td>{{ $row->equip_serial }}</td>
                         <td>{{ $row->make_type }}</td>
                         <td>{{ $row->branch->name }}</td>
