@@ -13,7 +13,7 @@ class EditUsergatewayentryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('edit-usergatewayentry');
+        return access()->allow('edit-user-gateway');
     }
 
     /**

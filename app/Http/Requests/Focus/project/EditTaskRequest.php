@@ -13,7 +13,7 @@ class EditTaskRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('task-edit');
+        return access()->allow('edit-task');
     }
 
     /**

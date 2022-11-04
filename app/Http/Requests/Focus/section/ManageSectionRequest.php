@@ -13,7 +13,7 @@ class ManageSectionRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('misc-manage');
+        return access()->allow('manage-misc');
     }
 
     /**

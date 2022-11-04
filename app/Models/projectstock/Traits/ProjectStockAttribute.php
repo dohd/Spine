@@ -15,8 +15,8 @@ trait ProjectStockAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.projectstock.show") . ' ' 
-            . $this->getEditButtonAttribute("project-edit", "biller.projectstock.edit") . ' ' 
-            . $this->getDeleteButtonAttribute("project-delete", "biller.projectstock.destroy");
+        return $this->getViewButtonAttribute("manage-project", "biller.projectstock.show") . ' ' 
+            . $this->getEditButtonAttribute("edit-project", "biller.projectstock.edit") . ' ' 
+            . $this->getDeleteButtonAttribute("delete-project", "biller.projectstock.destroy");
     }
 }

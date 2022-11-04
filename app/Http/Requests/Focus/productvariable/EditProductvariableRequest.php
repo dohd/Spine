@@ -13,7 +13,7 @@ class EditProductvariableRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('edit-productvariable');
+        return access()->allow('edit-product');
     }
 
     /**

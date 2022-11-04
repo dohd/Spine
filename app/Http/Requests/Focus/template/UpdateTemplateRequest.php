@@ -13,7 +13,7 @@ class UpdateTemplateRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-template');
+        return access()->allow('edit-template');
     }
 
     /**

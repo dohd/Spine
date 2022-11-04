@@ -13,7 +13,7 @@ class ManageTransactioncategoryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('manage-transactioncategory');
+        return access()->allow('manage-transaction-category');
     }
 
     /**

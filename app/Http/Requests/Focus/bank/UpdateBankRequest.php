@@ -13,7 +13,7 @@ class UpdateBankRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-bank');
+        return access()->allow('edit-bank');
     }
 
     /**

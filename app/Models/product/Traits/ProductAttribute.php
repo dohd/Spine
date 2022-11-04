@@ -18,9 +18,9 @@ trait ProductAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("product-manage", "biller.products.show").'
-                '.$this->getEditButtonAttribute("product-edit", "biller.products.edit").'
-                '.$this->getDeleteButtonAttribute("product-delete", "biller.products.destroy",'table').'
+         '.$this->getViewButtonAttribute("manage-product", "biller.products.show").'
+                '.$this->getEditButtonAttribute("edit-product", "biller.products.edit").'
+                '.$this->getDeleteButtonAttribute("delete-product", "biller.products.destroy",'table').'
                 ';
     }
 }

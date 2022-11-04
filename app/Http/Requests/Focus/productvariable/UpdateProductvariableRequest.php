@@ -13,7 +13,7 @@ class UpdateProductvariableRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-productvariable');
+        return access()->allow('update-product');
     }
 
     /**

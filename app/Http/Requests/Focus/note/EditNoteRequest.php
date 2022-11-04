@@ -13,7 +13,7 @@ class EditNoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('note-data');
+        return access()->allow('edit-note');
     }
 
     /**

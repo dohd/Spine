@@ -62,9 +62,9 @@ class QuotesController extends Controller
      * @return \App\Http\Responses\ViewResponse
      */
     public function index(ManageQuoteRequest $request)
-    {
+    {   
         $customers = Customer::all(['id', 'company']);
-
+        
         return new ViewResponse('focus.quotes.index', compact('customers'));
     }
 

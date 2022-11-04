@@ -10,8 +10,8 @@ trait AttendanceAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("product-manage", "biller.attendances.show")
-        // .' '. $this->getEditButtonAttribute("product-edit", "biller.attendances.edit")
-        .' '.$this->getDeleteButtonAttribute("product-delete", "biller.attendances.destroy");     
+        return $this->getViewButtonAttribute("manage-attendance", "biller.attendances.show")
+        // .' '. $this->getEditButtonAttribute("attendance-edit", "biller.attendances.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-attendance", "biller.attendances.destroy");     
     }
 }

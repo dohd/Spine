@@ -13,7 +13,7 @@ class UpdateUsergatewayentryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-usergatewayentry');
+        return access()->allow('update-user-gateway');
     }
 
     /**

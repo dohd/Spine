@@ -13,7 +13,7 @@ class EditTransactioncategoryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('edit-transactioncategory');
+        return access()->allow('edit-transaction-category');
     }
 
     /**

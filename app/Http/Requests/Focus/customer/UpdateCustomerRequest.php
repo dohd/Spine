@@ -13,7 +13,7 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-customer');
+        return access()->allow('edit-client');
     }
 
     /**

@@ -18,9 +18,9 @@ trait SupplierAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("supplier-manage", "biller.suppliers.show").'
-                '.$this->getEditButtonAttribute("supplier-data", "biller.suppliers.edit").'
-                '.$this->getDeleteButtonAttribute("supplier-data", "biller.suppliers.destroy").'
+         '.$this->getViewButtonAttribute("manage-supplier", "biller.suppliers.show").'
+                '.$this->getEditButtonAttribute("edit-supplier", "biller.suppliers.edit").'
+                '.$this->getDeleteButtonAttribute("delete-supplier", "biller.suppliers.destroy").'
                 ';
     }
 }

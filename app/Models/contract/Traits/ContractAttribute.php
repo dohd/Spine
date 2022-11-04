@@ -17,8 +17,8 @@ trait ContractAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.contracts.show")
-            . ' ' . $this->getEditButtonAttribute("project-edit", "biller.contracts.edit")
-            . ' ' . $this->getDeleteButtonAttribute("project-delete", "biller.contracts.destroy");
+        return $this->getViewButtonAttribute("manage-pm-contract", "biller.contracts.show")
+            . ' ' . $this->getEditButtonAttribute("edit-pm-contract", "biller.contracts.edit")
+            . ' ' . $this->getDeleteButtonAttribute("delete-pm-contract", "biller.contracts.destroy");
     }
 }

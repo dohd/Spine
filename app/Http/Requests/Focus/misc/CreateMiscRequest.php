@@ -13,7 +13,7 @@ class CreateMiscRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('misc-create');
+        return access()->allow('create-misc');
     }
 
     /**

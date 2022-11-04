@@ -13,7 +13,7 @@ class StoreCustomerRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-customer');
+        return access()->allow('create-client');
     }
 
     /**

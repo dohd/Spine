@@ -18,7 +18,7 @@ trait CreditorAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("manage-customer", "biller.creditors.show").'
+         '.$this->getViewButtonAttribute("manage-client", "biller.creditors.show").'
                 ';
     }
 }

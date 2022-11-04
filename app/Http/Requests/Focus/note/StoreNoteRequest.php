@@ -13,7 +13,7 @@ class StoreNoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-note');
+        return access()->allow('create-note');
     }
 
     /**

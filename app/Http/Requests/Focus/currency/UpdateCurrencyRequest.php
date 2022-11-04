@@ -13,7 +13,7 @@ class UpdateCurrencyRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-currency');
+        return access()->allow('edit-currency');
     }
 
     /**

@@ -19,8 +19,8 @@ trait PricegroupAttribute
     {
         return '
          '.$this->getViewButtonAttribute("manage-product", "biller.pricegroups.show").'
-                '.$this->getEditButtonAttribute("product-create", "biller.pricegroups.edit").'
-                '.$this->getDeleteButtonAttribute("product-create", "biller.pricegroups.destroy").'
+                '.$this->getEditButtonAttribute("create-product", "biller.pricegroups.edit").'
+                '.$this->getDeleteButtonAttribute("delete-product", "biller.pricegroups.destroy").'
                 ';
     }
 }

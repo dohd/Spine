@@ -13,7 +13,7 @@ class StoreAdditionalRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-additional');
+        return access()->allow('create-additional');
     }
 
     /**

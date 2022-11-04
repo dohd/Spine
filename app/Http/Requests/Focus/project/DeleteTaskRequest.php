@@ -13,7 +13,7 @@ class DeleteTaskRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('task-delete');
+        return access()->allow('delete-task');
     }
 
     /**

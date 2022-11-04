@@ -13,7 +13,7 @@ class StoreProjectRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('project-create');
+        return access()->allow('create-project');
     }
 
     /**

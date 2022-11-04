@@ -13,7 +13,7 @@ class ManageDepartmentRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('department-manage');
+        return access()->allow('manage-department');
     }
 
     /**

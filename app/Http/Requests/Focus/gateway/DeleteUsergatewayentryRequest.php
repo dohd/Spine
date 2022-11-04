@@ -13,7 +13,7 @@ class DeleteUsergatewayentryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('delete-usergatewayentry');
+        return access()->allow('delete-user-gateway');
     }
 
     /**

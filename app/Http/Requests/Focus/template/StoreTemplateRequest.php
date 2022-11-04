@@ -13,7 +13,7 @@ class StoreTemplateRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-template');
+        return access()->allow('create-template');
     }
 
     /**

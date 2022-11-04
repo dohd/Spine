@@ -13,7 +13,7 @@ class StorePrefixRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-prefix');
+        return access()->allow('create-prefix');
     }
 
     /**

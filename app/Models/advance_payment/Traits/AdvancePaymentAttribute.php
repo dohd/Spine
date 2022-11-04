@@ -10,8 +10,8 @@ trait AdvancePaymentAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("product-manage", "biller.advance_payments.show")
-        .' '. $this->getEditButtonAttribute("product-edit", "biller.advance_payments.edit")
-        .' '.$this->getDeleteButtonAttribute("product-delete", "biller.advance_payments.destroy");     
+        return $this->getViewButtonAttribute("manage-advance-payment", "biller.advance_payments.show")
+        .' '. $this->getEditButtonAttribute("edit-advance-payment", "biller.advance_payments.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-advance-payment", "biller.advance_payments.destroy");     
     }
 }

@@ -13,7 +13,7 @@ class EditProjectRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('project-edit');
+        return access()->allow('edit-project');
     }
 
     /**

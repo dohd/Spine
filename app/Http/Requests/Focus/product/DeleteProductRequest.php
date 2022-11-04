@@ -13,7 +13,7 @@ class DeleteProductRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('product-delete');
+        return access()->allow('delete-product');
     }
 
     /**

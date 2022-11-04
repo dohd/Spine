@@ -13,7 +13,7 @@ class EditHrmRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('edit-hrm');
+        return access()->allow('hrm');
     }
 
     /**

@@ -17,8 +17,8 @@ trait BranchAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-customer", "biller.branches.show")
-            . ' ' . $this->getEditButtonAttribute("manage-customer", "biller.branches.edit")
-            . ' ' . $this->getDeleteButtonAttribute("customer-create", "biller.branches.destroy");
+        return $this->getViewButtonAttribute("manage-branch", "biller.branches.show")
+            . ' ' . $this->getEditButtonAttribute("edit-branch", "biller.branches.edit")
+            . ' ' . $this->getDeleteButtonAttribute("delete-branch", "biller.branches.destroy");
     }
 }

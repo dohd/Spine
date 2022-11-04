@@ -13,7 +13,7 @@ class StoreHrmRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-hrm');
+        return access()->allow('hrm');
     }
 
     /**

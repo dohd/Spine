@@ -13,7 +13,7 @@ class UpdateTransactionRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-transaction');
+        return access()->allow('edit-transaction');
     }
 
     /**

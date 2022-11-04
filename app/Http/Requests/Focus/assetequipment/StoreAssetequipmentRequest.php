@@ -13,7 +13,7 @@ class StoreAssetequipmentRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('product-manage');
+        return access()->allow('create-asset-equipment');
     }
 
     /**

@@ -13,7 +13,7 @@ class UpdateSupplierRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-supplier');
+        return access()->allow('edit-supplier');
     }
 
     /**

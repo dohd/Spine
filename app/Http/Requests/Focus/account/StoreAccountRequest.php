@@ -13,7 +13,7 @@ class StoreAccountRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('account-data');
+        return access()->allow('manage-account');
     }
 
     /**

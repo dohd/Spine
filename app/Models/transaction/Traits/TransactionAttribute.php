@@ -17,6 +17,6 @@ trait TransactionAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("transaction-manage", "biller.transactions.show"); 
+        return $this->getViewButtonAttribute("manage-account", "biller.transactions.show"); 
     }
 }

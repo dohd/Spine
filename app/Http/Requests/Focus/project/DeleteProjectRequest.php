@@ -13,7 +13,7 @@ class DeleteProjectRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('project-delete');
+        return access()->allow('delete-project');
     }
 
     /**

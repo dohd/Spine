@@ -13,7 +13,7 @@ class ManageProjectRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('project-manage');
+        return access()->allow('manage-project');
     }
 
     /**

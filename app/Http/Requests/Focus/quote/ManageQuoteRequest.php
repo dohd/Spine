@@ -13,7 +13,7 @@ class ManageQuoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('quote-manage');
+        return access()->allow('manage-quote');
     }
 
     /**

@@ -13,7 +13,7 @@ class ManageAccountRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('account-manage');
+        return access()->allow('manage-account');
     }
 
     /**

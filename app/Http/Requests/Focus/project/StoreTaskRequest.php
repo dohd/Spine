@@ -13,7 +13,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-task');
+        return access()->allow('create-task');
     }
 
     /**

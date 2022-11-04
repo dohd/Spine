@@ -13,7 +13,7 @@ class UpdateAllowanceRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-department');
+        return access()->allow('edit-department');
     }
 
     /**

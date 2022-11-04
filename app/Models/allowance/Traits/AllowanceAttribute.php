@@ -18,9 +18,9 @@ trait AllowanceAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("department-manage", "biller.allowances.show").'
-                '.$this->getEditButtonAttribute("department-data", "biller.allowances.edit").'
-                '.$this->getDeleteButtonAttribute("department-data", "biller.allowances.destroy").'
+         '.$this->getViewButtonAttribute("manage-department", "biller.allowances.show").'
+                '.$this->getEditButtonAttribute("edit-department", "biller.allowances.edit").'
+                '.$this->getDeleteButtonAttribute("delete-department", "biller.allowances.destroy").'
                 ';
     }
 }

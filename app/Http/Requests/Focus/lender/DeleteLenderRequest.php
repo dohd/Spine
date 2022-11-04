@@ -13,7 +13,7 @@ class DeleteLenderRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('delete-customer');
+        return access()->allow('delete-client');
     }
 
     /**

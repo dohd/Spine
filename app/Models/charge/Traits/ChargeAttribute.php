@@ -20,6 +20,6 @@ trait ChargeAttribute
         return 
         // $this->getViewButtonAttribute("transaction-manage", "biller.charges.show")
             // . ' ' . $this->getEditButtonAttribute("transaction-data", "biller.charges.edit")
-            $this->getDeleteButtonAttribute("transaction-data", "biller.charges.destroy");
+            $this->getDeleteButtonAttribute("delete-account", "biller.charges.destroy");
     }
 }

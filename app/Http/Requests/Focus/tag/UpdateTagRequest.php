@@ -13,7 +13,7 @@ class UpdateTagRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-tag');
+        return access()->allow('edit-tag');
     }
 
     /**

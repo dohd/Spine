@@ -14,7 +14,7 @@ class ManageTaskRequest extends FormRequest
      */
     public function authorize()
     {
-      if(access()->allow('task-manage')){
+      if(access()->allow('manage-task')){
           return true;
       }
       if($this->id){

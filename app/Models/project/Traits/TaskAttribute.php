@@ -18,9 +18,9 @@ trait TaskAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("task-manage", "biller.tasks.show").'
-                '.$this->getEditButtonAttribute("task-edit", "biller.tasks.edit").'
-                '.$this->getDeleteButtonAttribute("task-delete", "biller.tasks.destroy").'
+         '.$this->getViewButtonAttribute("manage-task", "biller.tasks.show").'
+                '.$this->getEditButtonAttribute("edit-task", "biller.tasks.edit").'
+                '.$this->getDeleteButtonAttribute("delete-task", "biller.tasks.destroy").'
                 ';
     }
 }

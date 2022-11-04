@@ -13,7 +13,7 @@ class ManageWithholdingRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-manage');
+        return access()->allow('manage-withholding-cert');
     }
 
     /**

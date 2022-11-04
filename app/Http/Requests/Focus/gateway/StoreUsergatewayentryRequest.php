@@ -13,7 +13,7 @@ class StoreUsergatewayentryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-usergatewayentry');
+        return access()->allow('store-user-gateway');
     }
 
     /**

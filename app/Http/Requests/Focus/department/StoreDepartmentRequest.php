@@ -13,7 +13,7 @@ class StoreDepartmentRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('department-data');
+        return access()->allow('create-department');
     }
 
     /**

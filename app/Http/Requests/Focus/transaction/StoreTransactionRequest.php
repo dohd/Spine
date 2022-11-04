@@ -13,7 +13,7 @@ class StoreTransactionRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-data');
+        return access()->allow('create-transaction');
     }
 
     /**

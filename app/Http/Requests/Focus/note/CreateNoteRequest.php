@@ -13,7 +13,7 @@ class CreateNoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('note-create');
+        return access()->allow('create-note');
     }
 
     /**

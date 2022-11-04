@@ -13,7 +13,7 @@ class UpdateMiscRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-misc');
+        return access()->allow('edit-misc');
     }
 
     /**

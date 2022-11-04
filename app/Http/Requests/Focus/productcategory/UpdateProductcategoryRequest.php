@@ -13,7 +13,7 @@ class UpdateProductcategoryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-productcategory');
+        return access()->allow('edit-product-category');
     }
 
     /**

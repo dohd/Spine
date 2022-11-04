@@ -13,7 +13,7 @@ class UpdateHrmRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-hrm');
+        return access()->allow('hrm');
     }
 
     /**

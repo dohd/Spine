@@ -13,7 +13,7 @@ class DeleteBankRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('delete-bank');
+        return access()->allow('delete-account');
     }
 
     /**

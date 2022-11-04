@@ -13,7 +13,7 @@ class StoreSupplierRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('supplier-data');
+        return access()->allow('create-supplier');
     }
 
     /**

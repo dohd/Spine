@@ -13,7 +13,7 @@ class ManageInvoiceRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('invoice-manage');
+        return access()->allow('manage-invoice');
     }
 
     /**

@@ -13,7 +13,7 @@ class UpdatePrefixRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-prefix');
+        return access()->allow('edit-prefix');
     }
 
     /**

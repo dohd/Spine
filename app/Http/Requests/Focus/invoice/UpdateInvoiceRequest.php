@@ -13,7 +13,7 @@ class UpdateInvoiceRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-invoice');
+        return access()->allow('edit-invoice');
     }
 
     /**

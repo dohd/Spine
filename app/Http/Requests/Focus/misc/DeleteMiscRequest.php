@@ -13,7 +13,7 @@ class DeleteMiscRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('misc-delete');
+        return access()->allow('delete-misc');
     }
 
     /**

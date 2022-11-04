@@ -13,7 +13,7 @@ class UpdateWarehouseRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-warehouse');
+        return access()->allow('edit-warehouse');
     }
 
     /**

@@ -13,7 +13,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('stocktransfer');
+        return access()->allow('manage-product');
     }
 
     /**

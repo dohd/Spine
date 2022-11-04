@@ -19,7 +19,7 @@ trait CreditNoteAttribute
     {
         return 
             // $this->getViewButtonAttribute("transaction-manage", "biller.creditnotes.show")
-            ' '.$this->getEditButtonAttribute("transaction-data", "biller.creditnotes.edit")
-            .' '.$this->getDeleteButtonAttribute("transaction-data", "biller.creditnotes.destroy");
+            ' '.$this->getEditButtonAttribute("edit-credit-note", "biller.creditnotes.edit")
+            .' '.$this->getDeleteButtonAttribute("delete-credit-note", "biller.creditnotes.destroy");
     }
 }

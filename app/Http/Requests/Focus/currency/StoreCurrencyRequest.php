@@ -13,7 +13,7 @@ class StoreCurrencyRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-currency');
+        return access()->allow('create-currency');
     }
 
     /**

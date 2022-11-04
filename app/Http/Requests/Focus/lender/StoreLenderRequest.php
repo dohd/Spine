@@ -13,7 +13,7 @@ class StoreLenderRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-customer');
+        return access()->allow('store-client');
     }
 
     /**

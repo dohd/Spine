@@ -13,7 +13,7 @@ class StoreProductcategoryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('productcategory-data');
+        return access()->allow('create-product-category');
     }
 
     /**

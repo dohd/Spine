@@ -20,6 +20,6 @@ trait PriceListAttribute
         return  
         // $this->getViewButtonAttribute("manage-product", "biller.pricegroups.show") 
         //  . ' ' . $this->getEditButtonAttribute("product-create", "biller.pricegroups.edit") 
-        $this->getDeleteButtonAttribute("product-create", "biller.pricelists.destroy") ;
+        $this->getDeleteButtonAttribute("delete-pricelist", "biller.pricelists.destroy") ;
     }
 }

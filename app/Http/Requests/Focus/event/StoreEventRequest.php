@@ -13,7 +13,7 @@ class StoreEventRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-event');
+        return access()->allow('create-event');
     }
 
     /**

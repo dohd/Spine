@@ -13,7 +13,7 @@ class StoreTagRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-tag');
+        return access()->allow('create-tag');
     }
 
     /**

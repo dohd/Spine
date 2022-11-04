@@ -13,7 +13,7 @@ class MakePaymentRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('make-payment');
+        return access()->allow('manage-account');
     }
 
     /**

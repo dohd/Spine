@@ -13,7 +13,7 @@ class ManageNoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('note-manage');
+        return access()->allow('manage-note');
     }
 
     /**

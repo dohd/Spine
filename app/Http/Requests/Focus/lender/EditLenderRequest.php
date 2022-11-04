@@ -13,7 +13,7 @@ class EditLenderRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('edit-customer');
+        return access()->allow('edit-client');
     }
 
     /**

@@ -19,9 +19,9 @@ trait EquipmentAttribute
     {
 
         return '
-         '.$this->getViewButtonAttribute("project-manage", "biller.equipments.show").'
-                '.$this->getEditButtonAttribute("project-manage", "biller.equipments.edit").'
-                '.$this->getDeleteButtonAttribute("project-manage", "biller.equipments.destroy").'
+         '.$this->getViewButtonAttribute("manage-equipment", "biller.equipments.show").'
+                '.$this->getEditButtonAttribute("edit-equipment", "biller.equipments.edit").'
+                '.$this->getDeleteButtonAttribute("delete-equipment", "biller.equipments.destroy").'
                 ';
 
 

@@ -13,7 +13,7 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-product');
+        return access()->allow('create-product');
     }
 
     /**

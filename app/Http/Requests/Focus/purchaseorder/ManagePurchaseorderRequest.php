@@ -13,7 +13,7 @@ class ManagePurchaseorderRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('purchaseorder-manage');
+        return access()->allow('manage-purchase');
     }
 
     /**

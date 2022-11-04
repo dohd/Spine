@@ -13,7 +13,7 @@ class ManageProductvariableRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('manage-productvariable');
+        return access()->allow('manage-product');
     }
 
     /**

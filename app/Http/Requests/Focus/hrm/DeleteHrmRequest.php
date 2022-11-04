@@ -13,7 +13,7 @@ class DeleteHrmRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('delete-hrm');
+        return access()->allow('hrm');
     }
 
     /**

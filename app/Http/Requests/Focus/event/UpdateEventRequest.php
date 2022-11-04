@@ -13,7 +13,7 @@ class UpdateEventRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-event');
+        return access()->allow('edit-event');
     }
 
     /**

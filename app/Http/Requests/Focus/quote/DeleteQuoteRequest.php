@@ -13,7 +13,7 @@ class DeleteQuoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('quote-delete');
+        return access()->allow('delete-quote');
     }
 
     /**

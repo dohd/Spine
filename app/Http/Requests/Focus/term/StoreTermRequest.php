@@ -13,7 +13,7 @@ class StoreTermRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-term');
+        return access()->allow('create-term');
     }
 
     /**

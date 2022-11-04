@@ -13,7 +13,7 @@ class EditQuoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('quote-edit');
+        return access()->allow('edit-quote');
     }
 
     /**

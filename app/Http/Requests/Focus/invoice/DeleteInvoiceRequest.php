@@ -13,7 +13,7 @@ class DeleteInvoiceRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('invoice-delete');
+        return access()->allow('delete-invoice');
     }
 
     /**

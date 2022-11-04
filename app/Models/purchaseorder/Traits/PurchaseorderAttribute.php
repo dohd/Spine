@@ -18,9 +18,9 @@ trait PurchaseorderAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("purchaseorder-manage", "biller.purchaseorders.show").'
-                '.$this->getEditButtonAttribute("purchaseorder-data", "biller.purchaseorders.edit").'
-                '.$this->getDeleteButtonAttribute("purchaseorder-data", "biller.purchaseorders.destroy").'
+         '.$this->getViewButtonAttribute("manage-purchase", "biller.purchaseorders.show").'
+                '.$this->getEditButtonAttribute("edit-purchase", "biller.purchaseorders.edit").'
+                '.$this->getDeleteButtonAttribute("delete-purchase", "biller.purchaseorders.destroy").'
                 ';
     }
 }

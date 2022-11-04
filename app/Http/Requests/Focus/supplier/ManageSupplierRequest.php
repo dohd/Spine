@@ -13,7 +13,7 @@ class ManageSupplierRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('supplier-manage');
+        return access()->allow('manage-supplier');
     }
 
     /**

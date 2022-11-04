@@ -13,7 +13,7 @@ class CreateTaskRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('task-create');
+        return access()->allow('create-task');
     }
 
     /**

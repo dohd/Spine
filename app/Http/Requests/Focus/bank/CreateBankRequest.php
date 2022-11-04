@@ -13,7 +13,7 @@ class CreateBankRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('create-bank');
+        return access()->allow('create-account');
     }
 
     /**

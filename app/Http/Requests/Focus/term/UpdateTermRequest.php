@@ -13,7 +13,7 @@ class UpdateTermRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-term');
+        return access()->allow('edit-term');
     }
 
     /**

@@ -13,7 +13,7 @@ class DeleteCustomergroupRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('delete-customergroup');
+        return access()->allow('delete-client-group');
     }
 
     /**

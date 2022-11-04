@@ -13,7 +13,7 @@ class ManageUsergatewayentryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('manage-usergatewayentry');
+        return access()->allow('manage-user-gateway');
     }
 
     /**

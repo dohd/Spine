@@ -13,7 +13,7 @@ class CreateHrmRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('create-hrm');
+        return access()->allow('hrm');
     }
 
     /**

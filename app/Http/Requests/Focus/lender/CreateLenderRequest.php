@@ -13,7 +13,7 @@ class CreateLenderRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('customer-create');
+        return access()->allow('create-client');
     }
 
     /**

@@ -13,7 +13,7 @@ class WalletRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('wallet');
+        return access()->allow('manage-client');
     }
 
     /**

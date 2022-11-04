@@ -18,7 +18,7 @@ trait EventAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("edit-event", "biller.events.show").'
+         '.$this->getViewButtonAttribute("manage-event", "biller.events.show").'
                 '.$this->getEditButtonAttribute("edit-event", "biller.events.edit").'
                 '.$this->getDeleteButtonAttribute("delete-event", "biller.events.destroy").'
                 ';

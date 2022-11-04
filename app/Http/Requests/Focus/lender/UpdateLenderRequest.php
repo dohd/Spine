@@ -13,7 +13,7 @@ class UpdateLenderRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('update-customer');
+        return access()->allow('update-client');
     }
 
     /**

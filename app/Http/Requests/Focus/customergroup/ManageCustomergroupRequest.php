@@ -13,7 +13,7 @@ class ManageCustomergroupRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('manage-customergroup');
+        return access()->allow('manage-client-group');
     }
 
     /**

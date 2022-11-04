@@ -13,7 +13,7 @@ class CreateUsergatewayentryRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('create-usergatewayentry');
+        return access()->allow('create-user-gateway');
     }
 
     /**

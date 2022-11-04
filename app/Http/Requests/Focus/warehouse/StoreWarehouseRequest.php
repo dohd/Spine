@@ -13,7 +13,7 @@ class StoreWarehouseRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('warehouse-data');
+        return access()->allow('create-warehouse');
     }
 
     /**

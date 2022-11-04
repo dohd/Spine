@@ -13,7 +13,7 @@ class ManageBanktransferRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-manage');
+        return access()->allow('manage-money-transfer');
     }
 
     /**

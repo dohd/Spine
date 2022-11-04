@@ -13,7 +13,7 @@ class StoreQuoteRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-quote');
+        return access()->allow('create-quote');
     }
 
     /**

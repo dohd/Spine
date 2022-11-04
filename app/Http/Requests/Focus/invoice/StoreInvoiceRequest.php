@@ -13,7 +13,7 @@ class StoreInvoiceRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('invoice-create');
+        return access()->allow('create-invoice');
     }
 
     /**

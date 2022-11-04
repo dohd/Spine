@@ -13,7 +13,7 @@ class StorePurchaseRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-manage');
+        return access()->allow('create-purchase');
     }
 
     /**
