@@ -57,6 +57,8 @@ class ContractRepository extends BaseRepository
         $result = Contract::create($contract_data);
 
         $schedule_data = $input['schedule_data'];
+        if (!$schedule_data) throw ValidationException::withMessages(['task schedules required!']);
+
         $schedule_data = array_map(function ($v) use($result) {
             return [
                 'contract_id' => $result->id,
@@ -68,6 +70,8 @@ class ContractRepository extends BaseRepository
         TaskSchedule::insert($schedule_data);
 
         $equipment_data = $input['equipment_data'];
+        if (!$equipment_data) throw ValidationException::withMessages(['equipments required!']);
+
         $equipment_data = array_map(function ($v) use($result) {
             return $v + ['contract_id' => $result->id];
         }, $equipment_data);
@@ -103,6 +107,8 @@ class ContractRepository extends BaseRepository
         $result = $contract->update($contract_data);
 
         $schedule_data = $input['schedule_data'];        
+        if (!$schedule_data) throw ValidationException::withMessages(['task schedules required!']);
+
         $item_ids = array_map(fn($v) => $v['s_id'], $schedule_data);
         // delete omitted schedules
         $contract->task_schedules()->whereNotIn('id', $item_ids)->where('status', 'pending')->delete();
@@ -119,7 +125,9 @@ class ContractRepository extends BaseRepository
             $new_item->save();
         }
 
-        $equipment_data = $input['equipment_data'];        
+        $equipment_data = $input['equipment_data'];  
+        if (!$equipment_data) throw ValidationException::withMessages(['equipments required!']);
+
         $item_ids = array_map(fn($v) => $v['contracteq_id'], $equipment_data);
         // delete omitted equipment items
         $contract->contract_equipments()->whereNotIn('id', $item_ids)->delete();
@@ -133,8 +141,10 @@ class ContractRepository extends BaseRepository
             $new_item->save();
         }
 
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
