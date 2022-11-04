@@ -18,7 +18,7 @@ trait TagAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("edit-tag", "biller.tags.show").'
+         '.$this->getViewButtonAttribute("manage-tag", "biller.tags.show").'
                 '.$this->getEditButtonAttribute("edit-tag", "biller.tags.edit").'
                 '.$this->getDeleteButtonAttribute("delete-tag", "biller.tags.destroy").'
                 ';

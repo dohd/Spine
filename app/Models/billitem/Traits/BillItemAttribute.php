@@ -18,9 +18,9 @@ trait BillItemAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("invoice-manage", "biller.invoices.show").'
-                '.$this->getEditButtonAttribute("invoice-edit", "biller.invoices.edit").'
-                '.$this->getDeleteButtonAttribute("invoice-delete", "biller.invoices.destroy").'
+         '.$this->getViewButtonAttribute("manage-bill", "biller.purchase_items.show").'
+                '.$this->getEditButtonAttribute("edit-bill", "biller.purchase_items.edit").'
+                '.$this->getDeleteButtonAttribute("delete-bill", "biller.purchase_items.destroy").'
                 ';
     }
 }

@@ -18,9 +18,9 @@ trait ProjectstocktransferAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("purchaseorder-manage", "biller.projectstocktransfers.show").'
-                '.$this->getEditButtonAttribute("purchaseorder-data", "biller.projectstocktransfers.edit").'
-                '.$this->getDeleteButtonAttribute("purchaseorder-data", "biller.projectstocktransfers.destroy",'table').'
+         '.$this->getViewButtonAttribute("manage-stock-transfer", "biller.projectstocktransfers.show").'
+                '.$this->getEditButtonAttribute("edit-stock-transfer", "biller.projectstocktransfers.edit").'
+                '.$this->getDeleteButtonAttribute("delete-stock-transfer", "biller.projectstocktransfers.destroy",'table').'
                 ';
     }
 }

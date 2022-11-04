@@ -18,9 +18,9 @@ trait RegionAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("task-manage", "biller.regions.show").'
-                '.$this->getEditButtonAttribute("task-edit", "biller.regions.edit").'
-                '.$this->getDeleteButtonAttribute("task-delete", "biller.regions.destroy").'
+         '.$this->getViewButtonAttribute("manage-region", "biller.regions.show").'
+                '.$this->getEditButtonAttribute("edit-region", "biller.regions.edit").'
+                '.$this->getDeleteButtonAttribute("delete-region", "biller.regions.destroy").'
                 ';
     }
 }

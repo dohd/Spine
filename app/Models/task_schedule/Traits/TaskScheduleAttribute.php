@@ -11,8 +11,8 @@ trait TaskScheduleAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.taskschedules.show") 
-        . ' ' . $this->getEditButtonAttribute("project-manage", "biller.taskschedules.edit")
-        . ' ' . $this->getDeleteButtonAttribute("project-manage", "biller.taskschedules.destroy");
+        return $this->getViewButtonAttribute("manage-schedule", "biller.taskschedules.show") 
+        . ' ' . $this->getEditButtonAttribute("edit-schedule", "biller.taskschedules.edit")
+        . ' ' . $this->getDeleteButtonAttribute("delete-schedule", "biller.taskschedules.destroy");
     }
 }

@@ -18,9 +18,9 @@ trait ProductcategoryAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("productcategory-manage", "biller.productcategories.show").'
-                '.$this->getEditButtonAttribute("productcategory-data", "biller.productcategories.edit").'
-                '.$this->getDeleteButtonAttribute("productcategory-data", "biller.productcategories.destroy").'
+         '.$this->getViewButtonAttribute("manage-product-category", "biller.productcategories.show").'
+                '.$this->getEditButtonAttribute("edit-product-category", "biller.productcategories.edit").'
+                '.$this->getDeleteButtonAttribute("delete-product-category", "biller.productcategories.destroy").'
                 ';
     }
 }

@@ -17,8 +17,8 @@ trait GoodsreceivenoteAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.goodsreceivenote.show") . ' ' 
-            . $this->getEditButtonAttribute("project-edit", "biller.goodsreceivenote.edit") . ' ' 
-            . $this->getDeleteButtonAttribute("project-delete", "biller.goodsreceivenote.destroy");
+        return $this->getViewButtonAttribute("manage-grn", "biller.goodsreceivenote.show") . ' ' 
+            . $this->getEditButtonAttribute("edit-grn", "biller.goodsreceivenote.edit") . ' ' 
+            . $this->getDeleteButtonAttribute("delete-grn", "biller.goodsreceivenote.destroy");
     }
 }

@@ -17,8 +17,8 @@ trait LeadAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.leads.show") . ' ' 
-            . $this->getEditButtonAttribute("project-edit", "biller.leads.edit") . ' ' 
-            . $this->getDeleteButtonAttribute("project-delete", "biller.leads.destroy");
+        return $this->getViewButtonAttribute("manage-Lead", "biller.leads.show") . ' ' 
+            . $this->getEditButtonAttribute("edit-lead", "biller.leads.edit") . ' ' 
+            . $this->getDeleteButtonAttribute("delete-lead", "biller.leads.destroy");
     }
 }

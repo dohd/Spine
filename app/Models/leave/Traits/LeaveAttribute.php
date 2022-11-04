@@ -10,8 +10,8 @@ trait LeaveAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("product-manage", "biller.leave.show")
-        .' '. $this->getEditButtonAttribute("product-edit", "biller.leave.edit")
-        .' '.$this->getDeleteButtonAttribute("product-delete", "biller.leave.destroy");     
+        return $this->getViewButtonAttribute("manage-leave", "biller.leave.show")
+        .' '. $this->getEditButtonAttribute("edit-leave", "biller.leave.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-leave", "biller.leave.destroy");     
     }
 }

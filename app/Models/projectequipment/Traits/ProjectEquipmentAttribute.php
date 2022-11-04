@@ -18,9 +18,9 @@ trait ProjectEquipmentAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("task-manage", "biller.regions.show").'
-                '.$this->getEditButtonAttribute("task-edit", "biller.regions.edit").'
-                '.$this->getDeleteButtonAttribute("task-delete", "biller.regions.destroy").'
+         '.$this->getViewButtonAttribute("manage-equipment", "biller.regions.show").'
+                '.$this->getEditButtonAttribute("edit-equipment", "biller.regions.edit").'
+                '.$this->getDeleteButtonAttribute("delete-equipment", "biller.regions.destroy").'
                 ';
     }
 }

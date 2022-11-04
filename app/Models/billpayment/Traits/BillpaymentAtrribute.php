@@ -15,8 +15,8 @@ trait BillpaymentAtrribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.billpayments.show") . ' ' 
-            . $this->getEditButtonAttribute("project-edit", "biller.billpayments.edit") . ' ' 
-            . $this->getDeleteButtonAttribute("project-delete", "biller.billpayments.destroy");
+        return $this->getViewButtonAttribute("manage-bill", "biller.billpayments.show") . ' ' 
+            . $this->getEditButtonAttribute("edit-bill", "biller.billpayments.edit") . ' ' 
+            . $this->getDeleteButtonAttribute("delete-bill", "biller.billpayments.destroy");
     }
 }

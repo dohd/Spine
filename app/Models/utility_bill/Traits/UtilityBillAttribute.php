@@ -15,8 +15,8 @@ trait UtilityBillAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("project-manage", "biller.utility-bills.show") . ' ' 
-            . $this->getEditButtonAttribute("project-edit", "biller.utility-bills.edit") . ' ' 
-            . $this->getDeleteButtonAttribute("project-delete", "biller.utility-bills.destroy");
+        return $this->getViewButtonAttribute("manage-bill", "biller.utility-bills.show") . ' ' 
+            . $this->getEditButtonAttribute("edit-bill", "biller.utility-bills.edit") . ' ' 
+            . $this->getDeleteButtonAttribute("delete-bill", "biller.utility-bills.destroy");
     }
 }

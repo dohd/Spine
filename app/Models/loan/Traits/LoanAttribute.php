@@ -14,8 +14,8 @@ trait LoanAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("transaction-manage", "biller.loans.show") . ' ' 
+        return $this->getViewButtonAttribute("manage-loan", "biller.loans.show") . ' ' 
             // . $this->getEditButtonAttribute("transaction-manage", "biller.loans.edit") . ' ' 
-            . $this->getDeleteButtonAttribute("transaction-manage", "biller.loans.destroy");
+            . $this->getDeleteButtonAttribute("delete-loan", "biller.loans.destroy");
     }
 }

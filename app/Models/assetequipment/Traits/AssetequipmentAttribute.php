@@ -13,8 +13,8 @@ trait AssetequipmentAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return  $this->getViewButtonAttribute("product-manage", "biller.assetequipments.show")
-        .' ' . $this->getEditButtonAttribute("product-manage", "biller.assetequipments.edit")
-        .' ' . $this->getDeleteButtonAttribute("product-manage", "biller.assetequipments.destroy");
+        return  $this->getViewButtonAttribute("manage-asset-equipment", "biller.assetequipments.show")
+        .' ' . $this->getEditButtonAttribute("edit-asset-equipment", "biller.assetequipments.edit")
+        .' ' . $this->getDeleteButtonAttribute("delete-asset-equipment", "biller.assetequipments.destroy");
     }
 }

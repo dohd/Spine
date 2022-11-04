@@ -10,8 +10,8 @@ trait HolidayListAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("product-manage", "biller.holiday_list.show")
-        .' '. $this->getEditButtonAttribute("product-edit", "biller.holiday_list.edit")
-        .' '.$this->getDeleteButtonAttribute("product-delete", "biller.holiday_list.destroy");     
+        return $this->getViewButtonAttribute("manage-holiday", "biller.holiday_list.show")
+        .' '. $this->getEditButtonAttribute("edit-holiday", "biller.holiday_list.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-holiday", "biller.holiday_list.destroy");     
     }
 }

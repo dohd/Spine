@@ -18,9 +18,9 @@ trait MiscAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("misc-manage", "biller.miscs.show").'
-                '.$this->getEditButtonAttribute("misc-data", "biller.miscs.edit").'
-                '.$this->getDeleteButtonAttribute("misc-data", "biller.miscs.destroy",'table').'
+         '.$this->getViewButtonAttribute("manage-misc", "biller.miscs.show").'
+                '.$this->getEditButtonAttribute("edit-misc", "biller.miscs.edit").'
+                '.$this->getDeleteButtonAttribute("delete-misc", "biller.miscs.destroy",'table').'
                 ';
     }
 }

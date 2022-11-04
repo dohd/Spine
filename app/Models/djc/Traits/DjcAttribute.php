@@ -18,9 +18,9 @@ trait DjcAttribute
      public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("project-manage", "biller.djcs.show").'
-                '.$this->getEditButtonAttribute("project-edit", "biller.djcs.edit").'
-                '.$this->getDeleteButtonAttribute("project-delete", "biller.djcs.destroy").'
+         '.$this->getViewButtonAttribute("manage-djc", "biller.djcs.show").'
+                '.$this->getEditButtonAttribute("edit-djc", "biller.djcs.edit").'
+                '.$this->getDeleteButtonAttribute("delete-djc", "biller.djcs.destroy").'
                 ';
     }
 }

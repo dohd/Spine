@@ -18,9 +18,9 @@ trait NssfAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("department-manage", "biller.departments.show").'
-                '.$this->getEditButtonAttribute("department-data", "biller.departments.edit").'
-                '.$this->getDeleteButtonAttribute("department-data", "biller.departments.destroy").'
+         '.$this->getViewButtonAttribute("manage-department", "biller.departments.show").'
+                '.$this->getEditButtonAttribute("edit-department", "biller.departments.edit").'
+                '.$this->getDeleteButtonAttribute("delete-department", "biller.departments.destroy").'
                 ';
     }
 }

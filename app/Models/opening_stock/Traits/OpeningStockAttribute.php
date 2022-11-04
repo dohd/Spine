@@ -10,8 +10,8 @@ trait OpeningStockAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("product-manage", "biller.opening_stock.show")
-        .' '. $this->getEditButtonAttribute("product-edit", "biller.opening_stock.edit")
-        .' '.$this->getDeleteButtonAttribute("product-delete", "biller.opening_stock.destroy");     
+        return $this->getViewButtonAttribute("manage-opening-stock", "biller.opening_stock.show")
+        .' '. $this->getEditButtonAttribute("edit-opening-stock", "biller.opening_stock.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-opening-stock", "biller.opening_stock.destroy");     
     }
 }

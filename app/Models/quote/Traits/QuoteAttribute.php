@@ -17,6 +17,6 @@ trait QuoteAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("quote-edit", "biller.quotes.show");
+        return $this->getViewButtonAttribute("manage-quote", "biller.quotes.show");
     }
 }
