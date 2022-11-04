@@ -32,19 +32,31 @@
                                 <div class="col-3">
                                     <div class="form-group">
                                         <label><strong>Customer :</strong></label>
-                                        {{ Form::select('customer_id', $customers, null, ['placeholder' => '-- Customers --', 'id'=>'customer_id','class' => 'form-control']) }}
+                                        <select name="customer_id" id="customer_id" class="form-control" data-placeholder="Choose Customer" required>
+                                            @foreach ($customers as $row)
+                                                <option value="{{ $row->id }}">{{ $row->company }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-3">
                                     <div class="form-group">
                                         <label><strong>LPO :</strong></label>
-                                        {{ Form::select('lpo_number', $lpos, null, ['placeholder' => '-- LPOS --', 'id'=>'lpo_number','class' => 'form-control']) }}
+                                        <select name="lpo_id" id="lpo_number" class="form-control" data-placeholder="Choose Client LPO" required>
+                                            @foreach ($lpos as $row)
+                                                <option value="{{ $row->id }}" customer_id="{{ $row->customer_id }}">{{ $row->lpo_no }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-3">
                                     <div class="form-group">
                                         <label><strong>Project :</strong></label>
-                                        {{ Form::select('project_id', $projects, null, ['placeholder' => '-- Projects --', 'id'=>'project_id','class' => 'form-control']) }}
+                                        <select name="project_id" id="project_id" class="form-control" data-placeholder="Choose Project" required>
+                                            @foreach ($projects as $row)
+                                                <option value="{{ $row->id }}" customer_id="{{ $row->customer_id }}">{{ $row->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -92,10 +104,21 @@
 @endsection
 
 @section('after-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
+    config = {
+        select: {
+            allowClear: true,
+        }
+    };
+
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
+
+    $('#customer_id').select2(config.select).val('').change();
+    $('#lpo_number').select2(config.select).val('').change();
+    $('#project_id').select2(config.select).val('').change();
 
     $('#search').click(function() {
         var start_date = $('#start_date').val();
@@ -109,9 +132,27 @@
 
     // On selecting filter dropdown
     $('#customer_id, #lpo_number, #project_id').change(function() {
-        var customer_id = $('#customer_id').val()
-        var lpo_number = $('#lpo_number').val()
-        var project_id = $('#project_id').val()
+        var customer_id = $('#customer_id').val();
+        var lpo_number = $('#lpo_number').val();
+        var project_id = $('#project_id').val();
+
+        if ($(this).is('#customer_id')) {
+            $('#lpo_number option').each(function() {
+                if ($(this).attr('customer_id') == customer_id) {
+                    $(this).removeClass('d-none');
+                } else {
+                    $(this).addClass('d-none');
+                }
+            });
+            $('#project_id option').each(function() {
+                if ($(this).attr('customer_id') == customer_id) {
+                    $(this).removeClass('d-none');
+                } else {
+                    $(this).addClass('d-none');
+                }
+            });
+        }
+
         $('#customer').val(customer_id);
         $('#quotesTbl').DataTable().destroy();
         return draw_data(customer_id, lpo_number, project_id);

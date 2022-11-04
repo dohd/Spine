@@ -141,9 +141,16 @@ class InvoicesController extends Controller
      */
     public function uninvoiced_quote(ManageInvoiceRequest $request)
     {
-        $customers = Customer::where('active', 1)->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
-        $projects = Project::pluck('name', 'id');
+        $customers = Customer::whereHas('quotes', function ($q) {
+            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        })->get(['id', 'company']);
+            
+        $lpos = Lpo::whereHas('quotes', function ($q) {
+            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        })->get(['id', 'lpo_no', 'customer_id']);
+        $projects = Project::whereHas('quote', function ($q) {
+            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        })->get(['id', 'name', 'customer_id']);
 
         return new ViewResponse('focus.invoices.uninvoiced_quote', compact('customers', 'lpos', 'projects'));
     }

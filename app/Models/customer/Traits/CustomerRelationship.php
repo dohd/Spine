@@ -7,13 +7,17 @@ use App\Models\client_product\ClientProduct;
 use App\Models\lead\Lead;
 use App\Models\transaction\Transaction;
 use App\Models\project\Project;
-
+use App\Models\quote\Quote;
 
 /**
  * Class CustomerRelationship
  */
 trait CustomerRelationship
 {
+    function quotes() {
+        return $this->hasMany(Quote::class);
+    }
+
     public function products()
     {
         return $this->hasMany(ClientProduct::class);
