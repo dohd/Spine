@@ -131,11 +131,14 @@
     $("#titleRow").remove();
     let titleId = $("#quoteTbl tbody tr").length;
     $('#addTitle').click(function() {
+        $('#quoteTbl tbody tr.invisible').remove();
+
         const i = 't'+titleId;
         const newTitleHtml = '<tr>' + titleHtml.replace(/t1/g, i) + '</tr>';
         $("#quoteTbl tbody").append(newTitleHtml);
         titleId++;
         calcTotal();
+        adjustTbodyHeight();
     });
 
     // add product
@@ -143,18 +146,35 @@
     $("#productRow").remove();
     let rowId = $("#quoteTbl tbody tr").length;
     $('#addProduct').click(function() {
+        $('#quoteTbl tbody tr.invisible').remove();
+
         const i = 'p' + rowId;
         const newRowHtml = '<tr>' + rowHtml.replace(/p0/g, i) + '</tr>';
         $("#quoteTbl tbody").append(newRowHtml);
         $('#name-'+i).autocomplete(autoComp(i));
         rowId++;
         calcTotal();
-        // reset to initial pricelist
-        $('#lead_id').change();
+        // trigger lead change to reset client pricelist 
+        $('#lead_id').change();   
+        adjustTbodyHeight();
     });
+    // adjust tbody height to accomodate dropdown menu
+    function adjustTbodyHeight(rowCount) {
+        rowCount = rowCount || $('#quoteTbl tbody tr').length;
+        if (rowCount < 4) {
+            const rows = [];
+            for (let i = 0; i < 5; i++) {
+                const tr = `<tr class="invisible"><td colspan="100%"></td><tr>`
+                rows.push(tr);
+            }
+            $('#quoteTbl tbody').append(rows.join(''));
+        }
+    }
 
     // add miscellaneous product
     $('#addMisc').click(function() {
+        $('#quoteTbl tbody tr.invisible').remove();
+
         const i = 'p' + rowId;
         const newRowHtml = `<tr class="misc"> ${rowHtml.replace(/p0/g, i)} </tr>`;
         $("#quoteTbl tbody").append(newRowHtml);
@@ -167,6 +187,7 @@
         $('#lineprofit-'+i).addClass('invisible');
         rowId++;
         calcTotal();
+        adjustTbodyHeight();
     });
 
     // On clicking action drop down
@@ -176,7 +197,9 @@
         if (menu.is('.up')) row.insertBefore(row.prev());
         if (menu.is('.down')) row.insertAfter(row.next());
         if (menu.is('.delete') && confirm('Are you sure?')) {
-            menu.closest('tr').remove();
+            menu.parents('tr:first').remove();
+            $('#quoteTbl tbody tr.invisible').remove();
+            adjustTbodyHeight(1);
         }
         
         // drop down menus
