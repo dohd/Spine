@@ -39,7 +39,6 @@ Route::group(['namespace' => 'hrm'], function () {
     Route::get('hrms/attendance_new', 'HrmsController@attendance')->name('hrms.attendance');
     Route::get('hrms/attendance_destroy', 'HrmsController@attendance_destroy')->name('hrms.attendance_destroy');
     Route::post('hrms/attendance_destroy', 'HrmsController@attendance_destroy')->name('hrms.attendance_destroy');
-    Route::post('hrms/attendance_load', 'HrmsController@attendance_load')->name('hrms.attendance_load');
     Route::get('hrms/attendance', 'HrmsController@attendance_list')->name('hrms.attendance_list');
     Route::post('hrms/attendance', 'HrmsController@attendance_store')->name('hrms.attendance_store');
     Route::get('hrms/payroll', 'HrmsController@payroll')->name('hrms.payroll');
@@ -49,10 +48,10 @@ Route::group(['namespace' => 'hrm'], function () {
     Route::post('hrms/active', 'HrmsController@active')->name('hrms.active');
     Route::post('hrms/admin_permissions', 'HrmsController@admin_permissions')->name('hrms.admin_role_permission');
 
-
     Route::resource('hrms', 'HrmsController');
     //For Datatable
     Route::post('hrms/get', 'HrmsTableController')->name('hrms.get');
+    Route::post('hrms/get_attendance', 'HrmAttendanceTableController')->name('hrms.get_attendance');
 });
 
 

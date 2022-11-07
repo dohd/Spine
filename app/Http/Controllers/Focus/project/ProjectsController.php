@@ -376,7 +376,7 @@ class ProjectsController extends Controller
     public function project_search(Request $request)
     {        
         if (!access()->allow('product_search')) return false;
-
+        
         $k = $request->post('keyword');
 
         $projects = Project::whereHas('quote', function ($q) use($k) {
@@ -392,7 +392,7 @@ class ProjectsController extends Controller
         // response format
         $output = array();
         foreach ($projects as $project) {
-            if ($project->status == 'closed') continue;
+            // if ($project->status == 'closed') continue;
             
             $quote_tids = array();
             foreach ($project->quotes as $quote) {

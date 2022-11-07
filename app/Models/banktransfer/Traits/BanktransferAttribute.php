@@ -19,7 +19,7 @@ trait BanktransferAttribute
     {
         return 
         //  $this->getViewButtonAttribute("transaction-manage", "biller.banktransfers.show") 
-        $this->getEditButtonAttribute("transaction-data", "biller.banktransfers.edit")
-        . ' ' . $this->getDeleteButtonAttribute("transaction-data", "biller.banktransfers.destroy");                
+        $this->getEditButtonAttribute("manage-money-transfer", "biller.banktransfers.edit")
+        . ' ' . $this->getDeleteButtonAttribute("manage-money-transfer", "biller.banktransfers.destroy");                
     }
 }

@@ -406,4 +406,31 @@ class InvoicesController extends Controller
 
         return Response::stream($pdf->Output('payment.pdf', 'I'), 200, $headers);
     }        
+
+    /**
+     * Point of Sale
+     */
+    public function pos(ManagePosRequest $request, RegistersController $register)
+    {
+        if (!$register->status()) return view('focus.invoices.pos.open_register');
+
+        $input = $request->only(['sub', 'p']);
+        $customer = Customer::first();
+        $accounts = Account::all();
+
+        $input['sub'] = false;
+        $last_invoice = Invoice::latest()->first();
+
+        
+
+        return view('focus.invoices.pos.create')
+            ->with([
+                'last_invoice' => $last_invoice, 
+                'sub' => $input['sub'], 
+                'p' => $request->p, 
+                'accounts' => $accounts, 
+                'customer' => $customer
+            ])->with(bill_helper(1, 2))
+            ->with(product_helper());
+    }
 }

@@ -18,19 +18,15 @@
 namespace App\Http\Controllers\Focus\hrm;
 
 use App\Http\Requests\Focus\department\ManageDepartmentRequest;
-use App\Http\Resources\RoleResource;
 use App\Models\Access\Permission\Permission;
 use App\Models\Access\Permission\PermissionRole;
 use App\Models\Access\Permission\PermissionUser;
-use App\Models\Access\Role\Role;
 use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
-use App\Models\department\Department;
 use App\Models\employee\RoleUser;
 use App\Models\hrm\Attendance;
 use App\Models\hrm\Hrm;
 use App\Models\transactioncategory\Transactioncategory;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -38,7 +34,6 @@ use App\Http\Responses\Focus\hrm\CreateResponse;
 use App\Http\Responses\Focus\hrm\EditResponse;
 use App\Repositories\Focus\hrm\HrmRepository;
 use App\Http\Requests\Focus\hrm\ManageHrmRequest;
-use Yajra\DataTables\Facades\DataTables;
 
 
 /**
@@ -225,32 +220,34 @@ class HrmsController extends Controller
 
         // $rolePermissions =PermissionRole::all()->keyBy('id')->where('role_id','=',$emp_role)->toArray();
 
-
         //returning with successfull message
         return new ViewResponse('focus.hrms.view', compact('hrm', 'permissions', 'permissions_all'));
     }
 
+    /**
+     * Update Permission from Hrm Employee Permission Tab
+     */
     public function set_permission(ManageHrmRequest $request)
     {
-        //$request->uid
-        $hrm = RoleUser::where('user_id', '=', $request->uid)->first();
-        if ($hrm['role_id']) {
-            $permission = PermissionRole::where('role_id', '=', $hrm['role_id'])->where('permission_id', '=', $request->pid)->first();
-            if ($permission['permission_id']) {
-                if (!$request->active) {
+        // dd($request->all());
+        $user_role = RoleUser::where('user_id', $request->user_id)->first();
+        if ($user_role) {
+            $role_permission = PermissionRole::where('role_id', $user_role->role_id)
+                ->where('permission_id', $request->permission_id)->first();
+            if ($role_permission) {
+                $data = ['permission_id' => $request->permission_id, 'user_id' => $request->user_id,];
+                if ($request->is_checked) {
+                    // create permission
                     $permission_user = new PermissionUser;
-                    $permission_user->permission_id = $permission['permission_id'];
-                    $permission_user->user_id = $hrm['user_id'];
-                    $permission_user->save();
-                } else {
-                    if ($permission['permission_id'] == 29 and $hrm['role_id'] == 2) {
-
-                    } else {
-                        PermissionUser::where('permission_id', $permission['permission_id'])->where('user_id', $hrm['user_id'])->delete();
+                    foreach ($data as $key => $val) {
+                        $permission_user[$key] = $val;
                     }
+                    $permission_user->save();
+                } elseif ($user_role->role_id != 2) {
+                    // delete permission (non-business owner)
+                    PermissionUser::where($data)->delete();
                 }
-
-            }
+            } 
         }
     }
 
@@ -286,40 +283,6 @@ class HrmsController extends Controller
         return view('focus.hrms.attendance_list', compact('payroll'));
     }
 
-    public function attendance_load(ManageDepartmentRequest $request)
-    {
-        $attendance = Attendance::query()->select(['id', 'user_id', 'present', 't_from', 't_to']);
-        if (request('rel_id')) {
-            $user = Hrm::find(request('rel_id'));
-            $attendance->where('user_id', '=', $user->id);
-        }
-        $attendance->get();
-        return DataTables::of($attendance)
-            ->escapeColumns(['id'])
-            ->addIndexColumn()
-            ->addColumn('name', function ($attendance) {
-                return '<a class="font-weight-bold" href="' . route('biller.hrms.show', [$attendance->id]) . '">' . $attendance->user['first_name'] . ' ' . $attendance->user['last_name'] . '</a>';
-            })
-            ->addColumn('present', function ($attendance) {
-                return dateFormat($attendance->present);
-            })
-            ->addColumn('t_from', function ($attendance) {
-                return ($attendance->t_from);
-            })
-            ->addColumn('t_to', function ($attendance) {
-                return ($attendance->t_to);
-            })
-            ->addColumn('remove', function ($attendance) {
-                $btn = '<a href="#" id="a_' . $attendance['id'] . '" class=" delete-object"
-                                                                                  data-object-type="2"
-                                                                                  data-object-id="' . $attendance['id'] . '"><i
-                                                                    class="danger fa fa-trash"></i></a>';
-
-                return $btn;
-            })
-            ->make(true);
-
-    }
 
     public function attendance_destroy(ManageDepartmentRequest $request)
     {

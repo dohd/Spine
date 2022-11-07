@@ -2,18 +2,16 @@
 
 namespace App\Repositories\Focus\hrm;
 
-use App\Models\Access\Permission\Permission;
 use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\Role\Role;
 use App\Models\Access\User\UserProfile;
 use App\Models\employee\RoleUser;
 use App\Models\hrm\HrmMeta;
 use DB;
-use Carbon\Carbon;
 use App\Models\hrm\Hrm;
 use App\Exceptions\GeneralException;
+use App\Models\attendance\Attendance;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Utils\MessageUtil;
 use Illuminate\Support\Str;
@@ -61,6 +59,20 @@ class HrmRepository extends BaseRepository
             });
         }
         return $q->with(['monthlysalary'])->get(['id','email','picture','first_name','last_name','status','created_at']);
+    }
+
+    /**
+     * Get Attendance Data
+     */
+    public function getForAttendanceDataTable()
+    {
+        $q = Attendance::query();
+
+        $q->when(request('rel_id'), function ($q) {
+            $q->where('user_id', request('rel_id'));
+        });
+        
+        return $q->get();
     }
     
 

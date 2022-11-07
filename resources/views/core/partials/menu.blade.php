@@ -303,12 +303,10 @@
                         </li>
                          @endauth 
                         {{-- verification --}}
-                         @permission('manage-verify') 
+                         @permission('manage-quote-verify') 
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Job Verification</a>
                             <ul class="dropdown-menu">
-                                 @permission('manage-verify') 
                                 <li><a class="dropdown-item" href="{{ route('biller.quotes.get_verify_quote') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a></li>                                                            
-                                 @endauth 
                             </ul>                        
                         </li>
                          @endauth 

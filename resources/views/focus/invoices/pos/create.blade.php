@@ -2,13 +2,6 @@
 
 @section ('title', trans('pos.sale'))
 
-@section('page-header')
-    <h1>
-        {{ trans('labels.backend.invoices.management') }}
-        <small>{{ trans('labels.backend.invoices.create') }}</small>
-    </h1>
-@endsection
-
 @section('content')
     <form id="data_form">
         <div class="pos_panel">
@@ -224,12 +217,12 @@
                                         @foreach($additionals as $additional_tax)
 
                                             @php
-                                                if($additional_tax->id == $defaults[4][0]['feature_value']  && $additional_tax->class == 1){
-                                                 echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
-                                                 $tax_format=$additional_tax->type2;
-                                                 $tax_format_id=$additional_tax->id;
-                                                 $tax_format_type=$additional_tax->type3;
-                                                }
+                                                // if($additional_tax->id == $defaults[4][0]['feature_value']  && $additional_tax->class == 1){
+                                                //  echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
+                                                //  $tax_format=$additional_tax->type2;
+                                                //  $tax_format_id=$additional_tax->id;
+                                                //  $tax_format_type=$additional_tax->type3;
+                                                // }
 
                                             @endphp
                                             {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
@@ -252,10 +245,10 @@
                                             @endphp
                                             @foreach($additionals as $additional_discount)
                                                 @php
-                                                    if($defaults[3][0]['feature_value'] == $additional_discount->id && $additional_discount->class == 2){
-                                                     echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
-                                                     $discount_format=$additional_discount->type1;
-                                                    }
+                                                    // if($defaults[3][0]['feature_value'] == $additional_discount->id && $additional_discount->class == 2){
+                                                    //  echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
+                                                    //  $discount_format=$additional_discount->type1;
+                                                    // }
 
                                                 @endphp
                                                 {!! $additional_discount->class == 2 ? "<option value='$additional_discount->value' data-type1='$additional_discount->type1' data-type2='$additional_discount->type2' data-type3='$additional_discount->type3'>$additional_discount->name</option>" : "" !!}
@@ -403,7 +396,7 @@
         <input type="hidden" value="{{$discount_format}}"
                name="discount_format" id="discount_format">
 
-        @if($defaults[4][0]->ship_tax['id']>0) <input type='hidden'
+        {{-- @if($defaults[4][0]->ship_tax['id']>0) <input type='hidden'
                                                       value='{{numberFormat($defaults[4][0]->ship_tax['value'])}}'
                                                       name='ship_rate' id='ship_rate'><input
                 type='hidden' value='{{$defaults[4][0]->ship_tax['type2']}}'
@@ -415,7 +408,7 @@
                    name='ship_rate' id='ship_rate'><input
                     type='hidden' value='none' name='ship_tax_type'
                     id='ship_taxtype'>
-        @endif
+        @endif --}}
         <input type="hidden" value="0" name="ship_tax" id="ship_tax">
         <input type="hidden" value="0" id="custom_discount">
         <input type="hidden" name="total" class="form-control"
