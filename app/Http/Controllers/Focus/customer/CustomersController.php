@@ -307,12 +307,21 @@ class CustomersController extends Controller
         return new ViewResponse('focus.customers.wallet_history', compact('wallet_transactions'));
     }
 
+    /**
+     * Customer search options
+     */
     public function search(Request $request)
     {
         if (!access()->allow('crm')) return false;
-        $q = $request->post('keyword');
-        $user = \App\Models\customer\Customer::with('primary_group')->where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->orWhere('company', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email','company'));
-        if (count($user) > 0) return view('focus.customers.partials.search')->with(compact('user'));
+        
+        $k = $request->post('keyword');
+        $user = Customer::with('primary_group')->where('active', 1)->where(function ($q) use($k) {
+            $q->where('name', 'LIKE', '%' . $k . '%')
+            ->orWhere('email', 'LIKE', '%' . $k . '')
+            ->orWhere('company', 'LIKE', '%' . $k . '');
+        })->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email','company']);
+            
+        return view('focus.customers.partials.search')->with(compact('user'));
     }
 
     /**
