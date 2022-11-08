@@ -18,12 +18,14 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $roles=Role::where('status','<',1)->where(function ($query) {
-        $query->where('ins', '=', auth()->user()->ins)->orWhereNull('ins');})->get();
+        $roles=Role::where('status','<',1)->where(function ($q) {
+            $q->where('ins', auth()->user()->ins)->orWhereNull('ins');
+        })->get();
+
         $departments = Department::all()->pluck('name','id');
-        $general['create']=1;
-        $last_tid = HrmMeta::max('employee_no');
-        $last_tid= $last_tid+1;
-        return view('focus.hrms.create',compact('roles','general','departments','last_tid'));
+        $last_tid = HrmMeta::max('employee_no') + 1;
+        $general['create'] = 1;
+
+        return view('focus.hrms.create', compact('roles','general','departments','last_tid'));
     }
 }

@@ -80,7 +80,7 @@ class HrmsController extends Controller
      * @return \App\Http\Responses\Focus\hrm\CreateResponse
      */
     public function create(ManageHrmRequest $request)
-    {
+    {   
         return new CreateResponse('focus.hrms.create');
     }
 
@@ -146,7 +146,7 @@ class HrmsController extends Controller
      * Update the specified resource in storage.
      *
      * @param UpdateHrmRequestNamespace $request
-     * @param App\Models\hrm\Hrm $hrm
+     * @param Hrm $hrm
      * @return \App\Http\Responses\RedirectResponse
      */
     public function update(ManageHrmRequest $request, Hrm $hrm)

@@ -18,7 +18,7 @@
                                     class="btn btn-blue btn-outline-accent-5 btn-sm float-right"><i
                                             class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}</a>
                                 <div class="card-body">
-
+                                    {{-- tab links --}}
                                     <ul class="nav nav-tabs nav-top-border no-hover-bg"
                                         role="tablist">
                                         <li class="nav-item">
@@ -62,42 +62,35 @@
                                         </li>
 
                                     </ul>
+
                                     <div class="tab-content px-1 pt-1">
+                                        {{-- employee details --}}
                                         <div class="tab-pane active in" id="active1"
                                                 aria-labelledby="active-tab1" role="tabpanel">
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.employee')}}</p>
+                                            @php
+                                                $details = [
+                                                    trans('hrms.employee') => "{$hrm->first_name} {$hrm->last_name}",
+                                                    trans('hrms.email') => $hrm->email,
+                                                ];
+                                                $profile = $hrm->profile;
+                                                if ($profile) {
+                                                    $details = array_replace($details, [
+                                                        trans('hrms.company') => $profile->company,
+                                                        trans('hrms.phone') => $profile->contact,
+                                                    ]);
+                                                }
+                                            @endphp
+                                            @foreach ($details as $key => $val)
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <p>{{ $key }}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <p>{{ $val }}</p>
+                                                    </div>
                                                 </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm['first_name'].' '.$hrm['last_name']}}</p>
-                                                </div>
-                                            </div>
+                                            @endforeach 
 
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.company')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['company']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.phone')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['contact']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.email')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm['email']}}</p>
-                                                </div>
-                                            </div>
                                             <div class="row">
                                                 <div class="col-3 border-blue-grey border-lighten-5  p-1">
                                                     <p>{{trans('hrms.status')}}</p>
@@ -111,17 +104,20 @@
                                                     </p>
                                                 </div>
                                             </div>
+
                                             <div class="row">
                                                 <div class="col-3 border-blue-grey border-lighten-5  p-1">
                                                     <p>{{trans('hrms.confirmed')}}</p>
                                                 </div>
                                                 <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-
-                                                    <p>@if($hrm['confirmed'])<span
+                                                    <p>
+                                                        @if($hrm['confirmed'])<span
                                                                 class="badge badge-success round"><i
-                                                                    class="font-medium-2  fa fa-check-circle"></i></span>@else
+                                                                    class="font-medium-2  fa fa-check-circle"></i></span>
+                                                        @else
                                                             <span class="badge badge-danger round"><i
-                                                                        class="font-medium-2  fa fa-close"></i></span> @endif
+                                                                        class="font-medium-2  fa fa-close"></i></span> 
+                                                        @endif
                                                     </p>
                                                 </div>
                                             </div>
@@ -130,69 +126,47 @@
                                                     <p>{{trans('hrms.created_by')}}</p>
                                                 </div>
                                                 <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>@if(@$hrm['created_by']) {{ @$hrm->created_by_user['first_name'].' '.@$hrm->created_by_user['last_name'] }}@else
+                                                    <p>
+                                                        @if(@$hrm['created_by']) 
+                                                            {{ @$hrm->created_by_user['first_name'].' '.@$hrm->created_by_user['last_name'] }}
+                                                        @else
                                                             <span class="badge badge-danger round"><i
-                                                                        class="font-medium-2  fa fa-close"></i></span> @endif
+                                                                        class="font-medium-2  fa fa-close"></i></span> 
+                                                        @endif
                                                     </p>
 
                                                 </div>
                                             </div>
-
-
                                         </div>
+
+                                        {{-- other data --}}
                                         <div class="tab-pane" id="active2" aria-labelledby="link-tab2"
                                                 role="tabpanel">
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.address_1')}}</p>
+                                            @php
+                                                if ($profile) {
+                                                    $details = [
+                                                        trans('hrms.address_1') => "{$profile->address_1} {$profile->address_2}",
+                                                        trans('hrms.city') => $profile->city,
+                                                        trans('hrms.state') => $profile->state,
+                                                        trans('hrms.country') => $profile->country,
+                                                        trans('hrms.postal') => $profile->postal,
+                                                        trans('hrms.tax_id') => $profile->taxid,
+                                                    ];
+                                                }
+                                            @endphp
+                                            @foreach ($details as $key => $val)
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <p>{{ $key }}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <p>{{ $val }}</p>
+                                                    </div>
                                                 </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['address_1'].' '.$hrm->profile['address_2']}}</p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.city')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['city']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.state')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['state']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.country')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['country']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.postal')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['postal']}}</p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.tax_id')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->profile['taxid']}}</p>
-                                                </div>
-                                            </div>
+                                            @endforeach
                                         </div>
+
+                                        {{-- permissions --}}
                                         <div class="tab-pane" id="active3" aria-labelledby="link-tab3"
                                                 role="tabpanel">
                                             <h5 class="title m-2"><small
@@ -214,50 +188,40 @@
                                                 @endforeach
                                             </div>
                                         </div>
+
+                                        {{-- hrm --}}
                                         <div class="tab-pane" id="active4" aria-labelledby="link-tab4"
                                                 role="tabpanel">
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.salary')}}</p>
+                                            @php
+                                                $details = [
+                                                    trans('hrms.salary') => 'salary',
+                                                    trans('hrms.hra') => 'hra',
+                                                    trans('hrms.entry_time') => 'entry_time',
+                                                    trans('hrms.exit_time') => 'exit_time',
+                                                    trans('hrms.sales_commission') => 'commission'
+                                                ];
+                                            @endphp
+                                            @foreach ($details as $key => $val)
+                                                <div class="row">
+                                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                        <p>{{ $key }}</p>
+                                                    </div>
+                                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                        <p>
+                                                            @if (isset($hrm->meta))
+                                                                @if (in_array($val, ['salary', 'hra', 'commission']))
+                                                                    {{ numberFormat($hrm->meta->$val) }}
+                                                                @else
+                                                                    {{ $hrm->meta->$val }}
+                                                                @endif
+                                                            @endif
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{numberFormat($hrm->meta['salary'])}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.hra')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{numberFormat($hrm->meta['hra'])}}%</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.entry_time')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->meta['entry_time']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.exit_time')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{$hrm->meta['exit_time']}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                    <p>{{trans('hrms.sales_commission')}}</p>
-                                                </div>
-                                                <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                    <p>{{numberFormat($hrm->meta['commission'])}}</p>
-                                                </div>
-                                            </div>
+                                            @endforeach                                            
+                                        </div> 
 
-                                        </div>
+                                        {{-- attendance --}}
                                         <div class="tab-pane" id="active7" aria-labelledby="link-tab7"
                                                 role="tabpanel">
 
@@ -288,6 +252,7 @@
             </section>
         </div>
     </div>
+
     <div class="sidebar-detached sidebar-left">
         <div class="sidebar">
             <div class="bug-list-sidebar-content">
@@ -313,6 +278,7 @@
 
                     <div class="card-body">
                         <p class="lead"> {{trans('general.related')}}</p>
+                        
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <span class="badge badge-primary badge-pill float-right">{{ '' }}</span>
