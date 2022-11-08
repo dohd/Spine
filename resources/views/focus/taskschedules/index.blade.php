@@ -39,6 +39,16 @@
                                         <option value="">-- select contract --</option>
                                     </select>
                                 </div>
+
+                                <div class="col-2">
+                                    <label for="status">Service Status</label>
+                                    <select name="service_status" id="service_status" class="custom-select">
+                                        <option value="">-- select status --</option>
+                                        @foreach (['unserviced', 'partially_serviced', 'serviced'] as $status)
+                                            <option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>  
                             </div>
                         </div>
                     </div>
@@ -97,6 +107,7 @@
             this.drawDataTable();
             $('#customer').change(this.customerChange);
             $('#contract').change(this.contractChange);
+            $('#service_status').change(this.serviceStatusChange);
         },
 
         customerChange() {
@@ -115,6 +126,11 @@
             Index.drawDataTable();
         },
 
+        serviceStatusChange() {
+            $('#scheduleTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
         drawDataTable() {
             $('#scheduleTbl').dataTable({
                 stateSave: true,
@@ -128,7 +144,18 @@
                     data: {
                         customer_id: $('#customer').val(),
                         contract_id: $('#contract').val(),
-                    }
+                        equip_status: $('#service_status').val(),
+                    },
+                    dataSrc: ({data}) => {
+                        const serviceStatus = $('#service_status').val();
+                        if (serviceStatus == 'partially_serviced') {
+                            data = data.filter(v => v.service_status == 'partial');
+                        } else if (serviceStatus == 'serviced') {
+                            data = data.filter(v => v.service_status == 'complete');
+                        }
+                        
+                        return data;
+                    },
                 },
                 columns: [
                     {

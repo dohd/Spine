@@ -33,6 +33,8 @@ class TaskSchedulesTableController extends Controller
      */
     protected $schedule;
 
+    protected $service_status;
+
     /**
      * contructor to initialize repository object
      * @param TaskScheduleRepository $schedule;
@@ -74,6 +76,13 @@ class TaskSchedulesTableController extends Controller
                 $serviced_units = count($serviced_equip_ids);
                 $unserviced_units = count(array_diff($schedule_equip_ids, $serviced_equip_ids));
 
+                // service status
+                if ($serviced_units && $serviced_units >= $schedule_units) {
+                    $this->service_status = 'complete';
+                } elseif ($serviced_units && $serviced_units < $schedule_units) {
+                    $this->service_status = 'partial';
+                } else $this->service_status = 'unserviced';
+                    
                 $params = [
                     'contract_id' => $schedule->contract? $schedule->contract->id : '',
                     'customer_id' => $schedule->contract? $schedule->contract->customer_id : '', 
@@ -95,6 +104,9 @@ class TaskSchedulesTableController extends Controller
             })
             ->addColumn('end_date', function ($schedule) {
                 return dateFormat($schedule->end_date);
+            })
+            ->addColumn('service_status', function ($schedule) {
+                return $this->service_status;
             })
             ->addColumn('actions', function ($schedule) {
                 $params = ['customer_id' => $schedule->contract->customer_id, 'schedule_id' => $schedule->id];
