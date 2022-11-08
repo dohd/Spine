@@ -60,7 +60,7 @@ class ProductsTableController extends Controller
         $product_worth = 0;
         foreach ($core as $product) {
             $std_product = $product->standard;
-            if ($std_product && $std_product->qty) {
+            if ($std_product) {
                 $product_count++;
                 $product_worth += $std_product->purchase_price;
             }

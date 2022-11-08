@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\productcategory;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\productcategory\Productcategory;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProductcategoryRepository.

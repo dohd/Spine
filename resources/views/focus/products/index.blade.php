@@ -45,7 +45,9 @@
                                 <select name="category_id" id="category" class="custom-select">
                                     <option value="">-- select category --</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->title }}</option>
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->title }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>  
@@ -53,8 +55,8 @@
                                 <label for="status" class="text-primary h4">Product Status</label>
                                 <select name="status" id="status" class="custom-select">
                                     <option value="">-- select status --</option>
-                                    @foreach (['in stock', 'out of stock'] as $status)
-                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @foreach (['in_stock', 'out_of_stock'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
                                     @endforeach
                                 </select>
                             </div>                          
@@ -108,23 +110,15 @@
     };
     
     const Index = {
-        status: 'in stock',
-        warehouseId: '',
-        categoryId: '',
+        status: '',
+        warehouseId: @json(request('warehouse_id')),
+        categoryId: @json(request('productcategory_id')),
 
         init() {
-            this.fromWarehouseRedirect();
             this.drawDataTable();
-            $('#warehouse').change(this.warehouseChange);
-            $('#category').change(this.categoryChange);
-            $('#status').change(this.statusChange).val('in stock');
-        },
-
-        fromWarehouseRedirect() {
-            const queryString = window.location.search.substring(1);
-            const warehouseId = new URLSearchParams(queryString).get('warehouse_id');
-            $('#warehouse').val(warehouseId);
-            this.warehouseId = warehouseId;
+            $('#status').change(this.statusChange);
+            $('#warehouse').val(this.warehouseId).change(this.warehouseChange);
+            $('#category').val(this.categoryId).change(this.categoryChange);
         },
 
         categoryChange() {

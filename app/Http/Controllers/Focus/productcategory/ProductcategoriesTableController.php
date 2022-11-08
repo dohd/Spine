@@ -60,16 +60,17 @@ class ProductcategoriesTableController extends Controller
                 return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=' . $productcategory->c_type . '&rel_id=' . $productcategory->id . '">' . $productcategory->title . '</a>';
             })
             ->addColumn('total', function ($productcategory) {
-                return numberFormat($productcategory->products->sum('qty'));
+                return $productcategory->products->count();
             })
             ->addColumn('worth', function ($productcategory) {
-                return amountFormat($productcategory->products->sum('total_value'));
+                return amountFormat($productcategory->products->sum('purchase_price'));
             })
             ->addColumn('created_at', function ($productcategory) {
                 return dateFormat($productcategory->created_at);
             })
             ->addColumn('actions', function ($productcategory) {
-                return '<a class="btn btn-purple round" href="' . route('biller.products.index') . '?rel_type=' . $productcategory->c_type . '&rel_id=' . $productcategory->id . '" title="List"><i class="fa fa-list"></i></a>' . $productcategory->action_buttons;
+                return '<a class="btn btn-purple round" href="' . route('biller.products.index', 'productcategory_id=' . $productcategory->id) .'" title="List"><i class="fa fa-list"></i></a>' 
+                 . $productcategory->action_buttons;
             })
             ->make(true);
     }

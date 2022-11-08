@@ -62,11 +62,11 @@ class ProductRepository extends BaseRepository
                 $q->where('productcategory_id', request('category_id'));
             });
         })->when(request('status'), function ($q) {
-            if (request('status') == 'in stock') {
+            if (request('status') == 'in_stock') {
                 $q->whereHas('variations', function ($q) {
                     $q->where('qty', '>', 0);
                 });
-            } else {
+            } elseif (request('status') == 'out_of_stock') {
                 $q->whereHas('variations', function ($q) {
                     $q->where('qty', 0);
                 });
