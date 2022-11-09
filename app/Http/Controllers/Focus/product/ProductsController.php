@@ -34,6 +34,7 @@ use App\Http\Requests\Focus\product\ManageProductRequest;
 use App\Http\Requests\Focus\product\CreateProductRequest;
 use App\Http\Requests\Focus\product\EditProductRequest;
 use App\Models\client_product\ClientProduct;
+use App\Models\product\ProductMeta;
 
 /**
  * ProductsController
@@ -215,51 +216,64 @@ class ProductsController extends Controller
     public function pos(Request $request, $bill_type)
     {
         if (!access()->allow('pos')) return false;
-        $q = $request->post('keyword');
-        $w = $request->wid;
-        $cat_id = $request->post('cat_id');
-        $s = $request->post('serial_mode');
+        // printlog($request->all());
+        
+        $input = $request->except('_token');
         $limit = $request->post('search_limit', 20);
-        $bill_type=$request->bill_type;
-        if ($bill_type == 'label'){
-            $q = @$request->post('product')['term'];
+        $bill_type = $request->bill_type ?: $request->type;
 
-        }
+        if ($bill_type == 'label' && isset($input['product']['term']))
+            $input['keyword'] = $input['product']['term'];
 
-        $wq = compact('q', 'w', 'cat_id');
-        if ($s == 1 and $q) {
-            $product = \App\Models\product\ProductMeta::where('value', 'LIKE', '%' . $q . '%')->whereNull('value2')->whereHas('product_serial', function ($query) use ($wq) {
-                if ($wq['w'] > 0) return $query->where('warehouse_id', $wq['w']);
-            })->with(['product_standard'])->limit($limit)->get();
+        if ($input['serial_mode'] == 1 && $input['keyword']) {
+            $products = ProductMeta::where('value', 'LIKE', '%' . $input['keyword'] . '%')
+                ->whereNull('value2')
+                ->whereHas('product_serial', function ($q) use ($input) {
+                    if ($input['wid'] > 0) $q->where('warehouse_id', $input['wid']);
+                })->with(['product_standard'])->limit($limit)->get();
+
             $output = array();
-
-            foreach ($product as $row) {
-
-                $output[] = array('name' => $row->product_serial->product['name'], 'disrate' => $row->product_serial['disrate'], 'price' => $row->product_serial['price'], 'id' => $row->product_serial['id'], 'taxrate' => $row->product_serial->product['taxrate'], 'product_des' => $row->product_serial->product['product_des'], 'unit' => $row->product_serial->product['unit'], 'code' => $row->product_serial['code'], 'alert' => $row->product_serial['qty'], 'image' => $row->product_serial['image'], 'serial' => $row->value);
-
-
+            foreach ($products as $row) {
+                $output[] = [
+                    'name' => $row->product_serial->product['name'], 
+                    'disrate' => $row->product_serial['disrate'], 
+                    'price' => $row->product_serial['price'], 
+                    'id' => $row->product_serial['id'], 
+                    'taxrate' => $row->product_serial->product['taxrate'], 
+                    'product_des' => $row->product_serial->product['product_des'], 
+                    'unit' => $row->product_serial->product['unit'], 
+                    'code' => $row->product_serial['code'], 
+                    'alert' => $row->product_serial['qty'], 
+                    'image' => $row->product_serial['image'], 
+                    'serial' => $row->value,
+                ];
             }
         } else {
-
-            $product = ProductVariation::whereHas('product', function ($query) use ($wq) {
-                $query->where('name', 'LIKE', '%' . $wq['q'] . '%');
-                if ($wq['cat_id'] > 0) $query->where('productcategory_id', $wq['cat_id']);
-                return $query;
-            })->when($wq['w'] > 0, function ($q) use ($wq) {
-                $q->where('warehouse_id', $wq['w']);
+            $products = ProductVariation::whereHas('product', function ($q) use ($input) {
+                $q->where('name', 'LIKE', '%' . $input['keyword'] . '%');
+                if ($input['cat_id'] > 0) $q->where('productcategory_id', $input['cat_id']);
+            })->when($input['wid'] > 0, function ($q) use ($input) {
+                $q->where('warehouse_id', $input['wid']);
             })->limit($limit)->get();
+
             $output = array();
-
-            foreach ($product as $row) {
-                if (($row->product->stock_type > 0 and $row->qty > 0) or !$row->product->stock_type) {
-                    $output[] = array('name' => $row->product->name . ' ' . $row['name'], 'disrate' => numberFormat($row->disrate), 'price' => numberFormat($row->price), 'id' => $row->id, 'taxrate' => numberFormat($row->product['taxrate']), 'product_des' => $row->product['product_des'], 'unit' => $row->product['unit'], 'code' => $row->code, 'alert' => $row->qty, 'image' => $row->image, 'serial' => '');
-                }
+            foreach ($products as $row) {
+                $output[] = [
+                    'name' => "{$row->product->name} {$row['name']}", 
+                    'disrate' => numberFormat($row->disrate), 
+                    'price' => numberFormat($row->price), 
+                    'id' => $row->id, 
+                    'taxrate' => numberFormat($row->product['taxrate']), 
+                    'product_des' => $row->product['product_des'], 
+                    'unit' => $row->product['unit'], 
+                    'code' => $row->code, 
+                    'alert' => $row->qty, 
+                    'image' => $row->image, 
+                    'serial' => '',
+                ];
             }
-
         }
 
-        if (count($output) > 0)
-
-            return view('focus.products.partials.pos')->withDetails($output);
+        return view('focus.products.partials.pos')->withDetails($output);
     }
 }

@@ -18,15 +18,12 @@
 
 namespace App\Http\Controllers\Focus\invoice;
 
-use App\Http\Controllers\Focus\printer\PrinterController;
 use App\Http\Controllers\Focus\printer\RegistersController;
 use App\Http\Requests\Focus\invoice\ManagePosRequest;
 use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
 use App\Models\customer\Customer;
-use App\Models\invoice\Draft;
 use App\Models\invoice\Invoice;
-use App\Models\template\Template;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
@@ -44,7 +41,7 @@ use App\Models\bank\Bank;
 use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
-use Bitly;
+use App\Repositories\Focus\pos\PosRepository;
 
 /**
  * InvoicesController
@@ -56,14 +53,16 @@ class InvoicesController extends Controller
      * @var InvoiceRepository
      */
     protected $repository;
+    protected $pos_repository;
 
     /**
      * contructor to initialize repository object
      * @param InvoiceRepository $repository ;
      */
-    public function __construct(InvoiceRepository $repository)
+    public function __construct(InvoiceRepository $repository, PosRepository $pos_repository)
     {
         $this->repository = $repository;
+        $this->pos_repository = $pos_repository;
     }
 
     /**
@@ -88,6 +87,17 @@ class InvoicesController extends Controller
     public function create(CreateInvoiceRequest $request)
     {
         return new CreateResponse('focus.invoices.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param StoreInvoiceRequestNamespace $request
+     * @return \App\Http\Responses\RedirectResponse
+     */
+    public function store(CreateInvoiceRequest $request)
+    {
+        dd($request->all());
     }
 
     /**
@@ -408,7 +418,7 @@ class InvoicesController extends Controller
     }        
 
     /**
-     * Point of Sale
+     * POS Create 
      */
     public function pos(ManagePosRequest $request, RegistersController $register)
     {
@@ -421,8 +431,6 @@ class InvoicesController extends Controller
         $input['sub'] = false;
         $last_invoice = Invoice::latest()->first();
 
-        
-
         return view('focus.invoices.pos.create')
             ->with([
                 'last_invoice' => $last_invoice, 
@@ -430,7 +438,20 @@ class InvoicesController extends Controller
                 'p' => $request->p, 
                 'accounts' => $accounts, 
                 'customer' => $customer
-            ])->with(bill_helper(1, 2))
-            ->with(product_helper());
+            ])->with(bill_helper(1, 2))->with(product_helper());
+                
+    }
+
+    /**
+     * POS Store 
+     */
+    public function pos_store(CreateInvoiceRequest $request)
+    {
+        $this->pos_repository->create($request->except('_token'));
+        
+        return response()->json([
+            'status' => 'Success', 
+            'message' => 'Sale Posted Successfully'
+        ]);
     }
 }
