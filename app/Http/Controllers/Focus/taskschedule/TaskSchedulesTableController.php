@@ -63,8 +63,8 @@ class TaskSchedulesTableController extends Controller
                     $link = '<a href="'. route('biller.contracts.show', $contract).'">'.$name.'</a>';
                 }
                 return $link;
-                
-            })->addColumn('loaded', function ($schedule) {
+            })
+            ->addColumn('loaded', function ($schedule) {
                 $serviced_equip_ids = array();
                 foreach ($schedule->contractservices as $service) {
                     $equip_ids = $service->items()->pluck('equipment_id')->toArray();
@@ -102,8 +102,8 @@ class TaskSchedulesTableController extends Controller
             ->addColumn('start_date', function ($schedule) {
                 return dateFormat($schedule->start_date);
             })
-            ->addColumn('end_date', function ($schedule) {
-                return dateFormat($schedule->end_date);
+            ->addColumn('actual_startdate', function ($schedule) {
+                return dateFormat($schedule->actual_startdate);
             })
             ->addColumn('service_status', function ($schedule) {
                 return $this->service_status;
@@ -112,7 +112,6 @@ class TaskSchedulesTableController extends Controller
                 $params = ['customer_id' => $schedule->contract->customer_id, 'schedule_id' => $schedule->id];
                 return $schedule->action_buttons 
                     . ' <a class="btn btn-purple round" href="'. route('biller.equipments.index', $params) .'" title="equipments"><i class="fa fa-list"></i></a> '; 
-                    
             })
             ->make(true);
     }

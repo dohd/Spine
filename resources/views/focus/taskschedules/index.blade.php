@@ -67,7 +67,7 @@
                                         <th>Total Service Amount</th>
                                         <th>Total Bill Amount</th>
                                         <th>Start Date</th>
-                                        <th>End Date</th>
+                                        <th>Actual Start Date</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -187,8 +187,8 @@
                         name: 'start_date'
                     },
                     {
-                        data: 'end_date',
-                        name: 'end_date'
+                        data: 'actual_startdate',
+                        name: 'actual_startdate'
                     },
                     {
                         data: 'actions',
