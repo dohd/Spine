@@ -44,3 +44,7 @@ npm-debug.log
 yarn-error.log
 
 *.ico
+
+# Local pattern
+public/**/*
+!public/focus/js/
