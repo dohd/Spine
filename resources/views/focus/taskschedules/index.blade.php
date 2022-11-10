@@ -198,8 +198,8 @@
                     }
                 ],
                 columnDefs: [
-                    { type: "custom-number-sort", targets: [5, 6] },
-                    { type: "custom-date-sort", targets: [7, 8] }
+                    { type: "custom-number-sort", targets: [4, 5] },
+                    { type: "custom-date-sort", targets: [6, 7] }
                 ],
                 order: [[0, "desc"]],
                 searchDelay: 500,
