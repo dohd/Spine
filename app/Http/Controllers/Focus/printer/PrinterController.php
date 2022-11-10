@@ -59,9 +59,14 @@ class PrinterController extends Controller
         return $this->network_print($invoice);
     }
 
+
+    /**
+     * print POS receipt
+     */
     public function browser_print(ManageInvoiceRequest $request)
     {
-        $invoice = Invoice::where('id', '=', $request->id)->first();
+        $invoice = Invoice::find($request->invoice_id);
+
         $invoice['type'] = 1;
         $prefix = 1;
         $title = trans('invoices.invoice_title');
@@ -74,6 +79,7 @@ class PrinterController extends Controller
             $prefix = 6;
             $title = trans('invoices.subscription');
         }
+
         $general = array('bill_type' => $title,
             'lang_bill_number' => trans('invoices.tid'),
             'lang_bill_date' => trans('invoices.invoice_date'),
@@ -101,12 +107,16 @@ class PrinterController extends Controller
 
         $data = array('general' => $general, 'invoice' => $invoice, 'company' => $company, 'link' => $link);
 
+
         $this->pheight = 0;
         session(['height' => 0]);
         if ($data['invoice']['status'] != 'paid') {
             $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_';
+
+            printlog($data['link']['preview'], Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
+
             $qrCode = new QrCode($data['link']['preview']);
-            $qrCode->writeFile(Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
+            // $qrCode->writeFile(Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
             $data['image'] = Storage::disk('public')->url('app/public/qr/' . $data['qrc'] . '.png');
         }
 

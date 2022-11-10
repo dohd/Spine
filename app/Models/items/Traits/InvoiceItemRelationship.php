@@ -3,6 +3,7 @@
 namespace App\Models\items\Traits;
 
 use App\Models\invoice\Invoice;
+use App\Models\product\ProductVariation;
 use App\Models\quote\Quote;
 
 /**
@@ -22,11 +23,11 @@ trait InvoiceItemRelationship
 
     public function product()
     {
-        return $this->belongsTo('App\Models\product\ProductVariation', 'product_id', 'product_id')->withoutGlobalScopes();
+        return $this->belongsTo(ProductVariation::class, 'product_id')->withoutGlobalScopes();
     }
 
     public function variation()
     {
-        return $this->belongsTo('App\Models\product\ProductVariation', 'product_id', 'id')->withoutGlobalScopes();
+        return $this->belongsTo(ProductVariation::class, 'product_id')->withoutGlobalScopes();
     }
 }

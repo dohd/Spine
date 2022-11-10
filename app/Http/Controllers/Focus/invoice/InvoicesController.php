@@ -34,10 +34,12 @@ use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
 use App\Http\Requests\Focus\invoice\CreateInvoiceRequest;
 use App\Http\Requests\Focus\invoice\EditInvoiceRequest;
 use App\Http\Responses\RedirectResponse;
+use App\Models\additional\Additional;
 use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
 use App\Models\bank\Bank;
+use App\Models\currency\Currency;
 use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
@@ -424,22 +426,23 @@ class InvoicesController extends Controller
     {
         if (!$register->status()) return view('focus.invoices.pos.open_register');
 
-        $input = $request->only(['sub', 'p']);
-        $customer = Customer::first();
-        $accounts = Account::all();
-
-        $input['sub'] = false;
         $last_invoice = Invoice::latest()->first();
-
-        return view('focus.invoices.pos.create')
-            ->with([
-                'last_invoice' => $last_invoice, 
-                'sub' => $input['sub'], 
-                'p' => $request->p, 
-                'accounts' => $accounts, 
-                'customer' => $customer
-            ])->with(bill_helper(1, 2))->with(product_helper());
-                
+        $customer = Customer::first();
+        $currencies = Currency::all();
+        $terms = Term::all();
+        $additionals = Additional::all();
+        $defaults = ConfigMeta::get()->groupBy('feature_id');
+        
+        $pos_account = Account::where('system', 'pos')->first(['id', 'holder']);
+        $accounts = Account::where('account_type', 'Asset')
+            ->whereHas('accountType', fn($q) => $q->where('system', 'bank'))
+            ->get(['id', 'holder', 'number']);
+        
+        $params = compact('customer', 'accounts', 'pos_account', 'last_invoice', 'currencies', 'terms', 'additionals', 'defaults');
+        return view('focus.invoices.pos.create', $params)->with([
+            'sub' => false, 
+            'p' => $request->p,             
+        ])->with(product_helper());
     }
 
     /**
@@ -447,11 +450,19 @@ class InvoicesController extends Controller
      */
     public function pos_store(CreateInvoiceRequest $request)
     {
-        $this->pos_repository->create($request->except('_token'));
+        if (!request('is_future_pay')) {
+            $request->validate([
+                'pmt_reference' => 'required',
+                'p_account' => 'required',
+            ]);
+        }
+        
+        $result = $this->pos_repository->create($request->except('_token'));
         
         return response()->json([
             'status' => 'Success', 
-            'message' => 'Sale Posted Successfully'
+            'message' => 'POS Transaction Sale Created Successfully',
+            'invoice' => $result,
         ]);
     }
 }

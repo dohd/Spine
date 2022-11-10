@@ -59,14 +59,15 @@ class PosRepository extends BaseRepository
         
         // invoice
         $inv_data = Arr::only($input, [
-            'invoicedate', 'invoiceduedate', 'subtotal', 'total', 'customer_id', 'tax_id', 'notes'
+            'invoicedate', 'invoiceduedate', 'subtotal', 'total', 'customer_id', 'tax_id', 'notes', 
+            'account_id', 'claimer_tax_pin', 'claimer_company'
         ]);
         $inv_data = array_replace($inv_data, [
             'tid' => Invoice::max('tid') + 1,
             'notes' => $inv_data['notes'] ?: 'POS Transaction',
             'term_id' => 1,
             'user_id' => auth()->user()->id,
-            'user_id' => auth()->user()->ins,
+            'ins' => auth()->user()->ins,
         ]);
         $result = Invoice::create($inv_data);
 
@@ -78,8 +79,8 @@ class PosRepository extends BaseRepository
         $inv_items_data = modify_array($inv_items_data);
         $inv_items_data = array_map(function ($v) use($result) {
             $tax = $v['product_tax'] * 0.01;
-            $v['product_price'] = $v['product_price'] * $v['product_qty'] * (1+$tax);
             $v['total_tax'] = $v['product_subtotal'] * $tax;
+            $v['product_amount'] = $v['product_price'] * $v['product_qty'] * (1+$tax);
             
             $v['description'] = $v['product_name'];
             unset($v['product_name'], $v['unit_m']);
@@ -92,21 +93,16 @@ class PosRepository extends BaseRepository
         InvoiceItem::insert($inv_items_data);
 
         // reduce inventory
-        foreach ($result->items as $item) {
-            $product = $item->product;
-            if ($product) $product->decrement('qty', $item->product_qty);
+        foreach ($result->products as $item) {
+            $pos_product = $item->product;
+            if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
         }
-
-        // payment items
-        $pmt_items_data = Arr::only($input, ['p_amount', 'p_method']);
-        $pmt_items_data = modify_array($pmt_items_data);
-        $pmt_items_data = array_filter($pmt_items_data, fn($v) => numberClean($v['p_amount']) > 0);
-        if ($pmt_items_data) $this->generate_payment($pmt_items_data, $result);
-
-        dd($inv_data, $inv_items_data, $pmt_items_data, $input);
 
         /** accounting */
         $this->post_transaction($result);
+
+        // if direct payment
+        if (!$input['is_future_pay']) $this->generate_payment($input, $result);
 
         if ($result) {
             DB::commit();
@@ -116,40 +112,6 @@ class PosRepository extends BaseRepository
         throw new GeneralException('Error Creating Invoice');
     }
 
-    /**
-     * Generate POS Invoice Payment
-     */
-    public function generate_payment($input, $invoice)
-    {
-        $pmt_data = [
-            'tid' => PaidInvoice::max('tid') + 1,
-            'account_id' => $invoice->account_id,
-            'customer_id' => $invoice->customer_id,
-            'date' => $invoice->invoicedate,
-            'amount' => $invoice->total,
-            'allocate_ttl' => $invoice->total,
-            'payment_type' => 'per_invoice',
-            'ins' => $invoice->ins,
-            'user_id' => $invoice->user_id,
-        ];
-        foreach ($input as $pmt_data) {
-            $pmt_data = array_replace($pmt_data, [
-                'payment_mode' => $pmt_data['p_method'],
-                'reference' => '123456',
-            ]);
-            $result = PaidInvoice::create($pmt_data);
-
-            $pmt_item_data = [
-                'paidinvoice_id' => $result->id,
-                'invoice_id' => $invoice->id,
-                'paid' => $result->amount,
-            ];
-            PaidInvoiceItem::create($pmt_item_data);
-
-            /**accounting */
-            $this->post_payment_transaction($result);
-        }
-    }
 
     /**
      * Post Pos Invoice Transaction
@@ -208,6 +170,53 @@ class PosRepository extends BaseRepository
         ]);
         Transaction::create($stock_cr_data);
         aggregate_account_transactions();        
+    }    
+
+    /**
+     * Generate POS Invoice Payment
+     */
+    public function generate_payment($input, $invoice)
+    {
+        $pmt_items_data = Arr::only($input, ['p_amount', 'p_method']);
+        $pmt_items_data = modify_array($pmt_items_data);
+        $pmt_items_data = array_filter($pmt_items_data, fn($v) => numberClean($v['p_amount']) > 0);
+        if (!$pmt_items_data) throw ValidationException::withMessages(['Payment confirmation details required!']);
+            
+        $pmt_data = [
+            'tid' => PaidInvoice::max('tid') + 1,
+            'account_id' => $input['p_account'],
+            'customer_id' => $invoice->customer_id,
+            'date' => $invoice->invoicedate,
+            'amount' => $invoice->total,
+            'allocate_ttl' => $invoice->total,
+            'reference' => $input['pmt_reference'],
+            'payment_type' => 'per_invoice',
+            'ins' => $invoice->ins,
+            'user_id' => $invoice->user_id,
+        ];
+        foreach ($pmt_items_data as $row) {
+            $pmt_data = array_replace($pmt_data, [
+                'payment_mode' => $row['p_method'],
+            ]);
+            $result = PaidInvoice::create($pmt_data);
+
+            $pmt_item_data = [
+                'paidinvoice_id' => $result->id,
+                'invoice_id' => $invoice->id,
+                'paid' => $result->amount,
+            ];
+            PaidInvoiceItem::create($pmt_item_data);
+
+            // update invoice amount paid
+            $invoice->increment('amountpaid', $result->amount);
+            // update invoice payment status
+            if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+            elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+            else $invoice->update(['status' => 'paid']);
+
+            /**accounting */
+            $this->post_payment_transaction($result);
+        }
     }
 
     /**
