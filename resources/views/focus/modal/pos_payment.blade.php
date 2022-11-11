@@ -110,7 +110,7 @@
                         <button class="btn btn-primary btn-lg btn-block mb-1" type="button" id="pos_future_pay"
                                 data-type="4"><i class="fa fa-arrow-circle-o-right"></i> Pay Later
                         </button>
-                        {{ Form::hidden('is_future_pay', null, ['id' => 'is_future_pay']) }}
+                        {{ Form::hidden('is_pay', 1, ['id' => 'is_pay']) }}
                     </div>
 
                     <div class="col-6">

@@ -44,6 +44,7 @@ use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\pos\PosRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * InvoicesController
@@ -426,7 +427,7 @@ class InvoicesController extends Controller
     {
         if (!$register->status()) return view('focus.invoices.pos.open_register');
 
-        $last_invoice = Invoice::latest()->first();
+        $tid = Invoice::max('tid');
         $customer = Customer::first();
         $currencies = Currency::all();
         $terms = Term::all();
@@ -438,11 +439,8 @@ class InvoicesController extends Controller
             ->whereHas('accountType', fn($q) => $q->where('system', 'bank'))
             ->get(['id', 'holder', 'number']);
         
-        $params = compact('customer', 'accounts', 'pos_account', 'last_invoice', 'currencies', 'terms', 'additionals', 'defaults');
-        return view('focus.invoices.pos.create', $params)->with([
-            'sub' => false, 
-            'p' => $request->p,             
-        ])->with(product_helper());
+        $params = compact('customer', 'accounts', 'pos_account', 'tid', 'currencies', 'terms', 'additionals', 'defaults');
+        return view('focus.invoices.pos.create', $params)->with(product_helper());
     }
 
     /**
@@ -450,19 +448,18 @@ class InvoicesController extends Controller
      */
     public function pos_store(CreateInvoiceRequest $request)
     {
-        if (!request('is_future_pay')) {
-            $request->validate([
-                'pmt_reference' => 'required',
-                'p_account' => 'required',
-            ]);
+        if (request('is_pay') && (!request('pmt_reference') || !request('p_account'))) {
+            throw ValidationException::withMessages(['payment reference and payment account is required!']);
         }
         
-        $result = $this->pos_repository->create($request->except('_token'));
+        // dd($request->all());
+        // $result = $this->pos_repository->create($request->except('_token'));
         
         return response()->json([
             'status' => 'Success', 
-            'message' => 'POS Transaction Sale Created Successfully',
-            'invoice' => $result,
+            'message' => 'POS Transaction Done Successfully',
+            // 'invoice' => $result,
+            'invoice' => (object) ['id' => 235],
         ]);
     }
 }

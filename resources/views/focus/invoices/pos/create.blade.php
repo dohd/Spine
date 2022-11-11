@@ -10,15 +10,16 @@
                 <div class="invoice_settings">
                     <ul class="choose-section inv_config">
                         <li id="products_tab" class="active"><a
-                                    href="javascript:void(false);">{{trans('pos.inventory')}}</a>
+                                    href="javascript:">{{trans('pos.inventory')}}</a>
                         </li>
                         <li id="invoice_tab">
-                            <a href="javascript:void(false);">{{trans('pos.settings')}}</a></li>
+                            <a href="javascript:">{{trans('pos.settings')}}</a></li>
                         <li id="drafts">
-                            <a href="javascript:void(false);">{{trans('pos.on_hold')}}</a></li>
+                            <a href="javascript:">{{trans('pos.on_hold')}}</a></li>
                     </ul>
                 </div>
 
+                {{-- search product field --}}
                 <div class="row" id="search_product">
                     <div class="col-9">
                         <fieldset class="form-group position-relative has-icon-left">
@@ -44,7 +45,7 @@
                     </div>
                 </div>
 
-                <!-- items_load -->
+                {{-- searched inventory items --}}
                 <div id="items_load">
                     <div id="items_list">
                         <div class="loaded_products" id="product_group">
@@ -145,7 +146,7 @@
                                     <div class="input-group-addon"><span class="icon-file-text-o"
                                                                             aria-hidden="true"></span>
                                     </div>
-                                    {{ Form::number('tid', @$last_invoice->tid+1, ['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
+                                    {{ Form::number('tid', @$tid+1 ,['class' => 'form-control round', 'placeholder' => trans('invoices.tid')]) }}
                                 </div>
                             </div>
                             <div class="col-sm-6"><label for="invocieno"
@@ -184,7 +185,7 @@
                             </div>
 
                         </div>
-
+                        
                         <div class="row">
                             <div class="col-sm-6">
                                 <label for="taxFormat"
@@ -197,22 +198,12 @@
                                         $tax_format_id=0;
                                         $tax_format_type='exclusive';
                                     @endphp
-                                    @foreach($additionals as $additional_tax)
-
-                                        @php
-                                            // if($additional_tax->id == $defaults[4][0]['feature_value']  && $additional_tax->class == 1){
-                                            //  echo '<option value="'.numberFormat($additional_tax->value).'" data-type1="'.$additional_tax->type1.'" data-type2="'.$additional_tax->type2.'" data-type3="'.$additional_tax->type3.'" data-type4="'.$additional_tax->id.'" selected>--'.$additional_tax->name.'--</option>';
-                                            //  $tax_format=$additional_tax->type2;
-                                            //  $tax_format_id=$additional_tax->id;
-                                            //  $tax_format_type=$additional_tax->type3;
-                                            // }
-
-                                        @endphp
-                                        {!! $additional_tax->class == 1 ? "<option value='".numberFormat($additional_tax->value)."' data-type1='$additional_tax->type1' data-type2='$additional_tax->type2' data-type3='$additional_tax->type3' data-type4='$additional_tax->id'>$additional_tax->name</option>" : "" !!}
+                                    
+                                    @foreach($additionals as $row)
+                                        <option value="{{ +$row->value }}" {{ $row->value == 16? 'selected' : '' }}>
+                                            {{ $row->name }}
+                                        </option>
                                     @endforeach
-
-                                    <option value="0" data-type1="%" data-type2="off"
-                                            data-type3="off">{{trans('general.off')}}</option>
                                 </select>
                             </div>
                             <div class="col-sm-6">
@@ -227,16 +218,10 @@
                                             $discount_format='%';
                                         @endphp
                                         @foreach($additionals as $additional_discount)
-                                            @php
-                                                // if($defaults[3][0]['feature_value'] == $additional_discount->id && $additional_discount->class == 2){
-                                                //  echo '<option value="'.$additional_discount->value.'" data-type1="'.$additional_discount->type1.'" data-type2="'.$additional_discount->type2.'" data-type3="'.$additional_discount->type3.'" selected>--'.$additional_discount->name.'--</option>';
-                                                //  $discount_format=$additional_discount->type1;
-                                                // }
-
-                                            @endphp
-                                            {!! $additional_discount->class == 2 ? "<option value='$additional_discount->value' data-type1='$additional_discount->type1' data-type2='$additional_discount->type2' data-type3='$additional_discount->type3'>$additional_discount->name</option>" : "" !!}
+                                            <option value="{{ +$row->value }}" {{ $row->value == 16? 'selected' : '' }}>
+                                                {{ $row->name }}
+                                            </option>
                                         @endforeach
-
                                     </select>
                                 </div>
                             </div>
@@ -355,8 +340,6 @@
     </div>
 
     <input type="hidden" value="new_i" id="inv_page">
-    <input type="hidden" name="sub" value="{{$sub}}">
-    <input type="hidden" name="p" value="{{$p}}">
     <input type="hidden" value="{{route('biller.invoices.pos_store')}}" id="pos_action">
     <input type="hidden" value="{{route('biller.invoices.draft_store')}}" id="pos_action_draft">
     <input type="hidden" value="search" id="billtype">
@@ -364,27 +347,12 @@
     <input type="hidden" value="{{$tax_format}}" name="tax_format_static" id="tax_format">
     <input type="hidden" value="{{$tax_format_type}}" name="tax_format" id="tax_format_type">
     <input type="hidden" value="{{$tax_format_id}}" name="tax_id" id="tax_format_id">
-    <input type="hidden" value="{{$discount_format}}"
-            name="discount_format" id="discount_format">
-
-    {{-- @if($defaults[4][0]->ship_tax['id']>0) <input type='hidden'
-                                                    value='{{numberFormat($defaults[4][0]->ship_tax['value'])}}'
-                                                    name='ship_rate' id='ship_rate'><input
-            type='hidden' value='{{$defaults[4][0]->ship_tax['type2']}}'
-            name='ship_tax_type'
-            id='ship_taxtype'>
-    @else
-        <input type='hidden'
-                value='{{numberFormat(0)}}'
-                name='ship_rate' id='ship_rate'><input
-                type='hidden' value='none' name='ship_tax_type'
-                id='ship_taxtype'>
-    @endif --}}
+    <input type="hidden" value="{{$discount_format}}" name="discount_format" id="discount_format">
     <input type="hidden" value="0" name="ship_tax" id="ship_tax">
     <input type="hidden" value="0" id="custom_discount">
-    <input type="hidden" name="total" class="form-control"
-            id="invoiceyoghtml" readonly="">
     <input type="hidden" value="0" name="paid_amount" id="paid_amount">
+    <input type="hidden" value="0" name="total" id="invoiceyoghtml">
+    <input type="hidden" value="0" name="tax" id="tax_total">
     @include("focus.modal.pos_payment")
 </form>
 @include("focus.modal.customer")

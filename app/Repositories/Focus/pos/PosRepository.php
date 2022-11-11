@@ -7,9 +7,11 @@ use App\Models\invoice\Invoice;
 use App\Models\invoice\PaidInvoice;
 use App\Models\items\InvoiceItem;
 use App\Models\items\PaidInvoiceItem;
+use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use App\Repositories\Focus\product\ProductRepository;
 use DB;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -37,6 +39,22 @@ class PosRepository extends BaseRepository
         return $q->get();
     }
 
+    // generate product purchase price
+    public function gen_purchase_price($id)
+    {
+        $product = ProductVariation::find($id);
+        return (new ProductRepository)->eval_purchase_price($product->id, $product->qty, $product->purchase_price);
+    }
+
+    // generate product default unit of measure
+    public function gen_unit_measure($id)
+    {
+        $variation = ProductVariation::find($id);
+        $base_unit = $variation->product->units()->where('unit_type', 'base')->first();
+        if (!$base_unit) throw ValidationException::withMessages(['please set product units!']);
+
+        return ['code' => $base_unit->code, 'value' => $base_unit->base_ratio];
+    }
 
     /**
      * Create POS Transaction
@@ -49,7 +67,7 @@ class PosRepository extends BaseRepository
         foreach ($input as $key => $val) {
             if (in_array($key, ['invoicedate', 'invoiceduedate'])) 
                 $input[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax_id'])) 
+            if (in_array($key, ['total', 'subtotal', 'tax', 'tax_id'])) 
                 $input[$key] = numberClean($val);
 
             $item_keys = ['product_qty', 'product_price', 'product_tax', 'product_subtotal', 'total_tax'];
@@ -59,7 +77,7 @@ class PosRepository extends BaseRepository
         
         // invoice
         $inv_data = Arr::only($input, [
-            'invoicedate', 'invoiceduedate', 'subtotal', 'total', 'customer_id', 'tax_id', 'notes', 
+            'invoicedate', 'invoiceduedate', 'subtotal', 'tax', 'total', 'customer_id', 'tax_id', 'notes', 
             'account_id', 'claimer_tax_pin', 'claimer_company'
         ]);
         $inv_data = array_replace($inv_data, [
@@ -78,21 +96,29 @@ class PosRepository extends BaseRepository
         ]);
         $inv_items_data = modify_array($inv_items_data);
         $inv_items_data = array_map(function ($v) use($result) {
-            $tax = $v['product_tax'] * 0.01;
+            // expense
+            $v['product_purchase_price'] = $this->gen_purchase_price($v['product_id']);
+            $v['product_expense_amount'] = $v['product_purchase_price'] * $v['product_qty'];
+
+            // sale
+            $tax = $v['product_tax'] / 100;
             $v['total_tax'] = $v['product_subtotal'] * $tax;
             $v['product_amount'] = $v['product_price'] * $v['product_qty'] * (1+$tax);
             
             $v['description'] = $v['product_name'];
             unset($v['product_name'], $v['unit_m']);
             return array_replace($v, [
-                'unit' => 'Lot',
-                'unit_value' => 1,
+                'unit' => $this->gen_unit_measure($v['product_id'])['code'],
+                'unit_value' => $this->gen_unit_measure($v['product_id'])['value'],
                 'invoice_id' => $result->id,
             ]);
         }, $inv_items_data);
         InvoiceItem::insert($inv_items_data);
 
-        // reduce inventory
+        // update invoice products expense total
+        $result->update(['product_expense_total' => $result->products->sum('product_expense_amount')]);
+
+        // reduce inventory stock
         foreach ($result->products as $item) {
             $pos_product = $item->product;
             if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
@@ -101,8 +127,8 @@ class PosRepository extends BaseRepository
         /** accounting */
         $this->post_transaction($result);
 
-        // if direct payment
-        if (!$input['is_future_pay']) $this->generate_payment($input, $result);
+        // on purchase and direct payment
+        if ($input['is_pay']) $this->generate_payment($input, $result);
 
         if ($result) {
             DB::commit();
@@ -111,7 +137,6 @@ class PosRepository extends BaseRepository
 
         throw new GeneralException('Error Creating Invoice');
     }
-
 
     /**
      * Post Pos Invoice Transaction
@@ -146,19 +171,23 @@ class PosRepository extends BaseRepository
             'account_id' => $invoice->account_id,
             'credit' => $invoice->subtotal,
         ]);
+        Transaction::create($inc_cr_data);
+
         // credit Tax (VAT)
-        $account = Account::where('system', 'tax')->first(['id']);
-        $tax_cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'credit' => $invoice->tax,
-        ]);
-        Transaction::insert([$inc_cr_data, $tax_cr_data]);
+        if ($invoice->tax > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $tax_cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $invoice->tax,
+            ]);
+            Transaction::create($tax_cr_data);
+        }
 
         // debit COG
         $account = Account::where('system', 'cog')->first(['id']);
         $cog_dr_data = array_replace($dr_data, [
             'account_id' => $account->id,
-            'debit' => $invoice->subtotal,
+            'debit' => $invoice->product_expense_total,
         ]);
         Transaction::create($cog_dr_data);
 
@@ -166,7 +195,7 @@ class PosRepository extends BaseRepository
         $account = Account::where('system', 'stock')->first(['id']);
         $stock_cr_data = array_replace($dr_data, [
             'account_id' => $account->id,
-            'credit' => $invoice->subtotal,
+            'credit' => $invoice->product_expense_total,
         ]);
         Transaction::create($stock_cr_data);
         aggregate_account_transactions();        
@@ -227,7 +256,7 @@ class PosRepository extends BaseRepository
         // credit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::max('tid');
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

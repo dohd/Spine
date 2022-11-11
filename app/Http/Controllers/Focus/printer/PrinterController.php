@@ -66,62 +66,56 @@ class PrinterController extends Controller
     public function browser_print(ManageInvoiceRequest $request)
     {
         $invoice = Invoice::find($request->invoice_id);
+        $extras = [
+            'type' => 1,
+            'custom' => 2,
+            'person' => 1,
+            'person_id' => $invoice->customer_id,
+            'url' => route('biller.invoices.show', $invoice->id),
+            'title' =>'invoice',
+        ];
+        foreach ($extras as $key => $val) {
+            $invoice[$key] = $val;
+        }
 
-        $invoice['type'] = 1;
         $prefix = 1;
         $title = trans('invoices.invoice_title');
-        $invoice['custom'] = 2;
-        $invoice['person'] = 1;
-        $invoice['person_id'] = $invoice['customer_id'];
-        $invoice['url'] = route('biller.invoices.show', $invoice->id);
-        $invoice['title'] = 'invoice';
-        if ($invoice['i_class'] > 1) {
-            $prefix = 6;
-            $title = trans('invoices.subscription');
-        }
-
-        $general = array('bill_type' => $title,
+        $general = [
+            'bill_type' => $title,
             'lang_bill_number' => trans('invoices.tid'),
             'lang_bill_date' => trans('invoices.invoice_date'),
-            'lang_bill_due_date' => trans('invoices.invoice_due_date'
-            ), 'direction' => 'ltr',
+            'lang_bill_due_date' => trans('invoices.invoice_due_date'), 
+            'direction' => 'ltr',
             'person' => trans('customers.customer'),
-            'prefix' => $prefix, 'status_block' => true,);
-        $valid_token = token_validator('', 'i' . $invoice['id'] . $invoice['tid'], true);
+            'prefix' => $prefix, 
+            'status_block' => true,
+            'tax_string_total' => trans('general.total_tax'),
+            'tax_id' => trans('general.tax_id'),  
+        ];
 
-        $company = Company::where('id', '=', $invoice['ins'])->first();
-
-
-        config([
-            'currency' => ConfigMeta::where('feature_id', '=', 2)->where('ins', '=', $company['id'])->first()->currency
-        ]);
-
-        $general['tax_string_total'] = trans('general.total_tax');
-        $general['tax_id'] = trans('general.tax_id');
-        if ($invoice['tax_format'] == 'igst' or $invoice['tax_format'] == 'cgst') $general['tax_string_total'] = trans('general.total_gst');
-        $general['tax_id'] = trans('general.gstin');
-
-
-        $link['preview'] = route('biller.view_bill', [$invoice['id'], $invoice['type'], $valid_token, 0]);
-
-
-        $data = array('general' => $general, 'invoice' => $invoice, 'company' => $company, 'link' => $link);
-
-
+        $company = Company::find($invoice->ins);
+        $config_meta = ConfigMeta::where('feature_id', 2)->where('ins', $company->id)->first();
+        config(['currency' => $config_meta? $config_meta->currency : '']);
         $this->pheight = 0;
         session(['height' => 0]);
-        if ($data['invoice']['status'] != 'paid') {
+
+        $valid_token = token_validator('', 'i' . $invoice->id . $invoice->tid, true);
+        $link['preview'] = route('biller.view_bill', [$invoice->id, $invoice->type, $valid_token, 0]);
+
+        $data = compact('general', 'invoice', 'company', 'link');
+
+        if ($invoice->status != 'paid') {
             $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_';
 
+            $qrCode = new QrCode($link['preview']);
             printlog($data['link']['preview'], Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
 
-            $qrCode = new QrCode($data['link']['preview']);
-            // $qrCode->writeFile(Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
+            $qrCode->writeFile(Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
+
             $data['image'] = Storage::disk('public')->url('app/public/qr/' . $data['qrc'] . '.png');
         }
-
+        
         return view('focus.bill.print_compact_v1', $data);
-
     }
 
 

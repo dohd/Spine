@@ -186,9 +186,8 @@ class ProductsController extends Controller
                 'warehouse' => $row->warehouse->toArray()
             ];
             // purchase price set by inventory valuation (LIFO) method
-            $product['purchase_price'] = $this->repository->compute_purchase_price(
-                $row->id, $row->qty, $row->purchase_price
-            );  
+            $product['purchase_price'] = $this->repository->eval_purchase_price($row->id, $row->qty, $row->purchase_price);
+                
             $products[] =  $product;
         }
 
@@ -216,7 +215,6 @@ class ProductsController extends Controller
     public function pos(Request $request, $bill_type)
     {
         if (!access()->allow('pos')) return false;
-        // printlog($request->all());
         
         $input = $request->except('_token');
         $limit = $request->post('search_limit', 20);
@@ -234,17 +232,22 @@ class ProductsController extends Controller
 
             $output = array();
             foreach ($products as $row) {
+                $serial_product = $row->product_serial;
+                $stock_product = $serial_product->product;
                 $output[] = [
-                    'name' => $row->product_serial->product['name'], 
-                    'disrate' => $row->product_serial['disrate'], 
-                    'price' => $row->product_serial['price'], 
-                    'id' => $row->product_serial['id'], 
-                    'taxrate' => $row->product_serial->product['taxrate'], 
-                    'product_des' => $row->product_serial->product['product_des'], 
-                    'unit' => $row->product_serial->product['unit'], 
-                    'code' => $row->product_serial['code'], 
-                    'alert' => $row->product_serial['qty'], 
-                    'image' => $row->product_serial['image'], 
+                    'name' => $stock_product->name, 
+                    'disrate' => $serial_product->disrate, 
+                    'purchase_price' => $this->repository->eval_purchase_price(
+                        $stock_product->id, $stock_product->qty, $stock_product->purchase_price
+                    ),
+                    'price' => $serial_product['price'], 
+                    'id' => $serial_product['id'], 
+                    'taxrate' => $stock_product['taxrate'], 
+                    'product_des' => $stock_product['product_des'], 
+                    'units' => $stock_product['units'], 
+                    'code' => $serial_product['code'], 
+                    'alert' => $serial_product['qty'], 
+                    'image' => $serial_product['image'], 
                     'serial' => $row->value,
                 ];
             }
@@ -259,13 +262,16 @@ class ProductsController extends Controller
             $output = array();
             foreach ($products as $row) {
                 $output[] = [
-                    'name' => "{$row->product->name} {$row['name']}", 
-                    'disrate' => numberFormat($row->disrate), 
+                    'name' => $row->name ?: $row->product->name,
+                    'disrate' => numberFormat($row->disrate),
+                    'purchase_price' => $this->repository->eval_purchase_price(
+                        $row->id, $row->qty, $row->purchase_price
+                    ),
                     'price' => numberFormat($row->price), 
                     'id' => $row->id, 
                     'taxrate' => numberFormat($row->product['taxrate']), 
                     'product_des' => $row->product['product_des'], 
-                    'unit' => $row->product['unit'], 
+                    'units' => $row->product->units, 
                     'code' => $row->code, 
                     'alert' => $row->qty, 
                     'image' => $row->image, 
@@ -273,7 +279,7 @@ class ProductsController extends Controller
                 ];
             }
         }
-
+        
         return view('focus.products.partials.pos')->withDetails($output);
     }
 }

@@ -130,7 +130,7 @@
             @endforeach
             
             @php
-            //    $height =130;
+               $height = 130;
             //    foreach ($invoice->products as $row) {
             //     $height +=8;
             //     $length=strlen($row['product_name']);
@@ -176,7 +176,7 @@
         <div class="stamp"> {{trans('payments.'.$invoice['status'])}}</div>
     @endif
     @php
-        session(compact('height'));
+        session(['height' => $height]);
     @endphp
 </div>
 </body>

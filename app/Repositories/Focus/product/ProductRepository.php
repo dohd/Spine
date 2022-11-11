@@ -272,7 +272,7 @@ class ProductRepository extends BaseRepository
      * 
      * @return float
      */
-    public function compute_purchase_price(int $id, float $qty, float $rate)
+    public function eval_purchase_price(int $id, float $qty, float $rate)
     {
         if ($qty == 0) return $rate;
         

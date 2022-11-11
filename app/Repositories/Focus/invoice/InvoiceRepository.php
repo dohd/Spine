@@ -273,20 +273,24 @@ class InvoiceRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit Revenue Account (Income)
         unset($dr_data['debit'], $dr_data['is_primary']);
+
+        // credit Revenue Account (Income)
         $inc_cr_data = array_replace($dr_data, [
             'account_id' => $result->account_id,
             'credit' => $result->subtotal,
         ]);
+        Transaction::create($inc_cr_data);
 
         // credit tax (VAT)
-        $account = Account::where('system', 'tax')->first(['id']);
-        $tax_cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'credit' => $result->tax,
-        ]);
-        Transaction::insert([$inc_cr_data, $tax_cr_data]);
+        if ($result->tax > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $tax_cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $result->tax,
+            ]);
+            Transaction::create($tax_cr_data);
+        }
 
         // WIP and COG transactions
         $tr_data = array();
@@ -489,7 +493,7 @@ class InvoiceRepository extends BaseRepository
     }    
 
     /**
-     * Delete invoice payment
+     * Delete Invoice Payment
      */
     public function delete_invoice_payment($id)
     {
@@ -520,7 +524,9 @@ class InvoiceRepository extends BaseRepository
         throw new GeneralException('Error Creating Invoice');
     }
 
-    // payment transaction
+    /**
+     * Invoice Payment Transaction
+     */
     public function post_transaction_invoice_payment($result)
     {
         $account = Account::where('system', 'receivable')->first(['id']);
@@ -599,27 +605,31 @@ class InvoiceRepository extends BaseRepository
         // dd($invoice);
         DB::beginTransaction();
 
-        $invoice_items = $invoice->products;
-        foreach ($invoice_items as $item) {
-            $quote = $item->quote;
-            if ($quote) {
-                // reverse invoiced quotes
-                $quote->update(['invoiced' => 'No']);
-                // reverse closed projects
-                $project = Project::where('main_quote_id', $quote->id)->first();
-                if ($project) {
-                    // $project->update([
-                    //     'status' => 'open',
-                    //     'end_note' => null,
-                    //     'end_date' => null,
-                    //     'ended_by' => null,
-                    // ]);
-                }
+        // pos invoice
+        if ($invoice->product_expense_total > 0) {
+            // reverse product qty
+            foreach ($invoice->products as $item) {
+                $pos_product = $item->product;
+                if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
+            }
+
+            // delete payments
+            $payment_ids = PaidInvoice::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))
+                ->pluck('id')->toArray();
+            foreach ($payment_ids as $val) {
+                $this->delete_invoice_payment($val);
+            }
+        } else {
+            // project invoice
+            $invoice_items = $invoice->products;
+            foreach ($invoice_items as $item) {
+                $quote = $item->quote;
+                if ($quote) $quote->update(['invoiced' => 'No']);
             }
         }
-
         $invoice->transactions()->delete();
         aggregate_account_transactions();
+
         if ($invoice->delete()) {
             DB::commit();
             return true;

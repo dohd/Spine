@@ -27,7 +27,7 @@
 
     $(document).on('click', '.payment_row_add', function (e) {
         $("#amount_row").append($("#payment_row").clone());
-        update_pay_pos();
+        calcPaymentTotals();
     });
 
     $(document).on('change', '#s_warehouses, #s_category', function (e) {
@@ -38,43 +38,33 @@
      * Payment Modal Shown
     */
     $("#pos_payment").on("show.bs.modal", function () {
-        $('.p_amount').val($('#invoiceyoghtml').val());
-        update_pay_pos();
+        $('#is_pay').val(1);
+        $('.p_amount:first').val($('#mahayog').text());
+        calcPaymentTotals();
 
         // on click pay later
-        $('#is_future_pay').val('');
         $('#pos_future_pay').click(function() {
-            $('#is_future_pay').val(1);
+            $('#is_pay').val('');
             $('#pos_basic_pay').click();
         });
     });
     
     
-    function update_pay_pos() {
-        var am_pos = 0;
+    function calcPaymentTotals() {
+        let sumRowAmount = 0;
         $('.p_amount').each(function() {
-            if (this.value > 0) 
-                am_pos = am_pos + accounting.unformat(this.value, accounting.settings.number.decimal);
+            sumRowAmount += accounting.unformat(this.value);
         });
 
-        var ttl_pos = accounting.unformat($('#invoiceyoghtml').val(), accounting.settings.number.decimal);
-        <?php
-            $round_off = false;
-            if ($round_off == 'PHP_ROUND_HALF_UP') {
-                echo ' ttl_pos=Math.ceil(ttl_pos);';
-            } elseif ($round_off == 'PHP_ROUND_HALF_DOWN') {
-                echo ' ttl_pos=Math.floor(ttl_pos);';
-            }
-        ?>
-
-        var due = parseFloat(ttl_pos - am_pos).toFixed(2);
-        if (due >= 0) {
-            $('#balance1').val(accounting.formatNumber(due));
-            $('#change_p').val(0);
-        } else {
-            due = due * (-1)
+        const orderPanelTotal = accounting.unformat($('#mahayog').text());
+        let dueAmount = orderPanelTotal - sumRowAmount;
+        if (dueAmount < 0) {
+            dueAmount *= -1;
             $('#balance1').val(0);
-            $('#change_p').val(accounting.formatNumber(due));
+            $('#change_p').val(accounting.formatNumber(dueAmount));
+        } else {
+            $('#balance1').val(accounting.formatNumber(dueAmount));
+            $('#change_p').val(0);
         }
     }
 
