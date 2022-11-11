@@ -105,13 +105,12 @@ class PrinterController extends Controller
         $data = compact('general', 'invoice', 'company', 'link');
 
         if ($invoice->status != 'paid') {
-            $data['qrc'] = 'pos_' . date('Y_m_d_H_i_s') . '_';
-
+            $qrc = 'pos_' . date('Y_m_d_H_i_s') . '_';
+            
             $qrCode = new QrCode($link['preview']);
-            printlog($data['link']['preview'], Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
+            $qrCode->writeFile(Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $qrc . '.png'));
 
-            $qrCode->writeFile(Storage::disk('public')->path('qr' . DIRECTORY_SEPARATOR . $data['qrc'] . '.png'));
-
+            $data['qrc'] = $qrc;
             $data['image'] = Storage::disk('public')->url('app/public/qr/' . $data['qrc'] . '.png');
         }
         

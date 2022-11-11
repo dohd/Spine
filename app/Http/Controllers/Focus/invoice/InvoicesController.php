@@ -453,13 +453,13 @@ class InvoicesController extends Controller
         }
         
         // dd($request->all());
-        // $result = $this->pos_repository->create($request->except('_token'));
+        $result = $this->pos_repository->create($request->except('_token'));
         
         return response()->json([
             'status' => 'Success', 
             'message' => 'POS Transaction Done Successfully',
-            // 'invoice' => $result,
-            'invoice' => (object) ['id' => 235],
+            'invoice' => $result,
+            // 'invoice' => (object) ['id' => 62],
         ]);
     }
 }
