@@ -145,9 +145,8 @@ class FiledTaxReportsTableController extends Controller
             ->addColumn('pin', function ($item) {
                 if ($item->debit_note) {
                     $this->debit_note = $item->debit_note;
-                    if ($this->debit_note->supplier) {
+                    if ($this->debit_note->supplier) 
                         $this->supplier = $this->debit_note->supplier;
-                    }
                     $this->purchase = null;
                 } elseif ($item->purchase) {
                     $this->purchase = $item->purchase;
@@ -160,7 +159,9 @@ class FiledTaxReportsTableController extends Controller
                 return $this->supplier->taxid;
             })
             ->addColumn('supplier', function ($item) {
-                return $this->supplier->name;
+                $purchase = null;
+                if ($item->purchase) $purchase = $item->purchase;
+                return $purchase->suppliername?: $this->supplier->name;
             })
             ->addColumn('invoice_date', function ($item) {
                 $date = '';
@@ -175,9 +176,8 @@ class FiledTaxReportsTableController extends Controller
                 return $tid;
             })
             ->addColumn('note', function ($item) {
-                $note = 'Goods';
+                $note = ($this->purchase && $this->purchase->tax == 8)? 'Fuel' : 'Goods';
                 if ($this->debit_note) $note = 'Credit Note';
-                // if ($this->purchase) $note = $this->purchase->notes;
                 return $note;
             })
             ->addColumn('subtotal', function ($item) {

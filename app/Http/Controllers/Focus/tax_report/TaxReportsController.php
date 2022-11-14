@@ -199,9 +199,9 @@ class TaxReportsController extends Controller
             ->get()->map(fn($v) => [
                 'id' => $v->id,
                 'purchase_date' => $v->date,
-                'supplier' => $v->supplier->name,
+                'supplier' => $v->suppliername ?: $v->supplier->name,
                 'invoice_no' => $v->doc_ref,
-                'note' => 'Goods',
+                'note' => $v->tax == 8? 'Fuel' : 'Goods',
                 'subtotal' => $v->paidttl,
                 'total' => $v->grandttl,
                 'tax' => $v->grandtax,
@@ -217,7 +217,7 @@ class TaxReportsController extends Controller
         ->whereNull('customer_id')->get()->map(fn($v) => [
             'id' => $v->id,
             'debit_note_date' => $v->date,
-            'supplier' => $v->supplier->name,
+            'supplier' => $v->suppliername ?: $v->supplier->name,
             'note' => 'Debit Note',
             'subtotal' => $v->paidttl,
             'total' => $v->grandttl,
