@@ -750,6 +750,7 @@
                         </ul>
                     </li>
                     @endauth
+
                     @permission('manage-account')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Charts Of Accounts
                         </a>
@@ -767,15 +768,21 @@
                             </li>
                         </ul>
                     </li>
-                    @endauth  
                     
-                    @permission('manage-account')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Book Balance Report</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance', 'v') }}"><i class="fa fa-balance-scale"></i> Trial Balance</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.balance_sheet', 'v') }}"><i class="fa fa-book"></i> {{ trans('accounts.balance_sheet') }}</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.profit_and_loss', 'v') }}"><i class="fa fa-money"></i> Profit & Loss</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.project_gross_profit') }}"><i class="fa fa-money"></i>Project Gross Profit</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Tax Returns</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item " href="{{ route('biller.tax_reports.filed_report') }}"><i class="fa fa-balance-scale"></i> Filed Tax Returns</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax Report</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax Report</a></li>
                         </ul>
                     </li>
                     @endauth

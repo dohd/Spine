@@ -3,12 +3,18 @@
 namespace App\Models\purchase\Traits;
 
 use App\Models\items\PurchaseItem;
+use App\Models\items\TaxReportItem;
 
 /**
  * Class PurchaseorderRelationship
  */
 trait PurchaseRelationship
 {
+    public function purchase_tax_reports()
+    {
+        return $this->hasMany(TaxReportItem::class, 'purchase_id');
+    }
+
     public function items()
     {
         return $this->hasMany(PurchaseItem::class, 'bill_id');
