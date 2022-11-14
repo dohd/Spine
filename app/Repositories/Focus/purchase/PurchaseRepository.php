@@ -63,6 +63,8 @@ class PurchaseRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
+        $tid = Purchase::max('tid');
+        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $result = Purchase::create($data);
 
         $data_items = $input['data_items'];
