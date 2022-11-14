@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\tax_report;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\additional\Additional;
 use App\Models\creditnote\CreditNote;
 use App\Models\invoice\Invoice;
 use App\Models\purchase\Purchase;
@@ -61,7 +62,9 @@ class TaxReportsController extends Controller
      */
     public function create()
     {
-        return view('focus.tax_reports.create');
+        $additionals = Additional::all();
+        
+        return view('focus.tax_reports.create', compact('additionals'));
     }
 
     /**
@@ -195,13 +198,12 @@ class TaxReportsController extends Controller
         
         $direct_purchases = Purchase::when($month, fn($q) => $q->whereMonth('date', $month))
             ->doesntHave('purchase_tax_reports')
-            ->where('doc_ref_type', 'Invoice')
             ->get()->map(fn($v) => [
                 'id' => $v->id,
                 'purchase_date' => $v->date,
                 'supplier' => $v->suppliername ?: $v->supplier->name,
                 'invoice_no' => $v->doc_ref,
-                'note' => $v->tax == 8? 'Fuel' : 'Goods',
+                'note' => $v->tax == 8? gen4tid('DP-', $v->tid) . ' Fuel' : gen4tid('DP-', $v->tid) . ' Goods',
                 'subtotal' => $v->paidttl,
                 'total' => $v->grandttl,
                 'tax' => $v->grandtax,

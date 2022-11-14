@@ -20,8 +20,6 @@
         init() {
             $.ajaxSetup(config.ajax);
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-            this.fetchSales();
-            this.fetchPurchases();
 
             $('#sale_month').change(() => this.fetchSales());
             $('#sale_tax_rate').change(this.saleTaxRateChange);
@@ -31,6 +29,9 @@
             $('form').on('change', '#sale_file_all, #sale_remove_all, .sale-file-row, .sale-remove-row', this.saleRadioChange);
             $('form').on('change', '#purchase_file_all, #purchase_remove_all, .purchase-file-row, .purchase-remove-row', this.purchaseRadioChange);
             $('form').submit(this.formSubmit);
+
+            this.fetchSales();
+            this.fetchPurchases();
         },
 
         formSubmit() {
@@ -61,13 +62,11 @@
             const removedSaleRows = $('#saleTbl').find('.sale-remove-row:checked').length;
             if (filedSaleRows || removedSaleRows) {
                 $('#sale_month').attr('required', true);
-                $('#sale_tax_rate').attr('required', true);
             }
             const filedPurchaseRows = $('#purchaseTbl').find('.purchase-file-row:checked').length;
             const removedPurchaseRows = $('#purchaseTbl').find('.purchase-remove-row:checked').length;
             if (filedPurchaseRows || removedPurchaseRows) {
                 $('#purchase_month').attr('required', true);
-                $('#purchase_tax_rate').attr('required', true);
             }
         },
 
@@ -86,6 +85,7 @@
                 data.sort((a, b) => new Date(b.invoice_date) - new Date(a.invoice_date)); 
                 this.salesData = data;
                 this.renderSalesRow(data);
+                $('#sale_tax_rate').change();
             });
         },
         renderSalesRow(data = []) {
@@ -164,6 +164,7 @@
                 data.sort((a, b) => new Date(b.purchase_date) - new Date(a.purchase_date)); 
                 this.purchasesData = data;
                 this.renderPurchasesRow(data);
+                $('#purchase_tax_rate').change();
             });
         },
         renderPurchasesRow(data = []) {

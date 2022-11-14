@@ -14,10 +14,11 @@
     <div class="col-2">
         <label for="status">Tax Rate</label>
         <select name="sale_tax_rate" id="sale_tax_rate" class="custom-select">
-            <option value="">All</option>
-            <option value="16">General Rated (16 %)</option>
-            <option value="8">Other Rate (8 %)</option>
-            <option value="0">Zero Rated (Off)</option>
+            @foreach ($additionals as $row)
+                <option value="{{ $row->value }}" {{ $row->is_default? 'selected' : '' }}>
+                    {{ $row->name }}
+                </option>
+            @endforeach
         </select>
     </div>
 
