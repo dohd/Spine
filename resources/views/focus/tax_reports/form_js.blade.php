@@ -55,6 +55,20 @@
                 $(this).find('.purchase-file-row').attr('disabled', true); 
                 $(this).find('.purchase-remove-row').attr('disabled', true); 
             });
+
+            // set required attributes on filters
+            const filedSaleRows = $('#saleTbl').find('.sale-file-row:checked').length;
+            const removedSaleRows = $('#saleTbl').find('.sale-remove-row:checked').length;
+            if (filedSaleRows || removedSaleRows) {
+                $('#sale_month').attr('required', true);
+                $('#sale_tax_rate').attr('required', true);
+            }
+            const filedPurchaseRows = $('#purchaseTbl').find('.purchase-file-row:checked').length;
+            const removedPurchaseRows = $('#purchaseTbl').find('.purchase-remove-row:checked').length;
+            if (filedPurchaseRows || removedPurchaseRows) {
+                $('#purchase_month').attr('required', true);
+                $('#purchase_tax_rate').attr('required', true);
+            }
         },
 
         /**
