@@ -197,6 +197,7 @@ class TaxReportsController extends Controller
         $month = request('purchase_month', 0);
         
         $direct_purchases = Purchase::when($month, fn($q) => $q->whereMonth('date', $month))
+            ->where('tid', '>', 0)
             ->doesntHave('purchase_tax_reports')
             ->get()->map(fn($v) => [
                 'id' => $v->id,

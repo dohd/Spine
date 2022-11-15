@@ -71,11 +71,17 @@ class CustomerRepository extends BaseRepository
         return $q->get(['id','name','company','email','address','picture','active','created_at']);
     }
 
+    /**
+     * Customer Invoices data
+     */
     public function getInvoicesForDataTable($customer_id = 0)
     {
         return Invoice::where('customer_id', request('customer_id', $customer_id))->get();
     }
 
+    /**
+     * Statement on account transaction data
+     */
     public function getTransactionsForDataTable($customer_id = 0)
     {         
         $q = Transaction::whereHas('account', function ($q) { 
@@ -95,7 +101,7 @@ class CustomerRepository extends BaseRepository
                 $q1->where($customer);
             });
         });       
-                    
+        printlog(request('start_date'), request('is_transaction'));
         // on date filter
         if (request('start_date') && request('is_transaction')) {
             $from = date_for_database(request('start_date'));
@@ -125,6 +131,9 @@ class CustomerRepository extends BaseRepository
         return $q->get();
     }
 
+    /**
+     * Statement on invoice data
+     */
     public function getStatementForDataTable($customer_id = 0)
     {
         $q = Invoice::where('customer_id', request('customer_id', $customer_id));

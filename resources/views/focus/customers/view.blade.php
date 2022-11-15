@@ -52,111 +52,190 @@
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
-
-    // delete customer
-    $('#delCustomer').click(function() {
-        const form = $(this).children('form');
-        swal({
-            title: 'Are You  Sure?',
-            icon: "warning",
-            buttons: true,
-            dangerMode: true,
-            showCancelButton: true,
-        }, () => form.submit());
-    });
-
-    // datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-    .datepicker('setDate', new Date());
-
-    // date filter
-    $('.search').click(function() {
-        const start_date = $(this).parents('.row').find('.start_date');
-        const end_date = $(this).parents('.row').find('.end_date');
-        const id = $(this).attr('id');
-        if (id == 'search2') {
-            $('#transTbl').DataTable().destroy();
-            drawTransactionData(start_date.eq(0).val(), end_date.eq(0).val());
-        } else if (id == 'search4') {
-            $('#stmentTbl').DataTable().destroy();
-            drawStatementData(start_date.eq(1).val(), end_date.eq(1).val());
-        }
-    });
-    $('.refresh').click(function() {
-        const id = $(this).attr('id');
-        if (id == 'refresh2') {
-            $('#transTbl').DataTable().destroy();
-            drawTransactionData();
-        } else if (id == 'refresh4') {
-            $('#stmentTbl').DataTable().destroy();
-            drawStatementData();
-        }
-    });
-
-    // aging report clone
-    const aging = $('.aging').clone();
-    $('#stmentTbl').after(aging);
-    $('#active5').append(aging.clone());
-
-    // draw data
-    setTimeout(() => {
-        drawCustomerData();
-        drawTransactionData();
-        drawInvoiceData();
-        drawStatementData();
-    }, "{{ config('master.delay') }}");
-    const dTableConfig = {
-        processing: true,
-        serverSide: true,
-        responsive: true,
-        stateSave: true,
-        language: {@lang('datatable.strings')},
+    config = {
         ajax: {
-            url: '{{ route("biller.customers.get") }}',
-            type: 'post',
-            data: {customer_id: "{{ $customer->id }}" }
+            headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}
         },
-        columns: [{ data: 'name', name: 'name'}],
-        order: [[0, "desc"]],
-        searchDelay: 500,
-        dom: 'Blfrtip',
-        buttons: ['excel', 'csv', 'pdf']
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+        dataTable: {
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            stateSave: true,
+            language: {@lang('datatable.strings')},
+        }
     };
-    const indexCol = [{name: 'id', data: 'DT_Row_Index'}];
-    function drawCustomerData() {
-        const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.dom = 'frt';
-        const dataTable = $('#customerTbl').DataTable(config);
-    }
-    function drawTransactionData(start_date='', end_date='') {
-        const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.ajax.data = {...config.ajax.data, start_date, end_date, is_transaction: 1};
-        config.order[0][1] = 'asc';
-        const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'account_balance'];
-        config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
-        const dataTable = $('#transTbl').DataTable(config);
-    }
-    function drawInvoiceData() {
-        const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.ajax.data = {...config.ajax.data, is_invoice: 1};
-        const cols = ['date', 'status', 'note', 'amount', 'paid'];
-        config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
-        const dataTable = $('#invoiceTbl').DataTable(config);
-    }
-    function drawStatementData(start_date='', end_date='') {
-        const config = JSON.parse(JSON.stringify(dTableConfig));
-        config.ajax.data = {...config.ajax.data, start_date, end_date, is_statement: 1};
-        config.order[0][1] = 'asc';
-        const cols = ['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'invoice_balance'];
-        config.columns = indexCol.concat(cols.map(v => ({data: v, name: v})));
-        config.bSort = false;
-        const dataTable = $('#stmentTbl').DataTable(config);
-    }
+
+    const View = {
+        startDate: '',
+
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            
+            this.drawCustomerDataTable();
+            this.drawInvoiceDataTable();
+            this.drawAccountStatementDataTable();
+            this.drawInvoiceStatementDataTable();
+            this.cloneAgingReport();
+
+            $('.start_date').change(this.changeStartDate);
+            $('.search').click(this.searchClick);
+            $('.refresh').click(this.refreshClick);
+            $('#delCustomer').click(this.deleteCustomer);
+        },
+
+        deleteCustomer() {
+            const form = $(this).children('form');
+            swal({
+                title: 'Are You  Sure?',
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+                showCancelButton: true,
+            }, () => form.submit());
+        },
+
+        changeStartDate() {
+            const date = $(this).val();
+            // statement on account
+            if ($(this).parents('#active2').length) {
+                let link = $('.print-on-account').attr('href');
+                if (link.includes('start_date')) {
+                    link = link.split('?')[0];
+                    link += `?is_transaction=1&start_date=${date}`;
+                } else link += `?is_transaction=1&start_date=${date}`;
+                $('.print-on-account').attr('href', link);
+            } else if ($(this).parents('#active4').length) {
+                // statement on invoice
+                let link = $('.print-on-invoice').attr('href');
+                if (link.includes('start_date')) {
+                    link = link.split('?')[0];
+                    link += `?is_statement=1&start_date=${date}`;
+                } else link += `?is_statement&start_date=${date}`;
+                $('.print-on-invoice').attr('href', link);
+            }
+        },
+
+        searchClick() {
+            const startInpt = $(this).parents('.row').find('.start_date');
+            const id = $(this).attr('id');
+            if (id == 'search2') {
+                View.startDate = startInpt.eq(0).val();
+                $('#transTbl').DataTable().destroy();
+                View.drawAccountStatementDataTable();
+            } else if (id == 'search4') {
+                View.startDate = startInpt.eq(1).val();
+                $('#stmentTbl').DataTable().destroy();
+                View.drawInvoiceStatementDataTable();
+            }
+        },
+
+        refreshClick() {
+            View.startDate = '';
+            View.endDate = '';
+            const id = $(this).attr('id');
+            if (id == 'refresh2') {
+                $('#transTbl').DataTable().destroy();
+                View.drawAccountStatementDataTable();
+            } else if (id == 'refresh4') {
+                $('#stmentTbl').DataTable().destroy();
+                View.drawInvoiceStatementDataTable();
+            }
+        },
+
+        cloneAgingReport() {
+            const aging = $('.aging').clone();
+            $('#stmentTbl').after(aging);
+            $('#active5').append(aging.clone());
+        },
+
+        drawCustomerDataTable() {
+            $('#customerTbl').DataTable({
+                ...config.dataTable,
+                ajax: {
+                    url: '{{ route("biller.customers.get") }}',
+                    type: 'post',
+                    data: {customer_id: "{{ $customer->id }}" },
+                },
+                columns: [{ data: 'name', name: 'name'}],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'frt',
+            });
+        },
+
+        drawInvoiceDataTable() {
+            $('#invoiceTbl').DataTable({
+                ...config.dataTable,
+                ajax: {
+                    url: '{{ route("biller.customers.get") }}',
+                    type: 'post',
+                    data: {customer_id: "{{ $customer->id }}", start_date:this.startDate, is_invoice: 1 },
+                },
+                columns: [
+                    {name: 'id', data: 'DT_Row_Index'},
+                    ...['date', 'status', 'note', 'amount', 'paid'].map(v => ({data: v, name: v})),
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['excel', 'csv', 'pdf'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+            });
+        },
+
+        drawAccountStatementDataTable() {
+            $('#transTbl').DataTable({
+                ...config.dataTable,
+                ajax: {
+                    url: '{{ route("biller.customers.get") }}',
+                    type: 'post',
+                    data: {customer_id: "{{ $customer->id }}", start_date:this.startDate, is_transaction: 1 },
+                },
+                columns: [
+                    {name: 'id', data: 'DT_Row_Index'},
+                    ...['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'account_balance'].map(v => ({data: v, name: v})),
+                ],
+                order: [[1, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['excel', 'csv', 'pdf'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+            });
+        },
+
+        drawInvoiceStatementDataTable() {
+            $('#stmentTbl').DataTable({
+                ...config.dataTable,
+                bSort: false,
+                ajax: {
+                    url: '{{ route("biller.customers.get") }}',
+                    type: 'post',
+                    data: {customer_id: "{{ $customer->id }}", start_date:this.startDate, is_statement: 1 },
+                },
+                columns: [
+                    {name: 'id', data: 'DT_Row_Index'},
+                    ...['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'invoice_balance'].map(v => ({data: v, name: v})),
+                ],
+                order: [[0, "asc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['excel', 'csv', 'pdf'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+            });
+        },
+    };
+
+    $(() => View.init());
 </script>
 @endsection

@@ -17,12 +17,7 @@
  */
 namespace App\Http\Controllers\Focus\customer;
 
-use App\Http\Requests\Focus\general\CommunicationRequest;
-use App\Models\account\Account;
 use App\Models\customer\Customer;
-use App\Models\transaction\TransactionHistory;
-use App\Repositories\Focus\general\RosemailerRepository;
-use App\Repositories\Focus\general\RosesmsRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -33,7 +28,9 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
+use App\Models\Company\Company;
 use DateTime;
+use Illuminate\Http\Response;
 
 /**
  * CustomersController
@@ -223,90 +220,6 @@ class CustomersController extends Controller
         return new ViewResponse('focus.customers.view', compact('customer', 'aging_cluster', 'account_balance'));
     }
 
-    public function send_bill(CommunicationRequest $request)
-    {
-
-        $input = $request->only('text', 'subject', 'mail_to');
-        $mailer = new RosemailerRepository;
-        return $mailer->send($input['text'], $input);
-
-    }
-
-    public function selected_action(ManageCustomerRequest $request)
-    {
-
-        if (isset($request->cust)) {
-
-
-            switch ($request->r_type) {
-                case 'mail':
-                    if (access()->allow('communication')) {
-                        $customers_mails = Customer::whereIn('id', $request->cust)->get('email');
-                        $input = array();
-                        foreach ($customers_mails as $customer_mail) {
-                            $input['email'][] = $customer_mail->email;
-                        }
-                        $input['subject'] = $request->subject;
-                        $mailer = new RosemailerRepository;
-                        return $mailer->send_group($request->text, $input);
-                    }
-                    break;
-                case 'sms':
-                    if (access()->allow('communication')) {
-                        $customers_mails = Customer::whereIn('id', $request->cust)->get('phone');
-                        foreach ($customers_mails as $customer_mail) {
-                            $mailer = new RosesmsRepository;
-                            $mailer->send_sms($customer_mail->phone, $request->text, false);
-                        }
-                        return array('status' => 'Success', 'message' => '');
-                    }
-                    break;
-                case 'delete':
-                    if (access()->allow('delete-customer')) {
-                        $customers_mails = Customer::whereIn('id', $request->cust)->delete();
-                        return array('status' => 'Success', 'message' => trans('alerts.backend.customers.deleted'));
-                    }
-                    break;
-            }
-
-        }
-
-
-    }
-
-    public function wallet(ManageCustomerRequest $request)
-    {
-
-
-        if ($request->post('amount') and $request->post('wid')) {
-            $amount = numberClean($request->post('amount'));
-            if ($amount > 0) {
-                $customer = Customer::find($request->wid);
-                $customer->balance = $customer->balance + $amount;
-                $customer->save();
-                $note = trans('transactions.wallet_recharge') . ' ' . amountFormat($amount);
-                TransactionHistory::create(array('party_id' => $request->wid, 'user_id' => auth()->user()->id, 'note' => $note, 'relation_id' => 11, 'ins' => auth()->user()->ins));
-                return new RedirectResponse(route('biller.customers.wallet') . '?rel_id=' . $request->wid, ['flash_success' => trans('transactions.wallet_updated')]);
-            }
-            return new RedirectResponse(route('biller.customers.wallet') . '?rel_id=' . $request->wid, ['flash_error' => trans('transactions.zero_amount')]);
-
-        }
-
-        if ($request->rel_id) {
-            $customer = Customer::find($request->rel_id);
-            $accounts = Account::all();
-
-            return new ViewResponse('focus.customers.wallet', compact('customer', 'accounts'));
-        }
-
-    }
-
-    public function wallet_transactions(ManageCustomerRequest $request)
-    {
-        $wallet_transactions = TransactionHistory::where(['relation_id' => 11, 'party_id' => $request->rel_id])->get();
-        return new ViewResponse('focus.customers.wallet_history', compact('wallet_transactions'));
-    }
-
     /**
      * Customer search options
      */
@@ -340,13 +253,42 @@ class CustomersController extends Controller
         return response()->json($customers);
     }
 
-    public function active(ManageCustomerRequest $request)
-    {
+    /**
+     * Print customer statements
+     */
+    public function print_statement(Request $request, $customer_id)
+    {   
+        // dd($customer_id);
+        $page = '';
+        $params = [];
+        if ($request->type == 1) {
+            $page = 'focus.customers.statements.print_statement_on_account';
 
-        $cid = $request->post('cid');
-        $active = $request->post('active');
-        $active = !(bool)$active;
-        Customer::where('id', '=', $cid)->update(array('active' => $active));
+            $transactions = $this->repository->getTransactionsForDataTable($customer_id)->sortBy('tr_date');
+            $start_date = request('start_date', date('Y-m-d'));
+            $company = Company::find(auth()->user()->ins);
+            
+            $params = compact('transactions', 'start_date', 'company');
+        } elseif ($request->type == 2) {
+            $page = 'focus.customers.statements.print_statement_on_invoice';
+
+            $inv_statements = $this->repository->getStatementForDataTable($customer_id);
+            $start_date = request('start_date', date('Y-m-d'));
+            $company = Company::find(auth()->user()->ins);
+
+            $params = compact('inv_statements', 'start_date', 'company');
+        }
+        
+        $html = view($page, $params)->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+        return Response::stream($pdf->Output('statement_on_account' . '.pdf', 'I'), 200, $headers);
     }
 
 }

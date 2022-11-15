@@ -47,9 +47,12 @@
             <div class="col-2">
                 <input type="text" class="form-control form-control-sm datepicker end_date" disabled>
             </div>
-            <div class="col-2">
+            <div class="col-3">
                 <input type="button" id="search2" value="Search" class="btn btn-info btn-sm search">
-                <button type="button" id="refresh2" class="btn btn-success btn-sm refresh"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+                <button type="button" id="refresh2" class="btn btn-success btn-sm mr-1 refresh"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+                <a href="{{ route('biller.customers.print_statement', [$customer, token_validator('', 's', true), 1]) }}" target="_blank"  class="btn btn-sm btn-purple print-on-account">
+                    <i class="fa fa-print"></i> statement
+                </a>
             </div>
         </div>
         <table id="transTbl" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -125,9 +128,12 @@
             <div class="col-2">
                 <input type="text" id="end_date" class="form-control form-control-sm datepicker end_date" disabled>
             </div>
-            <div class="col-2">
+            <div class="col-3">
                 <input type="button" id="search4" value="Search" class="btn btn-info btn-sm search">
-                <button type="button" id="refresh4" class="btn btn-success btn-sm refresh"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+                <button type="button" id="refresh4" class="btn btn-success btn-sm mr-1 refresh"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+                <a href="{{ route('biller.customers.print_statement', [$customer, token_validator('', 's', true), 2]) }}" target="_blank"  class="btn btn-sm btn-purple print-on-invoice">
+                    <i class="fa fa-print"></i> statement
+                </a>
             </div>
         </div>
         <table id="stmentTbl" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">

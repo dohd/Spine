@@ -281,36 +281,35 @@
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
-    // datepicker
-    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date());
-                        
-    const customer = @json(@$customer);
-    if (customer) {
-        if (customer.open_balance_date) {
-            $('#open_balance_date').datepicker('setDate', new Date(customer.open_balance_date));
-        }
-        const balance = parseFloat(customer.open_balance);
-        $('#open_balance').val(accounting.formatNumber(balance));
-    }
+    const config = {
+        date: {format: "{{config('core.user_date_format')}}", autoHide: true}
+    };
 
-    $('#open_balance').change(function() {
-        const value = accounting.unformat($(this).val());
-        if (value > 0) $('#sale_account').attr('required', true);
-        else $('#sale_account').attr('required', false);
-        $(this).val(accounting.formatNumber(value));
-    });
+    const Form = {
+        customer: @json(@$customer),
 
-    
-    $(document).ready(function() {
-        $("#groups").select2();
-        $("#groups").on("select2:select", function(evt) {
-            var element = evt.params.data.element;
-            var $element = $(element);
-            $element.detach();
-            $(this).append($element);
-            $(this).trigger("change");
-        });
-    });
+        init() {
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+
+            if (this.customer) {
+                const openBalanceDate = this.customer.open_balance_date;
+                if (openBalanceDate) $('#open_balance_date').datepicker('setDate', new Date(openBalanceDate));
+
+                const balance = parseFloat(customer.open_balance);
+                $('#open_balance').val(accounting.formatNumber(balance));
+            }
+
+            $('#open_balance').change(this.openBalanceChange);
+        },
+
+        openBalanceChange() {
+            const balance = accounting.unformat($(this).val());
+            if (balance > 0) $('#sale_account').attr('required', true);
+            else $('#sale_account').attr('required', false);
+            $(this).val(accounting.formatNumber(balance));
+        },
+    };
+
+    $(() => Form.init());
 </script>
 @endsection

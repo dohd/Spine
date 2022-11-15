@@ -66,15 +66,19 @@ class CustomersTableController extends Controller
             ->make(true);
     }
 
+    // statement on account data
     public function invoke_transaction()
     {
         $core = $this->customer->getTransactionsForDataTable();
+        $core = $core->sortBy('tr_date');
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
         ->addColumn('date', function ($tr) {
-            return dateFormat($tr->tr_date);
+            $date = dateFormat($tr->tr_date);
+            $sort_id = strtotime($date);
+            return "<span sort_id='{$sort_id}'>{$date}</span>";
         })
         ->addColumn('type', function ($tr) {
             return $tr->tr_type;
@@ -99,6 +103,7 @@ class CustomersTableController extends Controller
         ->make(true);
     }
 
+    // invoice data 
     public function invoke_invoice()
     {
         $core = $this->customer->getInvoicesForDataTable();
@@ -124,10 +129,11 @@ class CustomersTableController extends Controller
         ->make(true);
     }
 
+    // statement on invoice data
     public function invoke_statement()
     {
         $core = $this->customer->getStatementForDataTable();
-        
+        printlog(request('start_date') . ' ' . request('end_date'));
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
