@@ -32,6 +32,16 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-2">
+                                    <label for="customer">File Status</label>
+                                    <select name="is_filed" class="custom-select" id="is_filed">
+                                        @foreach ([0,1] as $val)
+                                            <option value="{{ $val }}" {{ $val? 'selected' : '' }}>
+                                                {{ $val? 'Filed' : 'Removed' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -52,13 +62,7 @@
                             <div class="tab-content px-1 pt-1">
                                 {{-- sales tab --}}
                                 <div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
-                                    <div class="form-group col-1">
-                                        <label for="label_visibility">Label Visibility</label>
-                                        <select name="col_label" id="sale_col_label" class="custom-select">
-                                            <option value="visible">Visible</option>
-                                            <option value="invisible">Hidden</option>
-                                        </select>
-                                    </div>
+                                    
                                     <table id="saleTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
@@ -80,13 +84,7 @@
                                 </div>
                                 {{-- purchases tab --}}
                                 <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
-                                    <div class="form-group col-1">
-                                        <label for="label_visibility">Label Visibility</label>
-                                        <select name="col_label" id="purchase_col_label" class="custom-select">
-                                            <option value="visible">Visible</option>
-                                            <option value="invisible">Hidden</option>
-                                        </select>
-                                    </div>
+                                    
                                     <table id="purchaseTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
@@ -121,13 +119,11 @@
     const config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        dataTable: {
-            drawCallback: void 0,
-        }
     };
 
     const Index = {
-        taxReportId: 0,
+        taxReportId: @json(request('tax_report_id', 0)),
+        isFiled: 1,
 
         init() {
             this.drawSaleDataTable();
@@ -135,8 +131,15 @@
 
             $('#sale_col_label').change(this.saleHideColumnLabel);
             $('#purchase_col_label').change(this.purchaseHideColumnLabel);
+            $('#is_filed').change(this.fileStatusChange);
 
-            $('#tax_report').select2({allowClear: true}).val('').change();
+            $('#tax_report').select2({allowClear: true});
+            if (this.taxReportId) {
+                $('#tax_report').val(this.taxReportId);
+            } else {
+                $('#tax_report').val('').change();
+            }
+            
             $('#tax_report').change(this.taxReportChange);
         },
 
@@ -148,23 +151,11 @@
             Index.drawPurchaseDataTable();
         },
 
-        saleHideColumnLabel() {
-            if (this.value == 'invisible') {
-                config.dataTable.drawCallback = (settings) => {
-                    $("#saleTbl thead").remove();
-                }
-            } else config.dataTable.drawCallback = void 0; 
+        fileStatusChange() {
+            Index.isFiled = $(this).val();
             $('#saleTbl').DataTable().destroy();
-            Index.drawSaleDataTable();
-        },
-
-        purchaseHideColumnLabel() {
-            if (this.value == 'invisible') {
-                config.dataTable.drawCallback = (settings) => {
-                    $("#purchaseTbl thead").remove();
-                }
-            } else config.dataTable.drawCallback = void 0;
             $('#purchaseTbl').DataTable().destroy();
+            Index.drawSaleDataTable();
             Index.drawPurchaseDataTable();
         },
 
@@ -177,7 +168,12 @@
                 ajax: {
                     url: "{{ route('biller.tax_reports.get_filed_items') }}",
                     type: 'POST',
-                    data: {is_sale: 1, is_purchase: 0, tax_report_id: this.taxReportId}
+                    data: {
+                        is_sale: 1, 
+                        is_purchase: 0, 
+                        tax_report_id: this.taxReportId,
+                        is_filed: this.isFiled,
+                    },
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
@@ -194,7 +190,6 @@
                     [25, 50, 100, 200, -1],
                     [25, 50, 100, 200, "All"]
                 ],
-                ...config.dataTable,
             });
         },
 
@@ -207,7 +202,12 @@
                 ajax: {
                     url: "{{ route('biller.tax_reports.get_filed_items') }}",
                     type: 'POST',
-                    data: {is_sale: 0, is_purchase: 1, tax_report_id: this.taxReportId}
+                    data: {
+                        is_purchase: 1, 
+                        is_sale: 0, 
+                        tax_report_id: this.taxReportId,
+                        is_filed: this.isFiled,
+                    },
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
@@ -224,7 +224,6 @@
                     [25, 50, 100, 200, -1],
                     [25, 50, 100, 200, "All"]
                 ],
-                ...config.dataTable,
             });
         }
     };

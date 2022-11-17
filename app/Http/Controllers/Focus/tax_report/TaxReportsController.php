@@ -130,8 +130,6 @@ class TaxReportsController extends Controller
      */
     public function show(TaxReport $tax_report)
     {
-        return redirect()->back();
-
         return view('focus.tax_reports.view', compact('tax_report'));
     }
 
@@ -141,7 +139,7 @@ class TaxReportsController extends Controller
     public function filed_report()
     {
         $tax_reports = TaxReport::get(['id', 'title']);
-        
+
         return view('focus.tax_reports.filed_report', compact('tax_reports'));
     }
 

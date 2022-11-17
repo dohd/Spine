@@ -35,8 +35,7 @@ class TaxReportRepository extends BaseRepository
     {
         $q = TaxReportItem::query()->where(function ($q) {
             $q->whereHas('invoice')->orWhereHas('credit_note');
-        });
-        $q->where('is_filed', 1);
+        })->where('is_filed', request('is_filed', 1));
         
         $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
 
@@ -47,8 +46,7 @@ class TaxReportRepository extends BaseRepository
     {
         $q = TaxReportItem::query()->where(function ($q) {
             $q->whereHas('purchase')->orWhereHas('debit_note');
-        });
-        $q->where('is_filed', 1);
+        })->where('is_filed', request('is_filed', 1));
 
         $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
 
