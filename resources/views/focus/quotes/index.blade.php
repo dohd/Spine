@@ -146,38 +146,9 @@
                         data: 'DT_Row_Index',
                         name: 'id'
                     },
-                    {
-                        data: 'date',
-                        name: 'date'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'notes',
-                        name: 'notes'
-                    },                
-                    {
-                        data: 'total',
-                        name: 'total'
-                    },
-                    {
-                        data: 'client_ref',
-                        name: 'client_ref'
-                    },
-                    {
-                        data: 'lead_tid',
-                        name: 'lead_tid'
-                    },
-                    {
-                        data: 'invoice_tid',
-                        name: 'invoice_tid'
-                    },
+                    ...[
+                        'date', 'tid', 'customer', 'notes', 'total', 'client_ref', 'lead_tid', 'invoice_tid'
+                    ].map(v => ({data: v, name: v})),
                     {
                         data: 'actions',
                         name: 'actions',
@@ -192,31 +163,7 @@
                 order:[[0, 'desc']],
                 searchDelay: 500,
                 dom: 'Blfrtip',
-                buttons: {
-                    buttons: [
-                        {
-                            extend: 'csv',
-                            footer: true,
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                            }
-                        },
-                        {
-                            extend: 'excel',
-                            footer: true,
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            footer: true,
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                            }
-                        }
-                    ]
-                }
+                buttons: ['csv', 'excel', 'print'],
             });
         }
     };

@@ -200,7 +200,7 @@
                     {name: 'id', data: 'DT_Row_Index'},
                     ...['date', 'type', 'note', 'invoice_amount', 'amount_paid', 'account_balance'].map(v => ({data: v, name: v})),
                 ],
-                order: [[1, "desc"]],
+                order: [[1, "asc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['excel', 'csv', 'pdf'],
