@@ -3,6 +3,7 @@
 namespace App\Models\utility_bill\Traits;
 
 use App\Models\advance_payment\AdvancePayment;
+use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\items\TaxReportItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\purchase\Purchase;
@@ -23,6 +24,11 @@ trait UtilityBillRelationship
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'ref_id');
+    }
+
+    public function grn()
+    {
+        return $this->belongsTo(Goodsreceivenote::class, 'ref_id');
     }
 
     public function items()

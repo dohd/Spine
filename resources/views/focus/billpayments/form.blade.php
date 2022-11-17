@@ -223,7 +223,7 @@
                 <tr>
                     <td class="text-center">${new Date(v.due_date).toDateString()}</td>
                     <td class="bill-no">${v.tid}</td>
-                    <td>${v.purchase? v.purchase.suppliername : ''}</td>
+                    <td>${v.suppliername? v.suppliername : v.supplier.name}</td>
                     <td class="text-center">${v.note}</td>
                     <td>${v.status}</td>
                     <td>${accounting.formatNumber(v.total)}</td>

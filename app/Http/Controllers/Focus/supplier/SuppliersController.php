@@ -258,16 +258,27 @@ class SuppliersController extends Controller
     }
 
     /**
-     * Get due bills
+     * Get Supplier Bills
      */
     public function bills()
     {
         $bills = UtilityBill::where('supplier_id', request('supplier_id'))
             ->whereColumn('amount_paid', '<', 'total')
-            ->with(['purchase' => function ($q) {
-                $q->select('id', 'suppliername');
-            }])
-            ->orderBy('due_date', 'desc')->get(); 
+            ->with([
+                'supplier' => fn($q) => $q->select('id', 'name'),
+                'purchase' => fn($q) => $q->select('id', 'suppliername', 'note'),
+                'grn' => fn($q) => $q->select('id', 'note'),
+            ])
+            ->orderBy('due_date', 'desc')
+            ->get()->map(function ($v) {
+                if ($v->document_type == 'direct_purchase') {
+                    $v->suppliername = $v->purchase->suppliername;
+                    if ($v->grn) unset($v->grn);
+                } elseif ($v->document_type == 'goods_receive_note') {
+                   if ($v->purchase) unset($v->purchase);
+                }
+                return $v;
+            }); 
         
         return response()->json($bills);
     }
