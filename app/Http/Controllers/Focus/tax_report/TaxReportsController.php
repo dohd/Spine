@@ -140,7 +140,9 @@ class TaxReportsController extends Controller
      */
     public function filed_report()
     {
-        return view('focus.tax_reports.filed_report');
+        $tax_reports = TaxReport::get(['id', 'title']);
+        
+        return view('focus.tax_reports.filed_report', compact('tax_reports'));
     }
 
     /**

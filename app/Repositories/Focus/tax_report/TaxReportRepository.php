@@ -33,15 +33,25 @@ class TaxReportRepository extends BaseRepository
 
     public function getForSalesDataTable()
     {
-        $q = TaxReportItem::query()->whereHas('invoice')->orWhereHas('credit_note');
-            
+        $q = TaxReportItem::query()->where(function ($q) {
+            $q->whereHas('invoice')->orWhereHas('credit_note');
+        });
+        $q->where('is_filed', 1);
+        
+        $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
+
         return $q->with(['invoice', 'credit_note'])->get();
     }
 
     public function getForPurchasesDataTable()
     {
-        $q = TaxReportItem::query()->whereHas('purchase')->orWhereHas('debit_note');
-            
+        $q = TaxReportItem::query()->where(function ($q) {
+            $q->whereHas('purchase')->orWhereHas('debit_note');
+        });
+        $q->where('is_filed', 1);
+
+        $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
+
         return $q->with(['purchase', 'debit_note'])->get();
     }
 

@@ -21,6 +21,25 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
+                            <div class="row">
+                                <div class="col-5">
+                                    <label for="customer">Report Title</label>
+                                    <select name="tax_report_id" class="form-control" id="tax_report" data-placeholder="Choose Report">
+                                        @foreach ($tax_reports as $row)
+                                            <option value="{{ $row->id }}">
+                                                {{ $row->title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
                             {{-- tab menu --}}
                             <ul class="nav nav-tabs nav-top-border no-hover-bg" role="tablist">
                                 <li class="nav-item">
@@ -108,12 +127,25 @@
     };
 
     const Index = {
+        taxReportId: 0,
+
         init() {
             this.drawSaleDataTable();
             this.drawPurchaseDataTable();
 
             $('#sale_col_label').change(this.saleHideColumnLabel);
             $('#purchase_col_label').change(this.purchaseHideColumnLabel);
+
+            $('#tax_report').select2({allowClear: true}).val('').change();
+            $('#tax_report').change(this.taxReportChange);
+        },
+
+        taxReportChange() {
+            Index.taxReportId = $(this).val() || 0;
+            $('#saleTbl').DataTable().destroy();
+            $('#purchaseTbl').DataTable().destroy();
+            Index.drawSaleDataTable();
+            Index.drawPurchaseDataTable();
         },
 
         saleHideColumnLabel() {
@@ -145,7 +177,7 @@
                 ajax: {
                     url: "{{ route('biller.tax_reports.get_filed_items') }}",
                     type: 'POST',
-                    data: {is_sale: 1, is_purchase: 0}
+                    data: {is_sale: 1, is_purchase: 0, tax_report_id: this.taxReportId}
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
@@ -175,7 +207,7 @@
                 ajax: {
                     url: "{{ route('biller.tax_reports.get_filed_items') }}",
                     type: 'POST',
-                    data: {is_sale: 0, is_purchase: 1}
+                    data: {is_sale: 0, is_purchase: 1, tax_report_id: this.taxReportId}
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},

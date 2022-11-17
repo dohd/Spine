@@ -4,7 +4,7 @@ namespace App\Models\items\Traits;
 
 use App\Models\creditnote\CreditNote;
 use App\Models\invoice\Invoice;
-use App\Models\purchase\Purchase;
+use App\Models\tax_report\TaxReport;
 use App\Models\utility_bill\UtilityBill;
 
 trait TaxReportItemRelationship
@@ -27,5 +27,10 @@ trait TaxReportItemRelationship
     public function debit_note()
     {
         return $this->belongsTo(CreditNote::class, 'debit_note_id')->whereNull('customer_id');
+    }
+
+    public function tax_report()
+    {
+        return $this->belongsTo(TaxReport::class, 'tax_report_id');
     }
 }
