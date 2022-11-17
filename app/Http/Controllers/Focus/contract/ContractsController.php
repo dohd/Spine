@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Focus\contract;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\branch\Branch;
 use App\Models\contract\Contract;
 use App\Models\equipment\Equipment;
+use App\Models\items\ContractServiceItem;
 use App\Models\project\BudgetItem;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\contract\ContractRepository;
@@ -86,7 +88,10 @@ class ContractsController extends Controller
      */
     public function show(Contract $contract)
     {
-        return new ViewResponse('focus.contracts.view', compact('contract'));
+        $branch_ids = $contract->equipments()->pluck('branch_id')->toArray();
+        $branches = Branch::whereIn('id', $branch_ids)->get();
+
+        return new ViewResponse('focus.contracts.view', compact('contract', 'branches'));
     }
 
     /**
