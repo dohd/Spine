@@ -54,12 +54,19 @@
                                             {{ Form::text('postbox', @$company['postbox'], ['class' => 'form-control box-size', 'placeholder' => trans('hrms.postal')]) }}
                                         </div>
                                     </div>
-                                    <div class='form-group'>
-                                        {{ Form::label('taxid', trans('hrms.tax_id'), ['class' => 'col control-label']) }}
-                                        <div class='col'>
-                                            {{ Form::text('taxid', @$company['taxid'], ['class' => 'form-control box-size', 'placeholder' => trans('hrms.tax_id')]) }}
+                                    <div class='form-group col'>
+                                        <div class="row">
+                                            <div class='col'>
+                                                {{ Form::label('taxid', trans('hrms.tax_id'), ['class' => 'col control-label']) }}
+                                                {{ Form::text('taxid', @$company['taxid'], ['class' => 'form-control box-size', 'placeholder' => trans('hrms.tax_id')]) }}
+                                            </div>
+                                            <div class='col'>
+                                                {{ Form::label('etr_code', 'ETR Code', ['class' => 'col control-label']) }}
+                                                {{ Form::text('etr_code', @$company['etr_code'], ['class' => 'form-control box-size', 'placeholder' => 'ETR Code']) }}
+                                            </div>
                                         </div>
                                     </div>
+                                    
                                     <div class='form-group'>
                                         {{ Form::label('email', trans('general.email'), ['class' => 'col control-label']) }}
                                         <div class='col'>

@@ -22,6 +22,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\additional\Additional;
+use App\Models\Company\Company;
 use App\Models\creditnote\CreditNote;
 use App\Models\invoice\Invoice;
 use App\Models\purchase\Purchase;
@@ -139,8 +140,9 @@ class TaxReportsController extends Controller
     public function filed_report()
     {
         $tax_reports = TaxReport::get(['id', 'title']);
+        $company = Company::find(auth()->user()->ins,['id', 'etr_code']);
 
-        return view('focus.tax_reports.filed_report', compact('tax_reports'));
+        return view('focus.tax_reports.filed_report', compact('tax_reports', 'company'));
     }
 
     /**

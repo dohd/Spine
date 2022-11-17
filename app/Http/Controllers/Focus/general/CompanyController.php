@@ -80,7 +80,7 @@ class CompanyController extends Controller
     {
         $data = $request->only([
             'cname', 'address', 'city', 'region', 'country', 'postbox', 'taxid', 'logo', 'theme_logo', 
-            'icon', 'phone', 'email', 'clock_in', 'clock_out'
+            'icon', 'phone', 'email', 'clock_in', 'clock_out', 'etr_code'
         ]);
         $data2 = $request->only(['custom_field']);
 

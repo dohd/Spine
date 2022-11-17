@@ -90,7 +90,7 @@ class FiledTaxReportsTableController extends Controller
                 return $this->customer->company;
             })
             ->addColumn('etr_code', function ($item) {
-                return 'KRAMW043202206040503';
+                return 0;
             })
             ->addColumn('invoice_date', function ($item) {
                 $date = '';

@@ -174,6 +174,13 @@
                         tax_report_id: this.taxReportId,
                         is_filed: this.isFiled,
                     },
+                    dataSrc: ({data}) => {
+                        data = data.map(v => {
+                            v['etr_code'] = @json($company->etr_code);
+                            return v;
+                        });
+                        return data;
+                    },
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
