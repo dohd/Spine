@@ -26,7 +26,9 @@ use App\Models\creditnote\CreditNote;
 use App\Models\invoice\Invoice;
 use App\Models\purchase\Purchase;
 use App\Models\tax_report\TaxReport;
+use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\tax_report\TaxReportRepository;
+use DateTime;
 use Illuminate\Http\Request;
 
 
@@ -87,9 +89,10 @@ class TaxReportsController extends Controller
      */
     public function edit(TaxReport $tax_report)
     {
-        return redirect()->back();
-
-        return view('focus.tax_reports.edit', compact('tax_report'));
+        // return redirect()->back();
+        $additionals = Additional::all();
+        
+        return view('focus.tax_reports.edit', compact('tax_report', 'additionals'));
     }
 
     /**
@@ -164,23 +167,21 @@ class TaxReportsController extends Controller
                 'credit_note_date' => '',
                 'credit_note_tid' => '',
             ]);
-            
-        $credit_notes = CreditNote::when($month, function ($q) use($month) {
-            $q->whereHas('invoice', fn($q) => $q->whereMonth('invoicedate', $month));
-        })
+
+        $credit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month))
         ->doesntHave('credit_note_tax_reports')
         ->whereNull('supplier_id')->get()->map(fn($v) => [
             'id' => $v->id,
             'credit_note_tid' => $v->tid,
-            'credit_note_date' => $v->date,
+            'invoice_date' => $v->date,
             'customer' => $v->customer->company,
             'note' => 'Credit Note',
-            'subtotal' => $v->subtotal,
-            'total' => $v->total,
-            'tax' => $v->tax,
+            'subtotal' => -1 * $v->subtotal,
+            'total' => -1 * $v->total,
+            'tax' =>  -1 * $v->tax,
             'tax_rate' => ($v->tax/$v->subtotal * 100),
             'type' => 'credit_note',
-            'invoice_date' => $v->invoice->invoicedate,
+            'credit_note_date' => $v->invoice->invoicedate,
             'invoice_tid' => $v->invoice->tid,
         ]);
             
@@ -195,23 +196,46 @@ class TaxReportsController extends Controller
     public function get_purchases()
     {
         $month = request('purchase_month', 0);
-        
-        $direct_purchases = Purchase::when($month, fn($q) => $q->whereMonth('date', $month))
+
+        $bills = UtilityBill::when($month, fn($q) => $q->whereMonth('date', $month))
             ->where('tid', '>', 0)
+            ->whereIn('document_type', ['direct_purchase', 'goods_receive_note'])
             ->doesntHave('purchase_tax_reports')
-            ->get()->map(fn($v) => [
-                'id' => $v->id,
-                'purchase_date' => $v->date,
-                'supplier' => $v->suppliername ?: $v->supplier->name,
-                'invoice_no' => $v->doc_ref,
-                'note' => $v->tax == 8? gen4tid('DP-', $v->tid) . ' Fuel' : gen4tid('DP-', $v->tid) . ' Goods',
-                'subtotal' => $v->paidttl,
-                'total' => $v->grandttl,
-                'tax' => $v->grandtax,
-                'tax_rate' => $v->tax,
-                'type' => 'purchase',
-                'debit_note_date' => '',
-            ]);
+            ->get()->map(function ($v) {
+                $note = '';
+                $suppliername = '';
+                if ($v->document_type == 'direct_purchase') {         
+                    $purchase = $v->purchase;
+                    if ($v->tax_rate == 8 && $purchase) {
+                        $note .= gen4tid('DP-', $purchase->tid) . ' Fuel';
+                        $suppliername .= $purchase->suppliername;
+                    } elseif ($purchase) {
+                        $note .= gen4tid('DP-', $purchase->tid) . ' Goods';
+                        $suppliername .= $purchase->suppliername;
+                    }
+                } elseif ($v->document_type == 'goods_receive_note') {
+                    $grn = $v->grn;
+                    if ($v->tax_rate == 8 && $grn) {
+                        $note .= gen4tid('Grn-', $grn->tid) . ' Fuel';
+                    } elseif ($grn) {
+                        $note .= gen4tid('Grn-', $grn->tid) . ' Goods';
+                    }
+                }
+                
+                return [
+                    'id' => $v->id,
+                    'purchase_date' => $v->date,
+                    'supplier' => $suppliername ?: $v->supplier->name,
+                    'invoice_no' => $v->reference,
+                    'note' => $note,
+                    'subtotal' => $v->subtotal,
+                    'total' => $v->total,
+                    'tax' => $v->tax,
+                    'tax_rate' => $v->tax_rate,
+                    'type' => 'purchase',
+                    'debit_note_date' => '',
+                ];
+            });
 
         $debit_notes = CreditNote::when($month, function ($q) use($month) {
             $q->whereHas('supplier', fn($q) => $q->whereMonth('date', $month));
@@ -222,16 +246,16 @@ class TaxReportsController extends Controller
             'debit_note_date' => $v->date,
             'supplier' => $v->suppliername ?: $v->supplier->name,
             'note' => 'Debit Note',
-            'subtotal' => $v->paidttl,
-            'total' => $v->grandttl,
-            'tax' => $v->grandtax,
+            'subtotal' => $v->subtotal,
+            'total' => $v->total,
+            'tax' => $v->tax,
             'tax_rate' => ($v->tax/$v->subtotal * 100),
             'type' => 'debit_note',
             'purchase_date' => $v->date,
             'invoice_no' => '',
         ]);
            
-        $purchases = $direct_purchases->merge($debit_notes);
+        $purchases = $bills->merge($debit_notes);
 
         return response()->json($purchases->toArray());
     }    

@@ -26,7 +26,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Title</th>
-                                        <th>Filing Date</th>
+                                        <th>Created At</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>

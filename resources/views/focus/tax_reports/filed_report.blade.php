@@ -33,6 +33,13 @@
                             <div class="tab-content px-1 pt-1">
                                 {{-- sales tab --}}
                                 <div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
+                                    <div class="form-group col-1">
+                                        <label for="label_visibility">Label Visibility</label>
+                                        <select name="col_label" id="sale_col_label" class="custom-select">
+                                            <option value="visible">Visible</option>
+                                            <option value="invisible">Hidden</option>
+                                        </select>
+                                    </div>
                                     <table id="saleTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
@@ -54,6 +61,13 @@
                                 </div>
                                 {{-- purchases tab --}}
                                 <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
+                                    <div class="form-group col-1">
+                                        <label for="label_visibility">Label Visibility</label>
+                                        <select name="col_label" id="purchase_col_label" class="custom-select">
+                                            <option value="visible">Visible</option>
+                                            <option value="invisible">Hidden</option>
+                                        </select>
+                                    </div>
                                     <table id="purchaseTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
@@ -88,12 +102,38 @@
     const config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        dataTable: {
+            drawCallback: void 0,
+        }
     };
 
     const Index = {
         init() {
             this.drawSaleDataTable();
             this.drawPurchaseDataTable();
+
+            $('#sale_col_label').change(this.saleHideColumnLabel);
+            $('#purchase_col_label').change(this.purchaseHideColumnLabel);
+        },
+
+        saleHideColumnLabel() {
+            if (this.value == 'invisible') {
+                config.dataTable.drawCallback = (settings) => {
+                    $("#saleTbl thead").remove();
+                }
+            } else config.dataTable.drawCallback = void 0; 
+            $('#saleTbl').DataTable().destroy();
+            Index.drawSaleDataTable();
+        },
+
+        purchaseHideColumnLabel() {
+            if (this.value == 'invisible') {
+                config.dataTable.drawCallback = (settings) => {
+                    $("#purchaseTbl thead").remove();
+                }
+            } else config.dataTable.drawCallback = void 0;
+            $('#purchaseTbl').DataTable().destroy();
+            Index.drawPurchaseDataTable();
         },
 
         drawSaleDataTable() {
@@ -114,14 +154,15 @@
                         'empty_col', 'cn_invoice_no', 'cn_invoice_date',
                     ].map(v => ({data: v, name: v})),
                 ],
-                columnDefs: [
-                    // { type: "custom-number-sort", targets: [4, 5] },
-                    // { type: "custom-date-sort", targets: [2] }
-                ],
                 order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+                ...config.dataTable,
             });
         },
 
@@ -143,14 +184,15 @@
                         'empty_col', 'subtotal',
                     ].map(v => ({data: v, name: v})),
                 ],
-                columnDefs: [
-                    // { type: "custom-number-sort", targets: [4, 5] },
-                    // { type: "custom-date-sort", targets: [2] }
-                ],
                 order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+                ...config.dataTable,
             });
         }
     };

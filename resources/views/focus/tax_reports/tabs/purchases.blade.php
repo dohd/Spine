@@ -1,10 +1,17 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="month">Purchase Month</label>
-        <select name="purchase_month" id="purchase_month" class="custom-select">
+        <select name="purchase_month" id="purchase_month" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
             <option value="">All</option>
+            @php
+                $selected = '';
+            @endphp
             @foreach (range(1,12) as $v)
-                <option value="{{ $v }}" {{ $v == date('m')? 'selected' : '' }}>
+                @php
+                    if (isset($tax_report)) $selected = ($tax_report->purchase_month == $v)? 'selected' : '';
+                    else $selected = (date('m') == $v)? 'selected' : '';
+                @endphp
+                <option value="{{ $v }}" {{ $selected }}>
                     {{ DateTime::createFromFormat('!m', $v)->format('F') }}
                 </option>
             @endforeach
@@ -13,9 +20,16 @@
     
     <div class="col-2">
         <label for="status">Tax Rate</label>
-        <select name="purchase_tax_rate" id="purchase_tax_rate" class="custom-select">
+        <select name="purchase_tax_rate" id="purchase_tax_rate" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
+            @php
+                $selected = '';
+            @endphp
             @foreach ($additionals as $row)
-                <option value="{{ $row->value }}" {{ $row->is_default? 'selected' : '' }}>
+                @php
+                    if (isset($tax_report)) $selected = ($tax_report->purchase_tax_rate == $row->value)? 'selected' : '';
+                    else $selected = $row->is_default? 'selected' : '';
+                @endphp
+                <option value="{{ $row->value }}" {{ $selected }}>
                     {{ $row->name }}
                 </option>
             @endforeach
@@ -50,7 +64,74 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody></tbody>                        
+        <tbody>
+            @isset($tax_report)
+                @php
+                    $j = 0;
+                @endphp
+                @foreach ($tax_report->items as $row)
+                    @php
+                        $data = [];
+                        if ($row->purchase) {
+                            $purchase = $row->purchase;
+                            $data = array_replace($data, [
+                                'id' => $purchase->id,
+                                'type' => 'purchase',
+                                'purchase_date' => $purchase->invoicedate,
+                                'supplier' => $purchase->suppliername ?: $purchase->supplier->name,
+                                'purchase_no' => $purchase->tid,
+                                'note' => $purchase->tax == 8? gen4tid('DP-', $purchase->tid) . ' Fuel' : gen4tid('DP-', $purchase->tid) . ' Goods',
+                                'subtotal' => $purchase->paidttl,
+                                'total' => $purchase->grandttl,
+                                'tax' => $purchase->grandtax,
+                            ]);
+                        } elseif ($row->debit_note) {
+                            $dnote = $row->debit_note;
+                            $data = array_replace($data, [
+                                'id' => $dnote->id,
+                                'type' => 'debit_note',
+                                'purchase_date' => $dnote->date,
+                                'supplier' => $dnote->suppliername ?: $dnote->supplier->name,
+                                'purchase_no' => $dnote->tid,
+                                'note' => 'Debit Note',
+                                'subtotal' => -1 * $dnote->subtotal,
+                                'tax' => -1 * $inv->tax,
+                                'total' => -1 * $inv->total,
+                            ]);
+                        }
+                        if ($data) $j++;
+                    @endphp
+                    
+                    @if ($data)
+                        <tr>
+                            <td>{{ $j }}</td>
+                            <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
+                            <td>{{ dateFormat($data['purchase_date']) }}</td>
+                            <td>{{ $data['supplier'] }}</td>
+                            <td>{{ $data['purchase_no'] }}</td>
+                            <td>{{ $data['note'] }}</td>
+                            <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
+                            <td width="15%">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input purchase-file-row" type="radio" name="radio_p{{ $j }}" {{ $row->is_filed? 'checked=checked' : '' }}>
+                                    <label for="radio_p{{ $j }}">file</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input purchase-remove-row" type="radio" name="radio_p{{ $j }}" {{ !$row->is_filed? 'checked=checked' : '' }}>
+                                    <label for="radio_p{{ $j }}" class="text-danger">remove</label>
+                                </div>
+                            </td>
+                            <input type="hidden" class="tax" value="{{ $data['tax'] }}">
+                            <input type="hidden" class="total" value="{{ $data['total'] }}">
+                            <input type="hidden" class="purchase-id" name="purchase_id[]" value="{{ $data['id'] }}">
+                            <input type="hidden"  class="type" name="purchase_type[]" value="{{ $data['type'] }}">
+                            <input type="hidden" class="is-filed" name="purchase_is_filed[]" value="{{ $row->is_filed }}">
+                            <input type="hidden" class="item-id" name="purchase_item_id[]" value="{{ $row->id }}">
+                        </tr>
+                    @endif
+                @endforeach
+            @endisset
+        </tbody>                        
     </table>
 </div>
 <div>

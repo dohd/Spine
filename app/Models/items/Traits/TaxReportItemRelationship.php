@@ -5,6 +5,7 @@ namespace App\Models\items\Traits;
 use App\Models\creditnote\CreditNote;
 use App\Models\invoice\Invoice;
 use App\Models\purchase\Purchase;
+use App\Models\utility_bill\UtilityBill;
 
 trait TaxReportItemRelationship
 {
@@ -20,7 +21,7 @@ trait TaxReportItemRelationship
 
     public function purchase()
     {
-        return $this->belongsTo(Purchase::class, 'purchase_id');
+        return $this->belongsTo(UtilityBill::class, 'purchase_id');
     }
 
     public function debit_note()

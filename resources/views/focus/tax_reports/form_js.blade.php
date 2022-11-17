@@ -16,6 +16,7 @@
     const Index = {
         salesData: [],
         purchasesData: [],
+        taxReport: @json(@$tax_report),
         
         init() {
             $.ajaxSetup(config.ajax);
@@ -30,8 +31,14 @@
             $('form').on('change', '#purchase_file_all, #purchase_remove_all, .purchase-file-row, .purchase-remove-row', this.purchaseRadioChange);
             $('form').submit(this.formSubmit);
 
-            this.fetchSales();
-            this.fetchPurchases();
+            if (this.taxReport) {
+                // edit mode
+                this.editTaxReport()
+            } else {
+                // create mode
+                this.fetchSales();
+                this.fetchPurchases();
+            }
         },
 
         formSubmit() {
@@ -70,12 +77,34 @@
             }
         },
 
+        editTaxReport() {
+            // load radios
+            $('#saleTbl tbody tr').each(function() {
+                const fileInpt = $(this).find('.sale-file-row');
+                const removeInpt = $(this).find('.sale-remove-row');
+                if (fileInpt.attr('checked')) {
+                    fileInpt.prop('checked', true).change();
+                } else {
+                    removeInpt.prop('checked', true).change();
+                }
+            });
+            $('#purchaseTbl tbody tr').each(function() {
+                const fileInpt = $(this).find('.purchase-file-row');
+                const removeInpt = $(this).find('.purchase-remove-row');
+                if (fileInpt.attr('checked')) {
+                    fileInpt.prop('checked', true).change();
+                } else {
+                    removeInpt.prop('checked', true).change();
+                }
+            });
+        },
+
         /**
          * sales 
         */
         saleTaxRateChange() {
             let data = Index.salesData;
-            if ($(this).val()) data = data.filter(v => v.tax_rate == $(this).val());
+            if ($(this).val()) data = data.filter(v => parseFloat(v.tax_rate) == $(this).val());
             return Index.renderSalesRow(data);
         },
         fetchSales() {
@@ -154,7 +183,7 @@
         */
         purchaseTaxRateChange() {
             let data = Index.purchasesData;
-            if ($(this).val()) data = data.filter(v => v.tax_rate == $(this).val());
+            if ($(this).val()) data = data.filter(v => parseFloat(v.tax_rate) == $(this).val());
             return Index.renderPurchasesRow(data);
         },
         fetchPurchases() {
@@ -169,7 +198,7 @@
         },
         renderPurchasesRow(data = []) {
             $('#purchaseTbl tbody').html('');
-            data.forEach((v,i) => $('#purchaseTbl tbody').append(this.purchaseTableRow(v,i)));
+            data.forEach((v,i) => $('#purchaseTbl tbody').append(this.purchaseTableRow(v,i))); 
         },
         purchaseTableRow(v={},i=0) {
             return `

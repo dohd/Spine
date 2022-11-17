@@ -7,6 +7,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\creditnote\CreditNote;
 use App\Repositories\Focus\creditnote\CreditNoteRepository;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -171,4 +172,15 @@ class CreditNotesController extends Controller
 
         return Response::stream($pdf->Output('creditnote.pdf', 'I'), 200, $headers);
     }    
+
+    /**
+     * Customer Invoices
+     */
+    public function customer_invoice()
+    {
+        $date = '';
+        $last_month_day = (new DateTime($date))->format('Y-m-t');
+        $date_6months_prior = date('Y-m-d', strtotime("{$last_month_day} -6 months")); 
+        $first_month_day = substr_replace($date_6months_prior, '01', -2, 2);
+    }
 }

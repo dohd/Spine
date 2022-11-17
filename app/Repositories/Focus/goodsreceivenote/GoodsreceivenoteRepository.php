@@ -103,8 +103,13 @@ class GoodsreceivenoteRepository extends BaseRepository
         else $result->purchaseorder->update(['status' => 'complete']);
 
         /**accounting */
-        if ($result->invoice_no) $this->generate_bill($result);
-        else $this->post_transaction($result);
+        if ($result->invoice_no) {
+            // generate bill
+            $this->generate_bill($result);
+        } else {
+            // grn transaction
+            $this->post_transaction($result);
+        }
         
         if ($result) {
             DB::commit();
@@ -201,8 +206,10 @@ class GoodsreceivenoteRepository extends BaseRepository
         $goodsreceivenote->prev_note = $prev_note;
         /**accounting */
         if ($goodsreceivenote->invoice_no) {
+            // generate bill
             $this->generate_bill($goodsreceivenote);
         } else {
+            // grn transaction
             Transaction::where([
                 'tr_type' => 'grn', 
                 'tr_ref' => $goodsreceivenote->id, 
@@ -295,6 +302,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             'date' => $grn->date,
             'due_date' => $grn->date,
             'subtotal' => $grn->subtotal,
+            'tax_rate' => $grn->tax_rate,
             'tax' => $grn->tax,
             'total' => $grn->total,
             'note' => $grn->note,

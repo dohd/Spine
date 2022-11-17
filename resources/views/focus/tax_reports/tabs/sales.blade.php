@@ -1,10 +1,17 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="month">Sale Month</label>
-        <select name="sale_month" id="sale_month" class="custom-select">
+        <select name="sale_month" id="sale_month" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
             <option value="">All</option>
+            @php
+                $selected = '';
+            @endphp
             @foreach (range(1,12) as $v)
-                <option value="{{ $v }}" {{ $v == date('m')? 'selected' : '' }}>
+                @php
+                    if (isset($tax_report)) $selected = ($tax_report->sale_month == $v)? 'selected' : '';
+                    else $selected = (date('m') == $v)? 'selected' : '';
+                @endphp
+                <option value="{{ $v }}" {{ $selected }}>
                     {{ DateTime::createFromFormat('!m', $v)->format('F') }}
                 </option>
             @endforeach
@@ -13,9 +20,16 @@
     
     <div class="col-2">
         <label for="status">Tax Rate</label>
-        <select name="sale_tax_rate" id="sale_tax_rate" class="custom-select">
+        <select name="sale_tax_rate" id="sale_tax_rate" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
+            @php
+                $selected = '';
+            @endphp
             @foreach ($additionals as $row)
-                <option value="{{ $row->value }}" {{ $row->is_default? 'selected' : '' }}>
+                @php
+                    if (isset($tax_report)) $selected = ($tax_report->sale_tax_rate == $row->value)? 'selected' : '';
+                    else $selected = $row->is_default? 'selected' : '';
+                @endphp
+                <option value="{{ $row->value }}" {{ $selected }}>
                     {{ $row->name }}
                 </option>
             @endforeach
@@ -51,7 +65,74 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody></tbody>                      
+        <tbody>
+            @isset($tax_report)
+                @php
+                    $i = 0;
+                @endphp
+                @foreach ($tax_report->items as $row)
+                    @php
+                        $data = [];
+                        if ($row->invoice) {
+                            $inv = $row->invoice;
+                            $data = array_replace($data, [
+                                'id' => $inv->id,
+                                'type' => 'invoice',
+                                'invoice_date' => $inv->invoicedate,
+                                'customer' => $inv->customer? $inv->customer->company : '',
+                                'invoice_no' => $inv->tid,
+                                'note' => $inv->notes,
+                                'subtotal' => $inv->subtotal,
+                                'tax' => $inv->tax,
+                                'total' => $inv->total,
+                            ]);
+                        } elseif ($row->credit_note) {
+                            $cnote = $row->credit_note;
+                            $data = array_replace($data, [
+                                'id' => $cnote->id,
+                                'type' => 'credit_note',
+                                'invoice_date' => $cnote->date,
+                                'customer' => $cnote->customer? $cnote->customer->company : '',
+                                'invoice_no' => $cnote->tid,
+                                'note' => 'Credit Note',
+                                'subtotal' => -1 * $cnote->subtotal,
+                                'tax' => -1 * $inv->tax,
+                                'total' => -1 * $inv->total,
+                            ]);
+                        }
+                        if ($data) $i++;
+                    @endphp
+                    @if ($data)
+                        <tr>
+                            <td>{{ $i }}</td>
+                            <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
+                            <td>{{ dateFormat($data['invoice_date']) }}</td>
+                            <td>{{ $data['customer'] }}</td>
+                            <td>{{ $data['invoice_no'] }}</td>
+                            <td>{{ $data['note'] }}</td>
+                            <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
+
+                            <td width="15%">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input sale-file-row" type="radio" name="radio_{{ $i }}" {{ $row->is_filed? 'checked=checked' : '' }}>
+                                    <label for="radio_{{ $i }}">file</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input sale-remove-row" type="radio" name="radio_{{ $i }}" {{ !$row->is_filed? 'checked=checked' : '' }}>
+                                    <label for="radio_{{ $i }}" class="text-danger">remove</label>
+                                </div>
+                            </td>
+                            <input type="hidden" class="tax" value="{{ $data['tax'] }}">
+                            <input type="hidden" class="total" value="{{ $data['total'] }}">
+                            <input type="hidden" class="sale-id" name="sale_id[]" value="{{ $data['id'] }}">
+                            <input type="hidden"  class="type" name="sale_type[]" value="{{ $data['type'] }}">
+                            <input type="hidden" class="is-filed" name="sale_is_filed[]" value="{{ $row->is_filed }}">
+                            <input type="hidden" class="item-id" name="sale_item_id[]" value="{{ $row->id }}">
+                        </tr>
+                    @endif
+                @endforeach
+            @endisset
+        </tbody>                      
     </table>
 </div>
 

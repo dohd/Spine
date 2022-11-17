@@ -90,7 +90,7 @@ class FiledTaxReportsTableController extends Controller
                 return $this->customer->company;
             })
             ->addColumn('etr_code', function ($item) {
-                return '20013605';
+                return 'KRAMW043202206040503';
             })
             ->addColumn('invoice_date', function ($item) {
                 $date = '';
@@ -159,9 +159,13 @@ class FiledTaxReportsTableController extends Controller
                 return $this->supplier->taxid;
             })
             ->addColumn('supplier', function ($item) {
-                $purchase = null;
-                if ($item->purchase) $purchase = $item->purchase;
-                return $purchase->suppliername?: $this->supplier->name;
+                $suppliername = '';
+                $bill = $item->purchase;
+                if ($bill && $bill->purchase) {
+                    $suppliername .= $bill->purchase->suppliername;
+                }   
+                
+                return $suppliername ?: $this->supplier->name;
             })
             ->addColumn('invoice_date', function ($item) {
                 $date = '';
@@ -172,7 +176,7 @@ class FiledTaxReportsTableController extends Controller
             ->addColumn('invoice_no', function ($item) {
                 $tid = '';
                 if ($this->debit_note) $tid = $this->debit_note->tid;
-                if ($this->purchase) $tid = $this->purchase->doc_ref;
+                elseif ($item->purchase) $tid = $item->purchase->reference;
                 return $tid;
             })
             ->addColumn('note', function ($item) {
@@ -183,7 +187,7 @@ class FiledTaxReportsTableController extends Controller
             ->addColumn('subtotal', function ($item) {
                 $subtotal = 0;
                 if ($this->debit_note) $subtotal = $this->debit_note->subtotal;
-                if ($this->purchase) $subtotal = $this->purchase->paidttl;
+                if ($this->purchase) $subtotal = $this->purchase->subtotal;
                 return numberFormat($subtotal);
             })
             ->addColumn('empty_col', function ($item) {
