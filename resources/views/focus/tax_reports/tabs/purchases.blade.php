@@ -56,7 +56,8 @@
             <tr class="bg-gradient-directional-blue white">
                 <th>#</th>
                 <th>Type</th>
-                <th>Date</th>
+                <th>Pin</th>
+                <th>Purchase Date</th>
                 <th>Supplier</th>
                 <th>Invoice No.</th>
                 <th>Description</th>
@@ -68,67 +69,82 @@
             @isset($tax_report)
                 @php
                     $j = 0;
+                    $data = [];
                 @endphp
                 @foreach ($tax_report->items as $row)
                     @php
-                        $data = [];
-                        if ($row->purchase) {
-                            $purchase = $row->purchase;
-                            $data = array_replace($data, [
-                                'id' => $purchase->id,
+                        if ($row->bill) {
+                            $bill = $row->bill;
+                            $purchase = $bill->document_type == 'direct_purchase'? $bill->purchase : '';
+                            $grn = $bill->document_type == 'goods_receive_note'? $bill->grn : '';
+                            $note = '';
+                            if ($purchase) {
+                                if ($bill->tax_rate == 8) $note = gen4tid('DP-', $purchase->tid) . ' Fuel';
+                                else $note = gen4tid('DP-', $purchase->tid) . ' Goods';
+                            } elseif ($grn) {
+                                if ($bill->tax_rate == 8) $note = gen4tid('Grn-', $grn->tid) . ' Fuel';
+                                else $note = gen4tid('Grn-', $grn->tid) . ' Goods';
+                            }
+
+                            $data = [
+                                'id' => $bill->id,
                                 'type' => 'purchase',
-                                'purchase_date' => $purchase->invoicedate,
-                                'supplier' => $purchase->suppliername ?: $purchase->supplier->name,
-                                'purchase_no' => $purchase->tid,
-                                'note' => $purchase->tax == 8? gen4tid('DP-', $purchase->tid) . ' Fuel' : gen4tid('DP-', $purchase->tid) . ' Goods',
-                                'subtotal' => $purchase->paidttl,
-                                'total' => $purchase->grandttl,
-                                'tax' => $purchase->grandtax,
-                            ]);
+                                'tax_pin' => $purchase? $purchase->supplier_taxid : $bill->supplier->taxid,
+                                'purchase_date' => $bill->date,
+                                'supplier' => $purchase? $purchase->suppliername : $bill->supplier->name,
+                                'purchase_no' => $bill->tid,
+                                'note' => $note,
+                                'tax_rate' => $bill->tax_rate,
+                                'subtotal' => $bill->subtotal,
+                                'total' => $bill->total,
+                                'tax' => $bill->tax,
+                            ];
+                            $j++;
                         } elseif ($row->debit_note) {
                             $dnote = $row->debit_note;
-                            $data = array_replace($data, [
+                            $data = [
                                 'id' => $dnote->id,
                                 'type' => 'debit_note',
+                                'tax_pin' => $dnote->supplier->taxid,
                                 'purchase_date' => $dnote->date,
-                                'supplier' => $dnote->suppliername ?: $dnote->supplier->name,
+                                'supplier' => $dnote->supplier->name,
                                 'purchase_no' => $dnote->tid,
                                 'note' => 'Debit Note',
+                                'tax_rate' => $dnote->tax / $dnote->subtotal * 100,
                                 'subtotal' => -1 * $dnote->subtotal,
                                 'tax' => -1 * $inv->tax,
                                 'total' => -1 * $inv->total,
-                            ]);
-                        }
-                        if ($data) $j++;
+                            ];
+                            $j++;
+                        } else continue;
                     @endphp
                     
-                    @if ($data)
-                        <tr>
-                            <td>{{ $j }}</td>
-                            <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
-                            <td>{{ dateFormat($data['purchase_date']) }}</td>
-                            <td>{{ $data['supplier'] }}</td>
-                            <td>{{ $data['purchase_no'] }}</td>
-                            <td>{{ $data['note'] }}</td>
-                            <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
-                            <td width="15%">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input purchase-file-row" type="radio" name="radio_p{{ $j }}" {{ $row->is_filed? 'checked=checked' : '' }}>
-                                    <label for="radio_p{{ $j }}">file</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input purchase-remove-row" type="radio" name="radio_p{{ $j }}" {{ !$row->is_filed? 'checked=checked' : '' }}>
-                                    <label for="radio_p{{ $j }}" class="text-danger">remove</label>
-                                </div>
-                            </td>
-                            <input type="hidden" class="tax" value="{{ $data['tax'] }}">
-                            <input type="hidden" class="total" value="{{ $data['total'] }}">
-                            <input type="hidden" class="purchase-id" name="purchase_id[]" value="{{ $data['id'] }}">
-                            <input type="hidden"  class="type" name="purchase_type[]" value="{{ $data['type'] }}">
-                            <input type="hidden" class="is-filed" name="purchase_is_filed[]" value="{{ $row->is_filed }}">
-                            <input type="hidden" class="item-id" name="purchase_item_id[]" value="{{ $row->id }}">
-                        </tr>
-                    @endif
+                    <tr>
+                        <td>{{ $j }}</td>
+                        <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
+                        <td>{{ $data['tax_pin'] }}</td>
+                        <td>{{ dateFormat($data['purchase_date']) }}</td>
+                        <td>{{ isset($data['supplier']) ? $data['supplier'] : ''  }}</td>
+                        <td>{{ $data['purchase_no'] }}</td>
+                        <td>{{ $data['note'] }}</td>
+                        <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
+                        <td width="15%">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input purchase-file-row" type="radio" name="radio_p{{ $j }}" {{ $row->is_filed? 'checked=checked' : '' }}>
+                                <label for="radio_p{{ $j }}">file</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input purchase-remove-row" type="radio" name="radio_p{{ $j }}" {{ !$row->is_filed? 'checked=checked' : '' }}>
+                                <label for="radio_p{{ $j }}" class="text-danger">remove</label>
+                            </div>
+                        </td>
+                        <input type="hidden" class="tax" value="{{ $data['tax'] }}">
+                        <input type="hidden" class="total" value="{{ $data['total'] }}">
+                        <input type="hidden" class="purchase-id" name="purchase_id[]" value="{{ $data['id'] }}">
+                        <input type="hidden"  class="type" name="purchase_type[]" value="{{ $data['type'] }}">
+                        <input type="hidden" class="is-filed" name="purchase_is_filed[]" value="{{ $row->is_filed }}">
+                        <input type="hidden" class="item-id" name="purchase_item_id[]" value="{{ $row->id }}">
+                    </tr>
                 @endforeach
             @endisset
         </tbody>                        

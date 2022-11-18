@@ -126,6 +126,7 @@
                 <tr>
                     <td>${i+1}</td>
                     <td>${v.type}</td>
+                    <td>${v.tax_pin}</td>
                     <td>${v.invoice_date.split('-').reverse().join('-')}</td>
                     <td>${v.customer}</td>
                     <td>${v.invoice_tid}</td>
@@ -205,6 +206,7 @@
                 <tr>
                     <td>${i+1}</td>
                     <td>${v.type}</td>
+                    <td>${v.tax_pin}</td>
                     <td>${v.purchase_date.split('-').reverse().join('-')}</td>
                     <td>${v.supplier}</td>
                     <td>${v.invoice_no}</td>

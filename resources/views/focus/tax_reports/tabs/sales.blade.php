@@ -57,9 +57,10 @@
             <tr class="bg-gradient-directional-blue white">
                 <th>#</th>
                 <th>Type</th>
+                <th>Pin</th>
                 <th>Invoice Date</th>
                 <th>Buyer</th>
-                <th>Invoice / Credit Note No.</th>
+                <th>Invoice No.</th>
                 <th>Description</th>
                 <th>Taxable Amount</th>
                 <th>Action</th>
@@ -69,28 +70,31 @@
             @isset($tax_report)
                 @php
                     $i = 0;
+                    $data = array();
                 @endphp
                 @foreach ($tax_report->items as $row)
                     @php
-                        $data = [];
                         if ($row->invoice) {
                             $inv = $row->invoice;
-                            $data = array_replace($data, [
+                            $data = [
                                 'id' => $inv->id,
                                 'type' => 'invoice',
+                                'tax_pin' => $inv->customer? $inv->customer->taxid : '',
                                 'invoice_date' => $inv->invoicedate,
-                                'customer' => $inv->customer? $inv->customer->company : '',
+                                'cutomer' => $inv->customer? $inv->customer->company : '',
                                 'invoice_no' => $inv->tid,
                                 'note' => $inv->notes,
                                 'subtotal' => $inv->subtotal,
                                 'tax' => $inv->tax,
                                 'total' => $inv->total,
-                            ]);
+                            ];
+                            $i++;
                         } elseif ($row->credit_note) {
                             $cnote = $row->credit_note;
-                            $data = array_replace($data, [
+                            $data = [
                                 'id' => $cnote->id,
                                 'type' => 'credit_note',
+                                'tax_pin' => $cnote->customer? $cnote->customer->taxid : '',
                                 'invoice_date' => $cnote->date,
                                 'customer' => $cnote->customer? $cnote->customer->company : '',
                                 'invoice_no' => $cnote->tid,
@@ -98,20 +102,21 @@
                                 'subtotal' => -1 * $cnote->subtotal,
                                 'tax' => -1 * $inv->tax,
                                 'total' => -1 * $inv->total,
-                            ]);
-                        }
-                        if ($data) $i++;
+                            ];
+                            $i++;
+                        } else continue;
                     @endphp
+
                     @if ($data)
                         <tr>
                             <td>{{ $i }}</td>
                             <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
+                            <td>{{ $data['tax_pin'] }}</td>
                             <td>{{ dateFormat($data['invoice_date']) }}</td>
-                            <td>{{ $data['customer'] }}</td>
+                            <td>{{ isset($data['customer']) ? $data['customer'] : '' }}</td>
                             <td>{{ $data['invoice_no'] }}</td>
                             <td>{{ $data['note'] }}</td>
                             <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
-
                             <td width="15%">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input sale-file-row" type="radio" name="radio_{{ $i }}" {{ $row->is_filed? 'checked=checked' : '' }}>

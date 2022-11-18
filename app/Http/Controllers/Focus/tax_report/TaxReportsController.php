@@ -65,7 +65,9 @@ class TaxReportsController extends Controller
      */
     public function create()
     {
-        $additionals = Additional::all();
+        $additionals = Additional::where('value', '>', 0)->get();
+        $zero_rated = Additional::where('value', 0)->latest()->limit(1)->get();
+        $additionals = $additionals->merge($zero_rated);
         
         return view('focus.tax_reports.create', compact('additionals'));
     }
@@ -92,8 +94,9 @@ class TaxReportsController extends Controller
     {
         // return redirect()->back();
         $additionals = Additional::all();
+        $data = array();
         
-        return view('focus.tax_reports.edit', compact('tax_report', 'additionals'));
+        return view('focus.tax_reports.edit', compact('tax_report', 'additionals', 'data'));
     }
 
     /**
@@ -159,7 +162,8 @@ class TaxReportsController extends Controller
                 'id' => $v->id,
                 'invoice_tid' => $v->tid,
                 'invoice_date' => $v->invoicedate,
-                'customer' => $v->customer->company,
+                'tax_pin' => $v->customer->taxid ?: '',
+                'customer' => $v->customer->company ?: '',
                 'note' => $v->notes,
                 'subtotal' => $v->subtotal,
                 'total' => $v->total,
@@ -176,6 +180,7 @@ class TaxReportsController extends Controller
             'id' => $v->id,
             'credit_note_tid' => $v->tid,
             'invoice_date' => $v->date,
+            'tax_pin' => $v->customer->taxid ?: '',
             'customer' => $v->customer->company,
             'note' => 'Credit Note',
             'subtotal' => -1 * $v->subtotal,
@@ -206,27 +211,29 @@ class TaxReportsController extends Controller
             ->get()->map(function ($v) {
                 $note = '';
                 $suppliername = '';
+                $supplier_taxid = '';
                 if ($v->document_type == 'direct_purchase') {         
                     $purchase = $v->purchase;
-                    if ($v->tax_rate == 8 && $purchase) {
-                        $note .= gen4tid('DP-', $purchase->tid) . ' Fuel';
+                    if ($purchase) {
+                        if ($v->tax_rate == 8) {
+                            $note .= gen4tid('DP-', $purchase->tid) . ' Fuel';
+                        } else $note .= gen4tid('DP-', $purchase->tid) . ' Goods';
                         $suppliername .= $purchase->suppliername;
-                    } elseif ($purchase) {
-                        $note .= gen4tid('DP-', $purchase->tid) . ' Goods';
-                        $suppliername .= $purchase->suppliername;
-                    }
+                        $supplier_taxid .= $purchase->supplier_taxid;
+                    }                    
                 } elseif ($v->document_type == 'goods_receive_note') {
                     $grn = $v->grn;
-                    if ($v->tax_rate == 8 && $grn) {
-                        $note .= gen4tid('Grn-', $grn->tid) . ' Fuel';
-                    } elseif ($grn) {
-                        $note .= gen4tid('Grn-', $grn->tid) . ' Goods';
-                    }
+                    if ($grn) {
+                        if ($v->tax_rate == 8) {
+                            $note .= gen4tid('Grn-', $grn->tid) . ' Fuel';
+                        } else $note .= gen4tid('Grn-', $grn->tid) . ' Goods';
+                    } 
                 }
                 
                 return [
                     'id' => $v->id,
                     'purchase_date' => $v->date,
+                    'tax_pin' => $supplier_taxid ?: $v->supplier->taxid,
                     'supplier' => $suppliername ?: $v->supplier->name,
                     'invoice_no' => $v->reference,
                     'note' => $note,
@@ -246,6 +253,7 @@ class TaxReportsController extends Controller
         ->whereNull('customer_id')->get()->map(fn($v) => [
             'id' => $v->id,
             'debit_note_date' => $v->date,
+            'tax_pin' => $v->supplier->taxid ?: '',
             'supplier' => $v->suppliername ?: $v->supplier->name,
             'note' => 'Debit Note',
             'subtotal' => $v->subtotal,
