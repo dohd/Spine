@@ -40,7 +40,8 @@ class TaxReportRepository extends BaseRepository
         $q->when(request('tax_report_id'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
         })->when(request('file_month'), function ($q) {
-            $q->whereHas('tax_report', fn($q) => $q->where('sale_month', request('file_month')));
+            $date = explode('-', request('file_month'));
+            $q->whereHas('tax_report', fn($q) => $q->where('sale_month', current($date))->whereYear('created_at', end($date)));
         })->when(request('tax_rate'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('sale_tax_rate', request('tax_rate')));
         });
@@ -57,7 +58,8 @@ class TaxReportRepository extends BaseRepository
         $q->when(request('tax_report_id'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
         })->when(request('file_month'), function ($q) {
-            $q->whereHas('tax_report', fn($q) => $q->where('purchase_month', request('file_month')));
+            $date = explode('-', request('file_month'));
+            $q->whereHas('tax_report', fn($q) => $q->where('purchase_month', current($date))->whereYear('created_at', end($date)));
         })->when(request('tax_rate'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('purchase_tax_rate', request('tax_rate')));
         });

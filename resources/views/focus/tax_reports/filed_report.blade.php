@@ -24,13 +24,20 @@
                             <div class="row">
                                 <div class="col-2">
                                     <label for="month">File Month</label>
-                                    <select name="file_month" id="file_month" class="custom-select">
+                                    {{ Form::text('file_month', date('m-Y'), ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
+
+                                    {{-- <div class="col-2"> --}}
+                                        {{-- <label for="date">Attendance Date (month - year)</label> --}}
+                                        
+                                    {{-- </div> --}}
+                                    
+                                    {{-- <select name="file_month" id="file_month" class="custom-select">
                                         @foreach (range(1,12) as $v)
                                             <option value="{{ $v }}" {{ date('m') == $v? 'selected' : '' }}>
                                                 {{ DateTime::createFromFormat('!m', $v)->format('F') }}
                                             </option>
                                         @endforeach
-                                    </select>
+                                    </select> --}}
                                 </div>
                                 <div class="col-2">
                                     <label for="status">Tax Rate</label>
@@ -144,10 +151,22 @@
     const Index = {
         taxReportId: @json(request('tax_report_id')),
         isFiled: 1,
-        fileMonth: '',
+        fileMonth: @json(date('m-Y')),
         taxRate: '',
 
         init() {
+            // month picker
+            $('.datepicker').datepicker({
+                autoHide: true,
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                format: 'MM-yyyy',
+                onClose: function(dateText, inst) { 
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            }).change(this.fileMonthChange);
+
             this.drawSaleDataTable();
             this.drawPurchaseDataTable();
 
