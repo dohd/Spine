@@ -92,11 +92,9 @@ class TaxReportsController extends Controller
      */
     public function edit(TaxReport $tax_report)
     {
-        // return redirect()->back();
         $additionals = Additional::all();
-        $data = array();
         
-        return view('focus.tax_reports.edit', compact('tax_report', 'additionals', 'data'));
+        return view('focus.tax_reports.edit', compact('tax_report', 'additionals'));
     }
 
     /**
@@ -145,7 +143,11 @@ class TaxReportsController extends Controller
         $tax_reports = TaxReport::get(['id', 'title']);
         $company = Company::find(auth()->user()->ins,['id', 'etr_code']);
 
-        return view('focus.tax_reports.filed_report', compact('tax_reports', 'company'));
+        $additionals = Additional::where('value', '>', 0)->get();
+        $zero_rated = Additional::where('value', 0)->latest()->limit(1)->get();
+        $additionals = $additionals->merge($zero_rated);
+
+        return view('focus.tax_reports.filed_report', compact('tax_reports', 'company', 'additionals'));
     }
 
     /**

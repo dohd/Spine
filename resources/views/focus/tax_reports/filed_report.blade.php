@@ -32,6 +32,16 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-2">
+                                    <label for="status">Tax Rate</label>
+                                    <select name="tax_rate" id="tax_rate" class="custom-select">
+                                        @foreach ($additionals as $row)
+                                            <option value="{{ $row->value }}" {{ $row->default? 'selected' : '' }}>
+                                                {{ $row->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="col-5">
                                     <label for="customer">Report Title</label>
                                     <select name="tax_report_id" class="form-control" id="tax_report" data-placeholder="Choose Report">
@@ -132,9 +142,10 @@
     };
 
     const Index = {
-        taxReportId: @json(request('tax_report_id', 0)),
+        taxReportId: @json(request('tax_report_id')),
         isFiled: 1,
         fileMonth: '',
+        taxRate: '',
 
         init() {
             this.drawSaleDataTable();
@@ -144,6 +155,7 @@
             $('#purchase_col_label').change(this.purchaseHideColumnLabel);
             $('#is_filed').change(this.fileStatusChange);
             $('#file_month').change(this.fileMonthChange);
+            $('#tax_rate').change(this.taxRateChange);
 
             $('#tax_report').select2({allowClear: true});
             if (this.taxReportId) {
@@ -157,22 +169,25 @@
 
         taxReportChange() {
             Index.taxReportId = $(this).val() || 0;
-            $('#saleTbl').DataTable().destroy();
-            $('#purchaseTbl').DataTable().destroy();
-            Index.drawSaleDataTable();
-            Index.drawPurchaseDataTable();
+            Index.reloadDataTable();
         },
 
         fileStatusChange() {
             Index.isFiled = $(this).val();
-            $('#saleTbl').DataTable().destroy();
-            $('#purchaseTbl').DataTable().destroy();
-            Index.drawSaleDataTable();
-            Index.drawPurchaseDataTable();
+            Index.reloadDataTable();
         },
 
         fileMonthChange() {
             Index.fileMonth = $(this).val();
+            Index.reloadDataTable();
+        },
+
+        taxRateChange() {
+            Index.taxRate = $(this).val();
+            Index.reloadDataTable();
+        },
+
+        reloadDataTable() {
             $('#saleTbl').DataTable().destroy();
             $('#purchaseTbl').DataTable().destroy();
             Index.drawSaleDataTable();
@@ -194,6 +209,7 @@
                         tax_report_id: this.taxReportId,
                         is_filed: this.isFiled,
                         file_month: this.fileMonth,
+                        tax_rate: this.taxRate,
                     },
                     dataSrc: ({data}) => {
                         // set etr code
@@ -237,6 +253,7 @@
                         tax_report_id: this.taxReportId,
                         is_filed: this.isFiled,
                         file_month: this.fileMonth,
+                        tax_rate: this.taxRate,
                     },
                 },
                 columns: [
