@@ -66,7 +66,7 @@
                                     <table id="saleTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
-                                                <th>#</th>
+                                                {{-- <th>#</th> --}}
                                                 <th>Pin</th>
                                                 <th>Buyer</th>
                                                 <th>ETR Code</th>
@@ -88,7 +88,7 @@
                                     <table id="purchaseTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
-                                                <th>#</th>
+                                                {{-- <th>#</th> --}}
                                                 <th>Source</th>
                                                 <th>Pin</th>
                                                 <th>Supplier</th>
@@ -183,13 +183,13 @@
                     },
                 },
                 columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
+                    // {data: 'DT_Row_Index', name: 'id'},
                     ...[
                         'pin', 'customer', 'etr_code', 'invoice_date', 'invoice_no', 'note', 'subtotal',
                         'empty_col', 'cn_invoice_no', 'cn_invoice_date',
                     ].map(v => ({data: v, name: v})),
                 ],
-                order: [[0, "desc"]],
+                order: [[3, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],
@@ -217,13 +217,13 @@
                     },
                 },
                 columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
+                    // {data: 'DT_Row_Index', name: 'id'},
                     ...[
                         'source', 'pin', 'supplier', 'invoice_date', 'invoice_no', 'note', 
                         'empty_col', 'subtotal',
                     ].map(v => ({data: v, name: v})),
                 ],
-                order: [[0, "desc"]],
+                order: [[3, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],

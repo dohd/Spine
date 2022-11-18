@@ -70,10 +70,10 @@
             @isset($tax_report)
                 @php
                     $i = 0;
-                    $data = array();
                 @endphp
                 @foreach ($tax_report->items as $row)
                     @php
+                        $data = array();
                         if ($row->invoice) {
                             $inv = $row->invoice;
                             $data = [
@@ -81,7 +81,7 @@
                                 'type' => 'invoice',
                                 'tax_pin' => $inv->customer? $inv->customer->taxid : '',
                                 'invoice_date' => $inv->invoicedate,
-                                'cutomer' => $inv->customer? $inv->customer->company : '',
+                                'customer' => $inv->customer? $inv->customer->company : '',
                                 'invoice_no' => $inv->tid,
                                 'note' => $inv->notes,
                                 'subtotal' => $inv->subtotal,
@@ -107,34 +107,32 @@
                         } else continue;
                     @endphp
 
-                    @if ($data)
-                        <tr>
-                            <td>{{ $i }}</td>
-                            <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
-                            <td>{{ $data['tax_pin'] }}</td>
-                            <td>{{ dateFormat($data['invoice_date']) }}</td>
-                            <td>{{ isset($data['customer']) ? $data['customer'] : '' }}</td>
-                            <td>{{ $data['invoice_no'] }}</td>
-                            <td>{{ $data['note'] }}</td>
-                            <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
-                            <td width="15%">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input sale-file-row" type="radio" name="radio_{{ $i }}" {{ $row->is_filed? 'checked=checked' : '' }}>
-                                    <label for="radio_{{ $i }}">file</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input sale-remove-row" type="radio" name="radio_{{ $i }}" {{ !$row->is_filed? 'checked=checked' : '' }}>
-                                    <label for="radio_{{ $i }}" class="text-danger">remove</label>
-                                </div>
-                            </td>
-                            <input type="hidden" class="tax" value="{{ $data['tax'] }}">
-                            <input type="hidden" class="total" value="{{ $data['total'] }}">
-                            <input type="hidden" class="sale-id" name="sale_id[]" value="{{ $data['id'] }}">
-                            <input type="hidden"  class="type" name="sale_type[]" value="{{ $data['type'] }}">
-                            <input type="hidden" class="is-filed" name="sale_is_filed[]" value="{{ $row->is_filed }}">
-                            <input type="hidden" class="item-id" name="sale_item_id[]" value="{{ $row->id }}">
-                        </tr>
-                    @endif
+                    <tr>
+                        <td>{{ $i }}</td>
+                        <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
+                        <td>{{ $data['tax_pin'] }}</td>
+                        <td>{{ dateFormat($data['invoice_date']) }}</td>
+                        <td>{{ isset($data['customer']) ? $data['customer'] : '' }}</td>
+                        <td>{{ $data['invoice_no'] }}</td>
+                        <td>{{ $data['note'] }}</td>
+                        <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
+                        <td width="15%">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input sale-file-row" type="radio" name="radio_{{ $i }}" {{ $row->is_filed? 'checked=checked' : '' }}>
+                                <label for="radio_{{ $i }}">file</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input sale-remove-row" type="radio" name="radio_{{ $i }}" {{ !$row->is_filed? 'checked=checked' : '' }}>
+                                <label for="radio_{{ $i }}" class="text-danger">remove</label>
+                            </div>
+                        </td>
+                        <input type="hidden" class="tax" value="{{ $data['tax'] }}">
+                        <input type="hidden" class="total" value="{{ $data['total'] }}">
+                        <input type="hidden" class="sale-id" name="sale_id[]" value="{{ $data['id'] }}">
+                        <input type="hidden"  class="type" name="sale_type[]" value="{{ $data['type'] }}">
+                        <input type="hidden" class="is-filed" name="sale_is_filed[]" value="{{ $row->is_filed }}">
+                        <input type="hidden" class="item-id" name="sale_item_id[]" value="{{ $row->id }}">
+                    </tr>
                 @endforeach
             @endisset
         </tbody>                      

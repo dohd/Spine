@@ -69,10 +69,10 @@
             @isset($tax_report)
                 @php
                     $j = 0;
-                    $data = [];
                 @endphp
                 @foreach ($tax_report->items as $row)
                     @php
+                        $data = [];
                         if ($row->bill) {
                             $bill = $row->bill;
                             $purchase = $bill->document_type == 'direct_purchase'? $bill->purchase : '';
