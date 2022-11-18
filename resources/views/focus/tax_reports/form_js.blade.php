@@ -64,17 +64,35 @@
                 $(this).find('.purchase-remove-row').attr('disabled', true); 
             });
 
-            // set required attributes on filters
-            const filedSaleRows = $('#saleTbl').find('.sale-file-row:checked').length;
-            const removedSaleRows = $('#saleTbl').find('.sale-remove-row:checked').length;
-            if (filedSaleRows || removedSaleRows) {
-                $('#sale_month').attr('required', true);
+            // set required on month select options
+            const filedSaleRows = $('#saleTbl').find('.sale-file-row:checked');
+            const removedSaleRows = $('#saleTbl').find('.sale-remove-row:checked');
+            const filedPurchaseRows = $('#purchaseTbl').find('.purchase-file-row:checked');
+            const removedPurchaseRows = $('#purchaseTbl').find('.purchase-remove-row:checked');
+
+            const isFileSale = filedSaleRows.length || removedSaleRows.length;
+            const isPurchaseFile = filedPurchaseRows.length || removedPurchaseRows.length;
+            const allSaleMonths = !$('#sale_month').val();
+            const allPurchaseMonths = !$('#purchase_month').val();
+
+            let reload;
+            if (!isFileSale && !isPurchaseFile) {
+                event.preventDefault();
+                alert('filed returns required! check at least a single record');
+                reload = true;
+            } else {
+                if (allSaleMonths && isFileSale) {
+                    event.preventDefault();
+                    alert('sale month is required!');
+                    reload = true;
+                }
+                if (allPurchaseMonths && isPurchaseFile) {
+                    event.preventDefault();
+                    alert('purchase month is required!');
+                    reload = true;
+                }
             }
-            const filedPurchaseRows = $('#purchaseTbl').find('.purchase-file-row:checked').length;
-            const removedPurchaseRows = $('#purchaseTbl').find('.purchase-remove-row:checked').length;
-            if (filedPurchaseRows || removedPurchaseRows) {
-                $('#purchase_month').attr('required', true);
-            }
+            if (reload) location.reload();
         },
 
         editTaxReport() {
