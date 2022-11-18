@@ -24,6 +24,11 @@ trait TaxReportItemRelationship
         return $this->belongsTo(UtilityBill::class, 'purchase_id');
     }
 
+    public function bill()
+    {
+        return $this->belongsTo(UtilityBill::class, 'purchase_id');
+    }
+
     public function debit_note()
     {
         return $this->belongsTo(CreditNote::class, 'debit_note_id')->whereNull('customer_id');

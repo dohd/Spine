@@ -38,6 +38,7 @@ class FiledTaxReportsTableController extends Controller
 
     // purchase variables
     protected $purchase;
+    protected $bill;
     protected $debit_note;
     protected $supplier;
 
@@ -70,23 +71,25 @@ class FiledTaxReportsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('pin', function ($item) {
-                if ($item->credit_note) {
-                    $this->credit_note = $item->credit_note;
-                    if ($this->credit_note->customer) {
-                        $this->customer = $this->credit_note->customer;
-                    }
-                    $this->invoice = null;
-                } elseif ($item->invoice) {
-                    $this->invoice = $item->invoice;
-                    $this->customer = $this->invoice->customer;
+                $pin = '';
+                if ($item->invoice) {
+                    $invoice = $item->invoice;
+                    $this->invoice = $invoice;
                     $this->credit_note = null;
-                } else {
-                    $this->customer = (object) ['taxid' => '', 'company' => ''];
+                    $this->customer = $invoice->customer;
+                } elseif ($item->credit_note) {
+                    $credit_note = $item->credit_note;
+                    $this->credit_note = $credit_note;
+                    $this->invoice = null;
+                    $this->customer = $credit_note->customer;
                 }
 
-                return $this->customer->taxid;
+                if ($this->customer) $pin .= $this->customer->taxid;
+
+                return $pin;
             })
             ->addColumn('customer', function ($item) {
+                if ($this->customer)
                 return $this->customer->company;
             })
             ->addColumn('etr_code', function ($item) {
@@ -95,41 +98,50 @@ class FiledTaxReportsTableController extends Controller
             ->addColumn('invoice_date', function ($item) {
                 $date = '';
                 if ($this->credit_note) $date = $this->credit_note->date;
-                if ($this->invoice) $date = $this->invoice->invoicedate;
-                if ($date) return dateFormat($date);
+                elseif ($this->invoice) $date = $this->invoice->invoicedate;
+                if ($date) $date = dateFormat($date, 'd/m/Y');
+
+                return $date;
             })
             ->addColumn('invoice_no', function ($item) {
                 $tid = '';
                 if ($this->credit_note) $tid = $this->credit_note->tid;
-                if ($this->invoice) $tid = $this->invoice->tid;
+                elseif ($this->invoice) $tid = $this->invoice->tid;
+
                 return $tid;
             })
             ->addColumn('note', function ($item) {
                 $note = '';
                 if ($this->credit_note) $note = 'Credit Note';
-                if ($this->invoice) $note = $this->invoice->notes;
+                elseif ($this->invoice) $note = $this->invoice->notes;
+
                 return $note;
             })
             ->addColumn('subtotal', function ($item) {
                 $subtotal = 0;
                 if ($this->credit_note) $subtotal = $this->credit_note->subtotal;
-                if ($this->invoice) $subtotal = $this->invoice->subtotal;
+                elseif ($this->invoice) $subtotal = $this->invoice->subtotal;
+
                 return numberFormat($subtotal);
             })
             ->addColumn('empty_col', function ($item) {
                 return '';
             })
             ->addColumn('cn_invoice_no', function ($item) {
+                $cn_invoice_no = '';
                 if ($this->credit_note) {
                     $invoice = $this->credit_note->invoice;
-                    if ($invoice) return $invoice->tid;
+                    if ($invoice) $cn_invoice_no .= $invoice->tid;
                 }
+                return $cn_invoice_no;
             })
             ->addColumn('cn_invoice_date', function ($item) {
+                $cn_invoice_date = '';
                 if ($this->credit_note) {
                     $invoice = $this->credit_note->invoice;
-                    if ($invoice) return dateFormat($invoice->invoicedate);
+                    if ($invoice) $cn_invoice_date .= dateFormat($invoice->invoicedate, 'd/m/Y');
                 }
+                return $cn_invoice_date;
             })
             ->make(true);
     }
@@ -143,58 +155,74 @@ class FiledTaxReportsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('pin', function ($item) {
-                if ($item->debit_note) {
-                    $this->debit_note = $item->debit_note;
-                    if ($this->debit_note->supplier) 
-                        $this->supplier = $this->debit_note->supplier;
-                    $this->purchase = null;
-                } elseif ($item->purchase) {
-                    $this->purchase = $item->purchase;
-                    $this->supplier = $this->purchase->supplier;
+                $pin = '';
+                $bill = $item->bill;
+                if ($bill && $bill->document_type) {
+                    if ($bill->document_type == 'direct_purchase') {
+                        $purchase = $bill->purchase;
+                        $this->purchase = $purchase;
+                        $pin .= $purchase->supplier_taxid;
+                    } elseif ($bill->supplier) {
+                        $this->purchase = null;
+                        $pin .= $bill->supplier->taxid;
+                    }
+                    $this->bill = $bill;
+                    $this->supplier = $bill->supplier;
                     $this->debit_note = null;
-                } else {
-                    $this->supplier = (object) ['' => '', 'name' => ''];
+                } elseif ($item->debit_note) {
+                    $debit_note = $item->debit_note;
+                    $pin .= $debit_note->supplier->taxid;
+                    $this->debit_note = $debit_note;
+                    $this->supplier = $debit_note->supplier;
+                    $this->bill = null;
+                    $this->purchase = null;
                 }
 
-                return $this->supplier->taxid;
+                return $pin;
             })
             ->addColumn('supplier', function ($item) {
                 $suppliername = '';
-                $bill = $item->purchase;
-                if ($bill && $bill->purchase) {
-                    $suppliername .= $bill->purchase->suppliername;
-                }   
+                if ($this->purchase) {
+                    $suppliername .= $this->purchase->suppliername;
+                } else $suppliername .= $this->supplier->name;
                 
-                return $suppliername ?: $this->supplier->name;
+                return $suppliername;
             })
             ->addColumn('invoice_date', function ($item) {
                 $date = '';
                 if ($this->debit_note) $date = $this->debit_note->date;
-                if ($this->purchase) $date = $this->purchase->date;
-                if ($date) return dateFormat($date);
+                elseif ($this->bill) $date = $this->bill->date;
+                if ($date) $date = dateFormat($date, 'd/m/Y');
+
+                return $date;
             })
             ->addColumn('invoice_no', function ($item) {
                 $tid = '';
                 if ($this->debit_note) $tid = $this->debit_note->tid;
-                elseif ($item->purchase) $tid = $item->purchase->reference;
+                elseif ($item->bill) $tid = $item->bill->reference;
+
                 return $tid;
             })
             ->addColumn('note', function ($item) {
-                $note = ($this->purchase && $this->purchase->tax == 8)? 'Fuel' : 'Goods';
-                if ($this->debit_note) $note = 'Credit Note';
+                $note = '';
+                if ($this->bill && $this->bill->tax_rate == 8) $note = 'Fuel';
+                elseif ($this->bill) $note = 'Goods';
+                elseif ($this->debit_note) $note = 'Credit Note';
+
                 return $note;
             })
             ->addColumn('subtotal', function ($item) {
                 $subtotal = 0;
                 if ($this->debit_note) $subtotal = $this->debit_note->subtotal;
-                if ($this->purchase) $subtotal = $this->purchase->subtotal;
+                elseif ($this->bill) $subtotal = $this->bill->subtotal;
+
                 return numberFormat($subtotal);
             })
             ->addColumn('empty_col', function ($item) {
                 return '';
             })
             ->addColumn('source', function ($item) {
-                return 'local';
+                return 'Local';
             })
             ->make(true);
     }
