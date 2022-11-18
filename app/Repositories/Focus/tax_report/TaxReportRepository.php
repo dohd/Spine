@@ -37,7 +37,11 @@ class TaxReportRepository extends BaseRepository
             $q->whereHas('invoice')->orWhereHas('credit_note');
         })->where('is_filed', request('is_filed', 1));
         
-        $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
+        $q->when(request('tax_report_id'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
+        })->when(request('file_month'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('sale_month', request('file_month')));
+        });
 
         return $q->with(['invoice', 'credit_note'])->get();
     }
@@ -48,7 +52,11 @@ class TaxReportRepository extends BaseRepository
             $q->whereHas('purchase')->orWhereHas('debit_note');
         })->where('is_filed', request('is_filed', 1));
 
-        $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
+        $q->when(request('tax_report_id'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
+        })->when(request('file_month'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('purchase_month', request('file_month')));
+        });
 
         return $q->with(['purchase', 'debit_note'])->get();
     }

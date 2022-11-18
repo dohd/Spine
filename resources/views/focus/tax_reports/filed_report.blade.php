@@ -22,6 +22,16 @@
                     <div class="card-content">
                         <div class="card-body">
                             <div class="row">
+                                <div class="col-2">
+                                    <label for="month">File Month</label>
+                                    <select name="file_month" id="file_month" class="custom-select">
+                                        @foreach (range(1,12) as $v)
+                                            <option value="{{ $v }}" {{ date('m') == $v? 'selected' : '' }}>
+                                                {{ DateTime::createFromFormat('!m', $v)->format('F') }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="col-5">
                                     <label for="customer">Report Title</label>
                                     <select name="tax_report_id" class="form-control" id="tax_report" data-placeholder="Choose Report">
@@ -124,6 +134,7 @@
     const Index = {
         taxReportId: @json(request('tax_report_id', 0)),
         isFiled: 1,
+        fileMonth: '',
 
         init() {
             this.drawSaleDataTable();
@@ -132,6 +143,7 @@
             $('#sale_col_label').change(this.saleHideColumnLabel);
             $('#purchase_col_label').change(this.purchaseHideColumnLabel);
             $('#is_filed').change(this.fileStatusChange);
+            $('#file_month').change(this.fileMonthChange);
 
             $('#tax_report').select2({allowClear: true});
             if (this.taxReportId) {
@@ -159,6 +171,14 @@
             Index.drawPurchaseDataTable();
         },
 
+        fileMonthChange() {
+            Index.fileMonth = $(this).val();
+            $('#saleTbl').DataTable().destroy();
+            $('#purchaseTbl').DataTable().destroy();
+            Index.drawSaleDataTable();
+            Index.drawPurchaseDataTable();
+        },
+
         drawSaleDataTable() {
             $('#saleTbl').dataTable({
                 processing: true,
@@ -173,8 +193,10 @@
                         is_purchase: 0, 
                         tax_report_id: this.taxReportId,
                         is_filed: this.isFiled,
+                        file_month: this.fileMonth,
                     },
                     dataSrc: ({data}) => {
+                        // set etr code
                         data = data.map(v => {
                             v['etr_code'] = @json($company->etr_code);
                             return v;
@@ -214,6 +236,7 @@
                         is_sale: 0, 
                         tax_report_id: this.taxReportId,
                         is_filed: this.isFiled,
+                        file_month: this.fileMonth,
                     },
                 },
                 columns: [
