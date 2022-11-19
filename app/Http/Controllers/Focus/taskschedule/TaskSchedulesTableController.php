@@ -77,10 +77,10 @@ class TaskSchedulesTableController extends Controller
                 $unserviced_units = count(array_diff($schedule_equip_ids, $serviced_equip_ids));
 
                 // service status
-                if ($serviced_units && $serviced_units >= $schedule_units) {
-                    $this->service_status = 'complete';
-                } elseif ($serviced_units && $serviced_units < $schedule_units) {
-                    $this->service_status = 'partial';
+                if ($serviced_units) {
+                    if ($serviced_units >= $schedule_units)
+                        $this->service_status = 'complete';
+                    else $this->service_status = 'partial';
                 } else $this->service_status = 'unserviced';
                     
                 $params = [
@@ -91,6 +91,7 @@ class TaskSchedulesTableController extends Controller
                 ];
                 $unserviced_link = '<a href="'. route('biller.equipments.index', $params) .'">unserviced:</a>';
 
+                if ($serviced_units || $unserviced_units)
                 return "{$unserviced_link} <b>{$unserviced_units}/{$schedule_units}</b> <br> serviced: <b>{$serviced_units}/{$schedule_units}</b>";
             })
             ->addColumn('total_rate', function ($schedule) {

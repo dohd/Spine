@@ -30,8 +30,8 @@
                                     'Schedule Title' => $taskschedule->title,
                                     'Equipments' => '',
                                     'Customer Contract' => "{$contract_title} - {$customer_title}", 
-                                    'Schedule Date (Start - End)' => dateFormat($taskschedule->start_date) . ' : ' . dateFormat($taskschedule->end_date),
-                                    'Actual Date (Start - End)' => dateFormat($taskschedule->actual_startdate) . ' : ' . dateFormat($taskschedule->actual_enddate),
+                                    'Schedule Date (Start - End)' => dateFormat($taskschedule->start_date) . ' || ' . dateFormat($taskschedule->end_date),
+                                    'Actual Date (Start - End)' => dateFormat($taskschedule->actual_startdate) . ' || ' . dateFormat($taskschedule->actual_enddate),
                                     'Service Rate' => numberFormat($taskschedule->equipments->sum('service_rate'))
                                 ];
                             @endphp
@@ -53,7 +53,112 @@
                                         </td>
                                     </tr>
                                 @endforeach
+                                <tr>
+                                    <th width="50%">Equipment Count</th>
+                                    <td>{{ $taskschedule->equipments->count() }}</td>
+                                </tr>
+                                <tr>
+                                    <th width="50%">Branch Service Done</th>
+                                    <td><span id="branch_service_done"></span></td>
+                                </tr>
                             </table>
+
+                            <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-toggle="tab" href="#branch" role="tab" aria-controls="branch" aria-selected="false">
+                                        Branches
+                                    </a>
+                                </li>     
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#" role="tab" aria-controls="" aria-selected="false">
+                                        
+                                    </a>
+                                </li>              
+                            </ul>
+                            <div class="tab-content px-1 p-1" id="myTabContent">
+                                <div class="tab-pane fade show active" id="branch" role="tabpanel" aria-labelledby="branch-tab">
+                                    <div class="table-reponsive">
+                                        <table class="table" id="branchTbl">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Branch Name</th>
+                                                    <th>Unit Count</th>
+                                                    <th>Serviced Units</th>
+                                                    <th>Unserviced Units</th>
+                                                    <th>Service Done (%)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($branches as $i => $branch) 
+                                                    @php
+                                                        $branch_equip_ids = $branch->equipments()->pluck('equipments.id')->toArray();
+                                                        $schedule_equip_ids = $taskschedule->equipments()->pluck('equipments.id')->toArray();
+                                                        $branch_schedule_equip_ids = array_intersect($branch_equip_ids, $schedule_equip_ids);
+
+                                                        $branch_id = "{$branch->id}";
+                                                        $branch_equip_group = array($branch_id => []);
+                                                        foreach ($branch->contract_services as $service) {
+                                                            if ($service->contract_id == $taskschedule->contract_id) {
+                                                                if ($service->schedule_id == $taskschedule->id) {
+                                                                    $equip_ids = $service->items()->pluck('equipment_id')->toArray();
+                                                                    if (in_array($branch_id, array_keys($branch_equip_group))) {
+                                                                        $prev = $branch_equip_group[$branch_id];
+                                                                        $branch_equip_group[$branch_id] = array_merge($prev, $equip_ids);
+                                                                    } 
+                                                                }
+                                                            }
+                                                        }       
+                                                        $branch_serviced_equip_ids = $branch_equip_group[$branch_id];                                                 
+                                                        $branch_unserviced_equip_ids = array_diff($branch_schedule_equip_ids, $branch_serviced_equip_ids);
+                                                        // count
+                                                        $unit_count = count($branch_schedule_equip_ids);
+                                                        $serviced_count = count(array_unique($branch_serviced_equip_ids));
+                                                        $unserviced_count = count($branch_unserviced_equip_ids);
+                                                        $percent_done = round(div_num($serviced_count, $unit_count) * 100);
+                                                    @endphp                                           
+                                                    <tr>
+                                                        <td>{{ $i+1 }}</td>
+                                                        <td>
+                                                            @if ($unserviced_count)
+                                                                <b>{{ $branch->name }}<b>
+                                                            @else
+                                                                {{ $branch->name }}
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($unserviced_count)
+                                                                <b>{{ $unit_count }}<b>
+                                                            @else
+                                                                {{ $unit_count }}
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($serviced_count)
+                                                                {{ $serviced_count }}
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($unserviced_count)
+                                                                <b>{{ $unserviced_count }}</b>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if (!$percent_done)
+                                                                <span class="text-danger"><b>{{ $percent_done }}<b><span>
+                                                            @elseif ($percent_done < 100)
+                                                                <span class="text-primary"><b>{{ $percent_done }}<b><span>
+                                                            @else
+                                                                {{ $percent_done }}
+                                                            @endif
+                                                        </td>
+                                                    </tr>                                                        
+                                                @endforeach                                          
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>  
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -62,4 +167,24 @@
     </div>
 </div>
 @include('focus.taskschedules.partials.copy_modal')
+@endsection
+
+@section('after-scripts')
+<script>
+    let serviced = 0;
+    let unserviced = 0;
+    let branchCount = 0;
+    $('#branchTbl tbody tr').each(function() {
+        let serviceDone = $(this).find('td:eq(5)').text();
+        if (serviceDone > 0) serviced++;
+        else unserviced++;
+        branchCount++;
+    });
+
+    const text = `
+        <p>serviced: <b>${serviced}</b> / ${branchCount} <span class="ml-2"><b>${Math.round(serviced/branchCount*100)}%</b><span><p>
+        <p>unserviced: <b>${unserviced}</b> / ${branchCount} <span class="ml-2"><b>${Math.round(unserviced/branchCount*100)}%</b><span><p>
+    `;
+    $('#branch_service_done').html(text);
+</script>
 @endsection

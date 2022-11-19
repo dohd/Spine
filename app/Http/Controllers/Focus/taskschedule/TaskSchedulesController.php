@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\taskschedule;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\branch\Branch;
 use App\Models\contract\Contract;
 use App\Models\customer\Customer;
 use App\Models\task_schedule\TaskSchedule;
@@ -81,11 +82,14 @@ class TaskSchedulesController extends Controller
      */
     public function show(TaskSchedule $taskschedule)
     {    
-        $taskschedules_rel = TaskSchedule::doesntHave('equipments')
-            ->where('contract_id', $taskschedule->contract_id)
+        $taskschedules_rel = TaskSchedule::where('contract_id', $taskschedule->contract_id)
+            ->doesntHave('equipments')
             ->get(['id', 'title']);
 
-        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'taskschedules_rel'));
+        $branch_ids = $taskschedule->equipments()->pluck('branch_id')->toArray();
+        $branches = Branch::whereIn('id', $branch_ids)->get();
+
+        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'taskschedules_rel', 'branch_ids', 'branches'));
     }
 
     /**
