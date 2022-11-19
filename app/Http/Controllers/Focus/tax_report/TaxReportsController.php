@@ -68,8 +68,10 @@ class TaxReportsController extends Controller
         $additionals = Additional::where('value', '>', 0)->get();
         $zero_rated = Additional::where('value', 0)->latest()->limit(1)->get();
         $additionals = $additionals->merge($zero_rated);
+
+        $prev_month = (date('m')-1) . '-' . date('Y');
         
-        return view('focus.tax_reports.create', compact('additionals'));
+        return view('focus.tax_reports.create', compact('additionals', 'prev_month'));
     }
 
     /**
@@ -155,11 +157,18 @@ class TaxReportsController extends Controller
      */
     public function get_sales()
     {
-        $month = request('sale_month', 0);
-
-        $invoices = Invoice::when($month, fn($q) => $q->whereMonth('invoicedate', $month))
+        $sale_month = explode('-', request('sale_month', '0-0'));
+        $month = current($sale_month);
+        $year = end($sale_month);
+        printlog($sale_month);
+        $invoices = Invoice::when($month, fn($q) => $q->whereMonth('invoicedate', $month)->whereYear('invoicedate', $year))
             ->where('tid', '>', 0)
-            ->doesntHave('invoice_tax_reports')
+            ->where(function ($q) {
+                $q->doesntHave('invoice_tax_reports');
+                $q->orWhereHas('invoice_tax_reports', function ($q) {
+                    $q->where('is_filed', 0);
+                });
+            })
             ->get()->map(fn($v) => [
                 'id' => $v->id,
                 'invoice_tid' => $v->tid,
@@ -177,7 +186,12 @@ class TaxReportsController extends Controller
             ]);
 
         $credit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month))
-        ->doesntHave('credit_note_tax_reports')
+        ->where(function ($q) {
+            $q->doesntHave('credit_note_tax_reports');
+            $q->orWhereHas('credit_note_tax_reports', function ($q) {
+                $q->where('is_filed', 0);
+            });
+        })
         ->whereNull('supplier_id')->get()->map(fn($v) => [
             'id' => $v->id,
             'credit_note_tid' => $v->tid,
@@ -204,12 +218,19 @@ class TaxReportsController extends Controller
      */
     public function get_purchases()
     {
-        $month = request('purchase_month', 0);
-
-        $bills = UtilityBill::when($month, fn($q) => $q->whereMonth('date', $month))
+        $purchase_month = explode('-', request('purchase_month', '0-0'));
+        $month = current($purchase_month);
+        $year = end($purchase_month);
+        
+        $bills = UtilityBill::when($month, fn($q) => $q->whereMonth('date', $month)->whereYear('date', $year))
             ->where('tid', '>', 0)
             ->whereIn('document_type', ['direct_purchase', 'goods_receive_note'])
-            ->doesntHave('purchase_tax_reports')
+            ->where(function ($q) {
+                $q->doesntHave('purchase_tax_reports');
+                $q->orWhereHas('purchase_tax_reports', function ($q) {
+                    $q->where('is_filed', 0);
+                });
+            })
             ->get()->map(function ($v) {
                 $note = '';
                 $suppliername = '';
@@ -251,7 +272,12 @@ class TaxReportsController extends Controller
         $debit_notes = CreditNote::when($month, function ($q) use($month) {
             $q->whereHas('supplier', fn($q) => $q->whereMonth('date', $month));
         })
-        ->doesntHave('debit_note_tax_reports')
+        ->where(function ($q) {
+            $q->doesntHave('debit_note_tax_reports');
+            $q->orWhereHas('debit_note_tax_reports', function ($q) {
+                $q->where('is_filed', 0);
+            });
+        })
         ->whereNull('customer_id')->get()->map(fn($v) => [
             'id' => $v->id,
             'debit_note_date' => $v->date,

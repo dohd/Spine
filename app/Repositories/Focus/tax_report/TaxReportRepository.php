@@ -40,8 +40,7 @@ class TaxReportRepository extends BaseRepository
         $q->when(request('tax_report_id'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
         })->when(request('file_month'), function ($q) {
-            $date = explode('-', request('file_month'));
-            $q->whereHas('tax_report', fn($q) => $q->where('sale_month', current($date))->whereYear('created_at', end($date)));
+            $q->whereHas('tax_report', fn($q) => $q->where('sale_month', request('file_month')));
         })->when(request('tax_rate'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('sale_tax_rate', request('tax_rate')));
         });
@@ -58,8 +57,7 @@ class TaxReportRepository extends BaseRepository
         $q->when(request('tax_report_id'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
         })->when(request('file_month'), function ($q) {
-            $date = explode('-', request('file_month'));
-            $q->whereHas('tax_report', fn($q) => $q->where('purchase_month', current($date))->whereYear('created_at', end($date)));
+            $q->whereHas('tax_report', fn($q) => $q->where('purchase_month', request('file_month')));
         })->when(request('tax_rate'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('purchase_tax_rate', request('tax_rate')));
         });
@@ -106,6 +104,13 @@ class TaxReportRepository extends BaseRepository
                 'credit_note_id' => $v['sale_type'] == 'credit_note'? $v['sale_id'] : null,
                 'is_filed' => $v['sale_is_filed'],
             ], $sale_data_items);
+
+            // delete previously removed items on consecutive filing
+            $invoice_ids = array_map(fn($v) => $v['invoice_id'], $sale_data_items);
+            TaxReportItem::whereIn('invoice_id', $invoice_ids)->where('is_filed', 0)->delete();
+            $credit_note_ids = array_map(fn($v) => $v['credit_note_id'], $sale_data_items);
+            TaxReportItem::whereIn('credit_note_id', $credit_note_ids)->where('is_filed', 0)->delete();
+
             TaxReportItem::insert($sale_data_items);
         }
 
@@ -119,6 +124,13 @@ class TaxReportRepository extends BaseRepository
                 'debit_note_id' => $v['purchase_type'] == 'debit_note'? $v['purchase_id'] : null,
                 'is_filed' => $v['purchase_is_filed'],
             ], $purchase_data_items);
+
+            // delete previously removed items on consecutive filing
+            $purchase_ids = array_map(fn($v) => $v['purchase_id'], $sale_data_items);
+            TaxReportItem::whereIn('purchase_id', $purchase_ids)->where('is_filed', 0)->delete();
+            $debit_note_ids = array_map(fn($v) => $v['debit_note_id'], $sale_data_items);
+            TaxReportItem::whereIn('debit_note_id', $debit_note_ids)->where('is_filed', 0)->delete();
+
             TaxReportItem::insert($purchase_data_items);
         }
         

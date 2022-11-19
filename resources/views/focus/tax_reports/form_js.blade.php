@@ -20,7 +20,17 @@
         
         init() {
             $.ajaxSetup(config.ajax);
-            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            // month picker
+            $('.datepicker').datepicker({
+                autoHide: true,
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                format: 'MM-yyyy',
+                onClose: function(dateText, inst) { 
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
 
             $('#sale_month').change(() => this.fetchSales());
             $('#sale_tax_rate').change(this.saleTaxRateChange);

@@ -21,19 +21,16 @@
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
-                            $sale_month = $tax_report->sale_month;
-                            if ($sale_month) $sale_month = DateTime::createFromFormat('!m', $sale_month)->format('F');
-                            $purchase_month = $tax_report->purchase_month;
-                            if ($purchase_month) $sale_month = DateTime::createFromFormat('!m', $purchase_month)->format('F');
+                            
                             $details = [
                                 'Report Title' => $tax_report->title,
                                 'Filed Returns' => '',
-                                'Sale Filing Month' => $sale_month,
+                                'Sale Filing Month' => $tax_report->sale_month,
                                 'Sale Tax Rate' => +$tax_report->sale_tax_rate . '%',
                                 'Sale Taxable Amount' => numberFormat($tax_report->sale_subtotal),
                                 'Sale Tax' => numberFormat($tax_report->sale_tax),
                                 'Sale Total Amount' => numberFormat($tax_report->sale_total),
-                                'Purchase Filing Month' => DateTime::createFromFormat('!m', $purchase_month)->format('F'),
+                                'Purchase Filing Month' => $tax_report->purchase_month,
                                 'Purchase Tax Rate' => +$tax_report->purchase_tax_rate . '%',
                                 'Purchase Taxable Amount' => numberFormat($tax_report->purchase_subtotal),
                                 'Purchase Tax' => numberFormat($tax_report->purchase_tax),
