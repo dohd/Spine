@@ -2,22 +2,6 @@
     <div class="col-2">
         <label for="month">Sale Month</label>
         {{ Form::text('sale_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'sale_month']) }}
-
-        {{-- <select name="sale_month" id="sale_month" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
-            <option value="">All</option>
-            @php
-                $selected = '';
-            @endphp
-            @foreach (range(1,12) as $v)
-                @php
-                    if (isset($tax_report)) $selected = ($tax_report->sale_month == $v)? 'selected' : '';
-                    else $selected = (date('m')-1 == $v)? 'selected' : '';
-                @endphp
-                <option value="{{ $v }}" {{ $selected }}>
-                    {{ DateTime::createFromFormat('!m', $v)->format('F') }}
-                </option>
-            @endforeach
-        </select> --}}
     </div>
     
     <div class="col-2">
