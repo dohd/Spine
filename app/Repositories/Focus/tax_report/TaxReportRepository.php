@@ -126,9 +126,9 @@ class TaxReportRepository extends BaseRepository
             ], $purchase_data_items);
 
             // delete previously removed items on consecutive filing
-            $purchase_ids = array_map(fn($v) => $v['purchase_id'], $sale_data_items);
+            $purchase_ids = array_map(fn($v) => $v['purchase_id'], $purchase_data_items);
             TaxReportItem::whereIn('purchase_id', $purchase_ids)->where('is_filed', 0)->delete();
-            $debit_note_ids = array_map(fn($v) => $v['debit_note_id'], $sale_data_items);
+            $debit_note_ids = array_map(fn($v) => $v['debit_note_id'], $purchase_data_items);
             TaxReportItem::whereIn('debit_note_id', $debit_note_ids)->where('is_filed', 0)->delete();
 
             TaxReportItem::insert($purchase_data_items);
