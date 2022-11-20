@@ -140,6 +140,8 @@
             $.post(url, {sale_month: $('#sale_month').val()}, data => {
                 // sort by date
                 data.sort((a, b) => new Date(b.invoice_date) - new Date(a.invoice_date)); 
+                data = data.filter(v => v['tax_pin'] != 0);
+                
                 this.salesData = data;
                 this.renderSalesRow(data);
                 $('#sale_tax_rate').change();
@@ -220,6 +222,8 @@
             $.post(url, {purchase_month: $('#purchase_month').val()}, data => {
                 // sort by date
                 data.sort((a, b) => new Date(b.purchase_date) - new Date(a.purchase_date)); 
+                data = data.filter(v => v['tax_pin'] != 0);
+
                 this.purchasesData = data;
                 this.renderPurchasesRow(data);
                 $('#purchase_tax_rate').change();

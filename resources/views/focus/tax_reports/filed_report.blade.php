@@ -24,13 +24,13 @@
                             <div class="row">
                                 <div class="col-2">
                                     <label for="month">File Month</label>
-                                    {{ Form::text('file_month', (date('m')-1) . '-' . date('Y'), ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
+                                    {{ Form::text('file_month', request('file_month', @$prev_month), ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
                                 </div>
                                 <div class="col-2">
                                     <label for="status">Tax Rate</label>
                                     <select name="tax_rate" id="tax_rate" class="custom-select">
                                         @foreach ($additionals as $row)
-                                            <option value="{{ $row->value }}" {{ $row->default? 'selected' : '' }}>
+                                            <option value="{{ $row->value }}" {{ request('tax_rate', 0) == $row->value? 'selected' : ($row->default? 'selected' : '') }}>
                                                 {{ $row->name }}
                                             </option>
                                         @endforeach
@@ -138,8 +138,8 @@
     const Index = {
         taxReportId: @json(request('tax_report_id')),
         isFiled: 1,
-        fileMonth: @json((date('m')-1) . '-' . date('Y')),
-        taxRate: '',
+        fileMonth: @json(request('file_month', @$prev_month)),
+        taxRate: @json(request('tax_rate', 0)),
 
         init() {
             // month picker

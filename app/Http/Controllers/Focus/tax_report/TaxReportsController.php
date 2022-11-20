@@ -144,12 +144,13 @@ class TaxReportsController extends Controller
     {
         $tax_reports = TaxReport::get(['id', 'title']);
         $company = Company::find(auth()->user()->ins,['id', 'etr_code']);
+        $prev_month = (date('m')-1) . '-' . date('Y');
 
         $additionals = Additional::where('value', '>', 0)->get();
         $zero_rated = Additional::where('value', 0)->latest()->limit(1)->get();
         $additionals = $additionals->merge($zero_rated);
 
-        return view('focus.tax_reports.filed_report', compact('tax_reports', 'company', 'additionals'));
+        return view('focus.tax_reports.filed_report', compact('tax_reports', 'company', 'additionals', 'prev_month'));
     }
 
     /**
@@ -160,7 +161,7 @@ class TaxReportsController extends Controller
         $sale_month = explode('-', request('sale_month', '0-0'));
         $month = current($sale_month);
         $year = end($sale_month);
-        printlog($sale_month);
+        
         $invoices = Invoice::when($month, fn($q) => $q->whereMonth('invoicedate', $month)->whereYear('invoicedate', $year))
             ->where('tid', '>', 0)
             ->where(function ($q) {
@@ -173,8 +174,8 @@ class TaxReportsController extends Controller
                 'id' => $v->id,
                 'invoice_tid' => $v->tid,
                 'invoice_date' => $v->invoicedate,
-                'tax_pin' => $v->customer->taxid ?: '',
-                'customer' => $v->customer->company ?: '',
+                'tax_pin' => isset($v->customer->taxid) ? $v->customer->taxid : '',
+                'customer' => isset($v->customer->company) ? $v->customer->company : '',
                 'note' => $v->notes,
                 'subtotal' => $v->subtotal,
                 'total' => $v->total,
@@ -185,7 +186,8 @@ class TaxReportsController extends Controller
                 'credit_note_tid' => '',
             ]);
 
-        $credit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month))
+        $credit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month)->whereYear('date', $year))
+        ->whereHas('invoice')
         ->where(function ($q) {
             $q->doesntHave('credit_note_tax_reports');
             $q->orWhereHas('credit_note_tax_reports', function ($q) {
@@ -196,8 +198,8 @@ class TaxReportsController extends Controller
             'id' => $v->id,
             'credit_note_tid' => $v->tid,
             'invoice_date' => $v->date,
-            'tax_pin' => $v->customer->taxid ?: '',
-            'customer' => $v->customer->company,
+            'tax_pin' => isset($v->customer->taxid) ? $v->customer->taxid : '',
+            'customer' => isset($v->customer->company) ? $v->customer->company : '',
             'note' => 'Credit Note',
             'subtotal' => -1 * $v->subtotal,
             'total' => -1 * $v->total,
@@ -256,8 +258,8 @@ class TaxReportsController extends Controller
                 return [
                     'id' => $v->id,
                     'purchase_date' => $v->date,
-                    'tax_pin' => $supplier_taxid ?: $v->supplier->taxid,
-                    'supplier' => $suppliername ?: $v->supplier->name,
+                    'tax_pin' => isset($supplier_taxid) ? $supplier_taxid : $v->supplier->taxid,
+                    'supplier' => isset($suppliername) ? $suppliername : $v->supplier->name,
                     'invoice_no' => $v->reference,
                     'note' => $note,
                     'subtotal' => $v->subtotal,
@@ -269,9 +271,8 @@ class TaxReportsController extends Controller
                 ];
             });
 
-        $debit_notes = CreditNote::when($month, function ($q) use($month) {
-            $q->whereHas('supplier', fn($q) => $q->whereMonth('date', $month));
-        })
+        $debit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month)->whereYear('date', $year))
+        ->whereHas('supplier')
         ->where(function ($q) {
             $q->doesntHave('debit_note_tax_reports');
             $q->orWhereHas('debit_note_tax_reports', function ($q) {
@@ -281,8 +282,8 @@ class TaxReportsController extends Controller
         ->whereNull('customer_id')->get()->map(fn($v) => [
             'id' => $v->id,
             'debit_note_date' => $v->date,
-            'tax_pin' => $v->supplier->taxid ?: '',
-            'supplier' => $v->suppliername ?: $v->supplier->name,
+            'tax_pin' => isset($v->supplier->taxid) ? $v->supplier->taxid : '',
+            'supplier' => isset($v->suppliername) ? $v->suppliername : $v->supplier->name,
             'note' => 'Debit Note',
             'subtotal' => $v->subtotal,
             'total' => $v->total,

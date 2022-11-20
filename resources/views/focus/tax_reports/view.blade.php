@@ -21,7 +21,6 @@
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
-                            
                             $details = [
                                 'Report Title' => $tax_report->title,
                                 'Filed Returns' => '',
@@ -36,13 +35,27 @@
                                 'Purchase Tax' => numberFormat($tax_report->purchase_tax),
                                 'Purchase Total Amount' => numberFormat($tax_report->purchase_total),
                             ];
+
+                            $tax_rate = 0;
+                            if ($tax_report->sale_tax_rate > 0) $tax_rate = $tax_report->sale_tax_rate;
+                            if ($tax_report->purchase_tax_rate > 0) $tax_rate = $tax_report->purchase_tax_rate;
+
+                            $file_month = (date('m')-1) . '-' . date('Y');
+                            if ($tax_report->sale_month) $file_month = $tax_report->sale_month;
+                            if ($tax_report->purchase_month) $file_month = $tax_report->purchase_month;
+
+                            $file_return_params = [
+                                'tax_report_id' => $tax_report->id,
+                                'tax_rate' => $tax_rate,
+                                'file_month' => $file_month,
+                            ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
                                 <th width="30%">{{ $key }}</th>
                                 <td>
                                     @if ($key == 'Filed Returns')
-                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['tax_report_id' => $tax_report->id]) }}" title="tax returns">
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', $file_return_params) }}" title="tax returns">
                                             <i class="fa fa-list"></i> List
                                         </a>  
                                     @else
