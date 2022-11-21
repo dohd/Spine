@@ -71,20 +71,34 @@
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="is_claim">Claim Tax</label>
+                                <select name="is_claim" id="is_claim" class="custom-select">
+                                    @foreach (['no', 'yes'] as $val)
+                                        <option value="{{ $val }}">
+                                            {{ ucfirst($val) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div class="col tax-pin-col d-none">
+                    <div class="row">
+                        <div class="col">
                             <div class="form-group">
                                 <label for="tax_pin">Tax Claimer PIN</label>
                                 {{ Form::text('claimer_tax_pin', null, ['class' => 'form-control', 'id' => 'tax_pin']) }}
                             </div>
                         </div>
                     </div>
-                    
                 </div>
                 
-                {{-- income account (POS) --}}
-                {{ Form::hidden('account_id', $pos_account->id) }}
-
-                <div class="col">
+                <div class="col company-col d-none">
                     <div class="form-group">
                         <label for="company">Tax Claimer Company</label>
                         {{ Form::text('claimer_company', null, ['class' => 'form-control', 'id' => 'company']) }}
@@ -106,6 +120,8 @@
                 </div>
 
                 <div class="row">
+                    {{-- income account (POS) --}}
+                    {{ Form::hidden('account_id', $pos_account->id) }}
                     <div class="col-6">
                         <button class="btn btn-primary btn-lg btn-block mb-1" type="button" id="pos_future_pay"
                                 data-type="4"><i class="fa fa-arrow-circle-o-right"></i> Pay Later

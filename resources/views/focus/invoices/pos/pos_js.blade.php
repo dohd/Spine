@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    const config = {
+    const posConfig = {
         ajax: {
             headers: {
                 'X-CSRF-TOKEN': "{{ csrf_token() }}"
@@ -11,8 +11,8 @@
         }
     };
 
-    $.ajaxSetup(config.ajax);
-    $('[data-toggle="datepicker"]').datepicker(config.date);
+    $.ajaxSetup(posConfig.ajax);
+    $('[data-toggle="datepicker"]').datepicker(posConfig.date);
     $('[data-toggle="datepicker"]').datepicker('setDate', new Date());
 
     $('form input').keydown(function (e) {
@@ -34,6 +34,21 @@
         load_pos();
     });
 
+    // on change claim tax
+    $('#is_claim').change(function() {
+        if ($(this).val() == 'yes') {
+            $('.tax-pin-col').removeClass('d-none');
+            $('.company-col').removeClass('d-none');
+            $('#tax_pin').attr('required', true);
+            $('#company').attr('required', true);
+        } else {
+            $('.tax-pin-col').addClass('d-none');
+            $('.company-col').addClass('d-none');
+            $('#tax_pin').attr('false', true);
+            $('#company').attr('false', true);
+        }
+    });
+
     /**
      * Payment Modal Shown
     */
@@ -49,7 +64,7 @@
         });
     });
     
-    
+    // compute payment totals
     function calcPaymentTotals() {
         let sumRowAmount = 0;
         $('.p_amount').each(function() {
