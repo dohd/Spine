@@ -15,18 +15,24 @@
 			font-family: "Myriad Pro", "Myriad", "Liberation Sans", "Nimbus Sans L", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			font-size: 10pt;
 		}
-		td {
-			vertical-align: top;
-		}
-		.items td {
-			border-left: 0.1mm solid #000000;
-			border-right: 0.1mm solid #000000;
-		}
 		table thead th {
 			background-color: #BAD2FA;
 			text-align: center;
 			border: 0.1mm solid #000000;
 			font-weight: normal;
+		}
+		td {
+			vertical-align: top;
+		}
+		.items-table {
+			font-size: 10pt; 
+			border-collapse: collapse;
+			height: 700px;
+			width: 100%;
+		}
+		.items td {
+			border-left: 0.1mm solid #000000;
+			border-right: 0.1mm solid #000000;
 		}
 		.items td.totals {
 			text-align: right;
@@ -69,12 +75,6 @@
 			font-size: 9pt; 
 			text-align: center; 
 		}
-		.items-table {
-			font-size: 10pt; 
-			border-collapse: collapse;
-			height: 700px;
-			width: 100%;
-		}
 	</style>
     <title>Statement On Account</title>
 </head>
@@ -92,15 +92,27 @@
 		</tr>
 	</table>
 
-	<table width="100%" style="font-size: 10pt;margin-top:5px;">
+	<table width="100%" style="font-size:10pt; margin-top:5px;">
 		<tr>
 			<td style="text-align: center;" width="100%" class="headerData">
-				<span style="font-size:15pt;color:#0f4d9b;"><b>{{ strtoupper('Statement On Account') }}</b></span>
+				<span style="font-size:15pt; color:#0f4d9b; text-transform:uppercase;"><b>statement on account</b></span>
 			</td>
 		</tr>
-	</table><br>
+	</table>
 
-	<table class="items items-table" cellpadding=8>
+	<div>
+		<table class="customer-dt" cellpadding="10">
+			<tr>
+				<td width="50%">
+					<b>Customer Name :</b> {{ $customer->company }}<br>
+					<b>Start Date :</b> {{ request('start_date')? dateFormat($start_date, 'd M Y') : '' }}<br>
+					<b>End Date :</b> {{ date('d M Y') }}<br>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<table class="items items-table" cellpadding="8">
 		<thead>
 			<tr>
 				<th>#</th>
@@ -147,8 +159,44 @@
 					</td>
 				</tr>
 			@endforeach
-			<!-- END ITEMS HERE -->
 		</tbody>
 	</table>
+
+	<!-- Aging -->
+	<div style="margin-top: 1em">
+		<div>
+			<span style="font-size:10pt; color:#0f4d9b; text-transform:capitalize;"><b>Aging (days)</b></span>
+		</div>
+		
+		<table class="items items-table" cellpadding="8">
+			<thead>
+				<tr>                                                    
+					@foreach (['0 - 30', '31 - 60', '61 - 90', '91 - 120', '120+'] as $val)
+						<th>{{ $val }}</th>
+					@endforeach
+					<th>Aging Total</th>  
+					<th>Unallocated</th>
+					<th>Outstanding</th>                     
+				</tr>
+			</thead>
+			<tbody>
+				<tr>              
+					@php
+						$total_aging = 0;
+					@endphp          
+					@for ($i = 0; $i < count($aging_cluster); $i++) 
+						<td>{{ numberFormat($aging_cluster[$i]) }}</td>
+						@php
+							$total_aging += $aging_cluster[$i];
+						@endphp
+					@endfor
+					<td>{{ numberFormat($total_aging) }}</td>
+					<td>{{ numberFormat($customer->on_account) }}</td>
+					<td>{{ numberFormat($total_aging - $customer->on_account) }}</td>
+				</tr>                    
+			</tbody>                     
+		</table>  
+		          
+	</div>
 </body>
 </html>

@@ -163,6 +163,44 @@ class CustomersController extends Controller
      */
     public function show(Customer $customer, ManageCustomerRequest $request)
     {
+        // extract invoice from customer statement
+        $invoices = $this->statement_invoices($customer);
+
+        // aging balance from extracted invoices
+        $aging_cluster = $this->aging_cluster($customer, $invoices);
+
+        // customer debt balance
+        $account_balance = collect($aging_cluster)->sum() - $customer->on_account;
+
+        return new ViewResponse('focus.customers.view', compact('customer', 'aging_cluster', 'account_balance'));
+    }
+
+    /**
+     * Customer Statement Invoices
+     */
+    public function statement_invoices($customer)
+    {
+        $invoices = collect();
+        $statement = $this->repository->getStatementForDataTable($customer->id);
+        foreach ($statement as $row) {
+            if ($row->type == 'invoice') $invoices->add($row);
+            else {
+                $last_invoice = $invoices->last();
+                if ($last_invoice->invoice_id == $row->invoice_id) {
+                    $last_invoice->credit += $row->credit;
+                }
+            }
+        }
+
+        return $invoices;
+    }
+
+
+    /**
+     * Aging report from customer statement invoices
+     */
+    public function aging_cluster($customer, $invoices)
+    {
         // 5 date intervals of between 0 - 120+ days prior 
         $intervals = array();
         for ($i = 0; $i < 5; $i++) {
@@ -174,19 +212,6 @@ class CustomersController extends Controller
                 $to = date('Y-m-d', strtotime($from . ' - 28 days'));
             }
             $intervals[] = [$from, $to];
-        }
-
-        // extract invoice from customer statement
-        $invoices = collect();
-        $statement = $this->repository->getStatementForDataTable($customer->id);
-        foreach ($statement as $row) {
-            if ($row->type == 'invoice') $invoices->add($row);
-            else {
-                $last_invoice = $invoices->last();
-                if ($last_invoice->invoice_id == $row->invoice_id) {
-                    $last_invoice->credit += $row->credit;
-                }
-            }
         }
 
         // aging balance from extracted invoices
@@ -214,10 +239,7 @@ class CustomersController extends Controller
             }
         }
 
-        // customer debt balance
-        $account_balance = collect($aging_cluster)->sum() - $customer->on_account;
-
-        return new ViewResponse('focus.customers.view', compact('customer', 'aging_cluster', 'account_balance'));
+        return $aging_cluster;
     }
 
     /**
@@ -262,21 +284,31 @@ class CustomersController extends Controller
         $page = '';
         $params = [];
         if ($request->type == 1) {
+            // statement on account
             $page = 'focus.customers.statements.print_statement_on_account';
 
             $transactions = $this->repository->getTransactionsForDataTable($customer_id)->sortBy('tr_date');
             $start_date = request('start_date', date('Y-m-d'));
             $company = Company::find(auth()->user()->ins);
+            $customer = Customer::find($customer_id);
+
+            $statement_invoices = $this->statement_invoices($customer);
+            $aging_cluster = $this->aging_cluster($customer, $statement_invoices);
             
-            $params = compact('transactions', 'start_date', 'company');
+            $params = compact('transactions', 'start_date', 'company', 'customer', 'aging_cluster');
         } elseif ($request->type == 2) {
+            // statement on invoice
             $page = 'focus.customers.statements.print_statement_on_invoice';
 
             $inv_statements = $this->repository->getStatementForDataTable($customer_id);
             $start_date = request('start_date', date('Y-m-d'));
             $company = Company::find(auth()->user()->ins);
+            $customer = Customer::find($customer_id);
 
-            $params = compact('inv_statements', 'start_date', 'company');
+            $statement_invoices = $this->statement_invoices($customer);
+            $aging_cluster = $this->aging_cluster($customer, $statement_invoices);
+
+            $params = compact('inv_statements', 'start_date', 'company', 'customer', 'aging_cluster');
         }
         
         $html = view($page, $params)->render();
