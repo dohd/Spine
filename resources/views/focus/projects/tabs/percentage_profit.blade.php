@@ -27,7 +27,7 @@
                             <td>{{ numberFormat($estimated_amount) }}</td>
                             <td>{{ numberFormat($actual_amount) }}</td>
                             <td>{{ numberFormat($balance) }}</td>
-                            <td>{{ round(div_num($balance, $estimated_amount) * 100) }} %</td>
+                            <td>{{ round(div_num($balance, $actual_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
                 </tbody>
