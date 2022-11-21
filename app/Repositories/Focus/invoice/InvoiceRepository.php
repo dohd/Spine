@@ -7,15 +7,12 @@ use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
 use App\Models\invoice\PaidInvoice;
-use App\Models\items\PaidInvoiceItem;
 use App\Models\project\Project;
 use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use App\Models\quote\Quote;
 use App\Models\transactioncategory\Transactioncategory;
-use App\Repositories\Focus\customer\CustomerRepository;
-use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
@@ -78,59 +75,6 @@ class InvoiceRepository extends BaseRepository
     }
 
     /**
-     * Rectify Invoice Amount Paid amount and status columns incase of misreport
-     * by extracting balances from customer statement report
-     */
-    public function correct_invoice_amountpaid($q)
-    {
-        return $q->get()->map(function ($v) {
-            $customer_statement = (new CustomerRepository)->getStatementForDataTable($v->customer_id);
-            $invoices = collect();
-            foreach ($customer_statement as $row) {
-                if ($row->type == 'invoice') $invoices->add($row);
-                else {
-                    $last_invoice = $invoices->last();
-                    if ($last_invoice->invoice_id == $row->invoice_id) {
-                        $last_invoice->credit += $row->credit;
-                    }
-                }
-            }
-
-            // update amount paid
-            $update_amount = null;
-            foreach ($invoices as $invoice) {
-                if ($invoice->invoice_id == $v->id) {
-                    $update_amount = $invoice->credit;
-                    break;
-                }
-            }
-            $v->update(['amountpaid' => $update_amount]);
-
-            // update invoice status
-            if ($v->amountpaid == 0) $v->update(['status' => 'due']);
-            elseif (round($v->total) > round($v->amountpaid)) $v->update(['status' => 'partial']);
-            else $v->update(['status' => 'paid']);
-
-            return $v;
-        });
-    }
-
-    /**
-     * Payments DataTable
-     */
-    public function getPaymentsForDataTable()
-    {
-        $q = PaidInvoice::query();
-
-        $q->when(request('customer_id'), function ($q) {
-            $q->where('customer_id', request('customer_id'));
-        });
-
-        return $q->get();
-    }
-
-
-    /**
      * Create project invoice
      */
     public function create_project_invoice(array $input)
@@ -149,7 +93,7 @@ class InvoiceRepository extends BaseRepository
         // increament tid
         $tid = Invoice::max('tid');
         if ($bill['tid'] <= $tid) $bill['tid'] = $tid+1;
-
+        
         $result = Invoice::create($bill);
         
         $bill_items = $input['bill_items'];
@@ -161,24 +105,11 @@ class InvoiceRepository extends BaseRepository
         }
         InvoiceItem::insert($bill_items);
 
-        
         $invoice_items = $result->products;
         foreach ($invoice_items as $item) {
+            // update Quote or PI invoice status
             $quote = $item->quote;
-            if ($quote) {
-                // update Quote or PI invoice status
-                $quote->update(['invoiced' => 'Yes']);
-                // close associated projects
-                $project = Project::where('main_quote_id', $quote->id)->first();
-                if ($project) {
-                    // $project->update([
-                    //     'status' => 'closed',
-                    //     'end_note' => 'Invoiced',
-                    //     'end_date' => date('Y-m-d'),
-                    //     'ended_by' => auth()->user()->id,
-                    // ]);
-                }
-            }
+            if ($quote) $quote->update(['invoiced' => 'Yes']);
         }
         
         /** accounting */
@@ -248,8 +179,54 @@ class InvoiceRepository extends BaseRepository
         }
     }
 
+    /**
+     * Delete Project Invoice
+     *
+     * @param Invoice $invoice
+     * @return bool
+     * @throws GeneralException
+     */
+    public function delete($invoice)
+    {
+        // dd($invoice);
+        DB::beginTransaction();
 
-    // invoice transacton
+        // pos invoice
+        if ($invoice->product_expense_total > 0) {
+            // reverse product qty
+            foreach ($invoice->products as $item) {
+                $pos_product = $item->product;
+                if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
+            }
+
+            // delete payments
+            $payment_ids = PaidInvoice::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))
+                ->pluck('id')->toArray();
+            foreach ($payment_ids as $val) {
+                $this->delete_invoice_payment($val);
+            }
+        } else {
+            // project invoice
+            $invoice_items = $invoice->products;
+            foreach ($invoice_items as $item) {
+                $quote = $item->quote;
+                if ($quote) $quote->update(['invoiced' => 'No']);
+            }
+        }
+        $invoice->transactions()->delete();
+        aggregate_account_transactions();
+
+        if ($invoice->delete()) {
+            DB::commit();
+            return true;
+        }
+
+        throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
+    }
+
+    /**
+     * Project Invoice transaction
+     */
     public function post_transaction_project_invoice($result)
     {
         // debit Accounts Receivable (Debtors)
@@ -354,287 +331,4 @@ class InvoiceRepository extends BaseRepository
         aggregate_account_transactions();        
     }
 
-    /**
-     * Create invoice payment
-     */
-    public function create_invoice_payment(array $input)
-    {
-        // dd($input);
-        DB::beginTransaction();
-
-        $data = $input['data'];
-        foreach ($data as $key => $val) {
-            if ($key == 'date') $data[$key] = date_for_database($val);
-            if (in_array($key, ['amount', 'allocate_ttl'])) 
-                $data[$key] = numberClean($val);
-        }
-
-        $result = PaidInvoice::where('tid', $data['tid'])->count();
-        if ($result) throw ValidationException::withMessages(['Similar payment already received!']);
-
-        $is_payment = empty($data['payment_id']);
-        if ($is_payment) {
-            if (isset($data['payment_id'])) unset($data['payment_id']);
-            $result = PaidInvoice::create($data);
-
-            if (in_array($result->payment_type, ['per_invoice', 'on_account'])) {
-                $unallocated = $result->amount - $result->allocate_ttl;
-                $result->customer->increment('on_account', $unallocated);  
-            }
-        } else {
-            $result = PaidInvoice::find($data['payment_id']);            
-            $result->increment('allocate_ttl', $data['allocate_ttl']);
-
-            // reduce unallocated, else post Advance Payment Account
-            if (in_array($result->payment_type, ['per_invoice', 'on_account'])) {
-                $allocated = $result->amount - $result->allocate_ttl;
-                $result->customer->decrement('on_account', $allocated);    
-            } else {
-                $result->allocate_ttl = $data['allocate_ttl'];
-                $this->post_transaction_invoice_payment($result);
-            }
-        }
-
-        // allocate items
-        $data_items = $input['data_items'];
-        if ($data_items) {
-            $data_items = array_map(function ($v) use($result) {
-                return array_replace($v, [
-                    'paidinvoice_id' => $result->id,
-                    'paid' => numberClean($v['paid'])
-                ]);
-            }, $data_items);
-            PaidInvoiceItem::insert($data_items);
-
-            // increment invoice amount paid and update status
-            foreach ($result->items as $item) {
-                $invoice = $item->invoice;
-                $invoice->increment('amountpaid', $item->paid);
-                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
-                else $invoice->update(['status' => 'paid']);
-            }
-        }
-        
-        /**accounting */
-        if ($is_payment) $this->post_transaction_invoice_payment($result);
-        
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
-
-        throw new GeneralException('Error Creating Invoice');
-    }
-
-    /**
-     * Update invoice payment
-     */
-    public function update_invoice_payment($payment, array $input)
-    {
-        // dd($input);
-        DB::beginTransaction();
-
-        $data = $input['data'];
-        foreach ($data as $key => $val) {
-            if ($key == 'date') $data[$key] = date_for_database($val);
-            if (in_array($key, ['amount', 'allocate_ttl'])) 
-                $data[$key] = numberClean($val);
-        }
-        // reverse customer unallocated amount
-        $unallocated = $payment->amount - $payment->allocate_ttl;
-        $payment->customer->decrement('on_account', $unallocated);
-
-        $result = $payment->update($data);
-        
-        // update customer unallocated amount
-        $unallocated = $payment->amount - $payment->allocate_ttl;        
-        $payment->customer->increment('on_account', $unallocated);
-
-        // allocated items
-        $data_items = $input['data_items'];
-        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
-        $payment_items = PaidInvoiceItem::whereIn('id', $item_ids)->get();
-        // reverse invoice amount paid
-        foreach ($payment_items as $item) {
-            if ($item->invoice) $item->invoice->decrement('amountpaid', $item->paid);
-        }
-        // update payment items
-        $data_items = array_map(function ($v) {
-            return array_replace($v, [
-                'paid' => numberClean($v['paid'])
-            ]);
-        }, $data_items);
-        Batch::update(new PaidInvoiceItem, $data_items, 'id');
-
-        foreach ($payment->items as $item) {
-            // update invoice amount paid
-            if ($item->invoice) {
-                $invoice = $item->invoice;
-                $invoice->increment('amountpaid', $item->paid);
-                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
-                else $invoice->update(['status' => 'paid']);
-            }
-            // delete items with zero payment
-            if ($item->paid == 0) $item->delete();
-        }
-
-        /** accounting */
-        $payment->transactions()->delete();
-        $this->post_transaction_invoice_payment($payment);
-
-        if ($result) {
-            DB::commit();
-            return true;
-        }
-
-        throw new GeneralException('Error Creating Invoice');
-    }    
-
-    /**
-     * Delete Invoice Payment
-     */
-    public function delete_invoice_payment($id)
-    {
-        DB::beginTransaction();
-
-        $payment = PaidInvoice::find($id);
-        // reverse customer unallocated amount
-        $unallocated = $payment->amount - $payment->allocate_ttl;
-        $payment->customer->decrement('on_account', $unallocated);
-        // reverse payment
-        foreach ($payment->items as $item) {
-            if ($item->invoice) {
-                $invoice = $item->invoice;
-                $invoice->decrement('amountpaid', $item->paid);
-                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
-                else $invoice->update(['status' => 'paid']);
-            }            
-        }
-        $payment->transactions()->delete();
-        aggregate_account_transactions();
-
-        if ($payment->delete()) {
-            DB::commit();
-            return true;
-        }
-
-        throw new GeneralException('Error Creating Invoice');
-    }
-
-    /**
-     * Invoice Payment Transaction
-     */
-    public function post_transaction_invoice_payment($result)
-    {
-        $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
-        $cr_data = [
-            'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $result->amount,
-            'tr_date' => $result->date,
-            'due_date' => $result->date,
-            'user_id' => $result->user_id,
-            'note' => $result->payment_mode . ' - ' . $result->reference,
-            'ins' => $result->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $result->id,
-            'user_type' => 'customer',
-            'is_primary' => 1,
-        ];
-
-        if (in_array($result->payment_type, ['per_invoice', 'on_account'])) {
-            // credit Accounts Receivable (Debtors)
-            Transaction::create($cr_data);
-            
-            // debit Bank Account
-            unset($cr_data['credit'], $cr_data['is_primary']);
-            $dr_data = array_replace($cr_data, [
-                'account_id' => $result->account_id,
-                'debit' => $result->amount
-            ]);
-            Transaction::create($dr_data);
-        } else {
-            $adv_account = Account::where('system', 'adv_pmt')->first(['id']);
-            if ($result->allocate_ttl == 0)  {
-                // credit Advance Payment Account
-                $cr_data = array_replace($cr_data, [
-                    'account_id' => $adv_account->id,
-                ]);
-                Transaction::create($cr_data);
-
-                // debit Bank Account
-                unset($cr_data['credit'], $cr_data['is_primary']);
-                $dr_data = array_replace($cr_data, [
-                    'account_id' => $result->account_id,
-                    'debit' => $result->amount
-                ]);
-                Transaction::create($dr_data);
-            } else {
-                // credit Accounts Receivable (Debtors)
-                $cr_data['credit'] = $result->allocate_ttl;
-                Transaction::create($cr_data);
-
-                // debit Advance Payment Account
-                unset($cr_data['credit'], $cr_data['is_primary']);
-                $cr_data = array_replace($cr_data, [
-                    'account_id' => $adv_account->id,
-                    'debit' => $result->allocate_ttl
-                ]);
-                Transaction::create($cr_data);
-            }
-        }
-        aggregate_account_transactions();     
-    }
-
-
-    /**
-     * Delete Project Invoice
-     *
-     * @param Invoice $invoice
-     * @return bool
-     * @throws GeneralException
-     */
-    public function delete($invoice)
-    {
-        // dd($invoice);
-        DB::beginTransaction();
-
-        // pos invoice
-        if ($invoice->product_expense_total > 0) {
-            // reverse product qty
-            foreach ($invoice->products as $item) {
-                $pos_product = $item->product;
-                if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
-            }
-
-            // delete payments
-            $payment_ids = PaidInvoice::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))
-                ->pluck('id')->toArray();
-            foreach ($payment_ids as $val) {
-                $this->delete_invoice_payment($val);
-            }
-        } else {
-            // project invoice
-            $invoice_items = $invoice->products;
-            foreach ($invoice_items as $item) {
-                $quote = $item->quote;
-                if ($quote) $quote->update(['invoiced' => 'No']);
-            }
-        }
-        $invoice->transactions()->delete();
-        aggregate_account_transactions();
-
-        if ($invoice->delete()) {
-            DB::commit();
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
-    }
 }
