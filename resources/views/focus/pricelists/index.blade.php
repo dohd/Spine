@@ -26,8 +26,8 @@
                             <div class="row">
                                 <div class="col-4">
                                     <label for="client">Customer</label>                             
-                                    <select name="customer_id" id="customer" class="custom-select" data-placeholder="Choose Customer" required>
-                                        <option value="">-- select customer --</option>
+                                    <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Customer" required>
+                                        {{-- <option value="">-- select customer --</option> --}}
                                         @foreach ($customers as $customer)
                                             <option value="{{ $customer->id }}">{{ $customer->company }}</option>
                                         @endforeach
@@ -37,11 +37,6 @@
                                     <label for="contract">Contract</label>                             
                                     <select name="contract" id="contract" class="custom-select" disabled>
                                         <option value="">-- select contract --</option>
-                                        @foreach ($contracts as $row)
-                                            <option value="{{ $row->contract }}" customer_id={{ $row->customer_id }}>
-                                                {{ $row->contract }}
-                                            </option>
-                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="edit-form-btn">
@@ -99,11 +94,16 @@
     };
 
     const Index = {
+        customers: @json($customers),
+        contracts: @json($contracts),
+
         init() {
             $.ajaxSetup(config.ajax);
             this.drawDataTable();
+            $('#customer').select2({allowClear: true}).val('').change();
+
             $('.mass-delete').click(this.massDelete);
-            $('#customer').change(this.customerChange).trigger('change');
+            $('#customer').change(this.customerChange);
             $('#contract').change(this.contractChange);
         },
 
@@ -121,21 +121,19 @@
         },
 
         customerChange() {
-            const customerId = $(this).val();
-            if (customerId) {
+            if ($(this).val()) {
+                const contracts = Index.contracts.filter(v => v.customer_id == $(this).val());
+                $('#contract option:not(:eq(0))').remove();
+                contracts.forEach(v => {
+                    $('#contract').append(`<option value="${v.contract}" customer_id="${v.customer_id}" >${v.contract}</option>`);
+                });
                 $('.mass-delete').attr('disabled', false);
                 $('#contract').attr('disabled', false).val('');
-                $('#contract option:not(:first)').each(function() {
-                    if ($(this).attr('customer_id') == customerId) {
-                        $(this).removeClass('d-none');
-                    } else {
-                        $(this).addClass('d-none');
-                    }
-                })
             } else {
                 $('.mass-delete').attr('disabled', true);
                 $('#contract').attr('disabled', true).val('');
             }
+
             $('#listTbl').DataTable().destroy();
             return Index.drawDataTable();
         },

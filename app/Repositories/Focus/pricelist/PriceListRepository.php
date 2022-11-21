@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\pricelist;
 use App\Exceptions\GeneralException;
 use App\Models\client_product\ClientProduct;
 use App\Repositories\BaseRepository;
+use DB;
 
 /**
  * Class ProductcategoryRepository.
@@ -63,8 +64,17 @@ class PriceListRepository extends BaseRepository
     public function update(ClientProduct $client_product, array $input)
     {
         // dd($input);
+        DB::beginTransaction();
+
         $input['rate'] = numberClean($input['rate']);
-        if ($client_product->update($input)) return true;
+
+        if ($client_product->contract != $input['contract']);
+            ClientProduct::where('contract', $client_product->contract)->update(['contract' => $input['contract']]);
+
+        if ($client_product->update($input)) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }

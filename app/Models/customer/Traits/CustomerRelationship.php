@@ -23,6 +23,11 @@ trait CustomerRelationship
         return $this->hasMany(ClientProduct::class);
     }
 
+    public function client_products()
+    {
+        return $this->hasMany(ClientProduct::class);
+    }
+
     public function leads()
     {
         return $this->hasMany(Lead::class, 'client_id');
