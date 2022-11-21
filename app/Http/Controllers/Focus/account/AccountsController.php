@@ -90,8 +90,10 @@ class AccountsController extends Controller
             'account_type' => 'required',
         ]);
         // constraint for duplicate accounts of specific account-type e.g receivable and payable
-        if (!$request->is_multiple) 
-            throw ValidationException::withMessages(['account_type' => 'Duplicate account type is not allowed']);
+        if (!request('is_multiple')) throw ValidationException::withMessages([
+            'account_type' => 'Duplicate account type is not allowed'
+        ]);
+            
 
         // extract request input
         $input = $request->except(['_token']);

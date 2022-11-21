@@ -27,7 +27,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#Journal ID</th>
+                                        <th>#Entry No</th>
                                         <th>Date</th>
                                         <th>Note</th>
                                         <th>Debit</th>
@@ -61,11 +61,12 @@
         }
     });
 
-    const language = {@lang('datatable.strings')};
-    const dataTable = $('#journalsTbl').dataTable({
+    $('#journalsTbl').dataTable({
+        stateSave: true,
+        serverside: true,
         processing: true,
         responsive: true,
-        language,
+        language: {@lang('datatable.strings')},
         ajax: {
             url: '{{ route("biller.journals.get") }}',
             type: 'post'
@@ -105,37 +106,10 @@
             { type: "custom-number-sort", targets: [4, 5] },
             { type: "custom-date-sort", targets: [2] }
         ],
-        order: [
-            [0, "desc"]
-        ],
+        order: [[0, "desc"]],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'excel',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                }
-            ]
-        }
+        buttons: ['csv', 'excel', 'print'],
     });
 </script>
 @endsection

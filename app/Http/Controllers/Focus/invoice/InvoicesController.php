@@ -43,6 +43,7 @@ use App\Models\currency\Currency;
 use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
+use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
 use Illuminate\Validation\ValidationException;
 
@@ -57,15 +58,21 @@ class InvoicesController extends Controller
      */
     protected $repository;
     protected $pos_repository;
+    protected $inv_payment_repository;
 
     /**
      * contructor to initialize repository object
      * @param InvoiceRepository $repository ;
      */
-    public function __construct(InvoiceRepository $repository, PosRepository $pos_repository)
+    public function __construct(
+        InvoiceRepository $repository, 
+        PosRepository $pos_repository, 
+        InvoicePaymentRepository $inv_payment_repository
+    )
     {
         $this->repository = $repository;
         $this->pos_repository = $pos_repository;
+        $this->inv_payment_repository = $inv_payment_repository;
     }
 
     /**
@@ -319,9 +326,9 @@ class InvoicesController extends Controller
 
         // modify and filter paid data items 
         $data_items = modify_array($data_items);
-        $data_items = array_filter($data_items, function ($item) { return $item['paid'] > 0; });
+        $data_items = array_filter($data_items, fn($v) => $v['paid'] > 0);
 
-        $result = $this->repository->create_invoice_payment(compact('data', 'data_items'));
+        $result = $this->inv_payment_repository->create(compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
     }
@@ -363,7 +370,7 @@ class InvoicesController extends Controller
         $data['user_id'] = auth()->user()->id;
         $data_items = modify_array($data_items);
 
-        $result = $this->repository->update_invoice_payment($payment, compact('data', 'data_items'));
+        $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
     }    
@@ -373,7 +380,8 @@ class InvoicesController extends Controller
      */
     public function delete_payment($id)
     {
-        $this->repository->delete_invoice_payment($id);
+        $payment = PaidInvoice::find($id);
+        $this->inv_payment_repository->delete($payment);
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment deleted successfully']);
     }

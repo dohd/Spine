@@ -80,15 +80,15 @@ class CustomerRepository extends BaseRepository
     }
 
     /**
-     * Statement on account transaction data
+     * Statement on account transactions
      */
     public function getTransactionsForDataTable($customer_id = 0)
-    {         
+    {            
+        $customer = ['customer_id' => request('customer_id', $customer_id)];
+
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
-        })->where(function ($q) use($customer_id) {
-            $customer = ['customer_id' => request('customer_id', $customer_id)];
-            
+        })->where(function ($q) use($customer) {
             $q->where('tr_type', 'inv')->whereHas('invoice', function ($q1) use($customer) { 
                 $q1->where($customer); 
             })->orWhere('tr_type', 'pmt')->whereHas('paidinvoice', function ($q1) use($customer) {
@@ -97,11 +97,12 @@ class CustomerRepository extends BaseRepository
                 $q1->where($customer);
             })->orWhere('tr_type', 'cnote')->whereHas('creditnote', function ($q1) use($customer) {
                 $q1->where($customer);
-            })->orWhere('tr_type', 'dnote')->whereHas('debitnote', function ($q1) use($customer) {
-                $q1->where($customer);
             });
+        })->orwhere(function ($q) use($customer) {
+            $q->where('tr_type', 'genjr')->where('debit', '>', 0)
+                ->where('note', 'LIKE', "%{$customer['customer_id']}-customer%");
         });       
-        printlog(request('start_date'), request('is_transaction'));
+        
         // on date filter
         if (request('start_date') && request('is_transaction')) {
             $from = date_for_database(request('start_date'));
@@ -132,7 +133,7 @@ class CustomerRepository extends BaseRepository
     }
 
     /**
-     * Statement on invoice data
+     * Statement on invoice records
      */
     public function getStatementForDataTable($customer_id = 0)
     {
@@ -254,14 +255,17 @@ class CustomerRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);      
+        // dd($input);   
+        DB::beginTransaction();
+
         if (!empty($input['picture'])) 
             $input['picture'] = $this->uploadPicture($input['picture']);
 
-        DB::beginTransaction();
-        
         $email_exists = Customer::where('email', $input['email'])->count();
-        if ($email_exists) throw ValidationException::withMessages(['Duplicate Email!']);
+        if ($email_exists) throw ValidationException::withMessages(['Duplicate email!']);
+
+        $taxid_exists = Customer::where('taxid', $input['taxid'])->count();
+        if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
 
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
@@ -315,12 +319,13 @@ class CustomerRepository extends BaseRepository
                         'journal_id' => $journal->id,
                         'account_id' => $debtor_account->id,
                     ];
-                    if ($v == 1) $data['debit'] = $open_balance;
-                    else {
+                    if ($v == 1) {
+                        $data['debit'] = $open_balance;
+                    } else {
                         $balance_account = Account::where('system', 'retained_earning')->first(['id']);
                         $data['account_id'] = $balance_account->id;
                         $data['credit'] = $open_balance;
-                    }                
+                    }   
                     JournalItem::create($data);
                 }
 
@@ -333,8 +338,10 @@ class CustomerRepository extends BaseRepository
             }
         }
 
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
     }
 
     /**
@@ -348,6 +355,8 @@ class CustomerRepository extends BaseRepository
     public function update($customer, array $input)
     {
         // dd($input);
+        DB::beginTransaction();
+
         if (!empty($input['picture'])) {
             $this->removePicture($customer, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
@@ -357,7 +366,8 @@ class CustomerRepository extends BaseRepository
         $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->count();
         if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
 
-        DB::beginTransaction();
+        $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
+        if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
 
         $input = array_replace($input, [
             'open_balance' => numberClean($input['open_balance']),
@@ -368,23 +378,23 @@ class CustomerRepository extends BaseRepository
         $open_balance = $customer->open_balance;
         $open_balance_date = $customer->open_balance_date;
         if ($open_balance > 0) {
+            $data = array();
             $user_id = auth()->user()->id;
             $note = $customer->id . '-customer Account Opening Balance ' . $customer->open_balance_note;
-
-            $data = array();
             $journal = Journal::where('note', 'LIKE', '%' . $customer->id . '-customer Account Opening Balance ' . '%')->first();
             if ($journal) {
                 // remove previous transactions
-                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete(); 
+                Transaction::where(['tr_ref' => $journal->id, 'tr_type' => 'genjr'])->delete();                 
 
+                // update invoice
                 $invoice = Invoice::where('notes', $journal->note)->first();
                 if ($invoice) $invoice->update([
                     'notes' => $note, 
                     'subtotal' => $open_balance, 
                     'total' => $open_balance,
                     'account_id' => $customer->sale_account_id
-                ]);                      
-                
+                ]);   
+                                   
                 // recognised sale
                 if ($customer->sale_account_id) {
                     $journal->update([
@@ -404,8 +414,10 @@ class CustomerRepository extends BaseRepository
                         if ($item->debit > 0) $item->update(['debit' => $open_balance]);
                         elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
                     }
-                } else $journal->delete();
-                
+                } else {
+                    // remove journal
+                    $journal->delete();
+                }
             } else {
                 // unrecognised sale
                 $invoice_data = [
@@ -440,12 +452,13 @@ class CustomerRepository extends BaseRepository
                             'journal_id' => $journal->id,
                             'account_id' => $debtor_account->id,
                         ];
-                        if ($v == 1) $data['debit'] = $open_balance;
-                        else {
+                        if ($v == 1) {
+                            $data['debit'] = $open_balance;
+                        } else {
                             $balance_account = Account::where('system', 'retained_earning')->first(['id']);
                             $data['account_id'] = $balance_account->id;
                             $data['credit'] = $open_balance;
-                        }                
+                        }   
                         JournalItem::create($data);
                     }
 
@@ -460,10 +473,28 @@ class CustomerRepository extends BaseRepository
             if ($data) $this->post_transaction((object) $data);    
         }     
 
-        DB::commit();
-        if ($result) return true;
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.customers.update_error'));
+    }
+
+    /**
+     * For deleting the respective model from storage
+     *
+     * @param Customer $customer
+     * @return bool
+     * @throws GeneralException
+     */
+    public function delete($customer)
+    {
+        if ($customer->leads->count()) 
+            throw ValidationException::withMessages(['Customer has attached Tickets']);
+        if ($customer->delete()) return true;
+
+        throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
     }
 
     /**
@@ -494,9 +525,11 @@ class CustomerRepository extends BaseRepository
         // credit Retained Earning (Equity)
         unset($dr_data['debit'], $dr_data['is_primary']);
         $account = Account::where('system', 'retained_earning')->first(['id']);
-        $cr_data = array_replace($dr_data, ['account_id' => $account->id, 'credit' => $result->open_balance]);
+        $cr_data = array_replace($dr_data, [
+            'account_id' => $account->id, 
+            'credit' => $result->open_balance
+        ]);
         Transaction::create($cr_data);
-        
         aggregate_account_transactions();
     }
 
@@ -512,7 +545,7 @@ class CustomerRepository extends BaseRepository
     }
 
     /*
-    * remove logo or favicon icon
+    * Remove logo or favicon icon
     */
     public function removePicture(Customer $customer, $type)
     {
@@ -525,21 +558,5 @@ class CustomerRepository extends BaseRepository
         if ($customer->update([$type => ''])) return true;
             
         throw new GeneralException(trans('exceptions.backend.settings.update_error'));
-    }
-
-    /**
-     * For deleting the respective model from storage
-     *
-     * @param Customer $customer
-     * @return bool
-     * @throws GeneralException
-     */
-    public function delete($customer)
-    {
-        if ($customer->leads->count()) 
-            throw ValidationException::withMessages(['Customer has attached Ticket']);
-        if ($customer->delete()) return true;
-
-        throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
     }
 }

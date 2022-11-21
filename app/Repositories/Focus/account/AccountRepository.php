@@ -84,7 +84,8 @@ class AccountRepository extends BaseRepository
     $result = Account::create($input);
 
     // opening balance
-    if ($result->opening_balance > 0) {
+    $opening_balance = $result->opening_balance;
+    if ($opening_balance > 0) {
       $seco_account = Account::where('system', 'retained_earning')->first();
       $tid = Transaction::max('tid') + 1;
       $date = $result->opening_balance_date;
@@ -98,41 +99,29 @@ class AccountRepository extends BaseRepository
 
       $entry_type = 'dr';
       $account_type = AccountType::find($result->account_type_id);
+      // debit Bank and credit Retained Earnings
       if ($account_type->system == 'bank') {
-        // debit Bank and credit Retained Earnings
         $pri_tr = Transactioncategory::where('code', 'dep')->first(['id', 'code']);
         $data = $data + [
           'account_id' => $result->id,
-          'amount' => $result->opening_balance,
+          'amount' => $opening_balance,
           'transaction_ref' => $tid,
           'from_account_id' => $seco_account->id
         ];
         $deposit = Deposit::create($data);
 
         // transaction
-        double_entry(
-          $tid,
-          $result->id,
-          $seco_account->id,
-          $result->opening_balance,
-          $entry_type,
-          $pri_tr->id,
-          'company',
-          $deposit->user_id,
-          $date,
-          $result->opening_balance_date,
-          $pri_tr->code,
-          $note,
-          $result->ins
+        double_entry($tid, $result->id, $seco_account->id, $opening_balance, $entry_type, $pri_tr->id,
+          'company', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         );
       } else {
         // debit asset Account and credit Retained Earning
         $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
-        $open_bal = $result->opening_balance;
+        $opening_balance = $opening_balance;
         $data = $data + [
           'tid' => Journal::max('tid') + 1,
-          'debit_ttl' => $open_bal,
-          'credit_ttl' =>  $open_bal
+          'debit_ttl' => $opening_balance,
+          'credit_ttl' =>  $opening_balance
         ];
         $journal = Journal::create($data);
 
@@ -141,8 +130,8 @@ class AccountRepository extends BaseRepository
             'journal_id' => $journal->id,
             'account_id' => $result->id,
           ];
-          if ($v == 1) $item_data['debit'] = $open_bal;
-          else $item_data['credit'] = $open_bal;
+          if ($v == 1) $item_data['debit'] = $opening_balance;
+          else $item_data['credit'] = $opening_balance;
           JournalItem::create($item_data);
         }
 
@@ -151,26 +140,16 @@ class AccountRepository extends BaseRepository
           $entry_type = 'cr';
 
         // transaction
-        double_entry(
-          $tid,
-          $result->id,
-          $seco_account->id,
-          $result->opening_balance,
-          $entry_type,
-          $pri_tr->id,
-          'company',
-          $journal->user_id,
-          $date,
-          $result->opening_balance_date,
-          $pri_tr->code,
-          $note,
-          $result->ins
+        double_entry($tid, $result->id, $seco_account->id,  $opening_balance,  $entry_type, $pri_tr->id,
+          'company', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
         );
       }
     }
 
-    DB::commit();
-    if ($result) return $result;
+    if ($result) {
+      DB::commit();
+      return $result;
+    }
 
     throw new GeneralException(trans('exceptions.backend.accounts.create_error'));
   }
@@ -193,7 +172,8 @@ class AccountRepository extends BaseRepository
     $result = $account->update($input);
 
     // opening balance
-    if ($account->opening_balance > 0) {
+    $opening_balance = $account->opening_balance;
+    if ($opening_balance > 0) {
       $seco_account = Account::where('system', 'retained_earning')->first();
       $tid = 0;
       $date = $account->opening_balance_date;
@@ -208,69 +188,53 @@ class AccountRepository extends BaseRepository
       $entry_type = 'dr';
       $account_type = AccountType::find($account->account_type_id);
       if ($account_type->system == 'bank') {
-        // remove pprevious transactions
-        Transaction::where(['tr_ref' => $account->id, 'tr_type' => 'dep', 'note' => $note])->delete();
-        Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'dep', 'note' => $note])->delete();
+        // remove previous transactions
+        Transaction::where(['tr_ref' => $account->id, 'tr_type' => 'dep'])->delete();
+        Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'dep'])->delete();
 
         // debit Bank and credit Retained Earnings
         $tid = Transaction::max('tid') + 1;
         $pri_tr = Transactioncategory::where('code', 'dep')->first(['id', 'code']);
         $data = $data + [
           'account_id' => $account->id,
-          'amount' => $account->opening_balance,
+          'amount' => $opening_balance,
           'transaction_ref' => $tid,
           'from_account_id' => $seco_account->id
         ];
 
         // create or update deposit
         $deposit = Deposit::firstOrNew(['account_id' => $account->id]);
-        foreach ($data as $key => $val) {
-          $deposit[$key] = $val;
-        }
+        $deposit->fill($data);
         $deposit->save();
 
-        double_entry(
-          $tid,
-          $account->id,
-          $seco_account->id,
-          $account->opening_balance,
-          $entry_type,
-          $pri_tr->id,
-          'employee',
-          $deposit->user_id,
-          $date,
-          $account->opening_balance_date,
-          $pri_tr->code,
-          $note,
-          $account->ins
+        double_entry($tid,$account->id, $seco_account->id,$opening_balance,$entry_type,$pri_tr->id,
+          'employee',$deposit->user_id, $date,$account->opening_balance_date,$pri_tr->code,$note,$account->ins
         );
       } else {
         // remove previous transactions
-        Transaction::where(['tr_ref' => $account->id, 'tr_type' => 'genjr', 'note' => $note])->delete();
-        Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'genjr', 'note' => $note])->delete();
+        Transaction::where(['tr_ref' => $account->id, 'tr_type' => 'genjr'])->delete();
+        Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'genjr'])->delete();
 
         // debit Asset Account and credit Retained Earning
         $tid = Transaction::max('tid') + 1;
         $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
-        $open_bal = $account->opening_balance;
         $data = $data + [
           'tid' => Journal::max('tid') + 1,
-          'debit_ttl' => $open_bal,
-          'credit_ttl' =>  $open_bal
+          'debit_ttl' => $opening_balance,
+          'credit_ttl' =>  $opening_balance
         ];
 
         // create or update journal
         $journal = Journal::firstOrNew(['note' => $data['note']]);
-        foreach ($data as $key => $val) {
-          if ($key == 'tid' && $journal->tid) continue;
-          else $journal[$key] = $val;
-        }
+        if ($journal->tid) unset($data['tid']);
+        $journal->fill($data);
         $journal->save();
+
         // journal items
         if ($journal->items->count()) {
           foreach ($journal->items as $item) {
-            if ($item->debit > 0) $item->update(['debit' => $open_bal]);
-            elseif ($item->credit > 0) $item->update(['credit' => $open_bal]);
+            if ($item->debit > 0) $item->update(['debit' => $opening_balance]);
+            elseif ($item->credit > 0) $item->update(['credit' => $opening_balance]);
           }
         } else {
           foreach ([1, 2] as $v) {
@@ -278,8 +242,8 @@ class AccountRepository extends BaseRepository
               'journal_id' => $journal->id,
               'account_id' => $account->id,
             ];
-            if ($v == 1) $item_data['debit'] = $open_bal;
-            else $item_data['credit'] = $open_bal;
+            if ($v == 1) $item_data['debit'] = $opening_balance;
+            else $item_data['credit'] = $opening_balance;
             JournalItem::create($item_data);
           }
         }
@@ -288,26 +252,16 @@ class AccountRepository extends BaseRepository
         if (in_array($account_type->system, ['other_current_liability', 'long_term_liability', 'equity']))
           $entry_type = 'cr';
 
-        double_entry(
-          $tid,
-          $account->id,
-          $seco_account->id,
-          $account->opening_balance,
-          $entry_type,
-          $pri_tr->id,
-          'company',
-          $journal->user_id,
-          $date,
-          $account->opening_balance_date,
-          $pri_tr->code,
-          $note,
-          $account->ins
+        double_entry($tid,$account->id,$seco_account->id,$opening_balance,$entry_type,$pri_tr->id,
+          'company', $journal->user_id,$date,$account->opening_balance_date,$pri_tr->code,$note,$account->ins
         );
       }
     }
 
-    DB::commit();
-    if ($result) return true;
+    if ($result) {
+      DB::commit();
+      return true;
+    }
 
     throw new GeneralException(trans('exceptions.backend.accounts.update_error'));
   }
@@ -321,11 +275,8 @@ class AccountRepository extends BaseRepository
    */
   public function delete($account)
   {
-    if ($account->transactions->count())
-      throw ValidationException::withMessages(['Account has attached transactions']);
-    if ($account->system)
-      throw ValidationException::withMessages(['System Account cannot be deleted']);
-
+    if ($account->transactions->count()) throw ValidationException::withMessages(['Account has attached transactions!']);
+    if ($account->system) throw ValidationException::withMessages(['System account cannot be deleted!']);
     if ($account->delete()) {
       aggregate_account_transactions();
       return true;
