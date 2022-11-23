@@ -84,23 +84,24 @@ class CustomerRepository extends BaseRepository
      */
     public function getTransactionsForDataTable($customer_id = 0)
     {            
-        $customer = ['customer_id' => request('customer_id', $customer_id)];
+        $params = ['customer_id' => request('customer_id', $customer_id)];
+        $customer = Customer::find(request('customer_id'), ['id', 'open_balance_note']);
 
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
-        })->where(function ($q) use($customer) {
-            $q->where('tr_type', 'inv')->whereHas('invoice', function ($q1) use($customer) { 
-                $q1->where($customer); 
-            })->orWhere('tr_type', 'pmt')->whereHas('paidinvoice', function ($q1) use($customer) {
-                $q1->where($customer);
-            })->orWhere('tr_type', 'withholding')->whereHas('withholding', function ($q1) use($customer) {
-                $q1->where($customer);
-            })->orWhere('tr_type', 'cnote')->whereHas('creditnote', function ($q1) use($customer) {
-                $q1->where($customer);
+        })->where(function ($q) use($params) {
+            $q->where('tr_type', 'inv')->whereHas('invoice', function ($q1) use($params) { 
+                $q1->where($params); 
+            })->orWhere('tr_type', 'pmt')->whereHas('paidinvoice', function ($q1) use($params) {
+                $q1->where($params);
+            })->orWhere('tr_type', 'withholding')->whereHas('withholding', function ($q1) use($params) {
+                $q1->where($params);
+            })->orWhere('tr_type', 'cnote')->whereHas('creditnote', function ($q1) use($params) {
+                $q1->where($params);
             });
         })->orwhere(function ($q) use($customer) {
-            $q->where('tr_type', 'genjr')->where('debit', '>', 0)
-                ->where('note', 'LIKE', "%{$customer['customer_id']}-customer%");
+            $note = "%{$customer->id}-customer Account Opening Balance {$customer->open_balance_note}%";
+            $q->where('tr_type', 'genjr')->where('debit', '>', 0)->where('note', 'LIKE', $note);
         });       
         
         // on date filter

@@ -92,29 +92,12 @@
                                             <tbody>
                                                 @foreach ($branches as $i => $branch) 
                                                     @php
-                                                        $branch_equip_ids = $branch->equipments()->pluck('equipments.id')->toArray();
-                                                        $schedule_equip_ids = $taskschedule->equipments()->pluck('equipments.id')->toArray();
-                                                        $branch_schedule_equip_ids = array_intersect($branch_equip_ids, $schedule_equip_ids);
-
-                                                        $branch_id = "{$branch->id}";
-                                                        $branch_equip_group = array($branch_id => []);
-                                                        foreach ($branch->contract_services as $service) {
-                                                            if ($service->contract_id == $taskschedule->contract_id) {
-                                                                if ($service->schedule_id == $taskschedule->id) {
-                                                                    $equip_ids = $service->items()->pluck('equipment_id')->toArray();
-                                                                    if (in_array($branch_id, array_keys($branch_equip_group))) {
-                                                                        $prev = $branch_equip_group[$branch_id];
-                                                                        $branch_equip_group[$branch_id] = array_merge($prev, $equip_ids);
-                                                                    } 
-                                                                }
-                                                            }
-                                                        }       
-                                                        $branch_serviced_equip_ids = $branch_equip_group[$branch_id];                                                 
-                                                        $branch_unserviced_equip_ids = array_diff($branch_schedule_equip_ids, $branch_serviced_equip_ids);
+                                                        $branch_equip_ids = $branch->taskschedule_equipments->pluck('equipment_id')->toArray();
+                                                        $branch_serviced_equip_ids = $branch->service_contract_items->pluck('equipment_id')->toArray();
                                                         // count
-                                                        $unit_count = count($branch_schedule_equip_ids);
-                                                        $serviced_count = count(array_unique($branch_serviced_equip_ids));
-                                                        $unserviced_count = count($branch_unserviced_equip_ids);
+                                                        $unit_count = count($branch_equip_ids);
+                                                        $serviced_count = count($branch_serviced_equip_ids);
+                                                        $unserviced_count = count(array_diff($branch_equip_ids, $branch_serviced_equip_ids));
                                                         $percent_done = round(div_num($serviced_count, $unit_count) * 100);
                                                     @endphp                                           
                                                     <tr>
