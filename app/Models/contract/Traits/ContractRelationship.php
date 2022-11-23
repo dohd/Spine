@@ -21,9 +21,7 @@ trait ContractRelationship
     
     public function equipments()
     {
-        return $this->belongsToMany(Equipment::class, 'contract_equipment')
-            ->whereNull('schedule_id')
-            ->withPivot('id');
+        return $this->belongsToMany(Equipment::class, 'contract_equipment')->whereNull('schedule_id')->withPivot('id');
     }
 
     public function customer()

@@ -21,10 +21,9 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $words = ['title' => 'Repair Quote'];
-        if (request('doc_type') == 'maintenance') {
+        if (request('doc_type') == 'maintenance') 
             $words['title'] = 'Maintenance Quote';
-        }
-        $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
+        $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid') ?: new Quote;
         $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
         $additionals = Additional::all();
         $price_customers = Customer::whereHas('products')->get(['id', 'company']);
@@ -34,7 +33,7 @@ class CreateResponse implements Responsable
         // create proforma invoice
         if (request('page') == 'pi') {
             $banks = Bank::all();
-            $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
+            $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid') ?: new Quote;
             $words['title'] = 'Repair Proforma Invoice';
             if (request('doc_type') == 'maintenance') 
                 $words['title'] = 'Maintenance Proforma Invoice';

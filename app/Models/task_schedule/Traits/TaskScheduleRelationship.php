@@ -6,9 +6,15 @@ use App\Models\contract\Contract;
 use App\Models\contract_equipment\ContractEquipment;
 use App\Models\contractservice\ContractService;
 use App\Models\equipment\Equipment;
+use App\Models\items\ContractServiceItem;
 
 trait TaskScheduleRelationship
 {    
+    public function contract_service_items()
+    {
+        return $this->hasManyThrough(ContractServiceItem::class, ContractService::class, 'schedule_id', 'contractservice_id');
+    }
+    
     public function contractservices()
     {
         return $this->hasMany(ContractService::class, 'schedule_id');

@@ -65,16 +65,13 @@ class TaskSchedulesTableController extends Controller
                 return $link;
             })
             ->addColumn('loaded', function ($schedule) {
-                $serviced_equip_ids = array();
-                foreach ($schedule->contractservices as $service) {
-                    $equip_ids = $service->items()->pluck('equipment_id')->toArray();
-                    $serviced_equip_ids = array_merge($serviced_equip_ids, $equip_ids);
-                }
-                $schedule_equip_ids = $schedule->equipments()->get(['equipments.id'])->pluck('id')->toArray();
-                
+                $schedule_equip_ids = $schedule->equipments->pluck('id')->toArray();
+                $serviced_equip_ids = $schedule->contract_service_items->pluck('equipment_id')->toArray();
+                // count
                 $schedule_units = count($schedule_equip_ids);
                 $serviced_units = count($serviced_equip_ids);
                 $unserviced_units = count(array_diff($schedule_equip_ids, $serviced_equip_ids));
+                if (!$serviced_units && !$unserviced_units) return;
 
                 // service status
                 if ($serviced_units) {
@@ -91,7 +88,6 @@ class TaskSchedulesTableController extends Controller
                 ];
                 $unserviced_link = '<a href="'. route('biller.equipments.index', $params) .'">unserviced:</a>';
 
-                if ($serviced_units || $unserviced_units)
                 return "{$unserviced_link} <b>{$unserviced_units}/{$schedule_units}</b> <br> serviced: <b>{$serviced_units}/{$schedule_units}</b>";
             })
             ->addColumn('total_rate', function ($schedule) {

@@ -5,12 +5,18 @@ namespace App\Models\equipment\Traits;
 use App\Models\contract\Contract;
 use App\Models\contract_equipment\ContractEquipment;
 use App\Models\items\ContractServiceItem;
+use App\Models\items\ServiceItem;
 
 /**
  * Class EquipmentRelationship
  */
 trait EquipmentRelationship
-{
+{   
+    public function service_item()
+    {
+        return $this->hasOne(ServiceItem::class);
+    }
+
     public function contract_service_items()
     {
         return $this->hasMany(ContractServiceItem::class);

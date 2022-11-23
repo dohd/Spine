@@ -86,10 +86,15 @@ class TaskSchedulesController extends Controller
             ->doesntHave('equipments')
             ->get(['id', 'title']);
 
-        $branch_ids = $taskschedule->equipments()->pluck('branch_id')->toArray();
-        $branches = Branch::whereIn('id', $branch_ids)->get();
+        $branch_ids = $taskschedule->equipments->pluck('branch_id')->unique()->toArray();    
+        $branches = Branch::whereIn('id', $branch_ids)->with([
+            'taskschedule_equipments' => fn($q) => $q->where('schedule_id', $taskschedule->id),
+            'service_contract_items' => function($q) use($taskschedule) {
+                $q->whereHas('contractservice', fn($q) =>  $q->where('schedule_id', $taskschedule->id));
+            },
+        ])->get();
 
-        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'taskschedules_rel', 'branch_ids', 'branches'));
+        return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'taskschedules_rel', 'branches'));
     }
 
     /**

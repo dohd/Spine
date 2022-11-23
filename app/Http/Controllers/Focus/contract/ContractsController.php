@@ -88,8 +88,13 @@ class ContractsController extends Controller
      */
     public function show(Contract $contract)
     {
-        $branch_ids = $contract->equipments()->pluck('branch_id')->toArray();
-        $branches = Branch::whereIn('id', $branch_ids)->get();
+        $branch_ids = $contract->equipments->pluck('branch_id')->unique()->toArray();
+        $branches = Branch::whereIn('id', $branch_ids)->with([
+            'contract_equipments' => fn($q) => $q->where('contract_id', $contract->id),
+            'service_contract_items' => function($q) use($contract) {
+                $q->whereHas('contractservice', fn($q) =>  $q->where('contract_id', $contract->id));
+            },
+        ])->get();
 
         return new ViewResponse('focus.contracts.view', compact('contract', 'branches'));
     }
