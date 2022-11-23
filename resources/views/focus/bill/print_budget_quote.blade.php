@@ -130,16 +130,15 @@
 		</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
+	
 	<table class="header-table">
 		<tr>
-			<td width="23%"></td>
 			<td>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/erp.png') }}" style="width:350px;" /><br>
-			
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%"/>
 			</td>
-		
 		</tr>
 	</table>
+
 	<table class="doc-table">
 		<tr>
 			<td class="doc-title-td">

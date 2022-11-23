@@ -135,7 +135,7 @@
 	<table class="header-table">
 		<tr>
 			<td>
-				<img src="{{ asset('images/letterhead.png') }}" style="object-fit:contain" width="100%"/>
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%"/>
 			</td>
 		</tr>
 	</table>
