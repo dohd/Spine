@@ -62,9 +62,10 @@ class BillPaymentRepository extends BaseRepository
                 }, $val);
             }
         }
-        if($input['amount'] == 0) 
-            throw ValidationException::withMessages(['amount is required!']);
-
+        if ($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+            
+        $tid = Billpayment::max('tid');
+        if ($input['tid'] <= $tid) $input['tid'] = $tid+1;
         $result = Billpayment::create($input);
 
         $data_items = Arr::only($input, ['bill_id', 'paid']);
