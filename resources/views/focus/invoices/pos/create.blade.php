@@ -274,7 +274,7 @@
                                 <div class="clear"></div>
                             </div>
                             <div class="info_tab display-block">
-                                <i id="pos_customer">{{trans('business.default')}} - {{$customer->name}}</i>
+                                <i id="pos_customer">{{trans('business.default')}} - {{ @$customer->name}}</i>
                             </div>
                             <div class="clear"></div>
                         </div>

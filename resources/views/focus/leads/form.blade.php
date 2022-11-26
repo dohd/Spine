@@ -113,12 +113,12 @@
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                         <select id="ref_type" name="source" class="form-control round" required>
                             <option value="">-- Select Source --</option>
-                            <option value="Emergency Call">Emergency Call</option>
-                            <option value="RFQ">RFQ</option>
-                            <option value="Site Survey">Site Survey</option>
-                            <option value="Existing SLA">Existing SLA</option>
-                            <option value="Tender">Tender</option>
-                            <option value="Other">Other</option>
+                            @php
+                                $sources = ['Emergency Call', 'RFQ', 'Site Survey', 'Existing SLA', 'Tender', 'Other'];
+                            @endphp
+                            @foreach ($sources as $val)
+                                <option value="{{ $val }}">{{ $val }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
