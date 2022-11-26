@@ -7,6 +7,7 @@ use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
+use App\Models\items\VerifiedItem;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
 use App\Models\project\Budget;
@@ -70,6 +71,11 @@ trait QuoteRelationship
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function verified_products()
+    {
+        return $this->hasMany(VerifiedItem::class)->orderBy('row_index', 'ASC');
     }
 
     public function products()
