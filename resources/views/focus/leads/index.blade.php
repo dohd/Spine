@@ -25,12 +25,12 @@
                         <div class="row">
                             <div class="col-2 h4">Open Tickets</div>
                             <div class="col-1 h4">{{ $open_lead }}</div>
-                            <div class="col-1 h4">{{ numberFormat($open_lead/$total_lead * 100) }} %</div>
+                            <div class="col-1 h4">{{ numberFormat(div_num($open_lead, $total_lead) * 100) }} %</div>
                         </div>
                         <div class="row">
                             <div class="col-2 h4">Closed Tickets</div>
                             <div class="col-1 h4 text-success">{{ $closed_lead }}</div>
-                            <div class="col-1 h4 text-success">{{ numberFormat($closed_lead/$total_lead * 100) }} %</div>
+                            <div class="col-1 h4 text-success">{{ numberFormat(div_num($closed_lead, $total_lead) * 100) }} %</div>
                         </div>
                     </div>
                 </div>

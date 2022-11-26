@@ -11,7 +11,7 @@
         <a href="{{ $copy_link }}" class="btn btn-cyan mb-1"><i class="fa fa-clone"></i></i>
             {{ $quote->bank_id ? 'Copy to Quote' : 'Copy to PI' }}            
         </a>
-        @if (access()->allow('quote-delete'))
+        @if (access()->allow('delete-quote'))
             <a class="btn btn-danger mb-1 quote-delete" href="javascript:void(0);"><i class="fa fa-trash"></i> Delete
                 {{ Form::open(['route' => ['biller.quotes.destroy', $quote], 'method' => 'delete']) }} {{ Form::close() }}               
             </a>
