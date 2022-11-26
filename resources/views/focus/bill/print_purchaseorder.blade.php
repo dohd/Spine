@@ -186,10 +186,10 @@
                 <tr>
                     <td>{{ $i+1 }}</td>
                     <td>{{ $item->description }}</td>
-                    <td class="align-c">{{ (int) $item->qty }}</td>
+                    <td class="align-c">{{ +$item->qty }}</td>
 					<td class="align-c">{{ $item->uom }}</td>
-                    <td class="align-r">{{ number_format($item->rate, 2) }}</td>
-                    <td class="align-r">{{ number_format($item->amount, 2) }}</td>
+                    <td class="align-r">{{ numberFormat($item->rate) }}</td>
+                    <td class="align-r">{{ numberFormat($item->amount) }}</td>
                 </tr>
 			@endforeach
 			<!-- 20 dynamic empty rows -->
@@ -204,7 +204,7 @@
 			<tr>
 				<td colspan="4" class="bd-t" rowspan="2"></td>
 				<td class="bd align-r">Sub Total:</td>
-                <td class="bd align-r">{{ number_format($resource->paidttl, 2) }}</td>
+                <td class="bd align-r">{{ numberFormat($resource->paidttl) }}</td>
 			</tr>
 			<tr>
                 <td class="align-r">Tax {{ $resource->tax ? $resource->tax . '%' : 'Off' }}</td>
