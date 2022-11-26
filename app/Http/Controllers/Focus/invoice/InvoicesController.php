@@ -176,7 +176,7 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Filter invoice quotes and return Create Project Invoice Form
+     * Filter Invoice Products and redirect to Invoice Form
      */
     public function filter_invoice_quotes(Request $request)
     {
@@ -189,25 +189,19 @@ class InvoicesController extends Controller
             $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
             $projects = Project::pluck('name', 'id');
     
-            return redirect()->route('biller.invoices.project_invoice')
-                ->with(compact('customers', 'lpos', 'projects'));
-    
+            return redirect()->route('biller.invoices.project_invoice')->with(compact('customers', 'lpos', 'projects'));
         }
-        $quotes = Quote::whereIn('id', $quote_ids)->get();
+
+        $quotes = Quote::whereIn('id', $quote_ids)->with('verified_products')->get();
         $customer = Customer::find($customer_id);
-
-        $accounts = Account::whereHas('accountType', function ($q) {
-            $q->whereIn('name', ['Income', 'Other Income']);
-        })->with(['accountType' => function ($q) {
-            $q->select('id', 'name');
-        }])->get();
-
-        // invoice terms
-        $terms = Term::where('type', 1)->get();
+        $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
+        // invoice term type is 1
+        $terms = Term::where('type', 1)->get(); 
         $banks = Bank::all();
+        $additionals = Additional::all();
         $last_tid = Invoice::max('tid');
 
-        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms');
+        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals');
         return new ViewResponse('focus.invoices.create_project_invoice', $params);
     }
 
@@ -251,8 +245,9 @@ class InvoicesController extends Controller
         }])->get();
         // invoice type
         $terms = Term::where('type', 1)->get();
+        $additionals = Additional::all();
 
-        return new ViewResponse('focus.invoices.edit_project_invoice', compact('invoice', 'banks', 'accounts', 'terms'));
+        return new ViewResponse('focus.invoices.edit_project_invoice', compact('invoice', 'banks', 'accounts', 'terms', 'additionals'));
     }
 
     /**

@@ -87,15 +87,15 @@ class InvoicesTableController extends Controller
                 return dateFormat($invoice->invoiceduedate);
             })
             ->addColumn('quote_tid', function ($invoice) {
-                $tids = array();
+                $links = [];
                 foreach ($invoice->products as $item) {
                     $quote = $item->quote;
                     if ($quote) {
-                        $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'">'
-                            . gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid) .'</a>';
+                        $tid = gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid);
+                        $links[] = '<a href="'. route('biller.quotes.show', $quote) .'">'. $tid .'</a>';
                     }
                 }
-                return implode(', ', $tids);
+                return implode(', ', array_unique($links));
             })
             ->addColumn('last_pmt', function ($invoice) {
                 if ($invoice->payments->count()) {

@@ -90,10 +90,9 @@ class InvoiceRepository extends BaseRepository
             if (in_array($key, ['total', 'subtotal', 'tax'], 1)) 
                 $bill[$key] = numberClean($val);
         }
-        // increament tid
+        
         $tid = Invoice::max('tid');
         if ($bill['tid'] <= $tid) $bill['tid'] = $tid+1;
-        
         $result = Invoice::create($bill);
         
         $bill_items = $input['bill_items'];
@@ -105,9 +104,8 @@ class InvoiceRepository extends BaseRepository
         }
         InvoiceItem::insert($bill_items);
 
-        $invoice_items = $result->products;
-        foreach ($invoice_items as $item) {
-            // update Quote or PI invoice status
+        // update Quote or PI invoice status
+        foreach ($result->products as $item) {
             $quote = $item->quote;
             if ($quote) $quote->update(['invoiced' => 'Yes']);
         }
@@ -152,21 +150,10 @@ class InvoiceRepository extends BaseRepository
         }, $bill_items);
         Batch::update(new InvoiceItem, $bill_items, 'id');
 
-        $invoice_items = $invoice->products;
-        foreach ($invoice_items as $item) {
+        // update Quote or PI invoice status
+        foreach ($invoice->products as $item) {
             $quote = $item->quote;
-            if ($quote) {
-                // close associated projects
-                $project = Project::where('main_quote_id', $quote->id)->first();
-                if ($project) {
-                    $project->update([
-                        'status' => 'closed',
-                        'end_note' => 'Invoiced',
-                        'end_date' => date('Y-m-d'),
-                        'ended_by' => auth()->user()->id,
-                    ]);
-                }
-            }
+            if ($quote) $quote->update(['invoiced' => 'Yes']);
         }
 
         /**accounting */
@@ -192,30 +179,26 @@ class InvoiceRepository extends BaseRepository
         DB::beginTransaction();
 
         // pos invoice
-        if ($invoice->product_expense_total > 0) {
+        $is_pos_invoice = $invoice->product_expense_total > 0;
+        if ($is_pos_invoice) {
             // reverse product qty
             foreach ($invoice->products as $item) {
                 $pos_product = $item->product;
                 if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
             }
 
-            // delete payments
-            $payment_ids = PaidInvoice::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))
-                ->pluck('id')->toArray();
-            foreach ($payment_ids as $val) {
-                $this->delete_invoice_payment($val);
-            }
+            // delete related payment
+            PaidInvoice::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))->delete();
         } else {
-            // project invoice
-            $invoice_items = $invoice->products;
-            foreach ($invoice_items as $item) {
+            // update Quote or PI invoice status
+            foreach ($invoice->products as $item) {
                 $quote = $item->quote;
                 if ($quote) $quote->update(['invoiced' => 'No']);
             }
         }
+
         $invoice->transactions()->delete();
         aggregate_account_transactions();
-
         if ($invoice->delete()) {
             DB::commit();
             return true;
@@ -280,7 +263,7 @@ class InvoiceRepository extends BaseRepository
         $dirpurch_asset_amount = 0;
 
         // invoice related quotes and pi
-        $quote_ids = $result->products()->pluck('quote_id')->toArray();
+        $quote_ids = $result->products->pluck('quote_id')->toArray();
         $quotes = Quote::whereIn('id', $quote_ids)->get();
         foreach ($quotes as $quote) {
             $store_inventory_amount  = $quote->projectstock->sum('subtotal');

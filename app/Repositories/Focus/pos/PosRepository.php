@@ -61,7 +61,7 @@ class PosRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         foreach ($input as $key => $val) {
