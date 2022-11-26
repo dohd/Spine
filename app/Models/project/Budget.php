@@ -2,10 +2,13 @@
 
 namespace App\Models\project;
 
+use App\Models\project\Traits\BudgetRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class Budget extends Model
 {
+    use BudgetRelationship;
+    
      /**
      * The database table used by the model.
      * @var string
@@ -65,17 +68,7 @@ class Budget extends Model
         });
 
         static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', '=', auth()->user()->ins);
+            $builder->where('ins', auth()->user()->ins);
         });
     }    
-
-    // Relations
-    public function items()
-    {
-        return $this->hasMany(BudgetItem::class);
-    }
-    public function skillsets()
-    {
-        return $this->hasMany(BudgetSkillset::class);
-    }
 }
