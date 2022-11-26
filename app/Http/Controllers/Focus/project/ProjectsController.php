@@ -251,91 +251,6 @@ class ProjectsController extends Controller
         return redirect()->back();
     }
 
-
-    public function store_meta(ManageProjectRequest $request)
-    {
-
-        $input = $request->except(['_token', 'ins']);
-        if (!project_access($input['project_id'])) exit;
-        switch ($input['obj_type']) {
-            case 2:
-                $milestone = ProjectMileStone::create(array('project_id' => $input['project_id'], 'name' => $input['name'], 'note' => $input['description'], 'color' => $input['color'], 'due_date' => date_for_database($input['duedate']) . ' ' . $input['time_to'] . ':00', 'user_id' => auth()->user()->id));
-                $result = '<li class=" " id="m_' . $milestone->id . '">
-                                    <div class="timeline-badge" style="background-color: ' . $milestone->color . ' ;">*</div>
-                                    <div class="timeline-panel">
-                                        <div class="timeline-heading">
-                                            <h4 class="timeline-title">' . $milestone->name . '</h4>
-                                            <p>
-                                                <small class="text-muted"> [ ' . trans('general.due_date') . ' ' . dateTimeFormat($milestone->due_date) . ']
-                                                </small>
-
-                                            </p>
-                                        </div>';
-
-                $result .= '<div class="timeline-body mb-1">
-                                            <p> ' . $milestone->note . '</p><a href="#" class=" delete-object" data-object-type="2" data-object-id="' . $milestone->id . '"><i class="danger fa fa-trash"></i></a>
-                                        </div>';
-
-                $result .= '<small class="text-muted"><i class="fa fa-user"></i> <strong>' . $milestone->creator->first_name . ' ' . $milestone->creator->last_name . '</strong>  <i class="fa fa-clock-o"></i>  ' . trans('general.created') . '  ' . dateTimeFormat($milestone->created_at) . '
-                                                </small>
-                                    </div>
-                                </li>';
-                ProjectLog::create(array('project_id' => $milestone->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.new') . '] ' . $input['name'], 'user_id' => auth()->user()->id));
-                return json_encode(array('status' => 'Success', 'message' => trans('general.success'), 't_type' => 2, 'meta' => $result));
-                break;
-            case 5:
-
-                $p_log = ProjectLog::create(array('project_id' => $request->project_id, 'value' => $request->name, 'user_id' => auth()->user()->id));
-
-                $log_text = '<tr><td>*</td><td>' . dateTimeFormat($p_log->created_at) . '</td><td>' . auth()->user()->first_name . '</td><td>' . $p_log->value . '</td></tr>';
-
-                return json_encode(array('status' => 'Success', 'message' => trans('general.success'), 't_type' => 5, 'meta' => $log_text));
-                break;
-
-            case 6:
-
-                $note = Note::create(array('title' => $input['title'], 'content' => $input['content'], 'user_id' => auth()->user()->id, 'section' => 1, 'ins' => auth()->user()->ins));
-                $p_group = array('project_id' => $request->project_id, 'related' => 6, 'rid' => $note->id);
-                ProjectRelations::create($p_group);
-                ProjectLog::create(array('project_id' => $request->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . $request->title, 'user_id' => auth()->user()->id));
-                $log_text = '<tr><td>*</td><td>' . $note->title . '</td><td>' . dateTimeFormat($note->created_at) . '</td><td>' . auth()->user()->first_name . '</td><td><a href="' . route('biller.notes.show', [$note->id]) . '" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-eye"></i></a><a href="' . route('biller.notes.edit', [$note->id]) . '" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil "></i> </a> <a class="btn btn-danger round" table-method="delete" data-trans-button-cancel="Cancel" data-trans-button-confirm="Delete" data-trans-title="Are you sure you want to do this?" data-toggle="tooltip" data-placement="top" title="Delete" style="cursor:pointer;" onclick="$(this).find(&quot;form&quot;).submit();"><i class="fa fa-trash"></i> <form action="' . route('biller.notes.show', [$note->id]) . '" method="POST" name="delete_table_item" style="display:none"></form></a></td></tr>';
-                return json_encode(array('status' => 'Success', 'message' => trans('general.success'), 't_type' => 6, 'meta' => $log_text));
-
-                break;
-        }
-    }
-
-    public function delete_meta(ManageProjectRequest $request)
-    {
-        $input = $request->except(['_token', 'ins']);
-        switch ($input['obj_type']) {
-            case 2:
-                $milestone = ProjectMileStone::find($input['object_id']);
-                ProjectLog::create(array('project_id' => $milestone->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 'user_id' => auth()->user()->id));
-                $milestone->delete();
-                return json_encode(array('status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']));
-                break;
-        }
-    }
-
-    public function log_history(ManageProjectRequest $request)
-    {
-        $input = $request->except(['_token', 'ins']);
-
-        $project_select = Project::where('id', '=', $input['project_id'])->with('history')->first();
-        $h = $project_select->history;
-        return DataTables::of($h)
-            ->escapeColumns(['id'])
-            ->addIndexColumn()
-            ->addColumn('created_at', function ($project) {
-                return dateTimeFormat($project->created_at);
-            })
-            ->addColumn('user', function ($project) {
-                return user_data($project->user_id)['first_name'];
-            })
-            ->make(true);
-    }
-
     /**
      * Invoices Datatable
      */
@@ -431,43 +346,6 @@ class ProjectsController extends Controller
 
 
         if (count($projects) > 0) return view('focus.projects.partials.search')->with(compact('projects'));
-    }
-
-    public function update_status(ManageProjectRequest $request)
-    {
-        switch ($request->r_type) {
-            case 1:
-                $project = Project::find($request->project_id);
-                $project->progress = $request->progress;
-                if ($request->progress == 100) {
-                    $status_code = ConfigMeta::where('feature_id', '=', 16)->first();
-                    $project->status = $status_code->feature_value;
-                }
-                $project->save();
-                return json_encode(array('status' => $project->progress));
-                break;
-            case 2:
-                $project = Project::find($request->project_id);
-                $project->status = $request->sid;
-                $project->save();
-                $task_back = task_status($project->status);
-                $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ';
-                return json_encode(array('status' => $status));
-
-                break;
-        }
-    }
-
-    public function project_load(Request $request)
-    {
-        $q = $request->get('id');
-        if ($q == 1) {
-            $result = Equipment::all()->where('rel_id', '=', $q);
-            return json_encode($result);
-        }
-
-        $result = "";
-        return json_encode($result);
     }
 
     /**
