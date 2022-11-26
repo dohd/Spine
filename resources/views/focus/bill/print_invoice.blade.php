@@ -215,8 +215,8 @@
 					<td>{{ $val->description }}</td>
 					<td class="align-c">{{ (int) $val->product_qty }}</td>
 					<td class="align-c">{{ $val->unit }}</td>
-					<td class="align-r">{{ number_format($val->product_price, 2) }}</td>
-					<td class="align-r">{{ number_format($val->product_qty * $val->product_price, 2) }}</td>
+					<td class="align-r">{{ numberFormat($val->product_price) }}</td>
+					<td class="align-r">{{ numberFormat($val->product_qty * $val->product_price) }}</td>
 				</tr>
 			@endforeach
 			<!-- 20 dynamic empty rows -->
@@ -236,28 +236,14 @@
 						<b>Account Number :</b> {{ $resource->bank->number }}<br>
 						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
 						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
-						@php
-							$paybill = '';
-							switch ($resource->bank->code) {
-								case 'KCBLKENX': 
-									$paybill = '(KCB Mpesa Paybill: 522 522)';
-									break;
-								case 'EQBLKENA':
-									$paybill = '(Equity Mpesa Paybill: 247 247)';
-									break;
-								case 'CBAFKENX':
-									$paybill = '(NCBA Mpesa Paybill: 880 100)';
-									break;
-							}
-						@endphp
-						{{ $paybill }}
+						({{ $resource->bank->paybill }})
 					@endisset
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($resource->print_type == 'inclusive')
-					<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>
+					<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 				@else
-					<td class="bd align-r">{{ number_format($resource->subtotal, 2) }}</td>
+					<td class="bd align-r">{{ numberFormat($resource->subtotal) }}</td>
 				@endif
 			</tr>
 			<tr>
@@ -266,7 +252,7 @@
 					<td class="align-r">{{ $resource->tax_id ? 'INCLUSIVE' : 'NONE' }}</td>
 				@else
 					<td class="align-r">Tax {{ $resource->tax_id ? $resource->tax_id . '%' : 'Off' }}</td>
-					<td class="align-r">{{ number_format($resource->tax, 2) }}</td>
+					<td class="align-r">{{ numberFormat($resource->tax) }}</td>
 				@endif
 			</tr>
 			<tr>
@@ -274,7 +260,7 @@
 					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
 				</td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
-				<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>
+				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 			</tr>
 		</tbody>
 	</table>
