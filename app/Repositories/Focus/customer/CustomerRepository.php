@@ -259,14 +259,15 @@ class CustomerRepository extends BaseRepository
         // dd($input);   
         DB::beginTransaction();
 
-        if (!empty($input['picture'])) 
-            $input['picture'] = $this->uploadPicture($input['picture']);
-
+        if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
+            
         $email_exists = Customer::where('email', $input['email'])->count();
         if ($email_exists) throw ValidationException::withMessages(['Duplicate email!']);
 
-        $taxid_exists = Customer::where('taxid', $input['taxid'])->count();
-        if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
+        if (isset($input['taxid'])) {
+            $taxid_exists = Customer::where('taxid', $input['taxid'])->count();
+            if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
+        }
 
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
@@ -358,14 +359,16 @@ class CustomerRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        if (!empty($input['picture'])) {
+        if (isset($input['picture'])) {
             $this->removePicture($customer, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
         }
         if (empty($input['password'])) unset($input['password']);
 
-        $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->count();
-        if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
+        if (isset($input['email'])) {
+            $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->count();
+            if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
+        }
 
         $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
         if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
