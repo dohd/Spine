@@ -36,22 +36,65 @@
 
     // On selecting Tax
     $('#tax_id').change(function() {
-        let total = 0;
+        let tax = 0;
         let subtotal = 0; 
+        let total = 0;
         $('#quoteTbl tbody tr').each(function(i) {
-            if ($('#quoteTbl tbody tr:last').index() == i) return;
-            const subtStr = $('#initprice-'+i).val().replace(/,/g, '');
-            const rateExc = parseFloat(subtStr);
-            subtotal += rateExc;
-            total += rateExc * ($('#tax_id').val() / 100 + 1);
-            $(this).find('.rate').val(rateExc.toLocaleString());
-            $(this).find('.amount').text(rateExc.toLocaleString());
+            let lineSubtotal = accounting.unformat($(this).find('.subtotal').val());
+            let lineQty = parseFloat($(this).find('.qty').val());
+            const taxRate = $('#tax_id').val() / 100;
+            tax += lineSubtotal * taxRate;
+            subtotal += lineSubtotal * lineQty;
+            total += lineSubtotal * lineQty * (1+taxRate);
+            $(this).find('.rate').val(accounting.formatNumber(lineSubtotal));
+            $(this).find('.amount').text(accounting.formatNumber(lineSubtotal));
         });
-        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
-        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        const tax = (total - subtotal).toFixed(2);
-        $('#tax').val(parseFloat(tax).toLocaleString());
-    });
-    $('#tax_id').trigger('change');
+        $('#subtotal').val(accounting.formatNumber(subtotal));
+        $('#tax').val(accounting.formatNumber(tax));
+        $('#total').val(accounting.formatNumber(total));
+    }).trigger('change');
+
+    
+    /**
+     * Dynamic Invoice Type
+    */
+    const invoiceItemRow = $('#quoteTbl tbody tr:first').html();
+    const quote = @json(@$quotes->first());
+    $('#invoice_type').change(function() {
+        $('#quoteTbl tbody').html('');
+        if (this.value == 'collective') {
+            $('#quoteTbl tbody').append(`<tr>${invoiceItemRow}</tr>`);
+        } else {
+            if (quote && quote.verified_products) {
+                const items = quote.verified_products;
+                items.forEach((v,i) => {
+                    $('#quoteTbl tbody').append(`<tr>${invoiceItemRow}</tr>`);
+                    const row = $('#quoteTbl tbody tr:last');
+
+                    row.find('.num').text(v.numbering);
+
+                    const prefix = quote.bank_id > 0? 'QT-' : 'PI-';
+                    const tid = `${quote.tid}`.length < 4? `000${quote.tid}`.slice(-4) : quote.tid;
+                    row.find('.ref').val(prefix + tid);
+
+                    row.find('.descr').val(v.product_name);
+                    row.find('.unit').val(v.unit);
+
+                    const qty = parseFloat(v.product_qty);
+                    row.find('.qty').val(qty);
+
+                    const price = parseFloat(v.product_subtotal);
+                    row.find('.subtotal').val(accounting.formatNumber(price));
+                    row.find('.rate').val(accounting.formatNumber(price));
+                    row.find('.amount').text(accounting.formatNumber(qty * price));
+
+                    row.find('.quote-id').val(quote.id);
+                    row.find('.branch-id').val(quote.branch_id);
+                    row.find('.project-id').val(quote.project_quote.project_id);
+                });
+            }
+        }
+    }).trigger('change');   
+    
 </script>
 @endsection

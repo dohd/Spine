@@ -41,22 +41,24 @@
 
     // On selecting Tax
     $('#tax_id').change(function() {
-        let total = 0;
+        let tax = 0;
         let subtotal = 0; 
+        let total = 0;
         $('#quoteTbl tbody tr').each(function(i) {
-            if ($('#quoteTbl tbody tr:last').index() == i) return;
-            const subtStr = $('#initprice-'+i).val().replace(/,/g, '');
-            const rateExc = parseFloat(subtStr);
-            subtotal += rateExc;
-            total += rateExc * ($('#tax_id').val() / 100 + 1);
-            $(this).find('.rate').val(rateExc.toLocaleString());
-            $(this).find('.amount').text(rateExc.toLocaleString());
+            let lineSubtotal = accounting.unformat($(this).find('.subtotal').val());
+            let lineQty = parseFloat($(this).find('.qty').val());
+            const taxRate = $('#tax_id').val() / 100;
+            tax += lineSubtotal * taxRate;
+            subtotal += lineSubtotal * lineQty;
+            total += lineSubtotal * lineQty * (1+taxRate);
+            $(this).find('.rate').val(accounting.formatNumber(lineSubtotal));
+            $(this).find('.amount').text(accounting.formatNumber(lineSubtotal));
         });
-        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
-        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        const tax = (total - subtotal).toFixed(2);
-        $('#tax').val(parseFloat(tax).toLocaleString());
+        $('#subtotal').val(accounting.formatNumber(subtotal));
+        $('#tax').val(accounting.formatNumber(tax));
+        $('#total').val(accounting.formatNumber(total));
     });
-    $('#tax_id').trigger('change');
+
+    $('#tax_id').change();
 </script>
 @endsection
