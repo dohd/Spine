@@ -92,7 +92,7 @@
     });
 
     // calculate profit
-    const profitState = {sp_total: 0, bp_subtotal: 0, skill_total: 0};
+    const profitState = {sp_total: 0, bp_subtotal: 0, skill_total: 0, bp_total: 0};
     function calcProfit() {
         const {sp_total, bp_total, skill_total} = profitState;
         const profit = sp_total - (bp_total + skill_total);
@@ -109,7 +109,7 @@
         // budget limit 30 percent
         if (sp_total < bp_total * 1.3) {
             $('.budget-alert').removeClass('d-none');
-            scroll(0, 0);
+            // scroll(0, 0);
         } else $('.budget-alert').addClass('d-none');
     }
 
@@ -356,8 +356,7 @@
                     price_customer_id: $('#price_customer').val(),
                 };
                 // maintenance service product 
-                const queryString = window.location.search.substring(1);
-                const docType = new URLSearchParams(queryString).get('doc_type');
+                const docType = @json(request('doc_type'));
                 if (docType == 'maintenance') {
                     url = "{{ route('biller.taskschedules.quote_product_search') }}";
                     data.customer_id = $('#lead_id option:selected').attr('customer_id');

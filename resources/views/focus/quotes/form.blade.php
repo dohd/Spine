@@ -86,14 +86,14 @@
                 <label for="attention">Attention</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention', 'required']) }}
+                    {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id' => 'attention']) }}
                 </div>
             </div>
             <div class="col-4">                
                 <label for="prepared_by">Prepared By</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepaired By', 'id'=>'prepared_by', 'required']) }}
+                    {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepaired By', 'id' => 'prepared_by']) }}
                 </div>
             </div>
             <div class="col-4">
@@ -148,8 +148,15 @@
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="custom-select round" name="validity" id="validity">
+                        @php
+                            $selected = '';
+                        @endphp
                         @foreach ([0, 14, 30, 45, 60, 90] as $val)
-                            <option value="{{ $val }}" {{ $val == @$quote->validity? 'selected' : '' }}>
+                            @php
+                                if (isset($quote)) $selected =  $val == @$quote->validity? 'selected' : '';
+                                else $selected = $val == 30? 'selected' : '';
+                            @endphp
+                            <option value="{{ $val }}" {{ $selected }}>
                                 {{ $val ? 'Valid For '.$val.' Days' : 'On Receipt' }}
                             </option>
                         @endforeach                                                

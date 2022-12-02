@@ -210,13 +210,19 @@
 			</tr>
 		</thead>
 		<tbody>
+			@php 
+				$auto_num = 0;
+			@endphp
 			@foreach($resource->products as $product)
 				@php 
 					if ($product->misc) continue;
 				@endphp
 				@if ($product->a_type == 1)	
+					@php 
+						$auto_num++;
+					@endphp
 					<tr>
-						<td>{{ $product->numbering }}</td>
+						<td>{{ $product->numbering ?: $auto_num }}</td>
 						<td>{{ $product->product_name }}</td>
 						<td class="align-c">{{ +$product->product_qty }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
@@ -236,6 +242,9 @@
 							<td></td>
 						@endfor
 					</tr>
+					@php 
+						$auto_num = 0;
+					@endphp
 				@endif					
 			@endforeach
 			<!-- 20 dynamic empty rows -->

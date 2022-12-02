@@ -16,7 +16,7 @@
     <tbody>
         <!-- product row template-->
         <tr id="productRow">
-            <td><input type="text" class="form-control" name="numbering[]" id="numbering-p0" required></td>
+            <td><input type="text" class="form-control" name="numbering[]" id="numbering-p0" value=""></td>
             <td>
                 <textarea name="product_name[]" id="name-p0" cols="35" rows="2" class="form-control" placeholder="{{trans('general.enter_product')}}" required></textarea>
             </td>
@@ -42,7 +42,7 @@
         
         <!-- title row template-->
         <tr id="titleRow">
-            <td><input type="text" class="form-control" name="numbering[]" id="numbering-t1" required></td>
+            <td><input type="text" class="form-control" name="numbering[]" id="numbering-t1" value=""></td>
             <td colspan="8">
                 <input type="text"  class="form-control" name="product_name[]" placeholder="Enter Title Or Heading" id="name-t1" required>
             </td>
@@ -68,7 +68,7 @@
                 @if ($item->a_type == 1)
                     <!-- product -->
                     <tr>
-                        <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-p{{$k}}" required></td>
+                        <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-p{{$k}}"></td>
                         <td>
                             <textarea name="product_name[]" id="name-p{{ $k }}" cols="35" rows="2" class="form-control pname" placeholder="{{trans('general.enter_product')}}" required>{{ $item->product_name }}</textarea>
                         </td>
@@ -95,7 +95,7 @@
                 @else
                     <!-- group title  -->
                     <tr>
-                        <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-t{{$k}}" required></td>
+                        <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-t{{$k}}"></td>
                         <td colspan="8">
                             <input type="text"  class="form-control" name="product_name[]" value="{{ $item->product_name }}" placeholder="Enter Title Or Heading" id="name-t{{$k}}" required>
                         </td>
