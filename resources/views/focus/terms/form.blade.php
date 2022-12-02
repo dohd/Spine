@@ -15,6 +15,13 @@
 <div class='form-group row'>
     <div class='col-lg-10'>
         {{ Form::label( 'terms', trans('terms.terms'),['class' => 'control-label']) }}
-        {{ Form::textarea('terms', null, ['class' => 'form-control round', 'placeholder' => trans('terms.terms')]) }}
+        {{ Form::textarea('terms', null, ['class' => 'form-control html_editor round', 'placeholder' => trans('terms.terms')]) }}
     </div>
 </div>
+
+@section('after-scripts')
+<script>
+    // initialize html editor
+    editor();
+</script>
+@endsection
