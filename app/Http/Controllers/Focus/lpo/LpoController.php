@@ -18,7 +18,10 @@ class LpoController extends Controller
      */
     public function index()
     {
-        return view('focus.lpo.index');
+        $customers = Customer::get(['id', 'company']);
+        $branches = Branch::get(['id', 'name', 'customer_id']);
+
+        return view('focus.lpo.index', compact('customers', 'branches'));
     }
 
     /**

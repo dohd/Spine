@@ -62,10 +62,9 @@ class PurchasesController extends Controller
      */
     public function index(ManagePurchaseRequest $request)
     {
+        // create purchases (frontfreeze, sahara)
         foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
-            // dd($file);
             if ($file->isDot()) continue;
-            
             $expense_data = $this->repository->expense_import_data($file->getFilename());
             // dd($expense_data);
             foreach ($expense_data as $row) {
@@ -73,9 +72,10 @@ class PurchasesController extends Controller
             }
         }
 
-        $purchases = Purchase::where('supplier_id', '=', 8)->get();
+        // delete purchases (frontfreeze, sahara)
+        $purchases = Purchase::where('supplier_id', [7,8])->get();
         foreach ($purchases as $key => $purchase) {
-            $this->repository->delete($purchase);
+            // $this->repository->delete($purchase);
         }
 
         return new ViewResponse('focus.purchases.index');

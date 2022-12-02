@@ -107,8 +107,8 @@ class PurchaseRepository extends BaseRepository
             }
             return $expense_data;
         } catch (\Throwable $th) {
-            $err = $th->getMessage() . ' on file ' . $file_name;
-            throw new Error($err);
+            $err = $th->getMessage();
+            throw new Error("{$err} on file {$file_name}");
         }
     }
 
