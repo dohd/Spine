@@ -112,12 +112,9 @@
                 <div class="col-sm-6"><label for="source" class="caption">Source <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        <select id="source" name="source" class="form-control round" required>
+                        <select id="source" name="source" class="custom-select round" required>
                             <option value="">-- Select Source --</option>
-                            @php
-                                $sources = ['Emergency Call', 'RFQ', 'Site Survey', 'Existing SLA', 'Tender', 'Other'];
-                            @endphp
-                            @foreach ($sources as $val)
+                            @foreach (['Emergency Call', 'RFQ', 'Site Survey', 'Existing SLA', 'Tender', 'Other'] as $val)
                                 <option value="{{ $val }}" {{ @$lead->source == $val? 'selected' : '' }}>
                                     {{ $val }}
                                 </option>
@@ -136,7 +133,7 @@
                 <div class="col-6"><label for="client_ref" class="caption">Client Ref / Callout ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref', 'maxlength' => 30, 'required']) }}
+                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref', 'maxlength' => 30]) }}
                     </div>
                 </div>
             </div>
