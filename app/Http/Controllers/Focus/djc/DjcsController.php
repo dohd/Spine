@@ -68,10 +68,13 @@ class DjcsController extends Controller
      */
     public function create(ManageDjcRequest $request)
     {
-        $tid = Djc::max('tid');
+        $ins = auth()->user()->ins;
+        $tid = Djc::where('ins', $ins)->max('tid');
+        $prefixes = prefixesArray(['djc_report', 'lead'], $ins);
+
         $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
             
-        return new CreateResponse('focus.djcs.create', compact('leads','tid'));
+        return new CreateResponse('focus.djcs.create', compact('leads','tid', 'prefixes'));
     }
 
     /**
@@ -83,14 +86,21 @@ class DjcsController extends Controller
     public function store(ManageDjcRequest $request)
     {
         $request->validate([
+            'lead_id' => 'required',
             'attention' => 'required',
             'prepared_by' => 'required',
             'technician' => 'required',
             'subject' => 'required'
         ]);
         // extract request input
-        $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 'caption_two', 'caption_three', 'caption_four']);
-        $data_items = $request->only(['row_index', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data = $request->only(['client_ref', 'jobcard_date', 'job_card', 'tid', 'lead_id', 'client_id', 
+            'branch_id', 'reference', 'technician', 'action_taken', 'root_cause', 'recommendations', 'subject', 
+            'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four',
+            'caption_one', 'caption_two', 'caption_three', 'caption_four'
+        ]);
+        $data_items = $request->only(['row_index', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 
+            'capacity', 'location', 'last_service_date', 'next_service_date'
+        ]);
 
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
@@ -98,8 +108,7 @@ class DjcsController extends Controller
         $result = $this->repository->create(compact('data', 'data_items'));
 
         // print preview 
-        $valid_token = token_validator('', 'd' . $result->id, true);
-        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', $result->id, true), 1]) .'" class="invisible" id="printpreview"></a>'; 
 
         return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created' . $msg]);
     }
@@ -112,12 +121,12 @@ class DjcsController extends Controller
      */
     public function edit(Djc $djc)
     {
-        $leads = Lead::where('status', 0)
-            ->orderBy('id', 'DESC')->get()
-            ->merge(collect([$djc->lead]));
+        $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
+        if ($djc->lead) $leads = $leads->merge(collect([$djc->lead]));
         $djc_items = $djc->items()->orderBy('row_index', 'ASC')->get();
+        $prefixes = prefixesArray(['djc_report', 'lead'], $djc->ins);
 
-        return new EditResponse('focus.djcs.edit', compact('djc', 'leads', 'djc_items'));
+        return new EditResponse('focus.djcs.edit', compact('djc', 'leads', 'djc_items', 'prefixes'));
     }
 
     /**
@@ -130,6 +139,7 @@ class DjcsController extends Controller
     public function update(ManageDjcRequest $request, Djc $djc)
     {
         $request->validate([
+            'lead_id' => 'required',
             'attention' => 'required',
             'prepared_by' => 'required',
             'technician' => 'required',

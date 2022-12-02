@@ -50,22 +50,28 @@ class QuotesTableController extends Controller
         $core = $this->repository->getForDataTable();
 
         $sum_total = numberFormat($core->sum('total'));
-    
+
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'lead', 'invoice'], $ins);
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function ($quote) {               
+            ->addColumn('tid', function ($quote) use($prefixes) {               
                 $link = route('biller.quotes.show', [$quote->id]);
                 if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
-                return '<a class="font-weight-bold" href="' . $link . '">' . gen4tid($quote->bank_id? 'PI-': 'QT-', $quote->tid) . '</a>';
+                return '<a class="font-weight-bold" href="' . $link . '">' . gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid) . '</a>';
             })
             ->addColumn('customer', function ($quote) {
-                $client_name = $quote->customer ? $quote->customer->name : '';
-                $branch_name = $quote->branch ? $quote->branch->name : '';
-                if ($client_name && $branch_name) 
-                    return "{$client_name} - {$branch_name}";
-                if ($quote->lead)
-                return $quote->lead->client_name;
+                $customer = '';
+                if ($quote->customer) {
+                    $customer .= $quote->customer->company;
+                    if ($quote->branch) $customer .= " - {$quote->branch->name}";
+                } elseif ($quote->lead) {
+                    $customer .= $quote->lead->client_name;
+                }
+
+                return $customer;
             })
             ->addColumn('date', function ($quote) {
                 return dateFormat($quote->date);
@@ -73,13 +79,16 @@ class QuotesTableController extends Controller
             ->addColumn('total', function ($quote) {
                 return numberFormat($quote->total);
             })   
-            ->addColumn('lead_tid', function($quote) {
-                if ($quote->lead)
-                return '<a href="'. route('biller.leads.show', $quote->lead) .'">'.gen4tid('Tkt-', $quote->lead->reference).'</a>';
+            ->addColumn('lead_tid', function($quote) use($prefixes) {
+                $link = '';
+                if ($quote->lead) {
+                    $link = '<a href="'. route('biller.leads.show', $quote->lead) .'">'.gen4tid("{$prefixes[2]}-", $quote->lead->reference).'</a>';
+                }
+                return $link;
             })
-            ->addColumn('invoice_tid', function ($quote) {
+            ->addColumn('invoice_tid', function ($quote) use($prefixes) {
                 $inv_product = $quote->invoice_product;
-                if ($inv_product) return gen4tid('Inv-', $inv_product->invoice->tid);
+                if ($inv_product) return gen4tid("{$prefixes[3]}-", $inv_product->invoice->tid);
             })
             ->addColumn('sum_total', function ($quote) use($sum_total) {
                 return $sum_total;

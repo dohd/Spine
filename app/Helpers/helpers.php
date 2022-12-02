@@ -675,19 +675,7 @@ function business_alerts($input)
 }
 function parse($template, $data, $return = FALSE)
 {
-    /* Ported From
-CodeIgniter
-* This content is released under the MIT License (MIT)
-*
-* Copyright (c) 2014 - 2019, British Columbia Institute of Technology
-* @author	EllisLab Dev Team
-* @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
-* @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
-* @license	https://opensource.org/licenses/MIT	MIT License
-* @link	https://codeigniter.com
-* @since	Version 1.0.0
-* @filesource
-*/
+
     if ($template === '') {
         return FALSE;
     }
@@ -817,7 +805,7 @@ function printlog(...$logs)
 // modify input array
 function modify_array(array $input)
 {
-    $output = array();
+    $output = [];
     foreach ($input as $key => $list) {
         foreach ($list as $i => $v) {
             $output[$i][$key] = $v;
@@ -972,4 +960,15 @@ function calculate_paye($basicpay, $nhif, $nssf, $allowance = 0)
     $paye_after_tax = $basicpay - $paye;
     $net_pay = $paye_after_tax - $nhif + $allowance;
     return array('paye'=>$paye,'net_pay'=>$net_pay); 
+}
+// global document prefixes
+function prefixesArray(array $notes, $ins = 1)
+{
+    $prefixes = [];
+    foreach ($notes as $val) {
+        $prefix = \App\Models\items\Prefix::where('note', $val)->where('ins', $ins)->first();
+        if ($prefix) $prefixes[] = $prefix->value;
+        else $prefixes[] = '';
+    }
+    return $prefixes;
 }

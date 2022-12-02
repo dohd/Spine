@@ -305,7 +305,7 @@ class CustomerRepository extends BaseRepository
             // recognise sale as journal entry
             if ($result->sale_account_id) {
                 $data = [
-                    'tid' => Journal::max('tid') + 1,
+                    'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                     'date' => $open_balance_date,
                     'note' => $note,
                     'debit_ttl' => $open_balance,
@@ -440,7 +440,7 @@ class CustomerRepository extends BaseRepository
                 // recognise sale
                 if ($customer->sale_account_id) {
                     $data = [
-                        'tid' => Journal::max('tid') + 1,
+                        'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                         'date' => $open_balance_date,
                         'note' => $note,
                         'debit_ttl' => $open_balance,
@@ -510,7 +510,7 @@ class CustomerRepository extends BaseRepository
         // debit Accounts Receivable (Debtor)
         $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $dr_data = [
-            'tid' => Transaction::max('tid') + 1,
+            'tid' => Transaction::where('ins', auth()->user()->ins)->max('tid') + 1,
             'account_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
             'tr_date' => $result->date,

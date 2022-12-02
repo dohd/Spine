@@ -1,11 +1,13 @@
 <html>
 <head>
 	<title>
-		{{ 
-			$resource->bank_id ? 
-			'PI-'.sprintf('%04d', $resource->tid) : 
-			'QT-'.sprintf('%04d', $resource->tid) 
-		}}
+		@php
+			$prefixes = prefixesArray(['quote', 'proforma_invoice'], $company->id);
+			$tid = $resource->tid;
+			$doc_type = $resource->bank_id ? 'pi' : 'quote';
+			$tid = gen4tid($doc_type == 'pi'? "{$prefixes[1]}-" : "{$prefixes[0]}-", $tid);
+		@endphp
+		{{ $resource->bank_id? 'Proforma Invoice' : 'Quotation' }}
 	</title>
 	<style>
 		body {
@@ -158,20 +160,22 @@
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
 				@php
 					$clientname = $resource->lead->client_name;
-					$branch = 'Head Office';
+					$branch = $resource->lead->branch? $resource->lead->branch->name : '';
 					$address = $resource->lead->client_address;
 					$email = $resource->lead->client_email;
 					$cell = $resource->lead->client_contact;
 					if ($resource->client) {
 						$clientname = $resource->client->company;						
-						$branch = $resource->branch->name;
+						$branch = $resource->branch? $resource->branch->name : '';
 						$address = $resource->client->address;
 						$email = $resource->client->email;
 						$cell = $resource->client->phone;
 					}					
 				@endphp
 				<b>Client Name :</b> {{ $clientname }}<br>
-				<b>Branch :</b> {{ $branch }}<br>
+				@if ($branch)
+					<b>Branch :</b> {{ $branch }}<br>
+				@endif
 				<b>Address :</b> {{ $address }}<br>
 				<b>Email :</b> {{ $email }}<br>
 				<b>Cell :</b> {{ $cell }}<br>
@@ -179,20 +183,14 @@
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
-				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
-				@php					
-					$field_name = 'Quotation No';
-					$field_value =  gen4tid('QT-', $resource->tid);
-					if ($resource->bank_id) {
-						$field_name = 'Proforma No';
-						$field_value = gen4tid('PI-', $resource->tid);
-					}
-				@endphp
-				<b>{{ $field_name }} :</b> {{ $field_value . $resource->revision }}<br><br>		
+				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>	
+				<b>{{ $doc_type == 'pi'? 'Proforma No' : 'Quotation No' }} :</b> {{ $tid . $resource->revision }}<br><br>		
 				<b>Date :</b> {{ dateFormat($resource->date, 'd-M-Y') }}<br>	
-				<b>Valid Till :</b> {{ dateFormat($resource->date . ' + ' . $resource->validity . ' days', 'd-M-Y') }} <br>
-				<b>Currency :</b> Kenya Shillings <br>
-				<b>Client Ref :</b> {{ $resource->client_ref }}
+				<b>Valid Till :</b> {{ dateFormat("{$resource->date} + {$resource->validity} days", 'd-M-Y') }} <br>
+				<b>Currency :</b> {{ $resource->currency? $resource->currency->code : '' }} <br>
+				@if ($resource->client_ref)
+					<b>Client Ref :</b> {{ $resource->client_ref }}
+				@endif
 			</td>
 		</tr>
 	</table><br>
@@ -220,7 +218,7 @@
 					<tr>
 						<td>{{ $product->numbering }}</td>
 						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ number_format($product->product_qty, 1) }}</td>
+						<td class="align-c">{{ +$product->product_qty }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
 						@if ($resource->print_type == 'exclusive')
 							<td class="align-r">{{ numberFormat($product->product_subtotal) }}</td>
@@ -257,28 +255,14 @@
 						<b>Account Number :</b> {{ $resource->bank->number }}<br>
 						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
 						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
-						@php
-							$paybill = '';
-							switch ($resource->bank->code) {
-								case 'KCBLKENX': 
-									$paybill = '(KCB Mpesa Paybill: 522 522)';
-									break;
-								case 'EQBLKENA':
-									$paybill = '(Equity Mpesa Paybill: 247 247)';
-									break;
-								case 'CBAFKENX':
-									$paybill = '(NCBA Mpesa Paybill: 880 100)';
-									break;
-							}
-						@endphp
-						{{ $paybill }}
+						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}
 					@endisset
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($resource->print_type == 'inclusive')
-					<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>			
+					<td class="bd align-r">{{ numberFormat($resource->total) }}</td>			
 				@else
-					<td class="bd align-r">{{ number_format($resource->subtotal, 2) }}</td>
+					<td class="bd align-r">{{ numberFormat($resource->subtotal) }}</td>
 				@endif
 			</tr>
 			<tr>
@@ -286,17 +270,19 @@
 					<td class="align-r">VAT {{ $resource->tax_id }}%</td>
 					<td class="align-r">{{ $resource->tax_id ? 'INCLUSIVE' : 'NONE' }}</td>
 				@else
-					<td class="align-r">Tax {{ $resource->tax_id ? $resource->tax_id . '%' : 'Off' }}</td>
-					<td class="align-r">{{ number_format($resource->tax, 2) }}</td>
+					<td class="align-r">Tax {{ $resource->tax_id ? $resource->tax_id . '%' : 'OFF' }}</td>
+					<td class="align-r">{{ numberFormat($resource->tax) }}</td>
 				@endif
 			</tr>
 			<tr>
 				<td colspan="4">
 					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
-					<em>Prepared By : </em><b>{{ $resource->prepared_by }}</b>
+					@if ($resource->prepared_by)
+						<em>Prepared By : </em><b>{{ $resource->prepared_by }}</b>
+					@endif
 				</td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
-				<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>
+				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 			</tr>
 		</tbody>
 	</table>

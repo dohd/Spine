@@ -40,7 +40,7 @@ class GoodsReceiveNoteController extends Controller
      */
     public function create()
     {
-        $tid = Goodsreceivenote::max('tid');
+        $tid = Goodsreceivenote::where('ins', auth()->user()->ins)->max('tid');
         $suppliers = Supplier::get(['id', 'name']);
 
         return view('focus.goodsreceivenotes.create', compact('tid', 'suppliers'));

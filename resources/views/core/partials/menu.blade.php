@@ -289,19 +289,21 @@
                         </li>
                          @endauth 
                         {{-- project --}}
-                         @permission('manage-project') 
+                        @permission('manage-project') 
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> {{ trans('labels.backend.projects.management') }}</a>
                             <ul class="dropdown-menu">
-                                 @permission('manage-project') 
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown">
-                                        <i class="ft-list"></i>{{ trans('projects.projects')}} <span class="badge badge-sm badge-primary">Beta</span>
-                                    </a>                                
+                                    <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
                                 </li>
-                                 @endauth 
+                                {{-- <li>
+                                    <a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="ft-list" aria-hidden="true"></i>Milestones</a>                 
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Milestone</a>
+                                </li>  --}}
                             </ul>
                         </li>
-                         @endauth 
+                        @endauth 
                         {{-- verification --}}
                          @permission('manage-quote-verify') 
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Job Verification</a>

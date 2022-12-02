@@ -51,20 +51,23 @@ class LeadsTableController extends Controller
     {
         $core = $this->lead->getForDataTable();
 
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['lead'], $ins);
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('reference', function ($lead) {
-                return gen4tid('Tkt-', $lead->reference);
+            ->addColumn('reference', function ($lead) use($prefixes) {
+                return gen4tid("{$prefixes[0]}-", $lead->reference);
             })
             ->addColumn('client_name', function ($lead) {
-                $customer = isset($lead->customer) ?  $lead->customer->company : '';
-                $branch = isset($lead->branch) ? $lead->branch->name : '';
-                if ($customer && $branch) return $customer . ' - ' .$branch;
-                return $lead->client_name;
+                $client_name = '';
+                if ($lead->customer) $client_name .= $lead->customer->company;
+                if ($client_name && $lead->branch) $client_name .= " - {$lead->branch->name}";
+                return $client_name;
             })
             ->addColumn('created_at', function ($lead) {
-                return $lead->created_at->format('d-m-Y');
+                return dateFormat($lead->created_at);
             })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;

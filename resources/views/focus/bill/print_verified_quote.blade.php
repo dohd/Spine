@@ -1,12 +1,13 @@
 <html>
 <head>
 	@php
-		$tid = sprintf('%04d', $resource->tid);
-		$v_no =  ' (v' . $resource->verified_jcs[0]->verify_no . ')';
-		$field_value = 'QT-' . $tid;
-		if ($resource->bank_id) $field_value = 'PI-' . $tid;
+		$label = $resource->bank_id? 'pi' : 'quote';
+		$prefixes = prefixesArray(['quote', 'proforma_invoice'], $company->id);
+		$tid = gen4tid($label == 'pi'? "{$prefixes[1]}-" : "{$prefixes[0]}-", $resource->tid);
+		$v_no = '';
+		if (isset($resource->verified_jcs[0])) $v_no .= ' (v' . $resource->verified_jcs[0]->verify_no . ')';
 	@endphp
-	<title>{{ $field_value . $v_no }}</title>
+	<title>VERIFICATION {{ $v_no }}</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -154,7 +155,9 @@
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
 				<b>Client Name :</b> {{ $resource->client->company }}<br>
-				<b>Branch :</b> {{ $resource->branch->name }}<br>
+				@if ($resource->branch)
+					<b>Branch :</b> {{ $resource->branch->name }}<br>
+				@endif
 				<b>Address :</b> {{ $resource->client->address }}<br>
 				<b>Email :</b> {{ $resource->client->email }}<br>
 				<b>Cell :</b> {{ $resource->client->phone }}<br>
@@ -163,16 +166,12 @@
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>
-				@php
-					$tid = sprintf('%04d', $resource->tid);
-					$v_no =  ' (v' . $resource->verified_jcs[0]->verify_no . ')';
-					$field_value = 'QT-' . $tid;
-					if ($resource->bank_id) $field_value = 'PI-' . $tid;
-				@endphp
-				<b>Reference No :</b> {{ $field_value . $v_no }}<br>
+				<b>Reference No :</b> {{ $tid . $v_no }}<br>
                 <b>Reference Date :</b> {{ dateFormat($resource->verification_date, 'd-M-Y') }} <br>
-				<b>Currency :</b> Kenya Shillings <br><br>
-				<b>Client Ref: </b> {{ $resource->client_ref }}
+				<b>Currency :</b> {{ $resource->currency? $resource->currency->code : '' }} <br><br>
+				@if ($resource->client_ref)
+					<b>Client Ref: </b> {{ $resource->client_ref }}
+				@endif
 			</td>
 		</tr>
 	</table><br>
@@ -183,12 +182,15 @@
 				$jcard_refs = array();
                 $dnote_refs = array();
                 foreach ($resource->verified_jcs as $jc) {
+					// type 2 is d-note and type 1 is jobcard
                     if ($jc->type == 2) $dnote_refs[] = $jc->reference;
                     else $jcard_refs[] = $jc->reference;
                 }                
             @endphp
-            <td>RJC : <b>{{ implode(', ', $jcard_refs) }}</b></td>
-            <td>DNOTE : <b>{{ implode(', ', $dnote_refs) }}</b></td>
+			@if ($jcard_refs || $dnote_refs)
+				<td>RJC : <b>{{ implode(', ', $jcard_refs) }}</b></td>
+				<td>DNOTE : <b>{{ implode(', ', $dnote_refs) }}</b></td>
+			@endif
         </tr>		
 	</table>
 	<br>
@@ -207,27 +209,23 @@
 		<tbody>
 			@foreach($resource->verified_items as $product)
 				@if ($product->a_type == 1)	
-					
 					<tr>
 						<td>{{ $product->numbering }}</td>
 						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ (int) $product->product_qty }}</td>
+						<td class="align-c">{{ +$product->product_qty }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
                         <td class="align-r">
                             @if ($resource->print_type == 'inclusive')
-                                {{ number_format($product->product_subtotal, 2) }}
+                                {{ numberFormat($product->product_subtotal) }}
                             @else
-                                {{ number_format($product->product_price, 2) }}
+                                {{ numberFormat($product->product_price) }}
                             @endif
                         </td>
                         <td class="align-r">
-							@php
-								$product_qty = (int) $product->product_qty;
-							@endphp
                             @if ($resource->print_type == 'inclusive')
-                                {{ number_format($product_qty * $product->product_subtotal, 2) }}
+                                {{ numberFormat($product->product_qty * $product->product_subtotal) }}
                             @else
-                                {{ number_format($product_qty * $product->product_price, 2) }}
+                                {{ numberFormat($product->product_qty * $product->product_price) }}
                             @endif
                         </td>						
                         <td>{{ $product->remark }}</td>
@@ -253,21 +251,21 @@
 			<!--  -->
 			<tr>
 				<td colspan="4" class="bd-t">
-					@if ($resource->bank_id)
+					@isset($resource->bank)
 						<span class="customer-dt-title">BANK DETAILS:</span><br>
-						<b>Account Name :</b> Lean Ventures Limited<br>
-						<b>Account Number :</b> 1267496231<br>
-						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br>
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br>
-						(KCB Mpesa Paybill: 522 522)
-					@endif
+						<b>Account Name :</b> {{ $resource->bank->name }}<br>
+						<b>Account Number :</b> {{ $resource->bank->number }}<br>
+						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
+						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
+						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}
+					@endisset
 				</td>
 				<td class="bd align-r">Sub Total:</td>
                 <td class="bd align-r">
                     @if ($resource->print_type == 'inclusive')
-                        {{ number_format($resource->total, 2) }}
+                        {{ numberFormat($resource->total) }}
                     @else
-                        {{ number_format($resource->subtotal, 2) }}
+                        {{ numberFormat($resource->subtotal) }}
                     @endif
                 </td>				
                 <td class="bd-t"></td>
@@ -288,14 +286,18 @@
 					</td>
 				@else
 					<td class="align-r">Tax {{ $resource->tax_id }}%</td>
-					<td class="align-r">{{ number_format($resource->tax, 2) }}</td>
+					<td class="align-r">{{ numberFormat($resource->tax) }}</td>
 				@endif
-				<td></td>
+				<td class=""></td>
 			</tr>
 			<tr>
-				<td colspan="4" style="border-bottom: 1px solid;"><em>Prepared By : </em><b>{{ $resource->prepared_by }}</b></td>
+				<td colspan="4" style="border-bottom: 1px solid;">
+					@if ($resource->prepared_by)
+						<em>Prepared By : </em><b>{{ $resource->prepared_by }}</b>
+					@endif
+				</td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
-				<td class="bd align-r">{{ number_format($resource->total, 2) }}</td>
+				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 				<td style="border-bottom: 1px solid;"></td>
 			</tr>
 		</tbody>

@@ -81,8 +81,8 @@
             }, 
             function() {
                 $.ajax({ url })
-                .done(function() { location.reload(); })
-                .fail(function(err) {
+                .done(() => location.reload())
+                .fail((err) => {
                     if (err.status === 403) {
                         $('.lpo-alert').removeClass('d-none');
                         $('.lpoMsg').text(err.responseJSON.message);

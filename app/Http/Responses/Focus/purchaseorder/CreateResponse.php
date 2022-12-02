@@ -19,12 +19,14 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_tid = Purchaseorder::max('tid');
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['purchase_order'], $ins);
+        $last_tid = Purchaseorder::where('ins', $ins)->max('tid');
+
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
-        // Purchase order
-        $terms = Term::where('type', 4)->get();
+        $terms = Term::where('type', 4)->get(); // purchase order term
 
-        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups', 'terms'));
+        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups', 'terms', 'prefixes'));
     }
 }

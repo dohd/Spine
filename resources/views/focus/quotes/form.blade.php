@@ -3,11 +3,10 @@
     <div class="col-6">
         <h3 class="form-group">
             @php
-                $doc_type = request('doc_type') == 'maintenance'? 'Maintenance' : 'Repair';
                 $title_arr = explode(' ', $words['title']);
-                $title = implode(' ', [$title_arr[0], $doc_type, ...array_splice($title_arr, 1)]);
-                echo $title;
+                $title = implode(' ', [$title_arr[0], ...array_splice($title_arr, 1)]);
             @endphp
+            {{ $title }}
         </h3>
         <div class="form-group row">
             <div class="col-12">
@@ -17,10 +16,11 @@
                     <select class="form-control" name="lead_id" id="lead_id" required>                                                 
                         @foreach ($leads as $lead)
                             @php
-                                $tid = 'Tkt-'.sprintf('%04d', $lead->reference);
-                                $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
-                                $branch = isset($lead->branch) ? $lead->branch->name : '';
-                                if ($name && $branch) $name .= ' - ' . $branch;  
+                                $customer_name = '';
+                                if ($lead->customer) {
+                                    $customer_name .= $lead->customer->company;
+                                    if ($lead->branch) $customer_name .= " - {$lead->branch->name}";
+                                }
                             @endphp
                             <option 
                                 value="{{ $lead->id }}" 
@@ -30,7 +30,7 @@
                                 branch_id="{{ $lead->branch_id }}"
                                 {{ $lead->id == @$quote->lead_id ? 'selected' : '' }}
                             >
-                                {{ $tid }} - {{ $name }} - {{ $lead->title }}
+                                {{ gen4tid("{$prefixes[1]}-", $lead->reference) }} - {{ $customer_name }} - {{ $lead->title }}
                             </option>
                         @endforeach                                                                                             
                     </select>
@@ -73,34 +73,49 @@
                 <div class="input-group">
                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                     @php
-                        $label = $is_pi ? 'PI-' : 'QT-';
-                        $tid = gen4tid('', $lastquote->tid);
-                        if (!isset($words['edit_mode'])) $tid = gen4tid('', $lastquote->tid+1);;
-                        $label .= $tid;
+                        $tid = isset($words['edit_mode'])? $lastquote->tid : $lastquote->tid+1;
                     @endphp
-                    {{ Form::text('tid', $label, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                    {{ Form::text('tid', gen4tid("{$prefixes[0]}-", $tid), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                     <input type="hidden" name="tid" value="{{ $tid }}">
                 </div>
             </div>
         </div>
 
         <div class="form-group row">
-            <div class="col-6">
+            <div class="col-4">
                 <label for="attention">Attention</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                     {{ Form::text('attention', null, ['class' => 'form-control round', 'placeholder' => 'Attention', 'id'=>'attention', 'required']) }}
                 </div>
             </div>
-            <div class="col-6">                
+            <div class="col-4">                
                 <label for="prepared_by">Prepared By</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                     {{ Form::text('prepared_by', null, ['class' => 'form-control round', 'placeholder' => 'Prepaired By', 'id'=>'prepared_by', 'required']) }}
                 </div>
             </div>
+            <div class="col-4">
+                <label for="quote_type">{{ $is_pi? 'Proforma Invoice' : 'Quote' }} Type</label>
+                <select name="quote_type" id="quote_type" class="custom-select" required>
+                    @php
+                        $selected = '';
+                    @endphp
+                    @foreach (['standard', 'project'] as $val)
+                        @php
+                            if (isset($quote)) $selected = ($quote->quote_type == $val)? 'selected' : '';
+                            else $selected = $val? 'selected' : '';
+                        @endphp
+                        <option value="{{ $val }}" {{ $selected }}>
+                            {{ ucfirst($val) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
         </div>        
     </div>
+
     <!-- Properties -->
     <div class="col-6">
         <h3 class="form-group">{{ $is_pi ? 'PI Properties' : trans('quotes.properties')}}</h3>
@@ -109,7 +124,7 @@
                 <label for="reference" >Djc Reference</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference', 'required']) }}
+                    {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
                 </div>
             </div>
             <div class="col-4">
@@ -142,7 +157,7 @@
                 </div>
             </div>
             <div class="col-4">
-                <label for="currency" >Currency <span class="text-danger">*</span></label>
+                <label for="currency" >Currency</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
@@ -163,7 +178,7 @@
         </div>
         <div class="form-group row">
             <div class="col-4">
-                <label for="terms">Terms <span class="text-danger">*</span></label>
+                <label for="terms">Terms</label>
                 <select id="term_id" name="term_id" class="custom-select" required>
                     <option value="">-- Select Term --</option>
                     @foreach($terms as $term)

@@ -214,7 +214,7 @@ class SupplierRepository extends BaseRepository
             // recognise expense as journal entry
             if ($result->expense_account_id) {
                 $data = [
-                    'tid' => Journal::max('tid') + 1,
+                    'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                     'date' => $open_balance_date,
                     'note' => $note,
                     'debit_ttl' => $open_balance,
@@ -356,7 +356,7 @@ class SupplierRepository extends BaseRepository
                 // recognise expense as a journal entry
                 if ($supplier->expense_account_id) {
                     $data = [
-                        'tid' => Journal::max('tid') + 1,
+                        'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                         'date' => $open_balance_date,
                         'note' => $note,
                         'debit_ttl' => $open_balance,
@@ -407,7 +407,7 @@ class SupplierRepository extends BaseRepository
         // credit Accounts Payable (Creditor)
         $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $cr_data = [
-            'tid' => Transaction::max('tid') + 1,
+            'tid' => Transaction::where('ins', auth()->user()->ins)->max('tid') + 1,
             'account_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
             'tr_date' => $result->date,

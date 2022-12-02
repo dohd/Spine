@@ -76,7 +76,8 @@
                     <label for="tid" class="caption">Order No.</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        {{ Form::number('tid', @$po? $po->tid : $last_tid+1, ['class' => 'form-control round', 'readonly']) }}
+                        {{ Form::text('tid', gen4tid("{$prefixes[0]}-", @$po? $po->tid : $last_tid+1), ['class' => 'form-control round', 'disabled']) }}
+                        {{ Form::hidden('tid', @$po? $po->tid : $last_tid+1) }}
                     </div>
                 </div>
                 <div class="col-sm-4"><label for="transaction_date" class="caption">Order Date*</label>

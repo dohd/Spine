@@ -40,17 +40,17 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
             'equip_serial','unique_id','capacity','location','machine_gas','make_and_type',
             'model_and_model_no','equipment_category_id','service_rate','building','floor'
         ];
-        $tid = Equipment::max('tid') + 1;
+        $tid = Equipment::where('ins', auth()->user()->ins)->max('tid') + 1;
 
         $row_count = 0;
+        $label_count = count($columns);
         foreach ($rows as $i => $row) {
-            $row = $row->toArray();
+            $row = array_slice($row->toArray(), 0, $label_count);
+            
             if ($i == 0) {
                 $omitted_cols = array_diff($columns, $row);
-                if ($omitted_cols) throw new Error('Column label mismatch: ' . implode(', ',$omitted_cols));
+                if ($omitted_cols) throw new Error('Please check uploaded template! Template column label mismatch: ' . implode(', ', $omitted_cols));
                 continue;
-            } elseif (count($row) != count($columns)) {
-                throw new Error('Column mismatch on row ' . strval($i+1)  . '!');
             }
 
             $row_data = array_combine($columns, $row);

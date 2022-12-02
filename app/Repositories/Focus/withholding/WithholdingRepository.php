@@ -56,6 +56,7 @@ class WithholdingRepository extends BaseRepository
         $result = (object) array();
         $is_payment = empty($data['withholding_tax_id']);
         if ($is_payment) {
+            unset($data['withholding_tax_id']);
             $result = Withholding::create($data);
 
             $unallocated = $result->amount - $result->allocate_ttl;
@@ -159,7 +160,7 @@ class WithholdingRepository extends BaseRepository
         // credit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'withholding')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

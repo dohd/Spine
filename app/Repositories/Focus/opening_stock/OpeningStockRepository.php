@@ -140,7 +140,7 @@ class OpeningStockRepository extends BaseRepository
         // debit Inventory Account
         $account = Account::where('system', 'stock')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'stock')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

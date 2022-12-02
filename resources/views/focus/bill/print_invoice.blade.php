@@ -183,10 +183,10 @@
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
-				<b>Invoice No :</b> {{ sprintf('%04d', $resource->tid) }}<br><br>
+				<b>Invoice No :</b> {{ gen4tid('', $resource->tid) }}<br><br>
 				<b>Date :</b> {{ dateFormat($resource->invoicedate, 'd-M-Y') }}<br>
 				<b>Overdue after :</b> {{ $resource->validity ? $resource->validity . ' days' : 'On Receipt' }}<br>
-				<b>KRA Pin :</b> P051516705D<br>
+				<b>KRA Pin :</b> {{ $company->taxid }}<br>
 			</td>
 		</tr>
 	</table><br>
@@ -210,13 +210,13 @@
 		<tbody>
 			@foreach($resource->products as $k => $val)
 				<tr>
-					<td>{{ $k+1 }}</td>					
+					<td>{{ $val->numbering ?: $k+1 }}</td>					
 					<td>{{ $val->reference }}</td>
 					<td>{{ $val->description }}</td>
-					<td class="align-c">{{ (int) $val->product_qty }}</td>
+					<td class="align-c">{{ $val->product_qty > 0? +$val->product_qty : '' }}</td>
 					<td class="align-c">{{ $val->unit }}</td>
-					<td class="align-r">{{ numberFormat($val->product_price) }}</td>
-					<td class="align-r">{{ numberFormat($val->product_qty * $val->product_price) }}</td>
+					<td class="align-r">{{ $val->product_price > 0? numberFormat($val->product_price) : '' }}</td>
+					<td class="align-r">{{ $val->product_qty > 0? numberFormat($val->product_qty * $val->product_price) : '' }}</td>
 				</tr>
 			@endforeach
 			<!-- 20 dynamic empty rows -->
@@ -236,7 +236,7 @@
 						<b>Account Number :</b> {{ $resource->bank->number }}<br>
 						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
 						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
-						({{ $resource->bank->paybill }})
+						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}
 					@endisset
 				</td>
 				<td class="bd align-r">Sub Total:</td>

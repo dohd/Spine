@@ -58,7 +58,6 @@
         $('#tax').val(accounting.formatNumber(tax));
         $('#total').val(accounting.formatNumber(total));
     });
-
     $('#tax_id').change();
 </script>
 @endsection

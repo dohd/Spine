@@ -69,7 +69,10 @@ class PurchasesTableController extends Controller
                 return $name . ' <a class="font-weight-bold" href="' . $link . '"><i class="ft-eye"></i></a>';
             })
             ->addColumn('reference', function ($purchase) {
-                return $purchase->doc_ref . ' - ' .$purchase->doc_ref_type;
+                $reference = $purchase->doc_ref_type;
+                if ($purchase->doc_ref) return $reference .= " - {$purchase->doc_ref}";
+                
+                return $reference;
             })
             ->addColumn('amount', function ($purchase) {
                 return number_format($purchase->grandttl, 2);

@@ -56,13 +56,14 @@ class TaskSchedulesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('contract', function ($schedule) {   
-                $link = '';
-                $contract = $schedule->contract;
-                if ($contract && $contract->customer) {
-                    $name = "{$contract->title} - {$contract->customer->company}";
-                    $link = '<a href="'. route('biller.contracts.show', $contract).'">'.$name.'</a>';
+                $contract_name = '';
+                if ($schedule->contract) {
+                    $contract = $schedule->contract;
+                    $contract_name = $schedule->title;
+                    if ($contract->customer) $contract_name .= " - {$contract->customer->company}";
+                    $contract_name = '<a href="'. route('biller.contracts.show', $contract).'">'.$contract_name.'</a>';
                 }
-                return $link;
+                return $contract_name;
             })
             ->addColumn('loaded', function ($schedule) {
                 $schedule_equip_ids = $schedule->equipments->pluck('id')->toArray();
@@ -71,13 +72,12 @@ class TaskSchedulesTableController extends Controller
                 $schedule_units = count($schedule_equip_ids);
                 $serviced_units = count($serviced_equip_ids);
                 $unserviced_units = count(array_diff($schedule_equip_ids, $serviced_equip_ids));
-                if (!$serviced_units && !$unserviced_units) return;
 
                 // service status
                 if ($serviced_units) {
-                    if ($serviced_units >= $schedule_units)
+                    if ($serviced_units >= $schedule_units) {
                         $this->service_status = 'complete';
-                    else $this->service_status = 'partial';
+                    } else $this->service_status = 'partial';
                 } else $this->service_status = 'unserviced';
                     
                 $params = [
@@ -106,7 +106,9 @@ class TaskSchedulesTableController extends Controller
                 return $this->service_status;
             })
             ->addColumn('actions', function ($schedule) {
-                $params = ['customer_id' => $schedule->contract->customer_id, 'schedule_id' => $schedule->id];
+                $params = ['schedule_id' => $schedule->id, 'customer_id' => ''];
+                if ($schedule->contract) $params['customer_id'] = $schedule->contract->customer_id;
+                 
                 return $schedule->action_buttons 
                     . ' <a class="btn btn-purple round" href="'. route('biller.equipments.index', $params) .'" title="equipments"><i class="fa fa-list"></i></a> '; 
             })

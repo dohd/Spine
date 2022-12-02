@@ -107,11 +107,12 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     *  Project Quotes budgeted but not verified
+     * Quotes pending verification
      */
     public function getForVerifyDataTable()
     {
-        $q = $this->query()->whereHas('budget');
+        // budgeted project quotes or standard quotes
+        $q = $this->query()->whereHas('budget')->orWhere('quote_type', 'standard');
 
         $q->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
@@ -127,7 +128,7 @@ class QuoteRepository extends BaseRepository
     }
 
     /**
-     * Project Quotes Verified but not invoiced
+     * Quotes pending invoicing
      */
     public function getForVerifyNotInvoicedDataTable()
     {
@@ -168,9 +169,16 @@ class QuoteRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }   
         // increament tid
-        if (isset($data['bank_id'])) $last_tid = Quote::where('bank_id', '>', 0)->max('tid');
-        else $last_tid = Quote::where('bank_id', 0)->max('tid');
-        if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
+        $tid = 0;
+        if (isset($data['bank_id'])) {
+            $tid = Quote::where('ins', $data['ins'])
+                ->where('bank_id', '>', 0)->max('tid');
+        } else {
+            $tid = Quote::where('ins', $data['ins'])
+                ->where('bank_id', 0)->max('tid');
+        }
+        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
+
             
         // close lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);

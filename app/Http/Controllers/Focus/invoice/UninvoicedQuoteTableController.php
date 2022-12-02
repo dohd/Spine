@@ -48,6 +48,7 @@ class UninvoicedQuoteTableController extends Controller
     public function __invoke()
     {
         $core = $this->repository->getForVerifyNotInvoicedDataTable();
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
         
         return Datatables::of($core)
             ->escapeColumns(['id'])
@@ -58,16 +59,17 @@ class UninvoicedQuoteTableController extends Controller
             ->addColumn('title', function($quote) {
                 return $quote->notes;
             })
-            ->addColumn('tid', function ($quote) {
-                $tid = gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid);
+            ->addColumn('tid', function ($quote) use($prefixes) {
+                $tid = gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);
                 return '<a class="font-weight-bold" href="'. route('biller.quotes.show', $quote) .'">' . $tid . $quote->revision .'</a>';
             })
             ->addColumn('customer', function ($quote) {
-                $customer = isset($quote->customer) ? $quote->customer->company : '';
-                $branch  = isset($quote->branch) ? $quote->branch->name : '';
-                if ($customer && $branch) 
-                    return $customer.' - '.$branch
-                        .'&nbsp;<a class="font-weight-bold" href="'.route('biller.customers.show', $quote->customer).'"><i class="ft-eye"></i></a>';
+                $customer = $quote->lead? $quote->lead->client_name : '';
+                if ($quote->client) {
+                    $customer = "{$quote->client->company}";
+                    if ($quote->branch) $customer .= " - {$quote->branch->name}";
+                }
+                return $customer;
             })
             ->addColumn('created_at', function ($quote) {
                 return dateFormat($quote->invoicedate);
@@ -81,14 +83,15 @@ class UninvoicedQuoteTableController extends Controller
             ->addColumn('diff_total', function ($quote) {
                 return numberFormat($quote->total - $quote->verified_total);
             })
-            ->addColumn('project_tid', function($quote) {
-                if ($quote->project_quote_id) 
-                return gen4tid('Prj-', $quote->project_quote->project->tid);
+            ->addColumn('project_tid', function($quote) use($prefixes) {
+                if ($quote->project) 
+                return gen4tid("{$prefixes[2]}-", $quote->project->tid);
             })
             ->addColumn('lpo_number', function($quote) {
                 if (!$quote->lpo)  return 'Null:';
-
-                return $quote->lpo->lpo_no . '<br> Kes: ' . numberFormat($quote->lpo->amount);
+                $amount = numberFormat($quote->lpo->amount);
+                $currency = $quote->currency? $quote->currency->code : '';
+                return $quote->lpo->lpo_no . "<br> {$currency}: {$amount}";
             })
             ->make(true);
     }

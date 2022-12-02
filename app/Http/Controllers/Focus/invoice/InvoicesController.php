@@ -192,16 +192,21 @@ class InvoicesController extends Controller
             return redirect()->route('biller.invoices.project_invoice')->with(compact('customers', 'lpos', 'projects'));
         }
 
-        $quotes = Quote::whereIn('id', $quote_ids)->with('verified_products')->get();
+        $quotes = Quote::whereIn('id', $quote_ids)->with(['verified_products' => function ($q) {
+            $q->orderBy('row_index', 'ASC');
+        }])->get();
         $customer = Customer::find($customer_id);
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
-        // invoice term type is 1
-        $terms = Term::where('type', 1)->get(); 
+        $terms = Term::where('type', 1)->get();  // invoice term type is 1
         $banks = Bank::all();
         $additionals = Additional::all();
-        $last_tid = Invoice::max('tid');
 
-        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals');
+        $ins =  auth()->user()->ins;
+        $last_tid = Invoice::where('ins', $ins)->max('tid');
+        $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice', 'purchase_order', 'delivery_note', ''], $ins);
+
+        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes');
+
         return new ViewResponse('focus.invoices.create_project_invoice', $params);
     }
 
@@ -216,7 +221,8 @@ class InvoicesController extends Controller
             'subtotal', 'tax', 'total', 
         ]);
         $bill_items = $request->only([
-            'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id'
+            'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 
+            'project_id', 'branch_id'
         ]);
 
         $bill['user_id'] = auth()->user()->id;
@@ -243,11 +249,14 @@ class InvoicesController extends Controller
         })->with(['accountType' => function ($query) {
             $query->select('id', 'name');
         }])->get();
-        // invoice type
-        $terms = Term::where('type', 1)->get();
-        $additionals = Additional::all();
 
-        return new ViewResponse('focus.invoices.edit_project_invoice', compact('invoice', 'banks', 'accounts', 'terms', 'additionals'));
+        $terms = Term::where('type', 1)->get(); // invoice type 1
+        $additionals = Additional::all();
+        $prefixes = prefixesArray(['invoice'], $invoice->ins);
+
+        $params = compact('invoice', 'banks', 'accounts', 'terms', 'additionals', 'prefixes');
+
+        return new ViewResponse('focus.invoices.edit_project_invoice', $params);
     }
 
     /**
@@ -261,7 +270,7 @@ class InvoicesController extends Controller
             'subtotal', 'tax', 'total', 
         ]);
         $bill_items = $request->only([
-            'id', 'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 
+            'id', 'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 
             'branch_id'
         ]);
 
@@ -295,7 +304,7 @@ class InvoicesController extends Controller
      */
     public function create_payment(Request $request)
     {
-        $tid = PaidInvoice::max('tid');
+        $tid = PaidInvoice::where('ins', auth()->user()->ins)->max('tid');
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
@@ -430,7 +439,7 @@ class InvoicesController extends Controller
     {
         if (!$register->status()) return view('focus.invoices.pos.open_register');
 
-        $tid = Invoice::max('tid');
+        $tid = Invoice::where('ins', auth()->user()->ins)->max('tid');
         $customer = Customer::first();
         $currencies = Currency::all();
         $terms = Term::all();

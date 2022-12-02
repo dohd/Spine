@@ -52,7 +52,8 @@
         $('#subtotal').val(accounting.formatNumber(subtotal));
         $('#tax').val(accounting.formatNumber(tax));
         $('#total').val(accounting.formatNumber(total));
-    }).trigger('change');
+    });
+    $('#tax_id').change();
 
     
     /**
@@ -60,6 +61,7 @@
     */
     const invoiceItemRow = $('#quoteTbl tbody tr:first').html();
     const quote = @json(@$quotes->first());
+    const prefixes = @json($prefixes);
     $('#invoice_type').change(function() {
         $('#quoteTbl tbody').html('');
         if (this.value == 'collective') {
@@ -72,10 +74,12 @@
                     const row = $('#quoteTbl tbody tr:last');
 
                     row.find('.num').text(v.numbering);
+                    row.find('.num-val').val(v.numbering);
+                    row.find('.row-index').val(v.row_index);
 
-                    const prefix = quote.bank_id > 0? 'QT-' : 'PI-';
                     const tid = `${quote.tid}`.length < 4? `000${quote.tid}`.slice(-4) : quote.tid;
-                    row.find('.ref').val(prefix + tid);
+                    const pfx = quote.bank_id == 0? prefixes[1] : prefixes[2];
+                    row.find('.ref').val(`${pfx}-${tid}`);
 
                     row.find('.descr').val(v.product_name);
                     row.find('.unit').val(v.unit);
@@ -90,7 +94,8 @@
 
                     row.find('.quote-id').val(quote.id);
                     row.find('.branch-id').val(quote.branch_id);
-                    row.find('.project-id').val(quote.project_quote.project_id);
+                    const project_id = quote.project_quote? quote.project_quote.project_id : '';
+                    row.find('.project-id').val(project_id);
                 });
             }
         }

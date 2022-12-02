@@ -28,11 +28,11 @@ class LpoTableController extends Controller
             $link = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
             if ($quote->invoiced == 'Yes') {
                 $cluster['invoiced']['links'][] = $link;
-                $cluster['invoiced']['total'] += $quote->total;
+                $cluster['invoiced']['total'] += $quote->verified_total;
             }
             if ($quote->verified == 'Yes' && $quote->invoiced == 'No') {
                 $cluster['verified_uninvoiced']['links'][] = $link;
-                $cluster['verified_uninvoiced']['total'] += $quote->total;
+                $cluster['verified_uninvoiced']['total'] += $quote->verified_total;
             }
             if ($quote->status == 'approved' && $quote->verified == 'No') {
                 $cluster['approved_unverified']['links'][] = $link;

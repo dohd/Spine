@@ -41,7 +41,7 @@ class UtilityBillController extends Controller
      */
     public function create(Request $request)
     {
-        $tid = UtilityBill::max('tid');
+        $tid = UtilityBill::where('ins', auth()->user()->ins)->max('tid');
         $suppliers = Supplier::get(['id', 'name']);
 
         return view('focus.utility-bills.create', compact('tid', 'suppliers'));
@@ -128,7 +128,7 @@ class UtilityBillController extends Controller
      */
     public function create_kra_bill(Request $request)
     {
-        $tid = UtilityBill::max('tid');
+        $tid = UtilityBill::where('ins', auth()->user()->ins)->max('tid');
         $suppliers = Supplier::get(['id', 'name']);
 
         return view('focus.utility-bills.create-kra', compact('tid', 'suppliers'));

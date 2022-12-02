@@ -11,11 +11,11 @@
                     <div class='col m-1'>
                         <div><label for="client-type">Select Client Type</label></div>                        
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
-                            <input type="radio" class="custom-control-input bg-primary clientstatus" name="client_status" id="colorCheck1" value="customer" checked>
+                            <input type="radio" class="custom-control-input bg-primary client-type" name="client_status" id="colorCheck1" value="customer" checked>
                             <label class="custom-control-label" for="colorCheck1">Existing</label>
                         </div>
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
-                            <input type="radio" class="custom-control-input bg-purple clientstatus" name="client_status" value="new" id="colorCheck3">
+                            <input type="radio" class="custom-control-input bg-purple client-type" name="client_status" value="new" id="colorCheck3">
                             <label class="custom-control-label" for="colorCheck3">New Client</label>
                         </div>
                     </div>
@@ -25,13 +25,19 @@
                 <div class="col-sm-6"><label for="client_id" class="caption">Customer <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        <select id="person" name="client_id" class="form-control required select-box" data-placeholder="{{trans('customers.customer')}}"></select>
+                        <select id="customer" name="client_id" class="form-control" data-placeholder="Choose Customer">
+                            @foreach ($customers as $row)
+                                <option value="{{ $row->id }}">
+                                    {{ $row->company }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <div class="col-sm-6"><label for="ref_type" class="caption">Branch</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        <select id="branch_id" name="branch_id" class="form-control  select-box" data-placeholder="Branch">
+                        <select id="branch" name="branch_id" class="form-control  select-box" data-placeholder="Choose Branch" disabled>
                         </select>
                     </div>
                 </div>
@@ -80,13 +86,8 @@
                 <div class="col-sm-6"><label for="reference" class="caption">Ticket No</span></label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        @if (isset($tid))
-                            {{ Form::text('reference', 'Tkt-' . sprintf('%04d', $tid+1), ['class' => 'form-control round', 'disabled']) }}
-                            <input type="hidden" name="reference" value="{{ $tid+1 }}">
-                        @else
-                            {{ Form::text('reference', 'Tkt-' . sprintf('%04d', $lead->reference), ['class' => 'form-control round', 'disabled']) }}
-                            <input type="hidden" name="reference" value="{{ $lead->reference }}">
-                        @endif
+                        {{ Form::text('reference', gen4tid("{$prefixes[0]}-", @$lead->reference ?: $tid+1), ['class' => 'form-control round', 'disabled']) }}
+                        {{ Form::hidden('reference', @$lead->reference ?: $tid+1) }}                        
                     </div>
                 </div>
                 <div class="col-sm-6"><label for="date_of_request" class="caption">Callout / Client Report Date</label>
@@ -111,13 +112,15 @@
                 <div class="col-sm-6"><label for="source" class="caption">Source <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        <select id="ref_type" name="source" class="form-control round" required>
+                        <select id="source" name="source" class="form-control round" required>
                             <option value="">-- Select Source --</option>
                             @php
                                 $sources = ['Emergency Call', 'RFQ', 'Site Survey', 'Existing SLA', 'Tender', 'Other'];
                             @endphp
                             @foreach ($sources as $val)
-                                <option value="{{ $val }}">{{ $val }}</option>
+                                <option value="{{ $val }}" {{ @$lead->source == $val? 'selected' : '' }}>
+                                    {{ $val }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -151,107 +154,5 @@
 </div>
 
 @section("after-scripts")
-{{ Html::script('focus/js/select2.min.js') }}
-{{ Html::script('core/app-assets/vendors/js/extensions/sweetalert.min.js') }}
-
-<script type="text/javascript">
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
-
-    // Initialize datepicker
-    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})    
-    $('#date_of_request').datepicker('setDate', new Date());
-    
-    // On selecting client type radio
-    $('.clientstatus').change(function() {
-        if ($(this).val() === 'new') {
-            $('#person').attr('disabled', true).val('');
-            $('#branch_id').attr('disabled', true).val('');
-            $('#payer-name').attr('readonly', false).val('');
-            $('#client_email').attr('readonly', false).val('');
-            $('#client_contact').attr('readonly', false).val('');
-            $('#client_address').attr('readonly', false).val('');
-        } 
-        if ($(this).val() === 'customer') {
-            $('#person').attr('disabled', false).val('');
-            $('#branch_id').attr('disabled', false).val('');
-            $('#payer-name').attr('readonly', true).val('');
-            $('#client_email').attr('readonly', true).val('');;
-            $('#client_contact').attr('readonly', true).val('');
-            $('#client_address').attr('readonly', true).val('');
-        }
-    });
-
-    /**
-     * Edit Lead form script
-     */
-    const lead = @json(@$lead);
-    const branch = @json(@$lead->branch);
-    const customer = @json(@$lead->customer);
-    if (lead && lead.hasOwnProperty('branch_id')) {
-        // new customer
-        if (lead['client_status'] == 'new') {
-            $('#colorCheck1').attr('checked', false);
-            $('#colorCheck3').attr('checked', true);
-            $('#person').attr('disabled', true);
-            $('#branch_id').attr('disabled', true).select2();
-            $('#payer-name').attr('readonly', false);
-            $('#client_email').attr('readonly', false);
-            $('#client_contact').attr('readonly', false);
-            $('#client_address').attr('readonly', false);
-        } 
-        else {
-            $('#colorCheck1').attr('checked', true);
-            $('#colorCheck3').attr('checked', false);
-            $('#payer-name').attr('readonly', true);
-            $('#client_email').attr('readonly', true);
-            $('#client_contact').attr('readonly', true);
-            $('#client_address').attr('readonly', true);
-
-            $('#person').append(new Option(customer['name'], customer['id']));
-            $('#branch_id').append(new Option(branch['name'], branch['id']));
-        }
-
-        $('#reference').val(lead['reference']);
-        $('#ref_type').val(lead['source']);
-        const date = @json(date_for_database(@$lead->date_of_request));
-        if (date) $('#date_of_request').datepicker('setDate', new Date(date));
-    }
-
-    // fetch customers
-    $("#person").select2({
-        ajax: {
-            url: "{{ route('biller.customers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: function(params) { 
-                return { search: params.term }
-            },
-            processResults: function(data) {
-                return {
-                    results: data.map(v => ({ 
-                        id: v.id, 
-                        text: `${v.name} - ${v.company}`,
-                    }))
-                };
-            },
-        }
-    });
-
-    // on selecting a customer
-    $("#branch_id").select2();
-    $("#person").change(function() {
-        $("#branch_id").html('').select2({
-            ajax: {
-                url: "{{ route('biller.branches.select') }}",
-                type: 'POST',
-                quietMillis: 50,
-                data: ({term}) => ({search: term, customer_id: $("#person").val()}),                                
-                processResults: (data) => {
-                    return { results: data.map(v => ({ text: v.name, id: v.id })) };
-                },
-            }
-        });
-    });
-</script>
+@include('focus.leads.form_js')
 @endsection

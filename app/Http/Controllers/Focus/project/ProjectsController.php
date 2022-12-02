@@ -71,7 +71,7 @@ class ProjectsController extends Controller
     public function index(ManageProjectRequest $request)
     {
         $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
-        $last_tid = Project::max('tid');
+        $last_tid = Project::where('ins', auth()->user()->ins)->max('tid');
 
         return new ViewResponse('focus.projects.index', compact('accounts', 'last_tid'));
     }
@@ -154,7 +154,7 @@ class ProjectsController extends Controller
     public function show(Project $project, ManageProjectRequest $request)
     {
         $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
-        $last_tid = Project::max('tid');
+        $last_tid = Project::where('ins', auth()->user()->ins)->max('tid');
 
         // temp properties
         $project->customer = $project->customer_project;

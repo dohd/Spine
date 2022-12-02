@@ -52,6 +52,9 @@ class InvoicesTableController extends Controller
     {
         $core = $this->invoice->getForDataTable();
 
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice'], $ins);
+
         // aggregate
         $amount_total = $core->sum('total');
         $balance_total = $amount_total - $core->sum('amountpaid');
@@ -64,12 +67,16 @@ class InvoicesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($invoice) {
-                return ' <a class="font-weight-bold" href="'. route('biller.customers.show', [$invoice->customer->id]) .'">'
-                    . $invoice->customer->name .'</a>';                    
+                $link = '';
+                $customer = $invoice->customer;
+                if ($customer) {
+                    $link = ' <a class="font-weight-bold" href="'. route('biller.customers.show', $customer) .'">'. $customer->name .'</a>'; 
+                }
+                return $link;             
             })
-            ->addColumn('tid', function ($invoice) {
+            ->addColumn('tid', function ($invoice) use($prefixes) {
                 return '<a class="font-weight-bold" href="'.route('biller.invoices.show', [$invoice->id]).'">' 
-                    . gen4tid('Inv-', $invoice->tid) .'</a>';
+                    . gen4tid("{$prefixes[0]}-", $invoice->tid) .'</a>';
             })
             ->addColumn('invoicedate', function ($invoice) {
                 return dateFormat($invoice->invoicedate);
@@ -86,24 +93,24 @@ class InvoicesTableController extends Controller
             ->addColumn('invoiceduedate', function ($invoice) {
                 return dateFormat($invoice->invoiceduedate);
             })
-            ->addColumn('quote_tid', function ($invoice) {
+            ->addColumn('quote_tid', function ($invoice) use($prefixes) {
                 $links = [];
                 foreach ($invoice->products as $item) {
                     $quote = $item->quote;
                     if ($quote) {
-                        $tid = gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid);
+                        $tid = gen4tid($quote->bank_id ? "{$prefixes[1]}-" : "{$prefixes[2]}-", $quote->tid);
                         $links[] = '<a href="'. route('biller.quotes.show', $quote) .'">'. $tid .'</a>';
                     }
                 }
                 return implode(', ', array_unique($links));
             })
             ->addColumn('last_pmt', function ($invoice) {
+                $last_pmt = '';
                 if ($invoice->payments->count()) {
                     $last_pmt_item = $invoice->payments()->orderBy('id', 'desc')->first();
-                    return dateFormat($last_pmt_item->paid_invoice->date);
+                    $last_pmt .= dateFormat($last_pmt_item->paid_invoice->date);
                 } 
-
-                return '';
+                return $last_pmt;
             })
             ->addColumn('aggregate', function ($invoice) use($aggregate) {
                 return $aggregate;

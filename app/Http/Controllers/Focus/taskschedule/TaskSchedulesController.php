@@ -11,6 +11,7 @@ use App\Models\customer\Customer;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\taskschedule\TaskScheduleRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TaskSchedulesController extends Controller
 {
@@ -62,12 +63,16 @@ class TaskSchedulesController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'contract_id' => 'required',
+        ]);
+
         // extract request input
         $data = $request->only(['contract_id', 'schedule_id' , 'actual_startdate', 'actual_enddate']);
         $data_items = $request->only(['equipment_id']);
 
         $data_items = modify_array($data_items);
-        if (!$data_items) return session()->flash('flash_error', 'No equipments loaded!');
+        if (!$data_items) throw ValidationException::withMessages(['Equipments required!']);
 
         $this->repository->create(compact('data', 'data_items'));
         

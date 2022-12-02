@@ -2,6 +2,8 @@
 
 namespace App\Http\Responses\Focus\lead;
 
+use App\Models\branch\Branch;
+use App\Models\customer\Customer;
 use App\Models\lead\Lead;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -16,8 +18,13 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $tid = Lead::max('reference') ?: 0;
+        $ins = auth()->user()->ins;
+        $tid = Lead::where('ins', $ins)->max('reference');
+        $prefixes = prefixesArray(['lead'], $ins);
 
-        return view('focus.leads.create', compact('tid'));
+        $customers = Customer::get(['id', 'company']);
+        $branches = Branch::get(['id', 'name', 'customer_id']);
+    
+        return view('focus.leads.create', compact('tid', 'customers', 'branches', 'prefixes'));
     }
 }

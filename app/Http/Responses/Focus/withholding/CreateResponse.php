@@ -17,7 +17,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_tid = Withholding::max('tid');
+        $last_tid = Withholding::where('ins', auth()->user()->ins)->max('tid');
         $withholdings = Withholding::where('certificate', 'tax')->whereColumn('amount', '>', 'allocate_ttl')->get();
         
         return view('focus.withholdings.create', compact('last_tid', 'withholdings'));

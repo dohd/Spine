@@ -45,7 +45,7 @@ class RjcsController extends Controller
      */
     public function create()
     {
-        $tid =  Rjc::max('tid');
+        $tid =  Rjc::where('ins', auth()->user()->ins)->max('tid');
         $projects =  Project::doesntHave('rjc')->whereHas('quotes', function ($q) {
             $q->where('verified', 'Yes')->whereIn('invoiced', ['Yes', 'No']);
         })->get(['id', 'name', 'tid', 'main_quote_id']);

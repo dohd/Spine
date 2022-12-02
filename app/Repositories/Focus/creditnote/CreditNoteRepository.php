@@ -128,7 +128,7 @@ class CreditNoteRepository extends BaseRepository
     public function post_transaction($result)
     {
         $account = Account::where('system', 'receivable')->first(['id']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $data = [
             'tid' => $tid,
             'account_id' => $account->id,

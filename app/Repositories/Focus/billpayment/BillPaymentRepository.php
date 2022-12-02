@@ -64,7 +64,7 @@ class BillPaymentRepository extends BaseRepository
         }
         if ($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
             
-        $tid = Billpayment::max('tid');
+        $tid = Billpayment::where('ins', auth()->user()->ins)->max('tid');
         if ($input['tid'] <= $tid) $input['tid'] = $tid+1;
         $result = Billpayment::create($input);
 
@@ -244,7 +244,7 @@ class BillPaymentRepository extends BaseRepository
             $account = Account::where('system', 'adv_salary')->first(['id']);
             
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

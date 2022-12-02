@@ -51,9 +51,10 @@ class ProjectRepository extends BaseRepository
         if ($project_quote_exists) throw ValidationException::withMessages(['Tagged Quote / PI already attached to a project']);
 
         $data = $input['data'];
-        $tid = Project::max('tid');
-        if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
+        $tid = Project::where('ins', auth()->user()->ins)->max('tid');
+        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $data['main_quote_id'] = $data_items[0];
+        
         $result = Project::create($data);
 
         // create project_quote and update related foreign key in quote

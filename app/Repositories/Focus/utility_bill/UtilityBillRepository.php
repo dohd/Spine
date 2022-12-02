@@ -230,7 +230,7 @@ class UtilityBillRepository extends BaseRepository
         // credit Accounts Payable (Creditors)
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
@@ -269,7 +269,7 @@ class UtilityBillRepository extends BaseRepository
         // debit Uninvoiced Goods Received Note (liability)
         $account = Account::where('system', 'grn')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

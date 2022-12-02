@@ -11,14 +11,14 @@ use App\Models\lead\Lead;
  */
 trait DjcRelationship
 {
+     public function lead()
+     {
+          return $this->belongsTo(Lead::class);
+     }
+
      public function client()
      {
           return $this->hasOneThrough(Customer::class, Lead::class, 'id', 'id', 'lead_id', 'client_id')->withoutGlobalScopes();
-     }
-
-     public function lead()
-     {
-          return $this->hasOne(Lead::class, 'id', 'lead_id')->withoutGlobalScopes();
      }
 
      public function branch()

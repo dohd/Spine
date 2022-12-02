@@ -49,7 +49,7 @@ class ContractsController extends Controller
      */
     public function create()
     {
-        $last_tid = Contract::max('tid');
+        $last_tid = Contract::where('ins', auth()->user()->ins)->max('tid');
 
         return new ViewResponse('focus.contracts.create', compact('last_tid'));
     }

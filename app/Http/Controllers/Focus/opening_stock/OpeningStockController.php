@@ -58,7 +58,7 @@ class OpeningStockController extends Controller
      */
     public function create()
     {
-        $tid = OpeningStock::max('tid');
+        $tid = OpeningStock::where('ins', auth()->user()->ins)->max('tid');
         $warehouses = Warehouse::get(['id', 'title']);
 
         return view('focus.opening_stock.create', compact('warehouses', 'tid'));

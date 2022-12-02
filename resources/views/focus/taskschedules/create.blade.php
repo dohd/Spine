@@ -42,6 +42,8 @@
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     .datepicker('setDate', new Date());
 
+    // on taskschedule change
+    $('#schedule').select2({allowClear: true}).val('').change();
     $('#schedule').change(function () {
         const opt = $(this).find(':selected');
         const startDate = $(this).val()? new Date(opt.attr('actual_start')) : new Date();
@@ -51,6 +53,7 @@
     });
 
     // on contract select
+    $('#contract').select2({allowClear: true}).val('').change();
     const equipRow =  $('#equipmentTbl tbody tr').html();
     $('#contract').change(function() {
         const contract_id = $(this).val();
@@ -123,10 +126,10 @@
     function calcTotal() {
         let totalRate = 0;
         $('#equipmentTbl tbody tr').each(function() {
-            const rate = $(this).find('.rate:not(:disabled)');
-            if (rate.val()) totalRate += parseFloat(rate.val());
+            const rate = accounting.unformat($(this).find('.rate:not(:disabled)').val());
+            totalRate += rate;
         });
-        $('#totalRate').val(parseFloat(totalRate.toFixed(2)).toLocaleString());
+        $('#totalRate').val(accounting.formatNumber(totalRate));
     }
 </script>
 @endsection

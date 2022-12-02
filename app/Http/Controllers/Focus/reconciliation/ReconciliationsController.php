@@ -45,7 +45,7 @@ class ReconciliationsController extends Controller
      */
     public function create()
     {
-        $last_tid = Reconciliation::max('tid');
+        $last_tid = Reconciliation::where('ins', auth()->user()->ins)->max('tid');
         // banks
         $accounts = Account::where(['account_type_id' => 6])->whereHas('transactions', function ($q) {
             $q->where('reconciliation_id', 0);

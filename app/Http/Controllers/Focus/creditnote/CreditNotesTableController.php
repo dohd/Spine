@@ -47,21 +47,23 @@ class CreditNotesTableController extends Controller
     {
         $core = $this->creditnote->getForDataTable();
 
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['credit_note', 'debit_note', 'invoice'], $ins);
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function ($creditnote) {
-                $prefix = $creditnote->is_debit ? 'DN-': 'CN-';
-                return gen4tid($prefix, $creditnote->tid);
+            ->addColumn('tid', function ($creditnote) use($prefixes) {
+                return gen4tid($creditnote->is_debit ? "{$prefixes[1]}-" : "{$prefixes[0]}-", $creditnote->tid);
             })
             ->addColumn('customer', function ($creditnote) {
                 if ($creditnote->customer)
                     return $creditnote->customer->name;
             })
-            ->addColumn('invoice_no', function ($creditnote) {
+            ->addColumn('invoice_no', function ($creditnote) use($prefixes) {
                 if ($creditnote->invoice)
                     return '<a class="font-weight-bold" href="' . route('biller.invoices.show', $creditnote->invoice) . '">' 
-                        . gen4tid('INV-', $creditnote->invoice->tid) . '</a>';
+                        . gen4tid("{$prefixes[2]}-", $creditnote->invoice->tid) . '</a>';
             })
             ->addColumn('amount', function ($creditnote) {
                 return number_format($creditnote->total, 2);
@@ -70,10 +72,7 @@ class CreditNotesTableController extends Controller
                 return dateFormat($creditnote->date);
             })
             ->addColumn('actions', function ($creditnote) {
-                $valid_token = token_validator('', 'd' . $creditnote->id, true);
-                $link = route('biller.creditnotes.print_creditnote', $creditnote);
-
-                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
+                return '<a href="' . route('biller.creditnotes.print_creditnote', $creditnote) . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
                     . $creditnote->action_buttons;
             })
             ->make(true);

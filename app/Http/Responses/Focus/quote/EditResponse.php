@@ -6,7 +6,9 @@ use App\Models\additional\Additional;
 use App\Models\bank\Bank;
 use App\Models\customer\Customer;
 use App\Models\lead\Lead;
+use App\Models\quote\Quote;
 use Illuminate\Contracts\Support\Responsable;
+use Mavinoo\LaravelBatch\Common\Common;
 
 class EditResponse implements Responsable
 {
@@ -41,15 +43,21 @@ class EditResponse implements Responsable
         $additionals = Additional::all();
         $price_customers = Customer::whereHas('products')->get(['id', 'company']);
 
-        $lastquote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
-        $lastpi = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
+        $lastquote = new Quote;
+        $lastquote->tid = $quote->query()->where('ins', $quote->ins)->where('bank_id', 0)->max('tid');
+        $lastpi = new Quote;
+        $lastpi->tid = $quote->query()->where('ins', $quote->ins)->where('bank_id', '>', 0)->max('tid');
+
+        $prefixes = prefixesArray(['quote', 'proforma_invoice'], $quote->ins);
+
+        $common_params = ['lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers', 'prefixes'];
 
         // copy quote to quote
         if (request('task') == 'quote_to_quote') {
             $words['title'] = 'Copy Quote to Quote';
 
             return view('focus.quotes.edit')
-                ->with(compact('lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers'))
+                ->with(compact(...$common_params))
                 ->with(bill_helper(2, 4));
         }
         // copy quote to pi
@@ -58,7 +66,7 @@ class EditResponse implements Responsable
             $lastquote = $lastpi;
 
             return view('focus.quotes.edit')
-                ->with(compact('lastquote', 'quote', 'leads', 'words', 'banks', 'additionals', 'price_customers'))
+                ->with(compact('banks', ...$common_params))
                 ->with(bill_helper(2, 4));
         }
         // copy pi to pi
@@ -67,7 +75,7 @@ class EditResponse implements Responsable
             $lastquote = $lastpi;
 
             return view('focus.quotes.edit')
-                ->with(compact('lastquote', 'quote', 'leads', 'words', 'banks', 'additionals', 'price_customers'))
+                ->with(compact('banks', ...$common_params))
                 ->with(bill_helper(2, 4));
         }
         // copy pi to quote
@@ -75,7 +83,7 @@ class EditResponse implements Responsable
             $words['title'] = 'Copy PI to Quote';
 
             return view('focus.quotes.edit')
-                ->with(compact('lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers'))
+                ->with(compact(...$common_params))
                 ->with(bill_helper(2, 4));
         }
 
@@ -86,14 +94,14 @@ class EditResponse implements Responsable
         // edit proforma invoice
         if ($quote->bank_id) {    
             $words['title'] = 'Edit Proforma Invoice';
-       
+
             return view('focus.quotes.edit')
-                ->with(compact('banks', 'leads', 'quote', 'lastquote', 'words', 'revisions', 'additionals', 'price_customers'))
+                ->with(compact('banks','revisions', ...$common_params))
                 ->with(bill_helper(2, 4));
         }
         // edit quote
         return view('focus.quotes.edit')
-            ->with(compact('leads', 'quote', 'lastquote', 'words', 'revisions', 'additionals', 'price_customers'))
+            ->with(compact('revisions', ...$common_params))
             ->with(bill_helper(2, 4));
     }
 }

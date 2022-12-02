@@ -56,7 +56,7 @@ class InvoicePaymentRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
-        $result = PaidInvoice::where('tid', $data['tid'])->count();
+        $result = PaidInvoice::where('ins', auth()->user()->ins)->where('tid', $data['tid'])->count();
         if ($result) throw ValidationException::withMessages(['Similar payment already received!']);
 
         $is_payment = empty($data['payment_id']);
@@ -227,7 +227,7 @@ class InvoicePaymentRepository extends BaseRepository
     {
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', $payment->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

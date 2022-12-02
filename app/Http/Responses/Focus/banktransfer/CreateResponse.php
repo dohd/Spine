@@ -17,7 +17,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $tid = Transaction::max('tid');
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid');
         $accounts = Account::whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))->get();
         
         return view('focus.banktransfers.create', compact('tid', 'accounts'));;

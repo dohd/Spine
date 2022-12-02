@@ -46,7 +46,7 @@ class BillPaymentController extends Controller
      */
     public function create(Request $request)
     {
-        $tid = Billpayment::max('tid');
+        $tid = Billpayment::where('ins', auth()->user()->ins)->max('tid');
         $accounts = Account::whereNull('system')
             ->whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))
             ->get(['id', 'holder']);
