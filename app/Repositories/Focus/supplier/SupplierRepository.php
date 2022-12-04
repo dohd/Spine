@@ -262,14 +262,13 @@ class SupplierRepository extends BaseRepository
     public function update($supplier, array $input)
     {
         // dd($input);
-        $data = $input['data'];
+        DB::beginTransaction();
 
+        $data = $input['data'];
         if (!empty($input['picture'])) {
             $this->removePicture($supplier, 'picture');
             $data['picture'] = $this->uploadPicture($data['picture']);
         }
-
-        DB::beginTransaction();
 
         $account_data = $input['account_data'];
         $data = array_replace($data, [
@@ -283,16 +282,16 @@ class SupplierRepository extends BaseRepository
         $open_balance = $supplier->open_balance;
         $open_balance_date = $supplier->open_balance_date;
         if ($open_balance > 0) {
-            $user_id = auth()->user()->id;
-            $note = $supplier->id .  '-customer Account Opening Balance ' . $supplier->open_balance_note;
-
             $data = array();
-            $journal = Journal::where('note', 'LIKE', '%' . $supplier->id .  '-customer Account Opening Balance ' . '%')->first();
+            $user_id = auth()->user()->id;
+            $note = $supplier->id .  '-supplier Account Opening Balance ' . $supplier->open_balance_note;
+            $journal = Journal::where('note', 'LIKE', '%' . $supplier->id .  '-supplier Account Opening Balance ' . '%')->first();
             if ($journal) {
                 // remove previous transactions
                 Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();
 
-                $bill = BillUtility::where('note', $journal->note)->first();
+                // update bill
+                $bill = UtilityBill::where('note', $journal->note)->first();
                 if ($bill) {
                     $bill->update([
                         'date' => $open_balance_date,
@@ -307,7 +306,8 @@ class SupplierRepository extends BaseRepository
                         'note' => $note,
                     ]);
                 }
-                
+
+                // recognise expense
                 if ($supplier->expense_account_id) {
                     $journal->update([
                         'note' => $note,
@@ -339,7 +339,7 @@ class SupplierRepository extends BaseRepository
                     'total' => $open_balance,
                     'note' => $note,
                     'user_id' => $user_id,
-                    'ins' => auth()->user()->ins,                
+                    'ins' => $supplier->ins,                
                 ];
                 $bill = UtilityBill::create($bill_data);
     
@@ -354,7 +354,7 @@ class SupplierRepository extends BaseRepository
                 // recognise expense as a journal entry
                 if ($supplier->expense_account_id) {
                     $data = [
-                        'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
+                        'tid' => Journal::where('ins', auth()->user()->ins)->max('tid')+1,
                         'date' => $open_balance_date,
                         'note' => $note,
                         'debit_ttl' => $open_balance,
@@ -390,8 +390,10 @@ class SupplierRepository extends BaseRepository
             if ($data) $this->post_transaction((object) $data);
         }
 
-        DB::commit();
-        if ($result) return $result;
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
 
         throw new GeneralException(trans('exceptions.backend.suppliers.update_error'));
     }
