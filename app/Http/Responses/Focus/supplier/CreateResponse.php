@@ -17,6 +17,7 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         $accounts = Account::where('account_type', 'Expense')->get(['id', 'holder']);
+        
 
         return view('focus.suppliers.create', compact('accounts'));
     }

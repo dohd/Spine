@@ -4,7 +4,9 @@ namespace App\Models\supplier\Traits;
 
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\purchaseorder\Purchaseorder;
+use App\Models\purchase\Purchase;
 use App\Models\utility_bill\UtilityBill;
+use App\Models\supplier_product\SupplierProduct;
 
 /**
  * Class SupplierRelationship
@@ -24,5 +26,16 @@ trait SupplierRelationship
     public function purchase_orders()
     {
         return $this->hasMany(Purchaseorder::class);
+    }
+    public function products()
+    {
+        return $this->hasMany(SupplierProduct::class);
+    }
+    public function supplier_products()
+    {
+        return $this->hasMany(SupplierProduct::class);
+    }
+    function purchase() {
+        return $this->hasMany(Purchase::class);
     }
 }

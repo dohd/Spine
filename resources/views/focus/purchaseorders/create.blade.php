@@ -59,6 +59,14 @@
         $('#taxid').val(taxId);
         $('#supplierid').val(id);
         $('#supplier').val(name);
+        let priceCustomer = '';
+            $('#pricegroup_id option').each(function () {
+                if (id == $(this).val())
+                priceCustomer = $(this).val();
+                console.log($(this).val());
+            });
+            
+            $('#pricegroup_id').val(priceCustomer);
     });
     // load suppliers
     const supplierUrl = "{{ route('biller.suppliers.select') }}";
@@ -142,7 +150,7 @@
      */
     let stockRowId = 0;
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
-    const stockUrl = "{{ route('biller.products.quote_product_search') }}"
+    const stockUrl = "{{ route('biller.products.purchase_search') }}"
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
     $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
@@ -157,6 +165,16 @@
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
             taxRule('rowtax-'+i, $('#tax').val());
+
+            //Add the previous supplier data            
+            let priceCustomer = '';
+                $('#pricegroup_id option').each(function () {
+                    if ($('#supplierid').val() == $(this).val())
+                    priceCustomer = $(this).val();
+                    console.log(priceCustomer);
+                });
+                
+                $('#pricegroup_id').val(priceCustomer);
         }
 
         if ($(this).is('.remove')) {
@@ -224,11 +242,14 @@
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
 
         $('#uom-'+i).html('');
+        if(data.units)
         data.units.forEach(v => {
             const rate = accounting.unformat(v.base_ratio) * purchasePrice;
             const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
             $('#uom-'+i).append(option);
         });
+        const option = `<option value="${data.uom}"  >${data.uom}</option>`;
+        $('#uom-'+i).append(option);
     }
     $('#stockTbl').on('mouseup', '.stockname', function() {
         const id = $(this).attr('id').split('-')[1];

@@ -37,6 +37,7 @@ Route::group(['namespace' => 'product'], function () {
     Route::post('products/get', 'ProductsTableController')->name('products.get');
     Route::post('products/search/{bill_type}', 'ProductsController@product_search')->name('products.product_search');
     Route::post('products/quote', 'ProductsController@quote_product_search')->name('products.quote_product_search');
+    Route::post('products/purchase_search', 'ProductsController@purchase_search')->name('products.purchase_search');
 
     Route::post('products/product_sub_load', 'ProductsController@product_sub_load')->name('products.product_sub_load');
     Route::post('products/pos/{bill_type}', 'ProductsController@pos')->name('products.product_search');

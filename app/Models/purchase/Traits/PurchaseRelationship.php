@@ -29,6 +29,7 @@ trait PurchaseRelationship
     {
         return $this->belongsTo('App\Models\supplier\Supplier')->withoutGlobalScopes();
     }
+    
 
     public function items_purchased()
     {

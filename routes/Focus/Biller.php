@@ -273,6 +273,11 @@ Route::group(['namespace' => 'pricelist'], function () {
     Route::post('pricelists/get', 'PriceListTableController')->name('pricelists.get');
 });
 
+Route::group(['namespace' => 'pricelistSupplier'], function () {
+    Route::resource('pricelistsSupplier', 'PriceListsController');
+    //For Datatable
+    Route::post('pricelists/get', 'PriceListTableController')->name('pricelistsSupplier.get');
+});
 
 
 Route::group(['namespace' => 'productcategory'], function () {
@@ -303,6 +308,8 @@ Route::group(['namespace' => 'productvariable'], function () {
 Route::group(['namespace' => 'purchase'], function () {
     Route::resource('purchases', 'PurchasesController');
     Route::post('purchases/customer_load', 'PurchasesController@customer_load')->name('purchases.customer_load');
+    Route::post('purchases/quote', 'PurchasesController@quote_product_search')->name('purchase.quote_purchase_search');
+
 
     //For Datatable
     Route::post('purchases/get', 'PurchasesTableController')->name('purchases.get');
