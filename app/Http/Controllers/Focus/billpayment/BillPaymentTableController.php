@@ -82,7 +82,10 @@ class BillPaymentTableController extends Controller
                 return numberFormat($billpayment->amount - $billpayment->allocate_ttl);
             })
             ->addColumn('bill_no', function ($billpayment) {
-                return gen4tid('BILL-', $billpayment->tid);
+                $bill_tids = $billpayment->bills->pluck('tid')->toArray();
+                $bill_tids = array_map(fn($v) => gen4tid('BILL-', $v), $bill_tids);
+                
+                return implode(', ', $bill_tids);
             })
             ->addColumn('aggregate', function ($billpayment) use($aggregate) {
                 return $aggregate;
