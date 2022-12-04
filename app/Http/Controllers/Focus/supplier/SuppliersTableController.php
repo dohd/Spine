@@ -51,39 +51,40 @@ class SuppliersTableController extends Controller
      */
     public function __invoke(ManageSupplierRequest $request)
     {
-        if (request('is_transaction')) 
-            return $this->invoke_transaction();
-        if (request('is_bill')) 
-            return $this->invoke_bill();
-        if (request('is_statement')) 
-            return $this->invoke_statement();
-
+        if (request('is_transaction')) return $this->invoke_transaction();
+        if (request('is_bill')) return $this->invoke_bill();
+        if (request('is_statement')) return $this->invoke_statement();
+            
         $core = $this->supplier->getForDataTable();
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($supplier) {
-                return '<a class="font-weight-bold" href="' . route('biller.suppliers.show', [$supplier->id]) . '">' . $supplier->company . '</a>';
+                return '<a class="font-weight-bold" href="' . route('biller.suppliers.show', $supplier) . '">' . $supplier->name . '</a>';
             })
             ->make(true);
     }
 
+    // statement on account data
     public function invoke_transaction()
     {
         $core = $this->supplier->getTransactionsForDataTable();
+        $core = $core->sortBy('tr_date');
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
         ->addColumn('date', function ($tr) {
-            return dateFormat($tr->tr_date);
+            $date = dateFormat($tr->tr_date);
+            $sort_id = strtotime($date);
+            return "<span sort_id='{$sort_id}'>{$date}</span>";
         })
         ->addColumn('type', function ($tr) {
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            if ($tr->bill && $tr->tr_type == 'bill')
-                return gen4tid('Bill-', $tr->bill->tid) . ' - ' . $tr->bill->note;
+            if ($tr->tr_type == 'bill' && $tr->bill)
+                return gen4tid('BILL-', $tr->bill->tid) . ' - ' . $tr->bill->note;
             return $tr->note;
         })
         ->addColumn('bill_amount', function ($tr) {
@@ -92,68 +93,79 @@ class SuppliersTableController extends Controller
         ->addColumn('amount_paid', function ($tr) {
             return numberFormat($tr->debit);
         })
-        ->addColumn('balance', function ($tr) {
-            if ($tr->credit > 0) $this->balance += $tr->credit;
-            elseif ($tr->debit > 0) $this->balance -= $tr->debit;
+        ->addColumn('account_balance', function ($tr) {
+            if ($tr->debit > 0) $this->balance -= $tr->debit;
+            elseif ($tr->credit > 0) $this->balance += $tr->credit;
 
             return numberFormat($this->balance);
         })
         ->make(true);
     }
 
+    // bill data 
     public function invoke_bill()
     {
         $core = $this->supplier->getBillsForDataTable();
-
+        
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
         ->addColumn('date', function ($bill) {
             return dateFormat($bill->date);
         })
-        ->addColumn('reference', function ($bill) {
-            return $bill->doc_ref_type . ' - ' . $bill->doc_ref;
+        ->addColumn('status', function ($bill) {
+            return $bill->status;
         })
         ->addColumn('note', function ($bill) {
-            return gen4tid('Bill-', $bill->tid) . ' - ' .$bill->note;
+            return gen4tid('BILL-', $bill->tid) . ' - ' . $bill->note;
         })
         ->addColumn('amount', function ($bill) {
-            return numberFormat($bill->grandttl);
+            return numberFormat($bill->total);
         })
         ->addColumn('paid', function ($bill) {
-            return numberFormat($bill->amountpaid);
+            return numberFormat($bill->amount_paid);
         })
         ->make(true);
     }
 
+    // statement on bill data
     public function invoke_statement()
     {
-        $core = $this->supplier->getStatementsForDataTable();
-
+        $core = $this->supplier->getStatementForDataTable();
+        
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
-        ->addColumn('date', function ($tr) {
-            return dateFormat($tr->tr_date);
+        ->addColumn('date', function ($statement) {
+            return dateFormat($statement->date);
         })
-        ->addColumn('type', function ($tr) {
-            return $tr->tr_type;
-        })
-        ->addColumn('note', function ($tr) {
-            if ($tr->bill && $tr->tr_type == 'bill')
-                return gen4tid('Bill-', $tr->bill->tid) . ' - ' . $tr->bill->note;
-            return $tr->note;
-        })
-        ->addColumn('bill_amount', function ($tr) {
-            return numberFormat($tr->credit);
-        })
-        ->addColumn('amount_paid', function ($tr) {
-            return numberFormat($tr->debit);
-        })
-        ->addColumn('balance', function ($tr) {
-            if ($tr->credit > 0) $this->balance += $tr->credit;
-            elseif ($tr->debit > 0) $this->balance -= $tr->debit;
+        ->addColumn('type', function ($statement) {
+            $record = $statement->type;
+            switch ($record) {
+                case 'bill': 
+                    $record = '<a href="'. route('biller.utility-bills.show', $statement->bill_id) .'">'. $record .'</a>';
+                    break;
+                case 'payment': 
+                    // $type = '<a href="'. route('biller.invoices.show', $statement->invoice_id) .'">'. $type .'</a>';
+                    break; 
+            }
             
+            return $record;
+        })
+        ->addColumn('note', function ($statement) {
+            return $statement->note;
+        })
+        ->addColumn('bill_amount', function ($statement) {
+            return numberFormat($statement->credit);
+        })
+        ->addColumn('amount_paid', function ($statement) {
+            return numberFormat($statement->debit);
+        })
+        ->addColumn('bill_balance', function ($statement) {
+            if ($statement->type == 'bill') 
+                $this->balance = $statement->credit;
+            else $this->balance -= $statement->debit;
+
             return numberFormat($this->balance);
         })
         ->make(true);

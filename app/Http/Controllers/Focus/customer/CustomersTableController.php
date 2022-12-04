@@ -133,7 +133,7 @@ class CustomersTableController extends Controller
     public function invoke_statement()
     {
         $core = $this->customer->getStatementForDataTable();
-        printlog(request('start_date') . ' ' . request('end_date'));
+        
         return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()

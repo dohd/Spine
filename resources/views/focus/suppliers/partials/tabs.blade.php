@@ -66,33 +66,41 @@
             <tbody></tbody> 
         </table>
 
-        <!-- aging -->
-        <div class="aging mt-2" id="active5">
-            <h5>Aging</h5>
-            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                <thead>
-                    <tr>    
-                        @foreach ([30, 60, 90, 120] as $val)
-                            <th>{{ $val == 120? '120+' : $val }} Days</th>
-                        @endforeach
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        @php
-                            $total = 0;
-                        @endphp   
-                        @for ($i = 0; $i < count($aging_cluster); $i++) 
-                            <td>{{ numberFormat($aging_cluster[$i]) }}</td>
+        <!-- Aging -->
+        <div class="mt-2 aging">
+            <h5>Aging (days)</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>                                                    
+                            @foreach (['0 - 30', '31 - 60', '61 - 90', '91 - 120', '120+'] as $val)
+                                <th>{{ $val }}</th>
+                            @endforeach
+                            <th>Aging Total</th>  
+                            <th>Unallocated</th>
+                            <th>Outstanding</th>                     
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>              
                             @php
-                                $total += $aging_cluster[$i];
-                            @endphp
-                        @endfor
-                        <td>{{ numberFormat($total) }}</td>
-                    </tr>
-                </tbody>                                               
-            </table>                                         
+                                $total_aging = 0;
+                            @endphp          
+                            @for ($i = 0; $i < count($aging_cluster); $i++) 
+                                <td>
+                                    {{ numberFormat($aging_cluster[$i]) }}
+                                    @php
+                                        $total_aging += $aging_cluster[$i];
+                                    @endphp
+                                </td>
+                            @endfor
+                            <td>{{ numberFormat($total_aging) }}</td>
+                            <td>{{ numberFormat($supplier->on_account) }}</td>
+                            <td>{{ numberFormat($total_aging - $supplier->on_account) }}</td>
+                        </tr>                    
+                    </tbody>                     
+                </table>  
+            </div>            
         </div>
     </div>
 
@@ -101,7 +109,7 @@
         <table id="billTbl" class="table table-bordered zero-configuration" cellspacing="0" width="100%">
             <thead>
                 <tr>                                          
-                    @foreach (['#', 'Date', 'Reference', 'Note', 'Bill Amount', 'Amount Paid'] as $val)
+                    @foreach (['#', 'Date', 'Status', 'Note', 'Bill Amount', 'Amount Paid'] as $val)
                         <th>{{ $val }}</th>
                     @endforeach
                 </tr>

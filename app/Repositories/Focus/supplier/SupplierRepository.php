@@ -59,54 +59,49 @@ class SupplierRepository extends BaseRepository
 
     public function getBillsForDataTable($supplier_id = 0)
     {
-        $id = $supplier_id ?: request('supplier_id');
-
-        return Bill::where('supplier_id', $id)->get();
+        return UtilityBill::where('supplier_id', request('supplier_id', $supplier_id))->get();
     }
 
     public function getTransactionsForDataTable($supplier_id = 0)
     {
-        $id = $supplier_id ?: request('supplier_id');
+        $params = ['supplier_id' => request('supplier_id', $supplier_id)];
+        $supplier = Supplier::find(request('supplier_id'), ['id', 'open_balance_note']);
 
-        $q = Transaction::whereHas('account', function ($q) {
-            $q->where('system', 'payable');
-        })->where(function ($q) use ($id) {
-            $q->whereHas('bill', function ($q) use ($id) {
-                $q->where('supplier_id', $id);
+        $q = Transaction::whereHas('account', function ($q) { 
+            $q->where('system', 'payable');  
+        })->where(function ($q) use($params) {
+            $q->where('tr_type', 'bill')->whereHas('bill', function ($q1) use($params) { 
+                $q1->where($params); 
+            })->orWhere('tr_type', 'pmt')->whereHas('paidbill', function ($q1) use($params) {
+                $q1->where($params);
             });
-        })->where('tr_type', 'bill')
-            ->orWhere(function ($q) use ($id) {
-                $q->whereHas('paidbill', function ($q) use ($id) {
-                    $q->where('supplier_id', $id);
-                });
-            })->whereHas('account', function ($q) {
-                $q->where('system', 'payable');
-            })->where('tr_type', 'pmt');
+        })->orwhere(function ($q) use($supplier) {
+            $note = "%{$supplier->id}-supplier Account Opening Balance {$supplier->open_balance_note}%";
+            $q->where('tr_type', 'genjr')->where('credit', '>', 0)->where('note', 'LIKE', $note);
+        });
 
         // on date filter
-        $start_date = request('start_date');
-        $end_date = request('end_date');
-        if ($start_date && $end_date && request('is_transaction')) {
-            $start_date = date_for_database($start_date);
-            $end_date = date_for_database($end_date);
-            $prior_date = date('Y-m-d', strtotime($start_date . ' - 1 day'));
-            $q1 = clone $q;
-            $q2 = clone $q;
-
+        if (request('start_date') && request('is_transaction')) {
+            $from = date_for_database(request('start_date'));
+            $tr_ids = $q->pluck('id')->toArray();
+            
             $params = ['id', 'tr_date', 'tr_type', 'note', 'debit', 'credit'];
-            $bf_transactions = $q1->where('tr_date', '<', $start_date)->get($params);
-            $diff = $bf_transactions->sum('credit') - $bf_transactions->sum('debit');
-            $record = (object) array(
-                'id' => 0,
-                'tr_date' => $prior_date,
-                'tr_type' => '',
-                'note' => 'Balance brought foward as of ' . dateFormat($start_date),
-                'debit' => $diff < 0 ? $diff : 0,
-                'credit' => $diff > 0 ? $diff : 0,
-            );
-            $collection = collect([$record]);
-            $transactions = $q2->whereBetween('tr_date', [$start_date, $end_date])->get($params);
-            if ($diff > 0) $transactions = $collection->merge($transactions);
+            $transactions = Transaction::whereIn('id', $tr_ids)->whereBetween('tr_date', [$from, date('Y-m-d')])->get($params);
+            // compute balance brought foward as of start date
+            $bf_transactions = Transaction::whereIn('id', $tr_ids)->where('tr_date', '<', $from)->get($params);
+            $credit_balance = $bf_transactions->sum('credit') - $bf_transactions->sum('debit');
+            if ($credit_balance) {
+                $record = (object) array(
+                    'id' => 0,
+                    'tr_date' => date('Y-m-d', strtotime($from . ' - 1 day')),
+                    'tr_type' => 'balance',
+                    'note' => '** Balance Brought Foward ** ',
+                    'debit' => $credit_balance < 0 ? ($credit_balance * -1) : 0,
+                    'credit' => $credit_balance > 0 ? $credit_balance : 0,
+                );
+                // merge brought foward balance with the rest of the transactions
+                $transactions = collect([$record])->merge($transactions);
+            }
 
             return $transactions;
         }
@@ -114,53 +109,56 @@ class SupplierRepository extends BaseRepository
         return $q->get();
     }
 
-    public function getStatementsForDataTable($supplier_id = 0)
+    public function getStatementForDataTable($supplier_id = 0)
     {
-        $id = $supplier_id ?: request('supplier_id');
+        $q = UtilityBill::where('supplier_id', request('supplier_id', $supplier_id));
+        $q->with(['payments']);
+        $bills = $q->get();
 
-        $transactions = $this->getTransactionsForDataTable($id);
+        $i = 0;
+        $statement = collect();
+        foreach ($bills as $bill) {
+            $i++;
+            $bill_id = $bill->id;
+            $tid = gen4tid('BILL-', $bill->tid);
+            $note = $bill->note;
+            $bill_record = (object) array(
+                'id' => $i,
+                'date' => $bill->date,
+                'type' => 'bill',
+                'note' => '(' . $tid . ')' . ' ' . $note,
+                'debit' => 0,
+                'credit' => $bill->total,
+                'bill_id' => $bill_id
+            );
 
-        // on date filter
-        $start_date = request('start_date');
-        $end_date = request('end_date');
-        if ($start_date && $end_date) {
-            $transactions = $transactions->whereBetween('tr_date', [
-                date_for_database($start_date),
-                date_for_database($end_date)
-            ]);
+            $payments = collect();
+            foreach ($bill->payments as $pmt) {
+                $i++;
+                $reference = $pmt->bill->reference;
+                $mode = $pmt->bill->payment_mode;
+                $pmt_tid = gen4tid('pmt-', $pmt->bill->tid);
+                $account = $pmt->bill->account->holder;
+                $amount = $pmt->bill->amount;
+                $record = (object) array(
+                    'id' => $i,
+                    'date' => $pmt->bill->date,
+                    'type' => 'payment',
+                    'note' => '(' . $tid . ')' . ' ' . $pmt_tid . ' ' . ' reference: ' . $reference . ' mode: ' 
+                        . ucfirst($mode) . ', account: ' . $account . ', amount: ' . numberFormat($amount),
+                    'debit' => $pmt->paid,
+                    'credit' => 0,
+                    'bill_id' => $bill_id,
+                    'payment_item_id' => $pmt->id
+                );
+                $payments->add($record);
+            }      
+
+            $statement->add($bill_record);
+            $statement = $statement->merge($payments);
         }
 
-        // sequence of bill and related payments
-        $statements = collect();
-        $index_visited = array();
-        foreach ($transactions as $i => $tr_one) {
-            // add bill
-            if ($tr_one->tr_type == 'bill') {
-                $bill_id = $tr_one->bill->id;
-                $statements->add($tr_one);
-                $index_visited[] = $i;
-                // add payment
-                foreach ($transactions as $j => $tr_two) {
-                    if ($tr_two->tr_type == 'pmt' && $tr_two->paidbill) {
-                        $is_paidbill = $tr_two->paidbill->items->where('bill_id', $bill_id)->count();
-                        if ($is_paidbill) {
-                            $statements->add($tr_two);
-                            $index_visited[] = $j;
-                        }
-                    }
-                }
-            }
-        }
-        // add remaining transactions
-        if ($index_visited) {
-            foreach ($transactions as $i => $tr) {
-                // check if already added and skip
-                if (in_array($i, $index_visited, 1)) continue;
-                $statements->add($tr);
-            }
-        } else $statements = $transactions;
-
-        return $statements;
+        return $statement;     
     }
 
     /**

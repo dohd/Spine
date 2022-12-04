@@ -70,6 +70,7 @@
     </div>
 </div>
 <div class="form-group row">
+    {{ Form::hidden('equipment_ids', null, ['id' => 'equipment_ids']) }}
     <div class="col-2 ml-auto">
         {{ Form::submit('Load Equipments', ['class' => 'btn btn-primary btn-lg']) }}
     </div>

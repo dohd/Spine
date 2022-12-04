@@ -10,4 +10,9 @@ trait BillpaymentItemRelationship
     {
         return $this->belongsTo(UtilityBill::class, 'bill_id');
     }
+
+    public function bill()
+    {
+        return $this->belongsTo(UtilityBill::class, 'bill_id');
+    }
 }

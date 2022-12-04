@@ -99,8 +99,8 @@
 
         init() {
             $.ajaxSetup(config.ajax);
-            this.drawDataTable();
             $('#customer').select2({allowClear: true}).val('').change();
+            this.drawDataTable();
 
             $('.mass-delete').click(this.massDelete);
             $('#customer').change(this.customerChange);
@@ -143,7 +143,7 @@
             return Index.drawDataTable();
         },
 
-        drawDataTable() {            
+        drawDataTable() {       
             $('#listTbl').dataTable({
                 processing: true,
                 serverSide: true,

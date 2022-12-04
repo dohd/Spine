@@ -36,6 +36,18 @@
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
+    $('form').submit(function() {
+        const equipment_ids = [];
+        $('#equipmentTbl tbody tr').each(function() {
+            if ($(this).find('.select').prop('checked')) {
+                equipment_ids.push($(this).find('.equipId').val())
+            }
+        });
+        ['.equipId', '.rate'].forEach(v => $(v).remove());
+        $('#equipment_ids').val(equipment_ids.join(','));
+    });
+
+
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
     // initialize datepicker
@@ -90,7 +102,8 @@
             for (let prop in equipment) {
                 if ('#'+prop == id && prop == 'branch') html = html.replace(id, equipment.branch.name);
                 else if ('#'+prop == id && prop == 'service_rate') {
-                    html = html.replace(id, parseFloat(equipment.service_rate).toLocaleString())
+                    const serviceRate = parseFloat(equipment.service_rate);
+                    html = html.replace(id, accounting.formatNumber(serviceRate))
                     .replace(id, equipment.service_rate);
                 } 
                 else if ('#'+prop == id) html = html.replace(id, equipment[prop]? equipment[prop] : '');                
@@ -117,9 +130,17 @@
     $('#selectAll').change(function() {
         const selectAll = $(this).is(':checked');
         $('#equipmentTbl tbody tr').each(function() {
-            if (selectAll) $(this).find('.select').prop('checked', true).change();
-            else $(this).find('.select').prop('checked', false).change();
+            if (selectAll) {
+                $(this).find('.select').prop('checked', true);
+                $(this).find('.equipId').prop('disabled', false);
+                $(this).find('.rate').prop('disabled', false);
+            } else {
+                $(this).find('.select').prop('checked', false);
+                $(this).find('.equipId').prop('disabled', true);
+                $(this).find('.rate').prop('disabled', true);
+            }  
         });
+        calcTotal();
     });
     
     // compute total rate

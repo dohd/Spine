@@ -14,7 +14,7 @@
             </div>
         </div>
     </div>
-
+    {{ dd($billpayment->bills) }}
     <div class="content-body">
         <div class="card">
             <div class="card-content">

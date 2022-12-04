@@ -61,7 +61,7 @@ class PurchaseRepository extends BaseRepository
             // compatible database array
             $import = [];
             $headers = current($export);
-            $data_rows = array_slice($export, 1, -1);
+            $data_rows = array_slice($export, 1, count($export));
             foreach ($data_rows as $i => $row) {
                 $new_row = [];
                 foreach ($row as $key => $val) {
@@ -70,6 +70,7 @@ class PurchaseRepository extends BaseRepository
                 }
                 $import[] = $new_row;
             }
+            // dd($import);
 
             // expense and expense_items
             foreach ($import as $key => $data) {

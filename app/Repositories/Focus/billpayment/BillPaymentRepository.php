@@ -50,7 +50,7 @@ class BillPaymentRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         foreach ($input as $key => $val) {
@@ -69,7 +69,7 @@ class BillPaymentRepository extends BaseRepository
         $result = Billpayment::create($input);
 
         $data_items = Arr::only($input, ['bill_id', 'paid']);
-        $data_items = array_filter(modify_array($data_items), function ($v) { return $v['paid'] > 0; });
+        $data_items = array_filter(modify_array($data_items), fn($v) => $v['paid'] > 0);
         if (!$data_items) throw ValidationException::withMessages(['Allocate amount on payment line items!']);
 
         foreach ($data_items as $key => $val) {

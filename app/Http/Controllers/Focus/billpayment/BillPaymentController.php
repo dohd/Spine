@@ -10,7 +10,7 @@ use App\Models\billpayment\Billpayment;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
-use DB;
+use DirectoryIterator;
 use Illuminate\Http\Request;
 
 class BillPaymentController extends Controller
@@ -34,8 +34,23 @@ class BillPaymentController extends Controller
      */
     public function index()
     {
+        // create purchases (frontfreeze, sahara)
+        // foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
+        //     if ($file->isDot()) continue;
+        //     $expense_data = $this->repository->expense_import_data($file->getFilename());
+        //     // dd($expense_data);
+        //     foreach ($expense_data as $row) {
+        //         // $this->repository->create($row);
+        //     }
+        // }
+
+        // delete purchases (frontfreeze, sahara)
+        // $billpayments = Billpayment::get();
+        // foreach ($billpayments as $key => $purchase) {
+        //     // $this->repository->delete($purchase);
+        // }
+
         $suppliers = Supplier::get(['id', 'name']);
-        
         return view('focus.billpayments.index', compact('suppliers'));
     }
 

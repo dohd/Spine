@@ -4,6 +4,7 @@ namespace App\Models\utility_bill\Traits;
 
 use App\Models\advance_payment\AdvancePayment;
 use App\Models\goodsreceivenote\Goodsreceivenote;
+use App\Models\items\PaidbillItem;
 use App\Models\items\TaxReportItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\purchase\Purchase;
@@ -11,6 +12,11 @@ use App\Models\supplier\Supplier;
 
 trait UtilityBillRelationship
 {   
+    public function payments()
+    {
+        return $this->hasMany(PaidbillItem::class, 'bill_id');
+    }
+
     public function purchase_tax_reports()
     {
         return $this->hasMany(TaxReportItem::class, 'purchase_id');

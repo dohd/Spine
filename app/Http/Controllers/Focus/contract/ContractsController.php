@@ -242,12 +242,12 @@ class ContractsController extends Controller
     public function contract_equipment()
     {
         $equipments = Equipment::doesntHave('task_schedules')
-        ->whereHas('contracts', function ($q) {
-            $q->where('contract_id', request('contract_id'));
-        })->get()->map(function ($v) {
-            $v->branch = $v->branch;
-            return $v;
-        });
+            ->whereHas('contracts', function ($q) {
+                $q->where('contract_id', request('contract_id'));
+            })->get()->map(function ($v) {
+                $v->branch = $v->branch;
+                return $v;
+            });
         
         return response()->json($equipments);
     }    

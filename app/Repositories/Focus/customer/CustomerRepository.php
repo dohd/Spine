@@ -139,9 +139,7 @@ class CustomerRepository extends BaseRepository
     public function getStatementForDataTable($customer_id = 0)
     {
         $q = Invoice::where('customer_id', request('customer_id', $customer_id));
-        // date filter
-
-        // lazy load
+        
         $q->with(['payments', 'withholding_payments', 'creditnotes', 'debitnotes']);
         
         return $this->generate_statement($q->get());
