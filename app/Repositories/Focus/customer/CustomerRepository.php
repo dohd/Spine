@@ -368,8 +368,10 @@ class CustomerRepository extends BaseRepository
             if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
         }
 
-        $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
-        if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
+        if (isset($input['taxid'])) {
+            $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
+            if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
+        }
 
         $input = array_replace($input, [
             'open_balance' => numberClean($input['open_balance']),
@@ -386,7 +388,7 @@ class CustomerRepository extends BaseRepository
             $journal = Journal::where('note', 'LIKE', '%' . $customer->id . '-customer Account Opening Balance ' . '%')->first();
             if ($journal) {
                 // remove previous transactions
-                Transaction::where(['tr_ref' => $journal->id, 'tr_type' => 'genjr'])->delete();                 
+                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();                 
 
                 // update invoice
                 $invoice = Invoice::where('notes', $journal->note)->first();
@@ -416,10 +418,7 @@ class CustomerRepository extends BaseRepository
                         if ($item->debit > 0) $item->update(['debit' => $open_balance]);
                         elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
                     }
-                } else {
-                    // remove journal
-                    $journal->delete();
-                }
+                } else $journal->delete();
             } else {
                 // unrecognised sale
                 $invoice_data = [
