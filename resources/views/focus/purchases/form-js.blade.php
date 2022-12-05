@@ -229,7 +229,6 @@
                 $('#pricegroup_id option').each(function () {
                     if ($('#supplierid').val() == $(this).val())
                     priceCustomer = $(this).val();
-                    console.log(priceCustomer);
                 });
                 
                 $('#pricegroup_id').val(priceCustomer);
@@ -316,11 +315,9 @@
         $('#stockdescr-'+i).val(data.name);
         
         const purchasePrice = accounting.unformat(data.purchase_price);
-        console.log(data);
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
 
         $('#uom-'+i).html('');
-        //console.log(data.units);
         if (data.units)
         data.units.forEach(v => {
             const rate = parseFloat(v.base_ratio) * purchasePrice;

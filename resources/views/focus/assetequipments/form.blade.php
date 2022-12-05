@@ -3,7 +3,7 @@
         <div class='form-group'>
             {{ Form::label( 'purchase_date', 'Purchase Date',['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::date('purchase_date', null, ['class' => 'form-control box-size datepicker']) }}
+                {{ Form::text('purchase_date', null, ['class' => 'form-control box-size datepicker', 'id'=>'purchase_date']) }}
             </div>
         </div>
     </div>
@@ -77,7 +77,7 @@
 <div class="row">
     <div class="col-md-4">
         <div class='form-group'>
-            {{ Form::label('manufacturer', 'Manufacturer',['class' => 'col control-label']) }}
+            {{ Form::label('manufacturer', 'Manufacturer/Supplier',['class' => 'col control-label']) }}
             <div class='col'>
                 {{ Form::text('manufacturer', null, ['class' => 'form-control box-size', 'placeholder' => 'Vendor']) }}
             </div>
@@ -125,7 +125,7 @@
         <div class='form-group'>
             {{ Form::label( 'warranty_expiry_date', 'Warranty Expiry Date', ['class' => 'col control-label']) }}
             <div class='col'>
-                {{ Form::date('warranty_expiry_date', null, ['class' => 'form-control box-size']) }}
+                {{ Form::text('warranty_expiry_date', null, ['class' => 'form-control box-size datepicker', 'id'=>'warranty_expiry_date']) }}
             </div>
         </div>
     </div>

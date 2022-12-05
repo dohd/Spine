@@ -63,7 +63,6 @@
             $('#pricegroup_id option').each(function () {
                 if (id == $(this).val())
                 priceCustomer = $(this).val();
-                console.log($(this).val());
             });
             
             $('#pricegroup_id').val(priceCustomer);
@@ -171,7 +170,6 @@
                 $('#pricegroup_id option').each(function () {
                     if ($('#supplierid').val() == $(this).val())
                     priceCustomer = $(this).val();
-                    console.log(priceCustomer);
                 });
                 
                 $('#pricegroup_id').val(priceCustomer);
@@ -248,8 +246,11 @@
             const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
             $('#uom-'+i).append(option);
         });
-        const option = `<option value="${data.uom}"  >${data.uom}</option>`;
+        if(data.uom){
+            const option = `<option value="${data.uom}"  >${data.uom}</option>`;
         $('#uom-'+i).append(option);
+        }
+        
     }
     $('#stockTbl').on('mouseup', '.stockname', function() {
         const id = $(this).attr('id').split('-')[1];
