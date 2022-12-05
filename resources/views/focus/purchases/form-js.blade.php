@@ -53,7 +53,7 @@
     // load suppliers
     const supplierUrl = "{{ route('biller.suppliers.select') }}";
     function supplierData(data) {
-        return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))};
+        return {results: data.map(v => ({id: `${v.id}-${v.taxid || ''}`, text: `${v.name} : ${v.email}`}))};
     }
     $('#supplierbox').select2(select2Config(supplierUrl, supplierData));
 
