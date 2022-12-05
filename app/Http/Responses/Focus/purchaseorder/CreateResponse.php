@@ -31,6 +31,6 @@ class CreateResponse implements Responsable
         // Purchase order
         $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups','price_supplier', 'terms'));
+        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups','price_supplier', 'terms', 'prefixes'));
     }
 }

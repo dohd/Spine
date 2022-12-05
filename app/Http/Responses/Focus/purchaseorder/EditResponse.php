@@ -33,6 +33,8 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $po = $this->purchaseorder;
+        $prefixes = prefixesArray(['purchase_order'], $po->ins);
+
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
         $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
@@ -40,6 +42,6 @@ class EditResponse implements Responsable
         // Purchase order
         $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.edit', compact('po', 'additionals', 'pricegroups','price_supplier', 'terms'));
+        return view('focus.purchaseorders.edit', compact('po', 'additionals', 'pricegroups','price_supplier', 'terms', 'prefixes'));
     }
 }
