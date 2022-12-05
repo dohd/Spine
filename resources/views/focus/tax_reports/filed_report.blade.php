@@ -165,7 +165,7 @@
 
             $('#tax_report').select2({allowClear: true});
             if (this.taxReportId) {
-                $('#tax_report').val(this.taxReportId);
+                $('#tax_report').val(this.taxReportId).change();
             } else {
                 $('#tax_report').val('').change();
             }
