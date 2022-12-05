@@ -324,8 +324,10 @@
             const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
             $('#uom-'+i).append(option);
         });
-        const option = `<option value="${data.uom}" >${data.uom}</option>`;
-        $('#uom-'+i).append(option);
+        if(data.uom){
+            const option = `<option value="${data.uom}" >${data.uom}</option>`;
+            $('#uom-'+i).append(option);
+        }
     }
     function projectStockSelect(event, ui) {
         const {data} = ui.item;
