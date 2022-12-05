@@ -499,7 +499,23 @@
                                 @endauth
                             </ul>
                         </li>
-                        @endauth    
+                        @endauth
+                        
+                        {{-- Supplier Pricelist --}}
+                        @permission('manage-pricelist')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Supplier Pricelist</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.pricelistsSupplier.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Pricelist 
+                                    </a>
+                                </li>
+                                @permission('create-pricelist')
+                                <li><a class="dropdown-item" href="{{ route('biller.pricelistsSupplier.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Pricelist
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
 
                         @permission('manage-product-category')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
@@ -1213,6 +1229,11 @@
                                     <li>
                                         <a class="dropdown-item" href="{{route('biller.import.general',['client_pricelist'])}}">
                                             <i class="fa fa-file-excel-o"></i> Client Pricelist
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['supplier_pricelist'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Supplier Pricelist
                                         </a>
                                     </li>
                                 </ul>

@@ -5,6 +5,7 @@ namespace App\Http\Responses\Focus\purchaseorder;
 use App\Models\additional\Additional;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\purchaseorder\Purchaseorder;
+use App\Models\supplier\Supplier;
 use App\Models\term\Term;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -25,8 +26,11 @@ class CreateResponse implements Responsable
 
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
-        $terms = Term::where('type', 4)->get(); // purchase order term
+        $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
+        $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
+        // Purchase order
+        $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups', 'terms', 'prefixes'));
+        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups','price_supplier', 'terms'));
     }
 }

@@ -341,7 +341,7 @@
                         @lang('datatable.strings')
                     },
                     ajax: {
-                        url: '{{ route("biller.hrms.attendance_load") }}',
+                        url: '{{ route("biller.hrms.attendance_list") }}',
                         type: 'post',
                         data: {rel_id:{{$hrm->id}}}
                     },

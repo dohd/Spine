@@ -108,7 +108,12 @@
                     <label for="pricing" >Pricing</label>                    
                     <select id="pricegroup_id" name="pricegroup_id" class="custom-select">
                         <option value="0" selected>Default </option>
-                        @foreach($pricegroups as $group)
+                        {{-- @foreach($pricegroups as $group)
+                            @if (!$group->is_client)
+                                <option value="{{ $group->id }}">{{ $group->name }}</option>
+                            @endif
+                        @endforeach --}}
+                        @foreach($price_supplier as $group)
                             @if (!$group->is_client)
                                 <option value="{{ $group->id }}">{{ $group->name }}</option>
                             @endif

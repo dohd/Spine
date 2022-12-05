@@ -63,6 +63,15 @@
         $('#taxid').val(taxId);
         $('#supplierid').val(id);
         $('#supplier').val(name);
+
+        let priceCustomer = '';
+            $('#pricegroup_id option').each(function () {
+                if (id == $(this).val())
+                priceCustomer = $(this).val();
+                console.log($(this).val());
+            });
+            
+            $('#pricegroup_id').val(priceCustomer);
     });
     const supplierText = "{{ $po->supplier? $po->supplier->name : '' }} : ";
     const supplierVal = "{{ $po->supplier_id }}-{{ $po->supplier? $po->supplier->taxid : '' }}";
@@ -155,7 +164,7 @@
     let stockRowId = @json(count($po->products));
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
     $('#stockTbl tbody tr:lt(2)').remove(); 
-    const stockUrl = "{{ route('biller.products.quote_product_search') }}"
+    const stockUrl = "{{ route('biller.products.purchase_search') }}"
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
@@ -169,6 +178,16 @@
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
             taxRule('rowtax-'+i, $('#tax').val());
+
+            //Add the previous supplier data            
+            let priceCustomer = '';
+                $('#pricegroup_id option').each(function () {
+                    if ($('#supplierid').val() == $(this).val())
+                    priceCustomer = $(this).val();
+                    console.log(priceCustomer);
+                });
+                
+                $('#pricegroup_id').val(priceCustomer);
         }
 
         if ($(this).is('.remove')) {
@@ -238,11 +257,14 @@
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
 
         $('#uom-'+i).html('');
+        if(data.units)
         data.units.forEach(v => {
             const rate = parseFloat(v.base_ratio) * purchasePrice;
             const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
             $('#uom-'+i).append(option);
         });
+        const option = `<option value="${data.uom}" >${data.uom}</option>`;
+        $('#uom-'+i).append(option);
     }
     $('#stockTbl').on('mouseup', '.stockname', function() {
         const id = $(this).attr('id').split('-')[1];

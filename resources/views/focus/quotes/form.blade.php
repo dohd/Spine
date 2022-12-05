@@ -62,8 +62,8 @@
                     <select id="price_customer" name="price_customer_id" class="custom-select">
                         <option value="">Default </option>
                         @foreach($price_customers as $row)
-                            <option value="{{ $row->id }}">{{ $row->company }}</option>
-                        @endforeach
+                        <option value="{{ $row->id }}">{{ $row->company }}</option>
+                    @endforeach
                     </select>
                 </div>
             </div>

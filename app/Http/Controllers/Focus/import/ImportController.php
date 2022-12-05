@@ -30,6 +30,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
 use App\Imports\ClientPricelistImport;
+use App\Imports\SupplierPricelistImport;
 use App\Models\equipmentcategory\EquipmentCategory;
 use DB;
 use Error;
@@ -60,6 +61,7 @@ class ImportController extends Controller
             'transactions' => trans('import.import_transactions'),
             'equipments' => 'Import Equipments',
             'client_pricelist' => 'Import Client Pricelist',
+            'supplier_pricelist' => 'Import Supplier Pricelist',
         ];
         $data = ['title' => $titles[$type]] + compact('type');
             
@@ -138,6 +140,7 @@ class ImportController extends Controller
             'transactions' => new TransactionsImport($data),
             'equipments' => new EquipmentsImport($data),
             'client_pricelist' => new ClientPricelistImport($data),
+            'supplier_pricelist' => new SupplierPricelistImport($data),
         ];
 
         $storage_path = Storage::disk('public')->path($path . $filename);

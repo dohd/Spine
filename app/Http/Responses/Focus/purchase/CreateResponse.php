@@ -25,7 +25,8 @@ class CreateResponse implements Responsable
         $warehouses = Warehouse::all();
         $last_tid = Purchase::where('ins', auth()->user()->ins)->max('tid');
         $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
+        $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
 
-        return view('focus.purchases.create', compact('last_tid', 'additionals', 'supplier', 'pricegroups', 'warehouses'));
+        return view('focus.purchases.create', compact('last_tid', 'additionals', 'supplier', 'pricegroups', 'warehouses','price_supplier'));
     }
 }

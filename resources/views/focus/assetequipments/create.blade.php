@@ -42,3 +42,12 @@
     </div>
 </div>
 @endsection
+@section('extra-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
+<script>
+    // initialize datepicker
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    $('#purchase_date').datepicker('setDate', new Date());
+    $('#warranty_expiry_date').datepicker('setDate', new Date());
+</script>
+@endsection

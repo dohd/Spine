@@ -41,6 +41,13 @@
         $('#taxid').val(taxId);
         $('#supplierid').val(id);
         $('#supplier').val(name);
+        let priceCustomer = '';
+            $('#pricegroup_id option').each(function () {
+                if (id == $(this).val())
+                priceCustomer = $(this).val();
+            });
+            
+            $('#pricegroup_id').val(priceCustomer);
     });
 
     // load suppliers
@@ -177,7 +184,7 @@
 
 <!-- Stock Tab -->
 <script>
-    const stockUrl = "{{ route('biller.products.quote_product_search') }}";
+    const stockUrl = "{{ route('biller.products.purchase_search') }}";
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
 
     let stockRowId = 0;
@@ -217,6 +224,14 @@
             $('#projectstocktext-'+i).val(projectText);
             $('#projectstockval-'+i).val($("#project option:selected").val());
             taxRule('rowtax-'+i, $('#tax').val());
+            //Add the previous supplier data            
+            let priceCustomer = '';
+                $('#pricegroup_id option').each(function () {
+                    if ($('#supplierid').val() == $(this).val())
+                    priceCustomer = $(this).val();
+                });
+                
+                $('#pricegroup_id').val(priceCustomer);
         }
 
         if ($(this).is('.remove')) {
@@ -303,11 +318,16 @@
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
 
         $('#uom-'+i).html('');
+        if (data.units)
         data.units.forEach(v => {
             const rate = parseFloat(v.base_ratio) * purchasePrice;
             const option = `<option value="${v.code}" purchase_price="${rate}" >${v.code}</option>`;
             $('#uom-'+i).append(option);
         });
+        if(data.uom){
+            const option = `<option value="${data.uom}" >${data.uom}</option>`;
+            $('#uom-'+i).append(option);
+        }
     }
     function projectStockSelect(event, ui) {
         const {data} = ui.item;
