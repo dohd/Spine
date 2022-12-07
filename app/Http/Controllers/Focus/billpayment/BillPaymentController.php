@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\Access\User\User;
 use App\Models\account\Account;
-use App\Models\bill\Paidbill;
 use App\Models\billpayment\Billpayment;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
@@ -20,11 +19,11 @@ class BillPaymentController extends Controller
      * Store repository object
      * @var \App\Repositories\Focus\billpayment\BillPaymentRepository
      */
-    public $respository;
+    public $repository;
 
     public function __construct(BillPaymentRepository $repository)
     {
-        $this->respository = $repository;
+        $this->repository = $repository;
     }
 
 
@@ -36,20 +35,19 @@ class BillPaymentController extends Controller
     public function index()
     {
         // create purchases (frontfreeze, sahara)
-        // foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
-        //     if ($file->isDot()) continue;
-        //     $expense_data = $this->repository->expense_import_data($file->getFilename());
-        //     // dd($expense_data);
-        //     foreach ($expense_data as $row) {
-        //         // $this->repository->create($row);
-        //     }
-        // }
-
+        foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
+            if ($file->isDot()) continue;
+            $expense_data = $this->repository->expense_import_data($file->getFilename());
+            // dd($expense_data);
+            foreach ($expense_data as $row) {
+                // $this->repository->create($row);
+            }
+        }
         // delete purchases (frontfreeze, sahara)
-        // $billpayments = Billpayment::get();
-        // foreach ($billpayments as $key => $purchase) {
-        //     // $this->repository->delete($purchase);
-        // }
+        $billpayments = Billpayment::whereIn('supplier_id', [7,8])->get();
+        foreach ($billpayments as $key => $payment) {
+            // $this->repository->delete($payment);
+        }
 
         $suppliers = Supplier::get(['id', 'name']);
         return view('focus.billpayments.index', compact('suppliers'));
@@ -91,7 +89,8 @@ class BillPaymentController extends Controller
         }
 
         $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
-            ->whereColumn('amount', '!=', 'allocate_ttl')->get();
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
 
         return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees', 'direct_bill', 'unallocated_pmts'));
     }
@@ -104,7 +103,7 @@ class BillPaymentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->respository->create($request->except('_token'));
+        $this->repository->create($request->except('_token'));
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Created Successfully']);
     }
@@ -125,7 +124,8 @@ class BillPaymentController extends Controller
         })->get(['id', 'holder']);
 
         $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
-            ->whereColumn('amount', '!=', 'allocate_ttl')->get();
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
 
         $is_allocated = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
             ->where('rel_payment_id', $billpayment->id)->count();
@@ -142,7 +142,7 @@ class BillPaymentController extends Controller
      */
     public function update(Request $request, Billpayment $billpayment)
     {
-        $this->respository->update($billpayment, $request->except('_token'));
+        $this->repository->update($billpayment, $request->except('_token'));
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Updated Successfully']);
     }
@@ -155,7 +155,7 @@ class BillPaymentController extends Controller
      */
     public function destroy(Billpayment $billpayment)
     {
-        $this->respository->delete($billpayment);
+        $this->repository->delete($billpayment);
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Deleted Successfully']);
     }

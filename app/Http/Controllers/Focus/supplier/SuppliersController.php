@@ -287,7 +287,7 @@ class SuppliersController extends Controller
                 'purchase' => fn($q) => $q->select('id', 'suppliername', 'note'),
                 'grn' => fn($q) => $q->select('id', 'note'),
             ])
-            ->orderBy('due_date', 'desc')
+            ->orderBy('due_date', 'asc')
             ->get()->map(function ($v) {
                 if ($v->document_type == 'direct_purchase') {
                     $v->suppliername = $v->purchase->suppliername;

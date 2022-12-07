@@ -91,13 +91,19 @@
         >
             <option value="">None</option>
             @foreach ($unallocated_pmts as $pmt)
+                @php
+                    $balance = numberFormat($pmt->amount - $pmt->allocate_ttl);
+                    $payment_type = ucfirst(str_replace('_', ' ', $pmt->payment_type));
+                    $note = $pmt->note;
+                    $date = $pmt->date;
+                @endphp
                 <option 
                     value="{{ $pmt->id }}" 
                     supplier_id="{{ $pmt->supplier_id }}"
                     data="{{ json_encode($pmt) }}"
                 >
-                    ({{ numberFormat($pmt->amount - $pmt->allocate_ttl) }} - {{ ucfirst(str_replace('_', ' ', $pmt->payment_type)) }})   
-                    - {{ $pmt->note }}
+                    ({{ $balance }} - {{ $payment_type }} : {{ $date }}) - {{ $note }}
+                    
                 </option>
             @endforeach
         </select>

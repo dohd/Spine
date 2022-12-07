@@ -110,8 +110,7 @@ class SupplierRepository extends BaseRepository
 
     public function getStatementForDataTable($supplier_id = 0)
     {
-        $q = UtilityBill::where('supplier_id', request('supplier_id', $supplier_id));
-        $q->with(['payments']);
+        $q = UtilityBill::where('supplier_id', request('supplier_id', $supplier_id))->with('payments');
         $bills = $q->get();
 
         $i = 0;
@@ -120,12 +119,11 @@ class SupplierRepository extends BaseRepository
             $i++;
             $bill_id = $bill->id;
             $tid = gen4tid('BILL-', $bill->tid);
-            $note = $bill->note;
             $bill_record = (object) array(
                 'id' => $i,
                 'date' => $bill->date,
                 'type' => 'bill',
-                'note' => '(' . $tid . ')' . ' ' . $note,
+                'note' => "({$tid}) {$bill->note}",
                 'debit' => 0,
                 'credit' => $bill->total,
                 'bill_id' => $bill_id
@@ -134,25 +132,24 @@ class SupplierRepository extends BaseRepository
             $payments = collect();
             foreach ($bill->payments as $pmt) {
                 $i++;
-                $reference = $pmt->bill->reference;
-                $mode = $pmt->bill->payment_mode;
-                $pmt_tid = gen4tid('pmt-', $pmt->bill->tid);
-                $account = $pmt->bill->account->holder;
-                $amount = $pmt->bill->amount;
+                $reference = $pmt->bill_payment->reference;
+                $pmt_tid = gen4tid('PMT-', $pmt->bill_payment->tid);
+                $account = $pmt->bill_payment->account? $pmt->bill_payment->account->holder : '';
+                $amount = numberFormat($pmt->bill_payment->amount);
+                $payment_mode = ucfirst($pmt->bill_payment->payment_mode);
+
                 $record = (object) array(
                     'id' => $i,
                     'date' => $pmt->bill->date,
                     'type' => 'payment',
-                    'note' => '(' . $tid . ')' . ' ' . $pmt_tid . ' ' . ' reference: ' . $reference . ' mode: ' 
-                        . ucfirst($mode) . ', account: ' . $account . ', amount: ' . numberFormat($amount),
+                    'note' => "({$tid}) {$pmt_tid} reference: {$reference} mode: ${payment_mode} account: {$account} amount: {$amount}",
                     'debit' => $pmt->paid,
                     'credit' => 0,
                     'bill_id' => $bill_id,
                     'payment_item_id' => $pmt->id
                 );
                 $payments->add($record);
-            }      
-
+            }   
             $statement->add($bill_record);
             $statement = $statement->merge($payments);
         }
