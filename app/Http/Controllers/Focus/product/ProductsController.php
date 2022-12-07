@@ -158,8 +158,9 @@ class ProductsController extends Controller
             $products = ClientProduct::where('customer_id', request('price_customer_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
+                    $value = $v->row_num > 0 ? "($v->row_num)" : '';
                     return $v->fill([
-                        'name' => "{$v->descr} ({$v->row_num})",
+                        'name' => "{$v->descr} {$value}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => 0,
@@ -204,9 +205,9 @@ class ProductsController extends Controller
             $products = SupplierProduct::where('supplier_id', request('pricegroup_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
-                    //dd($v);
+                    $value = $v->row_num > 0 ? "($v->row_num)" : '';
                     return $v->fill([
-                        'name' => "{$v->descr} ({$v->row_num})",
+                        'name' => "{$v->descr} {$value}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => $v->rate,
