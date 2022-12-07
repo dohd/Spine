@@ -1,7 +1,7 @@
 <div class="form-group row">
     <div class="col-2">
         <label for="row_number">Row No.</label>
-        {{ Form::text('row_num', null, ['class' => 'form-control', 'required']) }}
+        {{ Form::text('row_num', null, ['class' => 'form-control']) }}
     </div>
     <div class="col-4">
         <label for="supplier">Supplier</label>
