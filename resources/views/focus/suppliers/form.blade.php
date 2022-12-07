@@ -157,7 +157,7 @@
                         <select name="expense_account_id" class="custom-select" id="expense_account">
                             <option value="">-- Select Expense Account --</option>
                             @foreach ($accounts as $row) 
-                                <option value="{{ $row->id }}" {{ $row->id == @$customer->expense_account_id? 'selected' : '' }}>
+                                <option value="{{ $row->id }}" {{ $row->id == @$supplier->expense_account_id? 'selected' : '' }}>
                                     {{ $row->holder }}
                                 </option>
                             @endforeach

@@ -37,13 +37,13 @@ class TransactionRepository extends BaseRepository
         }
 
         // filter by date
-        if (request('start_date') && request('end_date')) {
+        $q->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('tr_date', [
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
-        }
-
+        });
+        
         // fetch related double-entry transactions
         if (request('tr_id', 0)) {
             $q->where('tid', request('tr_tid', 0))->where('id', '!=', request('tr_id', 0));

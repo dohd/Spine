@@ -28,8 +28,6 @@ class Billpayment extends Model
      * @var array
      */
     protected $fillable = [
-        'tid', 'account_id', 'supplier_id', 'employee_id', 'date', 'amount', 'allocate_ttl', 
-        'note', 'reference', 'payment_mode'
     ];
 
     /**

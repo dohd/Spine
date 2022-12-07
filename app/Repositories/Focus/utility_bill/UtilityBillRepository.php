@@ -150,7 +150,7 @@ class UtilityBillRepository extends BaseRepository
     {     
         DB::beginTransaction();
 
-        $is_manual_bill = in_array($utility_bill->document_type, ['kra_bill', 'goods_receive_note']) && !$utility_bill->ref_id;
+        $is_manual_bill = in_array($utility_bill->document_type, ['kra_bill', 'goods_receive_note', 'opening_balance']) && !$utility_bill->ref_id;
         if (!$is_manual_bill) throw ValidationException::withMessages(['Please delete resource from parent record!']);
     
         Transaction::where(['tr_type' => 'bill', 'note' => $utility_bill->note, 'tr_ref' => $utility_bill->id])->delete();

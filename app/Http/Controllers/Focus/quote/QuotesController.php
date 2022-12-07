@@ -195,13 +195,15 @@ class QuotesController extends Controller
      */
     public function destroy(Quote $quote)
     {
-        $res = $this->repository->delete($quote);
+        $type = $quote->bank_id > 0? 'pi' : 'quote';
+
+        $this->repository->delete($quote);
 
         $link = route('biller.quotes.index');
         $msg = trans('alerts.backend.quotes.deleted');
-        if ($res == 'PI') {
+        if ($type == 'pi') {
             $link = route('biller.quotes.index', 'page=pi');
-            $msg = 'The Proforma Invoice was successfully deleted';
+            $msg = 'Proforma Invoice Successfully Deleted';
         }
 
         return new RedirectResponse($link, ['flash_success' => $msg]);
@@ -223,22 +225,6 @@ class QuotesController extends Controller
         $lpos = Lpo::where('customer_id', $quote->customer_id)->get();
 
         return new ViewResponse('focus.quotes.view', compact('quote', 'accounts', 'features', 'lpos'));
-    }
-
-    /**
-     * Close quote
-     */
-    public function close_quote(Quote $quote)
-    {
-        $data['user_id'] = auth()->user()->id;
-        $data['ins'] = auth()->user()->ins;
-        
-        $this->repository->close_quote($quote, $data);
-
-        $resource = $quote->bank_id ? 'Proforma Invoice' : 'Quote';
-        
-        return redirect()->back()->with(['flash_success' => $resource . ' closed successfully']);
-
     }
 
     /**

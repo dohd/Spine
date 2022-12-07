@@ -54,7 +54,7 @@
                                         <th>#</th>
                                         <th>RMT No.</th>
                                         <th>Supplier</th>
-                                        <th>Account</th>
+                                        <th>Paid From</th>
                                         <th>Date</th>
                                         <th>Amount</th>
                                         <th>Unallocated</th>

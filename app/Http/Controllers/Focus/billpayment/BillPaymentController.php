@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\Access\User\User;
 use App\Models\account\Account;
+use App\Models\bill\Paidbill;
 use App\Models\billpayment\Billpayment;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
@@ -65,7 +66,6 @@ class BillPaymentController extends Controller
         $accounts = Account::whereNull('system')
             ->whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))
             ->get(['id', 'holder']);
-
         $suppliers = Supplier::get(['id', 'name']);
         $employees = User::get();
 
@@ -77,22 +77,23 @@ class BillPaymentController extends Controller
                 'document_type' => $params['src_type'],
                 'status' => 'due'
             ])->first();
-            
-            if ($params['src_type'] == 'direct_purchase') {
-                if (!$bill) {
-                    return redirect(route('biller.purchases.index'))
-                    ->with(['flash_error' => 'Bill not available for direct payment.']);
-                }
+            if ($params['src_type'] == 'direct_purchase' && !$bill) {
+                return redirect(route('biller.purchases.index'))->with([
+                    'flash_error' => 'Bill Unavailable For Direct Payment.'
+                ]);
+            } else {
+                $direct_bill = [
+                    'tid' => $bill->tid,
+                    'supplier_id' => $bill->supplier_id,
+                    'amount' => $bill->total,
+                ];
             }
-                
-            $direct_bill = [
-                'tid' => $bill->tid,
-                'supplier_id' => $bill->supplier_id,
-                'amount' => $bill->total,
-            ];
         }
 
-        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees', 'direct_bill'));
+        $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')->get();
+
+        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees', 'direct_bill', 'unallocated_pmts'));
     }
 
     /**
@@ -123,8 +124,13 @@ class BillPaymentController extends Controller
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
 
+        $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')->get();
 
-        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees'));
+        $is_allocated = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->where('rel_payment_id', $billpayment->id)->count();
+
+        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated'));
     }
 
     /**

@@ -128,10 +128,18 @@ class ProjectRepository extends BaseRepository
      */
     public function delete($project)
     {  
-        $budgeted_quotes = $project->quotes()->whereHas('budget')->get();
-        if ($budgeted_quotes->count())
-            throw ValidationException::withMessages(['Project has been budgeted on!']);
-        if ($project->delete()) return true;
+        DB::beginTransaction();
+
+        if ($project->budget && $project->purchase_items->count()) {
+            throw ValidationException::withMessages(['Not allowed! Project has expense']);
+        } elseif ($project->budget) {
+            $project->budget->delete();
+        }
+
+        if ($project->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
     }    

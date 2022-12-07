@@ -6,7 +6,6 @@ use DB;
 use App\Models\supplier\Supplier;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
-use App\Models\bill\Bill;
 use App\Models\items\JournalItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\manualjournal\Journal;

@@ -71,11 +71,15 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-2">{{ trans('general.search_date')}}</div>
+                                @php
+                                    $now = date('d-m-Y');
+                                    $start = date('d-m-Y', strtotime("{$now} - 3 months"));
+                                @endphp
                                 <div class="col-2">
-                                    <input type="text" name="start_date" id="start_date" class="form-control form-control-sm datepicker">
+                                    <input type="text" name="start_date" value="{{ $start }}" id="start_date" class="form-control form-control-sm datepicker">
                                 </div>
                                 <div class="col-2">
-                                    <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker">
+                                    <input type="text" name="end_date" value="{{ $now }}" id="end_date" class="form-control form-control-sm datepicker">
                                 </div>
                                 <div class="col-2">
                                     <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm">
@@ -122,103 +126,74 @@
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });    
+    const config = {
+        ajax: {
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            }
+        },
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+    };
 
-    // datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-    .datepicker('setDate', new Date());
+    const Index = {        
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('.datepicker').datepicker(config.date);
 
-    // datefilter
-    $('#search').click(() => {
-        const start_date = $('#start_date').val();
-        const end_date = $('#end_date').val();
-        $('#transactionsTbl').DataTable().destroy();
-        draw_data(start_date, end_date);
-    });
+            this.drawDataTable();
+        
+            $('#search').click(this.dateSearchClick);
+        },
 
-    function draw_data(start_date='', end_date='') {
-        let obj = [];
-        const system = @json(request('system'));
-        if (system == 'tax') obj.push(
-            {data: 'vat_rate', name: 'vat_rate'},
-            {data: 'vat_amount', name: 'vat_amount'}
-        );
-        const input = @json(@$input);
-        const language = {@lang('datatable.strings')};
+        dateSearchClick() {
+            $('#transactionsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
 
-        const dataTable = $('#transactionsTbl').dataTable({
-            processing: true,
-            responsive: true,
-            stateSave: true,
-            language,
-            ajax: {
-                url: '{{ route("biller.transactions.get") }}',
-                type: 'post',
-                data: {system, start_date, end_date, ...input},
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
+        drawDataTable() {
+            let obj = [];
+            const system = @json(request('system'));
+            if (system == 'tax') obj = ['vat_rate', 'vat_amount'];
+            const input = @json(@$input);
+
+            $('#transactionsTbl').dataTable({
+                processing: true,
+                responsive: true,
+                stateSave: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: '{{ route("biller.transactions.get") }}',
+                    type: 'post',
+                    data: {system, start_date: $('#start_date').val(), end_date: $('#end_date').val(), ...input},
                 },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'tr_type',
-                    name: 'tr_type'
-                },
-                {
-                    data: 'reference',
-                    name: 'reference'
-                },
-                {
-                    data: 'note',
-                    name: 'note'
-                },
-                ...obj,
-                {
-                    data: 'debit',
-                    name: 'debit'
-                },
-                {
-                    data: 'credit',
-                    name: 'credit'
-                },
-                {
-                    data: 'balance',
-                    name: 'balance'
-                },
-                {
-                    data: 'tr_date',
-                    name: 'tr_date'
-                },
-                {
-                    data: 'created_at',
-                    name: 'created_at'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            columnDefs: [
-                { type: "custom-number-sort", targets: [5,6,7] },
-                { type: "custom-date-sort", targets: 8 }
-            ],
-            order: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print']
-        });
-    }
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    ...[
+                        'tid', 'tr_type', 'reference', 'note', ...obj, 'debit', 'credit',
+                        'balance', 'tr_date', 'created_at'
+                    ].map(v => ({data: v, name: v})),
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [5,6,7] },
+                    { type: "custom-date-sort", targets: 8 }
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print']
+            });
+
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection

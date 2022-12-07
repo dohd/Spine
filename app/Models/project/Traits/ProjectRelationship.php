@@ -11,6 +11,7 @@ use App\Models\hrm\Hrm;
 use App\Models\items\PurchaseItem;
 use App\Models\misc\Misc;
 use App\Models\note\Note;
+use App\Models\project\Budget;
 use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
@@ -34,6 +35,11 @@ trait ProjectRelationship
     public function purchase_items()
     {
         return $this->hasMany(PurchaseItem::class, 'itemproject_id');
+    }
+
+    public function budget()
+    {
+        return $this->hasOneThrough(Budget::class, Quote::class, 'id', 'quote_id', 'main_quote_id', 'id')->withoutGlobalScopes();
     }
 
     public function quote()

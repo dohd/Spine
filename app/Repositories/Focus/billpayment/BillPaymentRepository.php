@@ -50,52 +50,69 @@ class BillPaymentRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
-            if (in_array($key, ['paid'])) {
-                $input[$key] = array_map(function ($v) { 
-                    return numberClean($v); 
-                }, $val);
-            }
+            if (in_array($key, ['paid'])) 
+                $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
-        if ($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
-            
+        if ($input['amount'] == 0) 
+            throw ValidationException::withMessages(['amount is required!']);
+
         $tid = Billpayment::where('ins', auth()->user()->ins)->max('tid');
         if ($input['tid'] <= $tid) $input['tid'] = $tid+1;
-        $result = Billpayment::create($input);
 
+        $data = array_diff_key($input, array_flip(['balance', 'paid', 'bill_id']));
+        $result = Billpayment::create($data);
+       
         $data_items = Arr::only($input, ['bill_id', 'paid']);
         $data_items = array_filter(modify_array($data_items), fn($v) => $v['paid'] > 0);
-        if (!$data_items) throw ValidationException::withMessages(['Allocate amount on payment line items!']);
+        if ($data_items) {
+            foreach ($data_items as $key => $val) {
+                $val['bill_payment_id'] = $result->id;
+                $data_items[$key] = $val;
+            }
+            BillpaymentItem::insert($data_items);
 
-        foreach ($data_items as $key => $val) {
-            $val['bill_payment_id'] = $result->id;
-            $data_items[$key] = $val;
+            // increment bill amount paid and update status
+            foreach ($result->items as $item) {
+                $bill = $item->supplier_bill;
+                $bill->increment('amount_paid', $item->paid);
+                if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
+                elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+                else  $bill->update(['status' => 'paid']);
+            }
+        } elseif ($result->payment_type == 'per_invoice') {
+            throw ValidationException::withMessages(['Allocation on line items required!']);
         }
-        BillpaymentItem::insert($data_items);
 
-        // increment supplier on account balance
-        if ($result->supplier) {
-            $unallocated = $result->amount - $result->allocate_ttl;
-            $result->supplier->increment('on_account', $unallocated);
+        // set allocation type
+        $result->allocation_type = '';
+        $payment = Billpayment::find($result->rel_payment_id);
+        if ($payment) {
+            if ($payment->payment_type == 'on_account') 
+                $result->allocation_type = 'on_account';
+            elseif ($payment->payment_type == 'advance_payment') 
+                $result->allocation_type = 'advance_payment';
         }
         
-        // increment bill amount paid and update status
-        foreach ($result->items as $item) {
-            $bill = $item->supplier_bill;
-            $bill->increment('amount_paid', $item->paid);
-            if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
-            elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
-            else  $bill->update(['status' => 'paid']);
+        if ($result->supplier) {
+            if ($result->allocation_type) {
+                $unallocated = $result->amount - $result->allocate_ttl;
+                $result->supplier->decrement('on_account', $unallocated);
+                if ($payment) $payment->increment('allocate_ttl', $result->allocate_ttl);
+            } else {
+                $unallocated = $result->amount - $result->allocate_ttl;
+                $result->supplier->increment('on_account', $unallocated);
+            }
         }
 
         /**accounting */
         $this->post_transaction($result);
-
+                
         if ($result) {
             DB::commit();
             return $result;
@@ -114,17 +131,15 @@ class BillPaymentRepository extends BaseRepository
      */
     public function update(Billpayment $billpayment, array $input)
     {
-        // dd($input);
+        dd($input);
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
-            if (in_array($key, ['paid'])) {
-                $input[$key] = array_map(function ($v) { 
-                    return numberClean($v); 
-                }, $val);
-            }
+            if (in_array($key, ['paid'])) 
+                $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
-        if($input['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+        if ($input['amount'] == 0) 
+            throw ValidationException::withMessages(['amount is required!']);
 
         // reverse supplier unallocated amount
         if ($billpayment->supplier_id) {
@@ -144,12 +159,14 @@ class BillPaymentRepository extends BaseRepository
         // allocated items
         $data_items = Arr::only($input, ['id', 'bill_id', 'paid']);
         $data_items = modify_array($data_items);
-        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $item_ids = array_map(fn($v) => $v['id'], $data_items);
         $payment_items = BillpaymentItem::whereIn('id', $item_ids)->get();
         // reverse bill amount paid
         foreach ($payment_items as $item) {
-            if ($item->supplier_bill) $item->supplier_bill->decrement('amount_paid', $item->paid);
+            if ($item->supplier_bill) 
+                $item->supplier_bill->decrement('amount_paid', $item->paid);
         }
+
         // update payment items
         $data_items = array_map(function ($v) {
             return array_replace($v, [
@@ -197,14 +214,17 @@ class BillPaymentRepository extends BaseRepository
        
         // decrement supplier on account balance
         if ($billpayment->supplier_id) {
-            $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
-            $billpayment->supplier->decrement('on_account', $unallocated);
+            $allocated = $billpayment->allocate_ttl;
+            $billpayment->supplier->decrement('on_account', $allocated);
+            // related payment
+            $payment = Billpayment::find($billpayment->rel_payment_id);
+            if ($payment) $payment->decrement('allocate_ttl', $allocated);
         }
 
         // decrement bill amount paid and update status
         foreach ($billpayment->items as $item) {
-            $bill = $item->supplier_bill;
-            if ($bill) {
+            if ($item->supplier_bill) {
+                $bill = $item->supplier_bill;
                 $bill->decrement('amount_paid', $item->paid);
                 if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
                 elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
@@ -212,13 +232,8 @@ class BillPaymentRepository extends BaseRepository
             }
         }
 
-        Transaction::where([
-            'tr_type' => 'pmt', 
-            'note' => $billpayment->note, 
-            'tr_ref' => $billpayment->id
-        ])->delete();
+        Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
         aggregate_account_transactions();
-
         if ($billpayment->delete()) {
             DB::commit(); 
             return true;
@@ -234,22 +249,18 @@ class BillPaymentRepository extends BaseRepository
      * @return void
      */
     public function post_transaction($billpayment)
-    {
-        // for supplier, debit Accounts Payable (creditor)
-        // for employee, debit Advance Salary Account
-        $account = null;
-        if ($billpayment->supplier_id)
-            $account = Account::where('system', 'payable')->first(['id']);
-        if ($billpayment->employee_id)  
-            $account = Account::where('system', 'adv_salary')->first(['id']);
+    {   
+        // default liability accounts
+        $account = Account::where('system', 'payable')->first(['id']);
+        if ($billpayment->employee_id) $account = Account::where('system', 'adv_salary')->first(['id']);
             
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid')+1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'debit' => $billpayment->allocate_ttl,
+            'debit' => $billpayment->amount,
             'tr_date' => $billpayment->date,
             'due_date' => $billpayment->date,
             'user_id' => $billpayment->user_id,
@@ -260,15 +271,46 @@ class BillPaymentRepository extends BaseRepository
             'user_type' => 'supplier',
             'is_primary' => 1
         ];
-        Transaction::create($dr_data);
 
-        // credit bank
-        unset($dr_data['debit'], $dr_data['is_primary']);
-        $cr_data = array_replace($dr_data, [
-            'account_id' => $billpayment->account_id,
-            'credit' => $billpayment->allocate_ttl,
-        ]);    
-        Transaction::create($cr_data);
+        // advance payment allocation
+        if ($billpayment->allocation_type == 'advance_payment') {
+            // debit payables (liability)
+            Transaction::create($dr_data);
+            
+            // credit supplier advance payment 
+            unset($dr_data['debit'], $dr_data['is_primary']);
+            $account = Account::where('system', 'supplier_adv_pmt')->first(['id']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $billpayment->amount,
+            ]);    
+            Transaction::create($cr_data);
+        } elseif ($billpayment->payment_type == 'advance_payment') {
+            // debit supplier advance payment 
+            $account = Account::where('system', 'supplier_adv_pmt')->first(['id']);
+            $dr_data['account_id'] = $account->id;
+            Transaction::create($dr_data);
+            
+            // credit bank
+            unset($dr_data['debit'], $dr_data['is_primary']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $billpayment->account_id,
+                'credit' => $billpayment->amount,
+            ]);    
+            Transaction::create($cr_data);
+        } elseif (!$billpayment->allocation_type) {
+            // debit payables (liability)
+            Transaction::create($dr_data);
+            
+            // credit bank
+            unset($dr_data['debit'], $dr_data['is_primary']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $billpayment->account_id,
+                'credit' => $billpayment->amount,
+            ]);    
+            Transaction::create($cr_data);
+        }
+        
         aggregate_account_transactions();
     }
 }
