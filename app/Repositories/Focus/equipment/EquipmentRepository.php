@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\equipment;
 use App\Models\equipment\Equipment;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -104,6 +105,11 @@ class EquipmentRepository extends BaseRepository
      */
     public function delete($equipment)
     {
+        if ($equipment->contract_service) {
+            $service = $equipment->contract_service;
+            throw ValidationException::withMessages(["Equipment is attached to a report! Jobcard No. {$service->jobcard_no}"]);
+        }
+        
         if ($equipment->delete()) return true;
             
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));

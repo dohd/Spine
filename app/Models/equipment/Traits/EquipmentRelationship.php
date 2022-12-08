@@ -4,6 +4,7 @@ namespace App\Models\equipment\Traits;
 
 use App\Models\contract\Contract;
 use App\Models\contract_equipment\ContractEquipment;
+use App\Models\contractservice\ContractService;
 use App\Models\items\ContractServiceItem;
 use App\Models\items\ServiceItem;
 
@@ -12,6 +13,11 @@ use App\Models\items\ServiceItem;
  */
 trait EquipmentRelationship
 {   
+    public function contract_service()
+    {
+        return $this->hasOneThrough(ContractService::class, ServiceItem::class, 'equipment_id', 'id');
+    }
+
     public function service_item()
     {
         return $this->hasOne(ServiceItem::class);

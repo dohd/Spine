@@ -176,6 +176,11 @@ class ContractRepository extends BaseRepository
      */
     public function delete($contract)
     {   
+        foreach ($contract->task_schedules as $schedule) {
+            if ($schedule->equipments->count()) 
+                throw ValidationException::withMessages(["Contract Schedule {$schedule->title} has equipments!"]);
+        }
+
         if ($contract->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
