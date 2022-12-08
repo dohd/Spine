@@ -22,8 +22,8 @@
                     <div class="card-body">
                         {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'GET', 'id' => 'mass_add_form']) }}
                             <div class="row">                            
-                                <div class="col-3">
-                                    <div class="form-group">
+                                <div class="col-2">
+                                    <div class="form-group pl-3" style="padding-top: .5em">
                                         {{ Form::hidden('selected_products', null, ['id' => 'selected_products']) }}
                                         {{ Form::hidden('customer', null, ['id' => 'customer']) }}
                                         {{ Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) }}

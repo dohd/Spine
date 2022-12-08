@@ -297,24 +297,23 @@ class AccountsController extends Controller
      * Trial Balance
      */
     public function trial_balance(Request $request)
-    {
-        $q = Account::whereHas('transactions', function ($q)  {
-            $q->when(request('end_date'), function ($q) {
-                $q->whereDate('tr_date', '<=', date_for_database(request('end_date')));
+    {   
+        $end_date = $request->end_date? date_for_database($request->end_date) : '';
+        $q = Account::whereHas('transactions', function ($q) use($end_date) {
+            $q->when($end_date, function ($q) use($end_date) {
+                $q->whereDate('tr_date', '<=', $end_date);
             });
-        })->with(['transactions' => function ($q)  {
-            $q->when(request('end_date'), function ($q) {
-                $q->whereDate('tr_date', '<=', date_for_database(request('end_date')));
+        })->with(['transactions' => function ($q) use($end_date) {
+            $q->when($end_date, function ($q) use($end_date) {
+                $q->whereDate('tr_date', '<=', $end_date);
             });
         }]);
         
         $accounts = $q->orderBy('number', 'asc')->get();
-
-        $date = date_for_database(request('end_date'));
-        if ($request->type == 'p') {
+        $date = date_for_database($end_date);
+        if ($request->type == 'p') 
             return $this->print_document('trial_balance', $accounts, [0, $date], 0);
-        }
-
+        
         return new ViewResponse('focus.accounts.trial_balance', compact('accounts', 'date'));
     }
 
@@ -343,5 +342,37 @@ class AccountsController extends Controller
     public function project_gross_profit()
     {
         return new ViewResponse('focus.accounts.project_gross_profit');
+    }
+
+    /**
+     * Cashbook Index
+     */
+    public function cashbook()
+    {
+        $accounts = Account::whereHas('accountType', fn($q) => $q->where('system', 'bank'))
+            ->where('account_type', 'Asset')->get(['id', 'holder']);
+
+        return new ViewResponse('focus.accounts.cashbook', compact('accounts'));
+    }
+    // 
+    static function cashbook_transactions()
+    {
+        $q = Transaction::query()->where('tr_type', 'pmt');
+        $q->whereHas('account', function ($q) {
+            $q->where('account_type', 'Asset')->whereHas('accountType', fn($q) => $q->where('system', 'bank'));
+            $q->when(request('account_id'), fn($q) => $q->where('accounts.id', request('account_id')));
+        });
+
+        $q->when(request('tr_type') == 'receipt', fn($q) => $q->where('debit', '>', 0));
+        $q->when(request('tr_type') == 'payment', fn($q) => $q->where('credit', '>', 0));
+
+        $q->when(request('start_date') && request('end_date'), function ($q) {
+            $q->whereBetween('tr_date', [
+                date_for_database(request('start_date')),
+                date_for_database(request('end_date')),
+            ]);
+        });
+
+        return $q->get();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models\transaction\Traits;
 
 use App\Models\bill\Bill;
 use App\Models\bill\Paidbill;
+use App\Models\billpayment\Billpayment;
 use App\Models\charge\Charge;
 use App\Models\creditnote\CreditNote;
 use App\Models\hrm\Hrm;
@@ -18,6 +19,16 @@ use App\Models\withholding\Withholding;
  */
 trait TransactionRelationship
 {
+    public function invoice_payment()
+    {
+        return $this->belongsTo(PaidInvoice::class, 'tr_ref');
+    }
+
+    public function bill_payment()
+    {
+        return $this->belongsTo(Billpayment::class, 'tr_ref');
+    }
+
     public function journalentry() 
     {
         return $this->belongsTo(Journal::class, 'tr_ref');

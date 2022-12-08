@@ -141,7 +141,6 @@
             $('.datepicker').datepicker(config.date);
 
             this.drawDataTable();
-        
             $('#search').click(this.dateSearchClick);
         },
 

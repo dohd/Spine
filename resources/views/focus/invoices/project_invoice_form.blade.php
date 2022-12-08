@@ -4,6 +4,7 @@
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
             {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
             <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
+            {{ Form::hidden('taxid', $customer->taxid) }}
         </div>
     </div>
     <div class="col-2">
@@ -22,13 +23,7 @@
             <input type="hidden" name="tid" value={{ $tid }}>
         </div>
     </div>
-    <div class="col-2">
-        <label for="taxid" class="caption">KRA PIN</label>
-        <div class="input-group">
-            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-            {{ Form::text('taxid', $customer->taxid, ['class' => 'form-control round', 'required', isset($invoice) ? 'readonly' : '']) }}
-        </div>
-    </div>
+
     <div class="col-2">
         <label for="invoicedate" class="caption">Invoice Date</label>
         <div class="input-group">
