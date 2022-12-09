@@ -53,7 +53,7 @@ class TaxReportsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('date', function ($report) {
-                return dateFormat($report->createdAt);
+                return dateFormat($report->created_at);
             })
             ->addColumn('actions', function ($report) {
                 return $report->action_buttons;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\pricelist\Traits;
+namespace App\Models\client_pricelist\Traits;
 
 use App\Models\customer\Customer;
 use App\Models\supplier\Supplier;
 
-trait PriceListRelationship
+trait ClientPriceListRelationship
 {
     public function customer()
     {

@@ -1,17 +1,17 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Price List Management')
+@section ('title', 'Client Product Pricelist')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Price List Management</h4>
+            <h4 class="content-header-title">Client Product Pricelist</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
-                    @include('focus.pricelists.partials.pricelists-header-buttons')
+                    @include('focus.client_products.partials.clientproducts-header-buttons')
                 </div>
             </div>
         </div>

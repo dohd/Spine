@@ -33,7 +33,9 @@ class UtilityBillRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        return $q->get();
     }
 
     /**

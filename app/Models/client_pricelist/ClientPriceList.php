@@ -2,16 +2,16 @@
 
 namespace App\Models\pricelist;
 
+use App\Models\client_pricelist\Traits\ClientPriceListAttribute;
+use App\Models\client_pricelist\Traits\ClientPriceListRelationship;
 use App\Models\ModelTrait;
-use App\Models\pricelist\Traits\PriceListAttribute;
-use App\Models\pricelist\Traits\PriceListRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class PriceList extends Model
+class ClientPriceList extends Model
 {
-    use ModelTrait, PriceListRelationship, PriceListAttribute;
+    use ModelTrait, ClientPriceListAttribute, ClientPriceListRelationship;
 
-    protected $table = 'price_lists';
+    protected $table = 'client_pricelists';
 
     /**
      * Mass Assignable fields of model

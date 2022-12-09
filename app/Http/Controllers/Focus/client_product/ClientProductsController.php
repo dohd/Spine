@@ -1,28 +1,28 @@
 <?php
 
-namespace App\Http\Controllers\Focus\pricelist;
+namespace App\Http\Controllers\Focus\client_product;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\client_product\ClientProduct;
 use App\Models\customer\Customer;
-use App\Repositories\Focus\pricelist\PriceListRepository;
+use App\Repositories\Focus\client_product\ClientProductRepository;
 use Illuminate\Http\Request;
 
-class PriceListsController extends Controller
+class ClientProductsController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var PriceListRepository
+     * @var ClientProductRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param PriceListRepository $repository ;
+     * @param ClientProductRepository $repository ;
      */
-    public function __construct(PriceListRepository $repository)
+    public function __construct(ClientProductRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -38,7 +38,7 @@ class PriceListsController extends Controller
         $contracts = ClientProduct::get(['contract', 'customer_id'])->unique('contract');
         $contracts = [...$contracts];
 
-        return new ViewResponse('focus.pricelists.index', compact('customers', 'contracts'));
+        return new ViewResponse('focus.client_products.index', compact('customers', 'contracts'));
     }
 
     /**
@@ -50,7 +50,7 @@ class PriceListsController extends Controller
     {
         $customers = Customer::get(['id', 'company']);
 
-        return new ViewResponse('focus.pricelists.create', compact('customers'));
+        return new ViewResponse('focus.client_products.create', compact('customers'));
     }
 
     /**
@@ -63,7 +63,7 @@ class PriceListsController extends Controller
     {
         $this->repository->create($request->except('_token'));
 
-        return new RedirectResponse(route('biller.pricelists.index'), ['flash_success' => 'Pricelist Item Created Successfully']);
+        return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Created Successfully']);
     }
 
     /**
@@ -75,7 +75,7 @@ class PriceListsController extends Controller
     public function show($id)
     {
         $client_product = ClientProduct::find($id);
-        return view('focus.pricelists.view', compact('client_product'));
+        return view('focus.client_products.view', compact('client_product'));
     }
 
     /**
@@ -89,7 +89,7 @@ class PriceListsController extends Controller
         $client_product = ClientProduct::find($id);
         $customers = Customer::get(['id', 'company']);
 
-        return view('focus.pricelists.edit', compact('client_product', 'customers'));
+        return view('focus.client_products.edit', compact('client_product', 'customers'));
     }
 
     /**
@@ -104,7 +104,7 @@ class PriceListsController extends Controller
         $client_product = ClientProduct::find($id);
         $this->repository->update($client_product, $request->except('_token'));
 
-        return new RedirectResponse(route('biller.pricelists.index'), ['flash_success' => 'Pricelist Item Updated Successfully']);
+        return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Updated Successfully']);
     }
 
     /**
@@ -123,6 +123,6 @@ class PriceListsController extends Controller
             $this->repository->delete($client_product);    
         }
             
-        return new RedirectResponse(route('biller.pricelists.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);
+        return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);
     }
 }

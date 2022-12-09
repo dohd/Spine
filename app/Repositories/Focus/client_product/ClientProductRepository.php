@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Focus\pricelist;
+namespace App\Repositories\Focus\client_product;
 
 use App\Exceptions\GeneralException;
 use App\Models\client_product\ClientProduct;
@@ -10,7 +10,7 @@ use DB;
 /**
  * Class ProductcategoryRepository.
  */
-class PriceListRepository extends BaseRepository
+class ClientProductRepository extends BaseRepository
 {
     /**
      * Associated Repository Model.

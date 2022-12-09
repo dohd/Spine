@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\pricelist\Traits;
+namespace App\Models\client_pricelist\Traits;
 
 /**
  * Class WarehouseAttribute.
  */
-trait PriceListAttribute
+trait ClientPriceListAttribute
 {
     // Make your attributes functions here
     // Further, see the documentation : https://laravel.com/docs/5.4/eloquent-mutators#defining-an-accessor
@@ -20,6 +20,6 @@ trait PriceListAttribute
         return  
         // $this->getViewButtonAttribute("manage-product", "biller.pricegroups.show") 
         //  . ' ' . $this->getEditButtonAttribute("product-create", "biller.pricegroups.edit") 
-        $this->getDeleteButtonAttribute("delete-pricelist", "biller.pricelists.destroy") ;
+        $this->getDeleteButtonAttribute("delete-pricelist", "biller.client_products.destroy") ;
     }
 }

@@ -380,11 +380,11 @@
                         @permission('manage-pricelist')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Client Pricelist</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.pricelists.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Pricelist 
+                                <li><a class="dropdown-item" href="{{ route('biller.client_products.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Pricelist 
                                     </a>
                                 </li>
                                 @permission('create-pricelist')
-                                <li><a class="dropdown-item" href="{{ route('biller.pricelists.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Pricelist
+                                <li><a class="dropdown-item" href="{{ route('biller.client_products.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Pricelist
                                     </a>
                                 </li>
                                 @endauth

@@ -35,7 +35,7 @@
 </div>
 
 <div class="edit-form-btn">
-    {{ link_to_route('biller.pricelists.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+    {{ link_to_route('biller.client_products.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
     {{ Form::submit(@$client_product? 'Update' : 'Create', ['class' => 'btn btn-primary btn-md']) }}                                            
 </div>     
 
