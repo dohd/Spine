@@ -589,6 +589,22 @@
                     </li>
                     @endauth
 
+                    {{-- Purchase Requisition Management --}}
+                    @permission('manage-product')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i> Requisition Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.purchase_requests.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Requisition
+                                </a>
+                            </li>
+                            @permission('create-product')
+                            <li><a class="dropdown-item" href="{{ route('biller.purchase_requests.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Requisition
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
+
                     {{-- Manage Purchases --}}
                     @permission('manage-purchase')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Purchase Management
@@ -681,22 +697,6 @@
                             </li>
                             @permission('create-credit-note')
                             <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
-
-                    @permission('manage-account-charge')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Account Charges
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.charges.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Account Charges
-                                </a>
-                            </li>
-                            @permission('create-account-charge')
-                            <li><a class="dropdown-item" href="{{ route('biller.charges.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Account Charges
                                 </a>
                             </li>
                             @endauth
@@ -811,6 +811,22 @@
                             </li>
                             @permission('create-money-transfer')
                             <li><a class="dropdown-item" href="{{ route('biller.banktransfers.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Transfer
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('manage-account-charge')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Account Charges
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.charges.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Account Charges
+                                </a>
+                            </li>
+                            @permission('create-account-charge')
+                            <li><a class="dropdown-item" href="{{ route('biller.charges.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Account Charges
                                 </a>
                             </li>
                             @endauth
