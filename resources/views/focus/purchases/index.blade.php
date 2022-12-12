@@ -27,8 +27,9 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#Purchase No</th>
+                                        <th>Purchase No.</th>
                                         <th>Supplier</th>
+                                        <th>Tax Pin</th>
                                         <th>Note</th>
                                         <th>Date</th>
                                         <th>Reference</th>                                        
@@ -57,13 +58,12 @@
         }
     });
 
-    const language = {@lang('datatable.strings')};
-    var dataTable = $('#purchases').dataTable({
+    const dataTable = $('#purchases').dataTable({
         processing: true,
         serverSide: true,
         responsive: true,
         stateSave: true,
-        language,
+        language: {@lang('datatable.strings')},
         ajax: {
             url: "{{ route('biller.purchases.get') }}",
             type: 'post',
@@ -73,34 +73,9 @@
                 data: 'DT_Row_Index',
                 name: 'id'
             },
-            {
-                data: 'tid',
-                name: 'tid'
-            },
-            {
-                data: 'supplier',
-                name: 'supplier'
-            },
-            {
-                data: 'note',
-                name: 'note'
-            },
-            {
-                data: 'date',
-                name: 'date'
-            },
-            {
-                data: 'reference',
-                name: 'reference'
-            },
-            {
-                data: 'amount',
-                name: 'amount'
-            },
-            {
-                data: 'balance',
-                name: 'balance'
-            },
+            ...[
+                'tid', 'supplier', 'supplier_taxid', 'note', 'date', 'reference', 'amount', 'balance'
+            ].map(v => ({data:v, name: v})),
             {
                 data: 'actions',
                 name: 'actions',
@@ -113,32 +88,7 @@
         ],
         searchDelay: 500,
         dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'excel',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                }
-            ]
-        }
+        buttons: ['csv', 'excel', 'print'],
     });
 </script>
 @endsection

@@ -63,6 +63,9 @@ class PurchaseorderRepository extends BaseRepository
             if (in_array($key, $rate_keys, 1)) 
                 $order[$key] = numberClean($val);
         }
+        
+        $tid = Purchaseorder::where('ins', $order['ins'])->max('tid');
+        if ($order['tid'] <= $tid) $order['tid'] = $tid+1;
         $result = Purchaseorder::create($order);
 
         $order_items = $input['order_items'];
@@ -77,9 +80,11 @@ class PurchaseorderRepository extends BaseRepository
             ]);
         }, $order_items);
         PurchaseorderItem::insert($order_items);
-
-        DB::commit();
-        if ($result) return $result;   
+        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
@@ -169,7 +174,7 @@ class PurchaseorderRepository extends BaseRepository
         // credit Accounts Payable (Creditors) 
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

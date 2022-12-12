@@ -10,7 +10,7 @@ use App\Models\billpayment\Billpayment;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
-use DB;
+use DirectoryIterator;
 use Illuminate\Http\Request;
 
 class BillPaymentController extends Controller
@@ -19,11 +19,11 @@ class BillPaymentController extends Controller
      * Store repository object
      * @var \App\Repositories\Focus\billpayment\BillPaymentRepository
      */
-    public $respository;
+    public $repository;
 
     public function __construct(BillPaymentRepository $repository)
     {
-        $this->respository = $repository;
+        $this->repository = $repository;
     }
 
 
@@ -34,8 +34,22 @@ class BillPaymentController extends Controller
      */
     public function index()
     {
+        // create purchases (frontfreeze, sahara)
+        foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
+            if ($file->isDot()) continue;
+            $expense_data = $this->repository->expense_import_data($file->getFilename());
+            // dd($expense_data);
+            foreach ($expense_data as $row) {
+                // $this->repository->create($row);
+            }
+        }
+        // delete purchases (frontfreeze, sahara)
+        $billpayments = Billpayment::whereIn('supplier_id', [7,8])->get();
+        foreach ($billpayments as $key => $payment) {
+            // $this->repository->delete($payment);
+        }
+
         $suppliers = Supplier::get(['id', 'name']);
-        
         return view('focus.billpayments.index', compact('suppliers'));
     }
 
@@ -46,11 +60,10 @@ class BillPaymentController extends Controller
      */
     public function create(Request $request)
     {
-        $tid = Billpayment::max('tid');
+        $tid = Billpayment::where('ins', auth()->user()->ins)->max('tid');
         $accounts = Account::whereNull('system')
             ->whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))
             ->get(['id', 'holder']);
-
         $suppliers = Supplier::get(['id', 'name']);
         $employees = User::get();
 
@@ -62,22 +75,24 @@ class BillPaymentController extends Controller
                 'document_type' => $params['src_type'],
                 'status' => 'due'
             ])->first();
-            
-            if ($params['src_type'] == 'direct_purchase') {
-                if (!$bill) {
-                    return redirect(route('biller.purchases.index'))
-                    ->with(['flash_error' => 'Bill not available for direct payment.']);
-                }
+            if ($params['src_type'] == 'direct_purchase' && !$bill) {
+                return redirect(route('biller.purchases.index'))->with([
+                    'flash_error' => 'Bill Unavailable For Direct Payment.'
+                ]);
+            } else {
+                $direct_bill = [
+                    'tid' => $bill->tid,
+                    'supplier_id' => $bill->supplier_id,
+                    'amount' => $bill->total,
+                ];
             }
-                
-            $direct_bill = [
-                'tid' => $bill->tid,
-                'supplier_id' => $bill->supplier_id,
-                'amount' => $bill->total,
-            ];
         }
 
-        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees', 'direct_bill'));
+        $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
+
+        return view('focus.billpayments.create', compact('tid', 'accounts', 'suppliers', 'employees', 'direct_bill', 'unallocated_pmts'));
     }
 
     /**
@@ -88,7 +103,7 @@ class BillPaymentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->respository->create($request->except('_token'));
+        $this->repository->create($request->except('_token'));
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Created Successfully']);
     }
@@ -108,8 +123,14 @@ class BillPaymentController extends Controller
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
 
+        $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
 
-        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees'));
+        $is_allocated = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->where('rel_payment_id', $billpayment->id)->count();
+
+        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated'));
     }
 
     /**
@@ -121,7 +142,7 @@ class BillPaymentController extends Controller
      */
     public function update(Request $request, Billpayment $billpayment)
     {
-        $this->respository->update($billpayment, $request->except('_token'));
+        $this->repository->update($billpayment, $request->except('_token'));
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Updated Successfully']);
     }
@@ -134,7 +155,7 @@ class BillPaymentController extends Controller
      */
     public function destroy(Billpayment $billpayment)
     {
-        $this->respository->delete($billpayment);
+        $this->repository->delete($billpayment);
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Deleted Successfully']);
     }

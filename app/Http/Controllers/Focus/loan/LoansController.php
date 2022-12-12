@@ -70,7 +70,7 @@ class LoansController extends Controller
      */
     public function create()
     {
-        $tid = Loan::max('tid');
+        $tid = Loan::where('ins', auth()->user()->ins)->max('tid');
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder', 'account_type'])->pluck('holder', 'id');
@@ -144,7 +144,7 @@ class LoansController extends Controller
             $q->whereIn('system', ['bank', 'expense', 'other_current_liability']);
         })->where('system', null)
             ->get(['id', 'holder', 'account_type']);
-        $last_tid = Paidloan::max('tid');
+        $last_tid = Paidloan::where('ins', auth()->user()->ins)->max('tid');
 
         return new ViewResponse('focus.loans.pay_loans', compact('last_tid', 'accounts'));
     }
@@ -205,7 +205,7 @@ class LoansController extends Controller
         // debit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

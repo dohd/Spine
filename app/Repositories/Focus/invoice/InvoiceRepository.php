@@ -91,7 +91,7 @@ class InvoiceRepository extends BaseRepository
                 $bill[$key] = numberClean($val);
         }
         
-        $tid = Invoice::max('tid');
+        $tid = Invoice::where('ins', auth()->user()->ins)->max('tid');
         if ($bill['tid'] <= $tid) $bill['tid'] = $tid+1;
         $result = Invoice::create($bill);
         
@@ -215,7 +215,7 @@ class InvoiceRepository extends BaseRepository
         // debit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

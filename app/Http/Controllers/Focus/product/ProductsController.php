@@ -195,53 +195,6 @@ class ProductsController extends Controller
 
         return response()->json($products);
     }
-    public function purchase_search(Request $request)
-    {
-       // return 'dd';
-        if (!access()->allow('product_search')) return false;
-
-        // fetch pricelist customer products
-        if ($request->pricegroup_id) {
-            $products = SupplierProduct::where('supplier_id', request('pricegroup_id'))
-                ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
-                ->map(function ($v) {
-                    $value = $v->row_num > 0 ? "($v->row_num)" : '';
-                    return $v->fill([
-                        'name' => "{$v->descr} {$value}",
-                        'unit' => $v->uom,
-                        'price' => $v->rate,
-                        'purchase_price' => $v->rate,
-                    ]);
-                });
-
-            return response()->json($products);
-        }
-
-        // fetch inventory products
-        $productvariations = ProductVariation::whereHas('product', function ($q) {
-            $q->where('name', 'LIKE', '%' . request('keyword') . '%');
-        })->with(['warehouse' => function ($q) {
-            $q->select(['id', 'title']);
-        }])->with('product')->limit(6)->get()->unique('name');
-        
-        $products = array();
-        foreach ($productvariations as $row) {
-            $product = array_intersect_key($row->toArray(), array_flip([
-                'id', 'product_id', 'name', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'
-            ]));
-            $product = $product + [
-                'product_des' => $row->product->product_des,
-                'units' => $row->product->units,
-                'warehouse' => $row->warehouse->toArray()
-            ];
-            // purchase price set by inventory valuation (LIFO) method
-            $product['purchase_price'] = $this->repository->eval_purchase_price($row->id, $row->qty, $row->purchase_price);
-                
-            $products[] =  $product;
-        }
-
-        return response()->json($products);
-    }
 
     // 
     public function product_sub_load(Request $request)

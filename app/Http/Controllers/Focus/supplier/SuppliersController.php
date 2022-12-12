@@ -165,9 +165,9 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
-        // 4 date intervals of between 0 - 120 days earlier 
+        // 5 date intervals of between 0 - 120+ days prior 
         $intervals = array();
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $from = date('Y-m-d');
             $to = date('Y-m-d', strtotime($from . ' - 30 days'));
             if ($i > 0) {
@@ -178,13 +178,29 @@ class SuppliersController extends Controller
             $intervals[] = [$from, $to];
         }
 
-        // total debt and aging balance
-        $account_balance = 0;
-        $aging_cluster = array_fill(0, 4, 0);
-        $bills = $this->repository->getBillsForDataTable($supplier->id);
+        // statement on bills 
+        $bills = collect();
+        $bills_statement = $this->repository->getStatementForDataTable($supplier->id);
+        foreach ($bills_statement as $row) {
+            if ($row->type == 'bill') $bills->add($row);
+            else {
+                $last_bill = $bills->last();
+                if ($last_bill->bill_id == $row->bill_id) {
+                    $last_bill->debit += $row->debit;
+                }
+            }
+        }
+
+        // aging balance from extracted invoices
+        $aging_cluster = array_fill(0, 5, 0);
         foreach ($bills as $bill) {
-            $debt_amount = $bill->grandttl - $bill->amountpaid;
             $due_date = new DateTime($bill->date);
+            $debt_amount = $bill->credit - $bill->debit;
+            // over payment
+            if ($debt_amount < 0) {
+                $supplier->on_account += $debt_amount * -1;
+                $debt_amount = 0;
+            }
             // due_date between 0 - 120 days
             foreach ($intervals as $i => $dates) {
                 $start  = new DateTime($dates[0]);
@@ -194,12 +210,14 @@ class SuppliersController extends Controller
                     break;
                 }
             }
-            // due_date in 120 days plus
-            if ($due_date < new DateTime($intervals[3][1])) {
-                $aging_cluster[3] += $debt_amount;
+            // due_date in 120+ days
+            if ($due_date < new DateTime($intervals[4][1])) {
+                $aging_cluster[4] += $debt_amount;
             }
-            $account_balance += $debt_amount;
         }
+
+        // supplier debt balance
+        $account_balance = collect($aging_cluster)->sum() - $supplier->on_account;
 
         return new ViewResponse('focus.suppliers.view', compact('supplier', 'account_balance', 'aging_cluster'));
     }
@@ -269,7 +287,7 @@ class SuppliersController extends Controller
                 'purchase' => fn($q) => $q->select('id', 'suppliername', 'note'),
                 'grn' => fn($q) => $q->select('id', 'note'),
             ])
-            ->orderBy('due_date', 'desc')
+            ->orderBy('due_date', 'asc')
             ->get()->map(function ($v) {
                 if ($v->document_type == 'direct_purchase') {
                     $v->suppliername = $v->purchase->suppliername;

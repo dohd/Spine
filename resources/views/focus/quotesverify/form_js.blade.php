@@ -242,11 +242,13 @@
         $('#quotation tbody').append(productRow(rowIndx));
         $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
         rowIndx++;
+        calcTotals();
     });
     // on click Add Title button
     $('#add-title').click(function() {
         $('#quotation tbody').append(productTitleRow(rowIndx));
         rowIndx++;
+        calcTotals();
     });
 
     // on clicking Product row drop down menu

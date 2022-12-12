@@ -20,21 +20,27 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $words = ['title' => 'Repair Quote'];
-        if (request('doc_type') == 'maintenance') 
-            $words['title'] = 'Maintenance Quote';
-        $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid') ?: new Quote;
+        $ins = auth()->user()->ins;
+        $lastquote = new Quote;
+        $lastquote->tid = Quote::where('ins', $ins)->where('bank_id', 0)->max('tid');
+        $prefixes = prefixesArray(['quote', 'lead'], $ins);
+
+        $words['title'] = 'Quote';
+        if (request('doc_type') == 'maintenance') $words['title'] = 'Maintenance Quote';
+            
         $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
         $additionals = Additional::all();
         $price_customers = Customer::whereHas('products')->get(['id', 'company']);
         
-        $common_params = ['lastquote','leads', 'words', 'additionals', 'price_customers'];
+        $common_params = ['lastquote','leads', 'words', 'additionals', 'price_customers', 'prefixes'];
 
         // create proforma invoice
         if (request('page') == 'pi') {
+            $lastquote->tid = Quote::where('ins', $ins)->where('bank_id', '>', 0)->max('tid');
+            $prefixes = prefixesArray(['proforma_invoice', 'lead'], $ins);
+
             $banks = Bank::all();
-            $lastquote = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid') ?: new Quote;
-            $words['title'] = 'Repair Proforma Invoice';
+            $words['title'] = 'Proforma Invoice';
             if (request('doc_type') == 'maintenance') 
                 $words['title'] = 'Maintenance Proforma Invoice';
 

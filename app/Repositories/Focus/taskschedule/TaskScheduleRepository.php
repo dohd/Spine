@@ -163,6 +163,12 @@ class TaskScheduleRepository extends BaseRepository
      */
     public function delete($taskschedule)
     {
+        if ($taskschedule->contractservice) {
+            $service = $taskschedule->contractservice;
+            $msg = "Schedule is attached to service report! Jobcard No. {$service->jobcard_no}";
+            throw ValidationException::withMessages([$msg]);
+        }
+            
         if ($taskschedule->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));

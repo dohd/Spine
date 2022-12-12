@@ -41,14 +41,14 @@ class ClientPricelistImport implements ToCollection, WithBatchInserts, WithValid
         ];
 
         $row_count = 0;
+        $label_count = count($columns);
         foreach ($rows as $i => $row) {
-            $row = $row->toArray();
+            $row = array_slice($row->toArray(), 0, $label_count);
+            
             if ($i == 0) {
                 $omitted_cols = array_diff($columns, $row);
                 if ($omitted_cols) throw new Error('Column label mismatch: ' . implode(', ',$omitted_cols));
                 continue;
-            } elseif (count($row) != count($columns)) {
-                throw new Error('Column mismatch on row ' . strval($i+1)  . '!');
             }
 
             $row_data = array_combine($columns, $row);

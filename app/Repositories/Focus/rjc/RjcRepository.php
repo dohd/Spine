@@ -74,8 +74,8 @@ class RjcRepository extends BaseRepository
                 $data[$key] = date_for_database($value);
         }
         // update tid
-        $last_tid =  Rjc::max('tid');
-        if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
+        $tid =  Rjc::where('ins', $data['ins'])->max('tid');
+        if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
 
         $result = Rjc::create($data);
 

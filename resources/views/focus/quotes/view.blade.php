@@ -1,6 +1,7 @@
 @extends('core.layouts.app')
 @php
     $quote_type = $quote->bank_id ? 'Proforma Invoice' : 'Quote';
+    $prefixes = prefixesArray(['quote', 'proforma_invoice', 'lead'], $quote->ins);
 @endphp
 
 @section('title', $quote_type . ' Approval')
@@ -36,12 +37,12 @@
             <section class="card">
                 <div id="invoice-template" class="card-body">                    
                     @include('focus.quotes.partials.view_menu')
-                    @php
-                        $approved_verified = ($quote->verified == "Yes" && $quote->status == 'approved');
-                        $text = $quote->verified == "Yes" ? 'This ' . $quote_type . ' is verified' : '';
-                        if ($approved_verified) $text = 'This ' . $quote_type . ' is approved and verified';
-                    @endphp
-                    @if ($quote->verified == "Yes")
+                    @if ($quote->verified == "Yes" || $quote->status == 'approved')
+                        @php
+                            $text = "{$quote_type} is approved";
+                            if ($quote->verified == 'Yes') $text .= ' and verified';
+                            $approved_verified = ($quote->verified == "Yes" && $quote->status == 'approved');
+                        @endphp
                         <div class="badge text-center white d-block m-1">
                             <span class="{{ $approved_verified ? 'bg-primary' : 'bg-success' }} round p-1">
                                 <b>{{ $text }}</b>
@@ -53,16 +54,16 @@
                         <div class="col-6 text-center text-md-left">
                             @php
                                 $clientname = $quote->lead->client_name;
-                                $branch = 'Head Office';
+                                $branch = '';
                                 $address = $quote->lead->client_address;
                                 $email = $quote->lead->client_email;
                                 $cell = $quote->lead->client_contact;
                                 if ($quote->client) {
                                     $clientname = $quote->client->company;						
-                                    $branch = $quote->branch? $quote->branch->name : '';
                                     $address = $quote->client->address;
                                     $email = $quote->client->email;
                                     $cell = $quote->client->phone;
+                                    if ($quote->branch) $branch = $quote->branch;
                                 }					
                             @endphp
                             <span class="text-muted"><b>{{ trans('invoices.bill_to') }}</b></span>
@@ -77,10 +78,10 @@
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
                             <h2>
-                                {{ gen4tid($quote->bank_id? '#PI-' : '#QT-', $quote->tid)}}{{ $quote->revision }}
-                                {{ $quote->is_repair? 'Repair' : 'Maintenance' }}
+                                {{ gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid)}}{{ $quote->revision }}
+                                {{ !$quote->is_repair? 'Maintenance' : '' }}
                             </h2>
-                            <h3>{{ gen4tid('#Tkt-', $quote->lead->reference) }}</h3>
+                            <h3>{{ gen4tid("{$prefixes[2]}-", $quote->lead->reference) }}</h3>
                             <div class="row">
                                 <div class="col">
                                     <hr>
@@ -112,7 +113,7 @@
                                                     <td scope="row">{{ $item['numbering'] }}</td>
                                                     <td>
                                                         <p>{{$item['product_name']}}</p>
-                                                        <p class="text-muted"> {!!$item['product_des'] !!} </p>
+                                                        <p class="text-muted"> {!! $item['product_des'] !!} </p>
                                                     </td>
                                                     <td class="text-right">{{ +$item['product_qty'] }} {{$item['unit']}}</td>
                                                     <td class="text-right">{{amountFormat($item->product_subtotal)}}</td>
@@ -199,14 +200,11 @@
                                     <p>
                                         LPO Date : <span class="text-danger mr-1">{{ dateFormat($quote->lpo->date) }}</span>
                                         LPO Number : <span class="text-danger mr-1">{{ $quote->lpo->lpo_no }}</span>                                     
-                                        LPO Amount : <span class="text-danger">{{ number_format($quote->lpo->amount, 2) }}</span>                                                                    
+                                        LPO Amount : <span class="text-danger">{{ numberFormat($quote->lpo->amount) }}</span>                                                                    
                                     </p> 
-                                    <p>
-                                        LPO Remark : <span class="text-danger">{{ $quote->lpo->remark }}</span> 
-                                    </p>                               
+                                    <p>LPO Remark : <span class="text-danger">{{ $quote->lpo->remark }}</span></p>
                                @endisset
                             </div>
-
                             <div class="col-md-5 col-sm-12 text-center">
                                 @if ($quote->status !== 'cancelled') 
                                     <a href="#sendEmail" data-toggle="modal" data-remote="false" data-type="6" data-type1="proposal" class="btn btn-primary btn-lg my-1 send_bill">
@@ -255,7 +253,7 @@
     </div>
 </div>
 @php 
-    $invoice=$quote; 
+    $invoice = $quote; 
 @endphp
 @include("focus.modal.quote_status_model")
 @include("focus.modal.lpo_model")
@@ -296,17 +294,6 @@
         $(this).children('form').submit();
     });
 
-    // On close quote
-    // $('#closeQuote').click(function() { 
-    //     swal({
-    //         title: 'Are You  Sure?',
-    //         icon: "warning",
-    //         buttons: true,
-    //         dangerMode: true,
-    //         showCancelButton: true,
-    //     }, () => $('#closeQuote').children().submit());
-    // });
-
     // On Approve Quote
     $('.quote-approve').click(function(e) {
         const customerId = @json($quote->customer_id);
@@ -339,6 +326,7 @@
         $form.find('select[name=status]').click(function() {
             $form.find('label[for=approved-by]').text('Approved By');
             $form.find('label[for=approval-date]').text('Approval Date');
+            
             $('#approvedby').attr('placeholder', 'Approved By');
             $('#approvedmethod').attr('disabled', false);
             $('#btn_approve').text('Approve');
@@ -348,7 +336,6 @@
                 $form.find('label[for=approval-date]').text('Cancel Date');
                 $('#approvedby').attr('placeholder', 'Called By');
                 $('#btn_approve').text('Cancel');
-
                 $('#approvedmethod').attr('disabled', true);
             }
         });

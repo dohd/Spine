@@ -51,9 +51,10 @@ class ProjectRepository extends BaseRepository
         if ($project_quote_exists) throw ValidationException::withMessages(['Tagged Quote / PI already attached to a project']);
 
         $data = $input['data'];
-        $tid = Project::max('tid');
-        if ($data['tid'] <= $tid) $data['tid'] = $tid + 1;
+        $tid = Project::where('ins', auth()->user()->ins)->max('tid');
+        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $data['main_quote_id'] = $data_items[0];
+        
         $result = Project::create($data);
 
         // create project_quote and update related foreign key in quote
@@ -127,10 +128,18 @@ class ProjectRepository extends BaseRepository
      */
     public function delete($project)
     {  
-        $budgeted_quotes = $project->quotes()->whereHas('budget')->get();
-        if ($budgeted_quotes->count())
-            throw ValidationException::withMessages(['Project has been budgeted on!']);
-        if ($project->delete()) return true;
+        DB::beginTransaction();
+
+        if ($project->budget && $project->purchase_items->count()) {
+            throw ValidationException::withMessages(['Not allowed! Project has expense']);
+        } elseif ($project->budget) {
+            $project->budget->delete();
+        }
+
+        if ($project->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
     }    

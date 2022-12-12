@@ -1,5 +1,5 @@
 <div class="form-group row">
-    <div class="col-4">
+    <div class="col-5">
         <label for="contract">Contract</label>
         <select name="contract_id" id="contract" class="form-control" data-placeholder="Choose Contract" required>
             <option value="">-- Select Contract --</option>
@@ -10,7 +10,7 @@
             @endforeach
         </select>
     </div>
-    <div class="col-2">
+    <div class="col-3">
         <label for="schedule">Task Schedule</label>
         <select name="schedule_id" id="schedule" class="form-control" data-placeholder="Choose Task Schedule" required>
             <option value="">-- Select Schedule --</option>
@@ -70,6 +70,7 @@
     </div>
 </div>
 <div class="form-group row">
+    {{ Form::hidden('equipment_ids', null, ['id' => 'equipment_ids']) }}
     <div class="col-2 ml-auto">
         {{ Form::submit('Load Equipments', ['class' => 'btn btn-primary btn-lg']) }}
     </div>

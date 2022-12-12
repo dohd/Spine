@@ -47,7 +47,7 @@ class ProjectStockController extends Controller
         $quote_id = $request->quote_id;
         if (!$quote_id) return new RedirectResponse(route('biller.projectstock.quote_index'), []);
 
-        $tid = Projectstock::max('tid');
+        $tid = Projectstock::where('ins', auth()->user()->ins)->max('tid');
         $quote = Quote::find($quote_id);
         
         $budget_items = BudgetItem::where('a_type', 1)->whereHas('budget', function ($q) use($quote_id) { 

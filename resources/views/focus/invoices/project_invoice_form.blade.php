@@ -4,6 +4,7 @@
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
             {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
             <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
+            {{ Form::hidden('taxid', $customer->taxid) }}
         </div>
     </div>
     <div class="col-2">
@@ -11,10 +12,10 @@
         <div class="input-group">
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
             @php
-                $label = gen4tid('Inv-', @$last_tid+1);
+                $label = gen4tid("{$prefixes[0]}-", @$last_tid+1);
                 $tid = @$last_tid+1; 
                 if (isset($invoice)) {
-                    $label = gen4tid('Inv-', $invoice->tid);
+                    $label = gen4tid("{$prefixes[0]}-", $invoice->tid);
                     $tid = $invoice->tid;
                 }
             @endphp
@@ -22,13 +23,7 @@
             <input type="hidden" name="tid" value={{ $tid }}>
         </div>
     </div>
-    <div class="col-2">
-        <label for="taxid" class="caption">KRA PIN</label>
-        <div class="input-group">
-            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-            {{ Form::text('taxid', $customer->taxid, ['class' => 'form-control round', 'required', isset($invoice) ? 'readonly' : '']) }}
-        </div>
-    </div>
+
     <div class="col-2">
         <label for="invoicedate" class="caption">Invoice Date</label>
         <div class="input-group">
@@ -147,19 +142,18 @@
             @foreach($quotes as $k => $val)
                 @php
                     // Reference details
-                    $tid = gen4tid($val->bank_id? 'PI-' : 'QT-', $val->tid);
+                    $tid = gen4tid($val->bank_id? "{$prefixes[2]}-" : "{$prefixes[1]}-", $val->tid);
                     if ($val->revision) $tid .= $val->revision;
-                    $lpo_no = $val->lpo ? 'PO-'.$val->lpo->lpo_no : '';
+                    $lpo_no = $val->lpo ? "{$prefixes[3]}-{$val->lpo->lpo_no}" : '';
                     $client_ref = $val->client_ref;
-                    $branch_name = $val->branch->name;
-                    if ($val->branch->branch_code) $branch_name .=  ' (' . $val->branch->branch_code . ') ';
+                    $branch_name = $val->branch? "{$val->branch->name} ({$val->branch->branch_code})" : '';
                     
                     // Description details
                     $title = $val->notes;
                     $jcs = [];
                     foreach($val->verified_jcs as $jc) {
-                        if ($jc->type == 2) $jcs[] = 'DN-'.$jc->reference;
-                        else $jcs[] = 'JC-'.$jc->reference;
+                        if ($jc->type == 2) $jcs[] = "{$prefixes[4]}-{$jc->reference}";
+                        else $jcs[] = "{$prefixes[5]}-{$jc->reference}";
                     }
 
                     // Table values
@@ -177,6 +171,8 @@
                     <td><input type="text" class="form-control rate" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
                     <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ $price }}</span></strong></td>
                     <input type="hidden" class="subtotal" value="{{ $price }}" id="initprice-{{ $k }}" disabled>
+                    <input type="hidden" class="num-val" name="numbering[]" id="num-{{ $k }}">
+                    <input type="hidden" class="row-index" name="row_index[]" id="rowindex-{{ $k }}">
                     <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $val->id }}" id="quoteid-{{ $k }}">
                     <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $val->branch_id }}" id="branchid-{{ $k }}">
                     <input type="hidden" class="project-id" name="project_id[]" value="{{ $project_id }}" id="projectid-{{ $k }}">
@@ -194,6 +190,8 @@
                     <td><input type="text" class="form-control rate" name="product_price[]" value="{{ numberFormat($item->product_price) }}" id="product_price-{{ $k }}" readonly></td>
                     <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ numberFormat($item->product_price * $item->product_qty) }}</span></strong></td>
                     <input type="hidden"  class="subtotal" value="{{ $item->product_price }}" id="initprice-{{ $k }}" disabled>
+                    <input type="hidden" class="num-val" name="numbering[]" value="{{ $item->numbering }}" id="num-{{ $k }}">
+                    <input type="hidden" class="row-index" name="row_index[]" value="{{ $item->row_index }}" id="rowindex-{{ $k }}">
                     <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $item->quote_id }}" id="quoteid-{{ $k }}">
                     <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $item->branch_id }}" id="branchid-{{ $k }}">
                     <input type="hidden" class="project-id" name="project_id[]" value="{{ $item->project_id }}" id="projectid-{{ $k }}">

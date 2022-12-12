@@ -5,6 +5,7 @@ namespace App\Models\quote\Traits;
 use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
+use App\Models\currency\Currency;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\items\VerifiedItem;
@@ -31,6 +32,11 @@ trait QuoteRelationship
     public function projects()
     {
         return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
+    }
+
+    public function project()
+    {
+        return $this->hasOne(Project::class, 'main_quote_id');
     }
 
     public function skill_items()
@@ -96,6 +102,11 @@ trait QuoteRelationship
     public function attachment()
     {
         return $this->hasMany(MetaEntry::class, 'rel_id')->where('rel_type', '=', 4)->withoutGlobalScopes();
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function client()

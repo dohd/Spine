@@ -49,7 +49,7 @@ class ContractsController extends Controller
      */
     public function create()
     {
-        $last_tid = Contract::max('tid');
+        $last_tid = Contract::where('ins', auth()->user()->ins)->max('tid');
 
         return new ViewResponse('focus.contracts.create', compact('last_tid'));
     }
@@ -242,12 +242,12 @@ class ContractsController extends Controller
     public function contract_equipment()
     {
         $equipments = Equipment::doesntHave('task_schedules')
-        ->whereHas('contracts', function ($q) {
-            $q->where('contract_id', request('contract_id'));
-        })->get()->map(function ($v) {
-            $v->branch = $v->branch;
-            return $v;
-        });
+            ->whereHas('contracts', function ($q) {
+                $q->where('contract_id', request('contract_id'));
+            })->get()->map(function ($v) {
+                $v->branch = $v->branch;
+                return $v;
+            });
         
         return response()->json($equipments);
     }    

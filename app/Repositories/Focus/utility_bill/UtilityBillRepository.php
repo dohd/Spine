@@ -33,7 +33,9 @@ class UtilityBillRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        return $q->get();
     }
 
     /**
@@ -150,7 +152,7 @@ class UtilityBillRepository extends BaseRepository
     {     
         DB::beginTransaction();
 
-        $is_manual_bill = in_array($utility_bill->document_type, ['kra_bill', 'goods_receive_note']) && !$utility_bill->ref_id;
+        $is_manual_bill = in_array($utility_bill->document_type, ['kra_bill', 'goods_receive_note', 'opening_balance']) && !$utility_bill->ref_id;
         if (!$is_manual_bill) throw ValidationException::withMessages(['Please delete resource from parent record!']);
     
         Transaction::where(['tr_type' => 'bill', 'note' => $utility_bill->note, 'tr_ref' => $utility_bill->id])->delete();
@@ -230,7 +232,7 @@ class UtilityBillRepository extends BaseRepository
         // credit Accounts Payable (Creditors)
         $account = Account::where('system', 'payable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
@@ -269,7 +271,7 @@ class UtilityBillRepository extends BaseRepository
         // debit Uninvoiced Goods Received Note (liability)
         $account = Account::where('system', 'grn')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

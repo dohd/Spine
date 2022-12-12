@@ -151,7 +151,7 @@ class AdvancePaymentRepository extends BaseRepository
             }
         } else {
             // create bill
-            $bill_data['tid'] = UtilityBill::max('tid') + 1;
+            $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
             $bill = UtilityBill::create($bill_data);
 
             $bill_items_data = array_map(function ($v) use($bill) {

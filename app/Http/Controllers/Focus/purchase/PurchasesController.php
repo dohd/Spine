@@ -31,6 +31,7 @@ use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
 use App\Models\product\ProductVariation;
 use App\Models\supplier_product\SupplierProduct;
 use App\Http\Responses\RedirectResponse;
+use DirectoryIterator;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -61,6 +62,22 @@ class PurchasesController extends Controller
      */
     public function index(ManagePurchaseRequest $request)
     {
+        // create purchases (frontfreeze, sahara)
+        foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
+            if ($file->isDot()) continue;
+            $expense_data = $this->repository->expense_import_data($file->getFilename());
+            // dd($expense_data);
+            foreach ($expense_data as $row) {
+                // $this->repository->create($row);
+            }
+        }
+
+        // delete purchases (frontfreeze, sahara)
+        $purchases = Purchase::where('supplier_id', [7,8])->get();
+        foreach ($purchases as $key => $purchase) {
+            // $this->repository->delete($purchase);
+        }
+
         return new ViewResponse('focus.purchases.index');
     }
 
@@ -101,10 +118,10 @@ class PurchasesController extends Controller
         if (!$data_items) throw ValidationException::withMessages(['Please use suggested options for input within a row!']);
 
         $purchase = $this->repository->create(compact('data', 'data_items'));
-        $payment_params = "src_id={$purchase->id}&src_type=direct_purchase";
 
-        $msg = 'Direct Purchase Created Successfully.';
-        $msg .= ' <span class="pl-5 font-weight-bold h5"><a href="'. route('biller.billpayments.create', $payment_params) .'" target="_blank" class="btn btn-purple"><i class="fa fa-money"></i> Direct Payment</a></span>';
+        $msg = 'Direct Purchase Created Successfully.'
+            .' <span class="pl-5 font-weight-bold h5"><a href="'. route('biller.billpayments.create', ['src_id' => $purchase->id, 'src_type' => 'direct_purchase']) .'" target="_blank" class="btn btn-purple">
+            <i class="fa fa-money"></i> Direct Payment</a></span>';
 
         return new RedirectResponse(route('biller.purchases.index'), ['flash_success' => $msg]);
     }

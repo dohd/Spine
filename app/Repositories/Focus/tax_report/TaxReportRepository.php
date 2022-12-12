@@ -27,6 +27,10 @@ class TaxReportRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        $q->when(request('file_month'), function($q) {
+            $q->where('sale_month', request('file_month'))->orWhere('purchase_month', request('file_month'));
+        });
             
         return $q->get();
     }
@@ -90,7 +94,7 @@ class TaxReportRepository extends BaseRepository
             'title', 'sale_month', 'sale_tax_rate', 'purchase_month', 'purchase_tax_rate', ...$data_keys
         ]);
         $report_data = array_replace($report_data, [
-            'tid' => TaxReport::max('tid') + 1,
+            'tid' => TaxReport::where('ins', auth()->user()->ins)->max('tid') + 1,
         ]);
         $result = TaxReport::create($report_data);
 

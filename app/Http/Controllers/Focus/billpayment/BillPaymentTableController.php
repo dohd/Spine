@@ -82,7 +82,13 @@ class BillPaymentTableController extends Controller
                 return numberFormat($billpayment->amount - $billpayment->allocate_ttl);
             })
             ->addColumn('bill_no', function ($billpayment) {
-                return gen4tid('BILL-', $billpayment->tid);
+                $links = [];
+                foreach ($billpayment->bills as $bill) {
+                    $tid = gen4tid('BILL-', $bill->tid);
+                    $links[] = '<a href="'. route('biller.utility-bills.show', $bill) .'">'.$tid.'</a>';
+                }
+                
+                return implode(', ', $links);
             })
             ->addColumn('aggregate', function ($billpayment) use($aggregate) {
                 return $aggregate;

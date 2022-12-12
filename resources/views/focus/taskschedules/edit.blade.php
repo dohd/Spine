@@ -84,6 +84,7 @@
                                     </table>                                    
                                 </div>
                                 <div class="form-group row">
+                                    {{ Form::hidden('equipment_ids', null, ['id' => 'equipment_ids']) }}
                                     <div class="col-11">
                                         {{ Form::submit('Update', ['class' => 'btn btn-primary float-right btn-lg']) }}
                                     </div>
@@ -101,6 +102,17 @@
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
+    $('form').submit(function() {
+        const equipment_ids = [];
+        $('#equipmentTbl tbody tr').each(function() {
+            if ($(this).find('.select').prop('checked')) {
+                equipment_ids.push($(this).find('.equipId').val())
+            }
+        });
+        ['.equipId', '.rate'].forEach(v => $(v).remove());
+        $('#equipment_ids').val(equipment_ids.join(','));
+    });
+
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
     const schedule = @json($taskschedule);
@@ -113,19 +125,24 @@
     
     // on change row checkbox
     $('#equipmentTbl').on('change', '.select', function() {
-        const select = $(this).is(':checked');
         const equipId = $(this).parents('tr').find('.equipId');
-        if (select) equipId.attr('disabled', false);
+        if ($(this).is(':checked')) equipId.attr('disabled', false);
         else equipId.attr('disabled', true);
-    })
+    });
+
     // on change action checkbox
     $('#selectAll').change(function() {
         const selectAll = $(this).is(':checked');
         $('#equipmentTbl tbody tr').each(function() {
-            if (selectAll) $(this).find('.select').prop('checked', true).change();
-            else $(this).find('.select').prop('checked', false).change();
+            if (selectAll) {
+                $(this).find('.select').prop('checked', true);
+                $(this).find('.equipId').prop('disabled', false);
+            } else {
+                $(this).find('.select').prop('checked', false);
+                $(this).find('.equipId').prop('disabled', true);
+            }  
         });
     });
-    $('#selectAll').attr('checked', true).change();
+    $('#selectAll').prop('checked', true).change();
 </script>
 @endsection

@@ -107,7 +107,7 @@ class ChargeRepository extends BaseRepository
     {
         // credit bank
         $tr_category = Transactioncategory::where('code', 'chrg')->first(['id', 'code']);
-        $tid = Transaction::max('tid');
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid');
         $cr_data = [
             'tid' => $tid +1,
             'account_id' => $result->bank_id,

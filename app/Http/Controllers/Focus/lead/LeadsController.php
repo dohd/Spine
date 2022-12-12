@@ -26,6 +26,8 @@ use App\Http\Responses\Focus\lead\CreateResponse;
 use App\Http\Responses\Focus\lead\EditResponse;
 use App\Repositories\Focus\lead\LeadRepository;
 use App\Http\Requests\Focus\lead\ManageLeadRequest;
+use App\Models\branch\Branch;
+use App\Models\customer\Customer;
 use App\Models\lead\Lead;
 
 /**
@@ -111,7 +113,11 @@ class LeadsController extends Controller
      */
     public function edit(Lead $lead)
     {
-        return new EditResponse('focus.leads.edit', compact('lead'));
+        $customers = Customer::get(['id', 'company']);
+        $branches = Branch::get(['id', 'name', 'customer_id']);
+        $prefixes = prefixesArray(['lead'], $lead->ins);
+
+        return new EditResponse('focus.leads.edit', compact('lead', 'branches', 'customers', 'prefixes'));
     }
 
     /**
@@ -151,7 +157,7 @@ class LeadsController extends Controller
      */
     public function destroy(Lead $lead)
     {
-        $resp = $this->repository->delete($lead);
+        $this->repository->delete($lead);
             
         return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Deleted']);
     }

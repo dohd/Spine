@@ -32,11 +32,13 @@ Route::group(['namespace' => 'account'], function () {
     Route::get('accounts/balancesheet/{type}', 'AccountsController@balance_sheet')->name('accounts.balance_sheet');
     Route::get('accounts/trialbalance/{type}', 'AccountsController@trial_balance')->name('accounts.trial_balance');
     Route::get('accounts/project_gross_profit', 'AccountsController@project_gross_profit')->name('accounts.project_gross_profit');
+    Route::get('accounts/cashbook', 'AccountsController@cashbook')->name('accounts.cashbook');
 
     Route::post('accounts/search_next_account_no', 'AccountsController@search_next_account_no')->name('accounts.search_next_account_no');
     Route::post('accounts/search', 'AccountsController@account_search')->name('accounts.account_search');
     Route::resource('accounts', 'AccountsController');
     //For Datatable
+    Route::post('accounts/cashbook/transactions', 'CashbookTableController')->name('accounts.get_cashbook');
     Route::post('accounts/project_gross_profit/get', 'ProjectGrossProfitTableController')->name('accounts.get_project_gross_profit');
     Route::post('accounts/get', 'AccountsTableController')->name('accounts.get');
 });
@@ -267,10 +269,11 @@ Route::group(['namespace' => 'pricegroup'], function () {
     //For Datatable
     Route::post('pricegroups/get', 'PricegroupsTableController')->name('pricegroups.get');
 });
-Route::group(['namespace' => 'pricelist'], function () {
-    Route::resource('pricelists', 'PriceListsController');
+
+Route::group(['namespace' => 'client_product'], function () {
+    Route::resource('client_products', 'ClientProductsController');
     //For Datatable
-    Route::post('pricelists/get', 'PriceListTableController')->name('pricelists.get');
+    Route::post('client_products/get', 'ClientProductsTableController')->name('client_products.get');
 });
 
 Route::group(['namespace' => 'pricelistSupplier'], function () {

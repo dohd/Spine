@@ -73,12 +73,10 @@ class UtilityBillTableController extends Controller
                 $doc_type = $utility_bill->document_type;
                 if ($doc_type == 'direct_purchase') {
                     $purchase = $utility_bill->purchase;
-                    if ($purchase->suppliername)
-                        $name = $purchase->suppliername;
+                    if ($purchase) $name = $purchase->suppliername;
                 } elseif ($doc_type == 'advance_payment') {
                     $payment = $utility_bill->advance_payment;
-                    if ($payment->employee)
-                        $name = $payment->employee->full_name;
+                    if ($payment) $name = $payment->employee->full_name;
                 }
 
                 if ($utility_bill->supplier && !$name) 

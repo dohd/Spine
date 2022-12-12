@@ -87,7 +87,7 @@ class AccountRepository extends BaseRepository
     $opening_balance = $result->opening_balance;
     if ($opening_balance > 0) {
       $seco_account = Account::where('system', 'retained_earning')->first();
-      $tid = Transaction::max('tid') + 1;
+      $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
       $date = $result->opening_balance_date;
       $note = $result->number . '-' . $result->holder . ' Account Opening Balance';
       $data = [
@@ -119,7 +119,7 @@ class AccountRepository extends BaseRepository
         $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $opening_balance = $opening_balance;
         $data = $data + [
-          'tid' => Journal::max('tid') + 1,
+          'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
           'debit_ttl' => $opening_balance,
           'credit_ttl' =>  $opening_balance
         ];
@@ -193,7 +193,7 @@ class AccountRepository extends BaseRepository
         Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'dep'])->delete();
 
         // debit Bank and credit Retained Earnings
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $pri_tr = Transactioncategory::where('code', 'dep')->first(['id', 'code']);
         $data = $data + [
           'account_id' => $account->id,
@@ -216,10 +216,10 @@ class AccountRepository extends BaseRepository
         Transaction::where(['tr_ref' => $seco_account->id, 'tr_type' => 'genjr'])->delete();
 
         // debit Asset Account and credit Retained Earning
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $pri_tr = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $data = $data + [
-          'tid' => Journal::max('tid') + 1,
+          'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
           'debit_ttl' => $opening_balance,
           'credit_ttl' =>  $opening_balance
         ];

@@ -47,10 +47,12 @@ class CreditNotesController extends Controller
     public function create()
     {
         $is_debit = request('is_debit');
-        $last_tid = CreditNote::max('tid');
-        if ($is_debit == 1) $last_tid = CreditNote::where('is_debit', 1)->max('tid');
-            
-        return new ViewResponse('focus.creditnotes.create', compact('last_tid', 'is_debit'));
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['credit_note', 'debit_note'], $ins);
+        $last_tid = CreditNote::where('ins', $ins)->max('tid');
+        if ($is_debit == 1) $last_tid = CreditNote::where('ins', $ins)->where('is_debit', 1)->max('tid');
+
+        return new ViewResponse('focus.creditnotes.create', compact('last_tid', 'is_debit', 'prefixes'));
     }
 
     /**
@@ -104,8 +106,10 @@ class CreditNotesController extends Controller
                 $creditnote[$key] = numberFormat($val);
             }
         }
-        
-        return new ViewResponse('focus.creditnotes.edit', compact('creditnote', 'is_debit'));
+
+        $prefixes = prefixesArray(['credit_note', 'debit_note'], $creditnote->ins);
+
+        return new ViewResponse('focus.creditnotes.edit', compact('creditnote', 'is_debit', 'prefixes'));
     }
 
     /**

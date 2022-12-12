@@ -16,31 +16,31 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\pricelist;
+namespace App\Http\Controllers\Focus\client_product;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Focus\pricelist\PriceListRepository;
+use App\Repositories\Focus\client_product\ClientProductRepository;
 use Yajra\DataTables\Facades\DataTables;
 
 /**
  * Class BranchTableController.
  */
-class PriceListTableController extends Controller
+class ClientProductsTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var PriceListRepository
+     * @var ClientProductRepository
      */
-    protected $pricelist;
+    protected $client_product;
 
     /**
      * contructor to initialize repository object
-     * @param PriceListRepository $pricelist ;
+     * @param ClientProductRepository $client_product ;
      */
-    public function __construct(PriceListRepository $pricelist)
+    public function __construct(ClientProductRepository $client_product)
     {
 
-        $this->pricelist = $pricelist;
+        $this->pricelist = $client_product;
     }
 
     /**

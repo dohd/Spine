@@ -63,24 +63,29 @@ class PurchasesTableController extends Controller
                 return dateFormat($purchase->date);
             })
             ->addColumn('supplier', function ($purchase) {
-                $name = $purchase->suppliername ? $purchase->suppliername :  $purchase->supplier->name;
-                $link = route('biller.suppliers.show', [$purchase->supplier_id]);
+                $name = $purchase->suppliername;
+                if ($purchase->supplier) {
+                    $supplier = $purchase->supplier;
+                    $name = $name ?: $supplier->name;
+                    if ($supplier->taxid) $name .= " - {$supplier->taxid}";
+                }
 
-                return $name . ' <a class="font-weight-bold" href="' . $link . '"><i class="ft-eye"></i></a>';
+                return ' <a class="font-weight-bold" href="'. route('biller.suppliers.show', $purchase->supplier_id) .'">'. $name .'</a>';
             })
             ->addColumn('reference', function ($purchase) {
-                return $purchase->doc_ref . ' - ' .$purchase->doc_ref_type;
+                $reference = $purchase->doc_ref_type;
+                if ($purchase->doc_ref) $reference .= " - {$purchase->doc_ref}";
+                
+                return $reference;
             })
             ->addColumn('amount', function ($purchase) {
-                return number_format($purchase->grandttl, 2);
+                return numberFormat($purchase->grandttl);
             })
             ->addColumn('balance', function ($purchase) {
-                return number_format($purchase->grandttl - $purchase->amountpaid, 2);
+                return numberFormat($purchase->grandttl - $purchase->amountpaid);
             })
             ->addColumn('actions', function ($purchase) {
                 return $purchase->action_buttons;
-                // return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List">
-                //     <i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
             })
             ->make(true);
     }

@@ -121,7 +121,7 @@ class LoanRepository extends BaseRepository
     {
         // credit lender account (bank)
         $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $loan->lender_id,

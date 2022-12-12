@@ -130,8 +130,8 @@
                         url: "{{ route('biller.quotes.customer_quotes') }}?id=" + $(this).val(),
                         processResults: function(data) {
                             const results = data.map(v => {
-                                const tid = (''+v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
-                                const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch.name} - ${v.notes}`;
+                                const tid = `${v.tid}`.length < 4? `000${v.tid}`.slice(-4) : v.tid;
+                                const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch? v.branch.name : ''} - ${v.notes}`;
                                 return {id: v.id, text}; 
                             });
                             // replace array data

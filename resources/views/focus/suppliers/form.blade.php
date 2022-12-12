@@ -136,7 +136,7 @@
                 <div class='form-group'>
                     {{ Form::label('balance', 'Opening Balance',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('open_balance', '0.00', ['class' => 'form-control', 'id'=>'open_balance']) }}
+                        {{ Form::text('open_balance', numberFormat(@$supplier->open_balance), ['class' => 'form-control', 'id'=>'open_balance']) }}
                     </div>
                 </div>
                 <div class='form-group'>
@@ -157,7 +157,7 @@
                         <select name="expense_account_id" class="custom-select" id="expense_account">
                             <option value="">-- Select Expense Account --</option>
                             @foreach ($accounts as $row) 
-                                <option value="{{ $row->id }}" {{ $row->id == @$customer->expense_account_id? 'selected' : '' }}>
+                                <option value="{{ $row->id }}" {{ $row->id == @$supplier->expense_account_id? 'selected' : '' }}>
                                     {{ $row->holder }}
                                 </option>
                             @endforeach

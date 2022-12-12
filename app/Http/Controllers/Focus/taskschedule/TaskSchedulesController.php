@@ -11,6 +11,7 @@ use App\Models\customer\Customer;
 use App\Models\task_schedule\TaskSchedule;
 use App\Repositories\Focus\taskschedule\TaskScheduleRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TaskSchedulesController extends Controller
 {
@@ -62,13 +63,16 @@ class TaskSchedulesController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'contract_id' => 'required',
+            'schedule_id' => 'required',
+        ]);
+
         // extract request input
         $data = $request->only(['contract_id', 'schedule_id' , 'actual_startdate', 'actual_enddate']);
-        $data_items = $request->only(['equipment_id']);
-
-        $data_items = modify_array($data_items);
-        if (!$data_items) return session()->flash('flash_error', 'No equipments loaded!');
-
+        $data_items = array_map(fn($v) => ['equipment_id' => $v], explode(',', request('equipment_ids')));
+        if (!$data_items) throw ValidationException::withMessages(['equipments required!']);
+    
         $this->repository->create(compact('data', 'data_items'));
         
         return new RedirectResponse(route('biller.taskschedules.index'), ['flash_success' => 'Task Schedule Equipments loaded successfully']);
@@ -118,11 +122,11 @@ class TaskSchedulesController extends Controller
     public function update(Request $request, TaskSchedule $taskschedule)
     {
         $data = $request->only([
-            'title', 'start_date', 'end_date', 'actual_startdate', 'actual_enddate', 'schedule_id', 'is_copy'
+            'title', 'start_date', 'end_date', 'actual_startdate', 'actual_enddate', 'schedule_id', 
+            'is_copy'
         ]);
-        $data_items = $request->only('id');
-
-        $data_items = modify_array($data_items);
+        $data_items = array_map(fn($v) => ['id' => $v], explode(',', request('equipment_ids')));
+        if (!$data_items) throw ValidationException::withMessages(['equipments required!']);
 
         $this->repository->update($taskschedule, compact('data', 'data_items'));
 

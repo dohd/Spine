@@ -81,7 +81,7 @@ class PosRepository extends BaseRepository
             'account_id', 'claimer_tax_pin', 'claimer_company'
         ]);
         $inv_data = array_replace($inv_data, [
-            'tid' => Invoice::max('tid') + 1,
+            'tid' => Invoice::where('ins', auth()->user()->ins)->max('tid') + 1,
             'notes' => $inv_data['notes'] ?: 'POS Transaction',
             'term_id' => 1,
             'user_id' => auth()->user()->id,
@@ -146,7 +146,7 @@ class PosRepository extends BaseRepository
         // debit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
@@ -212,7 +212,7 @@ class PosRepository extends BaseRepository
         if (!$pmt_items_data) throw ValidationException::withMessages(['Payment confirmation details required!']);
             
         $pmt_data = [
-            'tid' => PaidInvoice::max('tid') + 1,
+            'tid' => PaidInvoice::where('ins', auth()->user()->ins)->max('tid') + 1,
             'account_id' => $input['p_account'],
             'customer_id' => $invoice->customer_id,
             'date' => $invoice->invoicedate,
@@ -256,7 +256,7 @@ class PosRepository extends BaseRepository
         // credit Accounts Receivable (Debtors)
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::max('tid');
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid');
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

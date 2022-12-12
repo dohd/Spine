@@ -35,7 +35,10 @@
                 <tbody>
                     <tr>
                         <th>Reference</th>
-                        <td>{{ 'Tkt-'.sprintf('%04d', $lead->reference) }}</td>
+                        @php
+                            $prefixes = prefixesArray(['lead'], $lead->ins);
+                        @endphp
+                        <td>{{ gen4tid("{$prefixes[0]}-", $lead->reference) }}</td>
                     </tr>
                     <tr>
                         <th>Status</th>

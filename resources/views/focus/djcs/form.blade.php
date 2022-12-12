@@ -14,24 +14,24 @@
                         <select class="form-control round" name="lead_id" id="lead_id" required>
                             @foreach ($leads as $lead)
                                 @php
-                                    $name =  isset($lead->customer) ? $lead->customer->company : $lead->client_name;
-                                    $branch = isset($lead->branch) ? $lead->branch->name : '';
-                                    if ($name && $branch) $name .= ' - ' . $branch;                                                                
+                                    $name =  $lead->customer? $lead->customer->company : $lead->client_name;
+                                    $branch = $lead->branch? $lead->branch->name : '';
+                                    if ($name && $branch) $name .= " - {$branch}";                                                                
                                 @endphp
                                 <option 
                                     value="{{ $lead->id }}" 
                                     title="{{ $lead->title }}"
                                     client_ref="{{ $lead->client_ref }}"
-                                    branch_id="{{ $lead->branch? $lead->branch->id : 0 }}"
-                                    client_id="{{ $lead->customer? $lead->customer->id : 0 }}"
+                                    branch_id="{{ $lead->branch? $lead->branch->id : '' }}"
+                                    client_id="{{ $lead->customer? $lead->customer->id : '' }}"
                                     {{ @$djc && $djc->lead_id == $lead->id? 'selected' : '' }}
                                 >
-                                    {{ gen4tid('Tkt-', @$lead->reference) }} - {{ $name }} - {{ $lead->title }}
+                                    {{ gen4tid("{$prefixes[1]}-", @$lead->reference) }} - {{ $name }} - {{ $lead->title }}
                                 </option>
                             @endforeach
                         </select>                                     
-                        <input type="hidden" name="client_id" value="0" id="client_id">
-                        <input type="hidden" name="branch_id" value="0" id="branch_id">                                                
+                        <input type="hidden" name="client_id" value="" id="client_id">
+                        <input type="hidden" name="branch_id" value="" id="branch_id">                                                
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                 <div class="col-sm-4"><label for="tid" class="caption">Report No</label>
                     <div class="input-group">
                         <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                        {{ Form::text('tid', gen4tid('DjR-', @$djc? $djc->tid : $tid+1), ['class' => 'form-control round', 'disabled']) }}
+                        {{ Form::text('tid', gen4tid("{$prefixes[0]}-", @$djc? $djc->tid : $tid+1), ['class' => 'form-control round', 'disabled']) }}
                         <input type="hidden" name="tid" value="{{ @$djc? $djc->tid : $tid+1 }}">
                     </div>
                 </div>                                        

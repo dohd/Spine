@@ -20,7 +20,10 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $last_tid = Purchaseorder::max('tid');
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['purchase_order'], $ins);
+        $last_tid = Purchaseorder::where('ins', $ins)->max('tid');
+
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
         $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
@@ -28,6 +31,6 @@ class CreateResponse implements Responsable
         // Purchase order
         $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups','price_supplier', 'terms'));
+        return view('focus.purchaseorders.create', compact('last_tid', 'additionals', 'pricegroups','price_supplier','price_supplier', 'terms', 'prefixes'));
     }
 }

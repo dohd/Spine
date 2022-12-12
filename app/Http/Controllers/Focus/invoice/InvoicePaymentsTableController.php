@@ -21,11 +21,12 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\invoice\InvoiceRepository;
 use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
+use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 
 /**
  * Class InvoicesTableController.
  */
-class PaymentsTableController extends Controller
+class InvoicePaymentsTableController extends Controller
 {
     /**
      * variable to store the repository object
@@ -37,7 +38,7 @@ class PaymentsTableController extends Controller
      * contructor to initialize repository object
      * @param InvoiceRepository $repository ;
      */
-    public function __construct(InvoiceRepository $repository)
+    public function __construct(InvoicePaymentRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -50,8 +51,9 @@ class PaymentsTableController extends Controller
      */
     public function __invoke(ManageInvoiceRequest $request)
     {
-        $core = $this->repository->getPaymentsForDataTable();
-
+        $core = $this->repository->getForDataTable();
+        $prefixes = prefixesArray(['invoice'], auth()->user()->ins);
+        printlog($core->toArray());
         // aggregate
         $amount_total = $core->sum('amount');
         $unallocated_total = $amount_total - $core->sum('allocate_ttl');
@@ -79,11 +81,10 @@ class PaymentsTableController extends Controller
             ->addColumn('unallocated', function ($payment) {
                 return numberFormat($payment->amount - $payment->allocate_ttl);
             })
-            ->addColumn('invoice_tid', function ($payment) {
-                if (!$payment->items->count()) return;
+            ->addColumn('invoice_tid', function ($payment) use($prefixes) {
                 $invoice_tids = array();
                 foreach ($payment->items as $item) {
-                    if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
+                    if ($item->invoice) $invoice_tids[] = gen4tid("{$prefixes[0]}-", $item->invoice->tid);
                 }
                 return implode(', ', $invoice_tids);
             })

@@ -12,7 +12,7 @@
     </div>
 
     <div class="col-2">
-        <label for="reference" class="caption">Transaction ID</label>
+        <label for="reference" class="caption">Payment No.</label>
         <div class="input-group">
             {{ Form::text('tid', @$payment ? $payment->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
         </div>
@@ -39,7 +39,7 @@
 
 <div class="form-group row">  
     <div class="col-2">
-        <label for="amount" class="caption">Amount (Ksh.)</label>
+        <label for="amount" class="caption">Amount</label>
         {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
     </div>     
     <div class="col-4">
@@ -89,7 +89,7 @@
                 <th>Amount</th>
                 <th>Paid</th>
                 <th>Outstanding</th>
-                <th>Allocate (Ksh.)</th>
+                <th>Allocate</th>
             </tr>
         </thead>
         <tbody>   

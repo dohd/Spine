@@ -139,9 +139,7 @@ class CustomerRepository extends BaseRepository
     public function getStatementForDataTable($customer_id = 0)
     {
         $q = Invoice::where('customer_id', request('customer_id', $customer_id));
-        // date filter
-
-        // lazy load
+        
         $q->with(['payments', 'withholding_payments', 'creditnotes', 'debitnotes']);
         
         return $this->generate_statement($q->get());
@@ -305,7 +303,7 @@ class CustomerRepository extends BaseRepository
             // recognise sale as journal entry
             if ($result->sale_account_id) {
                 $data = [
-                    'tid' => Journal::max('tid') + 1,
+                    'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                     'date' => $open_balance_date,
                     'note' => $note,
                     'debit_ttl' => $open_balance,
@@ -370,8 +368,10 @@ class CustomerRepository extends BaseRepository
             if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
         }
 
-        $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
-        if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
+        if (isset($input['taxid'])) {
+            $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
+            if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
+        }
 
         $input = array_replace($input, [
             'open_balance' => numberClean($input['open_balance']),
@@ -388,7 +388,7 @@ class CustomerRepository extends BaseRepository
             $journal = Journal::where('note', 'LIKE', '%' . $customer->id . '-customer Account Opening Balance ' . '%')->first();
             if ($journal) {
                 // remove previous transactions
-                Transaction::where(['tr_ref' => $journal->id, 'tr_type' => 'genjr'])->delete();                 
+                Transaction::where(['tr_ref' => $journal->id, 'note' => $journal->note])->delete();                 
 
                 // update invoice
                 $invoice = Invoice::where('notes', $journal->note)->first();
@@ -418,10 +418,7 @@ class CustomerRepository extends BaseRepository
                         if ($item->debit > 0) $item->update(['debit' => $open_balance]);
                         elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
                     }
-                } else {
-                    // remove journal
-                    $journal->delete();
-                }
+                } else $journal->delete();
             } else {
                 // unrecognised sale
                 $invoice_data = [
@@ -440,7 +437,7 @@ class CustomerRepository extends BaseRepository
                 // recognise sale
                 if ($customer->sale_account_id) {
                     $data = [
-                        'tid' => Journal::max('tid') + 1,
+                        'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                         'date' => $open_balance_date,
                         'note' => $note,
                         'debit_ttl' => $open_balance,
@@ -510,7 +507,7 @@ class CustomerRepository extends BaseRepository
         // debit Accounts Receivable (Debtor)
         $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $dr_data = [
-            'tid' => Transaction::max('tid') + 1,
+            'tid' => Transaction::where('ins', auth()->user()->ins)->max('tid') + 1,
             'account_id' => $result->account_id,
             'trans_category_id' => $tr_category->id,
             'tr_date' => $result->date,

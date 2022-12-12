@@ -35,8 +35,7 @@
 
                                 <div class="col-4">
                                     <label for="contract">Contract</label>
-                                    <select name="contract_id" class="form-control" id="contract">
-                                        <option value="">-- select contract --</option>
+                                    <select name="contract_id" class="form-control" id="contract" data-placeholder="Choose Contract">
                                     </select>
                                 </div>
 
@@ -103,6 +102,7 @@
         init() {
             $.ajaxSetup(config.ajax);
             $('#customer').select2(config.select).val('').change();
+            $('#contract').select2(config.select).val('').change();
 
             this.drawDataTable();
             $('#customer').change(this.customerChange);
@@ -147,13 +147,12 @@
                         equip_status: $('#service_status').val(),
                     },
                     dataSrc: ({data}) => {
-                        const serviceStatus = $('#service_status').val();
-                        if (serviceStatus == 'partially_serviced') {
+                        const status = $('#service_status').val();
+                        if (status == 'partially_serviced') {
                             data = data.filter(v => v.service_status == 'partial');
-                        } else if (serviceStatus == 'serviced') {
+                        } else if (status == 'serviced') {
                             data = data.filter(v => v.service_status == 'complete');
                         }
-                        
                         return data;
                     },
                 },

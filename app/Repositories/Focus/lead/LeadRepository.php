@@ -4,7 +4,11 @@ namespace App\Repositories\Focus\lead;
 
 use App\Models\lead\Lead;
 use App\Exceptions\GeneralException;
+use App\Models\djc\Djc;
+use App\Models\items\Prefix;
+use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
+use DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -25,7 +29,9 @@ class LeadRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        return $q->get();
     }
 
     /**
@@ -38,11 +44,8 @@ class LeadRepository extends BaseRepository
     public function create(array $data)
     {
         $data['date_of_request'] = date_for_database($data['date_of_request']);
-        // increament reference
-        $lead = Lead::orderBy('reference', 'desc')->first('reference');
-        if ($lead && $data['reference'] <= $lead->reference) {
-            $data['reference'] = $lead->reference + 1;
-        }
+        $tid = Lead::max('reference');
+        if ($data['reference'] <= $tid) $data['reference'] = $tid+1;
 
         $result = Lead::create($data);
         return $result;
@@ -60,8 +63,18 @@ class LeadRepository extends BaseRepository
      */
     public function update(Lead $lead, array $data)
     {
-        $data = array_map('strip_tags', $data);
-        if ($lead->update($data)) return true;
+        DB::beginTransaction();
+
+        $result = $lead->update($data);
+        // update quote and djc
+        $params = ['customer_id' => $lead->client_id, 'branch_id' => $lead->branch_id];
+        Quote::where('lead_id', $lead->id)->update($params);
+        Djc::where('lead_id', $lead->id)->update($params);
+
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
@@ -75,11 +88,13 @@ class LeadRepository extends BaseRepository
      */
     public function delete(Lead $lead)
     {
-        if ($lead->djcs->count()) 
-            throw ValidationException::withMessages(['Ticket is attached to DJC Report!']);
+        $prefix = Prefix::where('note', 'lead')->first();
+        $tid = gen4tid("{$prefix}-", $lead->reference);
 
+        if ($lead->djcs->count()) 
+            throw ValidationException::withMessages(["{$tid} is attached to DJC Report!"]);
         if ($lead->quotes->count()) 
-            throw ValidationException::withMessages(['Ticket is attached to Quote!']);
+            throw ValidationException::withMessages(["{$tid} is attached to Quote!"]);
             
         if ($lead->delete()) return true;
         

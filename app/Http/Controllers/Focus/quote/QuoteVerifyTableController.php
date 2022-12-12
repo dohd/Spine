@@ -48,23 +48,23 @@ class QuoteVerifyTableController extends Controller
     public function __invoke()
     {
         $core = $this->quote->getForVerifyDataTable();
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function ($quote) {
-                $tid = gen4tid('QT-', $quote->tid);
-                if ($quote->bank_id) $tid = gen4tid('PI-', $quote->tid);
-
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . $quote->revision . '</a>';
+            ->addColumn('tid', function ($quote) use($prefixes) {
+                $tid = gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);
+                return '<a class="font-weight-bold" href="'. route('biller.quotes.show',$quote) .'">'. $tid . $quote->revision .'</a>';
             })
             ->addColumn('customer', function ($quote) {
-                $client_name = $quote->customer ? $quote->customer->name : '';
-                $branch_name = $quote->branch ? $quote->branch->name : '';
-                if ($client_name && $branch_name) 
-                    return $client_name . ' - ' . $branch_name . ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
-
-                return $quote->lead->client_name;
+                $customer = $quote->lead? $quote->lead->client_name : '';
+                if ($quote->client) {
+                    $customer = "{$quote->client->company}";
+                    if ($quote->branch) $customer .= " - {$quote->branch->name}";
+                }
+                
+                return $customer;
             })
             ->addColumn('total', function ($quote) {
                 return numberFormat($quote->total);
@@ -75,9 +75,9 @@ class QuoteVerifyTableController extends Controller
             ->addColumn('lpo_number', function($quote) {
                 if ($quote->lpo) return 'lpo - ' . $quote->lpo->lpo_no;
             })
-            ->addColumn('project_tid', function($quote) {
-                if (isset($quote->project_quote->project)) 
-                return gen4tid('Prj-', $quote->project_quote->project->tid);
+            ->addColumn('project_tid', function($quote) use($prefixes) {
+                if ($quote->project) 
+                return gen4tid("{$prefixes[2]}-", $quote->project->tid);
             })
             ->addColumn('date', function($quote) {
                 return dateFormat($quote->date);

@@ -10,6 +10,8 @@ use App\Models\lead\Lead;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
 
+use function Composer\Autoload\includeFile;
+
 /**
  * Class ProductcategoryRepository.
  */
@@ -50,7 +52,7 @@ class DjcRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-        
+                
         return $q->get();
     }
 
@@ -78,7 +80,7 @@ class DjcRepository extends BaseRepository
         // close lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         // increament tid
-        $last_tid =  Djc::max('tid');
+        $last_tid =  Djc::where('ins', auth()->user()->ins)->max('tid');
         if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
 
         $result = Djc::create($data);

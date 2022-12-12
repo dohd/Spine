@@ -339,7 +339,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             $this->invoiced_grn_transaction($bill);
         } else {
             // create bill
-            $bill_data['tid'] = UtilityBill::max('tid') + 1;
+            $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
             $bill = UtilityBill::create($bill_data);
 
             $bill_items_data = array_map(function ($v) use($bill) {
@@ -361,7 +361,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         // debit Inventory Account (liability)
         $account = Account::where('system', 'stock')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $dr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
@@ -411,7 +411,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         // credit Uninvoiced Goods Received Note (liability)
         $account = Account::where('system', 'grn')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'grn')->first(['id', 'code']);
-        $tid = Transaction::max('tid') + 1;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,

@@ -1,5 +1,6 @@
 @php
     $label = $quote->bank_id ? 'PI' : 'Quote';
+    $prefixes = prefixesArray(['quote', 'proforma_invoice'], $quote->ins);
 @endphp
 <div class="row">
     {{ Form::hidden('id', $quote->id) }}
@@ -7,7 +8,7 @@
         <div id="customerpanel" class="inner-cmp-pnl">
             <div class="form-group row">
                 <div class="fcol-sm-12">
-                    <h3 class="title pl-1">{{ $quote->bank_id ? 'Verify Proforma Invoice' : 'Verify Quote' }}</h3>
+                    <h3 class="title pl-1">Verify {{ $label }}</h3>
                 </div>
             </div>
             <div class="form-group row">
@@ -16,8 +17,7 @@
                     <div class="input-group">
                         <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>                                           
                         @php
-                            $tid = 'QT-'.sprintf('%04d', $quote->tid);
-                            if ($quote->bank_id) $tid = 'PI-'.sprintf('%04d', $quote->tid);
+                            $tid = gen4tid($label == 'PI'? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);
                         @endphp
                         {{ Form::text('tid', $tid . $quote->revision, ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                     </div>

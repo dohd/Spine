@@ -23,7 +23,7 @@ class CreateResponse implements Responsable
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
         $warehouses = Warehouse::all();
-        $last_tid = Purchase::max('tid');
+        $last_tid = Purchase::where('ins', auth()->user()->ins)->max('tid');
         $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
         $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
 

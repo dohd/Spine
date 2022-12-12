@@ -12,3 +12,10 @@ Route::group(['namespace' => 'supplier'], function () {
   // data table
   Route::post('suppliers/get', 'SuppliersTableController')->name('suppliers.get');
 });
+
+// purchase requisition
+Route::group(['namespace' => 'purchase_request'], function () {
+  Route::resource('purchase_requests', 'PurchaseRequestsController');
+  // data table
+  Route::post('purchase_requests/get', 'PurchaseRequestsTableController')->name('purchase_requests.get');
+});

@@ -59,7 +59,6 @@
                                     <th>Mode</th>
                                     <th>Reference</th>
                                     <th>Inv No</th>
-                                    <th>Type</th>
                                     <th>{{ trans('labels.general.actions') }}</th>
                                 </tr>
                             </thead>
@@ -128,7 +127,6 @@
                     ...[
                         'tid', 'account', 'date', 'amount', 
                         'unallocated', 'payment_mode', 'reference', 'invoice_tid', 
-                        'payment_type'
                     ].map(v => ({data: v, name: v})),
                     {
                         data: 'actions',
