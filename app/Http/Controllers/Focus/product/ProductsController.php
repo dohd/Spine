@@ -158,8 +158,9 @@ class ProductsController extends Controller
             $products = ClientProduct::where('customer_id', request('price_customer_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
+                    $value = $v->row_num > 0 ? "($v->row_num)" : '';
                     return $v->fill([
-                        'name' => "{$v->descr} ({$v->row_num})",
+                        'name' => "{$v->descr} {$value}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => 0,
@@ -196,7 +197,6 @@ class ProductsController extends Controller
     }
     public function purchase_search(Request $request)
     {
-       // return 'dd';
         if (!access()->allow('product_search')) return false;
 
         // fetch pricelist customer products
@@ -204,9 +204,8 @@ class ProductsController extends Controller
             $products = SupplierProduct::where('supplier_id', request('pricegroup_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
-                    //dd($v);
                     return $v->fill([
-                        'name' => "{$v->descr} ({$v->row_num})",
+                        'name' => $v->row_num > 0? "{$v->descr} {$v->row_num}" : "{$v->descr}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => $v->rate,

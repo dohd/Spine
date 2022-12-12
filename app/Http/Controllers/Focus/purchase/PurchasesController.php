@@ -28,6 +28,8 @@ use App\Http\Responses\Focus\purchase\EditResponse;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
 use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
+use App\Models\product\ProductVariation;
+use App\Models\supplier_product\SupplierProduct;
 use App\Http\Responses\RedirectResponse;
 use DirectoryIterator;
 use Illuminate\Validation\ValidationException;
