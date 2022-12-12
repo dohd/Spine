@@ -21,6 +21,12 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
+                            <div class="col-2">
+                                <label for="month">File Return Month</label>
+                                {{ Form::text('file_month', date('m-Y', strtotime(date('Y-m-d') . " - 1 month")), ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
+                            </div>
+                            <hr>
+
                             <table id="taxReportTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
@@ -58,7 +64,24 @@
 
     const Index = {
         init() {
+            // month picker
+            $('.datepicker').datepicker({
+                autoHide: true,
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                format: 'MM-yyyy',
+                onClose: function(dateText, inst) { 
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            }).change(this.fileMonthChange);
+
             this.drawDataTable();
+        },
+
+        fileMonthChange() {
+            $('#taxReportTbl').DataTable().destroy();
+            return Index.drawDataTable();
         },
 
         drawDataTable() {
@@ -70,6 +93,7 @@
                 ajax: {
                     url: "{{ route('biller.tax_reports.get') }}",
                     type: 'POST',
+                    data: {file_month: $('#file_month').val()}
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},

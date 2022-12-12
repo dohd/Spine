@@ -27,6 +27,10 @@ class TaxReportRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        $q->when(request('file_month'), function($q) {
+            $q->where('sale_month', request('file_month'))->orWhere('purchase_month', request('file_month'));
+        });
             
         return $q->get();
     }
