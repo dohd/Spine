@@ -15,7 +15,7 @@
     </div>
     <div class="col-2">
         <label for="contract">Contract Title</label>
-        {{ Form::text('contract', null, ['class' => 'form-control', 'required']) }}
+        {{ Form::text('contract', null, ['class' => 'form-control', 'id' =>'contract', 'required']) }}
     </div>
     <div class="col-4">
         <label for="description">Product Description</label>
@@ -50,6 +50,11 @@
         supplierProduct: @json(@$supplier_product),
 
         init() {
+
+            if ($('#contract').val()) {
+                $('#supplier').select2({allowClear: true}).attr('disabled', true);
+                $('#contract').attr('disabled', true);
+            }
             $('#supplier').select2({allowClear: true});
             $('#rate').focusout(this.rateChange);
 
