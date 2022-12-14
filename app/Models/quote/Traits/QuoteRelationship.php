@@ -24,6 +24,12 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function project()
+    {
+        // return $this->hasOne(Project::class, 'main_quote_id');
+        return $this->hasOneThrough(Project::class, ProjectQuote::class, 'quote_id', 'id', 'id', 'project_id');
+    }
+
     public function projectstock()
     {
         return $this->hasMany(Projectstock::class);
@@ -32,11 +38,6 @@ trait QuoteRelationship
     public function projects()
     {
         return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
-    }
-
-    public function project()
-    {
-        return $this->hasOne(Project::class, 'main_quote_id');
     }
 
     public function skill_items()
