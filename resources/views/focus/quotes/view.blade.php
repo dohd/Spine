@@ -63,7 +63,7 @@
                                     $address = $quote->client->address;
                                     $email = $quote->client->email;
                                     $cell = $quote->client->phone;
-                                    if ($quote->branch) $branch = $quote->branch;
+                                    if ($quote->branch) $branch = $quote->branch->name;
                                 }					
                             @endphp
                             <span class="text-muted"><b>{{ trans('invoices.bill_to') }}</b></span>
