@@ -113,9 +113,10 @@
         customerChange() {
             const customer_id = $(this).val();
 
-            $('#contract option:not(:first)').remove();
+            $('#contract option').remove();
             contracts = Index.contracts.filter(v => v.customer_id == customer_id);
             contracts.forEach(v => $('#contract').append(`<option value="${v.id}">${v.title}</option>`));
+            $('#contract').val('');
             
             $('#scheduleTbl').DataTable().destroy();
             Index.drawDataTable();
