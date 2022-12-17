@@ -202,10 +202,9 @@ class BillPaymentRepository extends BaseRepository
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
-            if (in_array($key, ['paid'])) 
-                $input[$key] = array_map(fn($v) => numberClean($v), $val);
+            if (in_array($key, ['paid'])) $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
-        if ($input['amount'] == 0) 
+        if (isset($input['amount']) && $input['amount'] == 0) 
             throw ValidationException::withMessages(['amount is required!']);
 
         // reverse supplier unallocated amount

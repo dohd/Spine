@@ -142,7 +142,7 @@ class BillPaymentController extends Controller
      */
     public function update(Request $request, Billpayment $billpayment)
     {
-        $this->repository->update($billpayment, $request->except('_token'));
+        $this->repository->update($billpayment, $request->except('_token', 'balance'));
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Updated Successfully']);
     }
