@@ -65,11 +65,11 @@ class LeadRepository extends BaseRepository
     {
         DB::beginTransaction();
 
+        $params = ['customer_id' => @$data['customer_id'], 'branch_id' => @$data['branch_id']];
+        if ($lead->quote) $lead->quote->update($params);
+        if ($lead->djc) $lead->djc->update($params);
+
         $result = $lead->update($data);
-        // update quote and djc
-        $params = ['customer_id' => $lead->client_id, 'branch_id' => $lead->branch_id];
-        Quote::where('lead_id', $lead->id)->update($params);
-        Djc::where('lead_id', $lead->id)->update($params);
 
         if ($result) {
             DB::commit();
