@@ -23,7 +23,7 @@
                         <div class="card-body">
                             <div class="col-2">
                                 <label for="month">File Return Month</label>
-                                {{ Form::text('file_month', date('m-Y', strtotime(date('Y-m-d') . " - 1 month")), ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
+                                {{ Form::text('file_month', null, ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
                             </div>
                             <hr>
 

@@ -78,7 +78,7 @@
                                 'tax_pin' => $purchase? $purchase->supplier_taxid : $bill->supplier->taxid,
                                 'purchase_date' => $bill->date,
                                 'supplier' => $purchase? $purchase->suppliername : $bill->supplier->name,
-                                'purchase_no' => $bill->tid,
+                                'invoice_no' => $bill->reference,
                                 'note' => $note,
                                 'tax_rate' => $bill->tax_rate,
                                 'subtotal' => $bill->subtotal,
@@ -94,7 +94,7 @@
                                 'tax_pin' => $dnote->supplier->taxid,
                                 'purchase_date' => $dnote->date,
                                 'supplier' => $dnote->supplier->name,
-                                'purchase_no' => $dnote->tid,
+                                'invoice_no' => $dnote->tid,
                                 'note' => 'Debit Note',
                                 'tax_rate' => $dnote->tax / $dnote->subtotal * 100,
                                 'subtotal' => -1 * $dnote->subtotal,
@@ -110,8 +110,8 @@
                         <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
                         <td>{{ $data['tax_pin'] }}</td>
                         <td>{{ dateFormat($data['purchase_date']) }}</td>
-                        <td>{{ isset($data['supplier']) ? $data['supplier'] : ''  }}</td>
-                        <td>{{ $data['purchase_no'] }}</td>
+                        <td>{{ @$data['supplier'] ? $data['supplier'] : ''  }}</td>
+                        <td>{{ $data['invoice_no'] }}</td>
                         <td>{{ $data['note'] }}</td>
                         <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
                         <td width="15%">
