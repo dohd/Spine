@@ -28,8 +28,6 @@ use App\Http\Responses\Focus\purchase\EditResponse;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
 use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
-use App\Models\product\ProductVariation;
-use App\Models\supplier_product\SupplierProduct;
 use App\Http\Responses\RedirectResponse;
 use DirectoryIterator;
 use Illuminate\Validation\ValidationException;
@@ -73,7 +71,7 @@ class PurchasesController extends Controller
         }
 
         // delete purchases (frontfreeze, sahara)
-        $purchases = Purchase::where('supplier_id', [7,8])->get();
+        $purchases = Purchase::whereIn('supplier_id', [8])->get();
         foreach ($purchases as $key => $purchase) {
             // $this->repository->delete($purchase);
         }
