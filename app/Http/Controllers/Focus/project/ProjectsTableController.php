@@ -86,6 +86,9 @@ class ProjectsTableController extends Controller
             ->addColumn('start_date', function ($project) {
                 return dateFormat($project->start_date);
             })
+            ->addColumn('end_date', function ($project) {
+                return dateFormat($project->end_date);
+            })
             ->addColumn('status', function ($project) {
                 return ucfirst($project->status);
             })
