@@ -115,7 +115,7 @@ class ImportController extends Controller
 
         $path = 'temp' . DIRECTORY_SEPARATOR;
         $is_success = $this->upload_temp->put($path . $filename, file_get_contents($file->getRealPath()));
-        // printlog('****** store template *******', $path . $filename);
+        
         return new ViewResponse('focus.import.import_progress', compact('filename', 'is_success', 'data'));
     }    
 
@@ -130,7 +130,6 @@ class ImportController extends Controller
         $filename = $request->name;
         $path = 'temp' . DIRECTORY_SEPARATOR;
         $file_exists = Storage::disk('public')->exists($path . $filename);
-        // printlog('****** process template *******', $path . $filename);
         if (!$file_exists) throw new Error('Data processing failed! File import was unsuccessful');
 
         $models = [
@@ -145,7 +144,7 @@ class ImportController extends Controller
 
         $storage_path = Storage::disk('public')->path($path . $filename);
         $model = $models[$data['type']];
-
+        
         try {
             DB::beginTransaction();
             Excel::import($model, $storage_path);
@@ -154,16 +153,16 @@ class ImportController extends Controller
             DB::rollBack();
             Storage::disk('public')->delete($path . $filename);
             printlog($e->getMessage());
-            throw new Error(trans('import.import_process_failed'));
+            throw new Error(trans('import.import_process_failed') . ' OR Try a different file format');
         }
 
         $row_count = $model->getRowCount();
-        if (!$row_count) throw new Error(trans('import.import_process_failed'));
+        if (!$row_count) throw new Error(trans('import.import_process_failed') . " {$row_count} rows imported");
         Storage::disk('public')->delete($path . $filename);
         
         return response()->json([
             'status' => 'Success', 
-            'message' => trans('import.import_process_success') . ' ' . $row_count . ' rows imported successfully'
+            'message' => trans('import.import_process_success') . " {$row_count} rows imported successfully",
         ]);
     }
 }
