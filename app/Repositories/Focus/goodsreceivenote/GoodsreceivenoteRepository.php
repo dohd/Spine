@@ -13,6 +13,7 @@ use App\Models\utility_bill\UtilityBill;
 use App\Repositories\BaseRepository;
 use DB;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -57,9 +58,8 @@ class GoodsreceivenoteRepository extends BaseRepository
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['tax_rate', 'subtotal', 'tax', 'total'])) 
                 $input[$key] = numberClean($val);
-            if (in_array($key, ['qty', 'rate'])) $input[$key] = array_map(function ($v) { 
-                return numberClean($v); 
-            }, $val);
+            if (in_array($key, ['qty', 'rate'])) 
+                $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
 
         $result = Goodsreceivenote::create($input);
@@ -76,40 +76,39 @@ class GoodsreceivenoteRepository extends BaseRepository
         GoodsreceivenoteItem::insert($data_items);
         
         // increase stock qty
-        foreach ($result->items as $item) {
+        foreach ($result->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
             $po_item->increment('qty_received', $item->qty);
 
-            // apply unit conversion
             $prod_variation = $po_item->productvariation;
-            $units = $prod_variation->product->units;
-            foreach ($units as $unit) {
-                if ($unit->code == $po_item['uom']) {
-                    if ($unit->unit_type == 'base') {
-                        $prod_variation->increment('qty', $po_item['qty']);
-                    } else {
-                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
-                        $prod_variation->increment('qty', $converted_qty);
+            if (isset($prod_variation->product->units)) {
+                foreach ($prod_variation->product->units as $unit) {
+                    if ($unit->code == $po_item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->increment('qty', $po_item['qty']);
+                        } else {
+                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                            $prod_variation->increment('qty', $converted_qty);
+                        }
                     }
                 }
-            }   
+            } elseif ($prod_variation) $prod_variation->increment('qty', $po_item['qty']);
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);
         }
 
         // update purchase order status
         $received_goods_qty = $result->items->sum('qty');
-        $order_goods_qty = $result->purchaseorder->items->sum('qty');
-        if ($received_goods_qty == 0) $result->purchaseorder->update(['status' => 'pending']);
-        elseif (round($received_goods_qty) < round($order_goods_qty)) $result->purchaseorder->update(['status' => 'partial']);
-        else $result->purchaseorder->update(['status' => 'complete']);
+        if ($result->purchaseorder) {
+            $order_goods_qty = $result->purchaseorder->items->sum('qty');
+            if ($received_goods_qty == 0) $result->purchaseorder->update(['status' => 'pending']);
+            elseif (round($received_goods_qty) < round($order_goods_qty)) $result->purchaseorder->update(['status' => 'partial']);
+            else $result->purchaseorder->update(['status' => 'complete']);
+        } else throw ValidationException::withMessages(['Purchase order does not exist!']);
+
 
         /**accounting */
-        if ($result->invoice_no) {
-            // generate bill
-            $this->generate_bill($result);
-        } else {
-            // grn transaction
-            $this->post_transaction($result);
-        }
+        if ($result->invoice_no) $this->generate_bill($result); // generate bill
+        else $this->post_transaction($result);  // grn transaction
         
         if ($result) {
             DB::commit();
@@ -144,23 +143,25 @@ class GoodsreceivenoteRepository extends BaseRepository
         $result = $goodsreceivenote->update($input);
 
         // reverse previous stock qty
-        foreach ($goodsreceivenote->items as $item) {
+        foreach ($goodsreceivenote->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
             $po_item->decrement('qty_received', $item->qty);
 
             // apply unit conversion
             $prod_variation = $po_item->productvariation;
-            $units = $prod_variation->product->units;
-            foreach ($units as $unit) {
-                if ($unit->code == $po_item['uom']) {
-                    if ($unit->unit_type == 'base') {
-                        $prod_variation->decrement('qty', $po_item['qty']);
-                    } else {
-                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
-                        $prod_variation->decrement('qty', $converted_qty);
+            if (isset($prod_variation->product->units)) {
+                foreach ($prod_variation->product->units as $unit) {
+                    if ($unit->code == $po_item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->decrement('qty', $po_item['qty']);
+                        } else {
+                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                            $prod_variation->decrement('qty', $converted_qty);
+                        }
                     }
-                }
-            }   
+                }   
+            } elseif ($prod_variation) $prod_variation->decrement('qty', $po_item['qty']);      
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);     
         }
 
         // goods receive note items
@@ -169,10 +170,12 @@ class GoodsreceivenoteRepository extends BaseRepository
         $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
         foreach ($data_items as $item) {
             $grn_item = GoodsreceivenoteItem::find($item['id']);
-            // reverse items qty
-            $grn_item->decrement('qty', $grn_item->qty);
-            // update items qty
-            $grn_item->update($item);
+            if ($grn_item) {
+                // reverse items qty
+                $grn_item->decrement('qty', $grn_item->qty);
+                // update items qty
+                $grn_item->update($item);
+            } else throw ValidationException::withMessages(['GRN item does not exist!']);
         }
 
         // increase stock qty with new update 
@@ -183,38 +186,36 @@ class GoodsreceivenoteRepository extends BaseRepository
             
             // apply unit conversion
             $prod_variation = $po_item->productvariation;
-            $units = $prod_variation->product->units;
-            foreach ($units as $unit) {
-                if ($unit->code == $po_item['uom']) {
-                    if ($unit->unit_type == 'base') {
-                        $prod_variation->increment('qty', $po_item['qty']);
-                    } else {
-                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
-                        $prod_variation->increment('qty', $converted_qty);
+            if (isset($prod_variation->product->units)) {
+                foreach ($prod_variation->product->units as $unit) {
+                    if ($unit->code == $po_item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->increment('qty', $po_item['qty']);
+                        } else {
+                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                            $prod_variation->increment('qty', $converted_qty);
+                        }
                     }
-                }
-            }   
+                }   
+            } elseif ($prod_variation) $prod_variation->increment('qty', $po_item['qty']);
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);  
         }
 
         // update purchase order status
         $received_goods_qty = $grn_items->sum('qty');
-        $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
-        if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'pending']);
-        elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'partial']);
-        else $goodsreceivenote->purchaseorder->update(['status' => 'complete']);
+        if ($goodsreceivenote->purchaseorder) {
+            $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
+            if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'pending']);
+            elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'partial']);
+            else $goodsreceivenote->purchaseorder->update(['status' => 'complete']);    
+        } else throw ValidationException::withMessages(['Purchase Order does not exist!']);
         
         $goodsreceivenote->prev_note = $prev_note;
         /**accounting */
-        if ($goodsreceivenote->invoice_no) {
-            // generate bill
-            $this->generate_bill($goodsreceivenote);
-        } else {
+        if ($goodsreceivenote->invoice_no) $this->generate_bill($goodsreceivenote); // generate bill{
+        else {
             // grn transaction
-            Transaction::where([
-                'tr_type' => 'grn', 
-                'tr_ref' => $goodsreceivenote->id, 
-                'note' => $goodsreceivenote->prev_note
-            ])->delete();
+            Transaction::where(['tr_type' => 'grn', 'tr_ref' => $goodsreceivenote->id, 'note' => $goodsreceivenote->prev_note])->delete();
             $this->post_transaction($goodsreceivenote);
         }
 
@@ -238,7 +239,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         DB::beginTransaction();
         
         // reduce stock qty
-        foreach ($goodsreceivenote->items as $item) {
+        foreach ($goodsreceivenote->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
             $po_item->decrement('qty_received', $item->qty);
             // stock subtotal amount
@@ -246,17 +247,19 @@ class GoodsreceivenoteRepository extends BaseRepository
 
             // apply unit conversion
             $prod_variation = $po_item->productvariation;
-            $units = $prod_variation->product->units;
-            foreach ($units as $unit) {
-                if ($unit->code == $po_item['uom']) {
-                    if ($unit->unit_type == 'base') {
-                        $prod_variation->decrement('qty', $po_item['qty']);
-                    } else {
-                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
-                        $prod_variation->decrement('qty', $converted_qty);
+            if (isset($prod_variation->product->units)) {
+                foreach ($prod_variation->product->units as $unit) {
+                    if ($unit->code == $po_item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->decrement('qty', $po_item['qty']);
+                        } else {
+                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                            $prod_variation->decrement('qty', $converted_qty);
+                        }
                     }
-                }
-            }   
+                }   
+            } elseif ($prod_variation) $prod_variation->decrement('qty', $po_item['qty']);
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);  
         }
 
         $current = $goodsreceivenote;
@@ -275,8 +278,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'partial']);
         else $purchaseorder->update(['status' => 'complete']);
 
-        $result = $goodsreceivenote->delete();
-        if ($result) {
+        if ($goodsreceivenote->delete()) {
             DB::commit(); 
             return true;
         }
@@ -317,19 +319,12 @@ class GoodsreceivenoteRepository extends BaseRepository
             'total' => $v->qty * $v->rate * (1 + $v->tax_rate / 100)
         ])->toArray();       
         
-        $bill = UtilityBill::where([
-            'ref_id' => $grn->id, 
-            'document_type' => 'goods_receive_note'
-        ])->first();
-
+        $bill = UtilityBill::where(['ref_id' => $grn->id, 'document_type' => 'goods_receive_note'])->first();
         if ($bill) {
             // update bill
             $bill->update($bill_data);
             foreach ($grn_items as $item) {
-                $new_item = UtilityBillItem::firstOrNew([
-                    'bill_id' => $bill->id,
-                    'ref_id' => $item['ref_id']
-                ]);
+                $new_item = UtilityBillItem::firstOrNew(['bill_id' => $bill->id,'ref_id' => $item['ref_id']]);
                 $new_item->fill($item);
                 $new_item->save();
             }
