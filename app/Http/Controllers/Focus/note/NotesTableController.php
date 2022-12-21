@@ -52,21 +52,22 @@ class NotesTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        if (access()->allow('note-manage') or project_view(request('p', 0))) {
-            $core = $this->note->getForDataTable();
-            return Datatables::of($core)
-                ->escapeColumns(['id'])
-                ->addIndexColumn()
-                ->addColumn('created_at', function ($note) {
-                    return Carbon::parse($note->created_at)->toDateString();
-                })
-                ->addColumn('user', function ($note) {
-                    return user_data($note->user_id)['first_name'];
-                })
-                ->addColumn('actions', function ($note) {
-                    return $note->action_buttons;
-                })
-                ->make(true);
-        }
+        $core = collect();
+        $note_access = access()->allow('manage-note') || project_view(request('project_id', 0));
+        if ($note_access) $core = $this->note->getForDataTable();
+        
+        return Datatables::of($core)
+            ->escapeColumns(['id'])
+            ->addIndexColumn()
+            ->addColumn('created_at', function ($note) {
+                return Carbon::parse($note->created_at)->toDateString();
+            })
+            ->addColumn('user', function ($note) {
+                return user_data($note->user_id)['first_name'];
+            })
+            ->addColumn('actions', function ($note) {
+                return $note->action_buttons;
+            })
+            ->make(true);
     }
 }
