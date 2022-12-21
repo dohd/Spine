@@ -79,7 +79,8 @@ class BillPaymentRepository extends BaseRepository
             foreach ($import as $key => $data) {
                 $is_payment = (stripos($data['status'], 'pmt') !== false);
                 if (!$is_payment) continue;
-                unset($data['id']);
+                unset($data['id'], $data['created_at'], $data['updated_at']);
+                $data['date'] = date_for_database($data['date']);
                 // dd($data);
 
                 $account_name = current(explode(' ', $data['doc_ref_type']));
@@ -214,7 +215,8 @@ class BillPaymentRepository extends BaseRepository
         }
 
         $prev_note = $billpayment->note;
-        $result = $billpayment->update($input);
+        $data = array_diff_key($input, array_flip(['bill_id', 'paid']));
+        $result = $billpayment->update($data);
 
         // update supplier unallocated amount
         if ($billpayment->supplier_id) {

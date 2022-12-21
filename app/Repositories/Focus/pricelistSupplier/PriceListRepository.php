@@ -68,8 +68,9 @@ class PriceListRepository extends BaseRepository
 
         $input['rate'] = numberClean($input['rate']);
 
-        if ($Supplier_product->contract != $input['contract']);
+        if (isset($input['contract']) && $Supplier_product->contract != $input['contract'])
             SupplierProduct::where('contract', $Supplier_product->contract)->update(['contract' => $input['contract']]);
+            
 
         if ($Supplier_product->update($input)) {
             DB::commit();

@@ -16,6 +16,7 @@ use App\Models\utility_bill\UtilityBill;
 use App\Repositories\BaseRepository;
 use Error;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class PurchaseorderRepository.
@@ -35,7 +36,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->whereNull('po_id');
+        $q = $this->query();
 
         return $q->get();
     }
@@ -63,6 +64,12 @@ class PurchaseRepository extends BaseRepository
             $headers = current($export);
             $data_rows = array_slice($export, 1, count($export));
             foreach ($data_rows as $i => $row) {
+                if (count($headers) != count($row)) {
+                    throw ValidationException::withMessages([
+                        'Unequal column count on line '. strval($i+1). ' on file '.$file_name
+                    ]);
+                }
+
                 $new_row = [];
                 foreach ($row as $key => $val) {
                     if (stripos($val, 'null') !== false) $val = null;
@@ -78,15 +85,22 @@ class PurchaseRepository extends BaseRepository
                 $supplier = Supplier::find($data['supplier_id'], ['id', 'taxid']);
                 if ($supplier) $data['supplier_taxid'] = $supplier->taxid;
                 if ($data['grandtax'] == 0) $data['tax'] = 0;
+                
+                foreach ($data as $key => $value) {
+                    if (in_array($key, ['date', 'due_date'])) {
+                        $data[$key] = date_for_database($value);
+                    }
+                }
+                
 
                 if (stripos($data['status'], 'paid') !== false) $data['status'] = 'paid';
-                if (stripos($data['status'], 'partly paid') !== false) $data['status'] = 'partial';
-                if (stripos($data['status'], 'not paid') !== false) $data['status'] = 'pending';
+                elseif (stripos($data['status'], 'partly paid') !== false) $data['status'] = 'partial';
+                else $data['status'] = 'pending';
 
                 // skip payments
                 if (stripos($data['status'], 'pmt') !== false) continue;
 
-                unset($data['id'], $data['po_id']);
+                unset($data['id'], $data['po_id'], $data['created_at'], $data['updated_at']);
 
                 // expense items
                 $data_items = array_map(fn($v) => [

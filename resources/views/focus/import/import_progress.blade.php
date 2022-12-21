@@ -32,7 +32,7 @@
                 </div>
             @else
                 <div class="card-body">
-                    <h6>Import Process Failed! Incorrect file format or unrecognised templateuploading</h6><hr>
+                    <h6>Import Process Failed! Incorrect file format or unrecognised template uploading</h6><hr>
                     <div class="row sameheight-container">
                         <div class="col-md-12">
                             <div class="card card-block">
@@ -40,7 +40,7 @@
                             </div>
                         </div>
                     </div>
-                    <h6>Import Process Failed! Incorrect file format or unrecognised templateuploading!</h6>
+                    <h6>Import Process Failed! Incorrect file format or unrecognised template uploading!</h6>
                 </div>
             @endif
         </div>
