@@ -71,7 +71,6 @@ function addObject(action, trigger_n = false) {
     var errorNum = farmCheck(form_name);
     if ($("#notify").length == 0) {
         $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
-
     }
     if (errorNum > 0) {
         $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
@@ -79,17 +78,14 @@ function addObject(action, trigger_n = false) {
         $("html, body").scrollTop($("body").offset().top);
         $("#submit-data").show();
     } else {
-
         $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
         });
+
         $.ajax({
             url: action['url'],
             type: 'POST',
             data: action['form'],
-            dataType: 'json',
             success: function (data) {
                 $("#notify .message").html("<strong>" + data.status + "</strong>: " + data.message);
                 $("#notify").removeClass("alert-danger").addClass("alert-success").fadeIn();
@@ -99,10 +95,13 @@ function addObject(action, trigger_n = false) {
                 if (data.refresh) setTimeout(() => location.reload(), 1500);
             },
             error: function (data) {
-                var message = '';
-                $.each(data.responseJSON.errors, function (key, value) {
-                    message += value + ' ';
-                });
+                let message = '';
+                const response = data.responseJSON;
+                if (Array.isArray(response.errors)) {
+                    response.errors.forEach(v => { message += `${v} ` });
+                } else if (response.message) {
+                    message = response.message;
+                }
                 $("#notify .message").html("<strong>" + data.status + "</strong>: " + message);
                 $("#notify").removeClass("alert-success").addClass("alert-warning").fadeIn();
                 $("html, body").scrollTop($("body").offset().top);
