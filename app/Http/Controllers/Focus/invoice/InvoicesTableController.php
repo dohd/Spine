@@ -98,7 +98,7 @@ class InvoicesTableController extends Controller
                 foreach ($invoice->products as $item) {
                     $quote = $item->quote;
                     if ($quote) {
-                        $tid = gen4tid($quote->bank_id ? "{$prefixes[1]}-" : "{$prefixes[2]}-", $quote->tid);
+                        $tid = gen4tid($quote->bank_id ? "{$prefixes[2]}-" : "{$prefixes[1]}-", $quote->tid);
                         $links[] = '<a href="'. route('biller.quotes.show', $quote) .'">'. $tid .'</a>';
                     }
                 }
