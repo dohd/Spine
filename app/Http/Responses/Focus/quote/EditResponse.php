@@ -8,7 +8,6 @@ use App\Models\customer\Customer;
 use App\Models\lead\Lead;
 use App\Models\quote\Quote;
 use Illuminate\Contracts\Support\Responsable;
-use Mavinoo\LaravelBatch\Common\Common;
 
 class EditResponse implements Responsable
 {
@@ -48,7 +47,7 @@ class EditResponse implements Responsable
         $lastpi = new Quote;
         $lastpi->tid = $quote->query()->where('ins', $quote->ins)->where('bank_id', '>', 0)->max('tid');
 
-        $prefixes = prefixesArray(['quote', 'proforma_invoice'], $quote->ins);
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'lead'], $quote->ins);
 
         $common_params = ['lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers', 'prefixes'];
 
