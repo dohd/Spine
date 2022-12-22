@@ -102,13 +102,14 @@
 
         const labourCharge = $('#charge-'+i);
         const labourType = $('#skill-'+i);
+         
         switch (labourType.val()) {
             case 'casual': labourCharge.val(200).attr('readonly', true); break;
             case 'contract': labourCharge.val(350).attr('readonly', true); break;
             case 'attachee': labourCharge.val(150).attr('readonly', true); break;
-            case 'outsourced': labourCharge.val('').attr('readonly', false); break;
+            case 'outsourced': labourCharge.attr('readonly', false); break;
         }
-
+        
         const amount = $('#hours-'+i).val() * $('#notech-'+i).val() * $('#charge-'+i).val();
         $(this).parents('tr:first').find('span').text(accounting.formatNumber(amount));
         budgetTotal();
