@@ -2,8 +2,6 @@
 
 namespace App\Models\transaction\Traits;
 
-use App\Models\bill\Bill;
-use App\Models\bill\Paidbill;
 use App\Models\billpayment\Billpayment;
 use App\Models\charge\Charge;
 use App\Models\creditnote\CreditNote;
@@ -12,6 +10,7 @@ use App\Models\invoice\PaidInvoice;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
 use App\Models\manualjournal\Journal;
+use App\Models\utility_bill\UtilityBill;
 use App\Models\withholding\Withholding;
 
 /**
@@ -76,12 +75,12 @@ trait TransactionRelationship
 
     public function paidbill()
     {
-        return $this->belongsTo(Paidbill::class, 'tr_ref');
+        return $this->belongsTo(Billpayment::class, 'tr_ref');
     }
 
     public function bill()
     {
-        return $this->belongsTo(Bill::class, 'tr_ref');
+        return $this->belongsTo(UtilityBill::class, 'tr_ref');
     }
 
     public function account()
