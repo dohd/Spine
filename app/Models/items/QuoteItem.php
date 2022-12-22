@@ -2,16 +2,13 @@
 
 namespace App\Models\items;
 
-use App\Models\items\Traits\InvoiceItemRelationship;
 use App\Models\items\Traits\QuoteItemAttribute;
+use App\Models\items\Traits\QuoteItemRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class QuoteItem extends Model
 {
-    use InvoiceItemRelationship,
-        QuoteItemAttribute {
-            // 
-        }
+    use QuoteItemRelationship, QuoteItemAttribute;
 
     protected $table = 'quote_items';
 
