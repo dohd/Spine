@@ -58,22 +58,6 @@ class EquipmentsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            // ->addColumn('task_schedule', function ($item) {
-            //     $service = $item->contractservice;
-            //     if ($service && $service->task_schedule) 
-            //     return $service->task_schedule->title;
-            // })
-            
-            // ->addColumn('tid', function ($item) {
-            //     return '<a href="'. route('biller.equipments.edit', $item->equipment) .'">'. gen4tid('Eq-', $item->equipment->tid) .'</a>';
-            // })
-            // ->addColumn('descr', function ($item) {
-            //     return "{$item->equipment->make_type} {$item->equipment->capacity}";
-            // })
-            // ->addColumn('is_bill', function ($item) {
-            //     if (!$item->is_bill) return 'No';
-            //     return 'Yes';
-            // })
             ->addColumn('sum_total', function ($item) use($sum_total) {
                 return numberFormat($sum_total);
             })
@@ -95,6 +79,7 @@ class EquipmentsTableController extends Controller
                 return $item->equipment->building;
             })
             ->addColumn('category', function ($item) {
+                if (isset($item->equipment->category))
                 return $item->equipment->category->name;
             })
             ->addColumn('make_type', function ($item) {
