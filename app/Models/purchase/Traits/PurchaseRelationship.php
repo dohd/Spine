@@ -4,12 +4,18 @@ namespace App\Models\purchase\Traits;
 
 use App\Models\items\PurchaseItem;
 use App\Models\items\TaxReportItem;
+use App\Models\utility_bill\UtilityBill;
 
 /**
  * Class PurchaseorderRelationship
  */
 trait PurchaseRelationship
 {
+    public function bill()
+    {
+        return $this->hasOne(UtilityBill::class, 'ref_id')->where('document_type', 'direct_purchase');
+    }
+
     public function purchase_tax_reports()
     {
         return $this->hasMany(TaxReportItem::class, 'purchase_id');

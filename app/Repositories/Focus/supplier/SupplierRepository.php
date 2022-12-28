@@ -69,10 +69,10 @@ class SupplierRepository extends BaseRepository
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'payable');  
         })->where(function ($q) use($params) {
-            $q->where('tr_type', 'bill')->whereHas('bill', function ($q1) use($params) { 
-                $q1->where($params); 
-            })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q1) use($params) {
-                $q1->where($params);
+            $q->where('tr_type', 'bill')->whereHas('bill', function ($q) use($params) { 
+                $q->where('bills.supplier_id', $params['supplier_id']);
+            })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q) use($params) {
+                $q->where($params);
             });
         })->orwhere(function ($q) use($supplier) {
             $note = "%{$supplier->id}-supplier Account Opening Balance {$supplier->open_balance_note}%";

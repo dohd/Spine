@@ -100,11 +100,9 @@ class PurchaseRepository extends BaseRepository
                 // skip payments
                 if (stripos($data['status'], 'pmt') !== false) continue;
 
-                unset($data['id'], $data['po_id'], $data['created_at'], $data['updated_at']);
-
                 // expense items
                 $data_items = array_map(fn($v) => [
-                    'item_id' => 103, // cog account
+                    'item_id' => @$data['ledger_id']? $data['ledger_id'] : 103, // cog account
                     'description' => $v['note'],
                     'itemproject_id' => $v['project_id'],
                     'qty' => 1,
@@ -117,6 +115,7 @@ class PurchaseRepository extends BaseRepository
                     'uom' => 'Lot',
                 ], [$data]);
 
+                unset($data['id'], $data['po_id'], $data['created_at'], $data['updated_at'], $data['ledger_id']);
                 // dd(compact('data', 'data_items'));
                 $expense_data[] = compact('data', 'data_items');
             }

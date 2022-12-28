@@ -83,8 +83,12 @@ class SuppliersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            if ($tr->tr_type == 'bill' && $tr->bill)
-                return gen4tid('BILL-', $tr->bill->tid) . ' - ' . $tr->bill->note;
+            if ($tr->tr_type == 'bill') {
+                $purchase = $tr->bill;
+                $purchase_bill = $purchase->bill;
+                if ($purchase_bill) return gen4tid('BILL-', $purchase_bill->tid) . " - {$purchase_bill->note}";
+            }
+                
             return $tr->note;
         })
         ->addColumn('bill_amount', function ($tr) {
