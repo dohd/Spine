@@ -6,6 +6,8 @@ use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\currency\Currency;
+use App\Models\invoice\Invoice;
+use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\items\VerifiedItem;
@@ -48,6 +50,11 @@ trait QuoteRelationship
     public function invoice_product()
     {
         return $this->hasOne('App\Models\items\InvoiceItem')->withoutGlobalScopes();
+    }
+
+    public function invoice()
+    {
+        return $this->hasOneThrough(Invoice::class, InvoiceItem::class, 'quote_id', 'id', 'id', 'quote_id')->withoutGlobalScopes();
     }
 
     public function budget()
