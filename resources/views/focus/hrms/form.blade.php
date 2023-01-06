@@ -400,6 +400,8 @@
               
             
             </div>
+
+            {{-- Roles and Permissions --}}
             <div class="tab-pane" id="tab9" role="tabpanel" aria-labelledby="base-tab9">
                 <div class='form-group'>
                     {{ Form::label( 'role', trans('hrms.role'),['class' => 'col-lg-2 control-label']) }}
@@ -412,27 +414,29 @@
                             @endforeach
                         </select>
                     </div>
-                    <div id="permission_result">   @if(@$hrms->role['id'])
+                    <div id="permission_result">   
+                        @if(@$hrms->role['id'])
                             <div class="row p-1">
+                                {{-- @php  --}}
                                 @foreach($permissions_all as $row)
                                     <div class="col-md-6">
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" name="permission[]" value="{{$row['id']}}"
-                                                   @if(in_array_r($row['id'],@$permissions)) checked="checked" @endif>
-                                            <label>{{trans('permissions.'.$row['name'])}}</label>
+                                            <input type="checkbox" name="permission[]" value="{{ $row['id'] }}" @if(in_array_r($row['id'], @$permissions)) checked="checked" @endif>
+                                                   
+                                            <label>{{ trans('permissions.' . $row['name']) }}</label>
                                         </div>
                                     </div>
                                 @endforeach
+                                {{-- @endphp --}}
                             </div>
                         @endif
                     </div>
                 </div>
-
-             
             </div>
         </div>
     </div>
 </div>
+
 @section('after-scripts')
     {{ Html::script('focus/js/jquery.password-validation.js') }}
     <script>
@@ -473,7 +477,7 @@
             var pid = $(this).val();
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
                 }
             });
             $.ajax({
@@ -522,9 +526,6 @@
         const employement_date = @json(dateFormat(@$hrm->employement_date));
         if (dob) $('#dob').val(dob);
         if (employement_date) $('#employement_date').val(employement_date);
-        
-
     }
-   
     </script>
 @endsection
