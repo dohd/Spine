@@ -243,7 +243,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         // reduce stock qty
         foreach ($goodsreceivenote->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
-            if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
+            if (!$po_item) continue;
             $po_item->decrement('qty_received', $item->qty);
             // stock subtotal amount
             $goodsreceivenote->subtotal += ($item->qty * $po_item->rate / $po_item->qty);
@@ -262,7 +262,6 @@ class GoodsreceivenoteRepository extends BaseRepository
                     }
                 }   
             } elseif ($prod_variation) $prod_variation->decrement('qty', $po_item['qty']);
-            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);  
         }
 
         $current = $goodsreceivenote;
@@ -276,11 +275,12 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         // update purchase order status
         $purchaseorder = $goodsreceivenote->purchaseorder;
-        if (!$purchaseorder) throw ValidationException::withMessages(['Related purchase order does not exist!']);
-        $order_goods_qty = $purchaseorder->items->sum('qty');
-        if ($received_goods_qty == 0) $purchaseorder->update(['status' => 'Pending']);
-        elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'Partial']);
-        else $purchaseorder->update(['status' => 'Complete']);
+        if ($purchaseorder) {
+            $order_goods_qty = $purchaseorder->items->sum('qty');
+            if ($received_goods_qty == 0) $purchaseorder->update(['status' => 'Pending']);
+            elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'Partial']);
+            else $purchaseorder->update(['status' => 'Complete']);
+        }
 
         if ($goodsreceivenote->delete()) {
             DB::commit(); 
