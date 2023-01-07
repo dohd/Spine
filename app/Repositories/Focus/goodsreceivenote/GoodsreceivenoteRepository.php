@@ -100,9 +100,9 @@ class GoodsreceivenoteRepository extends BaseRepository
         $received_goods_qty = $result->items->sum('qty');
         if ($result->purchaseorder) {
             $order_goods_qty = $result->purchaseorder->items->sum('qty');
-            if ($received_goods_qty == 0) $result->purchaseorder->update(['status' => 'pending']);
-            elseif (round($received_goods_qty) < round($order_goods_qty)) $result->purchaseorder->update(['status' => 'partial']);
-            else $result->purchaseorder->update(['status' => 'complete']);
+            if ($received_goods_qty == 0) $result->purchaseorder->update(['status' => 'Pending']);
+            elseif (round($received_goods_qty) < round($order_goods_qty)) $result->purchaseorder->update(['status' => 'Partial']);
+            else $result->purchaseorder->update(['status' => 'Complete']);
         } else throw ValidationException::withMessages(['Purchase order does not exist!']);
 
 
@@ -145,6 +145,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         // reverse previous stock qty
         foreach ($goodsreceivenote->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
+            if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->decrement('qty_received', $item->qty);
 
             // apply unit conversion
@@ -170,18 +171,18 @@ class GoodsreceivenoteRepository extends BaseRepository
         $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
         foreach ($data_items as $item) {
             $grn_item = GoodsreceivenoteItem::find($item['id']);
-            if ($grn_item) {
-                // reverse items qty
-                $grn_item->decrement('qty', $grn_item->qty);
-                // update items qty
-                $grn_item->update($item);
-            } else throw ValidationException::withMessages(['GRN item does not exist!']);
+            if (!$grn_item) throw ValidationException::withMessages(['GRN item does not exist!']);
+            // reverse items qty
+            $grn_item->decrement('qty', $grn_item->qty);
+            // update items qty
+            $grn_item->update($item);
         }
 
         // increase stock qty with new update 
         $grn_items = $goodsreceivenote->items()->get();
         foreach ($grn_items as $item) {
             $po_item = $item->purchaseorder_item;
+            if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->increment('qty_received', $item->qty);
             
             // apply unit conversion
@@ -203,17 +204,18 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         // update purchase order status
         $received_goods_qty = $grn_items->sum('qty');
-        if ($goodsreceivenote->purchaseorder) {
-            $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
-            if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'pending']);
-            elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'partial']);
-            else $goodsreceivenote->purchaseorder->update(['status' => 'complete']);    
-        } else throw ValidationException::withMessages(['Purchase Order does not exist!']);
+        if (!$goodsreceivenote->purchaseorder) throw ValidationException::withMessages(['Purchase Order does not exist!']);
+        $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
+        if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'Pending']);
+        elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'Partial']);
+        else $goodsreceivenote->purchaseorder->update(['status' => 'Complete']); 
         
         $goodsreceivenote->prev_note = $prev_note;
         /**accounting */
-        if ($goodsreceivenote->invoice_no) $this->generate_bill($goodsreceivenote); // generate bill{
-        else {
+        if ($goodsreceivenote->invoice_no) {
+            // generate bill
+            $this->generate_bill($goodsreceivenote); 
+        } else {
             // grn transaction
             Transaction::where(['tr_type' => 'grn', 'tr_ref' => $goodsreceivenote->id, 'note' => $goodsreceivenote->prev_note])->delete();
             $this->post_transaction($goodsreceivenote);
@@ -241,6 +243,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         // reduce stock qty
         foreach ($goodsreceivenote->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
+            if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->decrement('qty_received', $item->qty);
             // stock subtotal amount
             $goodsreceivenote->subtotal += ($item->qty * $po_item->rate / $po_item->qty);
@@ -273,10 +276,11 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         // update purchase order status
         $purchaseorder = $goodsreceivenote->purchaseorder;
+        if (!$purchaseorder) throw ValidationException::withMessages(['Related purchase order does not exist!']);
         $order_goods_qty = $purchaseorder->items->sum('qty');
-        if ($received_goods_qty == 0) $purchaseorder->update(['status' => 'pending']);
-        elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'partial']);
-        else $purchaseorder->update(['status' => 'complete']);
+        if ($received_goods_qty == 0) $purchaseorder->update(['status' => 'Pending']);
+        elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'Partial']);
+        else $purchaseorder->update(['status' => 'Complete']);
 
         if ($goodsreceivenote->delete()) {
             DB::commit(); 
