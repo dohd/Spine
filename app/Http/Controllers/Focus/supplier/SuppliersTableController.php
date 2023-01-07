@@ -95,6 +95,8 @@ class SuppliersTableController extends Controller
                     $grn_bill = $grn->bill;
                     if ($grn_bill) $note = gen4tid('BILL-', $grn_bill->tid) . " - {$grn_bill->note}";
                 }
+                $grn_bill = $tr->grn_bill;
+                if ($grn_bill) $note = gen4tid('BILL-', $grn_bill->tid) . " - {$grn_bill->note}";
             }
                 
             return $note ?: $tr->note;
