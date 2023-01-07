@@ -6,11 +6,7 @@ use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
-use App\Models\bill\Bill;
-use App\Models\billitem\BillItem;
-use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
-use App\Models\purchaseorder\Grn;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
@@ -135,8 +131,10 @@ class PurchaseorderRepository extends BaseRepository
             $order_item->save();                
         }
 
-        DB::commit();
-        if ($purchaseorder) return true;
+        if ($purchaseorder) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }

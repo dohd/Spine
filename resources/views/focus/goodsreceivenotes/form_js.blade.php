@@ -12,7 +12,7 @@
                 url: "{{ route('biller.suppliers.purchaseorders') }}",
                 type: 'POST',
                 quietMillis: 50,
-                data: {supplier_id},
+                data: {supplier_id, type: 'grn'},
             });
         },
         fetchLpoGoods: (purchaseorder_id) => {
@@ -79,7 +79,6 @@
             $('#productTbl tbody').html('');
             if (!el.val()) return;
             config.fetchLpoGoods(el.val()).done(data => {
-                console.log(data)
                 data.forEach((v,i) => $('#productTbl tbody').append(Form.productRow(v,i)));
             });
         },
