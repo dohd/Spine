@@ -74,6 +74,10 @@ class SupplierRepository extends BaseRepository
             })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q) use($params) {
                 $q->where($params);
             });
+        })->orwhere(function ($q) use($params) {
+            $q->where('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn', function ($q) use($params) {
+                $q->where('goods_receive_notes.supplier_id', $params['supplier_id']);
+            });
         })->orwhere(function ($q) use($supplier) {
             $note = "%{$supplier->id}-supplier Account Opening Balance {$supplier->open_balance_note}%";
             $q->where('tr_type', 'genjr')->where('credit', '>', 0)->where('note', 'LIKE', $note);
