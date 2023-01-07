@@ -408,26 +408,24 @@
                     <div class='col-lg-10'>
                         <select class="form-control" name="role"
                                 id="{{ $general['create'] == 1 ? "new_emp_role" : "emp_role" }}">
-                            @foreach($roles AS $role)
-                                <option value="{{$role['id']}}"
-                                        @if(@$hrms->role['id']==$role['id']) selected @endif>{{$role['name']}}</option>
+                            @foreach($roles as $role)
+                                    <option value="{{$role['id']}}" @if(@$hrms->role['id']==$role['id']) selected @endif>
+                                        {{$role['name']}}
+                                    </option>
                             @endforeach
                         </select>
                     </div>
                     <div id="permission_result">   
                         @if(@$hrms->role['id'])
                             <div class="row p-1">
-                                {{-- @php  --}}
                                 @foreach($permissions_all as $row)
                                     <div class="col-md-6">
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" name="permission[]" value="{{ $row['id'] }}" @if(in_array_r($row['id'], @$permissions)) checked="checked" @endif>
-                                                   
                                             <label>{{ trans('permissions.' . $row['name']) }}</label>
                                         </div>
                                     </div>
                                 @endforeach
-                                {{-- @endphp --}}
                             </div>
                         @endif
                     </div>
@@ -438,86 +436,77 @@
 </div>
 
 @section('after-scripts')
-    {{ Html::script('focus/js/jquery.password-validation.js') }}
-    <script>
-        $(document).ready(function () {
-            $("#u_password").passwordValidation({
-                minLength: 6,
-                minUpperCase: 1,
-                minLowerCase: 1,
-                minDigits: 1,
-                minSpecial: 1,
-                maxRepeats: 5,
-                maxConsecutive: 3,
-                noUpper: false,
-                noLower: false,
-                noDigit: false,
-                noSpecial: false,
-                failRepeats: true,
-                failConsecutive: true,
-                confirmField: undefined
-            }, function (element, valid, match, failedCases) {
-
-                $("#errors").html("<pre>" + failedCases.join("\n") + "</pre>");
-
-                if (valid) $(element).css("border", "2px solid green");
-                if (!valid) {
-                    $(element).css("border", "2px solid red");
-                    $("#e_btn").prop('disabled', true);
-                }
-                if (valid && match) {
-                    $("#u_password").css("border", "2px solid green");
-                    $("#e_btn").prop('disabled', false);
-                }
-                if (!valid || !match) $("#u_password").css("border", "2px solid red");
-            });
+{{ Html::script('focus/js/jquery.password-validation.js') }}
+<script>
+    $(document).ready(function () {
+        $("#u_password").passwordValidation({
+            minLength: 6,
+            minUpperCase: 1,
+            minLowerCase: 1,
+            minDigits: 1,
+            minSpecial: 1,
+            maxRepeats: 5,
+            maxConsecutive: 3,
+            noUpper: false,
+            noLower: false,
+            noDigit: false,
+            noSpecial: false,
+            failRepeats: true,
+            failConsecutive: true,
+            confirmField: undefined
+        }, function (element, valid, match, failedCases) {
+            $("#errors").html("<pre>" + failedCases.join("\n") + "</pre>");
+            if (valid) $(element).css("border", "2px solid green");
+            if (!valid) {
+                $(element).css("border", "2px solid red");
+                $("#e_btn").prop('disabled', true);
+            }
+            if (valid && match) {
+                $("#u_password").css("border", "2px solid green");
+                $("#e_btn").prop('disabled', false);
+            }
+            if (!valid || !match) $("#u_password").css("border", "2px solid red");
         });
+    });
 
-        $(document.body).on('change', '#emp_role', function (e) {
-            var pid = $(this).val();
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                }
-            });
-            $.ajax({
-                url: '{{ route("biller.hrms.related_permission") }}',
-                type: 'post',
-                dataType: 'html',
-                data: {'rid': pid, 'create': '{{$general['create']}}'},
-                success: function (data) {
-                    $('#permission_result').html(data)
-                }
-            });
-        });
-        $(document.body).on('change', '#new_emp_role', function (e) {
-            var pid = $(this).val();
-            fresh_permission(pid);
-        });
-
-        function fresh_permission(pid = 1) {
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                url: '{{ route("biller.hrms.role_permission") }}',
-                type: 'post',
-                dataType: 'html',
-                data: {'rid': pid, 'create': '{{$general['create']}}'},
-                success: function (data) {
-                    $('#permission_result').html(data)
-                }
-            });
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
+    });
 
-        @if(isset($hrms->role['id']))  fresh_permission({{$hrms->role['id']}});
-        @else fresh_permission(2); @endif
-          // initialize datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+    $(document.body).on('change', '#emp_role', function (e) {
+        var pid = $(this).val();
+        $.ajax({
+            url: '{{ route("biller.hrms.related_permission") }}',
+            type: 'post',
+            dataType: 'html',
+            data: {'rid': pid, 'create': '{{$general['create']}}'},
+            success: function (data) {
+                $('#permission_result').html(data)
+            }
+        });
+    });
+
+    $(document.body).on('change', '#new_emp_role', function (e) {
+        var pid = $(this).val();
+        fresh_permission(pid);
+    });
+
+    function fresh_permission(pid = 1) {
+        $.ajax({
+            url: '{{ route("biller.hrms.role_permission") }}',
+            type: 'post',
+            dataType: 'html',
+            data: {'rid': pid, 'create': '{{$general['create']}}'},
+            success: function (data) {
+                $('#permission_result').html(data)
+            }
+        });
+    }
+
+    // initialize datepicker
+    $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true});
     $('#dob').datepicker('setDate', new Date());
     $('#employement_date').datepicker('setDate', new Date());
     const hrm = @json(@$hrms);
@@ -526,6 +515,12 @@
         const employement_date = @json(dateFormat(@$hrm->employement_date));
         if (dob) $('#dob').val(dob);
         if (employement_date) $('#employement_date').val(employement_date);
+
+        // refresh roles
+        if (hrm.role) {
+            fresh_permission(hrm.role.id);
+            $('#emp_role').change();
+        } else fresh_permission(2);
     }
-    </script>
+</script>
 @endsection

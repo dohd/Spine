@@ -10,7 +10,6 @@ use App\Models\hrm\HrmMeta;
 use DB;
 use App\Models\hrm\Hrm;
 use App\Exceptions\GeneralException;
-use App\Models\Access\Permission\Permission;
 use App\Models\attendance\Attendance;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
@@ -231,7 +230,10 @@ class HrmRepository extends BaseRepository
     {
         DB::beginTransaction();
 
+        HrmMeta::where('user_id', $hrm->id)->delete();
+        RoleUser::where('user_id', $hrm->id)->delete();
         UserProfile::where('user_id', $hrm->id)->delete();
+
         if ($hrm->delete()) {
             DB::commit();
             return true;

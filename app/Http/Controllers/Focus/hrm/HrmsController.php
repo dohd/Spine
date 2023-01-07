@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\hrm;
 
 use App\Http\Requests\Focus\department\ManageDepartmentRequest;
@@ -81,7 +82,7 @@ class HrmsController extends Controller
      * @return \App\Http\Responses\Focus\hrm\CreateResponse
      */
     public function create(ManageHrmRequest $request)
-    {   
+    {
         return new CreateResponse('focus.hrms.create');
     }
 
@@ -94,8 +95,8 @@ class HrmsController extends Controller
     public function store(ManageHrmRequest $request)
     {
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
-        $input['meta'] = $request->except(['_token','first_name', 'last_name', 'email', 'picture', 'signature', 'role','permission']);
-        $input = array_merge($input, $request->only(['permission']));       
+        $input['meta'] = $request->except(['_token', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission']);
+        $input = array_merge($input, $request->only(['permission']));
 
         // validate
         foreach ($input as $key => $val) {
@@ -138,7 +139,7 @@ class HrmsController extends Controller
     public function update(ManageHrmRequest $request, Hrm $hrm)
     {
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
-        $input['meta'] = $request->except(['_token','_method','first_name', 'last_name', 'email', 'picture', 'signature', 'role','permission']);
+        $input['meta'] = $request->except(['_token', '_method', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission']);
         $input = array_merge($input, $request->only(['permission']));
 
         // validate
@@ -219,7 +220,7 @@ class HrmsController extends Controller
                     // delete permission (non-business owner)
                     PermissionUser::where($data)->delete();
                 }
-            } 
+            }
         }
     }
 
@@ -283,14 +284,14 @@ class HrmsController extends Controller
         $create = $request->post('create');
 
         printlog($emp_role, $create);
-        
+
         $permissions_all = \App\Models\Access\Permission\Permission::orWhereHas('roles', function ($q) use ($emp_role) {
             return $q->where('role_id', '=', $emp_role);
         })->get()->toArray();
 
         $permissions = [];
         if ($create) $permissions = \App\Models\Access\Permission\PermissionUser::all()->keyBy('id')->where('user_id', '=', $create)->toArray();
-        
+
         return view('focus.hrms.partials.role_permissions')->with(compact('permissions_all', 'create', 'permissions'));
     }
 
@@ -317,6 +318,4 @@ class HrmsController extends Controller
         if ($create) $permissions = \App\Models\Access\Permission\PermissionUser::all()->keyBy('id')->where('user_id', '=', $create)->toArray();
         return view('focus.hrms.partials.admin_permissions')->with(compact('permissions_all', 'create', 'permissions'));
     }
-
-
 }

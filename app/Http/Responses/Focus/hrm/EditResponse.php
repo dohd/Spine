@@ -6,6 +6,7 @@ use App\Models\Access\Permission\Permission;
 use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\Role\Role;
 use App\Models\department\Department;
+use App\Models\hrm\HrmMeta;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -36,6 +37,7 @@ class EditResponse implements Responsable
         $roles = Role::where('status', 0)->get();
 
         $hrm_metadata = $this->hrms->meta? $this->hrms->meta->toArray() : [];
+
         $hrms_mod = collect([$this->hrms->toArray()])->map(function ($v) use($hrm_metadata) {
             return array_merge(array_diff_key($v, array_flip(['meta'])), $hrm_metadata);
         })->first();
