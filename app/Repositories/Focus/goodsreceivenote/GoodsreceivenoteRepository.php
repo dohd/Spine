@@ -53,7 +53,7 @@ class GoodsreceivenoteRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
-        // sanitize
+        
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['tax_rate', 'subtotal', 'tax', 'total'])) 
@@ -62,6 +62,8 @@ class GoodsreceivenoteRepository extends BaseRepository
                 $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
 
+        $tid = Goodsreceivenote::max('tid');
+        if ($input['tid'] <= $tid) $input['tid'] = $tid+1;
         $result = Goodsreceivenote::create($input);
 
         // grn items
@@ -79,6 +81,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         // increase stock qty
         foreach ($result->items as $i => $item) {
             $po_item = $item->purchaseorder_item;
+            if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->increment('qty_received', $item->qty);
 
             $prod_variation = $po_item->productvariation;
@@ -105,7 +108,6 @@ class GoodsreceivenoteRepository extends BaseRepository
             elseif (round($received_goods_qty) < round($order_goods_qty)) $result->purchaseorder->update(['status' => 'Partial']);
             else $result->purchaseorder->update(['status' => 'Complete']);
         } else throw ValidationException::withMessages(['Purchase order does not exist!']);
-
 
         /**accounting */
         if ($result->invoice_no) $this->generate_bill($result); // generate bill
