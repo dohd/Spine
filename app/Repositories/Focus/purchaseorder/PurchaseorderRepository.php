@@ -12,6 +12,7 @@ use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class PurchaseorderRepository.
@@ -148,15 +149,19 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function delete($purchaseorder)
     {
+        if ($purchaseorder->grn_items->count()) 
+            throw ValidationException::withMessages(['Purchase order is attached to a Goods Receive Note!']);
+            
         try {
             DB::beginTransaction();
 
             $purchaseorder->transactions()->delete();
             aggregate_account_transactions();
-            $purchaseorder->delete();
 
-            DB::commit();
-            return true;
+            if ($purchaseorder->delete()) {
+                DB::commit();
+                return true;
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));

@@ -64,6 +64,7 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         $result = Goodsreceivenote::create($input);
 
+        // grn items
         $data_items = Arr::only($input, ['qty', 'rate', 'purchaseorder_item_id', 'item_id']);
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
@@ -203,14 +204,15 @@ class GoodsreceivenoteRepository extends BaseRepository
         }
 
         // update purchase order status
-        $received_goods_qty = $grn_items->sum('qty');
         if (!$goodsreceivenote->purchaseorder) throw ValidationException::withMessages(['Purchase Order does not exist!']);
         $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
+        $received_goods_qty = $grn_items->sum('qty');
         if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'Pending']);
         elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'Partial']);
         else $goodsreceivenote->purchaseorder->update(['status' => 'Complete']); 
         
         $goodsreceivenote->prev_note = $prev_note;
+
         /**accounting */
         if ($goodsreceivenote->invoice_no) {
             // generate bill
@@ -239,54 +241,50 @@ class GoodsreceivenoteRepository extends BaseRepository
     public function delete(Goodsreceivenote $goodsreceivenote)
     {     
         DB::beginTransaction();
-        
-        // reduce stock qty
-        foreach ($goodsreceivenote->items as $i => $item) {
+
+        $grn_bill = $goodsreceivenote->bill;
+        if ($grn_bill) throw ValidationException::withMessages(['Goods Receive Note is attached to Bill ' . gen4tid('', $grn_bill->tid)]);
+
+        // decrease inventory stock 
+        foreach ($goodsreceivenote->items as $item) {
             $po_item = $item->purchaseorder_item;
-            if (!$po_item) continue;
-            $po_item->decrement('qty_received', $item->qty);
-            // stock subtotal amount
-            $goodsreceivenote->subtotal += ($item->qty * $po_item->rate / $po_item->qty);
-
-            // apply unit conversion
-            $prod_variation = $po_item->productvariation;
-            if (isset($prod_variation->product->units)) {
-                foreach ($prod_variation->product->units as $unit) {
-                    if ($unit->code == $po_item['uom']) {
-                        if ($unit->unit_type == 'base') {
-                            $prod_variation->decrement('qty', $po_item['qty']);
-                        } else {
-                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
-                            $prod_variation->decrement('qty', $converted_qty);
+            if ($po_item) {
+                $po_item->decrement('qty_received', $item->qty);
+                // apply unit conversion
+                $prod_variation = $po_item->productvariation;
+                if (isset($prod_variation->product->units)) {
+                    foreach ($prod_variation->product->units as $unit) {
+                        if ($unit->code == $po_item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->decrement('qty', $po_item['qty']);
+                            } else {
+                                $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                                $prod_variation->decrement('qty', $converted_qty);
+                            }
                         }
-                    }
-                }   
-            } elseif ($prod_variation) $prod_variation->decrement('qty', $po_item['qty']);
-        }
-
-        $current = $goodsreceivenote;
-        $goodsreceivenotes = GoodsreceivenoteItem::whereHas('goodsreceivenote', function ($q) use($current) {
-            $q->where('purchaseorder_id', $current->purchaseorder_id)->whereNotIn('id', $current->id);
-        });
-        $received_goods_qty = 0;
-        foreach ($goodsreceivenotes as $row) {
-            $received_goods_qty += $row->items->sum('qty');
+                    }   
+                } elseif ($prod_variation) $prod_variation->decrement('qty', $po_item['qty']);
+            }
         }
 
         // update purchase order status
-        $purchaseorder = $goodsreceivenote->purchaseorder;
-        if ($purchaseorder) {
-            $order_goods_qty = $purchaseorder->items->sum('qty');
-            if ($received_goods_qty == 0) $purchaseorder->update(['status' => 'Pending']);
-            elseif (round($order_goods_qty) > round($received_goods_qty)) $purchaseorder->update(['status' => 'Partial']);
-            else $purchaseorder->update(['status' => 'Complete']);
+        if ($goodsreceivenote->purchaseorder) {
+            $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
+            $received_goods_qty = $goodsreceivenote->items->sum('qty');
+            if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'Pending']);
+            elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'Partial']);
+            else $goodsreceivenote->purchaseorder->update(['status' => 'Complete']); 
         }
-
+        
+        // clear transactions
+        $goodsreceivenote->transactions()->delete();
+        aggregate_account_transactions();
+          
         if ($goodsreceivenote->delete()) {
             DB::commit(); 
             return true;
         }
-                
+  
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 
