@@ -111,6 +111,7 @@ class InvoicePaymentRepository extends BaseRepository
             return $result;
         }
 
+        DB::rollBack();
         throw new GeneralException('Error Creating Invoice');
     }
 
@@ -181,6 +182,7 @@ class InvoicePaymentRepository extends BaseRepository
             return true;
         }
 
+        DB::rollBack();
         throw new GeneralException('Error Creating Invoice');
     }
 
@@ -216,6 +218,7 @@ class InvoicePaymentRepository extends BaseRepository
             return true;
         }
 
+        DB::rollBack();
         throw new GeneralException('Error Creating Invoice');            
     }
 

@@ -186,6 +186,7 @@ class BillPaymentRepository extends BaseRepository
             return $result;
         }
 
+        DB::rollBack();
         throw new GeneralException('Error Creating Lead');
     }
 
@@ -266,6 +267,7 @@ class BillPaymentRepository extends BaseRepository
             return true;
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
@@ -312,7 +314,8 @@ class BillPaymentRepository extends BaseRepository
             DB::commit(); 
             return true;
         }
-                
+               
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 
@@ -384,7 +387,6 @@ class BillPaymentRepository extends BaseRepository
             ]);    
             Transaction::create($cr_data);
         }
-        
         aggregate_account_transactions();
     }
 }

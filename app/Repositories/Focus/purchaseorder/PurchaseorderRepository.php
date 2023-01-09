@@ -83,6 +83,7 @@ class PurchaseorderRepository extends BaseRepository
             return $result;   
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -137,6 +138,7 @@ class PurchaseorderRepository extends BaseRepository
             return true;
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
@@ -151,13 +153,12 @@ class PurchaseorderRepository extends BaseRepository
     {
         if ($purchaseorder->grn_items->count()) 
             throw ValidationException::withMessages(['Purchase order is attached to a Goods Receive Note!']);
-            
-        try {
-            DB::beginTransaction();
 
+        DB::beginTransaction();
+        try {
             $purchaseorder->transactions()->delete();
             aggregate_account_transactions();
-
+            
             if ($purchaseorder->delete()) {
                 DB::commit();
                 return true;

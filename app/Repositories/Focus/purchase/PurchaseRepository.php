@@ -221,7 +221,8 @@ class PurchaseRepository extends BaseRepository
             DB::commit();
             return $result;   
         }
-                
+        
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -328,6 +329,7 @@ class PurchaseRepository extends BaseRepository
             return $purchase;
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
@@ -340,9 +342,9 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             // reduce stock
             foreach ($purchase->items as $item) {
                 if ($item->type != 'Stock') continue;

@@ -50,42 +50,45 @@ class UtilityBillRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        foreach ($input as $key => $val) {
-            if (in_array($key, ['date', 'due_date'])) $input[$key] = date_for_database($val);
-            if (in_array($key, ['subtotal', 'tax', 'total'])) $input[$key] = numberClean($val);
-            if (in_array($key, ['item_subtotal', 'item_tax', 'item_total'])) {
-                $input[$key] = array_map(function ($v) { 
-                    return numberClean($v); 
-                }, $val);
+        try {
+            foreach ($input as $key => $val) {
+                if (in_array($key, ['date', 'due_date'])) $input[$key] = date_for_database($val);
+                if (in_array($key, ['subtotal', 'tax', 'total'])) $input[$key] = numberClean($val);
+                if (in_array($key, ['item_subtotal', 'item_tax', 'item_total'])) {
+                    $input[$key] = array_map(function ($v) { 
+                        return numberClean($v); 
+                    }, $val);
+                }
             }
+            $result = UtilityBill::create($input);
+    
+            $data_items = Arr::only($input, ['item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
+            $data_items = modify_array($data_items);
+            $data_items = array_map(function ($v) use($result) {
+                return [
+                    'bill_id' => $result->id,
+                    'ref_id' => $v['item_ref_id'],
+                    'note' => $v['item_note'],
+                    'qty' => $v['item_qty'],
+                    'subtotal' => $v['item_subtotal'],
+                    'tax' => $v['item_tax'],
+                    'total' => $v['item_total']
+                ];
+            }, $data_items);
+            UtilityBillItem::insert($data_items);
+    
+            /**accounting */
+            if ($result->document_type == 'goods_receive_note') 
+                $this->goods_receive_note_transaction($result);
+    
+            if ($result) {
+                DB::commit();
+                return $result;
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new GeneralException('Error Creating Bill');
         }
-        $result = UtilityBill::create($input);
-
-        $data_items = Arr::only($input, ['item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
-        $data_items = modify_array($data_items);
-        $data_items = array_map(function ($v) use($result) {
-            return [
-                'bill_id' => $result->id,
-                'ref_id' => $v['item_ref_id'],
-                'note' => $v['item_note'],
-                'qty' => $v['item_qty'],
-                'subtotal' => $v['item_subtotal'],
-                'tax' => $v['item_tax'],
-                'total' => $v['item_total']
-            ];
-        }, $data_items);
-        UtilityBillItem::insert($data_items);
-
-        /**accounting */
-        if ($result->document_type == 'goods_receive_note') 
-            $this->goods_receive_note_transaction($result);
-
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
-
-        throw new GeneralException('Error Creating Bill');
     }
 
     /**
@@ -101,44 +104,47 @@ class UtilityBillRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        foreach ($input as $key => $val) {
-            if (in_array($key, ['date', 'due_date'])) $input[$key] = date_for_database($val);
-            if (in_array($key, ['subtotal', 'tax', 'total'])) $input[$key] = numberClean($val);
-            if (in_array($key, ['item_subtotal', 'item_tax', 'item_total'])) {
-                $input[$key] = array_map(function ($v) { 
-                    return numberClean($v); 
-                }, $val);
+        try {
+            foreach ($input as $key => $val) {
+                if (in_array($key, ['date', 'due_date'])) $input[$key] = date_for_database($val);
+                if (in_array($key, ['subtotal', 'tax', 'total'])) $input[$key] = numberClean($val);
+                if (in_array($key, ['item_subtotal', 'item_tax', 'item_total'])) {
+                    $input[$key] = array_map(function ($v) { 
+                        return numberClean($v); 
+                    }, $val);
+                }
             }
-        }
-        $prev_note = $utility_bill->note;
-        $result = $utility_bill->update($input);
+            $prev_note = $utility_bill->note;
+            $result = $utility_bill->update($input);
 
-        $data_items = Arr::only($input, ['id', 'item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
-        $data_items = array_map(function ($v) {
-            return [
-                'id' => $v['id'],
-                'ref_id' => $v['item_ref_id'],
-                'note' => $v['item_note'],
-                'qty' => $v['item_qty'],
-                'subtotal' => $v['item_subtotal'],
-                'tax' => $v['item_tax'],
-                'total' => $v['item_total']
-            ];
-        }, modify_array($data_items));
-        Batch::update(new UtilityBillItem, $data_items, 'id');
+            $data_items = Arr::only($input, ['id', 'item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
+            $data_items = array_map(function ($v) {
+                return [
+                    'id' => $v['id'],
+                    'ref_id' => $v['item_ref_id'],
+                    'note' => $v['item_note'],
+                    'qty' => $v['item_qty'],
+                    'subtotal' => $v['item_subtotal'],
+                    'tax' => $v['item_tax'],
+                    'total' => $v['item_total']
+                ];
+            }, modify_array($data_items));
+            Batch::update(new UtilityBillItem, $data_items, 'id');
 
-        /**accounting */
-        if ($utility_bill->document_type == 'goods_receive_note') {
-            Transaction::where(['tr_type' => 'bill', 'note' => $prev_note, 'tr_ref' => $utility_bill->id])->delete();
-            $this->goods_receive_note_transaction($utility_bill);
+            /**accounting */
+            if ($utility_bill->document_type == 'goods_receive_note') {
+                Transaction::where(['tr_type' => 'bill', 'note' => $prev_note, 'tr_ref' => $utility_bill->id])->delete();
+                $this->goods_receive_note_transaction($utility_bill);
+            }
+                
+            if ($result) {
+                DB::commit();
+                return $result;
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
         }
-            
-        if ($result) {
-            DB::commit();
-            return $result;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
     /**
@@ -151,14 +157,9 @@ class UtilityBillRepository extends BaseRepository
     public function delete(UtilityBill $utility_bill)
     {     
         DB::beginTransaction();
-
-        $is_manual_bill = in_array($utility_bill->document_type, ['kra_bill', 'goods_receive_note', 'opening_balance']) && !$utility_bill->ref_id;
-        if (!$is_manual_bill) throw ValidationException::withMessages(['Please delete resource from parent record!']);
     
         Transaction::where(['tr_type' => 'bill', 'note' => $utility_bill->note, 'tr_ref' => $utility_bill->id])->delete();
-        $result = $utility_bill->delete();
-
-        if ($result) {
+        if ($utility_bill->delete()) {
             DB::commit(); 
             return true;
         }
@@ -176,50 +177,55 @@ class UtilityBillRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        foreach ($input as $key => $val) {
-            if ($key == 'reg_date') $input[$key] = date_for_database($val);
-            if ($key == 'total') $input[$key] = numberClean($val);
-            if ($key == 'amount') {
-                $input[$key] = array_map(function ($n) { 
-                    return numberClean($n); 
-                }, $val); 
-            }                
-        }
-        $data = (object) Arr::only($input, ['supplier_id', 'tid', 'reg_date', 'reg_no', 'note', 'total']);
-        $bill_data = [
-            'tid' => $data->tid,
-            'supplier_id' => $data->supplier_id,
-            'reference' => $data->reg_no,
-            'document_type' => 'kra_bill',
-            'date' => $data->reg_date,
-            'due_date' => $data->reg_date,
-            'subtotal' => $data->total,
-            'total' => $data->total,
-            'note' => $data->note,
-        ];
-        $result = UtilityBill::create($bill_data);
-
-        $data_items = Arr::only($input, ['payment_type', 'tax_type', 'tax_period', 'amount']);
-        if (!$data_items) throw ValidationException::withMessages(['Payment Details line items required!']);
-        // dd($data_items);
-        $bill_items_data = array_map(function ($v) use($result) {
-            return [
-                'bill_id' => $result->id,
-                'note' => implode(' - ', array($v['payment_type'], $v['tax_type'], $v['tax_period'])), 
-                'qty' => 1,
-                'subtotal' => $v['amount'],
-                'total' => $v['amount'],
+        try {
+            foreach ($input as $key => $val) {
+                if ($key == 'reg_date') $input[$key] = date_for_database($val);
+                if ($key == 'total') $input[$key] = numberClean($val);
+                if ($key == 'amount') {
+                    $input[$key] = array_map(function ($n) { 
+                        return numberClean($n); 
+                    }, $val); 
+                }                
+            }
+            $data = (object) Arr::only($input, ['supplier_id', 'tid', 'reg_date', 'reg_no', 'note', 'total']);
+            $bill_data = [
+                'tid' => $data->tid,
+                'supplier_id' => $data->supplier_id,
+                'reference' => $data->reg_no,
+                'document_type' => 'kra_bill',
+                'date' => $data->reg_date,
+                'due_date' => $data->reg_date,
+                'subtotal' => $data->total,
+                'total' => $data->total,
+                'note' => $data->note,
             ];
-        }, modify_array($data_items));
-        UtilityBillItem::insert($bill_items_data);
+            $result = UtilityBill::create($bill_data);
 
-        /** accounting */
-        $this->kra_transaction($result);
+            $data_items = Arr::only($input, ['payment_type', 'tax_type', 'tax_period', 'amount']);
+            if (!$data_items) throw ValidationException::withMessages(['Payment Details line items required!']);
+            // dd($data_items);
+            $bill_items_data = array_map(function ($v) use($result) {
+                return [
+                    'bill_id' => $result->id,
+                    'note' => implode(' - ', array($v['payment_type'], $v['tax_type'], $v['tax_period'])), 
+                    'qty' => 1,
+                    'subtotal' => $v['amount'],
+                    'total' => $v['amount'],
+                ];
+            }, modify_array($data_items));
+            UtilityBillItem::insert($bill_items_data);
 
-        DB::commit();
-        if ($result) return $result;
+            /** accounting */
+            $this->kra_transaction($result);
 
-        throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
+            if ($result) {
+                DB::commit();
+                return $result;
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
+        }
     }    
 
     /**
