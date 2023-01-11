@@ -132,10 +132,9 @@ class BillsController extends Controller
         $pdf->WriteHTML($html);
 
         $tid = $data['resource']['tid'];
-        $name = 'QT-' . sprintf('%04d', $tid) . '.pdf';
-        if ($data['resource']['bank_id']) {
-            $name = 'PI-' . sprintf('%04d', $tid) . '.pdf';
-        }
+        $prefixes = prefixesArray(['quote', 'proforma_invoice'], auth()->user()->ins);
+        $name = gen4tid($data['resource']['bank_id']? "{$prefixes[1]}-" : "{$prefixes[0]}-", $tid);
+        $name .= '.pdf';
 
         return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
