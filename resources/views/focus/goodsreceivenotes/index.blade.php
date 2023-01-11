@@ -67,6 +67,7 @@
 
         drawDataTable() {
             $('#grnTbl').dataTable({
+                stateSave: true,
                 processing: true,
                 serverSide: true,
                 responsive: true,

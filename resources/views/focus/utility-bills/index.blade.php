@@ -19,7 +19,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    <table id="grnTbl" class="table table-striped table-bordered zero-configuration" width="100%" cellpadding="0">
+                    <table id="billsTbl" class="table table-striped table-bordered zero-configuration" width="100%" cellpadding="0">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -63,7 +63,8 @@
         },
 
         drawDataTable() {
-            $('#grnTbl').dataTable({
+            $('#billsTbl').dataTable({
+                stateSave: true,
                 processing: true,
                 serverSide: true,
                 responsive: true,
