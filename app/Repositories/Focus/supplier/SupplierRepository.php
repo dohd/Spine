@@ -69,20 +69,21 @@ class SupplierRepository extends BaseRepository
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'payable');  
         })->where(function ($q) use($params) {
+            // purchase bill
             $q->where('tr_type', 'bill')->whereHas('bill', function ($q) use($params) { 
                 $q->where('bills.supplier_id', $params['supplier_id']);
             })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q) use($params) {
                 $q->where($params);
             });
         })->orwhere(function ($q) use($params) {
-            $q->where('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn', function ($q) use($params) {
-                $q->where('goods_receive_notes.supplier_id', $params['supplier_id']);
-            });
-        })->orwhere(function ($q) use($params) {
+            // grn bill
             $q->where('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn_bill', function ($q) use($params) {
-                $q->where('utility_bills.supplier_id', $params['supplier_id']);
+                $q->where($params);
+            })->orwhere('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn_invoice_bill', function ($q) use($params) {
+                $q->where($params);
             });
         })->orwhere(function ($q) use($supplier) {
+            // opening balance
             $note = "%{$supplier->id}-supplier Account Opening Balance {$supplier->open_balance_note}%";
             $q->where('tr_type', 'genjr')->where('credit', '>', 0)->where('note', 'LIKE', $note);
         });

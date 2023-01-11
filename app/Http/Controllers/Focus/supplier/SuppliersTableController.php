@@ -83,23 +83,21 @@ class SuppliersTableController extends Controller
             return $tr->tr_type;
         })
         ->addColumn('note', function ($tr) {
-            $note = '';
+            $note = $tr->note;
             if ($tr->tr_type == 'bill') {
                 $purchase = $tr->bill;
                 if ($purchase) {
                     $purchase_bill = $purchase->bill;
-                    if ($purchase_bill) $note = gen4tid('BILL-', $purchase_bill->tid) . " - {$purchase_bill->note}";
-                }
-                $grn = $tr->grn;
-                if ($grn) {
-                    $grn_bill = $grn->bill;
-                    if ($grn_bill) $note = gen4tid('BILL-', $grn_bill->tid) . " - {$grn_bill->note}";
+                    if ($purchase_bill) $note = gen4tid('BILL-', $purchase_bill->tid) . " - {$tr->note} {$purchase_bill->reference}";
                 }
                 $grn_bill = $tr->grn_bill;
-                if ($grn_bill) $note = gen4tid('BILL-', $grn_bill->tid) . " - {$grn_bill->note}";
+                if ($grn_bill) $note = gen4tid('BILL-', $grn_bill->tid) . " - {$tr->note} {$grn_bill->reference}";
+                
+                $grn_invoice_bill = $tr->grn_invoice_bill;
+                if ($grn_invoice_bill) $note = gen4tid('BILL-', $grn_invoice_bill->tid) . " - {$tr->note} {$grn_invoice_bill->reference}";
             }
                 
-            return $note ?: $tr->note;
+            return $note;
         })
         ->addColumn('bill_amount', function ($tr) {
             return numberFormat($tr->credit);
