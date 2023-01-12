@@ -30,7 +30,9 @@ class GoodsReceiveNoteController extends Controller
      */
     public function index()
     {
-        return view('focus.goodsreceivenotes.index');
+        $suppliers = Supplier::whereHas('goods_receive_notes')->get(['id', 'name']);
+
+        return view('focus.goodsreceivenotes.index', compact('suppliers'));
     }
 
     /**

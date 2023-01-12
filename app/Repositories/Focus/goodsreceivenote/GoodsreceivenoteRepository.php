@@ -37,6 +37,15 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         $q->when(request('supplier_id'), function ($q) {
             $q->where('supplier_id', request('supplier_id'));
+        })->when(request('invoice_status'), function ($q) {
+            switch (request('invoice_status')) {
+                case 'with_invoice':
+                    $q->whereNotNull('invoice_no');
+                    break;
+                case 'without_invoice':
+                    $q->whereNull('invoice_no');
+                    break;
+            }
         });
         
         return $q->get();
