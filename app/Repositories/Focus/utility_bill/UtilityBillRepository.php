@@ -35,6 +35,42 @@ class UtilityBillRepository extends BaseRepository
     {
         $q = $this->query();
 
+        // date filter
+        if (request('start_date') && request('end_date')) {
+            $q->whereBetween('date', [
+                date_for_database(request('start_date')), 
+                date_for_database(request('end_date'))
+            ]);
+        }
+
+        // supplier and status filter
+        $q->when(request('supplier_id'), function ($q) {
+            $q->where('supplier_id', request('supplier_id'));
+        })->when(request('bill_status'), function ($q) {
+            $status = request('bill_status');
+            switch ($status) {
+                case 'not yet due': 
+                    $q->where('due_date', '>', date('Y-m-d'));
+                    break;
+                case 'due':    
+                    $q->where('due_date', '<=', date('Y-m-d'));
+                    break;                 
+            }         
+        })->when(request('payment_status'), function ($q) {
+            $status = request('payment_status');
+            switch ($status) {
+                case 'unpaid':
+                    $q->where('amount_paid', 0);
+                    break; 
+                case 'partially paid':
+                    $q->whereColumn('amount_paid', '<', 'total')->where('amount_paid', '>', 0);
+                    break; 
+                case 'paid':
+                    $q->whereColumn('amount_paid', '>=', 'total');
+                    break; 
+            }         
+        });
+
         return $q->get();
     }
 

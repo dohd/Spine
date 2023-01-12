@@ -49,6 +49,14 @@ class UtilityBillTableController extends Controller
     {
         $core = $this->repository->getForDataTable();
 
+        // aggregate
+        $amount_total = $core->sum('total');
+        $balance_total = $amount_total - $core->sum('amount_paid');
+        $aggregate = [
+            'amount_total' => numberFormat($amount_total),
+            'balance_total' => numberFormat($balance_total),
+        ];   
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
@@ -122,6 +130,9 @@ class UtilityBillTableController extends Controller
             })
             ->addColumn('actions', function ($utility_bill) {
                 return $utility_bill->action_buttons;
+            })
+            ->addColumn('aggregate', function () use($aggregate) {
+                return $aggregate;
             })
             ->make(true);
     }

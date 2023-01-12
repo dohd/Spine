@@ -33,7 +33,9 @@ class UtilityBillController extends Controller
      */
     public function index()
     {
-        return view('focus.utility-bills.index');
+        $suppliers = Supplier::with('bills')->get(['id', 'name']);
+
+        return view('focus.utility-bills.index', compact('suppliers'));
     }
 
     /**
