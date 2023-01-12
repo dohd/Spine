@@ -83,7 +83,7 @@ class InvoicesController extends Controller
      */
     public function index(ManageInvoiceRequest $request)
     {
-        $customers = Customer::get(['id', 'company']);
+        $customers = Customer::whereHas('invoices')->get(['id', 'company']);
         
         return new ViewResponse('focus.invoices.index', compact('customers'));
     }
