@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Utils\MessageUtil;
 use Illuminate\Support\Str;
 use App\Repositories\Focus\general\RosemailerRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class HrmRepository.
@@ -52,12 +53,14 @@ class HrmRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
+        $q = $this->query()->where('first_name', 'NOT LIKE', '%Admin%')->where('last_name', 'NOT LIKE', '%Admin%');
+        
         if (request('rel_type') == 2 and request('rel_id')) {
             $q->whereHas('meta', function ($s) {
                 return $s->where('department_id', '=', request('rel_id', 0));
             });
         }
+
         return $q->with(['monthlysalary'])->get(['id', 'email', 'picture', 'first_name', 'last_name', 'status', 'created_at']);
     }
 
@@ -104,7 +107,7 @@ class HrmRepository extends BaseRepository
         }
 
         $username = Str::random(4);
-        $password = strval(range(1,6));
+        $password = strval("123456");
         $input['employee'] = array_replace($input['employee'], compact('username', 'password'));
 
         $email_input = [
@@ -222,7 +225,7 @@ class HrmRepository extends BaseRepository
     /**
      * For deleting the respective model from storage
      *
-     * @param Hrm $hrm
+     * @param \App\Models\hrm\Hrm $hrm
      * @return bool
      * @throws GeneralException
      */
@@ -230,9 +233,13 @@ class HrmRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        HrmMeta::where('user_id', $hrm->id)->delete();
-        RoleUser::where('user_id', $hrm->id)->delete();
-        UserProfile::where('user_id', $hrm->id)->delete();
+        if (auth()->user()->id == $hrm->id)
+            throw ValidationException::withMessages(['Not allowed!']);
+
+        $params = ['user_id' => $hrm->id];
+        HrmMeta::where($params)->delete();
+        RoleUser::where($params)->delete();
+        UserProfile::where($params)->delete();
 
         if ($hrm->delete()) {
             DB::commit();

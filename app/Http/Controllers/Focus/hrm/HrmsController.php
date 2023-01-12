@@ -165,14 +165,13 @@ class HrmsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param DeleteHrmRequestNamespace $request
-     * @param App\Models\hrm\Hrm $hrm
+     * @param \App\Models\hrm\Hrm $hrm
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Hrm $hrm, ManageHrmRequest $request)
+    public function destroy(Hrm $hrm)
     {
-        //Calling the delete method on repository
-        //$this->repository->delete($hrm);
-        //returning with successfull message
+        $this->repository->delete($hrm);
+        
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.deleted')]);
     }
 
