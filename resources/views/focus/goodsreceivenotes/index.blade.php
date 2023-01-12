@@ -119,7 +119,7 @@
                     type: 'POST',
                     data: {
                         invoice_status: $('#inv_status').val(),
-                        supplier: $('#supplier').val(),
+                        supplier_id: $('#supplier').val(),
                     }
                 },
                 columns: [
