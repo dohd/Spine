@@ -62,6 +62,60 @@ Route::group(['namespace' => 'assetequipment'], function () {
     Route::post('assetequipments/get', 'AssetequipmentsTableController')->name('assetequipments.get');
 });
 
+Route::group(['namespace' => 'assetissuance'], function () {
+    Route::resource('assetissuance', 'AssetissuanceController');
+    Route::post('assetissuance/ledger_load', 'AssetissuanceController@ledger_load')->name('assetissuance.ledger_load');
+    Route::post('assetissuance/search', 'AssetissuanceController@product_search')->name('assetissuance.product_search');
+    Route::post('assetissuance/select', 'AssetissuanceController@select')->name('assetissuance.select');
+    Route::post('assetissuance/{id}/shows', 'AssetissuanceController@shows')->name('assetissuance.shows');
+    //For Datatable
+    Route::post('assetissuance/get', 'AssetissuanceTableController')->name('assetissuance.get');
+});
+
+Route::group(['namespace' => 'assetreturned'], function () {
+    
+    Route::post('assetreturned/ledger_load', 'AssetreturnedController@ledger_load')->name('assetreturned.ledger_load');
+    Route::post('assetreturned/search', 'AssetreturnedController@product_search')->name('assetreturned.product_search');
+    Route::post('assetreturned/select', 'AssetreturnedController@select')->name('assetreturned.select');
+    Route::get('assetreturned/items', 'AssetreturnedController@items')->name('assetreturned.items');
+    Route::post('assetreturned/send', 'AssetreturnedController@send')->name('assetreturned.send');
+    Route::post('assetreturned/{id}/shows', 'AssetreturnedController@shows')->name('assetreturned.shows');
+    Route::resource('assetreturned', 'AssetreturnedController');
+    //For Datatable
+    Route::post('assetreturned/get', 'AssetreturnedTableController')->name('assetreturned.get');
+});
+
+Route::group(['namespace' => 'surcharge'], function () {
+    Route::get('surcharges/load_items/{requisition}', 'SurchargeController@load_items')->name('surcharge.load_items');
+    Route::post('surcharges/select', 'SurchargeController@select')->name('surcharge.select');
+    Route::post('surcharges/get_issuance', 'SurchargeController@get_issuance')->name('surcharge.get_issuance');
+    Route::get('surcharges/load/{id}', 'SurchargeController@load')->name('surcharges.load');
+    Route::put('surcharges/pay/{items}', 'SurchargeController@pay')->name('surcharges.pay');
+    Route::put('surcharges/send', 'SurchargeController@send')->name('surcharges.send');
+    Route::resource('surcharges', 'SurchargeController');
+
+    //For Datatable
+    Route::post('surcharges/get', 'SurchargeTableController')->name('surcharges.get');
+});
+
+Route::group(['namespace' => 'toolkit'], function () {
+    Route::post('toolkits/select', 'ToolkitController@select')->name('toolkits.select');
+    Route::post('toolkits/load', 'ToolkitController@load')->name('toolkits.load');
+    Route::resource('toolkits', 'ToolkitController');
+
+    //For Datatable
+    Route::post('toolkits/get', 'ToolkitTableController')->name('toolkits.get');
+});
+
+Route::group(['namespace' => 'workshift'], function () {
+    Route::post('workshifts/select', 'WorkshiftController@select')->name('workshifts.select');
+    Route::post('workshifts/load', 'WorkshiftController@load')->name('workshifts.load');
+    Route::resource('workshifts', 'WorkshiftController');
+
+    //For Datatable
+    Route::post('workshifts/get', 'WorkshiftTableController')->name('workshifts.get');
+});
+
 Route::group(['namespace' => 'bank'], function () {
     Route::resource('banks', 'BanksController');
     //For Datatable
@@ -116,6 +170,13 @@ Route::group(['namespace' => 'department'], function () {
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
 
+Route::group(['namespace' => 'jobtitle'], function () {
+    Route::post('jobtitles/select', 'JobTitleController@select')->name('jobtitles.select');
+    Route::resource('jobtitles', 'JobTitleController');
+    //For Datatable
+    Route::post('jobtitles/get', 'JobTitleTableController')->name('jobtitles.get');
+});
+
 Route::group(['namespace' => 'deptor'], function () {
     Route::resource('deptors', 'DeptorsController');
     //For Datatable
@@ -139,6 +200,8 @@ Route::group(['namespace' => 'equipment'], function () {
     Route::resource('equipments', 'EquipmentsController');
     Route::post('equipments/equipment_load', 'EquipmentsController@equipment_load')->name('equipments.equipment_load');
     Route::post('equipments/search/{id}', 'EquipmentsController@equipment_search')->name('equipments.equipment_search');
+    Route::post('equipments/attach', 'EquipmentsController@attach')->name('equipments.attach');
+    Route::post('equipments/dettach', 'EquipmentsController@dettach')->name('equipments.dettach');
 
     //For Datatable
     Route::post('equipments/get', 'EquipmentsTableController')->name('equipments.get');
@@ -184,6 +247,7 @@ Route::group(['namespace' => 'jobschedule'], function () {
 
 Route::group(['namespace' => 'lead'], function () {
     Route::patch('leads/update_status/{lead}', 'LeadsController@update_status')->name('leads.update_status');
+    Route::patch('leads/update_reminder/{lead}', 'LeadsController@update_reminder')->name('leads.update_reminder');
     Route::post('leads/lead_search', 'LeadsController@lead_search')->name('leads.lead_search');
     Route::resource('leads', 'LeadsController');
 

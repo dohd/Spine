@@ -206,4 +206,14 @@ class LeadsController extends Controller
 
         return redirect()->back();
     }
+
+    public function update_reminder(Lead $lead, Request $request)
+    {
+        // dd($lead);
+        $reminder_date = date_for_database($request->reminder_date);
+        $exact_date = date_for_database($request->exact_date);
+        $lead->update(compact('reminder_date', 'exact_date'));
+
+        return redirect()->back();
+    }
 }

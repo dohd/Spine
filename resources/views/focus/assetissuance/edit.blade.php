@@ -1,6 +1,6 @@
 @extends('core.layouts.app')
 
-@section('title', 'Direct Purchase | Edit')
+@section('title', 'Assetissuance | Edit')
 
 @section('content')
 <div class="content-wrapper">
@@ -21,8 +21,9 @@
         <div class="card">
             <div class="card-body">
                 {{ Form::model($assetissuance, ['route' => ['biller.assetissuance.update', $assetissuance], 'method' => 'PATCH']) }}
-                
-                    @include('focus.assetissuance.form')
+                    <div class="form-group">
+                        @include('focus.assetissuance.form')
+                    </div>
                 {{ Form::close() }}
             </div>
         </div>
@@ -34,18 +35,15 @@
 {{ Html::script('focus/js/select2.min.js') }}
 @include('focus.assetissuance.form-js')
 <script>
-    // reference and tax
-    // $('#ref_type').val("{{ $assetissuance->doc_ref_type }}");
-    // $('#tax').val("{{ $assetissuance->tax }}");
 
     // date
-    $('#issue_date').datepicker('setDate', new Date("{{ $assetissuance->issue_date }}"));
-    $('#return_date').datepicker('setDate', new Date("{{ $assetissuance->return_date }}"));
+    // $('#issue_date').datepicker('setDate', new Date("{{ $assetissuance->issue_date }}"));
+    // $('#return_date').datepicker('setDate', new Date("{{ $assetissuance->return_date }}"));
 
     // employee
-    const employeeText = "{{ $assetissuance->employee_name? $assetissuance->employee_name : $assetissuance->name }} : ";
+    const employeeText = "{{ $assetissuance->employee_name }} ";
     const employeeVal = "{{ $assetissuance->employee_id }}";
-    $('#employeebox').append(new Option(employeeText, employeeVal, true, true)).change();
+    $('#employeebox').append(new Option(employeeText, true)).change();
 
 </script>
 @endsection

@@ -549,6 +549,57 @@
                             </ul>
                         </li>
                         @endauth
+
+                        @permission('manage-asset-equipment')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-target"></i> Assets & issuances
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.assetissuance.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Assets & issuances Management
+                                    </a>
+                                </li>
+                                @permission('create-asset-equipment')
+                                <li><a class="dropdown-item" href="{{ route('biller.assetissuance.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Assets & issuances
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+                        @permission('manage-asset-equipment')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-target"></i> Assets Returns
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.assetreturned.items') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Returns
+                                    </a>
+                                </li>
+                                
+                                </li>
+                                @permission('create-asset-equipment')
+                                <li><a class="dropdown-item" href="{{ route('biller.assetreturned.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Returns
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+
+                        @permission('manage-asset-equipment')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa-product-hunt"></i> Toolkit
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.toolkits.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage ToolKits
+                                    </a>
+                                </li>
+                                
+                                </li>
+                                @permission('create-asset-equipment')
+                                <li><a class="dropdown-item" href="{{ route('biller.toolkits.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
                     </ul>
                 </li>
             @endif
@@ -991,6 +1042,42 @@
                         </li>
                         @endauth
 
+                        @permission('manage-holiday')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Job Title Management</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.jobtitles.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Jobtitle
+                                    </a>
+                                </li>
+                                @endauth
+                                @permission('create-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.jobtitles.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Jobtite
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+
+                        @permission('manage-holiday')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> WorkShift Management</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.workshifts.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage WorkShift
+                                    </a>
+                                </li>
+                                @endauth
+                                @permission('create-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.workshifts.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create WorkShift
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+
                         @permission('manage-leave')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                             <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Leave Category</a>
@@ -1033,6 +1120,20 @@
                                 @permission('create-attendance')
                                 <li><a class="dropdown-item" href="{{ route('biller.attendances.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('hrms.attendance_add') }}
                                     </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+                        @permission('manage-attendance')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i>Surcharges</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.surcharges.create') }}" data-toggle="dropdown"> <i class="ft-list"></i>Manage Surcharges
+                                </a>
+                  
+                                @permission('create-attendance')
+                                <li><a class="dropdown-item" href="{{ route('biller.surcharges.index') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Surcharges
+                                </a>
                                 </li>
                                 @endauth
                             </ul>

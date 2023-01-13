@@ -63,7 +63,7 @@ class PriceListRepository extends BaseRepository
      */
     public function update(SupplierProduct $Supplier_product, array $input)
     {
-        // dd($input);
+
         DB::beginTransaction();
 
         $input['rate'] = numberClean($input['rate']);

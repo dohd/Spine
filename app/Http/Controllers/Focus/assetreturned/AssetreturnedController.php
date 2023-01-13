@@ -8,6 +8,9 @@ use App\Repositories\Focus\assetreturned\AssetreturnedRepository;
 use App\Models\hrm\Hrm;
 use App\Models\assetreturned\Assetreturned;
 use App\Models\assetreturned\AssetreturnedItems;
+use App\Models\assetissuance\Assetissuance;
+use App\Models\product\ProductVariation;
+use App\Models\assetissuance\AssetissuanceItems;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\Focus\assetreturned\CreateResponse;
 use App\Http\Responses\Focus\assetreturned\EditResponse;
@@ -63,20 +66,20 @@ class AssetreturnedController extends Controller
         //dd($request->all());
          // extract input fields
          $assetreturned = $request->only([
-            'employee_id','employee_name','issue_date','return_date','note'
+            'employee_id','employee_name','issue_date','return_date','note','acquisition_number',
         ]);
         $assetreturned_items = $request->only([
-            'item_id','actual_return_date', 'lost_items','qty_issued','broken','serial_number','name',
+            'item_id','actual_return_date','returned_item', 'lost_items','qty_issued','broken','serial_number','name','purchase_price'
         ]);
 
         $assetreturned['ins'] = auth()->user()->ins;
         $assetreturned['user_id'] = auth()->user()->id;
         //$assetreturned_items['asset_returned_id'] = auth()->user()->id;
         // modify and filter items without item_id
-        
+        //dd($assetreturned);
         $assetreturned_items = modify_array($assetreturned_items);
         $assetreturned_items = array_filter($assetreturned_items, function ($v) { return $v['item_id']; });
-        //dd($assetreturned_items);
+        
         $result = $this->repository->create(compact('assetreturned', 'assetreturned_items'));
 
         return new RedirectResponse(route('biller.assetreturned.create'), ['flash_success' => 'Assetreturned Assetreturned created successfully']);
@@ -137,10 +140,10 @@ class AssetreturnedController extends Controller
     {
         //dd($request->all());
         $data = $request->only([
-            'employee_id','employee_name','issue_date','return_date','note'
+            'employee_id','employee_name','issue_date','return_date','note','acquisition_number'
         ]);
         $data_items = $request->only([
-            'item_id','name', 'serial_number','qty_issued','id',
+            'item_id','actual_return_date','returned_item','id', 'lost_items','qty_issued','broken','serial_number','name','purchase_price'
         ]);
 
         $data['ins'] = auth()->user()->ins;
@@ -153,9 +156,9 @@ class AssetreturnedController extends Controller
 
         $assetreturned = $this->repository->update($assetreturned, compact('data', 'data_items'));
 
-        $msg = 'Direct assetreturned Updated Successfully.';
+        $msg = 'Direct Assetreturned Updated Successfully.';
 
-        return new RedirectResponse(route('biller.assetreturned.index'), ['flash_success' => $msg]);
+        return new RedirectResponse(route('biller.assetreturned.items'), ['flash_success' => $msg]);
     }
 
     /**
@@ -185,7 +188,7 @@ class AssetreturnedController extends Controller
         // extract request input
         $data = $request->only('employee_id','employee_name','issue_date','return_date','note');
         $data_items = $request->only(
-            'item_id','actual_return_date', 'lost_items','qty_issued','broken','id'
+            'item_id','actual_return_date', 'lost_items','qty_issued','broken','id','purchase_price'
         );
         //dd($data_items);
        // $data_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
@@ -200,5 +203,44 @@ class AssetreturnedController extends Controller
     public function items()
     {
         return new ViewResponse('focus.assetreturned.items');
+    }
+    public function send(Request $request)
+    {
+        //dd($request->all());
+        if ($request->ajax()) {
+            //return response()->json($request->lost_item_id);
+            $purchase_price = ProductVariation::where('id',$request->product_id)->first();
+            $assetreturned = Assetreturned::where('id',$request->assetId)->first();
+            $requisition_number = $assetreturned->acquisition_number;
+            $assetissuance = Assetissuance::where('acquisition_number', $requisition_number)->first();
+            $issuance_id =$assetissuance->id;
+            $itemprice = AssetissuanceItems::where('asset_issuance_id',$issuance_id)->where('item_id',$request->product_id)
+                            ->where('serial_number',$request->serial_number)->first();
+            $update_lost = AssetreturnedItems::where('asset_returned_id',$request->assetId)->where('item_id',$request->product_id)
+                            ->where('serial_number',$request->serial_number)->first();
+            $lost = new AssetreturnedItems();
+            $lost->asset_returned_id = $request->assetId;
+            $lost->name = $request->name;
+            $lost->item_id = $request->product_id;
+            $lost->serial_number = $request->serial_number;
+            $lost->qty_issued = '0';
+            $lost->broken = $request->broken == '' ? '0': $request->broken;
+            $lost->returned_item = $request->returned_item == '' ? '0':$request->returned_item;
+            $lost->actual_return_date = $request->lost_date;
+            //Get purchase price from product variations
+            $lost->purchase_price = (int)$request->returned_item * $purchase_price->purchase_price;
+            $itemprice->purchase_price = $itemprice->purchase_price - $lost->purchase_price;
+            $update_lost->lost_items = $update_lost->lost_items - $request->returned_item;
+            $update_lost->update();
+            $itemprice->update();
+            $assetissuance->total_cost = $assetissuance->total_cost - $lost->purchase_price;
+            $assetissuance->update();
+
+
+            //echo $request->lost_item_id;
+            $lost['ins'] = auth()->user()->ins;
+            $lost['user_id'] = auth()->user()->id;
+            $lost->save();
+         }
     }
 }

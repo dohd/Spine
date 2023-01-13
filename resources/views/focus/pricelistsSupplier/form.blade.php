@@ -53,7 +53,7 @@
 
             if ($('#contract').val()) {
                 $('#supplier').select2({allowClear: true}).attr('disabled', true);
-                $('#contract').attr('disabled', true);
+                $('#contract').attr('readonly', true);
             }
             $('#supplier').select2({allowClear: true});
             $('#rate').focusout(this.rateChange);

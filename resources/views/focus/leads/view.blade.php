@@ -25,7 +25,10 @@
                 </a>
                 <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning btn-sm mr-1">
                     <i class="fa fa-clone" aria-hidden="true"></i> Copy
-                </a>                
+                </a> 
+                <a href="#" class="btn btn-danger btn-sm mr-1" data-toggle="modal" data-target="#reminderModal">
+                    <i class="fa fa-bell-o" aria-hidden="true"></i> Add Reminder
+                </a>               
             </div>
             
             <h5 class="card-title mt-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
@@ -102,4 +105,5 @@
     </div>
 </div>
 @include('focus.leads.partials.status_modal')
+@include('focus.leads.partials.reminder_modal')
 @endsection

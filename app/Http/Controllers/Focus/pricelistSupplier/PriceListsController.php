@@ -101,6 +101,7 @@ class PriceListsController extends Controller
      */
     public function update($id, Request $request)
     {
+        
         $supplier_product = SupplierProduct::find($id);
         $this->repository->update($supplier_product, $request->except('_token'));
 

@@ -7,6 +7,7 @@ use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use App\Models\assetissuance\Assetissuance;
+use App\Models\product\ProductVariation;
 
 
 /**
@@ -44,11 +45,11 @@ class AssetissuanceRepository extends BaseRepository
     {
         DB::beginTransaction();
         $assetissuance = $input['assetissuance'];
-        //dd($assetissuance);
+       
         //if (is_array($assetissuance) || is_object($assetissuance)){
             foreach ($assetissuance as $key => $val) {
                 $rate_keys = [
-                    'employee_id','employee_name','issue_date','return_date','note'
+                    'employee_id','employee_name','issue_date','return_date','note','total_cost'
                 ];
                 if (in_array($key, ['issue_date', 'return_date'], 1))
                     $assetissuance[$key] = date_for_database($val);
@@ -56,18 +57,36 @@ class AssetissuanceRepository extends BaseRepository
             }
             
        // }
-        
+        //dd($assetissuance);
         $result = Assetissuance::create($assetissuance);
 
         $assetissuance_items = $input['assetissuance_items'];
+    
         $assetissuance_items = array_map(function ($v) use($result) {
+            //dd($v);
             return array_replace($v, [
                 'ins' => $result->ins,
                 'user_id' => $result->user_id,
                 'asset_issuance_id' => $result->id,
             ]);
         }, $assetissuance_items);
-        AssetissuanceItems::insert($assetissuance_items);
+        
+        foreach ($assetissuance_items as $assetissuance_items) {
+            //
+            $assetissuance_items['purchase_price'] = (int)$assetissuance_items['qty_issued'] * (int)$assetissuance_items['purchase_price'];
+            //dd($assetissuance_items['purchase_price']);
+            unset($assetissuance_items['quantity']);
+
+            // $issuance['total_cost'] = (int)$assetissuance_items['qty_issued'] * (int)$assetissuance_items['purchase_price'];
+            // $issuance->update();
+            AssetissuanceItems::insert($assetissuance_items);
+            
+        }
+        $issuance = Assetissuance::where('acquisition_number', $result['acquisition_number'])->first();
+        $issuance->total_cost = $issuance->item()->sum('purchase_price');
+        $issuance->update();
+       // dd($assetissuance_items);
+        
 
         DB::commit();
         if ($result) return $result;   
@@ -97,32 +116,50 @@ class AssetissuanceRepository extends BaseRepository
         }
 
         $prev_note = $assetissuance->note;
+        //dd($data);
         $result = $assetissuance->update($data);
 
         $data_items = $input['data_items'];
-        //dd($data_items);
+        
         // delete omitted items
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         //dd($item_ids);
         $assetissuance->items()->whereNotIn('id', $item_ids)->delete();
         // create or update assetissuance item
         foreach ($data_items as $item) {         
-            $assetissuance_item = AssetissuanceItems::firstOrNew(['id' => $item['id']]);
-
-            // update product stock
-            // if ($item->exists()) {
-            //     $prod_variation = $assetissuance_item->product;
-            //     if ($prod_variation) $prod_variation->decrement('qty', $assetissuance_item->qty);
-            //     else $prod_variation = ProductVariation::find($item['item_id']);
-            //     // apply unit conversion
-                 
-            // }    
+            $assetissuance_item = AssetissuanceItems::firstOrNew(['id' => $item['id']]);   
 
             $item = array_replace($item, [
                 'ins' => $assetissuance->ins,
                 'user_id' => $assetissuance->user_id,
                 'asset_issuance_id' => $assetissuance->id,
-            ]);   
+            ]); 
+            $getQty = AssetissuanceItems::where('id', $item['id'])->get()->first(); 
+           if ($getQty) {
+            
+            $x = $getQty->qty_issued;
+            $qty_updated = $item['qty_issued'];
+            
+            if ($qty_updated > $x) {
+                $y = $qty_updated - $x;
+                $variations = ProductVariation::where('id', $item['item_id'])->get()->first();
+                $db_variation = $variations->qty;
+                if ($y > $db_variation) {
+                    $variations->qty = $variations->qty - $db_variation;
+                    $getQty->qty_issued = $getQty->qty_issued + $db_variation;
+                    $variations->update();
+                    $getQty->update();
+                }
+                else{
+                    $variations->qty = $variations->qty - $y;
+                    $getQty->qty_issued = $getQty->qty_issued + $y;
+                    $variations->update();
+                    $getQty->update();
+                }
+                //dd($db_variation);
+            }
+            
+           }
             $assetissuance_item->fill($item);
             if (!$assetissuance_item->id) unset($assetissuance_item->id);
             $assetissuance_item->save();
@@ -153,7 +190,17 @@ class AssetissuanceRepository extends BaseRepository
      */
     public function delete($assetissuance)
     {
-        if ($assetissuance->delete()) return true;
+        
+        $assetissuance_items = AssetissuanceItems::where('asset_issuance_id', $assetissuance->id)->get();
+        
+        foreach ($assetissuance_items as $key => $value) {
+            $variations = ProductVariation::where('id',$value->item_id)->get()->first();
+            $variations->qty = $variations->qty + $value->qty_issued;
+            $variations->update();
+            //dd($value->qty_issued);
+        }
+        
+        if ($assetissuance->delete() && $assetissuance_items->each->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.assetissuance.delete_error'));
     }

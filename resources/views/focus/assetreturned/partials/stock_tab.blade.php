@@ -1,5 +1,5 @@
-<div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
-    <table class="table-responsive tfr my_stripe" id="stockTbl">
+{{-- <div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
+    <table class="table-responsive tfr my_stripe" id="productTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
                 <th width="35%" class="text-center">Product Name</th>
@@ -38,18 +38,8 @@
                             <td><input type="text" class="form-control issued" name="qty_issued[]" id="issued-{{$i}}" value="{{ $item->qty_issued}}"></td>
                             <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
                             <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
-                            {{-- <input type="hidden" class="stocktaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
-                            <input type="hidden" class="stockamountr" name="amount[]" value="{{ (float) $item->amount }}">
-                            <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
-                            <input type="hidden" name="type[]" value="Stock"> --}}
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
-                        {{-- <tr>
-                            <td colspan=2>
-                                <textarea id="stockdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Product Description">{{ $item->description }}</textarea>
-                            </td>
-                            <td colspan="6"></td>
-                        </tr> --}}
                         @php ($i++)
                     @endif
                 @endforeach
@@ -66,4 +56,4 @@
         </tbody>
     </table>
     
-</div>
+</div> --}}

@@ -7,6 +7,8 @@ use App\Models\contract_equipment\ContractEquipment;
 use App\Models\contractservice\ContractService;
 use App\Models\items\ContractServiceItem;
 use App\Models\items\ServiceItem;
+use App\Models\toolkit\Toolkit;
+use App\Models\EquipmentToolkit\EquipmentToolkit;
 
 /**
  * Class EquipmentRelationship
@@ -95,5 +97,13 @@ trait EquipmentRelationship
     public function attachment()
     {
         return $this->hasMany('App\Models\items\MetaEntry', 'rel_id')->where('rel_type', '=', 5)->withoutGlobalScopes();
+    }
+    public function toolkits()
+    {
+        return $this->hasManyThrough(Toolkit::class, EquipmentToolkit::class, 'equipment_id', 'id', 'id', 'tool_id')->withoutGlobalScopes();
+    }
+    public function toolkit()
+    {
+        return $this->hasOneThrough(Toolkit::class, EquipmentToolkit::class)->withoutGlobalScopes();
     }
 }

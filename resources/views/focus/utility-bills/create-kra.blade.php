@@ -40,6 +40,7 @@
         datepicker: {format: "{{config('core.user_date_format')}}", autoHide: true, },
     };
 
+
     const Form = {
         rowIndx: 0,
         tableRow: $('#billsTbl tbody tr:first').html(),
