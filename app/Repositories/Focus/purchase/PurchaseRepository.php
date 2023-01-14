@@ -90,6 +90,7 @@ class PurchaseRepository extends BaseRepository
                     if (in_array($key, ['date', 'due_date'])) {
                         $data[$key] = date_for_database($value);
                     }
+                    $data[$key] = trim($value);
                 }
                 
 
@@ -116,6 +117,8 @@ class PurchaseRepository extends BaseRepository
                 ], [$data]);
 
                 unset($data['id'], $data['po_id'], $data['created_at'], $data['updated_at'], $data['ledger_id']);
+                $data_keys = array_filter(array_keys($data));
+                $data = array_intersect_key($data, array_flip($data_keys));
                 // dd(compact('data', 'data_items'));
                 $expense_data[] = compact('data', 'data_items');
             }
