@@ -30,6 +30,15 @@
                                 </select>
                             </div>
                             <div class="col-2">
+                                <label for="bill_type">Bill Type</label>
+                                <select name="bill_type" id="bill_type" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['direct_purchase', 'goods_receive_note', 'opening_balance', 'kra_bill'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
                                 <label for="bill_status">Bill Status</label>
                                 <select name="bill_status" id="bill_status" class="custom-select">
                                     <option value="">-- select status --</option>
@@ -122,6 +131,7 @@
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
 
             $('#bill_status').change(this.billStatusChange);
+            $('#bill_type').change(this.billTypeChange);
             $('#pmt_status').change(this.paymentStatusChange);
             $('#supplier').select2({allowClear: true}).val('').trigger('change')
             .change(this.supplierChange);
@@ -133,10 +143,15 @@
         searchClick() {
             Index.startDate = $('#start_date').val();
             Index.endDate =  $('#end_date').val();
-            if (!Index.startDate || !Index.endDate ) 
+            if (!Index.startDate || !Index.endDate) 
                 return alert("Date range is Required");
 
             $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        billTypeChange() {
+            $('#billsTbl').DataTable().destroy();
             return Index.drawDataTable();
         },
 
@@ -161,7 +176,6 @@
         },
 
         supplierChange() {
-            Index.customerId = $(this).val();
             $('#billsTbl').DataTable().destroy();
             return Index.drawDataTable();
         },
@@ -180,13 +194,14 @@
                         start_date: Index.startDate, 
                         end_date: Index.endDate,
                         supplier_id: $('#supplier').val(),
+                        bill_type: $('#bill_type').val(),
                         bill_status: $('#bill_status').val(),
                         payment_status: $('#pmt_status').val(),
                     },
                     dataSrc: ({data}) => {
                         $('#amount_total').val('');
                         $('#balance_total').val('');
-                        if (data.length) {
+                        if (data.length && data[0].aggregate) {
                             const aggregate = data[0].aggregate;
                             $('#amount_total').val(aggregate.amount_total);
                             $('#balance_total').val(aggregate.balance_total);

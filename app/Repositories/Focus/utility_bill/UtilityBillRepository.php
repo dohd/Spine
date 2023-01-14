@@ -46,28 +46,45 @@ class UtilityBillRepository extends BaseRepository
         // supplier and status filter
         $q->when(request('supplier_id'), function ($q) {
             $q->where('supplier_id', request('supplier_id'));
+        })->when(request('bill_type'), function ($q) {
+            // bill type
+            $type = request('bill_type');
+            switch ($type) {
+                case 'direct_purchase':
+                    $q->where('document_type', $type);
+                    break; 
+                case 'goods_receive_note':
+                    $q->where('document_type', $type);
+                    break;
+                case 'opening_balance':
+                    $q->where('document_type', $type);
+                    break;
+                case 'kra_bill':
+                    $q->where('document_type', $type);
+                    break;
+            }         
         })->when(request('bill_status'), function ($q) {
-            $status = request('bill_status');
-            switch ($status) {
+            // bill due status
+            switch (request('bill_status')) {
                 case 'not yet due': 
                     $q->where('due_date', '>', date('Y-m-d'));
                     break;
-                case 'due':    
+                case 'due':  
                     $q->where('due_date', '<=', date('Y-m-d'));
-                    break;                 
-            }         
+                    break; 
+            }
         })->when(request('payment_status'), function ($q) {
-            $status = request('payment_status');
-            switch ($status) {
+            // payment status
+            switch (request('payment_status')) {
                 case 'unpaid':
                     $q->where('amount_paid', 0);
                     break; 
                 case 'partially paid':
                     $q->whereColumn('amount_paid', '<', 'total')->where('amount_paid', '>', 0);
-                    break; 
+                    break;
                 case 'paid':
                     $q->whereColumn('amount_paid', '>=', 'total');
-                    break; 
+                    break;
             }         
         });
 

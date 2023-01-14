@@ -27,6 +27,7 @@ use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\RedirectResponse;
+use App\Models\supplier\Supplier;
 use Request;
 
 /**
@@ -57,7 +58,9 @@ class PurchaseordersController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.purchaseorders.index');
+        $suppliers = Supplier::whereHas('purchase_orders')->get(['id', 'name']);
+
+        return new ViewResponse('focus.purchaseorders.index', compact('suppliers'));
     }
 
     /**
