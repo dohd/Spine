@@ -305,11 +305,13 @@ class SupplierRepository extends BaseRepository
                         'total' => $open_balance,
                         'note' => $note,
                     ]);   
-                    $bill->item->update([
-                        'subtotal' => $open_balance,
-                        'total' => $open_balance,
-                        'note' => $note,
-                    ]);
+                    if ($bill->item) {
+                        $bill->item->update([
+                            'subtotal' => $open_balance,
+                            'total' => $open_balance,
+                            'note' => $note,
+                        ]);
+                    }
                 }
 
                 // recognise expense
