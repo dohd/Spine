@@ -165,6 +165,7 @@ class PurchaseRepository extends BaseRepository
                     $item[$key] = numberClean($val);
                 if (isset($item['itemproject_id'])) $item['warehouse_id'] = null;
                 if (isset($item['warehouse_id'])) $item['itemproject_id'] = null;
+                if ($item['type'] == 'Expense' && empty($input['uom'])) $input['uom'] = 'Lot';
             }
 
             // append modified data_items
@@ -262,7 +263,10 @@ class PurchaseRepository extends BaseRepository
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $purchase->items()->whereNotIn('id', $item_ids)->delete();
         // create or update purchase item
-        foreach ($data_items as $item) {         
+        foreach ($data_items as $item) {  
+            if ($item['type'] == 'Expense' && empty($item['uom'])) 
+                $item['uom'] = 'Lot';      
+                
             $purchase_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
 
             // update product stock
