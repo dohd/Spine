@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\productvariable;
 use App\Models\productvariable\Productvariable;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductvariableRepository.
@@ -38,6 +39,11 @@ class ProductvariableRepository extends BaseRepository
     {
         // dd($input);
         $input['base_ratio'] = numberClean($input['base_ratio']);
+
+        $params = ['title' => $input['title'], 'code' => $input['code']];
+        $exists = Productvariable::where('unit_type', 'base')->where($params)->count();
+        if ($exists) throw ValidationException::withMessages(['Base Unit exists!']);
+
         $result = Productvariable::create($input);
         if ($result) return $result;
 
@@ -56,6 +62,12 @@ class ProductvariableRepository extends BaseRepository
     {
         // dd($input);
         $input['base_ratio'] = numberClean($input['base_ratio']);
+
+        $params = ['title' => $input['title'], 'code' => $input['code']];
+        $exists = Productvariable::where('id', '!=', $productvariable->id)
+            ->where('unit_type', 'base')->where($params)->count();
+        if ($exists) throw ValidationException::withMessages(['Base Unit exists!']);
+
         $result = $productvariable->update($input);
     	if ($result) return $result;
 
@@ -71,6 +83,11 @@ class ProductvariableRepository extends BaseRepository
      */
     public function delete($productvariable)
     {
+        if ($productvariable->unit_type == 'base') {
+            $rel_units = Productvariable::where(['unit_type' => 'compound', 'base_unit_id' => $productvariable->id])->count();
+            if ($rel_units) throw ValidationException::withMessages(['Unit is attached to related compound unit']);
+        }
+
         if ($productvariable->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productvariables.delete_error'));

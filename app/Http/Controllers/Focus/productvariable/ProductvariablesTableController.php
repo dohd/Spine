@@ -64,7 +64,7 @@ class ProductvariablesTableController extends Controller
                     return $v->id == $productvariable->base_unit_id;
                 })->first();
 
-                return $ratio . ' / ' . $base_unit->code; 
+                return $base_unit? "{$ratio} / {$base_unit->code}" : $ratio;
             })
             ->addColumn('actions', function ($productvariable) {
                 return $productvariable->action_buttons;
