@@ -4,7 +4,6 @@ namespace App\Repositories\Focus\billpayment;
 
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
-use App\Models\bank\Bank;
 use App\Models\billpayment\Billpayment;
 use App\Models\items\BillpaymentItem;
 use App\Models\transaction\Transaction;
@@ -149,10 +148,21 @@ class BillPaymentRepository extends BaseRepository
             // increment bill amount paid and update status
             foreach ($result->items as $item) {
                 $bill = $item->supplier_bill;
-                $bill->increment('amount_paid', $item->paid);
-                if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
-                elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
-                else  $bill->update(['status' => 'paid']);
+                if ($bill) {
+                    $bill->increment('amount_paid', $item->paid);
+                    if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
+                    elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+                    else  $bill->update(['status' => 'paid']);
+
+                    // update purchase status
+                    if ($bill->purchase && $bill->purchase->supplier_type) {
+                        $purchase = $bill->purchase;
+                        $purchase->increment('amountpaid', $item->paid);
+                        if ($bill->amount_paid == 0) $bill->update(['status' => 'pending']);
+                        elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+                        else  $bill->update(['status' => 'paid']);
+                    }
+                }
             }
         } elseif ($result->payment_type == 'per_invoice') {
             throw ValidationException::withMessages(['Allocation on line items required!']);
@@ -244,16 +254,24 @@ class BillPaymentRepository extends BaseRepository
         }, $data_items);
         Batch::update(new BillpaymentItem, $data_items, 'id');
 
+        // update bill amount paid
         foreach ($billpayment->items as $item) {
-            // update bill amount paid
             $bill = $item->supplier_bill;
-            if (!$bill) continue;
+            if ($bill) {
+                $bill->increment('amount_paid', $item->paid);
+                if ($bill->amountpaid == 0) $bill->update(['status' => 'due']);
+                elseif (round($bill->total) > round($bill->amountpaid)) $bill->update(['status' => 'partial']);
+                else $bill->update(['status' => 'paid']);
 
-            $bill->increment('amount_paid', $item->paid);
-            if ($bill->amountpaid == 0) $bill->update(['status' => 'due']);
-            elseif (round($bill->total) > round($bill->amountpaid)) $bill->update(['status' => 'partial']);
-            else $bill->update(['status' => 'paid']);
-            
+                // update purchase status
+                if ($bill->purchase && $bill->purchase->supplier_type) {
+                    $purchase = $bill->purchase;
+                    $purchase->increment('amountpaid', $item->paid);
+                    if ($bill->amount_paid == 0) $bill->update(['status' => 'pending']);
+                    elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+                    else  $bill->update(['status' => 'paid']);
+                }
+            }
             // delete items with zero payment
             if ($item->paid == 0) $item->delete();
         }
@@ -299,12 +317,21 @@ class BillPaymentRepository extends BaseRepository
 
         // decrement bill amount paid and update status
         foreach ($billpayment->items as $item) {
-            if ($item->supplier_bill) {
-                $bill = $item->supplier_bill;
+            $bill = $item->supplier_bill;
+            if ($bill) {
                 $bill->decrement('amount_paid', $item->paid);
                 if ($bill->amount_paid == 0) $bill->update(['status' => 'due']);
                 elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
                 else $bill->update(['status' => 'paid']);
+
+                // update purchase status
+                if ($bill->purchase && $bill->purchase->supplier_type) {
+                    $purchase = $bill->purchase;
+                    $purchase->decrement('amountpaid', $item->paid);
+                    if ($bill->amount_paid == 0) $bill->update(['status' => 'pending']);
+                    elseif (round($bill->total) > round($bill->amount_paid)) $bill->update(['status' => 'partial']);
+                    else  $bill->update(['status' => 'paid']);
+                }
             }
         }
 
