@@ -295,7 +295,7 @@
                 const openBalanceDate = this.customer.open_balance_date;
                 if (openBalanceDate) $('#open_balance_date').datepicker('setDate', new Date(openBalanceDate));
 
-                const balance = parseFloat(customer.open_balance);
+                const balance = parseFloat(this.customer.open_balance);
                 $('#open_balance').val(accounting.formatNumber(balance));
             }
 
