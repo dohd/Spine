@@ -32,9 +32,9 @@
                         </div>
                         <div class="row">                            
                             <div class="col-3">
-                                <label for="warehouse" class="h4">Warehouse</label>
+                                <label for="warehouse" class="h4">Product Location</label>
                                 <select name="warehouse_id" id="warehouse" class="custom-select">
-                                    <option value="">-- select warehouse --</option>
+                                    <option value="">-- select location --</option>
                                     @foreach ($warehouses as $warehouse)
                                         <option value="{{ $warehouse->id }}">{{ $warehouse->title }}</option>
                                     @endforeach

@@ -1,25 +1,16 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.warehouses.management') . ' | ' . trans('labels.backend.warehouses.edit'))
-
-@section('page-header')
-    <h1>
-        {{ trans('labels.backend.warehouses.management') }}
-        <small>{{ trans('labels.backend.warehouses.edit') }}</small>
-    </h1>
-@endsection
+@section ('title', 'Edit | Product Location Management')
 
 @section('content')
     <div class="">
         <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ trans('labels.backend.warehouses.edit') }}</h4>
-
+            <div class="content-header row mb-2">
+                <div class="content-header-left col-md-6 col-12">
+                    <h4 class="content-header-title mb-0">Product Location Management</h4>
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right">
-
                         <div class="media-body media-right text-right">
                             @include('focus.warehouses.partials.warehouses-header-buttons')
                         </div>

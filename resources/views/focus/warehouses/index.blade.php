@@ -1,13 +1,13 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.warehouses.management'))
+@section ('title', 'Product Location')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-2">
         <div class="content-header-left col-6">
             <h4 class="content-header-title mb-0">
-                {{ trans('labels.backend.warehouses.management') }}
+                {{ 'Product Location' }}
             </h4>
         </div>
         <div class="content-header-right col-6">
@@ -46,7 +46,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Warehouse</th>
+                                        <th>Product Location</th>
                                         <th>Product Count</th>
                                         <th>{{ trans('productcategories.total_worth') }}</th>
                                         <th>{{ trans('general.createdat') }}</th>
