@@ -41,6 +41,8 @@ class UtilityBillRepository extends BaseRepository
                 date_for_database(request('start_date')), 
                 date_for_database(request('end_date'))
             ]);
+        } else {
+            $q->latest()->limit(2000);
         }
 
         // supplier and status filter
