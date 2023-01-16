@@ -151,7 +151,7 @@ class SupplierRepository extends BaseRepository
                     'id' => $i,
                     'date' => $pmt->bill->date,
                     'type' => 'payment',
-                    'note' => "({$tid}) {$pmt_tid} reference: {$reference} mode: ${payment_mode} account: {$account} amount: {$amount}",
+                    'note' => "({$tid}) {$pmt_tid} reference: {$reference} mode: {$payment_mode} account: {$account} amount: {$amount}",
                     'debit' => $pmt->paid,
                     'credit' => 0,
                     'bill_id' => $bill_id,
