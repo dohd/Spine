@@ -145,9 +145,7 @@
         },
 
         cloneAgingReport() {
-            const aging = $('.aging').clone();
-            $('#stmentTbl').after(aging);
-            $('#active5').append(aging.clone());
+            $('.stment-aging-wrapper').append($('.aging').clone());
         },
 
         drawSupplierDataTable() {
