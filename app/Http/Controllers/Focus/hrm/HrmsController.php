@@ -95,7 +95,7 @@ class HrmsController extends Controller
     public function store(ManageHrmRequest $request)
     {
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
-        $input['meta'] = $request->except(['_token', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission']);
+        $input['meta'] = $request->except(['_token', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission', 'check_all']);
         $input = array_merge($input, $request->only(['permission']));
 
         // validate
@@ -139,7 +139,7 @@ class HrmsController extends Controller
     public function update(ManageHrmRequest $request, Hrm $hrm)
     {
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
-        $input['meta'] = $request->except(['_token', '_method', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission']);
+        $input['meta'] = $request->except(['_token', '_method', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission', 'check_all']);
         $input = array_merge($input, $request->only(['permission']));
 
         // validate

@@ -404,14 +404,13 @@
             {{-- Roles and Permissions --}}
             <div class="tab-pane" id="tab9" role="tabpanel" aria-labelledby="base-tab9">
                 <div class='form-group'>
-                    {{ Form::label( 'role', trans('hrms.role'),['class' => 'col-lg-2 control-label']) }}
+                    <label for="role" class="ml-2">Role <input type="checkbox" name="check_all" id="check_all" class="check_all"></label>
                     <div class='col-lg-10'>
-                        <select class="form-control" name="role"
-                                id="{{ $general['create'] == 1 ? "new_emp_role" : "emp_role" }}">
+                        <select class="form-control" name="role" id="{{ $general['create'] == 1 ? "new_emp_role" : "emp_role" }}">
                             @foreach($roles as $role)
-                                    <option value="{{$role['id']}}" @if(@$hrms->role['id']==$role['id']) selected @endif>
-                                        {{$role['name']}}
-                                    </option>
+                                <option value="{{$role['id']}}" @if(@$hrms->role['id']==$role['id']) selected @endif>
+                                    {{$role['name']}}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -421,7 +420,7 @@
                                 @foreach($permissions_all as $row)
                                     <div class="col-md-6">
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" name="permission[]" value="{{ $row['id'] }}" @if(in_array_r($row['id'], @$permissions)) checked="checked" @endif>
+                                            <input type="checkbox" name="permission[]" value="{{ $row['id'] }}" class="permission_check" @if(in_array_r($row['id'], @$permissions)) checked="checked" @endif>
                                             <label>{{ trans('permissions.' . $row['name']) }}</label>
                                         </div>
                                     </div>
@@ -438,6 +437,19 @@
 @section('after-scripts')
 {{ Html::script('focus/js/jquery.password-validation.js') }}
 <script>
+    // check all roles
+    $('#check_all').change(function() {
+        if ($(this).prop('checked')) {
+            $('.permission').each(function(i) {
+                $(this).prop('checked', true);
+            })
+        } else {
+            $('.permission').each(function(i) {
+                $(this).prop('checked', false);
+            })
+        }
+    });
+
     $(document).ready(function () {
         $("#u_password").passwordValidation({
             minLength: 6,

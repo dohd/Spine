@@ -3,7 +3,7 @@
         @foreach($permissions_all as $row)
             <div class="col-md-6">
                 <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="permission[]" value="{{$row['id']}}">
+                    <input type="checkbox" name="permission[]" value="{{$row['id']}}" class="permission">
                     <label> {{trans('permissions.'.$row['name'])}}</label>
                 </div>
             </div>
