@@ -35,17 +35,25 @@
                                 <label for="status">Delivery Status</label>
                                 <select name="status" id="status" class="custom-select">
                                     <option value="">-- select status --</option>
-                                    @foreach (['pending', 'partial', 'complete'] as $status)
-                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @foreach (['Pending', 'Partial', 'Complete'] as $status)
+                                        <option value="{{ $status }}">{{ $status }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-2">
-                                <label for="amount">Total Amount</label>
-                                <input type="text" id="amount_total" class="form-control" readonly>
-                            </div>                            
+                                <label for="amount">Total Order Amount</label>
+                                <input type="text" id="order_total" class="form-control" readonly>
+                            </div>    
+                            <div class="col-2">
+                                <label for="amount">Total Received Amount</label>
+                                <input type="text" id="grn_total" class="form-control" readonly>
+                            </div>     
+                            <div class="col-2">
+                                <label for="amount">Total Pending Amount</label>
+                                <input type="text" id="due_total" class="form-control" readonly>
+                            </div>                        
                         </div>
                     </div>
                 </div>
@@ -68,7 +76,6 @@
                                         <th>{{ trans('general.amount') }}</th>
                                         <th>Date</th>
                                         <th>{{ trans('general.status') }}</th>
-                                        <th>Items Received</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -135,12 +142,14 @@
                         status: $('#status').val(),
                     },
                     dataSrc: ({data}) => {
-                        $('#amount_total').val('');
-                        // $('#balance_total').val('');
+                        $('#order_total').val('');
+                        $('#grn_total').val('');
+                        $('#due_total').val('');
                         if (data.length && data[0].aggregate) {
-                            const aggregate = data[0].aggregate;
-                            $('#amount_total').val(aggregate.amount_total);
-                            // $('#balance_total').val(aggregate.balance_total);
+                            const aggr = data[0].aggregate;
+                            $('#order_total').val(aggr.order_total);
+                            $('#grn_total').val(aggr.grn_total);
+                            $('#due_total').val(aggr.due_total);
                         }
                         return data;
                     },
@@ -176,10 +185,6 @@
                     {
                         data: 'status',
                         name: 'status'
-                    },
-                    {
-                        data: 'grn_count',
-                        name: 'grn_count'
                     },
                     {
                         data: 'actions',

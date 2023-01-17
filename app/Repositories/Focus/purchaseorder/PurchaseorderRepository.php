@@ -37,17 +37,7 @@ class PurchaseorderRepository extends BaseRepository
         $q->when(request('supplier_id'), function ($q) {
             $q->where('supplier_id', request('supplier_id'));
         })->when(request('status'), function ($q) {
-            switch (request('status')) {
-                case 'pending': 
-                    $q->where('status', 'Pending');
-                    break;
-                case 'partial':    
-                    $q->where('status', 'Partial');
-                    break;    
-                case 'complete':    
-                    $q->where('status', 'Complete');
-                    break;               
-            }         
+            $q->where('status', request('status'));     
         });
 
         return $q->get();
