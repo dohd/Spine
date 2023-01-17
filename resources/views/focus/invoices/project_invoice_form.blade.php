@@ -147,9 +147,9 @@
                     $lpo_no = $val->lpo ? "{$prefixes[3]}-{$val->lpo->lpo_no}" : '';
                     $client_ref = $val->client_ref;
                     $branch_name = $val->branch? "{$val->branch->name} ({$val->branch->branch_code})" : '';
+                    $djc_ref = $val->reference? "Djc-{$val->reference}" : '';
                     
                     // Description details
-                    $title = $val->notes;
                     $jcs = [];
                     foreach($val->verified_jcs as $jc) {
                         if ($jc->type == 2) $jcs[] = "{$prefixes[4]}-{$jc->reference}";
@@ -157,10 +157,13 @@
                     }
 
                     // Table values
-                    $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]);                                        
-                    $description = $title . '; ' . implode(', ', $jcs);
                     $price = numberFormat($val->subtotal);
                     $project_id = $val->project_quote ? $val->project_quote->project_id : '';
+
+                    $title = $val->notes;
+                    $jcs = implode(', ', $jcs);
+                    $description = implode(';', [$title, $djc_ref, $jcs]);
+                    $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]); 
                 @endphp
                 <tr>
                     <td class="num">{{ $k+1 }}</td>                                            
