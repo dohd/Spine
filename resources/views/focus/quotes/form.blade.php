@@ -20,7 +20,8 @@
                                 if ($lead->customer) {
                                     $customer_name .= $lead->customer->company;
                                     if ($lead->branch) $customer_name .= " - {$lead->branch->name}";
-                                }
+                                } else $customer_name = $lead->client_name;
+                                
                                 $prefix = $prefixes[1];
                                 if (isset($quote)) $prefix = $prefixes[2];
                             @endphp
