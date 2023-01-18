@@ -765,9 +765,9 @@
 
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Tax Returns</a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax Returns</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax Return</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.tax_reports.filed_report') }}"><i class="fa fa-book"></i> Filed Tax Returns</a></li>
-                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax Report</a></li>
-                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax Report</a></li>
                         </ul>
                     </li>
                     @endauth

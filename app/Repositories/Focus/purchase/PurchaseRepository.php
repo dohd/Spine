@@ -36,7 +36,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->latest()->limit(2000);
+        $q = $this->query();
 
         return $q->get();
     }

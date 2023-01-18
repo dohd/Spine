@@ -1,12 +1,43 @@
 <div class="card">
     <div class="card-content">
         <div class="card-body">
-            <div class="form-group row mb-2">
-                <div class="col-6">
-                    <label for="title">Report Subject</label>
-                    {{ Form::text('title', null, ['class' => 'form-control', 'required']) }}
+            <div class="row form-group">
+                <div class="col-3">
+                    <label for="record_month">Sale / Purchase Month</label>
+                    {{ Form::text('record_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'record_month']) }}
+                </div>
+
+                <div class="col-3">
+                    <label for="tax_group">Tax Group</label>
+                    @php
+                        $options = [
+                            '16' => 'General Rated Sales/Purchases (16%)',
+                            '8' => 'Other Rated Sales/Purchases (8%)',
+                            '0' => 'Zero Rated Sales/Purchases (0%)',
+                            '00' => 'Exempted Rated Sales/Purchases',
+                        ]
+                    @endphp
+                    <select name="tax_group" id="tax_group" class="custom-select">
+                        <option value="">-- select tax group --</option>
+                        @foreach ($options as $key => $val)
+                            <option value="{{ intval($key) }}" {{ @$tax_report && intval($key) == $tax_report->tax_group? 'selected' : '' }}>{{ $val }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-3">
+                    <label for="return_month">Return Month</label>
+                    {{ Form::text('return_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'return_month']) }}
                 </div>
             </div>
+
+            <div class="row form-group">
+                <div class="col-9">
+                    <label for="note">Note</label>
+                    {{ Form::text('note', null, ['class' => 'form-control']) }}
+                </div>
+            </div>
+            
             {{-- tab menu --}}
             <ul class="nav nav-tabs nav-top-border no-hover-bg" role="tablist">
                 <li class="nav-item">

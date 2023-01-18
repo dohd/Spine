@@ -21,17 +21,41 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <div class="col-2">
-                                <label for="month">File Return Month</label>
-                                {{ Form::text('file_month', null, ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="record_month">Sale / Purchase Month</label>
+                                    {{ Form::text('record_month', null, ['class' => 'form-control datepicker', 'id' => 'record_month']) }}
+                                </div>
+                                <div class="col-3">
+                                    <label for="return_month">Return Month</label>
+                                    {{ Form::text('return_month', null, ['class' => 'form-control datepicker', 'id' => 'return_month']) }}
+                                </div>
+                                <div class="col-3">
+                                    <label for="tax_group">Tax Group</label>
+                                    @php
+                                        $options = [
+                                            '16' => 'General Rated Sales/Purchases (16%)',
+                                            '8' => 'Other Rated Sales/Purchases (8%)',
+                                            '0' => 'Zero Rated Sales/Purchases (0%)',
+                                            '00' => 'Exempted Rated Sales/Purchases',
+                                        ]
+                                    @endphp
+                                    <select name="tax_group" id="tax_group" class="custom-select">
+                                        <option value="">-- select tax group --</option>
+                                        @foreach ($options as $key => $val)
+                                            <option value="{{ intval($key) }}">{{ $val }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <hr>
-
                             <table id="taxReportTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Title</th>
+                                        <th>Purchase / Sale Month</th>
+                                        <th>Return Month</th>
+                                        <th>Note</th>
                                         <th>Created At</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -74,14 +98,19 @@
                 onClose: function(dateText, inst) { 
                     $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
                 }
-            }).change(this.fileMonthChange);
+            });
+
+            $('.datepicker').change(function() {
+                $('#taxReportTbl').DataTable().destroy();
+                Index.drawDataTable();
+            });
+
+            $('#tax_group').change(function() {
+                $('#taxReportTbl').DataTable().destroy();
+                Index.drawDataTable();
+            });
 
             this.drawDataTable();
-        },
-
-        fileMonthChange() {
-            $('#taxReportTbl').DataTable().destroy();
-            return Index.drawDataTable();
         },
 
         drawDataTable() {
@@ -93,16 +122,21 @@
                 ajax: {
                     url: "{{ route('biller.tax_reports.get') }}",
                     type: 'POST',
-                    data: {file_month: $('#file_month').val()}
+                    data: {
+                        record_month: $('#record_month').val(), 
+                        return_month: $('#return_month').val(),
+                        tax_group: $('#tax_group').val(),
+                    }
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'title', name: 'title'},
+                    {data: 'record_month', name: 'record_month'},
+                    {data: 'return_month', name: 'return_month'},
+                    {data: 'note', name: 'note'},
                     {data: 'date', name: 'date'},                    
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 columnDefs: [
-                    // { type: "custom-number-sort", targets: [4, 5] },
                     { type: "custom-date-sort", targets: [2] }
                 ],
                 order: [[0, "desc"]],

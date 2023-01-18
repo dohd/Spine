@@ -25,10 +25,16 @@
                 }
             });
 
-            $('#sale_month').change(() => this.fetchSales());
-            $('#sale_tax_rate').change(this.saleTaxRateChange);
-            $('#purchase_month').change(() => this.fetchPurchases());
-            $('#purchase_tax_rate').change(this.purchaseTaxRateChange);
+
+            $('#record_month').change(function() {
+                $('#tax_group').val('');
+                Index.fetchSales();
+                Index.fetchPurchases();
+            });
+            $('#tax_group').change(function() {
+                Index.saleTaxRateChange();
+                Index.purchaseTaxRateChange();
+            });
             
             $('form').on('change', '#sale_file_all, #sale_remove_all, .sale-file-row, .sale-remove-row', this.saleRadioChange);
             $('form').on('change', '#purchase_file_all, #purchase_remove_all, .purchase-file-row, .purchase-remove-row', this.purchaseRadioChange);
@@ -73,29 +79,14 @@
             const filedPurchaseRows = $('#purchaseTbl').find('.purchase-file-row:checked');
             const removedPurchaseRows = $('#purchaseTbl').find('.purchase-remove-row:checked');
 
+            // validation
             const isFileSale = filedSaleRows.length || removedSaleRows.length;
             const isPurchaseFile = filedPurchaseRows.length || removedPurchaseRows.length;
-            const allSaleMonths = !$('#sale_month').val();
-            const allPurchaseMonths = !$('#purchase_month').val();
-
-            let reload;
             if (!isFileSale && !isPurchaseFile) {
                 event.preventDefault();
                 alert('filed returns required! check at least a single record');
-                reload = true;
-            } else {
-                if (allSaleMonths && isFileSale) {
-                    event.preventDefault();
-                    alert('sale month is required!');
-                    reload = true;
-                }
-                if (allPurchaseMonths && isPurchaseFile) {
-                    event.preventDefault();
-                    alert('purchase month is required!');
-                    reload = true;
-                }
+                location.reload();
             }
-            if (reload) location.reload();
         },
 
         editTaxReport() {
@@ -125,19 +116,20 @@
         */
         saleTaxRateChange() {
             let data = Index.salesData;
-            if ($(this).val()) data = data.filter(v => parseFloat(v.tax_rate) == $(this).val());
+            const tax = $('#tax_group').val();
+            if (tax) data = data.filter(v => parseFloat(v.tax_rate) == tax);
             Index.renderSalesRow(data);
         },
         fetchSales() {
             const url = "{{ route('biller.tax_reports.get_sales') }}";
-            $.post(url, {sale_month: $('#sale_month').val()}, data => {
+            $.post(url, {sale_month: $('#record_month').val()}, data => {
                 // sort by date
                 data.sort((a, b) => new Date(b.invoice_date) - new Date(a.invoice_date)); 
                 data = data.filter(v => (v['tax_pin'] != 0 && v['tax_pin'] != 'null'));
                 
                 this.salesData = data;
                 this.renderSalesRow(data);
-                $('#sale_tax_rate').change();
+                this.saleTaxRateChange();
             });
         },
         renderSalesRow(data = []) {
@@ -207,19 +199,20 @@
         */
         purchaseTaxRateChange() {
             let data = Index.purchasesData;
-            if ($(this).val()) data = data.filter(v => parseFloat(v.tax_rate) == $(this).val());
+            const tax = $('#tax_group').val();
+            if (tax) data = data.filter(v => parseFloat(v.tax_rate) == tax);
             Index.renderPurchasesRow(data);
         },
         fetchPurchases() {
             const url = "{{ route('biller.tax_reports.get_purchases') }}";
-            $.post(url, {purchase_month: $('#purchase_month').val()}, data => {
+            $.post(url, {purchase_month: $('#record_month').val()}, data => {
                 // sort by date
                 data.sort((a, b) => new Date(b.purchase_date) - new Date(a.purchase_date)); 
                 data = data.filter(v => (v['tax_pin'] != 0 && v['tax_pin'] != 'null'));
 
                 this.purchasesData = data;
                 this.renderPurchasesRow(data);
-                $('#purchase_tax_rate').change();
+                this.purchaseTaxRateChange();
             });
         },
         renderPurchasesRow(data = []) {

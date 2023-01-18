@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Tax Return Report')
+@section('title', 'Filed Tax Returns')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Tax Return Report</h4>
+            <h4 class="content-header-title">Filed Tax Returns</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -22,48 +22,34 @@
                     <div class="card-content">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-2">
-                                    <label for="month">File Month</label>
-                                    {{ Form::text('file_month', request('file_month', @$prev_month), ['class' => 'form-control datepicker', 'id' => 'file_month']) }}
+                                <div class="col-3">
+                                    <label for="record_month">Sale / Purchase Month</label>
+                                    {{ Form::text('record_month', request('record_month'), ['class' => 'form-control datepicker', 'id' => 'record_month']) }}
                                 </div>
-                                <div class="col-2">
-                                    <label for="status">Tax Rate</label>
-                                    <select name="tax_rate" id="tax_rate" class="custom-select">
-                                        @foreach ($additionals as $row)
-                                            <option value="{{ $row->value }}" {{ request('tax_rate', 0) == $row->value? 'selected' : ($row->default? 'selected' : '') }}>
-                                                {{ $row->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <div class="col-3">
+                                    <label for="return_month">Return Month</label>
+                                    {{ Form::text('return_month', request('return_month'), ['class' => 'form-control datepicker', 'id' => 'return_month']) }}
                                 </div>
-                                <div class="col-5">
-                                    <label for="customer">Report Title</label>
-                                    <select name="tax_report_id" class="form-control" id="tax_report" data-placeholder="Choose Report">
-                                        @foreach ($tax_reports as $row)
-                                            <option value="{{ $row->id }}">
-                                                {{ $row->title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-2">
-                                    <label for="customer">File Status</label>
-                                    <select name="is_filed" class="custom-select" id="is_filed">
-                                        @foreach ([0,1] as $val)
-                                            <option value="{{ $val }}" {{ $val? 'selected' : '' }}>
-                                                {{ $val? 'Filed' : 'Removed' }}
-                                            </option>
+                                <div class="col-3">
+                                    <label for="tax_group">Tax Group</label>
+                                    @php
+                                        $options = [
+                                            '16' => 'General Rated Sales/Purchases (16%)',
+                                            '8' => 'Other Rated Sales/Purchases (8%)',
+                                            '0' => 'Zero Rated Sales/Purchases (0%)',
+                                            '00' => 'Exempted Rated Sales/Purchases',
+                                        ]
+                                    @endphp
+                                    <select name="tax_group" id="tax_group" class="custom-select">
+                                        <option value="">-- select tax group --</option>
+                                        @foreach ($options as $key => $val)
+                                            <option value="{{ intval($key) }}" {{ in_array(request('tax_group'), ['16', '8', '0']) && intval($key) == request('tax_group')? 'selected' : '' }}>{{ $val }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                            <br>
 
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
                             {{-- tab menu --}}
                             <ul class="nav nav-tabs nav-top-border no-hover-bg" role="tablist">
                                 <li class="nav-item">
@@ -137,9 +123,9 @@
 
     const Index = {
         taxReportId: @json(request('tax_report_id')),
-        isFiled: 1,
-        fileMonth: @json(request('file_month', @$prev_month)),
-        taxRate: @json(request('tax_rate', 0)),
+        recordMonth: @json(request('record_month')),
+        returnMonth: @json(request('record_month')),
+        taxGroup: @json(request('tax_group')),
 
         init() {
             // month picker
@@ -152,45 +138,16 @@
                 onClose: function(dateText, inst) { 
                     $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
                 }
-            }).change(this.fileMonthChange);
+            });
+            $('.datepicker').change(function() {
+                Index.reloadDataTable();
+            });
+            $('#tax_group').change(function() {
+                Index.reloadDataTable();
+            });
 
             this.drawSaleDataTable();
             this.drawPurchaseDataTable();
-
-            $('#sale_col_label').change(this.saleHideColumnLabel);
-            $('#purchase_col_label').change(this.purchaseHideColumnLabel);
-            $('#is_filed').change(this.fileStatusChange);
-            $('#file_month').change(this.fileMonthChange);
-            $('#tax_rate').change(this.taxRateChange);
-
-            $('#tax_report').select2({allowClear: true});
-            if (this.taxReportId) {
-                $('#tax_report').val(this.taxReportId).change();
-            } else {
-                $('#tax_report').val('').change();
-            }
-            
-            $('#tax_report').change(this.taxReportChange);
-        },
-
-        taxReportChange() {
-            Index.taxReportId = $(this).val() || 0;
-            Index.reloadDataTable();
-        },
-
-        fileStatusChange() {
-            Index.isFiled = $(this).val();
-            Index.reloadDataTable();
-        },
-
-        fileMonthChange() {
-            Index.fileMonth = $(this).val();
-            Index.reloadDataTable();
-        },
-
-        taxRateChange() {
-            Index.taxRate = $(this).val();
-            Index.reloadDataTable();
         },
 
         reloadDataTable() {
@@ -210,15 +167,14 @@
                     url: "{{ route('biller.tax_reports.get_filed_items') }}",
                     type: 'POST',
                     data: {
+                        record_month: $('#record_month').val(),
+                        return_month: $('#return_month').val(),
+                        tax_group: $('#tax_group').val(),
+                        tax_report_id: Index.taxReportId,
                         is_sale: 1, 
                         is_purchase: 0, 
-                        tax_report_id: this.taxReportId,
-                        is_filed: this.isFiled,
-                        file_month: this.fileMonth,
-                        tax_rate: this.taxRate,
                     },
                     dataSrc: ({data}) => {
-                        // set etr code
                         data = data.map(v => {
                             v['etr_code'] = @json($company->etr_code);
                             return v;
@@ -227,9 +183,7 @@
                     },
                 },
                 columns: [
-                    // {data: 'DT_Row_Index', name: 'id'},
-                    ...[
-                        'pin', 'customer', 'etr_code', 'invoice_date', 'invoice_no', 'note', 'subtotal',
+                    ...['pin', 'customer', 'etr_code', 'invoice_date', 'invoice_no', 'note', 'subtotal',
                         'empty_col', 'cn_invoice_no', 'cn_invoice_date',
                     ].map(v => ({data: v, name: v})),
                 ],
@@ -254,18 +208,16 @@
                     url: "{{ route('biller.tax_reports.get_filed_items') }}",
                     type: 'POST',
                     data: {
+                        record_month: $('#record_month').val(),
+                        return_month: $('#return_month').val(),
+                        tax_group: $('#tax_group').val(),
+                        tax_report_id: Index.taxReportId,
                         is_purchase: 1, 
                         is_sale: 0, 
-                        tax_report_id: this.taxReportId,
-                        is_filed: this.isFiled,
-                        file_month: this.fileMonth,
-                        tax_rate: this.taxRate,
                     },
                 },
                 columns: [
-                    // {data: 'DT_Row_Index', name: 'id'},
-                    ...[
-                        'source', 'pin', 'supplier', 'invoice_date', 'invoice_no', 'note', 
+                    ...['source', 'pin', 'supplier', 'invoice_date', 'invoice_no', 'note', 
                         'empty_col', 'subtotal',
                     ].map(v => ({data: v, name: v})),
                 ],

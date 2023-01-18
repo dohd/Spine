@@ -66,7 +66,10 @@ class TaxReportsController extends Controller
     public function create()
     {
         $additionals = Additional::all();
-        $prev_month = (date('m')-1) . '-' . date('Y');
+
+        $month = (date('m')-1)? (date('m')-1) : 12;
+        $year = (date('m')-1)? date('Y') : (date('Y')-1);
+        $prev_month = "{$month}-{$year}";
         
         return view('focus.tax_reports.create', compact('additionals', 'prev_month'));
     }
@@ -139,11 +142,13 @@ class TaxReportsController extends Controller
      */
     public function filed_report()
     {
-        $tax_reports = TaxReport::get(['id', 'title']);
+        $tax_reports = TaxReport::get(['id', 'note']);
         $company = Company::find(auth()->user()->ins, ['id', 'etr_code']);
         $additionals = Additional::all();
 
-        $prev_month = (date('m')-1) . '-' . date('Y');
+        $month = (date('m')-1)? (date('m')-1) : 12;
+        $year = (date('m')-1)? date('Y') : (date('Y')-1);
+        $prev_month = "{$month}-{$year}";
 
         return view('focus.tax_reports.filed_report', compact('tax_reports', 'company', 'additionals', 'prev_month'));
     }
