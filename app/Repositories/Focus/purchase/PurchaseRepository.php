@@ -154,6 +154,18 @@ class PurchaseRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
+        // restrict special characters to only "/" and "-"
+        $pattern = "/^[a-zA-Z0-9-\/]+$/i";
+        if ($data['doc_ref_type'] == 'Invoice' && !preg_match($pattern, $data['doc_ref']))
+            throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
+
+        if (isset($data['supplier_taxid']) && count($data['supplier_taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
+        $inv_exists = Purchase::where('doc_ref_type', 'Invoice')
+            ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
+        if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
+
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $result = Purchase::create($data);
@@ -254,6 +266,18 @@ class PurchaseRepository extends BaseRepository
             if (in_array($key, $rate_keys)) 
                 $data[$key] = numberClean($val);
         }
+
+        // restrict special characters to only "/" and "-"
+        $pattern = "/^[a-zA-Z0-9-\/]+$/i";
+        if ($data['doc_ref_type'] == 'Invoice' && !preg_match($pattern, $data['doc_ref']))
+            throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
+
+        if (isset($data['supplier_taxid']) && count($data['supplier_taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
+        $inv_exists = Purchase::where('id', '!=', $purchase->id)->where('doc_ref_type', 'Invoice')
+            ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
+        if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
 
         $prev_note = $purchase->note;
         $result = $purchase->update($data);

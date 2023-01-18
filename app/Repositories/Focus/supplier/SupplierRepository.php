@@ -179,6 +179,9 @@ class SupplierRepository extends BaseRepository
         $data = $input['data'];
         if (!empty($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
 
+        if (isset($data['taxid']) && count($data['taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
         DB::beginTransaction();
 
         $account_data = $input['account_data'];
@@ -274,6 +277,9 @@ class SupplierRepository extends BaseRepository
             $this->removePicture($supplier, 'picture');
             $data['picture'] = $this->uploadPicture($data['picture']);
         }
+
+        if (isset($data['taxid']) && count($data['taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
 
         $account_data = $input['account_data'];
         $data = array_replace($data, [
