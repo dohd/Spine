@@ -85,7 +85,7 @@
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
-                data: {customer_id: $(this).val()}, 
+                data: ({term}) => ({search: term, customer_id: $(this).val()}), 
                 processResults: data => {
                     return {
                         results: data.filter(v => v.name != 'All Branches').map(v => ({

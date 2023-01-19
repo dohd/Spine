@@ -91,7 +91,7 @@
                 type: 'POST',
                 quietMillis: 50,
                 params: {'cat_id': tips},
-                data: product => ({product}), 
+                data: ({term}) => ({search: term, customer_id: $(this).val()}), 
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {

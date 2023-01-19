@@ -15,7 +15,7 @@
     </div>
     <div class='col-md-4'>
         {{ Form::label('branch_id', 'Branch',['class' => 'col-12 control-label']) }}
-        <select id="branch" name="branch_id" class="form-control   select-box" data-placeholder="Branch">
+        <select id="branch" name="branch_id" class="form-control select-box" data-placeholder="Branch">
             @isset ($equipment)
                 <option value="{{ $equipment->branch_id }}" selected>
                     {{ $equipment->branch? $equipment->branch->name : '' }}
