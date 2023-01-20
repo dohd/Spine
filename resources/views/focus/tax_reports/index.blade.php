@@ -55,6 +55,8 @@
                                         <th>#</th>
                                         <th>Purchase / Sale Month</th>
                                         <th>Return Month</th>
+                                        <th>Sale Tax Amount</th>
+                                        <th>Purchase Tax Amount</th>
                                         <th>Note</th>
                                         <th>Created At</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -132,6 +134,8 @@
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'record_month', name: 'record_month'},
                     {data: 'return_month', name: 'return_month'},
+                    {data: 'sale_tax', name: 'sale_tax'},
+                    {data: 'purchase_tax', name: 'purchase_tax'},
                     {data: 'note', name: 'note'},
                     {data: 'date', name: 'date'},                    
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
