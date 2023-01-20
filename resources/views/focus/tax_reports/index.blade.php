@@ -141,6 +141,7 @@
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 columnDefs: [
+                    { type: "custom-number-sort", targets: [3, 4] },
                     { type: "custom-date-sort", targets: [2] }
                 ],
                 order: [[0, "desc"]],

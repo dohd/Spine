@@ -159,7 +159,7 @@ class PurchaseRepository extends BaseRepository
         if ($data['doc_ref_type'] == 'Invoice' && !preg_match($pattern, $data['doc_ref']))
             throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
 
-        if (isset($data['supplier_taxid']) && count($data['supplier_taxid']) != 11)
+        if (isset($data['supplier_taxid']) && strlen($data['supplier_taxid']) != 11)
             throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
 
         $inv_exists = Purchase::where('doc_ref_type', 'Invoice')
@@ -272,7 +272,7 @@ class PurchaseRepository extends BaseRepository
         if ($data['doc_ref_type'] == 'Invoice' && !preg_match($pattern, $data['doc_ref']))
             throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
 
-        if (isset($data['supplier_taxid']) && count($data['supplier_taxid']) != 11)
+        if (isset($data['supplier_taxid']) && strlen($data['supplier_taxid']) != 11)
             throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
 
         $inv_exists = Purchase::where('id', '!=', $purchase->id)->where('doc_ref_type', 'Invoice')

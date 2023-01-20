@@ -20,7 +20,7 @@
                     <select name="tax_group" id="tax_group" class="custom-select">
                         <option value="">-- select tax group --</option>
                         @foreach ($options as $key => $val)
-                            <option value="{{ intval($key) }}" {{ @$tax_report && intval($key) == $tax_report->tax_group? 'selected' : '' }}>{{ $val }}</option>
+                            <option value="{{ intval($key) }}" key="{{ $key }}" {{ @$tax_report && intval($key) == $tax_report->tax_group? 'selected' : '' }}>{{ $val }}</option>
                         @endforeach
                     </select>
                 </div>

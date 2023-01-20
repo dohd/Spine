@@ -17,13 +17,13 @@
     </div> 
     <div class="col-2">
         <label for="reference">Reference</label>
-        {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference', 'required']) }}
+        {{ Form::text('reference', null, ['class' => 'form-control', 'placeholder' => 'Requisition No.', 'id' => 'reference', 'required']) }}
     </div> 
 </div> 
 <div class="form-group row">  
     <div class="col-12">
         <label for="note">Note</label>    
-        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note', 'required']) }}
+        {{ Form::text('note', null, ['class' => 'form-control', 'placeholder' => 'Additional Remarks e.g Technician names', 'id' => 'note', 'required']) }}
     </div>                          
 </div>
 

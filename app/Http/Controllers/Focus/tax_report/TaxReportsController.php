@@ -184,6 +184,7 @@ class TaxReportsController extends Controller
                 'type' => 'invoice',
                 'credit_note_date' => '',
                 'credit_note_tid' => '',
+                'is_tax_exempt' => isset($v->customer->is_tax_exempt)? $v->customer->is_tax_exempt : 0,
             ]);
 
         $credit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month)->whereYear('date', $year))
@@ -208,6 +209,7 @@ class TaxReportsController extends Controller
             'type' => 'credit_note',
             'credit_note_date' => $v->invoice->invoicedate,
             'invoice_tid' => $v->invoice->tid,
+            'is_tax_exempt' => isset($v->customer->is_tax_exempt)? $v->customer->is_tax_exempt : 0,
         ]);
             
         $sales = $invoices->merge($credit_notes);

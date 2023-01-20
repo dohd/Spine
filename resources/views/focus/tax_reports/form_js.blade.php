@@ -117,7 +117,12 @@
         saleTaxRateChange() {
             let data = Index.salesData;
             const tax = $('#tax_group').val();
-            if (tax) data = data.filter(v => parseFloat(v.tax_rate) == tax);
+            if ($('#tax_group option:selected').attr('key') == '00') {
+                data = data.filter(v => parseFloat(v.tax_rate) == tax && v.is_tax_exempt);
+            } else if (['16', '8', '0'].includes(tax)) {
+                data = data.filter(v => parseFloat(v.tax_rate) == tax && !v.is_tax_exempt);
+            }
+            
             Index.renderSalesRow(data);
         },
         fetchSales() {
@@ -200,7 +205,12 @@
         purchaseTaxRateChange() {
             let data = Index.purchasesData;
             const tax = $('#tax_group').val();
-            if (tax) data = data.filter(v => parseFloat(v.tax_rate) == tax);
+            if ($('#tax_group option:selected').attr('key') == '00') {
+                data = [];
+            } else if (['16', '8', '0'].includes(tax)) {
+                data = data.filter(v => parseFloat(v.tax_rate) == tax);
+            }
+
             Index.renderPurchasesRow(data);
         },
         fetchPurchases() {
