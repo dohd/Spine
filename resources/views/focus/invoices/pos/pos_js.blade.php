@@ -63,6 +63,10 @@
             $('#pos_basic_pay').click();
         });
     });
+
+    function update_pay_pos() {
+        calcPaymentTotals();
+    }
     
     // compute payment totals
     function calcPaymentTotals() {

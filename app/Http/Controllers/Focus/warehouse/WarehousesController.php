@@ -88,7 +88,7 @@ class WarehousesController extends Controller
         //Create the model using repository create method
         $this->repository->create($input);
         //return with successfull message
-        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => trans('alerts.backend.warehouses.created')]);
+        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Created Successfully']);
     }
 
     /**
@@ -117,7 +117,7 @@ class WarehousesController extends Controller
         //Update the model using repository update method
         $this->repository->update($warehouse, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => trans('alerts.backend.warehouses.updated')]);
+        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Updated Successfully']);
     }
 
     /**
@@ -132,7 +132,7 @@ class WarehousesController extends Controller
         //Calling the delete method on repository
         $this->repository->delete($warehouse);
         //returning with successfull message
-        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => trans('alerts.backend.warehouses.deleted')]);
+        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Deleted Successfully']);
     }
 
     /**
