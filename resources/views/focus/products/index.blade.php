@@ -23,11 +23,11 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-2 h4">Total Stock Count</div>                            
+                            <div class="col-2 h4">Product Count</div>                            
                             <div class="col-2 h4 stock-count">0</div>
                         </div>
                         <div class="row mb-1">
-                            <div class="col-2 h4">Total Stock Worth</div>                           
+                            <div class="col-2 h4">Total Unit Cost</div>                           
                             <div class="col-4 h4 stock-worth">0.00</div>
                         </div>
                         <div class="row">                            
@@ -77,9 +77,10 @@
                                         <th>{{ trans('labels.backend.products.table.id') }}</th>
                                         <th>Description</th>
                                         <th>Product Code</th>
-                                        <th>Unit (Qty)</th>
-                                        <th>Unit Code</th>
-                                        <th>Purchase Price</th>
+                                        <th>Qty</th>
+                                        <th>UoM</th>
+                                        <th>Unit Cost</th>
+                                        <th>Total Cost</th>
                                         <th>{{ trans('general.createdat') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -157,7 +158,7 @@
                     dataSrc: ({data}) => {
                         $('.stock-count').text('0');
                         $('.stock-worth').text('0.00');
-                        if (data.length) {
+                        if (data.length && data[0].aggregate) {
                             const aggr = data[0].aggregate;
                             $('.stock-count').text(aggr.product_count);
                             $('.stock-worth').text(aggr.product_worth);
@@ -171,7 +172,8 @@
                     {data: 'code', name: 'code'},                    
                     {data: 'qty', name: 'qty'},
                     {data: 'unit', name: 'unit'},
-                    {data: 'price', name: 'price'},
+                    {data: 'purchase_price', name: 'purchase_price'},
+                    {data: 'total', name: 'total'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

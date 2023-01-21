@@ -60,13 +60,17 @@ class WarehousesTableController extends Controller
                 return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=2&rel_id=' . $warehouse->id . '">' . $warehouse->title . '</a>';
             })
             ->addColumn('total', function ($warehouse) {
-                return  $warehouse->products()->groupBy('parent_id')->where('qty', '>', 0)->get()->count();
+                return  $warehouse->products->count();
             })
             ->addColumn('worth', function ($warehouse) {
-                return numberFormat($warehouse->products()->where('qty', '>', 0)->get()->sum('purchase_price'));
+                $worth = 0;
+                foreach ($warehouse->products as $product) {
+                    $worth += $product->purchase_price * $product->qty;
+                }
+                return numberFormat($worth);
             })
             ->addColumn('created_at', function ($warehouse) {
-                return $warehouse->created_at->format('d-m-Y');
+                return dateFormat($warehouse->created_at);
             })
             ->addColumn('actions', function ($warehouse) {
                 return '<a class="btn btn-purple round" href="'. route('biller.products.index', ['warehouse_id' => $warehouse->id]) .'" title="products"><i class="fa fa-list"></i></a>' 

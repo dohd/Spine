@@ -56,8 +56,8 @@ class ProductRepository extends BaseRepository
         $q->when(request('warehouse_id'), function ($q) {
             $q->whereHas('variations', function ($q) {
                 $q->where('warehouse_id', request('warehouse_id'));
-            });
-        })->when(request('category_id'), function ($q) {
+            })->with(['variations' => fn($q) => $q->where('warehouse_id', request('warehouse_id'))]);
+        })->when(request('category_id'), function ($q) {            
             $q->whereHas('category', function ($q) {
                 $q->where('productcategory_id', request('category_id'));
             });
@@ -65,11 +65,11 @@ class ProductRepository extends BaseRepository
             if (request('status') == 'in_stock') {
                 $q->whereHas('variations', function ($q) {
                     $q->where('qty', '>', 0);
-                });
-            } elseif (request('status') == 'out_of_stock') {
+                })->with(['variations' => fn($q) => $q->where('qty', '>', 0)]);
+            } else {
                 $q->whereHas('variations', function ($q) {
                     $q->where('qty', 0);
-                });
+                })->with(['variations' => fn($q) => $q->where('qty', 0)]);
             }            
         });
 

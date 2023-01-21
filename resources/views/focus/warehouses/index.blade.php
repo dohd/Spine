@@ -25,11 +25,11 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-2 h4">Total Stock Count</div>                            
+                            <div class="col-2 h4">Product Count</div>                            
                             <div class="col-2 h4">{{ $product_count }}</div>
                         </div>
                         <div class="row">
-                            <div class="col-2 h4">Total Stock Worth</div>                           
+                            <div class="col-2 h4">Total Unit Cost</div>                           
                             <div class="col-4 h4">{{ amountFormat($product_worth) }}</div>
                         </div>
                     </div>
