@@ -131,16 +131,18 @@
                                                 </tr>
                                             </thead>
                                             <tbody>   
-                                                @foreach ($contract->equipments as $i => $row)                                            
+                                                @php $i = 0; @endphp
+                                                @foreach ($contract->equipments->sortBy('branch_id') as $row)                                            
                                                     <tr>
                                                         <td>{{ $i+1 }}</td>
                                                         <td>{{ gen4tid('Eq-', $row->tid) }}</td>
                                                         <td>{{ $row->equip_serial }}</td>
                                                         <td>{{ $row->make_type }}</td>
-                                                        <td>{{ $row->branch->name }}</td>
+                                                        <td>{{ $row->branch? $row->branch->name : '' }}</td>
                                                         <td>{{ $row->location }}</td>
-                                                    </tr>                                                        
-                                                @endforeach                                                    
+                                                    </tr>     
+                                                    @php $i++ @endphp
+                                                @endforeach                                                  
                                             </tbody>
                                         </table>
                                     </div>
