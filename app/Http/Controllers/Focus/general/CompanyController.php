@@ -345,11 +345,16 @@ class CompanyController extends Controller
 
     public function clear_cache()
     {
-        if (single_ton()) {
-            Artisan::call('cache:clear');
-            Artisan::call('route:cache');
-            Artisan::call('config:cache');
-            return "Cache is cleared";
+        try {
+            if (single_ton()) {
+                Artisan::call('cache:clear');
+                Artisan::call('route:cache');
+                Artisan::call('config:cache');
+                return "Cache is cleared";
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            return "Something went wrong!";
         }
     }
 
