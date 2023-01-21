@@ -24,6 +24,7 @@ use App\Models\opening_stock\OpeningStock;
 use App\Models\product\ProductVariation;
 use App\Models\warehouse\Warehouse;
 use App\Repositories\Focus\opening_stock\OpeningStockRepository;
+use DB;
 use Illuminate\Http\Request;
 
 class OpeningStockController extends Controller
@@ -49,6 +50,29 @@ class OpeningStockController extends Controller
      */
     public function index()
     {
+        // import opening stock from existing inventory
+        // $data = [
+        //     'tid' => OpeningStock::max('tid')+1,
+        //     'date' => date('Y-m-d'),
+        //     'note' => 'Opening Stock Balance',
+        //     'warehouse_id' => 10,
+        //     'total' => 0,
+        // ];
+        // $data_items = ProductVariation::select(DB::raw('id as product_id, parent_id, purchase_price, qty, (purchase_price * qty) as amount'))
+        //     ->get();
+
+        // $data['total'] = $data_items->sum('amount');
+        // $data_items2 = [];
+        // foreach ($data_items->toArray() as $row) {
+        //     foreach ($row as $i => $value) {
+        //         if (isset($data_items2[$i])) $data_items2[$i][] = $value;
+        //         else $data_items2[$i] = [$value];
+        //     }
+        // }
+
+        // $input = array_merge($data, $data_items2);
+        // $this->repository->create($input);
+
         return new ViewResponse('focus.opening_stock.index');
     }
 

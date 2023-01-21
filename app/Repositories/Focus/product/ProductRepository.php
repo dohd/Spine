@@ -254,7 +254,14 @@ class ProductRepository extends BaseRepository
                 throw ValidationException::withMessages(['Product is attached to Issued Project Stock number {$project_stock->tid} !']);
             }
         }
-        if ($product->delete()) return true;
+
+        DB::beginTransaction();
+        
+        $product->variations()->delete();
+        if ($product->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.products.delete_error'));
     }

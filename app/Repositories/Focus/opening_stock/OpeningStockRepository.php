@@ -56,9 +56,7 @@ class OpeningStockRepository extends BaseRepository
         $result = OpeningStock::create($input);
 
         $data_items = Arr::only($input, ['product_id', 'parent_id', 'qty_alert', 'purchase_price', 'qty', 'amount']);
-        $data_items = array_filter(modify_array($data_items), function ($v) {
-            return $v['qty'] > 0;
-        });
+        $data_items = array_filter(modify_array($data_items), fn($v) => $v['qty'] > 0);
         $data_items = array_map(function ($v) use ($result) {
             return array_replace($v, [
                 'opening_stock_id' => $result->id,
