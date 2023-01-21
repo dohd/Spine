@@ -51,7 +51,10 @@ class TaxReportsTableController extends Controller
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
-            ->addIndexColumn()    
+            ->addIndexColumn()   
+            ->addColumn('tax_group', function ($report) {
+                return "{$report->tax_group}%";
+            }) 
             ->addColumn('sale_tax', function ($report) {
                 return numberFormat($report->sale_tax);
             })
