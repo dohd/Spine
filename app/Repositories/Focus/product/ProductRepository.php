@@ -231,24 +231,24 @@ class ProductRepository extends BaseRepository
     public function delete(Product $product)
     {
         foreach ($product->variations as $product_variation) {
-            if ($product_variation->quote_item) {
+            if (isset($product_variation->quote_item->quote)) {
                 $quote = $product_variation->quote_item->quote;
                 if ($quote) {
                     $type = $quote->bank_id? 'PI' : 'Quote';
                     throw ValidationException::withMessages(["Product is attached to {$type} number {$quote->tid} !"]);
                 }
             }
-            if ($product_variation->purchase_item) {
+            if (isset($product_variation->purchase_item->purchase)) {
                 $purchase = $product_variation->purchase_item->purchase;
                 if ($purchase)
                 throw ValidationException::withMessages(['Product is attached to Purchase number {$purchase->tid} !']);
             }
-            if ($product_variation->purchaseorder_item) {
+            if (isset($product_variation->purchase_order_item->purchaseorder)) {
                 $purchaseorder = $product_variation->purchase_order_item->purchaseorder;
                 if ($purchaseorder) 
                 throw ValidationException::withMessages(['Product is attached to Purchase Order number {$purchaseorder->tid} !']);
             }
-            if ($product_variation->project_stock_item) {
+            if (isset($product_variation->project_stock_item->project_stock)) {
                 $project_stock = $product_variation->project_stock_item->project_stock;
                 if ($project_stock) 
                 throw ValidationException::withMessages(['Product is attached to Issued Project Stock number {$project_stock->tid} !']);
