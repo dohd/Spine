@@ -157,7 +157,13 @@
                 [0, "asc"]
             ],
             searchDelay: 500,
-            dom: 'frt',
+            // dom: 'frt',
+            dom: 'Blfrtip',
+            buttons: [],
+            lengthMenu: [
+                [15, 25, 50, 100, 200, -1],
+                [15, 25, 50, 100, 200, "All"]
+            ],
         });
     }
 </script>
