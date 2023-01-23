@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Poject Gross Profit</h4>
+            <h4 class="content-header-title">Project Gross Profit</h4>
         </div>
     </div>
 
@@ -54,7 +54,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Project No</th>  
-                                        <th>Client</th>
+                                        <th>Client-Branch</th>
                                         <th>Title</th>   
                                         <th>QT/PI Amount</th>  
                                         <th>Verification</th>
