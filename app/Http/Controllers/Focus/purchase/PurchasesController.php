@@ -85,7 +85,9 @@ class PurchasesController extends Controller
         //     // $this->repository->delete($purchase);
         // }
 
-        return new ViewResponse('focus.purchases.index');
+        $suppliers = Supplier::whereHas('bills')->get();
+
+        return new ViewResponse('focus.purchases.index', compact('suppliers'));
     }
 
     /**
