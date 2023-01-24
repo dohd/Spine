@@ -1,10 +1,10 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Job Title Management' . ' | ' . 'Create')
+@section ('title', 'Benefits Management' . ' | ' . 'Create')
 
 @section('page-header')
     <h1>
-        {{ 'Job Title Management' }}
+        {{ 'Benefits Management' }}
         <small>{{ 'Create' }}</small>
     </h1>
 @endsection
@@ -21,7 +21,7 @@
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                            @include('focus.jobtitle.partials.jobtitles-header-buttons')
+                            @include('focus.benefit.partials.benefits-header-buttons')
                         </div>
                     </div>
                 </div>
@@ -36,18 +36,26 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>Job Title</p>
+                                            <p>Benefits Name</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$jobtitle['name']}}</p>
+                                            <p>{{$benefit['name']}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>Department Name</p>
+                                            <p>Benefit Type</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$jobtitle['department']}}</p>
+                                            <p>{{$benefit['type']}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Amount</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{$benefit['amount']}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -55,7 +63,7 @@
                                             <p>{{trans('departments.note')}}</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$jobtitle['note']}}</p>
+                                            <p>{{$benefit['note']}}</p>
                                         </div>
                                     </div>
 

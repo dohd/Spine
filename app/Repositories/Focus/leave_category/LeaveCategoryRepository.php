@@ -35,7 +35,7 @@ class LeaveCategoryRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+         dd($input);
         $input['qty'] = numberClean($input['qty']);
         $result = LeaveCategory::create($input);
         if ($result) return $result;

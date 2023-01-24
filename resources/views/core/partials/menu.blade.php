@@ -1052,7 +1052,24 @@
                                 </li>
                                 @endauth
                                 @permission('create-holiday')
-                                <li><a class="dropdown-item" href="{{ route('biller.jobtitles.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Jobtite
+                                <li><a class="dropdown-item" href="{{ route('biller.jobtitles.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Jobtitle
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+                        @permission('manage-holiday')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> OverTime Rate Management</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.overtimerates.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage OvertimeRate
+                                    </a>
+                                </li>
+                                @endauth
+                                @permission('create-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.overtimerates.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create OvertimeRate
                                     </a>
                                 </li>
                                 @endauth
@@ -1183,6 +1200,35 @@
                                 </li>
                                 @permission('create-payroll')
                                 <li><a class="dropdown-item" href="{{ route('biller.hrms.payroll') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('hrms.payroll_entry') }}
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+                        @permission('manage-payroll')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i>Deductions</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.deductions.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Deductions
+                                    </a>
+                                </li>
+                                @permission('create-payroll')
+                                <li><a class="dropdown-item" href="{{ route('biller.deductions.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Deductions
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
+
+                        @permission('manage-payroll')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i>Benefits</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.benefits.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Benefit
+                                    </a>
+                                </li>
+                                @permission('create-payroll')
+                                <li><a class="dropdown-item" href="{{ route('biller.benefits.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Benefit
                                     </a>
                                 </li>
                                 @endauth

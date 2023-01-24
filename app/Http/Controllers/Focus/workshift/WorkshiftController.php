@@ -74,7 +74,7 @@ class WorkshiftController extends Controller
         $workshift_items = $request->only([
             'weekday',
             'clock_out',
-            'hours',
+            'is_checked',
             'clock_in',
         ]);
         
@@ -126,9 +126,9 @@ class WorkshiftController extends Controller
         ]);
         $data_items = $request->only([
             'weekday',
-            'hours',
             'clock_out',
             'clock_in',
+            'is_checked',
             'id'
         ]);
         $data['ins'] = auth()->user()->ins;

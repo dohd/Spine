@@ -1,10 +1,10 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Job Title Management' . ' | ' . 'Create')
+@section ('title', 'Deductions Management' . ' | ' . 'Create')
 
 @section('page-header')
     <h1>
-        {{ 'Job Title Management' }}
+        {{ 'Deductions Management' }}
         <small>{{ 'Create' }}</small>
     </h1>
 @endsection
@@ -21,7 +21,7 @@
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                            @include('focus.jobtitle.partials.jobtitles-header-buttons')
+                            @include('focus.deduction.partials.deductions-header-buttons')
                         </div>
                     </div>
                 </div>
@@ -36,33 +36,29 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>Job Title</p>
+                                            <p>Deductions Name</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$jobtitle['name']}}</p>
+                                            <p>{{$deduction['name']}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>Department Name</p>
+                                            <p>Brackets</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$jobtitle['department']}}</p>
+                                            <p>{{$deduction['brackets']}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>{{trans('departments.note')}}</p>
+                                            <p>Rate</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$jobtitle['note']}}</p>
+                                            <p>{{$deduction['rate']}}</p>
                                         </div>
                                     </div>
-
-
                                 </div>
-
-
                             </div>
                         </div>
                     </div>

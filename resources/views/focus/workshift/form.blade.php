@@ -15,7 +15,7 @@
                 <tr class="bg-gradient-directional-blue white round">
                     <th width="40%">Day of Week</th>
                     <th>Clock In</th>
-                    <th>Hours</th>
+                    {{-- <th>Hours</th> --}}
                     <th>Clock Out</th>
                     <th>Action</th>
                 </tr>
@@ -25,54 +25,23 @@
                     $days = ['Monday', 'Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
                 @endphp
                 <tr>
-                    @foreach ($days as $day)
-                        <tr>
-                            <td><input type="text" class="form-control day col round" value="{{$day}}" name="day[]" placeholder="eg. Monday" id="day-0">
-                            </td>
-                            
-                            <td><input type="time" class="form-control clock_in" name="clock_in[]" id="clock_in-0"></td>
-                            <td><input type="number" class="form-control hours" onchange="handleChange(this);" name="hours[]" id="hours-0"></td>
-                            <td><input type="time" class="form-control clock_out" name="clock_out[]" id="clock_out-0"></td>
-                            <td><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>
-                        </tr>
-                    @endforeach
-
-                    @isset ($workshift_items)
-                    @php ($i = 0)
-                    @foreach ($workshift_items as $item)
-                        @if ($item)
+                        @foreach ($days as $day)
                             <tr>
-                                <td>
-                                    <select class="form-control day col round day" name="weekday[]" id="day-{{$i}}">
-                                        <option value="{{$item->weekday}}">{{$item->weekday}}</option>
-                                        <option value="Monday">Monday</option>
-                                        <option value="Tuesday">Tuesday</option>
-                                        <option value="Wednesday">Wednesday</option>
-                                        <option value="Thursday">Thursday</option>
-                                        <option value="Friday">Friday</option>
-                                        <option value="Saturday">Saturday</option>
-                                        <option value="Sunday">Sunday</option>
-                                    </select>
+                                <td><input type="text" class="form-control day col round" value="{{$day}}" name="weekday[]" placeholder="eg. Monday" id="day-0">
                                 </td>
-                                <td><input type="time" class="form-control clock_in" name="clock_in[]" value="{{$item->clock_in}}" id="clock_in-{{$i}}}"></td>
-                                <td><input type="number" class="form-control hours" onchange="handleChange(this);" name="hours[]" value="{{$item->hours}}" id="hours-{{$i}}"></td>
-                                <td><input type="time" class="form-control clock_out" name="clock_out[]" value="{{$item->clock_out}}" id="clock_out-{{$i}}"></td>
-                                <td><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>
-                                <input type="hidden" class="id" name="id[]" value="{{$item->id}}" id="id-{{$i}}">
+                                
+                                <td><input type="time" class="form-control clock_in" name="clock_in[]" id="clock_in-0"></td>
+                                {{-- <td><input type="number" class="form-control hours" onchange="handleChange(this);" name="hours[]" id="hours-0"></td> --}}
+                                <td><input type="time" class="form-control clock_out" name="clock_out[]" id="clock_out-0"></td>
+                                <td><input type="checkbox" class="form-control remove" value="1" name="is_checked[]" id="">
+                                </td>
+                                <input type="hidden" class="status" name="status[]" id="status-0">
                                 
                             </tr>
-                            @php ($i++)
-                        @endif
-                    @endforeach
-                @endisset
+                        @endforeach
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div class="form-group row">
-        <div class="col-2 ml-2">
-            <button type="button" class="btn btn-success" id="addtool">Add Days</button>
-        </div>
     </div>
 </div>
 </div>

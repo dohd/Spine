@@ -27,7 +27,10 @@ class LeaveCategory extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'gender', 'is_payable', 'is_encashed', 'policy', 'qty'
+        'title', 'gender', 'is_payable', 'is_encashed', 'policy', 'qty',
+        'leave_code','leave_pay','leave_start','mandatory','color','start_contract',
+        'days_accrued','registered_accrued','days_carried_foward','employment_type','off_days',
+        'holidays'
     ];
 
     /**

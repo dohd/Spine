@@ -70,7 +70,6 @@ class AssetissuanceRepository extends BaseRepository
                 'asset_issuance_id' => $result->id,
             ]);
         }, $assetissuance_items);
-        
         foreach ($assetissuance_items as $assetissuance_items) {
             //
             $assetissuance_items['purchase_price'] = (int)$assetissuance_items['qty_issued'] * (int)$assetissuance_items['purchase_price'];

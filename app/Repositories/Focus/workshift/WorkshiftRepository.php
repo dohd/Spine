@@ -66,6 +66,7 @@ class WorkshiftRepository extends BaseRepository
         }, $workshift_items);
         
         foreach ($workshift_items as $workshift_items) {
+            //$workshift_items['hours'] = $workshift_items['clock_out'] - $workshift_items['clock_in'];
             unset($workshift_items['qty']);
             unset($workshift_items['q']);
             WorkshiftItems::insert($workshift_items);

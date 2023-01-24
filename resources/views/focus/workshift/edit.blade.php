@@ -23,7 +23,7 @@
                     <div class="card-content">
                         <div class="card-body">
                             {{ Form::model($workshift, ['route' =>  ['biller.workshifts.update', $workshift], 'method' => 'PATCH' ]) }}
-                                @include("focus.workshift.form")
+                                @include("focus.workshift.editform")
                                 
                                 {{ Form::submit('Update', ['class' => 'btn btn-primary btn-md col-1 mr-2']) }}                                           
                             

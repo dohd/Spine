@@ -177,6 +177,26 @@ Route::group(['namespace' => 'jobtitle'], function () {
     Route::post('jobtitles/get', 'JobTitleTableController')->name('jobtitles.get');
 });
 
+Route::group(['namespace' => 'benefit'], function () {
+    Route::post('benefits/select', 'BenefitController@select')->name('benefits.select');
+    Route::resource('benefits', 'BenefitController');
+    //For Datatable
+    Route::post('benefits/get', 'BenefitTableController')->name('benefits.get');
+});
+
+Route::group(['namespace' => 'deduction'], function () {
+    Route::post('deductions/select', 'DeductionController@select')->name('deductions.select');
+    Route::resource('deductions', 'DeductionController');
+    //For Datatable
+    Route::post('deductions/get', 'DeductionTableController')->name('deductions.get');
+});
+Route::group(['namespace' => 'overtimerate'], function () {
+    Route::post('overtimerates/select', 'OvertimeRateController@select')->name('overtimerates.select');
+    Route::resource('overtimerates', 'OvertimeRateController');
+    //For Datatable
+    Route::post('overtimerates/get', 'OvertimeRateTableController')->name('overtimerates.get');
+});
+
 Route::group(['namespace' => 'deptor'], function () {
     Route::resource('deptors', 'DeptorsController');
     //For Datatable

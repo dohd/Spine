@@ -1,10 +1,14 @@
 @section('extra-scripts')
 <script>
-
+    $(".remove:checked").each(function() {
+        const $tr = $(this).parents('tr:first');
+        $tr.find('td input').prop('readonly',true);
+                
+    });
     // $('form').submit(function (e) { 
     //     e.preventDefault();
     //     console.log($(this).serializeArray());
-    // });
+    // })
     function handleChange(input) {
         var input_value = $('.hours').val();
         if (input_value < 0) input.value = 0;
@@ -24,9 +28,16 @@
 
     $('#itemTbl').on('click', '.remove', removeRow);
     function removeRow() {
-        const $tr = $(this).parents('tr:first');
-        $tr.next().remove();
-        $tr.remove();
+        if ($(this).is(':checked', true)) {
+                const $tr = $(this).parents('tr:first');
+                $tr.find('td input').prop('readonly',true);
+            } else {
+                const $tr = $(this).parents('tr:first');
+                $tr.find('td input').prop('readonly',false);
+            }
+        
+        // $tr.next().remove();
+        // $tr.remove();
     }
 </script>
 @endsection
