@@ -16,7 +16,7 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\product;
+namespace App\Http\Controllers\Focus\pricelistSupplier;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
@@ -27,7 +27,7 @@ use App\Models\productcategory\Productcategory;
 /**
  * Class ProductsTableController.
  */
-class ProductsTableController extends Controller
+class SupplierPriceListTableController extends Controller
 {
     /**
      * variable to store the repository object
@@ -74,7 +74,7 @@ class ProductsTableController extends Controller
             ->addIndexColumn()
             ->addColumn('name', function ($product) {
                 $this->standard_product = $product->standard ?: $product;
-                return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product->name . '</a>';
+                return  $product->name;
             })
             ->addColumn('productcategory_id', function ($product) {
                 $this->standard_product = $product->standard ?: $product;
@@ -83,14 +83,16 @@ class ProductsTableController extends Controller
             })
             ->addColumn('code', function ($product) {
                 $code = $this->standard_product->code;
+               
                 if ($code) 
-                return '<a class="font-weight-bold" href="' . route('biller.products.view', [$code]) . '">' . $code . '</a>';
+                //return ' <button class="btn btn-primary click btn-sm" type="button" data-toggle="modal" data-target="#exampleModal">' . $code . '</button>';
+                 return '<a class="font-weight-bold click" data-toggle="modal" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
             })
             ->addColumn('qty', function ($product) {
                 return $product->variations->sum('qty');       
             })
             ->addColumn('unit', function ($product) {
-                $unit = $product->unit;
+                $unit = $this->standard_product->unit;
                 if ($unit) return $unit->code;  
             })
             ->addColumn('price', function ($product) {

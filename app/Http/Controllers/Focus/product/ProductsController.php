@@ -332,4 +332,9 @@ class ProductsController extends Controller
         
         return view('focus.products.partials.pos')->withDetails($output);
     }
+    public function view($code)
+    {
+        $supplier_pricelist = SupplierProduct::where('product_code', $code)->get();
+        return view('focus.products.view_pricelist', compact('supplier_pricelist'));
+    }
 }

@@ -361,9 +361,11 @@ Route::group(['namespace' => 'client_product'], function () {
 });
 
 Route::group(['namespace' => 'pricelistSupplier'], function () {
+    Route::get('pricelistsSupplier/list', 'PriceListsController@list')->name('pricelistsSupplier.list');
     Route::resource('pricelistsSupplier', 'PriceListsController');
     //For Datatable
     Route::post('pricelists/get', 'PriceListTableController')->name('pricelistsSupplier.get');
+    Route::post('pricelists/gets', 'SupplierPriceListTableController')->name('pricelistsSupplier.gets');
 });
 
 

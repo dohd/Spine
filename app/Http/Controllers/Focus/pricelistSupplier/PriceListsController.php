@@ -9,6 +9,8 @@ use App\Models\supplier_product\SupplierProduct;
 use App\Models\supplier\Supplier;
 use App\Repositories\Focus\pricelistSupplier\PriceListRepository;
 use Illuminate\Http\Request;
+use App\Models\productcategory\Productcategory;
+use App\Models\warehouse\Warehouse;
 
 class PriceListsController extends Controller
 {
@@ -49,8 +51,10 @@ class PriceListsController extends Controller
     public function create()
     {
         $suppliers = Supplier::get(['id', 'company']);
+        $warehouses = Warehouse::get(['id', 'title']);
+        $categories = Productcategory::get(['id', 'title']);
 
-        return new ViewResponse('focus.pricelistsSupplier.create', compact('suppliers'));
+        return new ViewResponse('focus.pricelistsSupplier.create', compact('suppliers','warehouses','categories'));
     }
 
     /**
@@ -125,5 +129,11 @@ class PriceListsController extends Controller
         }
             
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);
+    }
+    public function list($code)
+    {
+        $users = ProductVariation::where('code',$code)->get();
+
+        return response()->json($users);
     }
 }

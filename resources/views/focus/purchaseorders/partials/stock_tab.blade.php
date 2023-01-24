@@ -42,6 +42,7 @@
                 <td colspan="2">
                     <textarea id="stockdescr-0" class="form-control descr" name="description[]" placeholder="Product Description"></textarea>
                 </td>
+                <td><input type="text" class="form-control product_code" name="product_code[]" id="product_code-0" readonly></td>
                 <td colspan="6"></td>
             </tr>
             <!-- end layout -->

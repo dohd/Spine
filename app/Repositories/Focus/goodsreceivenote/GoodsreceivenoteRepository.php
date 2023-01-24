@@ -82,17 +82,47 @@ class GoodsreceivenoteRepository extends BaseRepository
 
             // apply unit conversion
             $prod_variation = $po_item->productvariation;
-            $units = $prod_variation->product->units;
-            foreach ($units as $unit) {
-                if ($unit->code == $po_item['uom']) {
-                    if ($unit->unit_type == 'base') {
-                        $prod_variation->increment('qty', $po_item['qty']);
-                    } else {
-                        $converted_qty = $po_item['qty'] * $unit->base_ratio;
-                        $prod_variation->increment('qty', $converted_qty);
+            if($prod_variation){
+                $units = $prod_variation->product->unit;
+                // dd($units);
+                foreach ($units as $unit) {
+                    if ($unit->code == $po_item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->increment('qty', $po_item['qty']);
+                        } else {
+                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                            $prod_variation->increment('qty', $converted_qty);
+                        }
                     }
-                }
-            }   
+                }   
+            }else{
+                $prod_variate = $po_item->prod_variate;
+                $units = $prod_variate->product->unit;
+                //dd($units->code);
+                 foreach ($units as $unit) {
+                    
+                    if ($units->code == $po_item['uom']) {
+                        if ($units->unit_type == 'base') {
+                            $prod_variate->increment('qty', $po_item['qty']);
+                        } else {
+                            $converted_qty = $po_item['qty'] * $unit->base_ratio;
+                            $prod_variate->increment('qty', $converted_qty);
+                        }
+                    }
+                 }   
+            }
+            // dd($po_item->prod_variate->product->unit);
+            // $units = $prod_variation->product->unit;
+            // foreach ($units as $unit) {
+            //     if ($unit->code == $po_item['uom']) {
+            //         if ($unit->unit_type == 'base') {
+            //             $prod_variation->increment('qty', $po_item['qty']);
+            //         } else {
+            //             $converted_qty = $po_item['qty'] * $unit->base_ratio;
+            //             $prod_variation->increment('qty', $converted_qty);
+            //         }
+            //     }
+            // }   
         }
 
         // update purchase order status

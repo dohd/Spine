@@ -76,9 +76,10 @@
                                     <tr>
                                         <th>{{ trans('labels.backend.products.table.id') }}</th>
                                         <th>Description</th>
-                                        <th>Product Code</th>
+                                        <th>Category Name</th>
+                                        <th>product_code</th>
                                         <th>Unit (Qty)</th>
-                                        <th>Unit Code</th>
+                                        <th>UOM</th>
                                         <th>Purchase Price</th>
                                         <th>{{ trans('general.createdat') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -168,6 +169,7 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
+                    {data: 'productcategory_id', name: 'productcategory_id'},
                     {data: 'code', name: 'code'},                    
                     {data: 'qty', name: 'qty'},
                     {data: 'unit', name: 'unit'},

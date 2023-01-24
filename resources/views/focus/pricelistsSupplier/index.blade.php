@@ -60,9 +60,11 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Supplier</th>
+                                        <th>Product Code</th>
+                                        <th>System Description</th>
                                         <th>Contract</th>
                                         <th>Row No.</th>
-                                        <th>Product Description</th>
+                                        <th>Supplier Description</th>
                                         <th>UoM</th>
                                         <th>Rate</th>
                                         <th>Action</th>
@@ -165,6 +167,14 @@
                     {
                         data: 'supplier',
                         name: 'supplier'
+                    },
+                    {
+                        data: 'product_code',
+                        name: 'product_code'
+                    },
+                    {
+                        data: 'product_desc',
+                        name: 'product_desc'
                     },
                     {
                         data: 'contract',

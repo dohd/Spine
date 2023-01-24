@@ -12,6 +12,7 @@ use DateTime;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Models\productcategory\Productcategory;
 
 /**
  * Class ProductRepository.
@@ -89,7 +90,15 @@ class ProductRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
-
+        $productcategory = Productcategory::where('id',$input['productcategory_id'])->first();
+        $strArray = explode(' ',$productcategory->title);
+        $lastElement = end($strArray);
+        $firstparent = $strArray[0][0].$lastElement[0];
+        $last_variation = ProductVariation::latest()->first()->id;
+        $added = $last_variation + 1;
+        $code = $firstparent.$added;
+       // $lastElement[0]
+       // dd($code);
         // validate stock keeping unit
         $sku_exists = Product::where('sku', $input['sku'])->count();
         if (empty($input['sku']) || $sku_exists) {
@@ -109,6 +118,15 @@ class ProductRepository extends BaseRepository
             'price', 'purchase_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
             'warehouse_id', 'variation_name', 'image'
         ]);
+       // $data_items['code'] = $code;
+       // dd(count($data_items['code']));
+    //    foreach ($data_items['code'] as $code) {
+    //     $code_exists = ProductVariation::where('code', $code)->count();
+    //         if (empty($data_items['code']) || $code_exists) {
+    //             $data_items['code'] = $firstparent . rand(1, 10000);
+    //         }
+    //    }
+    //     dd($data_items);
         $data_items = modify_array($data_items);
         foreach ($data_items as $item) {
             if (empty($item['image'])) $item['image'] = 'example.png';
@@ -124,6 +142,8 @@ class ProductRepository extends BaseRepository
                 }
                 if ($key == 'barcode' && !$val)
                     $item[$key] =  rand(100, 999) . rand(0, 9) . rand(1000000, 9999999) . rand(0, 9);
+                if ($key == 'code' && !$val)
+                    $item[$key] =  $firstparent . rand(1, 10000);
                 if ($key == 'expiry') {
                     $expiry = new DateTime(date_for_database($val));
                     $now = new DateTime(date('Y-m-d'));
@@ -137,6 +157,7 @@ class ProductRepository extends BaseRepository
                 'ins' => auth()->user()->ins
             ]);
         }
+        //dd($variations);
         ProductVariation::insert($variations);   
         
         DB::commit();

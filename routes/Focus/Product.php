@@ -28,6 +28,7 @@ Route::group(['namespace' => 'product'], function () {
     Route::get('products/label', 'ProductsController@product_label')->name('products.product_label');
     Route::get('products/quick_add', 'ProductsController@quick_add')->name('products.quick_add');
     Route::get('products/standard', 'ProductsController@standard')->name('products.standard');
+    Route::get('products/view/{id}', 'ProductsController@view')->name('products.view');
     Route::post('products/standard', 'ProductsController@standard')->name('products.standard');
     Route::post('products/label', 'ProductsController@product_label')->name('products.product_label');
     Route::get('products/stock_transfer', 'ProductsController@stock_transfer')->name('products.stock_transfer');

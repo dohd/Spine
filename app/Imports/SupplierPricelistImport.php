@@ -35,9 +35,10 @@ class SupplierPricelistImport implements ToCollection, WithBatchInserts, WithVal
      * @return void
      */
     public function collection(Collection $rows)
-    {        
+    {      
+        //add extra columns  
         $columns = [
-            'row_num','description','uom','rate'
+            'Id','Description','Category Name','product_code','uom','row_num','description','rate'
         ];
 
         $row_count = 0;
@@ -52,9 +53,10 @@ class SupplierPricelistImport implements ToCollection, WithBatchInserts, WithVal
             } elseif (count($row) != count($columns)) {
                 throw new Error('Column mismatch on row ' . strval($i+1)  . '!');
             }
-
+            //add Array Slice
             $row_data = array_combine($columns, $row);
             $row_data = array_replace($row_data, [
+                'product_code' => $row_data['product_code'],
                 'descr' => $row_data['description'],
                 'contract' => $this->data['contract'],
                 'supplier_id' => $this->data['supplier_id'],
@@ -62,6 +64,9 @@ class SupplierPricelistImport implements ToCollection, WithBatchInserts, WithVal
                 'user_id' => auth()->user()->id
             ]);
             unset($row_data['description']);
+            unset($row_data['Description']);
+            unset($row_data['Category Name']);
+            unset($row_data['Id']);
             foreach ($row_data as $key => $val) {
                 if ($key == 'rate') $row_data[$key] = numberClean($row_data['rate']);
                 if (strcasecmp($val, 'null') == 0) $row_data[$key] = null;

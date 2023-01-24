@@ -90,23 +90,13 @@
 <h4>Standard Product Variation Details</h4>
 <div id="main_product">
     <div class="product round">
-        <div class="row mt-1 mb-1">
-            <div class="col-md-12">
-                <div class='form-group'>
-                    {{ Form::label( 'variation_name', trans('general.description'),['class' => 'col control-label']) }}
-                    <div class='col-6'>
-                        {{ Form::text('variation_name[]',@$product->standard['name'], ['class' => 'form-control box-size', 'placeholder' => trans('general.description')]) }}
-                    </div>
-                </div>
-            </div>
-            <div class="old_id"><input type="hidden" name="v_id[]" value="{{@$product->standard['id']}}"><input type="hidden" name="pv_id" value="{{@$product->standard['id']}}"></div>
-        </div>
+        
         <div class="row">
             <div class="col-md-4">
                 <div class='form-group'>
-                    {{ Form::label( 'price', trans('products.price'),['class' => 'col control-label']) }}
+                    {{ Form::label( 'price', 'Product Selling Price',['class' => 'col control-label']) }}
                     <div class='col'>
-                        {{ Form::text('price[]', numberFormat(@$product->standard['price']), ['class' => 'form-control box-size', 'placeholder' => trans('products.price').'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
+                        {{ Form::text('price[]', numberFormat(@$product->standard['price']), ['class' => 'form-control box-size', 'placeholder' => 'Product Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
                     </div>
                 </div>
             </div>
@@ -122,7 +112,8 @@
                 <div class='form-group'>
                     {{ Form::label( 'qty', trans('products.qty'),['class' => 'col control-label']) }}
                     <div class='col'>
-                        {{ Form::text('qty[]', numberFormat(@$product->standard['qty']), ['class' => 'form-control box-size', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }}
+                        <input type="text" class="form-control box-size" value="{{numberFormat(@$product->standard['qty'])}}" name="qty[]" @if(isset($product->standard['qty'])) readonly @endif id="" onkeypress="return isNumber(event)">
+                        {{-- {{ Form::text('qty[]', numberFormat(@$product->standard['qty']), ['class' => 'form-control box-size','readonly', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }} --}}
                     </div>
                 </div>
             </div>
@@ -146,7 +137,8 @@
                 <div class='form-group'>
                     {{ Form::label('code', trans('products.code'),['class' => 'col control-label']) }}
                     <div class='col'>
-                        {{ Form::text('code[]', @$product->standard['code'], ['class' => 'form-control box-size', 'placeholder' => trans('products.code')]) }}
+                        <input type="text" class="form-control box-size" name="code[]" value="{{ @$product->standard['code']}}" @if(isset($product->standard['code'])) readonly @endif placeholder="{{trans('products.code')}}" id="">
+                        {{-- {{ Form::text('code[]', @$product->standard['code'], ['class' => 'form-control box-size','readonly', 'placeholder' => trans('products.code')]) }} --}}
                     </div>
                 </div>
             </div>
@@ -184,6 +176,17 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row mt-1 mb-1">
+            <div class="col-md-12">
+                <div class='form-group'>
+                    {{ Form::label( 'variation_name', 'Variation Description',['class' => 'col control-label']) }}
+                    <div class='col-6'>
+                        {{ Form::text('variation_name[]',@$product->standard['name'], ['class' => 'form-control box-size', 'placeholder' => 'Variation Description']) }}
+                    </div>
+                </div>
+            </div>
+            <div class="old_id"><input type="hidden" name="v_id[]" value="{{@$product->standard['id']}}"><input type="hidden" name="pv_id" value="{{@$product->standard['id']}}"></div>
         </div>
         <div class="row">
             <div class="col-md-6">
@@ -249,7 +252,7 @@
                         <div class='form-group'>
                             {{ Form::label( 'qty', trans('products.qty'),['class' => 'col control-label']) }}
                             <div class='col'>
-                                {{ Form::text('qty[]', numberFormat(@$row->qty), ['class' => 'form-control box-size', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }}
+                                {{ Form::text('qty[]', numberFormat(@$row->qty), ['class' => 'form-control box-size','readonly', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }}
                             </div>
                         </div>
                     </div>
@@ -271,7 +274,7 @@
                         <div class='form-group'>
                             {{ Form::label( 'code', trans('products.code'),['class' => 'col control-label']) }}
                             <div class='col'>
-                                {{ Form::text('code[]', @$row->code, ['class' => 'form-control box-size', 'placeholder' => trans('products.code')]) }}
+                                {{ Form::text('code[]', @$row->code, ['class' => 'form-control box-size','placeholder' => trans('products.code')]) }}
                             </div>
                         </div>
                     </div>

@@ -28,6 +28,19 @@
         <label for="uom">Unit of Measure (UoM)</label>
         {{ Form::text('uom', null, ['class' => 'form-control', 'required']) }}
     </div>
+   
+    <div class="col-4">
+        <label for="system_descr">System Description</label>
+        <input type="text" class="form-control" @isset($supplier_product)
+            {{$supplier_product->products->name}}
+        @endisset name="" value="{{$supplier_product->products->name}}" id="" readonly>
+    </div>
+    <div class="col-2">
+        <label for="code">Product Code</label>
+        <input type="text" class="form-control" @isset($supplier_product)
+        {{$supplier_product->products->name}}
+    @endisset name="" value="{{$supplier_product->product_code}}" id="" readonly>
+    </div>
     <div class="col-2">
         <label for="rate">Rate (Ksh.)</label>
         {{ Form::text('rate', null, ['class' => 'form-control', 'id' => 'rate', 'required']) }}
