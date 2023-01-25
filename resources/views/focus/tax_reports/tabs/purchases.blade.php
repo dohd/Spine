@@ -1,26 +1,4 @@
 <div class="form-group row">
-    <div class="col-2">
-        <label for="month">Purchase Month</label>
-        {{ Form::text('purchase_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'purchase_month']) }}
-    </div>
-    
-    <div class="col-2">
-        <label for="status">Tax Rate</label>
-        <select name="purchase_tax_rate" id="purchase_tax_rate" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
-            @php
-                $selected = '';
-            @endphp
-            @foreach ($additionals as $row)
-                @php
-                    if (isset($tax_report)) $selected = ($tax_report->purchase_tax_rate == $row->value)? 'selected' : '';
-                    else $selected = $row->is_default? 'selected' : '';
-                @endphp
-                <option value="{{ $row->value }}" {{ $selected }}>
-                    {{ $row->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
 
     <div class="col-3 ml-auto">
         <label for="file_status">Action Status</label>
@@ -78,7 +56,7 @@
                                 'tax_pin' => $purchase? $purchase->supplier_taxid : $bill->supplier->taxid,
                                 'purchase_date' => $bill->date,
                                 'supplier' => $purchase? $purchase->suppliername : $bill->supplier->name,
-                                'purchase_no' => $bill->tid,
+                                'invoice_no' => $bill->reference,
                                 'note' => $note,
                                 'tax_rate' => $bill->tax_rate,
                                 'subtotal' => $bill->subtotal,
@@ -94,7 +72,7 @@
                                 'tax_pin' => $dnote->supplier->taxid,
                                 'purchase_date' => $dnote->date,
                                 'supplier' => $dnote->supplier->name,
-                                'purchase_no' => $dnote->tid,
+                                'invoice_no' => $dnote->tid,
                                 'note' => 'Debit Note',
                                 'tax_rate' => $dnote->tax / $dnote->subtotal * 100,
                                 'subtotal' => -1 * $dnote->subtotal,
@@ -110,8 +88,8 @@
                         <td>{{ ucfirst(str_replace('_', ' ', $data['type'])) }}</td>
                         <td>{{ $data['tax_pin'] }}</td>
                         <td>{{ dateFormat($data['purchase_date']) }}</td>
-                        <td>{{ isset($data['supplier']) ? $data['supplier'] : ''  }}</td>
-                        <td>{{ $data['purchase_no'] }}</td>
+                        <td>{{ @$data['supplier'] ? $data['supplier'] : ''  }}</td>
+                        <td>{{ $data['invoice_no'] }}</td>
                         <td>{{ $data['note'] }}</td>
                         <td class="subtotal">{{ numberFormat($data['subtotal']) }}</td>
                         <td width="15%">

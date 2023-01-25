@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Create | Tax Return Management')
+@section('title', 'View | Tax Return Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -20,42 +20,33 @@
             <div class="card-content">
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
-                        @php
+                        @php                    
                             $details = [
-                                'Report Title' => $tax_report->title,
-                                'Filed Returns' => '',
-                                'Sale Filing Month' => $tax_report->sale_month,
-                                'Sale Tax Rate' => +$tax_report->sale_tax_rate . '%',
+                                'Sale/Purchase Month' => $tax_report->record_month,
+                                'Return Month' => $tax_report->return_month,
+                                'Report Note' => $tax_report->note,
                                 'Sale Taxable Amount' => numberFormat($tax_report->sale_subtotal),
                                 'Sale Tax' => numberFormat($tax_report->sale_tax),
                                 'Sale Total Amount' => numberFormat($tax_report->sale_total),
-                                'Purchase Filing Month' => $tax_report->purchase_month,
-                                'Purchase Tax Rate' => +$tax_report->purchase_tax_rate . '%',
                                 'Purchase Taxable Amount' => numberFormat($tax_report->purchase_subtotal),
                                 'Purchase Tax' => numberFormat($tax_report->purchase_tax),
                                 'Purchase Total Amount' => numberFormat($tax_report->purchase_total),
                             ];
 
-                            $tax_rate = 0;
-                            if ($tax_report->sale_tax_rate > 0) $tax_rate = $tax_report->sale_tax_rate;
-                            if ($tax_report->purchase_tax_rate > 0) $tax_rate = $tax_report->purchase_tax_rate;
-
-                            $file_month = (date('m')-1) . '-' . date('Y');
-                            if ($tax_report->sale_month) $file_month = $tax_report->sale_month;
-                            if ($tax_report->purchase_month) $file_month = $tax_report->purchase_month;
-
-                            $file_return_params = [
+                            $filed_report_params = [
                                 'tax_report_id' => $tax_report->id,
-                                'tax_rate' => $tax_rate,
-                                'file_month' => $file_month,
+                                'record_month' => $tax_report->record_month,
+                                'return_month' => $tax_report->return_month,
+                                'tax_group' => $tax_report->tax_group,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
                                 <th width="30%">{{ $key }}</th>
                                 <td>
-                                    @if ($key == 'Filed Returns')
-                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', $file_return_params) }}" title="tax returns">
+                                    @if ($key == 'Sale/Purchase Month')
+                                        <span class="mr-1">{{ $val }}</span>
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', $filed_report_params) }}" title="field_returns">
                                             <i class="fa fa-list"></i> List
                                         </a>  
                                     @else

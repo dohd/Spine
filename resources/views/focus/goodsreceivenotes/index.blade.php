@@ -19,6 +19,34 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <label for="customer">Supplier</label>
+                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose Supplier">
+                                    @foreach ($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}">{{ $supplier->name }} {{ $supplier->goods_receive_notes->count() }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="inv_status">Goods Reception Status</label>
+                                <select name="inv_status" id="inv_status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['with_invoice', 'without_invoice'] as $status)
+                                        <option value="{{ $status }}">{{  ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <table id="grnTbl" class="table table-striped table-bordered zero-configuration" width="100%" cellpadding="0">
@@ -57,16 +85,31 @@
 <script>
     const config = {
         ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
-        datepicker: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
     };
 
     const Index = {
         init() {
+            $('#inv_status').change(this.invoiceStatusChange);
+            $('#supplier').select2({allowClear: true}).val('').trigger('change')
+            .change(this.supplierChange);
+
             this.drawDataTable();
+        },
+
+        invoiceStatusChange() {
+            $('#grnTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        supplierChange() {
+            $('#grnTbl').DataTable().destroy();
+            return Index.drawDataTable();
         },
 
         drawDataTable() {
             $('#grnTbl').dataTable({
+                stateSave: true,
                 processing: true,
                 serverSide: true,
                 responsive: true,
@@ -74,6 +117,10 @@
                 ajax: {
                     url: "{{ route('biller.goodsreceivenote.get') }}",
                     type: 'POST',
+                    data: {
+                        invoice_status: $('#inv_status').val(),
+                        supplier_id: $('#supplier').val(),
+                    }
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},

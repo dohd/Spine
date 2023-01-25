@@ -75,7 +75,7 @@ class DjcsTableController extends Controller
                 return gen4tid("{$prefixes[1]}-", $djc->lead->reference);
             })
             ->addColumn('actions', function ($djc) {
-                return '<a href="' . route('biller.print_djc', [$djc->id, 10, token_validator('', $djc->id, true), 1]) . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
+                return '<a href="' . route('biller.print_djc', [$djc->id, 10, token_validator('', "d{$djc->id}", true), 1]) . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
                     . $djc->action_buttons;
             })
             ->make(true);

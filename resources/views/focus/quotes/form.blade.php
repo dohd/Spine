@@ -20,7 +20,10 @@
                                 if ($lead->customer) {
                                     $customer_name .= $lead->customer->company;
                                     if ($lead->branch) $customer_name .= " - {$lead->branch->name}";
-                                }
+                                } else $customer_name = $lead->client_name;
+                                
+                                $prefix = $prefixes[1];
+                                if (isset($quote)) $prefix = $prefixes[2];
                             @endphp
                             <option 
                                 value="{{ $lead->id }}" 
@@ -30,7 +33,7 @@
                                 branch_id="{{ $lead->branch_id }}"
                                 {{ $lead->id == @$quote->lead_id ? 'selected' : '' }}
                             >
-                                {{ gen4tid("{$prefixes[1]}-", $lead->reference) }} - {{ $customer_name }} - {{ $lead->title }}
+                                {{ gen4tid("{$prefix}-", $lead->reference) }} - {{ $customer_name }} - {{ $lead->title }}
                             </option>
                         @endforeach                                                                                             
                     </select>
@@ -259,14 +262,17 @@
         <a href="javascript:" class="btn btn-warning" id="addMisc"><i class="fa fa-plus"></i> Miscellaneous</a>
     </div>
     <div class="col-3">
-        <label>SubTotal ({{ config('currency.symbol') }})</label>
+        <div>
+            <label><span class="text-primary">(Estimated Cost: <span class="estimate-cost font-weight-bold text-dark">0.00</span>)</span></label>
+        </div>
+        <label>SubTotal</label>
         <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
-        <label id="tax-label">{{ trans('general.total_tax') }} ({{ config('currency.symbol') }})
-            <span id="vatText" class="text-danger">(VAT-Exclusive)</span>
+        <label id="tax-label">{{ trans('general.total_tax') }}
+            <span id="vatText" class="text-primary">(VAT-Exc)</span>
         </label>
         <input type="text" name="tax" id="tax" class="form-control" readonly>
         <label>
-            {{trans('general.grand_total')}} ({{ config('currency.symbol') }})
+            {{trans('general.grand_total')}}
             <b class="text-primary">
                 (E.P: &nbsp;<span class="text-dark profit">0</span>)
             </b>

@@ -76,72 +76,74 @@
                                     <div class="col-3 border-blue-grey border-lighten-5  p-1">
                                         {{ trans('products.unit') }}</div>
                                     <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ $product->unit->code }}</div>
+                                        {{ @$product->unit->code }}</div>
                                 </div>
 
                                 {{-- standard details --}}
-                                <h4 class="card-title">{{ trans('products.standard_details') }}</h4>
-                                <div class="row mt-3">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.warehouse_id') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold"><a
-                                            href="{{ route('biller.warehouses.show', [$product->standard->warehouse['id']]) }}">{{ $product->standard->warehouse['title'] }}</a>
+                                @isset ($product->standard)
+                                    <h4 class="card-title">{{ trans('products.standard_details') }}</h4>
+                                    <div class="row mt-3">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.warehouse_id') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold"><a
+                                                href="{{ route('biller.warehouses.show', [$product->standard->warehouse['id']]) }}">{{ $product->standard->warehouse['title'] }}</a>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.price') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ amountFormat($product->standard['price']) }}</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.disrate') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ numberFormat($product->standard['disrate']) }}
-                                        %
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.purchase_price') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ amountFormat($product->standard['purchase_price']) }}</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.qty') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ numberFormat($product->standard['qty']) }}</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.alert') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ numberFormat($product->standard['alert']) }}</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.code') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ $product->standard['code'] }}</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                        {{ trans('products.barcode') }}</div>
-                                    <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                        {{ $product->standard['barcode'] }}
-                                        <span class="font-size-xsmall purple">({{ $product['code_type'] }})</span>
-                                    </div>
-                                </div>
-                                @if (strtotime($product->standard['expiry']))
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            {{ trans('products.expiry') }}</div>
+                                            {{ trans('products.price') }}</div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            {{ dateFormat($product->standard['expiry']) }}</div>
+                                            {{ amountFormat($product->standard['price']) }}</div>
                                     </div>
-                                @endif
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.disrate') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ numberFormat($product->standard['disrate']) }}
+                                            %
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.purchase_price') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ amountFormat($product->standard['purchase_price']) }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.qty') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ numberFormat($product->standard['qty']) }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.alert') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ numberFormat($product->standard['alert']) }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.code') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ @$product->standard['code'] }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            {{ trans('products.barcode') }}</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ @$product->standard['barcode'] }}
+                                            <span class="font-size-xsmall purple">({{ $product['code_type'] }})</span>
+                                        </div>
+                                    </div>
+                                    @if (strtotime($product->standard['expiry']))
+                                        <div class="row">
+                                            <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                {{ trans('products.expiry') }}</div>
+                                            <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                {{ dateFormat($product->standard['expiry']) }}</div>
+                                        </div>
+                                    @endif
+                                @endisset
 
                                 {{-- product variations --}}
                                 @if (isset($product->variations[0]))

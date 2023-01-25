@@ -28,13 +28,18 @@ class TaxReportRepository extends BaseRepository
     {
         $q = $this->query();
 
-        $q->when(request('file_month'), function($q) {
-            $q->where('sale_month', request('file_month'))->orWhere('purchase_month', request('file_month'));
+        $q->when(request('record_month'), function($q) {
+            $q->where('record_month', request('record_month'));
+        })->when(request('return_month'), function($q) {
+            $q->where('return_month', request('return_month'));
+        })->when(request('tax_group') != '', function ($q) {
+            $q->where('tax_group', request('tax_group'));
         });
-            
+    
         return $q->get();
     }
 
+    // sales returns
     public function getForSalesDataTable()
     {
         $q = TaxReportItem::query()->where(function ($q) {
@@ -43,15 +48,17 @@ class TaxReportRepository extends BaseRepository
         
         $q->when(request('tax_report_id'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
-        })->when(request('file_month'), function ($q) {
-            $q->whereHas('tax_report', fn($q) => $q->where('sale_month', request('file_month')));
-        })->when(request('tax_rate'), function ($q) {
-            $q->whereHas('tax_report', fn($q) => $q->where('sale_tax_rate', request('tax_rate')));
+        })->when(request('record_month'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('record_month', request('record_month')));
+        })->when(request('return_month'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('return_month', request('return_month')));
+        })->when(request('tax_group') != '', function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('tax_group', request('tax_group')));
         });
 
         return $q->with(['invoice', 'credit_note'])->get();
     }
-
+    // purchase returns
     public function getForPurchasesDataTable()
     {
         $q = TaxReportItem::query()->where(function ($q) {
@@ -60,10 +67,12 @@ class TaxReportRepository extends BaseRepository
 
         $q->when(request('tax_report_id'), function ($q) {
             $q->whereHas('tax_report', fn($q) => $q->where('id', request('tax_report_id')));
-        })->when(request('file_month'), function ($q) {
-            $q->whereHas('tax_report', fn($q) => $q->where('purchase_month', request('file_month')));
-        })->when(request('tax_rate'), function ($q) {
-            $q->whereHas('tax_report', fn($q) => $q->where('purchase_tax_rate', request('tax_rate')));
+        })->when(request('record_month'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('record_month', request('record_month')));
+        })->when(request('return_month'), function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('return_month', request('return_month')));
+        })->when(request('tax_group') != '', function ($q) {
+            $q->whereHas('tax_report', fn($q) => $q->where('tax_group', request('tax_group')));
         });
         
         return $q->with(['purchase', 'debit_note'])->get();
@@ -81,21 +90,21 @@ class TaxReportRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $data_keys = [
-            'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
-            'purchase_tax', 'purchase_total',
-        ];
         foreach ($input as $key => $val) {
+            $data_keys = [
+                'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
+                'purchase_tax', 'purchase_total',
+            ];
             if (in_array($key, $data_keys)) $input[$key] = numberClean($val);
         }
 
         // report data
         $report_data = Arr::only($input, [
-            'title', 'sale_month', 'sale_tax_rate', 'purchase_month', 'purchase_tax_rate', ...$data_keys
+            'record_month', 'tax_group', 'return_month', 'note', 'sale_month', 'sale_tax_rate', 
+            'purchase_month', 'purchase_tax_rate', ...$data_keys
         ]);
-        $report_data = array_replace($report_data, [
-            'tid' => TaxReport::where('ins', auth()->user()->ins)->max('tid') + 1,
-        ]);
+        $report_data['tid'] = TaxReport::max('tid')+1;
+
         $result = TaxReport::create($report_data);
 
         // sale data items
@@ -159,17 +168,18 @@ class TaxReportRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $data_keys = [
-            'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
-            'purchase_tax', 'purchase_total',
-        ];
         foreach ($input as $key => $val) {
+            $data_keys = [
+                'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
+                'purchase_tax', 'purchase_total',
+            ];
             if (in_array($key, $data_keys)) $input[$key] = numberClean($val);
         }
 
         // report data
         $report_data = Arr::only($input, [
-            'title', 'sale_month', 'sale_tax_rate', 'purchase_month', 'purchase_tax_rate', ...$data_keys
+            'record_month', 'tax_group', 'return_month', 'note', 'sale_month', 'sale_tax_rate', 
+            'purchase_month', 'purchase_tax_rate', ...$data_keys
         ]);
         $result = $tax_report->update($report_data);
 

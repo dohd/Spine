@@ -186,7 +186,8 @@ class FiledTaxReportsTableController extends Controller
                     $suppliername .= $this->purchase->suppliername;
                 } else $suppliername .= $this->supplier->name;
                 
-                return $suppliername;
+                // limit to 50 chars as per KRA portal
+                return substr($suppliername, 0, 50);
             })
             ->addColumn('invoice_date', function ($item) {
                 $date = '';

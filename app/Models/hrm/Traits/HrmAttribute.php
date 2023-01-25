@@ -17,11 +17,9 @@ trait HrmAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return '
-         ' . $this->getViewButtonAttribute("manage-hrm", "biller.hrms.show") . '
-                ' . $this->getEditButtonAttribute("manage-hrm", "biller.hrms.edit") . '
-            
-                ';
+        return $this->getViewButtonAttribute("hrm", "biller.hrms.show") 
+        . ' ' . $this->getEditButtonAttribute("hrm", "biller.hrms.edit")
+        . ' ' . $this->getDeleteButtonAttribute("hrm", "biller.hrms.destroy");
     }
 
     public function getPictureAttribute()

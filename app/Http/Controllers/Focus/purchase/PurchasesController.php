@@ -28,8 +28,6 @@ use App\Http\Responses\Focus\purchase\EditResponse;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
 use App\Http\Requests\Focus\purchase\StorePurchaseRequest;
-use App\Models\product\ProductVariation;
-use App\Models\supplier_product\SupplierProduct;
 use App\Http\Responses\RedirectResponse;
 use DirectoryIterator;
 use Illuminate\Validation\ValidationException;
@@ -62,23 +60,34 @@ class PurchasesController extends Controller
      */
     public function index(ManagePurchaseRequest $request)
     {
-        // create purchases (frontfreeze, sahara)
+        // import purchases
         foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
             if ($file->isDot()) continue;
             $expense_data = $this->repository->expense_import_data($file->getFilename());
+            $expense_data = array_slice($expense_data, 0, 500);
+            $expense_data = array_slice($expense_data, 500, 500);
+            $expense_data = array_slice($expense_data, 1000, 500);
+            $expense_data = array_slice($expense_data, 1500, 500);
+            $expense_data = array_slice($expense_data, 2000, 500);
+            $expense_data = array_slice($expense_data, 2500, 500);
+            $expense_data = array_slice($expense_data, 3000, 500);
+            if (isset($expense_data[3500])) $expense_data = array_slice($expense_data, 3500, count($expense_data));
+
             // dd($expense_data);
-            foreach ($expense_data as $row) {
+            foreach ([] as $row) {
                 // $this->repository->create($row);
             }
         }
 
         // delete purchases (frontfreeze, sahara)
-        $purchases = Purchase::where('supplier_id', [7,8])->get();
-        foreach ($purchases as $key => $purchase) {
-            // $this->repository->delete($purchase);
-        }
+        // $purchases = Purchase::whereIn('supplier_id', [8])->get();
+        // foreach ($purchases as $key => $purchase) {
+        //     // $this->repository->delete($purchase);
+        // }
 
-        return new ViewResponse('focus.purchases.index');
+        $suppliers = Supplier::whereHas('bills')->get();
+
+        return new ViewResponse('focus.purchases.index', compact('suppliers'));
     }
 
     /**
@@ -154,7 +163,7 @@ class PurchasesController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl', 'is_tax_exc'
         ]);
         $data_items = $request->only([
-            'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type', 'warehouse_id'
+            'id', 'item_id', 'description', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type', 'warehouse_id', 'uom'
         ]);
 
         $data['ins'] = auth()->user()->ins;

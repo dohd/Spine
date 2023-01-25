@@ -101,14 +101,14 @@
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name : </b>{{ $resource->client->company }}<br>
-				<b>Site / Branch : </b>{{ $resource->branch->name }}<br>
+				<b>Client Name : </b>{{ $resource->client? $resource->client->company : ($resource->lead? $resource->lead->client_name : '') }}<br>
+				<b>Site / Branch : </b>{{ $resource->branch? $resource->branch->name : '' }}<br>
 				<b>Region : </b>{{ $resource->region }}<br>
 				<b>Attention : </b> {{ $resource->attention }}<br>
 			<td width="5%">&nbsp;</td>
 			<td width="45%" style="border: 0.1mm solid #888888;">
 				<span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
-				<b>Report No : </b> {{ 'DjR-'.sprintf('%04d', $resource->tid) }}<br>
+				<b>Report No : </b> {{ gen4tid('DjR-', $resource->tid) }}<br>
 				<b>Date : </b>{{ dateFormat($resource->report_date, 'd-M-Y') }}<br><br>
 				<b>Prepared By : </b>{{ $resource->prepared_by }}<br>
 			</td>
@@ -151,11 +151,14 @@
 		</tbody>
 	</table>
 	<div>
-		<h5><span>b.</span> Call Out Details</h5>
-		<p>
-			{{ $resource->lead->title }} <b>on</b> <i>{{ dateFormat($resource->lead->date_of_request, 'd-M-Y') }}</i> <b>as
-			per call reference</b> <i>{{ $resource->lead->client_ref }}</i>
-		</p><br>
+		@if ($resource->lead)
+			<h5><span>b.</span> Call Out Details</h5>
+			<p>
+				{{ $resource->lead->title }} <b>on</b> <i>{{ dateFormat($resource->lead->date_of_request, 'd-M-Y') }}</i> <b>as
+				per call reference</b> <i>{{ $resource->lead->client_ref }}</i>
+			</p>
+		@endif
+		<br>
 		<table class="items items-table" cellpadding=8>
 			<thead>
 				<tr>

@@ -21,9 +21,51 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-4">
+                                <label for="customer">Supplier</label>
+                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose Supplier">
+                                    @foreach ($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="status">Delivery Status</label>
+                                <select name="status" id="status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['Pending', 'Partial', 'Complete'] as $status)
+                                        <option value="{{ $status }}">{{ $status }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2">
+                                <label for="amount">Total Order Amount</label>
+                                <input type="text" id="order_total" class="form-control" readonly>
+                            </div>    
+                            <div class="col-2">
+                                <label for="amount">Total Received Amount</label>
+                                <input type="text" id="grn_total" class="form-control" readonly>
+                            </div>     
+                            <div class="col-2">
+                                <label for="amount">Total Pending Amount</label>
+                                <input type="text" id="due_total" class="form-control" readonly>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="purchaseorders-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="purchaseordersTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -34,7 +76,6 @@
                                         <th>{{ trans('general.amount') }}</th>
                                         <th>Date</th>
                                         <th>{{ trans('general.status') }}</th>
-                                        <th>Items Received</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -56,98 +97,110 @@
 @endsection
 
 @section('after-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
-
-    const tableLan = {@lang('datatable.strings')};
-    var dataTable = $('#purchaseorders-table').dataTable({
-        processing: true,
-        serverSide: true,
-        responsive: true,
-        stateSave: true,
-        language: tableLan,
+    const config = {
         ajax: {
-            url: '{{ route("biller.purchaseorders.get") }}',
-            type: 'post',
+            headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"},
         },
-        columns: [{
-                data: 'DT_Row_Index',
-                name: 'id'
-            },
-            {
-                data: 'tid',
-                name: 'tid'
-            },
-            {
-                data: 'supplier',
-                name: 'supplier'
-            },
-            {
-                data: 'note',
-                name: 'note'
-            },
-            {
-                data: 'count',
-                name: 'count'
-            },
-            {
-                data: 'amount',
-                name: 'amount'
-            },
-            {
-                data: 'date',
-                name: 'date'
-            },
-            {
-                data: 'status',
-                name: 'status'
-            },
-            {
-                data: 'grn_count',
-                name: 'grn_count'
-            },
-            {
-                data: 'actions',
-                name: 'actions',
-                searchable: false,
-                sortable: false
-            }
-        ],
-        order: [
-            [0, "desc"]
-        ],
-        searchDelay: 500,
-        dom: 'Blfrtip',
-        buttons: {
-            buttons: [
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
+    };
+    
+    const Index = {
+        init() {
+            $.ajaxSetup(config.ajax);
+
+            $('#status').change(this.statusChange);
+            $('#supplier').select2({allowClear: true}).val('').trigger('change')
+            .change(this.supplierChange);
+
+            this.drawDataTable();
+        },
+
+        supplierChange() {
+            $('#purchaseordersTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        statusChange() {
+            $('#purchaseordersTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#purchaseordersTbl').dataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                stateSave: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: '{{ route("biller.purchaseorders.get") }}',
+                    type: 'post',
+                    data: {
+                        supplier_id: $('#supplier').val(),
+                        status: $('#status').val(),
+                    },
+                    dataSrc: ({data}) => {
+                        $('#order_total').val('');
+                        $('#grn_total').val('');
+                        $('#due_total').val('');
+                        if (data.length && data[0].aggregate) {
+                            const aggr = data[0].aggregate;
+                            $('#order_total').val(aggr.order_total);
+                            $('#grn_total').val(aggr.grn_total);
+                            $('#due_total').val(aggr.due_total);
+                        }
+                        return data;
+                    },
                 },
-                {
-                    extend: 'excel',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    {
+                        data: 'tid',
+                        name: 'tid'
+                    },
+                    {
+                        data: 'supplier',
+                        name: 'supplier'
+                    },
+                    {
+                        data: 'note',
+                        name: 'note'
+                    },
+                    {
+                        data: 'count',
+                        name: 'count'
+                    },
+                    {
+                        data: 'amount',
+                        name: 'amount'
+                    },
+                    {
+                        data: 'date',
+                        name: 'date'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
                     }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1]
-                    }
-                }
-            ]
-        }
-    });
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection

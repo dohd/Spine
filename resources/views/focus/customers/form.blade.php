@@ -120,9 +120,21 @@
 
                     <div class="col-sm-6">
                         <div class='form-group'>
-                            {{ Form::label( 'taxid', trans('customers.taxid'),['class' => 'col-lg-6 control-label']) }}
+                            {{ Form::label('taxid', trans('customers.taxid'),['class' => 'col-lg-6 control-label']) }}
                             <div class='col-lg-12'>
                                 {{ Form::text('taxid', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.taxid')]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class='form-group'>
+                            <div class='col-lg-12'>
+                                <label for="tax_exempt">Is Tax Exempted</label>
+                                <select name="is_tax_exempt" id="is_tax_exempt" class="custom-select">
+                                    @foreach (['No', 'Yes'] as $key => $val)
+                                        <option value="{{ $key }}" {{ @$customer->is_tax_exempt == $key? 'selected' : '' }}>{{ $val }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -295,7 +307,7 @@
                 const openBalanceDate = this.customer.open_balance_date;
                 if (openBalanceDate) $('#open_balance_date').datepicker('setDate', new Date(openBalanceDate));
 
-                const balance = parseFloat(customer.open_balance);
+                const balance = parseFloat(this.customer.open_balance);
                 $('#open_balance').val(accounting.formatNumber(balance));
             }
 

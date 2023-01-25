@@ -79,7 +79,7 @@ class RoleController extends Controller
      */
     public function store(ManageHrmRequest $request)
     {
-        $this->roles->create($request->all());
+        $this->roles->create($request->except('_token'));
 
         return new RedirectResponse(route('biller.role.index'), ['flash_success' => trans('alerts.backend.roles.created')]);
     }
@@ -109,7 +109,8 @@ class RoleController extends Controller
      */
     public function update(Role $role, ManageHrmRequest $request)
     {
-        if (auth()->user()->ins == $role->ins) $this->roles->update($role, $request->all());
+        if (auth()->user()->ins == $role->ins) 
+            $this->roles->update($role, $request->except('_token'));
 
         return new RedirectResponse(route('biller.role.index'), ['flash_success' => trans('alerts.backend.roles.updated')]);
     }

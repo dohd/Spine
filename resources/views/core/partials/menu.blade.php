@@ -479,14 +479,14 @@
                         @endauth
 
                         @permission('manage-warehouse')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-building-o"></i> {{ trans('labels.backend.warehouses.management') }}
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-building-o"></i> Product Location
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.warehouses.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('labels.backend.warehouses.management') }}
+                                <li><a class="dropdown-item" href="{{ route('biller.warehouses.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Location Management
                                     </a>
                                 </li>
                                 @permission('create-warehouse')
-                                <li><a class="dropdown-item" href="{{ route('biller.warehouses.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> {{ trans('labels.backend.warehouses.create') }}
+                                <li><a class="dropdown-item" href="{{ route('biller.warehouses.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Location
                                     </a>
                                 </li>
                                 @endauth
@@ -816,9 +816,9 @@
 
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Tax Returns</a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax Returns</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax Return</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.tax_reports.filed_report') }}"><i class="fa fa-book"></i> Filed Tax Returns</a></li>
-                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax Report</a></li>
-                            <li><a class="dropdown-item" href="{{ route('biller.tax_reports.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax Report</a></li>
                         </ul>
                     </li>
                     @endauth
@@ -982,9 +982,6 @@
                         @permission('manage-pm-report')
                         <li class="dropdown dropdown-submenu"><a class="dropdown-item" href="#" data-toggle="dropdown"> <i class="fa fa-wrench"></i> PM Report Management</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.serviced_equipment') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Serviced Equipments
-                                    </a>                                
-                                </li>
                                 <li><a class="dropdown-item" href="{{ route('biller.contractservices.index') }}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage PM Report 
                                     </a>                                
                                 </li>
@@ -993,6 +990,9 @@
                                     </a>
                                 </li>
                                 @endauth
+                                <li><a class="dropdown-item" href="{{ route('biller.contractservices.serviced_equipment') }}" data-toggle="dropdown"> <i class="icon-tag"></i> Serviced Equipments
+                                    </a>                                
+                                </li>
                             </ul>
                         </li>
                         @endauth

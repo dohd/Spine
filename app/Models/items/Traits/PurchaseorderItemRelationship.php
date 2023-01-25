@@ -7,9 +7,15 @@ use App\Models\assetequipment\Assetequipment;
 use App\Models\items\GrnItem;
 use App\Models\product\ProductVariation;
 use App\Models\project\Project;
+use App\Models\purchaseorder\Purchaseorder;
 
 trait PurchaseorderItemRelationship
 {
+    public function purchaseorder()
+    {
+        return $this->belongsTo(Purchaseorder::class, 'purchaseorder_id');
+    }
+
     public function grn_items()
     {
         return $this->hasMany(GrnItem::class, 'poitem_id');

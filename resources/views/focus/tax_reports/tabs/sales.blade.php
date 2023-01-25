@@ -1,27 +1,4 @@
 <div class="form-group row">
-    <div class="col-2">
-        <label for="month">Sale Month</label>
-        {{ Form::text('sale_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'sale_month']) }}
-    </div>
-    
-    <div class="col-2">
-        <label for="status">Tax Rate</label>
-        <select name="sale_tax_rate" id="sale_tax_rate" class="custom-select" {{ @$tax_report? 'disabled' : '' }}>
-            @php
-                $selected = '';
-            @endphp
-            @foreach ($additionals as $row)
-                @php
-                    if (isset($tax_report)) $selected = ($tax_report->sale_tax_rate == $row->value)? 'selected' : '';
-                    else $selected = $row->is_default? 'selected' : '';
-                @endphp
-                <option value="{{ $row->value }}" {{ $selected }}>
-                    {{ $row->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
     <div class="col-3 ml-auto">
         <label for="file_status">Action Status</label>
         <div>

@@ -6,6 +6,8 @@ use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
 use App\Models\currency\Currency;
+use App\Models\invoice\Invoice;
+use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
 use App\Models\items\VerifiedItem;
@@ -24,6 +26,12 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function project()
+    {
+        // return $this->hasOne(Project::class, 'main_quote_id');
+        return $this->hasOneThrough(Project::class, ProjectQuote::class, 'quote_id', 'id', 'id', 'project_id')->withoutGlobalScopes();
+    }
+
     public function projectstock()
     {
         return $this->hasMany(Projectstock::class);
@@ -34,11 +42,6 @@ trait QuoteRelationship
         return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
     }
 
-    public function project()
-    {
-        return $this->hasOne(Project::class, 'main_quote_id');
-    }
-
     public function skill_items()
     {
         return $this->hasMany(BudgetSkillset::class);
@@ -47,6 +50,11 @@ trait QuoteRelationship
     public function invoice_product()
     {
         return $this->hasOne('App\Models\items\InvoiceItem')->withoutGlobalScopes();
+    }
+
+    public function invoice()
+    {
+        return $this->hasOneThrough(Invoice::class, InvoiceItem::class, 'quote_id', 'id', 'id', 'quote_id')->withoutGlobalScopes();
     }
 
     public function budget()

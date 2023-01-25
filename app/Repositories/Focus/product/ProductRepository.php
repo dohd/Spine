@@ -57,8 +57,8 @@ class ProductRepository extends BaseRepository
         $q->when(request('warehouse_id'), function ($q) {
             $q->whereHas('variations', function ($q) {
                 $q->where('warehouse_id', request('warehouse_id'));
-            });
-        })->when(request('category_id'), function ($q) {
+            })->with(['variations' => fn($q) => $q->where('warehouse_id', request('warehouse_id'))]);
+        })->when(request('category_id'), function ($q) {            
             $q->whereHas('category', function ($q) {
                 $q->where('productcategory_id', request('category_id'));
             });
@@ -66,11 +66,11 @@ class ProductRepository extends BaseRepository
             if (request('status') == 'in_stock') {
                 $q->whereHas('variations', function ($q) {
                     $q->where('qty', '>', 0);
-                });
-            } elseif (request('status') == 'out_of_stock') {
+                })->with(['variations' => fn($q) => $q->where('qty', '>', 0)]);
+            } else {
                 $q->whereHas('variations', function ($q) {
                     $q->where('qty', 0);
-                });
+                })->with(['variations' => fn($q) => $q->where('qty', 0)]);
             }            
         });
 
@@ -251,7 +251,38 @@ class ProductRepository extends BaseRepository
      */
     public function delete(Product $product)
     {
-        if ($product->delete()) return true;
+        foreach ($product->variations as $product_variation) {
+            if (isset($product_variation->quote_item->quote)) {
+                $quote = $product_variation->quote_item->quote;
+                if ($quote) {
+                    $type = $quote->bank_id? 'PI' : 'Quote';
+                    throw ValidationException::withMessages(["Product is attached to {$type} number {$quote->tid} !"]);
+                }
+            }
+            if (isset($product_variation->purchase_item->purchase)) {
+                $purchase = $product_variation->purchase_item->purchase;
+                if ($purchase)
+                throw ValidationException::withMessages(['Product is attached to Purchase number {$purchase->tid} !']);
+            }
+            if (isset($product_variation->purchase_order_item->purchaseorder)) {
+                $purchaseorder = $product_variation->purchase_order_item->purchaseorder;
+                if ($purchaseorder) 
+                throw ValidationException::withMessages(['Product is attached to Purchase Order number {$purchaseorder->tid} !']);
+            }
+            if (isset($product_variation->project_stock_item->project_stock)) {
+                $project_stock = $product_variation->project_stock_item->project_stock;
+                if ($project_stock) 
+                throw ValidationException::withMessages(['Product is attached to Issued Project Stock number {$project_stock->tid} !']);
+            }
+        }
+
+        DB::beginTransaction();
+        
+        $product->variations()->delete();
+        if ($product->delete()) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.products.delete_error'));
     }

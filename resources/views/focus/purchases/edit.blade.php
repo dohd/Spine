@@ -51,7 +51,18 @@
     if (supplierType == 'supplier') $('#supplierbox').append(new Option(supplierText, supplierVal, true, true)).change();
 
     // project
-    const projectName = "{{ $purchase->project? $purchase->project->name : '' }}";
+    @php
+        $project_name = '';
+        $project = $purchase->project;
+        if ($project) {
+            $tid = gen4tid('Prj-', $project->tid);
+            $customer = '';
+            if ($project->customer_project) $customer = $project->customer_project->company;
+            if ($customer && $project->branch) $customer .= " - {$project->branch->name}";
+            $project_name = "{$customer} - {$tid} - {$project->name}";
+        }
+    @endphp
+    const projectName = "{{ $project_name }}";
     const projectId = "{{ $purchase->project_id }}";
     $('#project').append(new Option(projectName, projectId, true, true)).change();
     // expense tab row 1

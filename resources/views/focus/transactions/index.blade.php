@@ -92,7 +92,7 @@
                                         <th>#</th> 
                                         <th>Tr No.</th>
                                         <th>Type</th>
-                                        <th>{{ $is_tax? 'Customer PIN' : 'Reference' }}</th>
+                                        <th>{{ $is_tax? 'Customer PIN' : 'Ledger Account' }}</th>
                                         <th>Note</th>
                                         @if ($is_tax)
                                             <th>VAT %</th>

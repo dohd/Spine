@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Focus\utility_bill;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\items\GoodsreceivenoteItem;
+use App\Models\items\UtilityBillItem;
+use App\Models\purchaseorder\Purchaseorder;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\utility_bill\UtilityBillRepository;
@@ -31,7 +33,9 @@ class UtilityBillController extends Controller
      */
     public function index()
     {
-        return view('focus.utility-bills.index');
+        $suppliers = Supplier::whereHas('bills')->get(['id', 'name']);
+
+        return view('focus.utility-bills.index', compact('suppliers'));
     }
 
     /**
@@ -155,22 +159,36 @@ class UtilityBillController extends Controller
     public function goods_receive_note(Request $request)
     {
         $grn_items = GoodsreceivenoteItem::whereHas('goodsreceivenote', function ($q) {
-            $q->whereHas('purchaseorder', function ($q) {
-                $q->where('supplier_id', request('supplier_id'))->where('status', '!=', 'complete');
+            $q->whereNull('invoice_no')->whereHas('purchaseorder', function ($q) {
+                $q->where('supplier_id', request('supplier_id'));
             });
         })->with([
             'purchaseorder_item' => fn($q) => $q->select(['id', 'description', 'uom']),
-            'goodsreceivenote' => fn($q) => $q->select(['id', 'dnote', 'date',]),
-        ])->get()->map(fn($v) => [
+            'goodsreceivenote' => fn($q) => $q->select(['id', 'dnote', 'date']),
+        ])->get()
+        ->map(fn($v) => [
             'id' => $v->id,
             'date' => $v->goodsreceivenote->date,
-            'note' => "(DN-{$v->goodsreceivenote->dnote}) - {$v->purchaseorder_item->description} ({$v->purchaseorder_item->uom})",
+            'note' => "DNote:{$v->goodsreceivenote->dnote} - {$v->purchaseorder_item->description} {$v->purchaseorder_item->uom}",
             'qty' => $v->qty,
             'rate' => $v->rate,
             'tax' => $v->tax_rate,
             'total' => $v->tax_rate == 0? ($v->qty * $v->rate) : (($v->qty * $v->rate) * (1 + $v->tax_rate)),
-        ]);
-        
+            'goodsreceivenote_id' => $v->goodsreceivenote->id,
+        ])->toArray();
+
+        // decrement grn items qty by billed items qty        
+        $bill_items = UtilityBillItem::whereHas('bill', function ($q) {
+            $q->where('supplier_id', request('supplier_id'));
+        })->get();
+        foreach ($bill_items as $bill_item) {
+            foreach ($grn_items as $i => $grn_item) {
+                $is_equal = trim($grn_item['note']) == trim($bill_item['note']);
+                if ($is_equal) $grn_items[$i]['qty'] -= $bill_item['qty'];
+            }
+        }
+        $grn_items = array_filter($grn_items, fn($v) => $v['qty'] > 0);
+
         return response()->json($grn_items);
     }
 

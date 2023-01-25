@@ -28,6 +28,7 @@ use App\Repositories\Focus\warehouse\WarehouseRepository;
 use App\Http\Requests\Focus\warehouse\ManageWarehouseRequest;
 use App\Http\Requests\Focus\warehouse\StoreWarehouseRequest;
 use App\Models\product\ProductVariation;
+use DB;
 
 /**
  * WarehousesController
@@ -57,9 +58,9 @@ class WarehousesController extends Controller
      */
     public function index(ManageWarehouseRequest $request)
     {
-        $product_count = ProductVariation::where('qty', '>', 0)->groupBy('parent_id')->get()->count();
-        $product_worth = ProductVariation::where('qty', '>', 0)->sum('purchase_price');
-
+        $product_count = ProductVariation::count();
+        $product_worth = ProductVariation::sum(DB::raw('qty*purchase_price'));
+        
         return new ViewResponse('focus.warehouses.index', compact('product_count', 'product_worth'));
     }
 
@@ -88,7 +89,7 @@ class WarehousesController extends Controller
         //Create the model using repository create method
         $this->repository->create($input);
         //return with successfull message
-        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => trans('alerts.backend.warehouses.created')]);
+        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Created Successfully']);
     }
 
     /**
@@ -117,7 +118,7 @@ class WarehousesController extends Controller
         //Update the model using repository update method
         $this->repository->update($warehouse, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => trans('alerts.backend.warehouses.updated')]);
+        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Updated Successfully']);
     }
 
     /**
@@ -132,7 +133,7 @@ class WarehousesController extends Controller
         //Calling the delete method on repository
         $this->repository->delete($warehouse);
         //returning with successfull message
-        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => trans('alerts.backend.warehouses.deleted')]);
+        return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Deleted Successfully']);
     }
 
     /**

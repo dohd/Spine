@@ -118,7 +118,7 @@ class ProductsController extends Controller
     {
         $this->repository->update($product, $request->except(['_token']));
         
-        return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.deleted')]);
+        return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.updated')]);
     }
 
     /**

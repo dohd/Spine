@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\hrm;
 
 use App\Http\Requests\Focus\department\ManageDepartmentRequest;
@@ -70,6 +71,7 @@ class HrmsController extends Controller
             $title = trans('hrms.payroll');
             $flag = false;
         }
+
         return new ViewResponse('focus.hrms.index', compact('title', 'flag'));
     }
 
@@ -80,7 +82,7 @@ class HrmsController extends Controller
      * @return \App\Http\Responses\Focus\hrm\CreateResponse
      */
     public function create(ManageHrmRequest $request)
-    {   
+    {
         return new CreateResponse('focus.hrms.create');
     }
 
@@ -92,41 +94,26 @@ class HrmsController extends Controller
      */
     public function store(ManageHrmRequest $request)
     {
-
-
-        //Input received from the request
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
-        //$input['profile'] = $request->only(['contact', 'company', 'address_1', 'city', 'state', 'country', 'tax_id', 'postal']);
-        $input['meta'] = $request->except(['_token','first_name', 'last_name', 'email', 'picture', 'signature', 'role','permission']);
-        $input['permission'] = $request->only(['permission']);
+        $input['meta'] = $request->except(['_token', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission', 'check_all']);
+        $input = array_merge($input, $request->only(['permission']));
+
+        // validate
+        foreach ($input as $key => $val) {
+            if ($key == 'employee') {
+                if (isset($val['picture'])) $request->validate(['picture' => 'required|mimes:jpeg,png']);
+                if (isset($val['signature'])) $request->validate(['signature' => 'required|mimes:jpeg,png']);
+            }
+            if ($key == 'meta') {
+                if (isset($val['id_front'])) $request->validate(['id_front' => 'required|mimes:jpeg,png']);
+                if (isset($val['id_back'])) $request->validate(['id_front' => 'required|mimes:jpeg,png']);
+            }
+        }
+
         $input['employee']['ins'] = auth()->user()->ins;
-       
 
-        if (!empty($input['employee']['picture'])) {
-            $request->validate([
-                'picture' => 'required|mimes:jpeg,png',
-            ]);
-        }
-        if (!empty($input['employee']['signature'])) {
-            $request->validate([
-                'signature' => 'required|mimes:jpeg,png',
-            ]);
-        }
-        if (!empty($input['meta']['id_front'])) {
-            $request->validate([
-                'id_front' => 'required|mimes:jpeg,png',
-            ]);
-        }
-        if (!empty($input['meta']['id_back'])) {
-            $request->validate([
-                'id_back' => 'required|mimes:jpeg,png',
-            ]);
-        }
-
-
-        //Create the model using repository create method
         $this->repository->create($input);
-        //return with successfull message
+
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.created')]);
     }
 
@@ -151,40 +138,26 @@ class HrmsController extends Controller
      */
     public function update(ManageHrmRequest $request, Hrm $hrm)
     {
-        //Input received from the request
-        // $input = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'password']);
-
-
-        //Input received from the request
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature', 'role']);
-        $input['meta'] = $request->except(['_token','_method','first_name', 'last_name', 'email', 'picture', 'signature', 'role','permission']);
-        $input['permission'] = $request->only(['permission']);
+        $input['meta'] = $request->except(['_token', '_method', 'first_name', 'last_name', 'email', 'picture', 'signature', 'role', 'permission', 'check_all']);
+        $input = array_merge($input, $request->only(['permission']));
+
+        // validate
+        foreach ($input as $key => $val) {
+            if ($key == 'employee') {
+                if (isset($val['picture'])) $request->validate(['picture' => 'required|mimes:jpeg,png']);
+                if (isset($val['signature'])) $request->validate(['signature' => 'required|mimes:jpeg,png']);
+            }
+            if ($key == 'meta') {
+                if (isset($val['id_front'])) $request->validate(['id_front' => 'required|mimes:jpeg,png']);
+                if (isset($val['id_back'])) $request->validate(['id_front' => 'required|mimes:jpeg,png']);
+            }
+        }
+
         $input['employee']['ins'] = auth()->user()->ins;
 
-        if (!empty($input['employee']['picture'])) {
-            $request->validate([
-                'picture' => 'required|mimes:jpeg,png',
-            ]);
-        }
-        if (!empty($input['employee']['signature'])) {
-            $request->validate([
-                'signature' => 'required|mimes:jpeg,png',
-            ]);
-        }
-        if (!empty($input['meta']['id_front'])) {
-            $request->validate([
-                'id_front' => 'required|mimes:jpeg,png',
-            ]);
-        }
-        if (!empty($input['meta']['id_back'])) {
-            $request->validate([
-                'id_back' => 'required|mimes:jpeg,png',
-            ]);
-        }
-
-        //Update the model using repository update method
         $this->repository->update($hrm, $input);
-        //return with successfull message
+
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.updated')]);
     }
 
@@ -192,14 +165,13 @@ class HrmsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param DeleteHrmRequestNamespace $request
-     * @param App\Models\hrm\Hrm $hrm
+     * @param \App\Models\hrm\Hrm $hrm
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Hrm $hrm, ManageHrmRequest $request)
+    public function destroy(Hrm $hrm)
     {
-        //Calling the delete method on repository
-        //$this->repository->delete($hrm);
-        //returning with successfull message
+        $this->repository->delete($hrm);
+        
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.deleted')]);
     }
 
@@ -247,7 +219,7 @@ class HrmsController extends Controller
                     // delete permission (non-business owner)
                     PermissionUser::where($data)->delete();
                 }
-            } 
+            }
         }
     }
 
@@ -309,11 +281,16 @@ class HrmsController extends Controller
     {
         $emp_role = $request->post('rid');
         $create = $request->post('create');
-        $permissions = '';
+
+        printlog($emp_role, $create);
+
         $permissions_all = \App\Models\Access\Permission\Permission::orWhereHas('roles', function ($q) use ($emp_role) {
             return $q->where('role_id', '=', $emp_role);
         })->get()->toArray();
+
+        $permissions = [];
         if ($create) $permissions = \App\Models\Access\Permission\PermissionUser::all()->keyBy('id')->where('user_id', '=', $create)->toArray();
+
         return view('focus.hrms.partials.role_permissions')->with(compact('permissions_all', 'create', 'permissions'));
     }
 
@@ -340,6 +317,4 @@ class HrmsController extends Controller
         if ($create) $permissions = \App\Models\Access\Permission\PermissionUser::all()->keyBy('id')->where('user_id', '=', $create)->toArray();
         return view('focus.hrms.partials.admin_permissions')->with(compact('permissions_all', 'create', 'permissions'));
     }
-
-
 }

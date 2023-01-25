@@ -211,7 +211,8 @@
             $('#open_balance_date').datepicker('setDate', new Date(supplier.open_balance_date));
         }
         const balance = parseFloat(supplier.open_balance);
-        $('#open_balance').val(accounting.numberFormat(balance));
+        $('#open_balance').val(accounting.formatNumber(balance));
+        $('#expense_account').val(supplier.expense_account_id);
     }
 
     // on selecting groups

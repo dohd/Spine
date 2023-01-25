@@ -47,4 +47,29 @@ class Role extends BaseModel
         parent::__construct($attributes);
         $this->table = config('access.roles_table');
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->created_by = auth()->user()->id;
+            $instance->updated_by = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::updating(function ($instance) {
+            $instance->updated_by = auth()->user()->id;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('roles.ins', auth()->user()->ins)->orWhereNull('roles.ins');
+        });
+    }    
 }

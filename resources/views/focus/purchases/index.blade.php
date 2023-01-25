@@ -21,6 +21,25 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-4">
+                                <label for="customer">Supplier</label>
+                                <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose Supplier">
+                                    @foreach ($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <table id="purchases" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -51,44 +70,67 @@
 
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
-<script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
+{{ Html::script('focus/js/select2.min.js') }}
 
-    const dataTable = $('#purchases').dataTable({
-        processing: true,
-        serverSide: true,
-        responsive: true,
-        stateSave: true,
-        language: {@lang('datatable.strings')},
+<script>
+    const config = {
         ajax: {
-            url: "{{ route('biller.purchases.get') }}",
-            type: 'post',
-            data: {rel_type: 1}
-        },
-        columns: [{
-                data: 'DT_Row_Index',
-                name: 'id'
-            },
-            ...[
-                'tid', 'supplier', 'supplier_taxid', 'note', 'date', 'reference', 'amount', 'balance'
-            ].map(v => ({data:v, name: v})),
-            {
-                data: 'actions',
-                name: 'actions',
-                searchable: false,
-                sortable: false
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
             }
-        ],
-        order: [
-            [0, "desc"]
-        ],
-        searchDelay: 500,
-        dom: 'Blfrtip',
-        buttons: ['csv', 'excel', 'print'],
-    });
+        },
+    };
+
+    const Index = {
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('#supplier').select2({allowClear: true}).val('').trigger('change')
+            .change(this.supplierChange);
+
+            this.drawDataTable();
+        },
+
+        supplierChange() {
+            $('#purchases').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#purchases').dataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                stateSave: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.purchases.get') }}",
+                    type: 'post',
+                    data: {rel_type: 1, supplier_id: $('#supplier').val()}
+                },
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    ...[
+                        'tid', 'supplier', 'supplier_taxid', 'note', 'date', 'reference', 'amount', 'balance'
+                    ].map(v => ({data:v, name: v})),
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
+                ],
+                order: [
+                    [0, "desc"]
+                ],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+
+    $(() => Index.init());
 </script>
 @endsection

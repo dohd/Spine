@@ -97,10 +97,11 @@
         else $('.profit').removeClass('text-danger').addClass('text-dark');
 
         // budget limit 30 percent
-        if (sp_total < bp_total * 1.3) {
-            $('.budget-alert').removeClass('d-none');
-            // scroll(0, 0);
-        } else $('.budget-alert').addClass('d-none');
+        if (sp_total < bp_total * 1.3) $('.budget-alert').removeClass('d-none');
+        else $('.budget-alert').addClass('d-none');
+
+        // estimate cost
+        $('.estimate-cost').text(accounting.formatNumber(bp_total + skill_total));
     }
 
     /**

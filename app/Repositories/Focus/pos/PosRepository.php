@@ -182,23 +182,25 @@ class PosRepository extends BaseRepository
             ]);
             Transaction::create($tax_cr_data);
         }
+        
+        if ($invoice->product_expense_total > 0) {
+            // debit COG
+            $account = Account::where('system', 'cog')->first(['id']);
+            $cog_dr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'debit' => $invoice->product_expense_total,
+            ]);
+            Transaction::create($cog_dr_data);
 
-        // debit COG
-        $account = Account::where('system', 'cog')->first(['id']);
-        $cog_dr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'debit' => $invoice->product_expense_total,
-        ]);
-        Transaction::create($cog_dr_data);
-
-        // credit Inventory
-        $account = Account::where('system', 'stock')->first(['id']);
-        $stock_cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'credit' => $invoice->product_expense_total,
-        ]);
-        Transaction::create($stock_cr_data);
-        aggregate_account_transactions();        
+            // credit Inventory
+            $account = Account::where('system', 'stock')->first(['id']);
+            $stock_cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $invoice->product_expense_total,
+            ]);
+            Transaction::create($stock_cr_data);
+            aggregate_account_transactions();   
+        }
     }    
 
     /**

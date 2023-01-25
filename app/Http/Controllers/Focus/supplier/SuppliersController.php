@@ -260,9 +260,15 @@ class SuppliersController extends Controller
      */
     public function purchaseorders()
     {
+        $purchase_orders = [];
         $supplier = Supplier::find(request('supplier_id'));
+        if ($supplier) {
+            if (request('type') == 'grn') {
+                $purchase_orders =  $supplier->purchase_orders()->whereIn('status', ['Pending', 'Partial'])->get();
+            } else $purchase_orders =  $supplier->purchase_orders;
+        }
 
-        return response()->json($supplier->purchase_orders);
+        return response()->json($purchase_orders);
     }
 
     /**
@@ -271,8 +277,9 @@ class SuppliersController extends Controller
     public function goods_receive_note()
     {
         $supplier = Supplier::find(request('supplier_id'));
+        $grns = $supplier? $supplier->goods_receive_notes : [];
 
-        return response()->json($supplier->goods_receive_notes);
+        return response()->json($grns);
     }
 
     /**
@@ -287,14 +294,15 @@ class SuppliersController extends Controller
                 'purchase' => fn($q) => $q->select('id', 'suppliername', 'note'),
                 'grn' => fn($q) => $q->select('id', 'note'),
             ])
-            ->orderBy('due_date', 'asc')
-            ->get()->map(function ($v) {
+            ->orderBy('due_date', 'asc')->get()
+            ->map(function ($v) {
                 if ($v->document_type == 'direct_purchase') {
                     $v->suppliername = $v->purchase->suppliername;
                     if ($v->grn) unset($v->grn);
                 } elseif ($v->document_type == 'goods_receive_note') {
                    if ($v->purchase) unset($v->purchase);
                 }
+                
                 return $v;
             }); 
         

@@ -62,7 +62,15 @@ class LpoTableController extends Controller
                 if ($customer && $branch) return "{$customer} - {$branch}";
             })
             ->addColumn('lpo_no', function ($lpo) {
-                return $lpo->lpo_no;
+                $links = [];
+                foreach ($lpo->quotes as $quote) {
+                    if ($quote->invoice) {
+                        $invoice = $quote->invoice;
+                        $links[] = '<a href="'. route('biller.invoices.show', $invoice->id) .'">'. gen4tid('Inv-', $invoice->tid) .'</a>';
+                    }
+                }
+
+                return $lpo->lpo_no . '<br>' . implode(', ', array_unique($links));
             })
             ->addColumn('amount', function ($lpo) {
                 $this->balance = $lpo->amount;

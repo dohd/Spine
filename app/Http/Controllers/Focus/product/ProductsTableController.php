@@ -23,6 +23,7 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\product\ProductRepository;
 use App\Http\Requests\Focus\product\ManageProductRequest;
 use App\Models\productcategory\Productcategory;
+use DB;
 
 /**
  * Class ProductsTableController.
@@ -60,11 +61,8 @@ class ProductsTableController extends Controller
         $product_count = 0;
         $product_worth = 0;
         foreach ($core as $product) {
-            $std_product = $product->standard;
-            if ($std_product) {
-                $product_count++;
-                $product_worth += $std_product->purchase_price;
-            }
+            $product_count += $product->variations()->count();
+            $product_worth += $product->variations()->sum(DB::raw('purchase_price*qty'));
         }
         $product_worth = amountFormat($product_worth);
         $aggregate = compact('product_count', 'product_worth');
@@ -93,21 +91,25 @@ class ProductsTableController extends Controller
                 $unit = $product->unit;
                 if ($unit) return $unit->code;  
             })
-            ->addColumn('price', function ($product) {
+            ->addColumn('purchase_price', function ($product) {
                 return NumberFormat($this->standard_product->purchase_price);
+            })
+            ->addColumn('total', function ($product) {
+                $total = 0;
+                foreach ($product->variations as $product_var) {
+                    $total += $this->standard_product->purchase_price * $product_var->qty;
+                }
+                return NumberFormat($total);
             })
             ->addColumn('created_at', function ($product) {
                 return $product->created_at->format('d-m-Y');
             })
-            ->addColumn('aggregate', function ($product) use($aggregate) {
-                return $aggregate;
-            })
             ->addColumn('actions', function ($product) {
-                $buttons = '';
-                if ($product->action_buttons) $buttons = $product->action_buttons;
-                if (isset($product->product->action_buttons)) $buttons = $product->product->action_buttons;
-
-                return $buttons;
+                if ($product->action_buttons) return $product->action_buttons;
+                if (isset($product->product->action_buttons)) return $product->product->action_buttons;
+            })
+            ->addColumn('aggregate', function () use($aggregate) {
+                return $aggregate;
             })
             ->make(true);
     }

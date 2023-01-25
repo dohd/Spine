@@ -5,7 +5,7 @@
     </div>
     <div class="col-4">
         <label for="supplier">Supplier</label>
-        <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose-Supplier" required>
+        <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose-Supplier" {{ @$supplier_product? 'disabled' : 'required' }}>
             @foreach($suppliers as $row)
                 <option value="{{ $row->id }}" {{ @$supplier_product && $supplier_product->supplier_id == $row->id? 'selected' : '' }}>
                     {{ $row->company }}
@@ -15,7 +15,7 @@
     </div>
     <div class="col-2">
         <label for="contract">Contract Title</label>
-        {{ Form::text('contract', null, ['class' => 'form-control', 'id' =>'contract', 'required']) }}
+        {{ Form::text('contract', null, ['class' => 'form-control', 'required']) }}
     </div>
     <div class="col-4">
         <label for="description">Product Description</label>

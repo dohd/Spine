@@ -32,7 +32,7 @@
                 <div class="col-sm-4"><label for="taxid" class="caption">Tax ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id'=>'taxid', 'required']) }}
+                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id'=>'taxid']) }}
                     </div>
                 </div>
             </div>

@@ -125,7 +125,7 @@
                     <div class='col'>
                         <select class="custom-select" name="warehouse_id[]">
                             @foreach($warehouses as $item)
-                                <option value="{{$item->id}}" {{ $item->id == @$product->warehouse_id ? "selected" : "" }}>
+                                <option value="{{$item->id}}" {{ $item->id == @$product->standard->warehouse_id ? "selected" : "" }}>
                                     {{$item->title}}
                                 </option>
                             @endforeach

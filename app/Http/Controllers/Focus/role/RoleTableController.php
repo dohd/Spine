@@ -47,27 +47,26 @@ class RoleTableController extends Controller
      */
     public function __invoke(ManageHrmRequest $request)
     {
-        return Datatables::of($this->roles->getForDataTable())
+        $core = $this->roles->getForDataTable();
+
+        return Datatables::of($core)
             ->escapeColumns(['name', 'sort'])
             ->addColumn('permissions', function ($role) {
-                if ($role->all) {
-                    return '<span class="label label-success">' . trans('labels.general.all') . '</span>';
-                }
-
+                if ($role->all) return '<span class="label label-success">' . trans('labels.general.all') . '</span>';
                 return $role->permission_name;
             })
             ->addColumn('actions', function ($role) {
-
                 if ($role->ins == auth()->user()->ins) {
                     return '<a class="btn btn-flat btn-default btn-primary" href="' . route('biller.role.edit', $role->id) . '">
-                    <i data-toggle="tooltip" data-placement="top" title="Edit" class="fa fa-pencil"></i>
-                </a> <a class="btn btn-flat btn-default btn-danger" href="' . route('biller.role.destroy', $role->id) . '" data-method="delete"
+                        <i data-toggle="tooltip" data-placement="top" title="Edit" class="fa fa-pencil"></i></a> 
+                    <a class="btn btn-flat btn-default btn-danger" href="' . route('biller.role.destroy', $role->id) . '" data-method="delete"
                         data-trans-button-cancel="' . trans('buttons.general.cancel') . '"
                         data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '"
                         data-trans-title="' . trans('strings.backend.general.are_you_sure') . '">
                             <i data-toggle="tooltip" data-placement="top" title="Delete" class="fa fa-trash"></i>
                     </a>';
                 }
+                
                 return trans('business.default');
             })
             ->make(true);

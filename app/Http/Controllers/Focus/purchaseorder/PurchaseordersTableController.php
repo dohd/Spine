@@ -52,8 +52,18 @@ class PurchaseordersTableController extends Controller
     {
         $core = $this->purchaseorder->getForDataTable();
 
-        $ins = auth()->user()->ins;
-        $prefixes = prefixesArray(['purchase_order'], $ins);
+        $prefixes = prefixesArray(['purchase_order'], auth()->user()->ins);
+        // aggregate
+        $order_total = $core->sum('grandttl');
+        $grn_total = 0;
+        foreach ($core as $po) {
+            $grn_total += $po->grns->sum('total');
+        }
+        $aggregate = [
+            'order_total' => numberFormat($order_total),
+            'grn_total' => numberFormat($grn_total),
+            'due_total' => numberFormat($order_total - $grn_total),
+        ];   
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
@@ -77,11 +87,11 @@ class PurchaseordersTableController extends Controller
             ->addColumn('status', function ($po) {
                 return $po->status;
             })
-            ->addColumn('grn_count', function ($po) {
-                return $po->grn_items->count();
-            })
             ->addColumn('actions', function ($po) {
                 return $po->action_buttons;
+            })
+            ->addColumn('aggregate', function () use($aggregate) {
+                return $aggregate;
             })
             ->make(true);
     }

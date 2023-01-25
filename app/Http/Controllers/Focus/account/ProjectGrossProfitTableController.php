@@ -56,8 +56,12 @@ class ProjectGrossProfitTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function($project) {
-                if ($project->customer_project)
-                return $project->customer_project->company;
+                $customer = '';
+                if ($project->customer_project) {
+                    $customer = $project->customer_project->company;
+                    if ($project->branch) $customer .= " - {$project->branch->name}";
+                }
+                return $customer;
             })
             ->addColumn('tid', function($project) {
                 return '<a href="'. route('biller.projects.show', $project) .'">'. gen4tid('Prj-', $project->tid) .'</a>';

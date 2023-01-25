@@ -269,6 +269,7 @@ class CustomerRepository extends BaseRepository
 
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
+        
         $result = Customer::create($input);
 
         $branches = [['name' => 'All Branches'], ['name' => 'Head Office']];

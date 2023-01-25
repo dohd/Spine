@@ -83,7 +83,7 @@ class InvoicesController extends Controller
      */
     public function index(ManageInvoiceRequest $request)
     {
-        $customers = Customer::get(['id', 'company']);
+        $customers = Customer::whereHas('invoices')->get(['id', 'company']);
         
         return new ViewResponse('focus.invoices.index', compact('customers'));
     }
@@ -203,7 +203,7 @@ class InvoicesController extends Controller
 
         $ins =  auth()->user()->ins;
         $last_tid = Invoice::where('ins', $ins)->max('tid');
-        $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice', 'purchase_order', 'delivery_note', ''], $ins);
+        $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice', 'purchase_order', 'delivery_note', 'jobcard'], $ins);
 
         $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes');
 

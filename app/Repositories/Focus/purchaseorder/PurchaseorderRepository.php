@@ -6,16 +6,13 @@ use App\Models\purchaseorder\Purchaseorder;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
-use App\Models\bill\Bill;
-use App\Models\billitem\BillItem;
-use App\Models\items\GrnItem;
 use App\Models\items\PurchaseorderItem;
-use App\Models\purchaseorder\Grn;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class PurchaseorderRepository.
@@ -36,6 +33,12 @@ class PurchaseorderRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        $q->when(request('supplier_id'), function ($q) {
+            $q->where('supplier_id', request('supplier_id'));
+        })->when(request('status'), function ($q) {
+            $q->where('status', request('status'));     
+        });
 
         return $q->get();
     }
@@ -86,6 +89,7 @@ class PurchaseorderRepository extends BaseRepository
             return $result;   
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -135,9 +139,12 @@ class PurchaseorderRepository extends BaseRepository
             $order_item->save();                
         }
 
-        DB::commit();
-        if ($purchaseorder) return true;
+        if ($purchaseorder) {
+            DB::commit();
+            return true;
+        }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
@@ -150,15 +157,18 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function delete($purchaseorder)
     {
-        try {
-            DB::beginTransaction();
+        if ($purchaseorder->grn_items->count()) 
+            throw ValidationException::withMessages(['Purchase order is attached to a Goods Receive Note!']);
 
+        DB::beginTransaction();
+        try {
             $purchaseorder->transactions()->delete();
             aggregate_account_transactions();
-            $purchaseorder->delete();
-
-            DB::commit();
-            return true;
+            
+            if ($purchaseorder->delete()) {
+                DB::commit();
+                return true;
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));

@@ -23,18 +23,18 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-2 h4">Total Stock Count</div>                            
+                            <div class="col-2 h4">Product Count</div>                            
                             <div class="col-2 h4 stock-count">0</div>
                         </div>
                         <div class="row mb-1">
-                            <div class="col-2 h4">Total Stock Worth</div>                           
+                            <div class="col-2 h4">Total Unit Cost</div>                           
                             <div class="col-4 h4 stock-worth">0.00</div>
                         </div>
                         <div class="row">                            
                             <div class="col-3">
-                                <label for="warehouse" class="h4">Warehouse</label>
+                                <label for="warehouse" class="h4">Product Location</label>
                                 <select name="warehouse_id" id="warehouse" class="custom-select">
-                                    <option value="">-- select warehouse --</option>
+                                    <option value="">-- select location --</option>
                                     @foreach ($warehouses as $warehouse)
                                         <option value="{{ $warehouse->id }}">{{ $warehouse->title }}</option>
                                     @endforeach
@@ -158,7 +158,7 @@
                     dataSrc: ({data}) => {
                         $('.stock-count').text('0');
                         $('.stock-worth').text('0.00');
-                        if (data.length) {
+                        if (data.length && data[0].aggregate) {
                             const aggr = data[0].aggregate;
                             $('.stock-count').text(aggr.product_count);
                             $('.stock-worth').text(aggr.product_worth);
@@ -173,7 +173,8 @@
                     {data: 'code', name: 'code'},                    
                     {data: 'qty', name: 'qty'},
                     {data: 'unit', name: 'unit'},
-                    {data: 'price', name: 'price'},
+                    {data: 'purchase_price', name: 'purchase_price'},
+                    {data: 'total', name: 'total'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

@@ -69,12 +69,21 @@ class SupplierRepository extends BaseRepository
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'payable');  
         })->where(function ($q) use($params) {
-            $q->where('tr_type', 'bill')->whereHas('bill', function ($q1) use($params) { 
-                $q1->where($params); 
-            })->orWhere('tr_type', 'pmt')->whereHas('paidbill', function ($q1) use($params) {
-                $q1->where($params);
+            // purchase bill
+            $q->where('tr_type', 'bill')->whereHas('bill', function ($q) use($params) { 
+                $q->where('bills.supplier_id', $params['supplier_id']);
+            })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q) use($params) {
+                $q->where($params);
+            });
+        })->orwhere(function ($q) use($params) {
+            // grn bill
+            $q->where('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn_bill', function ($q) use($params) {
+                $q->where($params);
+            })->orwhere('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn_invoice_bill', function ($q) use($params) {
+                $q->where($params);
             });
         })->orwhere(function ($q) use($supplier) {
+            // opening balance
             $note = "%{$supplier->id}-supplier Account Opening Balance {$supplier->open_balance_note}%";
             $q->where('tr_type', 'genjr')->where('credit', '>', 0)->where('note', 'LIKE', $note);
         });
@@ -142,7 +151,7 @@ class SupplierRepository extends BaseRepository
                     'id' => $i,
                     'date' => $pmt->bill->date,
                     'type' => 'payment',
-                    'note' => "({$tid}) {$pmt_tid} reference: {$reference} mode: ${payment_mode} account: {$account} amount: {$amount}",
+                    'note' => "({$tid}) {$pmt_tid} reference: {$reference} mode: {$payment_mode} account: {$account} amount: {$amount}",
                     'debit' => $pmt->paid,
                     'credit' => 0,
                     'bill_id' => $bill_id,
@@ -169,6 +178,9 @@ class SupplierRepository extends BaseRepository
         // dd($input);
         $data = $input['data'];
         if (!empty($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
+
+        if (isset($data['taxid']) && strlen($data['taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
 
         DB::beginTransaction();
 
@@ -266,6 +278,9 @@ class SupplierRepository extends BaseRepository
             $data['picture'] = $this->uploadPicture($data['picture']);
         }
 
+        if (isset($data['taxid']) && strlen($data['taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
         $account_data = $input['account_data'];
         $data = array_replace($data, [
             'open_balance' => numberClean($account_data['open_balance']),
@@ -296,11 +311,13 @@ class SupplierRepository extends BaseRepository
                         'total' => $open_balance,
                         'note' => $note,
                     ]);   
-                    $bill->item->update([
-                        'subtotal' => $open_balance,
-                        'total' => $open_balance,
-                        'note' => $note,
-                    ]);
+                    if ($bill->item) {
+                        $bill->item->update([
+                            'subtotal' => $open_balance,
+                            'total' => $open_balance,
+                            'note' => $note,
+                        ]);
+                    }
                 }
 
                 // recognise expense

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Utils\MessageUtil;
 use Illuminate\Support\Str;
 use App\Repositories\Focus\general\RosemailerRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class HrmRepository.
@@ -25,7 +26,7 @@ class HrmRepository extends BaseRepository
     /**
      * Associated Repository Model.
      */
-  
+
 
     const MODEL = Hrm::class;
     protected $file_picture_path;
@@ -52,13 +53,15 @@ class HrmRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
-        if (request('rel_type') == 2 AND request('rel_id')) {
+        $q = $this->query()->where('first_name', 'NOT LIKE', '%Admin%')->where('last_name', 'NOT LIKE', '%Admin%');
+        
+        if (request('rel_type') == 2 and request('rel_id')) {
             $q->whereHas('meta', function ($s) {
                 return $s->where('department_id', '=', request('rel_id', 0));
             });
         }
-        return $q->with(['monthlysalary'])->get(['id','email','picture','first_name','last_name','status','created_at']);
+
+        return $q->with(['monthlysalary'])->get(['id', 'email', 'picture', 'first_name', 'last_name', 'status', 'created_at']);
     }
 
     /**
@@ -71,10 +74,10 @@ class HrmRepository extends BaseRepository
         $q->when(request('rel_id'), function ($q) {
             $q->where('user_id', request('rel_id'));
         });
-        
+
         return $q->get();
     }
-    
+
 
     /**
      * For Creating the respective model in storage
@@ -85,63 +88,69 @@ class HrmRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-        if (!empty($input['employee']['picture'])) {
-            $input['employee']['picture'] = $this->uploadPicture($input['employee']['picture'], $this->file_picture_path);
-        }
-        if (!empty($input['employee']['signature'])) {
-            $input['employee']['signature'] = $this->uploadPicture($input['employee']['signature'], $this->file_sign_path);
-        }
-        if (!empty($input['meta']['id_front'])) {
-            $input['meta']['id_front'] = $this->uploadPicture($input['meta']['id_front'], $this->file_sign_path);
-        }
-        if (!empty($input['meta']['id_back'])) {
-            $input['meta']['id_back'] = $this->uploadPicture($input['meta']['id_back'], $this->file_sign_path);
-        }
-        $username=Str::random(4);
-        $password=Str::random(6);
-        $input['employee']['password']= $password;
-        $input['employee']['username']= $username;
-        $email_input=array();
-        $email_input['text']='ERPSPINE  account created Successfully!!Your  username is : '.$username.' and password is : '.$password .'';
-        $email_input['subject']='ERPSPINE LOGIN DETAILS';
-        $email_input['mail_to']=$input['employee']['email'];
-        $email_input['customer_name']=$input['employee']['first_name'];
-        $input['meta']['dob'] =date_for_database($input['meta']['dob']);
-        $input['meta']['employement_date'] =date_for_database($input['meta']['employement_date']);
-
+        // dd($input);
         DB::beginTransaction();
-        $role = $input['employee']['role'];
-        $role_valid = Role::where(function ($query) {
-            $query->where('ins', '=', auth()->user()->ins)->orWhereNull('ins');
-        })->where('id', '=', $role)->first();
-        if ($role_valid->status < 1) {
-            unset($input['employee']['role']);
-            $input['employee']['created_by'] = auth()->user()->id;
-            $input['employee']['confirmed'] = 1;
-           // $input['profile'] = array_map( 'strip_tags', $input['profile']);
-            $input['meta'] = array_map( 'strip_tags', $input['meta']);
-            $input['employee'] = array_map( 'strip_tags', $input['employee']);
-            $hrm = Hrm::create($input['employee']);
 
-           // $input['profile']['user_id'] = $hrm->id;
-            $input['meta']['user_id'] = $hrm->id;
-
-           // UserProfile::create($input['profile']);
-            HrmMeta::create($input['meta']);
-            RoleUser::create(array('user_id' => $hrm->id, 'role_id' => $role));
-
-            if (isset($input['permission']['permission'])) $hrm->permissions()->attach($input['permission']['permission']);
-
-            DB::commit();
-            if ($hrm->id) {
-                //send email and text
-               // $this->messageUtil->sendMessage($input['meta']['primary_contact'],$email_input['text']);
-                $mailer = new RosemailerRepository;
-                $mailer->send($email_input['text'], $email_input);
-                return $hrm->id;
+        foreach ($input as $key => $val) {
+            if ($key == 'employee') {
+                if (isset($val['picture'])) 
+                    $input[$key]['picture'] = $this->uploadPicture($val['picture'], $this->file_picture_path);
+                if (isset($val['signature'])) 
+                    $input[$key]['signature'] = $this->uploadPicture($val['signature'], $this->file_sign_path);
+            }
+            if ($key == 'meta') {
+                if (isset($val['id_front'])) 
+                    $input[$key]['id_front'] = $this->uploadPicture($val['id_front'], $this->file_sign_path);
+                if (isset($val['id_back'])) 
+                    $input[$key]['id_back'] = $this->uploadPicture($val['id_back'], $this->file_sign_path);
             }
         }
+
+        $username = Str::random(4);
+        $password = strval("123456");
+        $input['employee'] = array_replace($input['employee'], compact('username', 'password'));
+
+        $email_input = [
+            'text' => 'Account Created Successfully. Username: ' . $username . ' and Password: ',
+            'subject' => strtoupper('login details'),
+            'mail_to' => $input['employee']['email'],
+            'customer_name' => $input['employee']['first_name'],
+        ];
+
+        $input['meta'] = array_replace($input['meta'], [
+            'dob' => date_for_database($input['meta']['dob']),
+            'employement_date' => date_for_database($input['meta']['employement_date']),
+        ]);
+
+        $role_id = $input['employee']['role'];
+        $role = Role::find($role_id);
+        if ($role && $role->status == 0) {
+            $input['employee'] = array_replace($input['employee'], [
+                'created_by' => auth()->user()->id,
+                'confirmed' => 1,
+            ]);
+            unset($input['employee']['role']);
+            $hrm = Hrm::create($input['employee']);
+
+            $input['meta']['user_id'] = $hrm->id;
+            if (!$input['meta']['is_cronical']) $input['meta']['specify'] = 'none';
+            HrmMeta::create($input['meta']);
+
+            RoleUser::create(['user_id' => $hrm->id, 'role_id' => $role_id]);
+            
+            if (isset($input['permission'])) $hrm->permissions()->attach($input['permission']);
+
+            if ($hrm) {
+                DB::commit();
+                // send email and text
+                // $this->messageUtil->sendMessage($input['meta']['primary_contact'], $email_input['text']);
+                $mailer = new RosemailerRepository;
+                $mailer->send($email_input['text'], $email_input);
+
+                return $hrm;
+            }
+        }
+
         throw new GeneralException(trans('exceptions.backend.hrms.create_error'));
     }
 
@@ -155,63 +164,60 @@ class HrmRepository extends BaseRepository
      */
     public function update(Hrm $hrm, array $input)
     {
-        if (!empty($input['employee']['picture'])) {
-            if ($this->storage->exists($this->file_picture_path . $hrm->picture)) {
-                $this->storage->delete($this->file_picture_path . $hrm->picture);
-            }
-            $input['employee']['picture'] = $this->uploadPicture($input['employee']['picture'], $this->file_picture_path);
-        }
-        if (!empty($input['employee']['signature'])) {
-            if ($this->storage->exists($this->file_sign_path . $hrm->signature)) {
-                $this->storage->delete($this->file_sign_path . $hrm->signature);
-            }
-            $input['employee']['signature'] = $this->uploadPicture($input['employee']['signature'], $this->file_sign_path);
-        }
-        if (!empty($input['meta']['id_front'])) {
-            if ($this->storage->exists($this->file_sign_path . $hrm->id_front)) {
-                $this->storage->delete($this->file_sign_path . $hrm->id_front);
-            }
-            $input['meta']['id_front'] = $this->uploadPicture($input['meta']['id_front'], $this->file_sign_path);
-        }
-        if (!empty($input['meta']['id_back'])) {
-            if ($this->storage->exists($this->file_sign_path . $hrm->id_back)) {
-                $this->storage->delete($this->file_sign_path . $hrm->id_back);
-            }
-            $input['meta']['id_back'] = $this->uploadPicture($input['meta']['id_back'], $this->file_sign_path);
-        }
-        $input['meta']['dob'] =date_for_database($input['meta']['dob']);
-        $input['meta']['employement_date'] =date_for_database($input['meta']['employement_date']);
+        // dd($input);
+        DB::beginTransaction();
 
+        foreach ($input as $key => $val) {
+            if ($key == 'employee') {
+                if (isset($val['picture'])) {
+                    if ($this->storage->exists($this->file_picture_path . $hrm->picture)) {
+                        $this->storage->delete($this->file_picture_path . $hrm->picture);
+                    }
+                    $input[$key]['picture'] = $this->uploadPicture($val['picture'], $this->file_picture_path);
+                }
+                if (isset($val['signature'])) {
+                    if ($this->storage->exists($this->file_sign_path . $hrm->signature)) {
+                        $this->storage->delete($this->file_sign_path . $hrm->signature);
+                    }
+                    $input[$key]['signature'] = $this->uploadPicture($val['signature'], $this->file_sign_path);
+                }
+            }
+            if ($key == 'meta') {
+                if (isset($val['id_front'])) {
+                    if ($this->storage->exists($this->file_sign_path . $hrm->id_front)) {
+                        $this->storage->delete($this->file_sign_path . $hrm->id_front);
+                    }
+                    $input[$key]['id_front'] = $this->uploadPicture($val['id_front'], $this->file_sign_path);
+                }
+                if (isset($val['id_back'])) {
+                    if ($this->storage->exists($this->file_sign_path . $hrm->id_back)) {
+                        $this->storage->delete($this->file_sign_path . $hrm->id_back);
+                    }
+                    $input[$key]['id_back'] = $this->uploadPicture($val['id_back'], $this->file_sign_path);
+                }
+                $input[$key]['dob'] = date_for_database($val['dob']);
+                $input[$key]['employement_date'] = date_for_database($val['employement_date']);
+            }
+        }
 
-       
+        $role_id = $input['employee']['role'];
+        $role = Role::find($role_id);
+        if ($role && $role->status == 0) {
+            $role_user = RoleUser::where('user_id', $hrm->id)->first();
+            if ($role_user) $role_user->update(compact('role_id'));
 
+            $hrm_meta = HrmMeta::where('user_id', $hrm->id)->first();
+            if ($hrm_meta) $hrm_meta->update($input['meta']);
 
-        $role = $input['employee']['role'];
-        $role_valid = Role::where(function ($query) {
-            $query->where('ins', '=', auth()->user()->ins)->orWhereNull('ins');
-        })->where('id', '=', $role)->first();
-        if (@$role_valid->status < 1) {
-            DB::beginTransaction();
-            // $input['profile'] = array_map( 'strip_tags', $input['profile']);
-           // $user = UserProfile::where('user_id', $hrm->id)->update($input['profile']);
-            $role = $input['employee']['role'];
             unset($input['employee']['role']);
-            RoleUser::where('user_id', $hrm->id)->update(array('role_id' => $role));
+            $hrm->update($input['employee']);
 
-              $input['meta'] = array_map( 'strip_tags', $input['meta']);
-
-            HrmMeta::where('user_id', $hrm->id)->update($input['meta']);
-
-            //$hrm->permissions()->delete(['user_id'=>$hrm->id]);
             PermissionUser::where('user_id', $hrm->id)->delete();
-                   $input['employee'] = array_map( 'strip_tags', $input['employee']);
-            if ($hrm->update($input['employee'])) DB::commit();
-            if (isset($input['permission']['permission'])) {
-                $hrm->permissions()->attach($input['permission']['permission']);
-            }
+            if (isset($input['permission'])) $hrm->permissions()->attach($input['permission']);
+
+            DB::commit();
             return true;
         }
-
 
         throw new GeneralException(trans('exceptions.backend.hrms.update_error'));
     }
@@ -219,14 +225,24 @@ class HrmRepository extends BaseRepository
     /**
      * For deleting the respective model from storage
      *
-     * @param Hrm $hrm
+     * @param \App\Models\hrm\Hrm $hrm
      * @return bool
      * @throws GeneralException
      */
     public function delete(Hrm $hrm)
     {
-        UserProfile::where('user_id', $hrm->id)->delete();
+        DB::beginTransaction();
+
+        if (auth()->user()->id == $hrm->id)
+            throw ValidationException::withMessages(['Not allowed!']);
+
+        $params = ['user_id' => $hrm->id];
+        HrmMeta::where($params)->delete();
+        RoleUser::where($params)->delete();
+        UserProfile::where($params)->delete();
+
         if ($hrm->delete()) {
+            DB::commit();
             return true;
         }
 
@@ -234,8 +250,8 @@ class HrmRepository extends BaseRepository
     }
 
     /*
-* Upload logo image
-*/
+    * Upload logo image
+    */
     public function uploadPicture($logo, $path)
     {
 

@@ -27,6 +27,7 @@ use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\RedirectResponse;
+use App\Models\supplier\Supplier;
 use Request;
 
 /**
@@ -57,7 +58,9 @@ class PurchaseordersController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.purchaseorders.index');
+        $suppliers = Supplier::whereHas('purchase_orders')->get(['id', 'name']);
+
+        return new ViewResponse('focus.purchaseorders.index', compact('suppliers'));
     }
 
     /**
@@ -157,7 +160,6 @@ class PurchaseordersController extends Controller
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        
     }
 
-
     /**
      * Remove the specified resource from storage.
      *
@@ -171,45 +173,12 @@ class PurchaseordersController extends Controller
     }
 
     /**
-     * 
-     */
-    public function create_grn(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
-    {
-        return new ViewResponse('focus.purchaseorders.create_grn', compact('purchaseorder'));
-    }
-
-    /**
-     * Receive purchase order goods
-     */
-    public function store_grn(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
-    {
-        // extract input fields
-        $order = $request->only([
-            'stock_grn', 'expense_grn', 'asset_grn',
-            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
-            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
-        ]);
-        $order_items = $request->only(['poitem_id', 'qty', 'dnote', 'date']);
-
-        $order['purchaseorder_id'] = $purchaseorder->id;
-        $order['ins'] = auth()->user()->ins;
-        $order['user_id'] = auth()->user()->id;
-        // modify and filter items with 0 qty
-        $order_items = modify_array($order_items);
-        $order_items = array_filter($order_items, function ($v) { return $v['qty']; });
-
-        $result = $this->repository->create_grn($purchaseorder, compact('order', 'order_items'));
-
-        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order Goods successfully received']);
-    }
-
-    /**
      * Purchase Order Goods
      */
     public function goods(Request $request)
     {
         $purchaseorder = Purchaseorder::find(request('purchaseorder_id'));
-        $stock_goods = $purchaseorder->goods()->where('type', 'Stock')->get();
+        $stock_goods = $purchaseorder? $purchaseorder->goods()->where('type', 'Stock')->get() : [];
 
         return response()->json($stock_goods);
     }

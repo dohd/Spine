@@ -47,6 +47,7 @@ trait SupplierRelationship
     {
         return $this->hasMany(SupplierProduct::class);
     }
+    
     function purchase() {
         return $this->hasMany(Purchase::class);
     }

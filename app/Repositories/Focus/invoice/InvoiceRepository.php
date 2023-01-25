@@ -7,7 +7,6 @@ use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
 use App\Models\invoice\PaidInvoice;
-use App\Models\project\Project;
 use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -118,6 +117,7 @@ class InvoiceRepository extends BaseRepository
             return $result;
         }
 
+        DB::rollBack();
         throw new GeneralException('Error Creating Invoice');
     }
 
@@ -164,6 +164,9 @@ class InvoiceRepository extends BaseRepository
             DB::commit();
             return $invoice;        
         }
+
+        DB::rollBack();
+        throw new GeneralException(trans('exceptions.backend.invoices.update_error'));
     }
 
     /**
@@ -204,6 +207,7 @@ class InvoiceRepository extends BaseRepository
             return true;
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
     }
 

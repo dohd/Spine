@@ -3,10 +3,10 @@
 namespace App\Models\purchaseorder\Traits;
 
 use App\Models\bill\Bill;
-use App\Models\items\GrnItem;
+use App\Models\goodsreceivenote\Goodsreceivenote;
+use App\Models\items\GoodsreceivenoteItem;
 use App\Models\items\PurchaseorderItem;
 use App\Models\project\Project;
-use App\Models\purchaseorder\Grn;
 use App\Models\transaction\Transaction;
 
 /**
@@ -21,12 +21,12 @@ trait PurchaseorderRelationship
 
     public function grn_items()
     {
-        return $this->hasManyThrough(GrnItem::class, Grn::class, 'purchaseorder_id', 'grn_id')->withoutGlobalScopes();
+        return $this->hasManyThrough(GoodsreceivenoteItem::class, Goodsreceivenote::class, 'purchaseorder_id', 'goods_receive_note_id')->withoutGlobalScopes();
     }
 
-    public function grn()
+    public function grns()
     {
-        return $this->hasMany(Grn::class, 'purchaseorder_id');
+        return $this->hasMany(Goodsreceivenote::class, 'purchaseorder_id');
     }
 
     public function items()

@@ -1,5 +1,5 @@
 <div class="row p-1">
-    @if(access()->allow('manage-hrm'))
+    @if(access()->allow('hrm'))
         @foreach($permissions_all as $row)
             <div class="col-md-6">
                 <div class="custom-control custom-checkbox">

@@ -41,13 +41,16 @@
         let total = 0;
         $('#quoteTbl tbody tr').each(function(i) {
             let lineSubtotal = accounting.unformat($(this).find('.subtotal').val());
-            let lineQty = parseFloat($(this).find('.qty').val());
+            let lineQty = accounting.unformat($(this).find('.qty').val());
+            let lineTotal = lineSubtotal * lineQty;
             const taxRate = $('#tax_id').val() / 100;
-            tax += lineSubtotal * taxRate;
-            subtotal += lineSubtotal * lineQty;
-            total += lineSubtotal * lineQty * (1+taxRate);
+           
+            tax += lineTotal * taxRate;
+            subtotal += lineTotal;
+            total += lineTotal * (1+taxRate);
+             
             $(this).find('.rate').val(accounting.formatNumber(lineSubtotal));
-            $(this).find('.amount').text(accounting.formatNumber(lineSubtotal));
+            $(this).find('.amount').text(accounting.formatNumber(lineTotal));
         });
         $('#subtotal').val(accounting.formatNumber(subtotal));
         $('#tax').val(accounting.formatNumber(tax));
@@ -94,6 +97,7 @@
 
                     row.find('.quote-id').val(quote.id);
                     row.find('.branch-id').val(quote.branch_id);
+
                     const project_id = quote.project_quote? quote.project_quote.project_id : '';
                     row.find('.project-id').val(project_id);
                 });

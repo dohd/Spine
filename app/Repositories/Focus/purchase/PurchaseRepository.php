@@ -16,6 +16,7 @@ use App\Models\utility_bill\UtilityBill;
 use App\Repositories\BaseRepository;
 use Error;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class PurchaseorderRepository.
@@ -35,7 +36,11 @@ class PurchaseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->whereNull('po_id');
+        $q = $this->query();
+
+        $q->when(request('supplier_id'), function($q) {
+            $q->where('supplier_id', request('supplier_id'));
+        });
 
         return $q->get();
     }
@@ -63,6 +68,12 @@ class PurchaseRepository extends BaseRepository
             $headers = current($export);
             $data_rows = array_slice($export, 1, count($export));
             foreach ($data_rows as $i => $row) {
+                if (count($headers) != count($row)) {
+                    throw ValidationException::withMessages([
+                        'Unequal column count on line '. strval($i+1). ' on file '.$file_name
+                    ]);
+                }
+
                 $new_row = [];
                 foreach ($row as $key => $val) {
                     if (stripos($val, 'null') !== false) $val = null;
@@ -78,19 +89,25 @@ class PurchaseRepository extends BaseRepository
                 $supplier = Supplier::find($data['supplier_id'], ['id', 'taxid']);
                 if ($supplier) $data['supplier_taxid'] = $supplier->taxid;
                 if ($data['grandtax'] == 0) $data['tax'] = 0;
+                
+                foreach ($data as $key => $value) {
+                    if (in_array($key, ['date', 'due_date'])) {
+                        $data[$key] = date_for_database($value);
+                    }
+                    $data[$key] = trim($value);
+                }
+                
 
                 if (stripos($data['status'], 'paid') !== false) $data['status'] = 'paid';
-                if (stripos($data['status'], 'partly paid') !== false) $data['status'] = 'partial';
-                if (stripos($data['status'], 'not paid') !== false) $data['status'] = 'pending';
+                elseif (stripos($data['status'], 'partly paid') !== false) $data['status'] = 'partial';
+                else $data['status'] = 'pending';
 
                 // skip payments
                 if (stripos($data['status'], 'pmt') !== false) continue;
 
-                unset($data['id'], $data['po_id']);
-
                 // expense items
                 $data_items = array_map(fn($v) => [
-                    'item_id' => 103, // cog account
+                    'item_id' => @$data['ledger_id']? $data['ledger_id'] : 103, // cog account
                     'description' => $v['note'],
                     'itemproject_id' => $v['project_id'],
                     'qty' => 1,
@@ -103,6 +120,9 @@ class PurchaseRepository extends BaseRepository
                     'uom' => 'Lot',
                 ], [$data]);
 
+                unset($data['id'], $data['po_id'], $data['created_at'], $data['updated_at'], $data['ledger_id']);
+                $data_keys = array_filter(array_keys($data));
+                $data = array_intersect_key($data, array_flip($data_keys));
                 // dd(compact('data', 'data_items'));
                 $expense_data[] = compact('data', 'data_items');
             }
@@ -138,6 +158,18 @@ class PurchaseRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
+        // restrict special characters to only "/" and "-"
+        $pattern = "/^[a-zA-Z0-9-\/]+$/i";
+        if ($data['doc_ref_type'] == 'Invoice' && !preg_match($pattern, $data['doc_ref']))
+            throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
+
+        if (isset($data['supplier_taxid']) && strlen($data['supplier_taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
+        $inv_exists = Purchase::where('doc_ref_type', 'Invoice')
+            ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
+        if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
+
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $result = Purchase::create($data);
@@ -149,6 +181,7 @@ class PurchaseRepository extends BaseRepository
                     $item[$key] = numberClean($val);
                 if (isset($item['itemproject_id'])) $item['warehouse_id'] = null;
                 if (isset($item['warehouse_id'])) $item['itemproject_id'] = null;
+                if ($item['type'] == 'Expense' && empty($input['uom'])) $input['uom'] = 'Lot';
             }
 
             // append modified data_items
@@ -208,7 +241,8 @@ class PurchaseRepository extends BaseRepository
             DB::commit();
             return $result;   
         }
-                
+        
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
@@ -237,6 +271,18 @@ class PurchaseRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
+        // restrict special characters to only "/" and "-"
+        $pattern = "/^[a-zA-Z0-9-\/]+$/i";
+        if ($data['doc_ref_type'] == 'Invoice' && !preg_match($pattern, $data['doc_ref']))
+            throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
+
+        if (isset($data['supplier_taxid']) && strlen($data['supplier_taxid']) != 11)
+            throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
+        $inv_exists = Purchase::where('id', '!=', $purchase->id)->where('doc_ref_type', 'Invoice')
+            ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
+        if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
+
         $prev_note = $purchase->note;
         $result = $purchase->update($data);
 
@@ -245,7 +291,10 @@ class PurchaseRepository extends BaseRepository
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
         $purchase->items()->whereNotIn('id', $item_ids)->delete();
         // create or update purchase item
-        foreach ($data_items as $item) {         
+        foreach ($data_items as $item) {  
+            if ($item['type'] == 'Expense' && empty($item['uom'])) 
+                $item['uom'] = 'Lot';      
+                
             $purchase_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
 
             // update product stock
@@ -315,6 +364,7 @@ class PurchaseRepository extends BaseRepository
             return $purchase;
         }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
@@ -327,9 +377,9 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             // reduce stock
             foreach ($purchase->items as $item) {
                 if ($item->type != 'Stock') continue;

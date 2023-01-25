@@ -4,10 +4,16 @@ namespace App\Models\items\Traits;
 
 use App\Models\product\ProductVariation;
 use App\Models\project\BudgetItem;
+use App\Models\projectstock\Projectstock;
 use App\Models\warehouse\Warehouse;
 
 trait ProjectstockItemRelationship
 {
+    public function project_stock()
+    {
+        return $this->belongsTo(Projectstock::class, 'project_stock_id');
+    }
+
     public function productvariation()
     {
         return $this->belongsTo(ProductVariation::class, 'product_id');

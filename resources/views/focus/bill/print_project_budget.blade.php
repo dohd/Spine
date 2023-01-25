@@ -152,13 +152,13 @@
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
 				@php
 					$clientname = $resource->lead->client_name;
-					$branch = 'Head Office';
+					$branch = '';
 					$address = $resource->lead->client_address;
 					$email = $resource->lead->client_email;
 					$cell = $resource->lead->client_contact;
 					if ($resource->client) {
 						$clientname = $resource->client->company;						
-						$branch = $resource->branch->name;
+						$branch = $resource->branch? $resource->branch->name : '';
 						$address = $resource->client->address;
 						$email = $resource->client->email;
 						$cell = $resource->client->phone;
