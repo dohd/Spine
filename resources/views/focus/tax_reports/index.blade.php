@@ -55,7 +55,7 @@
                                         <th>#</th>
                                         <th>Purchase / Sale Month</th>
                                         <th>Return Month</th>
-                                        <th>Tax Rate</th>
+                                        <th>Tax Group</th>
                                         <th>Sale Tax</th>
                                         <th>Purchase Tax</th>
                                         <th>Note</th>
