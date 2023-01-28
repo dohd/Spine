@@ -376,7 +376,14 @@
                 $('#productid-'+i).val(data.id);
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#qty-'+i).val(1);                
+                $('#qty-'+i).val(1);           
+                
+                const currencyRate = $('#currency option:selected').attr('currency_rate');
+                if (currencyRate > 1) {
+                    data.purchase_price = parseFloat(data.purchase_price) / currencyRate;
+                    data.price = parseFloat(data.price) / currencyRate;
+                }
+                
                 $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
                 $('#estqty-'+i).val(1);
 

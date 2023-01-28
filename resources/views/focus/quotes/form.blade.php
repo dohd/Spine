@@ -171,9 +171,9 @@
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
-                        @foreach($currencies as $curr)
-                            <option value="{{ $curr->id }}" {{ $curr->id === 1? 'selected' : '' }}>
-                                {{ $curr->symbol }} - {{ $curr->code }}
+                        @foreach($currencies as $currency)
+                            <option value="{{ $currency->id }}" currency_rate="{{ +$currency->rate }}" {{ $currency->id === 1? 'selected' : '' }}>
+                                {{ $currency->symbol }} - {{ $currency->code }}
                             </option>
                         @endforeach
                     </select>

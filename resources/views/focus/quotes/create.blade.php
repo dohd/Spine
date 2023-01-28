@@ -241,6 +241,32 @@
         });
     });    
 
+    // on currency change
+    // let initCurrencyRate = 1;
+    // $('#currency').change(function() {
+    //     const currencyRate = $(this).find(':selected').attr('currency_rate')*1;
+    //     console.log(currencyRate)
+    //     if (currencyRate > 1) {
+    //         initCurrencyRate = currencyRate;
+    //         $('#quoteTbl tbody tr').each(function() {
+    //             const purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currencyRate;
+    //             const itemRate = accounting.unformat($(this).find('.rate').val()) / currencyRate;
+    //             $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice));
+    //             $(this).find('.rate').val(accounting.formatNumber(itemRate));
+    //             console.log(purchasePrice, itemRate)
+               
+    //         });
+    //     } else {
+    //         $('#quoteTbl tbody tr').each(function() {
+    //             const purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initCurrencyRate;
+    //             const itemRate = accounting.unformat($(this).find('.rate').val()) * initCurrencyRate;
+    //             $(this).find('.buyprice').val(accounting.formatNumber((purchasePrice)));
+    //             $(this).find('.rate').val(accounting.formatNumber((itemRate)));
+    //             console.log(purchasePrice, itemRate)
+    //         });
+    //     }
+    // });       
+
     // compute totals
     function calcTotal() {
         let total = 0;
@@ -352,7 +378,14 @@
                 $('#productid-'+i).val(data.id);
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#qty-'+i).val(1);                
+                $('#qty-'+i).val(1); 
+                
+                const currencyRate = $('#currency option:selected').attr('currency_rate');
+                if (currencyRate > 1) {
+                    data.purchase_price = parseFloat(data.purchase_price) / currencyRate;
+                    data.price = parseFloat(data.price) / currencyRate;
+                }
+
                 $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
                 $('#estqty-'+i).val(1);
 
