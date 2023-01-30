@@ -129,9 +129,13 @@ class ProductsController extends Controller
      */
     public function destroy(Product $product)
     {
-        $this->repository->delete($product);
-
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.products.deleted')));
+        try {
+            $this->repository->delete($product);
+        } catch (\Throwable $th) {
+            return json_encode(['status' => 'Error', 'message' => $th->getMessage()]);
+        }
+        
+        return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.products.deleted')]);
     }
 
     /**
