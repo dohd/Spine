@@ -82,10 +82,10 @@ class InvoicesTableController extends Controller
                 return dateFormat($invoice->invoicedate);
             })
             ->addColumn('total', function ($invoice) {
-                return numberFormat($invoice->total);
+                return $invoice->currency? amountFormat($invoice->total, $invoice->currency->id) : numberFormat($invoice->total);
             })
             ->addColumn('balance', function ($invoice) {
-                return numberFormat($invoice->total - $invoice->amountpaid);
+                return $invoice->currency? amountFormat(($invoice->total - $invoice->amountpaid), $invoice->currency->id) : numberFormat($invoice->total - $invoice->amountpaid);
             })
             ->addColumn('status', function ($invoice) {
                 return '<span class="st-' . $invoice->status . '">' . trans('payments.' . $invoice->status) . '</span>';

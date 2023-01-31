@@ -157,7 +157,7 @@
                     }
 
                     // Table values
-                    $price = numberFormat($val->subtotal);
+                    $price = number_format($val->subtotal, 4);
                     $project_id = $val->project_quote ? $val->project_quote->project_id : '';
 
                     $title = $val->notes;
@@ -173,6 +173,7 @@
                     <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
                     <td><input type="text" class="form-control rate" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
                     <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ $price }}</span></strong></td>
+                    
                     <input type="hidden" class="subtotal" value="{{ $price }}" id="initprice-{{ $k }}" disabled>
                     <input type="hidden" class="num-val" name="numbering[]" id="num-{{ $k }}">
                     <input type="hidden" class="row-index" name="row_index[]" id="rowindex-{{ $k }}">
@@ -190,8 +191,9 @@
                     <td><textarea class="form-control descr" name="description[]" id="description-{{ $k }}" rows="5">{{ $item->description }}</textarea></td>
                     <td><input type="text" class="form-control unit" name="unit[]" id="unit-{{ $k }}" value="{{ $item->unit }}" readonly></td>
                     <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="{{ +$item->product_qty }}" readonly></td>
-                    <td><input type="text" class="form-control rate" name="product_price[]" value="{{ numberFormat($item->product_price) }}" id="product_price-{{ $k }}" readonly></td>
-                    <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ numberFormat($item->product_price * $item->product_qty) }}</span></strong></td>
+                    <td><input type="text" class="form-control rate" name="product_price[]" value="{{ number_format($item->product_price, 4) }}" id="product_price-{{ $k }}" readonly></td>
+                    <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ number_format($item->product_price * $item->product_qty, 4) }}</span></strong></td>
+
                     <input type="hidden"  class="subtotal" value="{{ $item->product_price }}" id="initprice-{{ $k }}" disabled>
                     <input type="hidden" class="num-val" name="numbering[]" value="{{ $item->numbering }}" id="num-{{ $k }}">
                     <input type="hidden" class="row-index" name="row_index[]" value="{{ $item->row_index }}" id="rowindex-{{ $k }}">

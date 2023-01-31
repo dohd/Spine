@@ -89,14 +89,18 @@
                 </div>             
             </div>
             <div class="form-group row">
-                <div class="col-6">
-                    <label for="quote_subtotal">{{ $label }} Subtotal (Ksh.)</label>
+                <div class="col-4">
+                    <label for="quote_subtotal">{{ $label }} Subtotal</label>
                     {{ Form::text('quote_subtotal', numberFormat($quote->subtotal), ['class' => 'form-control', 'id' => 'quote_subtotal',  'disabled']) }}
                 </div>
-                <div class="col-6">
-                    <label for="quote_subtotal">{{ $label }} Total (Ksh.)</label>
+                <div class="col-4">
+                    <label for="quote_subtotal">{{ $label }} Total</label>
                     {{ Form::text('quote_total', numberFormat($quote->total), ['class' => 'form-control', 'id' => 'quote_total', 'disabled']) }}
-                </div>                
+                </div>    
+                <div class="col-4">
+                    <label for="currency">Currency</label>
+                    {{ Form::text('currency', $quote->currency? $quote->currency->code : '', ['class' => 'form-control', 'id' => 'currency', 'disabled']) }}
+                </div>              
             </div>   
             <div class="form-group row">
                 <div class="col-12">

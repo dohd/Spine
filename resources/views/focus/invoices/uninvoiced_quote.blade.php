@@ -78,9 +78,9 @@
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th># {{ trans('quotes.quote') }} / PI</th>
                                         <th>Title</th>
-                                        <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                        <th>Verified (Ksh.)</th>
-                                        <th>Difference (Ksh.)</th>
+                                        <th>{{ trans('general.amount') }}</th>
+                                        <th>Verified</th>
+                                        <th>Margin</th>
                                         <th>Quote / PI Date</th>
                                         <th>LPO No</th>
                                         <th>Project No</th>
@@ -116,10 +116,12 @@
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
+    // init select2
     $('#customer_id').select2(config.select).val('').change();
     $('#lpo_number').select2(config.select).val('').change();
     $('#project_id').select2(config.select).val('').change();
 
+    // filter records by date
     $('#search').click(function() {
         var start_date = $('#start_date').val();
         var end_date = $('#end_date').val();
@@ -130,7 +132,7 @@
         alert("Date range is Required");
     });
 
-    // On selecting filter dropdown
+    // On filter change
     $('#customer_id, #lpo_number, #project_id').change(function() {
         var customer_id = $('#customer_id').val();
         var lpo_number = $('#lpo_number').val();
@@ -152,12 +154,26 @@
                 }
             });
         }
-
         $('#customer').val(customer_id);
         $('#quotesTbl').DataTable().destroy();
         return draw_data(customer_id, lpo_number, project_id);
     });
 
+    // on checking a row
+    const checkedCurrency = {};
+    $(document).on('click', '.row-select', function() {
+        const row = $(this).parents('tr:first');
+        const key = $(this).val();
+        const value = row.find('.currency').attr('currency_id');
+        if ($(this).prop('checked')) {
+            checkedCurrency[key] = value;
+        } else {
+            delete checkedCurrency[key];
+        }
+        console.log(checkedCurrency)
+    });
+   
+    // on multiselect
     $(document).on('click', '#select-all-row', function() {
         const $input = $(this).closest('table').find('tbody').find('input.row-select');
         if (this.checked) {
@@ -171,20 +187,16 @@
         }      
     });
 
-    //get selected items
-    function getSelectedRows() {
-        const rows = [];
-        $('.row-select:checked').each(function() {
-            rows.push($(this).val());
-        });
-        return rows;
-    }
-
-    //add selected rows
+    // submit selected rows
     $(document).on('click', '#add-selected', function(e) {
         e.preventDefault();
         if (!$('#customer_id').val()) return swal('Filter Customer');
-        const selected_rows = getSelectedRows();
+
+        const selected_rows =  [];
+        $('.row-select:checked').each(function() {
+            selected_rows.push($(this).val());
+        });
+
         if (!selected_rows.length) {
             $('#selected_products').val('');
             return swal('No records Selected');
@@ -199,6 +211,7 @@
         }, () => $('form#mass_add_form').submit()); 
     });
 
+    // draw dataTable
     function draw_data(customer_id = '', lpo_number = '', project_id = '') {
         const table = $('#quotesTbl').dataTable({
             processing: true,
@@ -217,42 +230,10 @@
                     searchable: false,
                     sortable: false
                 },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'title',
-                    name: 'title'
-                },
-                {
-                    data: 'total',
-                    name: 'total'
-                },
-                {
-                    data: 'verified_total',
-                    name: 'verified_total'
-                },
-                {
-                    data: 'diff_total',
-                    name: 'diff_total'
-                },
-                {
-                    data: 'created_at',
-                    name: 'created_at'
-                },
-                {
-                    data: 'lpo_number',
-                    name: 'lpo_number'
-                },
-                {
-                    data: 'project_tid',
-                    name: 'project_tid'
-                },
+                ...[
+                    'customer', 'tid', 'title', 'total', 'verified_total', 'diff_total', 
+                    'created_at', 'lpo_number', 'project_tid'
+                ].map(v => ({data: v, name: v})),
             ],
             order:[[0, 'desc']],
             searchDelay: 500,

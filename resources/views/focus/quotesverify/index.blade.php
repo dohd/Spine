@@ -60,8 +60,8 @@
                                         <th># Quote / PI</th>
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th>Title</th>                                            
-                                        <th>{{ trans('general.amount') }} (Ksh.)</th>
-                                        <th>Verified (Ksh.)</th>
+                                        <th>{{ trans('general.amount') }}</th>
+                                        <th>Verified</th>
                                         <th>Project No</th>
                                         <th>LPO No</th>
                                         <th>Client Ref</th>

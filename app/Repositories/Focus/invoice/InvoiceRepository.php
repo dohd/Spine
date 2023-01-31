@@ -74,6 +74,36 @@ class InvoiceRepository extends BaseRepository
     }
 
     /**
+     * Convert Invoice totals to KES
+     */
+    public function convert_totals_to_kes($result)
+    {
+        $quote_ids = [];
+        $inv_has_tax = $result['tax_id'] > 0;
+        foreach ($result->products as $key => $inv_product) {
+            $quote = $inv_product->quote;
+            if ($quote) {
+                if (in_array($quote->id, $quote_ids)) continue;
+                $quote_ids[] = $quote->id;
+                $currency = $inv_product->quote->currency;
+                if ($currency && $currency->rate > 1) {
+                    $subtotal = $quote->verified_products()->sum(DB::raw('product_subtotal * product_qty')) * $currency->rate;
+                    $total = $quote->verified_products()->sum(DB::raw('product_price * product_qty')) * $currency->rate;
+                    if ($key == 0) {
+                        foreach (['total', 'tax', 'subtotal'] as $value) {
+                            $result[$value] = 0;
+                        }
+                    }
+                    $result['total'] += $total;
+                    $result['subtotal'] += $subtotal;
+                    if ($inv_has_tax) $result['tax'] += $total - $subtotal;
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Create project invoice
      */
     public function create_project_invoice(array $input)
@@ -98,16 +128,18 @@ class InvoiceRepository extends BaseRepository
         foreach ($bill_items as $k => $item) {
             $bill_items[$k] = array_replace($item, [
                 'invoice_id' => $result->id,
-                'product_price' => numberClean($item['product_price']),
+                'product_price' => floatval(str_replace(',', '', $item['product_price'])),
             ]);
         }
         InvoiceItem::insert($bill_items);
 
         // update Quote or PI invoice status
         foreach ($result->products as $item) {
-            $quote = $item->quote;
-            if ($quote) $quote->update(['invoiced' => 'Yes']);
+            if ($item->quote) $item->quote->update(['invoiced' => 'Yes']);
         }
+
+        // convert invoice totals to KES via verified quote items
+        $result = $this->convert_totals_to_kes($result);
         
         /** accounting */
         $this->post_transaction_project_invoice($result);
@@ -152,9 +184,11 @@ class InvoiceRepository extends BaseRepository
 
         // update Quote or PI invoice status
         foreach ($invoice->products as $item) {
-            $quote = $item->quote;
-            if ($quote) $quote->update(['invoiced' => 'Yes']);
+            if ($item->quote) $item->quote->update(['invoiced' => 'Yes']);
         }
+
+        // convert invoice totals to KES via verified quote items
+        $invoice = $this->convert_totals_to_kes($invoice);
 
         /**accounting */
         $invoice->transactions()->delete();

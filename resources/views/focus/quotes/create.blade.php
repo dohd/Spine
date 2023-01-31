@@ -27,7 +27,7 @@
 
     <div class="card">
         <div class="card-body">
-        {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST']) }}
+        {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST', 'id' => 'quoteForm']) }}
             @include('focus.quotes.form')
         {{ Form::close() }}
         </div>
@@ -219,10 +219,10 @@
         let pcent_profit = profit / (estqty * buyprice) * 100;
         pcent_profit = isFinite(pcent_profit)? Math.round(pcent_profit) : 0;
 
-        $('#buyprice-'+id).val(accounting.formatNumber(buyprice));
-        $('#rate-'+id).val(accounting.formatNumber(rate));
-        $('#price-'+id).val(accounting.formatNumber(price));
-        $('#amount-'+id).text(accounting.formatNumber(qty * price));
+        $('#buyprice-'+id).val(accounting.formatNumber(buyprice, 4));
+        $('#rate-'+id).val(accounting.formatNumber(rate, 4));
+        $('#price-'+id).val(accounting.formatNumber(price, 4));
+        $('#amount-'+id).text(accounting.formatNumber(qty * price, 4));
         $('#lineprofit-'+id).text(pcent_profit + '%');
         calcTotal();
     });
@@ -235,38 +235,34 @@
             if (qty > 0) {
                 const rate = accounting.unformat($(this).find('.rate').val());
                 let price = rate * tax;
-                $(this).find('.price').val(accounting.formatNumber(price));
+                $(this).find('.price').val(accounting.formatNumber(price, 4));
                 $(this).find('.rate').change();
             }
         });
     });    
 
     // on currency change
-    // let initCurrencyRate = 1;
-    // $('#currency').change(function() {
-    //     const currencyRate = $(this).find(':selected').attr('currency_rate')*1;
-    //     console.log(currencyRate)
-    //     if (currencyRate > 1) {
-    //         initCurrencyRate = currencyRate;
-    //         $('#quoteTbl tbody tr').each(function() {
-    //             const purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currencyRate;
-    //             const itemRate = accounting.unformat($(this).find('.rate').val()) / currencyRate;
-    //             $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice));
-    //             $(this).find('.rate').val(accounting.formatNumber(itemRate));
-    //             console.log(purchasePrice, itemRate)
-               
-    //         });
-    //     } else {
-    //         $('#quoteTbl tbody tr').each(function() {
-    //             const purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initCurrencyRate;
-    //             const itemRate = accounting.unformat($(this).find('.rate').val()) * initCurrencyRate;
-    //             $(this).find('.buyprice').val(accounting.formatNumber((purchasePrice)));
-    //             $(this).find('.rate').val(accounting.formatNumber((itemRate)));
-    //             console.log(purchasePrice, itemRate)
-    //         });
-    //     }
-    // });       
-
+    let initCurrencyRate = $('#currency option:selected').attr('currency_rate');
+    $('#currency').change(function() {
+        const currencyRate = $(this).find(':selected').attr('currency_rate')*1;
+        if (currencyRate > 1) {
+            initCurrencyRate = currencyRate;
+            $('#quoteTbl tbody tr').each(function() {
+                const purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currencyRate;
+                const itemRate = accounting.unformat($(this).find('.rate').val()) / currencyRate;
+                $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
+                $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
+            });
+        } else {
+            $('#quoteTbl tbody tr').each(function() {
+                purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initCurrencyRate;
+                itemRate = accounting.unformat($(this).find('.rate').val())  * initCurrencyRate;
+                $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
+                $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
+            });
+        }
+    });      
+    
     // compute totals
     function calcTotal() {
         let total = 0;

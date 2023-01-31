@@ -84,7 +84,7 @@ class CustomersController extends Controller
     public function store(CreateCustomerRequest $request)
     {
         $request->validate([
-            'name' => 'required',
+            'company' => 'required',
             'phone' => 'required',
             'email' => 'required',
         ]);
@@ -128,7 +128,7 @@ class CustomersController extends Controller
     public function update(EditCustomerRequest $request, Customer $customer)
     {
         $request->validate([
-            'name' => 'required',
+            'company' => 'required',
             'phone' => 'required',
             'email' => 'required',
         ]);

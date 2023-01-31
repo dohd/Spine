@@ -3,6 +3,7 @@
 namespace App\Models\invoice\Traits;
 
 use App\Models\creditnote\CreditNote;
+use App\Models\currency\Currency;
 use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
@@ -89,5 +90,10 @@ trait InvoiceRelationship
     public function branch()
     {
         return $this->hasOneThrough(Branch::class, Lead::class, 'id', 'id', 'lead_id', 'branch_id')->withoutGlobalScopes();
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 }

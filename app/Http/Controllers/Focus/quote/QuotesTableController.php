@@ -77,6 +77,7 @@ class QuotesTableController extends Controller
                 return dateFormat($quote->date);
             })
             ->addColumn('total', function ($quote) {
+                if ($quote->currency) return amountFormat($quote->total, $quote->currency->id);
                 return numberFormat($quote->total);
             })   
             ->addColumn('lead_tid', function($quote) use($prefixes) {

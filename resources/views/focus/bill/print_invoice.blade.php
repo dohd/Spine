@@ -199,12 +199,19 @@
 		<thead>
 			<tr>
 				<td width="6%">No.</td>
-				<td width="24%"> REFERENCE</td>
-				<td width="24%"> DESCRIPTION</td>
+				<td width="24%">REFERENCE</td>
+				<td width="24%">DESCRIPTION</td>
 				<td width="8%">QTY</td>
 				<td width="8%">UoM</td>
 				<td width="14%">RATE</td>
-				<td width="14%">AMOUNT(Ksh)</td>
+				@php
+					$code = '';
+					$inv_product = 	$resource->products->first();
+					if ($inv_product && isset($inv_product->quote->currency)) {
+						$code = $inv_product->quote->currency->code;
+					} 
+				@endphp
+				<td width="14%">AMOUNT {{ $code? "({$code})" : '' }}</td>
 			</tr>
 		</thead>
 		<tbody>

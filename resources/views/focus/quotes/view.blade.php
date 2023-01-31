@@ -53,17 +53,17 @@
                     <div id="invoice-customer-details" class="row pt-2">                        
                         <div class="col-6 text-center text-md-left">
                             @php
-                                $clientname = $quote->lead->client_name;
+                                $clientname = $quote->lead? $quote->lead->client_name : '';
                                 $branch = '';
-                                $address = $quote->lead->client_address;
-                                $email = $quote->lead->client_email;
-                                $cell = $quote->lead->client_contact;
-                                if ($quote->client) {
-                                    $clientname = $quote->client->company;						
-                                    $address = $quote->client->address;
-                                    $email = $quote->client->email;
-                                    $cell = $quote->client->phone;
-                                    if ($quote->branch) $branch = $quote->branch->name;
+                                $address = $quote->lead? $quote->lead->client_address : '';
+                                $email = $quote->lead? $quote->lead->client_email : '';
+                                $cell = $quote->lead? $quote->lead->client_contact : '';
+                                if ($quote->customer) {
+                                    $clientname = $quote->customer->company;						
+                                    $address = $quote->customer->address;
+                                    $email = $quote->customer->email;
+                                    $cell = $quote->customer->phone;
+                                    $branch = $quote->branch? $quote->branch->name : '';
                                 }					
                             @endphp
                             <span class="text-muted"><b>{{ trans('invoices.bill_to') }}</b></span>
@@ -74,14 +74,14 @@
                                 <li><i>{{ $email }},</i></li>
                                 <li><i>{{ $cell }}</i></li>                                
                             </ul>
-                            Client Ref: {{ $quote->client_ref }}
+                            Client Ref: {{ $quote->customer_ref }}
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
                             <h2>
                                 {{ gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid)}}{{ $quote->revision }}
                                 {{ !$quote->is_repair? 'Maintenance' : '' }}
                             </h2>
-                            <h3>{{ gen4tid("{$prefixes[2]}-", $quote->lead->reference) }}</h3>
+                            <h3>{{ $quote->lead? gen4tid("{$prefixes[2]}-", $quote->lead->reference) : '' }}</h3>
                             <div class="row">
                                 <div class="col">
                                     <hr>
@@ -116,12 +116,21 @@
                                                         <p class="text-muted"> {!! $item['product_des'] !!} </p>
                                                     </td>
                                                     <td class="text-right">{{ +$item['product_qty'] }} {{$item['unit']}}</td>
-                                                    <td class="text-right">{{amountFormat($item->product_subtotal)}}</td>
-                                                    <td class="text-right">
-                                                        {{ amountFormat(($item->product_price - $item->product_subtotal) * $item->product_qty) }}
-                                                        <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
-                                                    </td>
-                                                    <td class="text-right">{{ amountFormat($item->product_qty * $item->product_price) }}</td>
+                                                    @if ($quote->currency)
+                                                        <td class="text-right">{{ amountFormat($item->product_subtotal, $quote->currency->id) }}</td>
+                                                        <td class="text-right">
+                                                            {{ amountFormat(($item->product_price - $item->product_subtotal) * $item->product_qty, $quote->currency->id) }}
+                                                            <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
+                                                        </td>
+                                                        <td class="text-right">{{ amountFormat($item->product_qty * $item->product_price, $quote->currency->id) }}</td>
+                                                    @else
+                                                        <td class="text-right">{{ numberFormat($item->product_subtotal) }}</td>
+                                                        <td class="text-right">
+                                                            {{ numberFormat(($item->product_price - $item->product_subtotal) * $item->product_qty) }}
+                                                            <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
+                                                        </td>
+                                                        <td class="text-right">{{ numberFormat($item->product_qty * $item->product_price) }}</td>
+                                                    @endif
                                                 </tr>
                                             @else
                                                 <tr>
@@ -166,18 +175,33 @@
                                 <div class="table-responsive">
                                     <table class="table">
                                         <tbody>
-                                            <tr>
-                                                <td>{{trans('general.subtotal')}}</td>
-                                                <td class="text-right">{{amountFormat($quote['subtotal'])}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{trans('general.tax')}}</td>
-                                                <td class="text-right">{{amountFormat($quote['tax'])}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="text-bold-800">{{trans('general.total')}}</td>
-                                                <td class="text-bold-800 text-right">{{amountFormat($quote['total'])}}</td>
-                                            </tr>
+                                            @if ($quote->currency)
+                                                <tr>
+                                                    <td>{{trans('general.subtotal')}}</td>
+                                                    <td class="text-right">{{amountFormat($quote['subtotal'], $quote->currency->id)}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{trans('general.tax')}}</td>
+                                                    <td class="text-right">{{amountFormat($quote['tax'], $quote->currency->id)}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-bold-800">{{trans('general.total')}}</td>
+                                                    <td class="text-bold-800 text-right">{{amountFormat($quote['total'], $quote->currency->id)}}</td>
+                                                </tr>
+                                            @else
+                                                <tr>
+                                                    <td>{{trans('general.subtotal')}}</td>
+                                                    <td class="text-right">{{numberFormat($quote['subtotal'])}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{trans('general.tax')}}</td>
+                                                    <td class="text-right">{{numberFormat($quote['tax'])}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-bold-800">{{trans('general.total')}}</td>
+                                                    <td class="text-bold-800 text-right">{{numberFormat($quote['total'])}}</td>
+                                                </tr>
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>

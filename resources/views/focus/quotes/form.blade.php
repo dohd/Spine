@@ -171,9 +171,20 @@
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
-                        @foreach($currencies as $currency)
-                            <option value="{{ $currency->id }}" currency_rate="{{ +$currency->rate }}" {{ $currency->id === 1? 'selected' : '' }}>
-                                {{ $currency->symbol }} - {{ $currency->code }}
+                        @foreach ($currencies as $key => $currency)
+                            @php 
+                                if ($key > 1) break; 
+                                $selected = '';
+                                if ($currency->id == @$quote->currency_id) $selected = 'selected';
+                                elseif ($currency->id == 1 && !@$quote) $selected = 'selected';
+                                $rate_label = $currency->rate > 1? "1/" . (+$currency->rate) : '';
+                            @endphp
+                            <option 
+                                value="{{ $currency->id }}" 
+                                currency_rate="{{ +$currency->rate }}" 
+                                {{ $selected }}
+                            >
+                                {{ $currency->code }} {{ $rate_label }}
                             </option>
                         @endforeach
                     </select>
