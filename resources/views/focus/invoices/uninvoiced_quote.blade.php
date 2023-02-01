@@ -108,9 +108,7 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     config = {
-        select: {
-            allowClear: true,
-        }
+        select: {allowClear: true}
     };
 
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
@@ -159,32 +157,56 @@
         return draw_data(customer_id, lpo_number, project_id);
     });
 
-    // on checking a row
-    const checkedCurrency = {};
+    // on selecting a row
+    const currencyState = {};
     $(document).on('click', '.row-select', function() {
         const row = $(this).parents('tr:first');
         const key = $(this).val();
         const value = row.find('.currency').attr('currency_id');
-        if ($(this).prop('checked')) {
-            checkedCurrency[key] = value;
+        if (this.checked) {
+            const currencyIds = Object.values(currencyState);
+            const last = currencyIds.slice(-1).pop();
+            if (last && last != value) {
+                $(this).prop('checked', false);
+                alert('Select records with same currency rate!');
+            } else {
+                currencyState[key] = value;
+            }
         } else {
-            delete checkedCurrency[key];
+            delete currencyState[key];
         }
-        console.log(checkedCurrency)
     });
-   
+
     // on multiselect
     $(document).on('click', '#select-all-row', function() {
-        const $input = $(this).closest('table').find('tbody').find('input.row-select');
+        for (let key in currencyState) {
+            if (currencyState[key]) delete currencyState[key];
+        }
+        const selectInputs = $(this).closest('table').find('tbody').find('input.row-select');
         if (this.checked) {
-            $input.each(function() {
-                if (!this.checked) $(this).prop('checked', true).change();
+            selectInputs.each(function(i) {
+                const row = $(this).parents('tr:first');
+                const key = $(this).val();
+                const value = row.find('.currency').attr('currency_id');
+                if (i > 0) {
+                    const currencyIds = Object.values(currencyState);
+                    const last = currencyIds.slice(-1).pop();
+                    if (last && last != value) {
+                        $(this).prop('checked', false);
+                    } else {
+                        $(this).prop('checked', true);
+                        currencyState[key] = value;
+                    }
+                } else {
+                    $(this).prop('checked', true);
+                    currencyState[key] = value;
+                }
             });
         } else {
-            $input.each(function() {
-                if (this.checked) $(this).prop('checked', false).change();                
+            selectInputs.each(function() {
+                $(this).prop('checked', false);
             });
-        }      
+        }   
     });
 
     // submit selected rows

@@ -48,6 +48,7 @@ class UninvoicedQuoteTableController extends Controller
     public function __invoke()
     {
         $core = $this->repository->getForVerifyNotInvoicedDataTable();
+        
         $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
         
         return Datatables::of($core)
