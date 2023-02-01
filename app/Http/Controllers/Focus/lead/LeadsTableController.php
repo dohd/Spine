@@ -61,8 +61,8 @@ class LeadsTableController extends Controller
                 return gen4tid("{$prefixes[0]}-", $lead->reference);
             })
             ->addColumn('client_name', function ($lead) {
-                $client_name = '';
-                if ($lead->customer) $client_name .= $lead->customer->company;
+                $client_name = $lead->client_name;
+                if ($lead->customer) $client_name = $lead->customer->company;
                 if ($client_name && $lead->branch) $client_name .= " - {$lead->branch->name}";
                 return $client_name;
             })
