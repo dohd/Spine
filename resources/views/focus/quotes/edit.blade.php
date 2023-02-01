@@ -264,26 +264,30 @@
     $('#tax_id').change();
 
     // on currency change
-    let initCurrencyRate = $('#currency option:selected').attr('currency_rate');
+    let initRate = $('#currency option:selected').attr('currency_rate')*1;
     $('#currency').change(function() {
-        const currencyRate = $(this).find(':selected').attr('currency_rate')*1;
-        if (currencyRate > 1) {
-            initCurrencyRate = currencyRate;
+        const currentRate = $(this).find(':selected').attr('currency_rate')*1;
+        if (currentRate > initRate) {
             $('#quoteTbl tbody tr').each(function() {
-                const purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currencyRate;
-                const itemRate = accounting.unformat($(this).find('.rate').val()) / currencyRate;
+                let purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initRate;
+                let itemRate = accounting.unformat($(this).find('.rate').val()) * initRate;
+                purchasePrice = purchasePrice / currentRate;
+                itemRate = itemRate / currentRate;
                 $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
                 $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
             });
         } else {
             $('#quoteTbl tbody tr').each(function() {
-                purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initCurrencyRate;
-                itemRate = accounting.unformat($(this).find('.rate').val())  * initCurrencyRate;
+                let purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currentRate;
+                let itemRate = accounting.unformat($(this).find('.rate').val()) / currentRate;
+                purchasePrice = purchasePrice * initRate;
+                itemRate = itemRate * initRate;
                 $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
                 $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
             });
         }
-    });      
+        initRate = currentRate;
+    });    
     
     // compute totals
     function calcTotal() {

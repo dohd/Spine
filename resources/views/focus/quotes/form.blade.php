@@ -173,7 +173,6 @@
                     <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
                         @foreach ($currencies as $key => $currency)
                             @php 
-                                if ($key > 1) break; 
                                 $selected = '';
                                 if ($currency->id == @$quote->currency_id) $selected = 'selected';
                                 elseif ($currency->id == 1 && !@$quote) $selected = 'selected';
