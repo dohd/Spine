@@ -134,8 +134,12 @@ class InvoiceRepository extends BaseRepository
         InvoiceItem::insert($bill_items);
 
         // update Quote or PI invoice status
-        foreach ($result->products as $item) {
-            if ($item->quote) $item->quote->update(['invoiced' => 'Yes']);
+        foreach ($result->products as $key => $item) {
+            $quote = $item->quote;
+            if ($quote) {
+                $quote->update(['invoiced' => 'Yes']);
+                if ($key == 0) $result->update(['currency_id' => $quote->currency_id]);
+            }
         }
 
         // convert invoice totals to KES via verified quote items
