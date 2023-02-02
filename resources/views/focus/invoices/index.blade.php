@@ -50,11 +50,11 @@
                         </div>
                         <div class="row">
                             <div class="col-2">
-                                <label for="amount">Total Amount (Ksh.)</label>
+                                <label for="amount">Total Amount</label>
                                 <input type="text" id="amount_total" class="form-control" readonly>
                             </div>                            
                             <div class="col-2">
-                                <label for="unallocate">Outstanding (Ksh.)</label>
+                                <label for="unallocate">Outstanding</label>
                                 <input type="text" id="balance_total" class="form-control" readonly>
                             </div>
                         </div>
