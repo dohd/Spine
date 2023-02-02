@@ -66,8 +66,8 @@ class UninvoicedQuoteTableController extends Controller
             })
             ->addColumn('customer', function ($quote) {
                 $customer = $quote->lead? $quote->lead->client_name : '';
-                if ($quote->client) {
-                    $customer = "{$quote->client->company}";
+                if ($quote->customer) {
+                    $customer = "{$quote->customer->company}";
                     if ($quote->branch) $customer .= " - {$quote->branch->name}";
                 }
                 return $customer;

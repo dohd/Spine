@@ -36,7 +36,7 @@
                     <label for="client" class="caption">Client</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('client', @$quote->client->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
+                        {{ Form::text('client', @$quote->customer->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
                         <input type="hidden" name="client_id" value="{{ @$quote->customer_id }}" id="client_id">
                     </div>
                 </div>
