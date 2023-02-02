@@ -39,12 +39,14 @@ use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
 use App\Models\bank\Bank;
+use App\Models\Company\Company;
 use App\Models\currency\Currency;
 use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
+use Error;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -473,5 +475,90 @@ class InvoicesController extends Controller
             'invoice' => $result,
             // 'invoice' => (object) ['id' => 62],
         ]);
+    }
+
+    /**
+     * TIMS KIT Api Call: Electronic Tax Register (ETR) Invoice
+     */
+    public function attach_etr()
+    {
+        $company = Company::find(auth()->user()->ins); 
+        if (!$company->etr_invoice_endpoint) throw new Error('ETR invoice endpoint not set!');
+
+        $invoice = Invoice::find(request('invoice_id'));
+
+        $buyer = [];
+        $customer = $invoice->customer;
+        if ($customer) {
+            $buyer = [
+                'buyerAddress' => 'string',
+                'buyerName' => $customer->company,
+                'buyerPhone' => $customer->phone,
+                'pinOfBuyer' => 'P123456789P',
+            ];
+        }
+        $payload = [
+            'buyer' => $buyer,
+            'cashier' => 'string',
+            'ExemptionNumber' => 'string',
+            'invoiceType' => 0,
+            'items' => [
+              [
+                'description' => [
+                  [
+                    'value' => 'string',
+                  ],
+                ],
+                'discounts' => 'unitPrice',
+                'gtin' => '012345678905',
+                'hsCode' => '0011.11.00',
+                'name' => 'string',
+                'quantity' => 1,
+                'unitPrice' => +$invoice->total,
+              ],
+            ],
+            'lines' => [
+              [
+                'alignment' => 'Left',
+                'format' => 'Bold',
+                'lineType' => 'Text',
+                'value' => 'Free text',
+              ],
+            ],
+            'payment' => [
+              [
+                'amount' => +$invoice->total,
+                'paymentType' => 0,
+              ],
+            ],
+            'relevantNumber' => 'string',
+            'TraderSystemInvoiceNumber' => 'string',
+            'transactionType' => 0,
+        ];
+
+        try {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post($company->etr_invoice_endpoint, [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                ],
+                'json' => $payload,
+            ]);
+            $data = $response->getBody()->getContents();
+            $data = json_decode($data);
+
+            $data = (array) $data;
+            if (@$data['messages'] == 'Success' && isset($data['verificationUrl'])) {
+                $query = parse_url($data['verificationUrl'], PHP_URL_QUERY);
+                parse_str($query, $params);
+                if (isset($params['invoiceNo'])) 
+                    $invoice->update(['etr_tid' => $params['invoiceNo']]);
+            }
+
+            return $data;
+        } catch (\Throwable $th) {
+            printlog($th->getMessage());
+        }
     }
 }

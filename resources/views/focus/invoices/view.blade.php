@@ -20,93 +20,100 @@
             <section class="card">
                 <div id="invoice-template" class="card-body">
                     <div class="row">
-                        @if($invoice['status']!='canceled')
-                        <div class="col">
-                            <a href="{{ route('biller.invoices.edit_project_invoice', $invoice) }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
-                            <a href="#modal_bill_payment_1" data-toggle="modal" data-remote="false" data-type="reminder" class="btn btn-large btn-info mb-1" title="Partial Payment"><span class="fa fa-money"></span> {{trans('general.make_payment')}} </a>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-facebook dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="fa fa-envelope-o"></span> {{trans('customers.email')}}
-                                </button>
-                                <div class="dropdown-menu"><a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="1" data-type1="notification">{{trans('general.invoice_notification')}}</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="2" data-type1="reminder">{{trans('general.payment_reminder')}}</a>
-                                    <a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="3" data-type1="received">{{trans('general.payment_received')}}</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" href="#" data-type="4" data-type1="overdue"> {{trans('general.payment_overdue')}}</a><a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="5" data-type1="refund">{{trans('general.refund_generated')}}</a>
-                                </div>
-                            </div>
+                        @if($invoice['status'] != 'canceled')
+                            <div class="col">
+                                {{-- edit --}}
+                                <a href="{{ route('biller.invoices.edit_project_invoice', $invoice) }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
+                                <a class="btn btn-vimeo mb-1 mr-3" href="javascript:" id="attach_etr"><i class="fa fa-retweet"></i> Attach ETR</a>
 
-                            <!-- SMS -->
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-blue dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="fa fa-mobile"></span> {{trans('general.sms')}}
-                                </button>
-                                <div class="dropdown-menu"><a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="11" data-type1="notification">{{trans('general.invoice_notification')}}</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="12" data-type1="reminder">{{trans('general.payment_reminder')}}</a>
-                                    <a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="13" data-type1="received">{{trans('general.payment_received')}}</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" href="#" data-type="14" data-type1="overdue">{{trans('general.payment_overdue')}}</a><a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="15" data-type1="refund">{{trans('general.refund_generated')}}</a>
+                                {{-- print --}}
+                                <div class="btn-group ">
+                                    <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-print"></i> {{trans('general.print')}}
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        @php $valid_token = token_validator('', 'i' . $invoice['id'].$invoice['tid'],true); @endphp
+                                        <a class="dropdown-item" target="_blank" href="{{ route('biller.print_bill', [$invoice['id'],1,$valid_token,1]) }}">PDF {{trans('general.print')}}</a>
+                                        <a class="dropdown-item" href="{{route('biller.print_compact',[$invoice['id'],1,$valid_token,1])}}">POS Print</a>
+                                    </div>
                                 </div>
-                            </div>
-                            @php
-                                $valid_token = token_validator('','i' . $invoice['id'].$invoice['tid'],true);
-                                $link = route( 'biller.print_bill',[$invoice['id'],1,$valid_token,1]);
-                                $link_download = route( 'biller.print_bill',[$invoice['id'],1,$valid_token,2]);
-                                $link_preview = route( 'biller.view_bill',[$invoice['id'],1,$valid_token,0]);
-                                if ($invoice['i_class'] > 1) {
-                                    $title = trans('invoices.subscription');
-                                    $inv_no = prefix(6).' # '.$invoice['tid'];
-                                } elseif ($invoice['i_class'] == 1) {
-                                    $title = trans('invoices.pos');
-                                    $inv_no = prefix(10).' # '.$invoice['tid'];
-                                } else {
-                                    $title = trans('invoices.invoice');
-                                    $inv_no = prefix(1).' # '.$invoice['tid'];
-                                }
-                            @endphp
-                            <div class="btn-group ">
-                                <button type="button" class="btn btn-success mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-print"></i> {{trans('general.print')}}
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" target="_blank" href="{{$link}}">{{trans('general.print')}}</a>
+                                {{-- preview --}}
+                                <a href="{{ route('biller.view_bill', [$invoice['id'],1,$valid_token,0]) }}" class="btn btn-purple mb-1"><i class="fa fa-globe"></i> {{trans('general.preview')}}</a>
+
+                                {{-- payment --}}
+                                <a href="#modal_bill_payment_1" data-toggle="modal" data-remote="false" data-type="reminder" class="btn btn-large btn-info mb-1 mr" title="Partial Payment"><span class="fa fa-money"></span> {{trans('general.make_payment')}} </a>
+                                {{-- email --}}
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-facebook dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="fa fa-envelope-o"></span> {{trans('customers.email')}}
+                                    </button>
+                                    <div class="dropdown-menu"><a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="1" data-type1="notification">{{trans('general.invoice_notification')}}</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="2" data-type1="reminder">{{trans('general.payment_reminder')}}</a>
+                                        <a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="3" data-type1="received">{{trans('general.payment_received')}}</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" href="#" data-type="4" data-type1="overdue"> {{trans('general.payment_overdue')}}</a><a href="#sendEmail" data-toggle="modal" data-remote="false" class="dropdown-item send_bill" data-type="5" data-type1="refund">{{trans('general.refund_generated')}}</a>
+                                    </div>
                                 </div>
-                            </div>
-                            <a href="{{$link_preview}}" class="btn btn-purple mb-1"><i class="fa fa-globe"></i> {{trans('general.preview')}}
-                            </a>
-                            <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="btn btn-large btn-cyan mb-1" title="Change Status"><span class="fa fa-retweet"></span> {{trans('general.change_status')}}</a>
-                            <a href="#pop_model_2" class="btn btn-danger mb-1" data-toggle="modal" data-remote="false"><i class="fa fa-minus-circle"> </i> {{trans('general.cancel')}}
-                            </a>
-                            <div class="btn-group ">
-                                <button type="button" class="btn btn-primary mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icon-anchor"></i> {{trans('general.extra_options')}}
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{route('biller.invoices.print_document',[$invoice['id'],1])}}">{{trans('general.delivery_note')}}</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{route( 'biller.print_bill',[$invoice['id'],3,$valid_token,1])}}">{{trans('general.proforma_invoice')}}</a>
+                                <!-- SMS -->
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-blue dropdown-toggle mb-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="fa fa-mobile"></span> {{trans('general.sms')}}
+                                    </button>
+                                    <div class="dropdown-menu"><a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="11" data-type1="notification">{{trans('general.invoice_notification')}}</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="12" data-type1="reminder">{{trans('general.payment_reminder')}}</a>
+                                        <a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="13" data-type1="received">{{trans('general.payment_received')}}</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" href="#" data-type="14" data-type1="overdue">{{trans('general.payment_overdue')}}</a><a href="#sendSMS" data-toggle="modal" data-remote="false" class="dropdown-item send_sms" data-type="15" data-type1="refund">{{trans('general.refund_generated')}}</a>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="btn-group ">
-                                <button type="button" class="btn btn-vimeo mb-1 btn-md dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i> {{trans('general.pos_print')}}
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{route('biller.print_compact',[$invoice['id'],1,$valid_token,1])}}">{{trans('general.pdf_print')}}</a>
+                                @php
+                                    $valid_token = token_validator('', 'i' . $invoice['id'].$invoice['tid'],true);
+                                    // $link = ;
+                                    $link_download = route('biller.print_bill', [$invoice['id'],1,$valid_token,2]);
+                                    // $link_preview = ;
+                                    if ($invoice['i_class'] > 1) {
+                                        $title = trans('invoices.subscription');
+                                        $inv_no = prefix(6).' # '.$invoice['tid'];
+                                    } elseif ($invoice['i_class'] == 1) {
+                                        $title = trans('invoices.pos');
+                                        $inv_no = prefix(10).' # '.$invoice['tid'];
+                                    } else {
+                                        $title = trans('invoices.invoice');
+                                        $inv_no = prefix(1).' # '.$invoice['tid'];
+                                    }
+                                @endphp
+                                
+                                {{-- change status --}}
+                                <a href="#pop_model_1" data-toggle="modal" data-remote="false" class="btn btn-large btn-cyan mb-1" title="Change Status"><span class="fa fa-retweet"></span> {{trans('general.change_status')}}</a>
+                                {{-- cancel --}}
+                                <a href="#pop_model_2" class="btn btn-danger mb-1" data-toggle="modal" data-remote="false"><i class="fa fa-minus-circle"> </i> {{trans('general.cancel')}} </a>
+                                {{-- extra options --}}
+                                <div class="btn-group ">
+                                    <button type="button" class="btn btn-primary mb-1 btn-min-width dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icon-anchor"></i> {{trans('general.extra_options')}}
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{{route('biller.invoices.print_document',[$invoice['id'],1])}}">{{trans('general.delivery_note')}}</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="{{route( 'biller.print_bill',[$invoice['id'],3,$valid_token,1])}}">{{trans('general.proforma_invoice')}}</a>
+                                    </div>
                                 </div>
+                                @if($invoice['i_class']>1)
+                                    <a href="#pop_model_4" data-toggle="modal" data-remote="false" class="btn btn-large btn-blue-grey mb-1" title="Change Status"><span class="fa fa-superscript"></span> {{trans('invoices.subscription')}}</a>
+                                @endif
                             </div>
-                            @if($invoice['i_class']>1)
-                            <a href="#pop_model_4" data-toggle="modal" data-remote="false" class="btn btn-large btn-blue-grey mb-1" title="Change Status"><span class="fa fa-superscript"></span> {{trans('invoices.subscription')}}</a>
-                            @endif
-                        </div>
                         @else
-                        <div class="badge text-center white d-block m-1"><span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('payments.'.$invoice['status'])}}&nbsp;&nbsp;</span>
-                        </div>
+                            <div class="badge text-center white d-block m-1">
+                                <span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('payments.'.$invoice['status'])}}&nbsp;&nbsp;</span>
+                            </div>
                         @endif
                     </div>
-                    @if($invoice['currency'])
-                    <div class="badge text-center white d-block m-1"><span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('general.different_currency')}}&nbsp;&nbsp;</span>
-                    </div>
+
+                    @if ($invoice['currency']['rate'] != 1)
+                        <div class="badge text-center white d-block m-1">
+                            <span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('general.different_currency')}}&nbsp;&nbsp;</span>
+                        </div>
                     @endif
 
                     <!-- Invoice Company Details -->
@@ -125,14 +132,11 @@
                             <h2>{{$title}}</h2>
                             <p class="pb-1">{{$inv_no}}</p>
                             @php
-                            switch ($invoice['i_class']){
-                            case 2: echo '<h4><span class="st-sub2">'.trans('payments.active').'</span></h4>';
-                            break;
-                            case 3: echo '<h4><span class="st-sub3">'.trans('payments.recurred').'</span></h4>';
-                            break;
-                            case 4: echo '<h4><span class="st-sub4">'.trans('payments.stopped').'</span></h4>';
-                            break;
-                            }
+                                switch ($invoice['i_class']) {
+                                    case 2: echo '<h4><span class="st-sub2">'.trans('payments.active').'</span></h4>'; break;
+                                    case 3: echo '<h4><span class="st-sub3">'.trans('payments.recurred').'</span></h4>'; break;
+                                    case 4: echo '<h4><span class="st-sub4">'.trans('payments.stopped').'</span></h4>';  break;
+                                }
                             @endphp
                             <ul class="px-0 list-unstyled">
                                 <li>{{trans('general.total')}}</li>
@@ -292,28 +296,23 @@
                             </div>
                         </div>
 
+                       
                         <div class="row">
                             <div class="col-md-7 col-sm-12 text-center text-md-left">
-                                <p class="lead">{{trans('payments.payment_status')}}:</p>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <table class="table table-borderless table-md">
-                                            <tbody>
-                                                <tr>
-                                                    <td>{{trans('payments.payment_status')}}:</td>
-                                                    <td id="status" class="badge st-{{$invoice['status']}}">{{trans('payments.'.$invoice['status'])}}</td>
-                                                </tr>
-                                                @if($invoice['pmethod'])
-                                                <tr>
-                                                    <td>{{trans('general.payment_method')}}:</td>
-                                                    <td id="method">{{$invoice['pmethod']}}</td>
-                                                </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                                 <!-- payment status summary -->
+                                <p class="lead">
+                                    {{trans('payments.payment_status')}}: 
+                                    <span id="status" class="badge st-{{$invoice['status']}}" style="font-size: 1em">
+                                        {{ trans('payments.'.$invoice['status']) }}
+                                    </span>
+                                </p>
+                                <!-- ETR status summary -->
+                                <h4 class="etr_status">
+                                    ETR Invoice No: {{ $invoice->etr_tid }}
+                                </h4>
                             </div>
+
+                            <!-- amount summary -->
                             <div class="col-md-5 col-sm-12">
                                 <p class="lead">{{trans('general.summary')}}</p>
                                 <div class="table-responsive">
@@ -470,9 +469,28 @@
 @endsection
 
 @section('extra-scripts')
+{{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 <script type="text/javascript">
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
+
+    // on click attach etr
+    $('#attach_etr').click(function() {
+        swal({
+            title: 'Are You  Sure?',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCancelButton: true,
+        }, () => {
+            const invoice_id = @json($invoice->id);
+            $.post("{{ route('biller.invoices.attach_etr') }}", {invoice_id}, data => {
+                if (data.messages == 'Success') location.reload();
+                else alert('Failed to attach ETR! Try again later');
+            });
+        }); 
+    });
+
 
     $(function() {
         'use strict';

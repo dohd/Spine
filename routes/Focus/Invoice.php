@@ -32,6 +32,9 @@ Route::group(['namespace' => 'invoice'], function () {
     Route::post('store_project_invoice', 'InvoicesController@store_project_invoice')->name('invoices.store_project_invoice');
     Route::get('invoices/print_document/{id}/{type}', 'InvoicesController@print_document')->name('invoices.print_document');
 
+    // TIMS ETR invoice
+    Route::post('invoices/attach_etr', 'InvoicesController@attach_etr')->name('invoices.attach_etr');
+
     Route::get('uninvoiced_quote', 'InvoicesController@uninvoiced_quote')->name('invoices.uninvoiced_quote');
     Route::resource('invoices', 'InvoicesController');
     //For Datatable
