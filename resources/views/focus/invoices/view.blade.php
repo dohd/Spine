@@ -152,16 +152,18 @@
                             <p class="text-muted">{{trans('invoices.bill_to')}}</p>
                         </div>
                         <div class="col-md-6 col-sm-12 text-center text-md-left">
-                            <ul class="px-0 list-unstyled">
-                                <li class="text-bold-800"><a href="{{route('biller.customers.show',[$invoice->customer->id])}}">{{$invoice->customer->name}}</a>
-                                </li>
-                                <li>{{$invoice->customer->address}},</li>
-                                <li>{{$invoice->customer->city}},{{$invoice->customer->region}}</li>
-                                <li>{{$invoice->customer->country}}-{{$invoice->customer->postbox}}.</li>
-                                <li>{{$invoice->customer->email}},</li>
-                                <li>{{$invoice->customer->phone}},</li>
-                                {!! custom_fields_view(1,$invoice->customer->id,false) !!}
-                            </ul>
+                            @if ($invoice->customer)
+                                <ul class="px-0 list-unstyled">
+                                    <li class="text-bold-800"><a href="{{route('biller.customers.show',[$invoice->customer->id])}}">{{$invoice->customer->name}}</a>
+                                    </li>
+                                    <li>{{$invoice->customer->address}},</li>
+                                    <li>{{$invoice->customer->city}},{{$invoice->customer->region}}</li>
+                                    <li>{{$invoice->customer->country}}-{{$invoice->customer->postbox}}.</li>
+                                    <li>{{$invoice->customer->email}},</li>
+                                    <li>{{$invoice->customer->phone}},</li>
+                                    {!! custom_fields_view(1,$invoice->customer->id,false) !!}
+                                </ul>
+                            @endif
                         </div>
 
                         <div class="col-md-6 col-sm-12 text-center text-md-right">
@@ -307,9 +309,14 @@
                                     </span>
                                 </p>
                                 <!-- ETR status summary -->
-                                <h4 class="etr_status">
-                                    ETR Invoice No: {{ $invoice->etr_tid }}
-                                </h4>
+                                <p class="etr_status" style="font-size: 1em">
+                                    ETR Invoice Verification Link: 
+                                    @if ($invoice->etr_url)
+                                        <a href="{{ $invoice->etr_url  }}" target="_tab">{{ $invoice->etr_url  }}</a>
+                                        <br>
+                                        <img src="{{ Storage::disk('public')->url('qr/' . $invoice->etr_qrcode) }}" style="object-fit:contain" width="20%"/>
+                                    @endif
+                                </p>
                             </div>
 
                             <!-- amount summary -->

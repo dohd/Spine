@@ -46,8 +46,10 @@ use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
+use Endroid\QrCode\QrCode;
 use Error;
 use Illuminate\Validation\ValidationException;
+use Storage;
 
 /**
  * InvoicesController
@@ -486,79 +488,52 @@ class InvoicesController extends Controller
         if (!$company->etr_invoice_endpoint) throw new Error('ETR invoice endpoint not set!');
 
         $invoice = Invoice::find(request('invoice_id'));
+        if (!array_key_exists('etr_url', $invoice->toArray())) throw new Error('ETR invoice url field not set!');
+        if (!array_key_exists('etr_qrcode', $invoice->toArray())) throw new Error('ETR invoice QRcode field not set!');
+            
+        $payload = config('datecs_etr.invoice');
 
-        $buyer = [];
-        $customer = $invoice->customer;
-        if ($customer) {
-            $buyer = [
+        if ($invoice->customer) {
+            $customer = $invoice->customer;
+            $payload['buyer'] = [
                 'buyerAddress' => 'string',
                 'buyerName' => $customer->company,
                 'buyerPhone' => $customer->phone,
                 'pinOfBuyer' => 'P123456789P',
             ];
         }
-        $payload = [
-            'buyer' => $buyer,
-            'cashier' => 'string',
-            'ExemptionNumber' => 'string',
-            'invoiceType' => 0,
-            'items' => [
-              [
-                'description' => [
-                  [
-                    'value' => 'string',
-                  ],
-                ],
-                'discounts' => 'unitPrice',
-                'gtin' => '012345678905',
-                'hsCode' => '0011.11.00',
-                'name' => 'string',
-                'quantity' => 1,
-                'unitPrice' => +$invoice->total,
-              ],
-            ],
-            'lines' => [
-              [
-                'alignment' => 'Left',
-                'format' => 'Bold',
-                'lineType' => 'Text',
-                'value' => 'Free text',
-              ],
-            ],
-            'payment' => [
-              [
-                'amount' => +$invoice->total,
-                'paymentType' => 0,
-              ],
-            ],
-            'relevantNumber' => 'string',
-            'TraderSystemInvoiceNumber' => 'string',
-            'transactionType' => 0,
-        ];
-
+        $payload['items'][0]['unitPrice'] = +$invoice->total;
+        $payload['payment'][0]['amount'] = +$invoice->total;
+        
         try {
             $client = new \GuzzleHttp\Client();
-            $response = $client->post($company->etr_invoice_endpoint, [
+            $client_resp = $client->post($company->etr_invoice_endpoint, [
                 'headers' => [
                     'Content-Type' => "application/json",
                     'Accept' => "application/json",
                 ],
                 'json' => $payload,
             ]);
-            $data = $response->getBody()->getContents();
-            $data = json_decode($data);
+            $data = json_decode($client_resp->getBody()->getContents());
 
-            $data = (array) $data;
-            if (@$data['messages'] == 'Success' && isset($data['verificationUrl'])) {
-                $query = parse_url($data['verificationUrl'], PHP_URL_QUERY);
+            if ($data->messages == 'Success' && isset($data->verificationUrl)) {
+                // extract invoice no
+                $query = parse_url($data->verificationUrl, PHP_URL_QUERY);
                 parse_str($query, $params);
-                if (isset($params['invoiceNo'])) 
-                    $invoice->update(['etr_tid' => $params['invoiceNo']]);
+                $invoice_no = $params['invoiceNo'];
+                // generate QR code
+                $timestamp = date('Y_m_d_H_i_s');
+                $filename = "invoice_{$invoice_no}_{$timestamp}.png";
+                $qrCode = new QrCode($data->verificationUrl);
+                $qrCode->writeFile(Storage::disk('public')->path("qr".DIRECTORY_SEPARATOR."{$filename}"));
+                // update invoice
+                $invoice->update(['etr_url' => $data->verificationUrl, 'etr_qrcode' => $filename]);
             }
 
-            return $data;
+            return (array) $data;
         } catch (\Throwable $th) {
             printlog($th->getMessage());
+            throw new Error('ETR Processing error!');
         }
     }
 }
