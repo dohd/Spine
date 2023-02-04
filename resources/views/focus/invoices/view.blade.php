@@ -312,8 +312,7 @@
                                 <p class="etr_status" style="font-size: 1em">
                                     ETR Invoice Verification Link: 
                                     @if ($invoice->etr_url)
-                                        <a href="{{ $invoice->etr_url  }}" target="_tab">{{ $invoice->etr_url  }}</a>
-                                        <br>
+                                        <a href="{{ $invoice->etr_url  }}" target="_tab">{{ $invoice->etr_url  }}</a><br>
                                         <img src="{{ Storage::disk('public')->url('qr/' . $invoice->etr_qrcode) }}" style="object-fit:contain" width="20%"/>
                                     @endif
                                 </p>
