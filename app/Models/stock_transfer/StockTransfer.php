@@ -69,12 +69,11 @@ class StockTransfer extends Model
         parent::boot();
 
         static::creating(function ($instance) {
-            $params = [
+            $instance->fill( [
                 'ins' => auth()->user()->ins,
                 'user_id' => auth()->user()->id,
-                'tid' => StockTransfer::getTid(),
-            ];
-            $instance->fill(compact('tid', 'user_id', 'ins'));
+                'tid' => StockTransfer::getTid()+1,
+            ]);
             return $instance;
         });
 
@@ -86,6 +85,6 @@ class StockTransfer extends Model
     static function getTid()
     {
         $ins = auth()->user()->ins;
-        return StockTransfer::where('ins', $ins)->max('tid')+1;
+        return StockTransfer::where('ins', $ins)->max('tid');
     }
 }

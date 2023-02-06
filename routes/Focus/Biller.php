@@ -387,11 +387,14 @@ Route::group(['namespace' => 'gateway'], function () {
     //For Datatable
     Route::post('usergatewayentries/get', 'UsergatewayentriesTableController')->name('usergatewayentries.get');
 });
+
 Route::group(['namespace' => 'warehouse'], function () {
     Route::resource('warehouses', 'WarehousesController');
+    Route::post('warehouses/products', 'WarehousesController@warehouse_products')->name('warehouse_products.get');
     //For Datatable
     Route::post('warehouses/get', 'WarehousesTableController')->name('warehouses.get');
 });
+
 Route::group(['namespace' => 'withholding'], function () {
     Route::resource('withholdings', 'WithholdingsController');
     //For Datatable

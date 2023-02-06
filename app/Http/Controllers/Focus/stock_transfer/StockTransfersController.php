@@ -75,7 +75,7 @@ class StockTransfersController extends Controller
     {
         $this->repository->create($request->except('_token'));
 
-        return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_success' => 'StockTransfer Created Successfully']);
+        return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_success' => 'Stock Transfer Created Successfully']);
     }
 
     /**

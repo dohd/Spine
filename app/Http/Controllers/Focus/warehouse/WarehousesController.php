@@ -149,4 +149,22 @@ class WarehousesController extends Controller
         //returning with successfull message
         return new ViewResponse('focus.warehouses.view', compact('warehouse'));
     }
+
+    // warehouse products
+    public function warehouse_products()
+    {
+        $products = ProductVariation::where('warehouse_id', request('warehouse_id'))
+            ->where('qty', '>=', 1)
+            ->get()
+            ->map(function($v) {
+                $v->unit = '';
+                if ($v->product && $v->product->unit) {
+                    $v->unit =  $v->product->unit->code;
+                }
+                return $v;
+            });
+
+        return $products->toArray();
+    }
+
 }

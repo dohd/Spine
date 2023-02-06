@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Leave Management')
+@section('title', 'Stock Transfer Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Leave Management</h4>
+            <h4 class="content-header-title">Stock Transfer Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.leave.partials.leave-header-buttons')
+                @include('focus.stock_transfers.partials.stock-transfer-header-buttons')
             </div>
         </div>
     </div>
@@ -21,17 +21,15 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="leaveTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="stocktransferTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Employee</th>
-                                        <th>Leave Category</th>
-                                        <th>Leave Reason</th>
-                                        <th>Leave Duration</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Status</th>
+                                        <th>#tid</th>
+                                        <th>Note</th>
+                                        <th>Source</th>
+                                        <th>Destination</th>
+                                        <th>Stock Amount</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -67,24 +65,18 @@
         },
 
         drawDataTable() {
-            $('#leaveTbl').dataTable({
+            $('#stocktransferTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.leave.get') }}",
+                    url: "{{ route('biller.stock_transfers.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'employee', name: 'employee'},
-                    {data: 'leave_category', name: 'leave_category'},                    
-                    {data: 'reason', name: 'reason'},
-                    {data: 'qty', name: 'qty'},
-                    {data: 'start_date', name: 'start_date'},
-                    {data: 'end_date', name: 'end_date'},
-                    {data: 'status', name: 'status'},
+                    ...['tid', 'source_id', 'destination_id', 'total'].map(v=> ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
