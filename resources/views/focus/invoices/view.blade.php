@@ -24,7 +24,7 @@
                             <div class="col">
                                 {{-- edit --}}
                                 <a href="{{ route('biller.invoices.edit_project_invoice', $invoice) }}" class="btn btn-warning mb-1"><i class="fa fa-pencil"></i> Edit</a>
-                                <a class="btn btn-vimeo mb-1 mr-3" href="javascript:" id="attach_etr"><i class="fa fa-retweet"></i> Attach ETR</a>
+                                <a class="btn btn-vimeo mb-1 mr-3" href="javascript:" id="attach_etr" disabled><i class="fa fa-retweet"></i> Attach ETR</a>
 
                                 {{-- print --}}
                                 <div class="btn-group ">
@@ -110,7 +110,7 @@
                         @endif
                     </div>
 
-                    @if ($invoice['currency']['rate'] != 1)
+                    @if (@$invoice['currency']['rate'] != 1)
                         <div class="badge text-center white d-block m-1">
                             <span class="bg-danger round p-1">&nbsp;&nbsp;{{trans('general.different_currency')}}&nbsp;&nbsp;</span>
                         </div>
@@ -482,6 +482,7 @@
 
     // on click attach etr
     $('#attach_etr').click(function() {
+        if ($(this).attr('disabled')) return;
         swal({
             title: 'Are You  Sure?',
             icon: "warning",
