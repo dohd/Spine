@@ -64,6 +64,8 @@ class DjcsTableController extends Controller
                     $customer = $djc->client->company;
                     if ($djc->branch) $customer .= " - {$djc->branch->name}";
                     $link = $customer . ' <a class="font-weight-bold" href="'. route('biller.customers.show', $djc->client) .'"><i class="ft-eye"></i></a>';
+                } elseif ($djc->lead) {
+                    $link = $djc->lead->client_name;
                 }
                 return $link;
             })
