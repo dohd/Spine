@@ -175,11 +175,15 @@ class ProductsController extends Controller
         }
 
         // fetch inventory products
-        $productvariations = ProductVariation::whereHas('product', function ($q) {
-            $q->where('name', 'LIKE', '%' . request('keyword') . '%');
-        })->with(['warehouse' => function ($q) {
+        $productvariations = ProductVariation::where(function ($q) {
+            $q->whereHas('product', function ($q) {
+                $q->where('name', 'LIKE', '%' . request('keyword') . '%');
+            })->orWhere('name', 'LIKE', '%' . request('keyword') . '%');
+        })
+        ->with(['warehouse' => function ($q) {
             $q->select(['id', 'title']);
-        }])->with('product')->limit(6)->get()->unique('name');
+        }])
+        ->with('product')->limit(6)->get()->unique('name');
         
         $products = array();
         foreach ($productvariations as $row) {
