@@ -160,7 +160,8 @@
 	<table class="header-table">
 		<tr>
 			<td>
-				<img src="{{ Storage::path("public{$dir_sep}img{$dir_sep}company{$dir_sep}{$company->logo}") }}" style="object-fit:contain" width="100%" />
+				{{-- {{ Storage::path("public{$dir_sep}img{$dir_sep}company{$dir_sep}{$company->logo}") }} --}}
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%" />
 			</td>
 		</tr>
 	</table>
@@ -177,11 +178,34 @@
 		<tr>
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name :</b> {{ $resource->customer->company }}<br>
-				<b>Client Tax Pin : </b>{{ $resource->customer->taxid }}<br>
-				<b>Address :</b> {{ $resource->customer->address }}<br>
-				<b>Email :</b> {{ $resource->customer->email }}<br>
-				<b>Cell :</b> {{ $resource->customer->phone }}<br>
+				@if ($resource->customer)
+					<b>Client Name :</b> {{ $resource->customer->company }}<br>
+					<b>Client Tax Pin : </b>{{ $resource->customer->taxid }}<br>
+					<b>Address :</b> {{ $resource->customer->address }}<br>
+					<b>Email :</b> {{ $resource->customer->email }}<br>
+					<b>Cell :</b> {{ $resource->customer->phone }}<br>
+				@else
+					@php
+						$customer = '';
+						$lead = '';
+						$quote = isset($resource->products->first()->quote)? $resource->products->first()->quote : '';
+						if ($quote && $quote->customer) $customer = $quote->customer;
+						elseif ($quote && $quote->lead) $lead = $quote->lead;
+					@endphp
+					@if ($customer)
+						<b>Client Name</b> {{ $customer->company }}<br>
+						<b>Client Tax Pin : </b>{{ $customer->taxid }}<br>
+						<b>Address :</b> {{ $customer->address }}<br>
+						<b>Email :</b> {{ $customer->email }}<br>
+						<b>Cell :</b> {{ $customer->phone }}<br>
+					@elseif ($lead)
+						<b>Client Name</b> {{ $lead->client_name }}<br>
+						<b>Client Tax Pin : </b>{{ '' }}<br>
+						<b>Address :</b> {{ $lead->client_address }}<br>
+						<b>Email :</b> {{ $lead->client_email }}<br>
+						<b>Cell :</b> {{ $lead->client_contact }}<br>
+					@endif
+				@endif 
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
@@ -258,7 +282,8 @@
 					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
 				</td>
 				<td colspan="2" class="bd-t" rowspan="3" style="border-left: hidden; padding-top: 1em;">
-					<img src="{{ Storage::path("public{$dir_sep}qr{$dir_sep}{$resource->etr_qrcode}") }}" style="object-fit:contain" width="10%"/>
+					{{-- Storage::path("public{$dir_sep}qr{$dir_sep}{$resource->etr_qrcode}") --}}
+					<img src="{{ '' }}" style="object-fit:contain" width="10%"/>
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($resource->print_type == 'inclusive')
