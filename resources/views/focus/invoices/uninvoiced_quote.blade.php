@@ -212,7 +212,8 @@
     // submit selected rows
     $(document).on('click', '#add-selected', function(e) {
         e.preventDefault();
-        if (!$('#customer_id').val()) return swal('Filter Customer');
+        if (!$('#customer_id').val() && $('.row-select:checked').length > 1) 
+            return swal('Filter records by customer');
 
         const selected_rows =  [];
         $('.row-select:checked').each(function() {
