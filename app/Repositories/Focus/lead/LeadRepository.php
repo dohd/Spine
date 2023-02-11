@@ -4,9 +4,7 @@ namespace App\Repositories\Focus\lead;
 
 use App\Models\lead\Lead;
 use App\Exceptions\GeneralException;
-use App\Models\djc\Djc;
 use App\Models\items\Prefix;
-use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
 use DB;
 use Illuminate\Validation\ValidationException;

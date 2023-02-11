@@ -114,7 +114,7 @@
                             <p class="pb-1">{{trans('general.reference')}} : {{$resource['refer']}}</p>
                             <ul class="px-0 list-unstyled">
                                 <li>{{trans('general.gross_amount')}}</li>
-                                <li class="lead text-bold-800"> {{amountFormat($resource['total'],$resource['currency'])}}</li>
+                                <li class="lead text-bold-800"> {{amountFormat($resource['total'], $resource['currency']['id'])}}</li>
                             </ul>
                         </div>
 
@@ -227,19 +227,19 @@
                                                 {{numberFormat($product['product_qty'])}} {{$product['unit']}}
                                             </td>
                                             <td>
-                                                {{amountFormat($product['product_price'],$resource['currency'])}}
+                                                {{amountFormat($product['product_price'],$resource['currency']['id'])}}
                                             </td>
 
 
-                                            <td>{{amountFormat($product['total_tax'],$resource['currency'])}} <span
-                                                        class="font-size-xsmall">({{numberFormat($product['product_tax'],$resource['currency'])}}%)</span>
+                                            <td>{{amountFormat($product['total_tax'],$resource['currency']['id'])}} <span
+                                                        class="font-size-xsmall">({{numberFormat($product['product_tax'],$resource['currency']['id'])}}%)</span>
                                             </td>
 
 
-                                            <td>{{amountFormat($product['total_discount'],$resource['currency'])}}</td>
+                                            <td>{{amountFormat($product['total_discount'],$resource['currency']['id'])}}</td>
 
                                             <td>
-                                                {{amountFormat($product['product_subtotal'],$resource['currency'])}}
+                                                {{amountFormat($product['product_subtotal'],$resource['currency']['id'])}}
                                             </td>
                                         </tr>
                                         @if($product['product_des'])
@@ -294,22 +294,22 @@
                                                     {{numberFormat($product['product_qty'])}} {{$product['unit']}}
                                                 </td>
                                                 <td>
-                                                    {{amountFormat($product['product_price'],$resource['currency'])}}
+                                                    {{amountFormat($product['product_price'],$resource['currency']['id'])}}
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_tax']/2,$resource['currency'])}} <span
-                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$resource['currency'])}}%)</span>
+                                                <td>{{amountFormat($product['total_tax']/2,$resource['currency']['id'])}} <span
+                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$resource['currency']['id'])}}%)</span>
                                                 </td>
-                                                <td>{{amountFormat($product['total_tax']/2,$resource['currency'])}} <span
-                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$resource['currency'])}}%)</span>
+                                                <td>{{amountFormat($product['total_tax']/2,$resource['currency']['id'])}} <span
+                                                            class="font-size-xsmall">({{numberFormat($product['product_tax']/2,$resource['currency']['id'])}}%)</span>
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_discount'],$resource['currency'])}}</td>
+                                                <td>{{amountFormat($product['total_discount'],$resource['currency']['id'])}}</td>
 
                                                 <td>
-                                                    {{amountFormat($product['product_subtotal'],$resource['currency'])}}
+                                                    {{amountFormat($product['product_subtotal'],$resource['currency']['id'])}}
                                                 </td>
                                             </tr>
 
@@ -364,19 +364,19 @@
                                                     {{numberFormat($product['product_qty'])}} {{$product['unit']}}
                                                 </td>
                                                 <td>
-                                                    {{amountFormat($product['product_price'],$resource['currency'])}}
+                                                    {{amountFormat($product['product_price'],$resource['currency']['id'])}}
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_tax'],$resource['currency'])}} <span
-                                                            class="font-size-xsmall">({{numberFormat($product['product_tax'],$resource['currency'])}}%)</span>
+                                                <td>{{amountFormat($product['total_tax'],$resource['currency']['id'])}} <span
+                                                            class="font-size-xsmall">({{numberFormat($product['product_tax'],$resource['currency']['id'])}}%)</span>
                                                 </td>
 
 
-                                                <td>{{amountFormat($product['total_discount'],$resource['currency'])}}</td>
+                                                <td>{{amountFormat($product['total_discount'],$resource['currency']['id'])}}</td>
 
                                                 <td>
-                                                    {{amountFormat($product['product_subtotal'],$resource['currency'])}}
+                                                    {{amountFormat($product['product_subtotal'],$resource['currency']['id'])}}
                                                 </td>
                                             </tr>
                                             @if($product['product_des'])
@@ -433,46 +433,46 @@
                                         <tbody>
                                         <tr>
                                             <td>{{trans('general.subtotal')}}</td>
-                                            <td class="text-xs-right"> {{amountFormat($resource['subtotal'],$resource['currency'])}}</td>
+                                            <td class="text-xs-right"> {{amountFormat($resource['subtotal'],$resource['currency']['id'])}}</td>
                                         </tr>
                                         @if($resource['tax']>0)
                                             <tr>
                                                 <td>{{$general['tax_string_total']}}</td>
-                                                <td class="text-xs-right">{{amountFormat($resource['tax'],$resource['currency'])}}</td>
+                                                <td class="text-xs-right">{{amountFormat($resource['tax'],$resource['currency']['id'])}}</td>
                                             </tr>@endif
                                         @if($resource['discount']>0)
                                             <tr>
                                                 <td>{{trans('general.discount')}}</td>
-                                                <td class="text-xs-right">{{amountFormat($resource['discount'],$resource['currency'])}}</td>
+                                                <td class="text-xs-right">{{amountFormat($resource['discount'],$resource['currency']['id'])}}</td>
                                             </tr>@endif
                                         @if($resource['shipping']>0)
                                             <tr>
                                                 <td>{{trans('general.shipping')}}</td>
-                                                <td class="text-xs-right">{{amountFormat($resource['shipping'],$resource['currency'])}}</td>
+                                                <td class="text-xs-right">{{amountFormat($resource['shipping'],$resource['currency']['id'])}}</td>
                                             </tr>
                                             @if($resource['ship_tax']>0)
                                                 <tr>
                                                     <td>{{trans('general.shipping_tax')}}
                                                         ({{trans('general.'.$resource['ship_tax_type'])}})
                                                     </td>
-                                                    <td>{{amountFormat($resource['ship_tax'],$resource['currency'])}}</td>
+                                                    <td>{{amountFormat($resource['ship_tax'],$resource['currency']['id'])}}</td>
                                                 </tr>@endif
                                         @endif
                                         <tr>
                                             <td class="text-bold-800">{{trans('general.total')}}</td>
-                                            <td class="text-bold-800">{{amountFormat($resource['total'],$resource['currency'])}}</td>
+                                            <td class="text-bold-800">{{amountFormat($resource['total'],$resource['currency']['id'])}}</td>
                                         </tr>
                                         @if( $general['status_block'])
                                             <tr>
                                                 <td>{{trans('general.payment_made')}}</td>
                                                 <td class="pink">(-) <span
-                                                            id="payment_made">{{amountFormat($resource['pamnt'],$resource['currency'])}}</span>
+                                                            id="payment_made">{{amountFormat($resource['pamnt'],$resource['currency']['id'])}}</span>
                                                 </td>
                                             </tr>
                                             <tr class="bg-grey bg-lighten-4">
                                                 <td class="text-bold-800">{{trans('general.balance_due')}}</td>
                                                 <td class="text-bold-800"
-                                                    id="payment_due"> {{amountFormat($resource['total']-$resource['pamnt'],$resource['currency'])}}</td>
+                                                    id="payment_due"> {{amountFormat($resource['total']-$resource['pamnt'],$resource['currency']['id'])}}</td>
                                             </tr>
                                         @endif
                                         </tbody>
@@ -515,8 +515,8 @@
                                             <p class="text-muted">{{$transaction['payment_date']}}</p>
                                         </td>
                                         <td class="">{{$transaction['method']}}</td>
-                                        <td class="text-right">{{amountFormat($transaction['debit'],$resource['currency'])}}</td>
-                                        <td class="text-right">{{amountFormat($transaction['credit'],$resource['currency'])}}</td>
+                                        <td class="text-right">{{amountFormat($transaction['debit'],$resource['currency']['id'])}}</td>
+                                        <td class="text-right">{{amountFormat($transaction['credit'],$resource['currency']['id'])}}</td>
                                         <td class="">{{$transaction['note']}}</td>
 
                                     </tr>
@@ -577,7 +577,7 @@
                                     $title = $row['name'];
                                     if ($row->config['surcharge'] > 0) {
                                         $surcharge_t = true;
-                                        $fee = '( ' . amountFormat($resource['total']-$resource['pamnt'],$resource['currency']) . '+' . numberFormat($row->config['surcharge']) . ' %)';
+                                        $fee = '( ' . amountFormat($resource['total']-$resource['pamnt'],$resource['currency']['id']) . '+' . numberFormat($row->config['surcharge']) . ' %)';
                                     } else {
                                         $fee = '';
                                     }

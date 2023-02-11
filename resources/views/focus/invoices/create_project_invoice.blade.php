@@ -49,8 +49,8 @@
             subtotal += lineTotal;
             total += lineTotal * (1+taxRate);
              
-            $(this).find('.rate').val(accounting.formatNumber(lineSubtotal));
-            $(this).find('.amount').text(accounting.formatNumber(lineTotal));
+            $(this).find('.rate').val(accounting.formatNumber(lineSubtotal, 4));
+            $(this).find('.amount').text(accounting.formatNumber(lineTotal, 4));
         });
         $('#subtotal').val(accounting.formatNumber(subtotal));
         $('#tax').val(accounting.formatNumber(tax));
@@ -91,9 +91,9 @@
                     row.find('.qty').val(qty);
 
                     const price = parseFloat(v.product_subtotal);
-                    row.find('.subtotal').val(accounting.formatNumber(price));
-                    row.find('.rate').val(accounting.formatNumber(price));
-                    row.find('.amount').text(accounting.formatNumber(qty * price));
+                    row.find('.subtotal').val(accounting.formatNumber(price, 4));
+                    row.find('.rate').val(accounting.formatNumber(price, 4));
+                    row.find('.amount').text(accounting.formatNumber(qty * price, 4));
 
                     row.find('.quote-id').val(quote.id);
                     row.find('.branch-id').val(quote.branch_id);

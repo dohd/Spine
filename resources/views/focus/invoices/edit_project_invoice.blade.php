@@ -54,8 +54,8 @@
             subtotal += lineTotal;
             total += lineTotal * (1+taxRate);
              
-            $(this).find('.rate').val(accounting.formatNumber(lineSubtotal));
-            $(this).find('.amount').text(accounting.formatNumber(lineTotal));
+            $(this).find('.rate').val(accounting.formatNumber(lineSubtotal, 4));
+            $(this).find('.amount').text(accounting.formatNumber(lineTotal, 4));
         });
         $('#subtotal').val(accounting.formatNumber(subtotal));
         $('#tax').val(accounting.formatNumber(tax));

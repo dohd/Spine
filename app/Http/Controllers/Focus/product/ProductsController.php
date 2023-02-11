@@ -129,9 +129,13 @@ class ProductsController extends Controller
      */
     public function destroy(Product $product)
     {
-        $this->repository->delete($product);
-
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.products.deleted')));
+        try {
+            $this->repository->delete($product);
+        } catch (\Throwable $th) {
+            return json_encode(['status' => 'Error', 'message' => $th->getMessage()]);
+        }
+        
+        return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.products.deleted')]);
     }
 
     /**
@@ -171,11 +175,15 @@ class ProductsController extends Controller
         }
 
         // fetch inventory products
-        $productvariations = ProductVariation::whereHas('product', function ($q) {
-            $q->where('name', 'LIKE', '%' . request('keyword') . '%');
-        })->with(['warehouse' => function ($q) {
+        $productvariations = ProductVariation::where(function ($q) {
+            $q->whereHas('product', function ($q) {
+                $q->where('name', 'LIKE', '%' . request('keyword') . '%');
+            })->orWhere('name', 'LIKE', '%' . request('keyword') . '%');
+        })
+        ->with(['warehouse' => function ($q) {
             $q->select(['id', 'title']);
-        }])->with('product')->limit(6)->get()->unique('name');
+        }])
+        ->with('product')->limit(6)->get()->unique('name');
         
         $products = array();
         foreach ($productvariations as $row) {

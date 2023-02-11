@@ -53,7 +53,7 @@
                             </select>
                         </div>
                         <div class="col-3">
-                            <label for="total">Total Amount (Ksh):</label>                             
+                            <label for="total">Total Amount</label>                             
                             <input type="text" name="amount_total" class="form-control" id="amount_total" readonly>
                         </div>
                     </div>                    
@@ -72,7 +72,7 @@
                                 <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
                                 <th>Customer - Branch</th>   
                                 <th>Title</th>                                                                       
-                                <th>{{ trans('general.amount') }} (Ksh.)</th>
+                                <th>{{ trans('general.amount') }}</th>
                                 <th>Client Ref</th>                                
                                 <th>Ticket No</th>
                                 <th>Invoice No</th>

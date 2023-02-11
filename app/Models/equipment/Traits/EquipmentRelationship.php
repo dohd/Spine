@@ -15,6 +15,11 @@ use App\Models\EquipmentToolkit\EquipmentToolkit;
  */
 trait EquipmentRelationship
 {   
+    public function contract_equipment()
+    {
+        return $this->hasOne(ContractEquipment::class)->whereNull('schedule_id');
+    }
+
     public function contract_service()
     {
         return $this->hasOneThrough(ContractService::class, ServiceItem::class, 'equipment_id', 'id');

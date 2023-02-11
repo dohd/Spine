@@ -9,6 +9,7 @@ use App\Exceptions\GeneralException;
 use App\Models\items\PurchaseItem;
 use App\Repositories\BaseRepository;
 use DateTime;
+use Error;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -251,30 +252,33 @@ class ProductRepository extends BaseRepository
      */
     public function delete(Product $product)
     {
+        $error_msg = '';
         foreach ($product->variations as $product_variation) {
             if (isset($product_variation->quote_item->quote)) {
                 $quote = $product_variation->quote_item->quote;
                 if ($quote) {
                     $type = $quote->bank_id? 'PI' : 'Quote';
-                    throw ValidationException::withMessages(["Product is attached to {$type} number {$quote->tid} !"]);
+                    $error_msg = "Product is attached to {$type} number {$quote->tid} !";
+                    break;
                 }
             }
             if (isset($product_variation->purchase_item->purchase)) {
                 $purchase = $product_variation->purchase_item->purchase;
-                if ($purchase)
-                throw ValidationException::withMessages(['Product is attached to Purchase number {$purchase->tid} !']);
+                if ($purchase) $error_msg = 'Product is attached to Purchase number {$purchase->tid} !';
+                break;
             }
             if (isset($product_variation->purchase_order_item->purchaseorder)) {
                 $purchaseorder = $product_variation->purchase_order_item->purchaseorder;
-                if ($purchaseorder) 
-                throw ValidationException::withMessages(['Product is attached to Purchase Order number {$purchaseorder->tid} !']);
+                if ($purchaseorder) $error_msg = 'Product is attached to Purchase Order number {$purchaseorder->tid} !';
+                break;
             }
             if (isset($product_variation->project_stock_item->project_stock)) {
                 $project_stock = $product_variation->project_stock_item->project_stock;
-                if ($project_stock) 
-                throw ValidationException::withMessages(['Product is attached to Issued Project Stock number {$project_stock->tid} !']);
+                if ($project_stock) $error_msg = 'Product is attached to Issued Project Stock number {$project_stock->tid} !';
+                break;
             }
         }
+        if ($error_msg) throw new Error($error_msg);
 
         DB::beginTransaction();
         

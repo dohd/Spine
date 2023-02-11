@@ -226,7 +226,7 @@
     // on change qty and rate
     $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty", function() {
         const id = $(this).attr('id').split('-')[1];
-
+       
         const qty = accounting.unformat($('#qty-'+id).val());
         let buyprice = accounting.unformat($('#buyprice-'+id).val());
         let estqty = accounting.unformat($('#estqty-'+id).val() || '1');
@@ -237,11 +237,11 @@
         let profit = (qty * rate) - (estqty * buyprice);
         let pcent_profit = profit / (estqty * buyprice) * 100;
         pcent_profit = isFinite(pcent_profit)? Math.round(pcent_profit) : 0;
-
-        $('#buyprice-'+id).val(accounting.formatNumber(buyprice));
-        $('#rate-'+id).val(accounting.formatNumber(rate));
-        $('#price-'+id).val(accounting.formatNumber(price));
-        $('#amount-'+id).text(accounting.formatNumber(qty * price));
+       
+        $('#buyprice-'+id).val(accounting.formatNumber(buyprice, 4));
+        $('#rate-'+id).val(accounting.formatNumber(rate, 4));
+        $('#price-'+id).val(accounting.formatNumber(price, 4));
+        $('#amount-'+id).text(accounting.formatNumber(qty * price, 4));
         $('#lineprofit-'+id).text(pcent_profit + '%');
         calcTotal();
     });
@@ -256,14 +256,39 @@
                 const rate = accounting.unformat($(this).find('.rate').val());
                 let price = rate * ($('#tax_id').val()/100 + 1);
 
-                if (initTaxChange > 1) 
-                    $(this).find('.price').val(accounting.formatNumber(price));                
+                if (initTaxChange > 1) $(this).find('.price').val(accounting.formatNumber(price, 4)); 
                 $(this).find('.rate').change();
             }
         });
     });       
     $('#tax_id').change();
 
+    // on currency change
+    let initRate = $('#currency option:selected').attr('currency_rate')*1;
+    $('#currency').change(function() {
+        const currentRate = $(this).find(':selected').attr('currency_rate')*1;
+        if (currentRate > initRate) {
+            $('#quoteTbl tbody tr').each(function() {
+                let purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initRate;
+                let itemRate = accounting.unformat($(this).find('.rate').val()) * initRate;
+                purchasePrice = purchasePrice / currentRate;
+                itemRate = itemRate / currentRate;
+                $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
+                $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
+            });
+        } else {
+            $('#quoteTbl tbody tr').each(function() {
+                let purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currentRate;
+                let itemRate = accounting.unformat($(this).find('.rate').val()) / currentRate;
+                purchasePrice = purchasePrice * initRate;
+                itemRate = itemRate * initRate;
+                $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
+                $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
+            });
+        }
+        initRate = currentRate;
+    });    
+    
     // compute totals
     function calcTotal() {
         let total = 0;
@@ -338,7 +363,7 @@
             total += amount;
             $(this).find('.amount').text(amount);
         });
-        $('#skill_total').val(total.toLocaleString());
+        $('#skill_total').val(accounting.formatNumber(total));
         profitState.skill_total = total;
         calcProfit();
     }
@@ -376,15 +401,22 @@
                 $('#productid-'+i).val(data.id);
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#qty-'+i).val(1);                
-                $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
+                $('#qty-'+i).val(1);           
+                
+                const currencyRate = $('#currency option:selected').attr('currency_rate');
+                if (currencyRate > 1) {
+                    data.purchase_price = parseFloat(data.purchase_price) / currencyRate;
+                    data.price = parseFloat(data.price) / currencyRate;
+                }
+                
+                $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price, 4)); 
                 $('#estqty-'+i).val(1);
 
                 const rate = parseFloat(data.price);
                 let price = rate * ($('#tax_id').val()/100 + 1);
-                $('#price-'+i).val(accounting.formatNumber(price));                
-                $('#amount-'+i).text(accounting.formatNumber(price));
-                $('#rate-'+i).val(accounting.formatNumber(rate)).change();
+                $('#price-'+i).val(accounting.formatNumber(price, 4));                
+                $('#amount-'+i).text(accounting.formatNumber(price, 4));
+                $('#rate-'+i).val(accounting.formatNumber(rate, 4)).change();
 
                 if (data.units) {
                     let units = data.units.filter(v => v.unit_type == 'base');

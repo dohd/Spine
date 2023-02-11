@@ -90,7 +90,7 @@ class ProjectStockRepository extends BaseRepository
             }   
 
             // update stock worth based on last in first out purchase price
-            $purchase_price = $product_repository->compute_purchase_price(
+            $purchase_price = $product_repository->eval_purchase_price(
                 $prod_variation->id, $prod_variation->qty, $prod_variation->purchase_price
             );
             $subtotal = $issue_item->qty * $purchase_price;

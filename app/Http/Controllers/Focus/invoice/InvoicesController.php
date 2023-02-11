@@ -39,13 +39,17 @@ use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
 use App\Models\bank\Bank;
+use App\Models\Company\Company;
 use App\Models\currency\Currency;
 use App\Models\invoice\PaidInvoice;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
+use Endroid\QrCode\QrCode;
+use Error;
 use Illuminate\Validation\ValidationException;
+use Storage;
 
 /**
  * InvoicesController
@@ -184,18 +188,18 @@ class InvoicesController extends Controller
         $customer_id = $request->customer;
         $quote_ids = explode(',', $request->selected_products);
 
-        if (!$customer_id || !$quote_ids) {
+        if (!$quote_ids) {
             $customers = Customer::where('active', '1')->pluck('company', 'id');
             $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
             $projects = Project::pluck('name', 'id');
-    
-            return redirect()->route('biller.invoices.project_invoice')->with(compact('customers', 'lpos', 'projects'));
+            
+            return redirect()->back()->with(['flash_error' => 'Please filter records by customer!']);
         }
 
         $quotes = Quote::whereIn('id', $quote_ids)->with(['verified_products' => function ($q) {
             $q->orderBy('row_index', 'ASC');
         }])->get();
-        $customer = Customer::find($customer_id);
+        $customer = Customer::find($customer_id) ?: new Customer;
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
         $terms = Term::where('type', 1)->get();  // invoice term type is 1
         $banks = Bank::all();
@@ -205,9 +209,9 @@ class InvoicesController extends Controller
         $last_tid = Invoice::where('ins', $ins)->max('tid');
         $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice', 'purchase_order', 'delivery_note', 'jobcard'], $ins);
 
-        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes');
-
-        return new ViewResponse('focus.invoices.create_project_invoice', $params);
+        return new ViewResponse('focus.invoices.create_project_invoice',
+            compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes'),
+        );
     }
 
     /**
@@ -473,5 +477,63 @@ class InvoicesController extends Controller
             'invoice' => $result,
             // 'invoice' => (object) ['id' => 62],
         ]);
+    }
+
+    /**
+     * TIMS KIT Api Call: Electronic Tax Register (ETR) Invoice
+     */
+    public function attach_etr()
+    {
+        $company = Company::find(auth()->user()->ins); 
+        if (!$company->etr_invoice_endpoint) throw new Error('ETR invoice endpoint not set!');
+
+        $invoice = Invoice::find(request('invoice_id'));
+        if (!array_key_exists('etr_url', $invoice->toArray())) throw new Error('ETR invoice url field not set!');
+        if (!array_key_exists('etr_qrcode', $invoice->toArray())) throw new Error('ETR invoice QRcode field not set!');
+            
+        $payload = config('datecs_etr.invoice');
+
+        if ($invoice->customer) {
+            $customer = $invoice->customer;
+            $payload['buyer'] = [
+                'buyerAddress' => 'string',
+                'buyerName' => $customer->company,
+                'buyerPhone' => $customer->phone,
+                'pinOfBuyer' => 'P123456789P',
+            ];
+        }
+        $payload['items'][0]['unitPrice'] = +$invoice->total;
+        $payload['payment'][0]['amount'] = +$invoice->total;
+        
+        try {
+            $client = new \GuzzleHttp\Client();
+            $client_resp = $client->post($company->etr_invoice_endpoint, [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                ],
+                'json' => $payload,
+            ]);
+            $data = json_decode($client_resp->getBody()->getContents());
+
+            if ($data->messages == 'Success' && isset($data->verificationUrl)) {
+                // extract invoice no
+                $query = parse_url($data->verificationUrl, PHP_URL_QUERY);
+                parse_str($query, $params);
+                $invoice_no = $params['invoiceNo'];
+                // generate QR code
+                $timestamp = date('Y_m_d_H_i_s');
+                $filename = "invoice_{$invoice_no}_{$timestamp}.png";
+                $qrCode = new QrCode($data->verificationUrl);
+                $qrCode->writeFile(Storage::disk('public')->path("qr".DIRECTORY_SEPARATOR."{$filename}"));
+                // update invoice
+                $invoice->update(['etr_url' => $data->verificationUrl, 'etr_qrcode' => $filename]);
+            }
+
+            return (array) $data;
+        } catch (\Throwable $th) {
+            printlog($th->getMessage());
+            throw new Error('ETR Processing error!');
+        }
     }
 }

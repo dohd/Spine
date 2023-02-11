@@ -1,9 +1,17 @@
 <div class="row mb-1">
     <div class="col-4"><label for="payer" class="caption">Customer Name</label>
         <div class="input-group">
+            @php
+                $customer_name = '';
+                if (!$customer->company && $quotes->count() == 1) {
+                    $quote = $quotes->first();
+                    if ($quote->customer) $customer_name = $quote->customer->company;
+                    elseif ($quote->lead) $customer_name = $quote->lead->client_name;
+                } else $customer_name = $customer->company;
+            @endphp
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-            {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
-            <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
+            {{ Form::text('customer_name', $customer_name, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
+            <input type="hidden" name="customer_id" value="{{ $customer->id ?: 0 }}" id="customer_id">
             {{ Form::hidden('taxid', $customer->taxid) }}
         </div>
     </div>
@@ -157,7 +165,7 @@
                     }
 
                     // Table values
-                    $price = numberFormat($val->subtotal);
+                    $price = number_format($val->subtotal, 4);
                     $project_id = $val->project_quote ? $val->project_quote->project_id : '';
 
                     $title = $val->notes;
@@ -173,6 +181,7 @@
                     <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
                     <td><input type="text" class="form-control rate" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
                     <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ $price }}</span></strong></td>
+                    
                     <input type="hidden" class="subtotal" value="{{ $price }}" id="initprice-{{ $k }}" disabled>
                     <input type="hidden" class="num-val" name="numbering[]" id="num-{{ $k }}">
                     <input type="hidden" class="row-index" name="row_index[]" id="rowindex-{{ $k }}">
@@ -190,8 +199,9 @@
                     <td><textarea class="form-control descr" name="description[]" id="description-{{ $k }}" rows="5">{{ $item->description }}</textarea></td>
                     <td><input type="text" class="form-control unit" name="unit[]" id="unit-{{ $k }}" value="{{ $item->unit }}" readonly></td>
                     <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="{{ +$item->product_qty }}" readonly></td>
-                    <td><input type="text" class="form-control rate" name="product_price[]" value="{{ numberFormat($item->product_price) }}" id="product_price-{{ $k }}" readonly></td>
-                    <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ numberFormat($item->product_price * $item->product_qty) }}</span></strong></td>
+                    <td><input type="text" class="form-control rate" name="product_price[]" value="{{ number_format($item->product_price, 4) }}" id="product_price-{{ $k }}" readonly></td>
+                    <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ number_format($item->product_price * $item->product_qty, 4) }}</span></strong></td>
+
                     <input type="hidden"  class="subtotal" value="{{ $item->product_price }}" id="initprice-{{ $k }}" disabled>
                     <input type="hidden" class="num-val" name="numbering[]" value="{{ $item->numbering }}" id="num-{{ $k }}">
                     <input type="hidden" class="row-index" name="row_index[]" value="{{ $item->row_index }}" id="rowindex-{{ $k }}">

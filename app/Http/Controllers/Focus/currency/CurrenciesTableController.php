@@ -54,9 +54,13 @@ class CurrenciesTableController extends Controller
     {
         //
         $core = $this->currency->getForDataTable();
+        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('rate', function ($currency) {
+                return +$currency->rate;
+            })
             ->addColumn('created_at', function ($currency) {
                 return dateFormat($currency->created_at);
             })

@@ -108,7 +108,7 @@ class DjcsController extends Controller
         $result = $this->repository->create(compact('data', 'data_items'));
 
         // print preview 
-        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', $result->id, true), 1]) .'" class="invisible" id="printpreview"></a>'; 
+        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
 
         return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created' . $msg]);
     }
@@ -157,8 +157,7 @@ class DjcsController extends Controller
         $result = $this->repository->update($djc, compact('data', 'data_items'));
 
         // print preview 
-        $valid_token = token_validator('', 'd' . $result->id, true);
-        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
 
         return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated' . $msg]);
     }

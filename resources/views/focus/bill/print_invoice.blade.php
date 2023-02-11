@@ -154,10 +154,14 @@
 		</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
+		@php
+			$dir_sep = DIRECTORY_SEPARATOR;
+		@endphp
 	<table class="header-table">
 		<tr>
 			<td>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%"/>
+				{{-- {{ Storage::path("public{$dir_sep}img{$dir_sep}company{$dir_sep}{$company->logo}") }} --}}
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%" />
 			</td>
 		</tr>
 	</table>
@@ -174,19 +178,49 @@
 		<tr>
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name :</b> {{ $resource->customer->company }}<br>
-				<b>Client Tax Pin : </b>{{ $resource->customer->taxid }}<br>
-				<b>Address :</b> {{ $resource->customer->address }}<br>
-				<b>Email :</b> {{ $resource->customer->email }}<br>
-				<b>Cell :</b> {{ $resource->customer->phone }}<br>
+				@if ($resource->customer)
+					<b>Client Name :</b> {{ $resource->customer->company }}<br>
+					<b>Client Tax Pin : </b>{{ $resource->customer->taxid }}<br>
+					<b>Address :</b> {{ $resource->customer->address }}<br>
+					<b>Email :</b> {{ $resource->customer->email }}<br>
+					<b>Cell :</b> {{ $resource->customer->phone }}<br>
+				@else
+					@php
+						$customer = '';
+						$lead = '';
+						$quote = isset($resource->products->first()->quote)? $resource->products->first()->quote : '';
+						if ($quote && $quote->customer) $customer = $quote->customer;
+						elseif ($quote && $quote->lead) $lead = $quote->lead;
+					@endphp
+					@if ($customer)
+						<b>Client Name</b> {{ $customer->company }}<br>
+						<b>Client Tax Pin : </b>{{ $customer->taxid }}<br>
+						<b>Address :</b> {{ $customer->address }}<br>
+						<b>Email :</b> {{ $customer->email }}<br>
+						<b>Cell :</b> {{ $customer->phone }}<br>
+					@elseif ($lead)
+						<b>Client Name</b> {{ $lead->client_name }}<br>
+						<b>Client Tax Pin : </b>{{ '' }}<br>
+						<b>Address :</b> {{ $lead->client_address }}<br>
+						<b>Email :</b> {{ $lead->client_email }}<br>
+						<b>Cell :</b> {{ $lead->client_contact }}<br>
+					@endif
+				@endif 
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
-				<b>Invoice No :</b> {{ gen4tid('', $resource->tid) }}<br><br>
+				<b>Invoice No :</b> {{ gen4tid('', $resource->tid) }}<br>
 				<b>Date :</b> {{ dateFormat($resource->invoicedate, 'd-M-Y') }}<br>
 				<b>Overdue after :</b> {{ $resource->validity ? $resource->validity . ' days' : 'On Receipt' }}<br>
 				<b>KRA Pin :</b> {{ $company->taxid }}<br>
+				@php
+					if ($resource->etr_url) {
+						parse_str(parse_url($resource->etr_url, PHP_URL_QUERY), $params);
+						$invoice_no = $params['invoiceNo'];
+						echo '<b>ETR Invoice No :</b> ' . $invoice_no;
+					}
+				@endphp
 			</td>
 		</tr>
 	</table><br>
@@ -199,12 +233,19 @@
 		<thead>
 			<tr>
 				<td width="6%">No.</td>
-				<td width="24%"> REFERENCE</td>
-				<td width="24%"> DESCRIPTION</td>
+				<td width="24%">REFERENCE</td>
+				<td width="24%">DESCRIPTION</td>
 				<td width="8%">QTY</td>
 				<td width="8%">UoM</td>
 				<td width="14%">RATE</td>
-				<td width="14%">AMOUNT(Ksh)</td>
+				@php
+					$code = '';
+					$inv_product = 	$resource->products->first();
+					if ($inv_product && isset($inv_product->quote->currency)) {
+						$code = $inv_product->quote->currency->code;
+					} 
+				@endphp
+				<td width="14%">AMOUNT {{ $code? "({$code})" : '' }}</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -229,15 +270,20 @@
 			@endfor
 			<!--  -->
 			<tr>
-				<td colspan="5" class="bd-t" rowspan="2">
-					@isset($resource->bank)
+				<td colspan="3" class="bd-t" rowspan="3">
+					@if ($resource->bank)
 						<span class="customer-dt-title">BANK DETAILS:</span><br>
 						<b>Account Name :</b> {{ $resource->bank->name }}<br>
 						<b>Account Number :</b> {{ $resource->bank->number }}<br>
 						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
-						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}
-					@endisset
+						<b>Currency :</b> {{ $resource->currency? $resource->currency->code : 'Kenyan Shillings' }} &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
+						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}<br><br>
+					@endif
+					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
+				</td>
+				<td colspan="2" class="bd-t" rowspan="3" style="border-left: hidden; padding-top: 1em;">
+					{{-- Storage::path("public{$dir_sep}qr{$dir_sep}{$resource->etr_qrcode}") --}}
+					<img src="{{ '' }}" style="object-fit:contain" width="10%"/>
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($resource->print_type == 'inclusive')
@@ -256,9 +302,6 @@
 				@endif
 			</tr>
 			<tr>
-				<td colspan="5">
-					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
-				</td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 			</tr>

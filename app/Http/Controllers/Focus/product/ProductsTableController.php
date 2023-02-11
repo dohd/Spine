@@ -71,6 +71,10 @@ class ProductsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($product) {
+                if ($product->standard) {
+                    $this->standard_product = $product->standard;
+                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . "{$product->name} ({$product->standard->name})" . '</a>';
+                }
                 $this->standard_product = $product->standard ?: $product;
                 return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product->name . '</a>';
             })
@@ -102,11 +106,10 @@ class ProductsTableController extends Controller
                 return NumberFormat($total);
             })
             ->addColumn('created_at', function ($product) {
-                return $product->created_at->format('d-m-Y');
+                return dateFormat($product->created_at);
             })
             ->addColumn('actions', function ($product) {
-                if ($product->action_buttons) return $product->action_buttons;
-                if (isset($product->product->action_buttons)) return $product->product->action_buttons;
+                return $product->action_buttons;
             })
             ->addColumn('aggregate', function () use($aggregate) {
                 return $aggregate;

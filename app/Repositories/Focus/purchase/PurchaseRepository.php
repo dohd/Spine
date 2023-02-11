@@ -216,17 +216,19 @@ class PurchaseRepository extends BaseRepository
                 }
 
                 // apply unit conversion
-                $units = $prod_variation->product->units;
-                foreach ($units as $unit) {
-                    if ($unit->code == $item['uom']) {
-                        if ($unit->unit_type == 'base') {
-                            $prod_variation->increment('qty', $item['qty']);
-                        } else {
-                            $converted_qty = $item['qty'] * $unit->base_ratio;
-                            $prod_variation->increment('qty', $converted_qty);
+                if (isset($prod_variation->product->units)) {
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->increment('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->increment('qty', $converted_qty);
+                            }
                         }
-                    }
-                }             
+                    }    
+                } else throw ValidationException::withMessages(['Please attach units to stock items']);
             }
         }
         PurchaseItem::insert($data_items);
@@ -324,17 +326,19 @@ class PurchaseRepository extends BaseRepository
                 }
 
                 // apply unit conversion
-                $units = $prod_variation->product->units;
-                foreach ($units as $unit) {
-                    if ($unit->code == $item['uom']) {
-                        if ($unit->unit_type == 'base') {
-                            $prod_variation->increment('qty', $item['qty']);
-                        } else {
-                            $converted_qty = $item['qty'] * $unit->base_ratio;
-                            $prod_variation->increment('qty', $converted_qty);
+                if (isset($prod_variation->product->units)) {
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->increment('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->increment('qty', $converted_qty);
+                            }
                         }
-                    }
-                }     
+                    }   
+                } else throw ValidationException::withMessages(['Please attach units to stock items']);
             }    
 
             $item = array_replace($item, [

@@ -35,20 +35,8 @@ class CreditNotesController extends Controller
    */
   public function index()
   {
-    // test KRA ETR TIMS device api call
-    // $client = new \GuzzleHttp\Client();
-    // $response = $client->post("http://192.168.0.57:8086/api/v3/invoices", [
-    //   'headers' => [
-    //     // 'Content-Type' => "text/plain; charset=utf-8",
-    //     'Content-Type' => "application/json",
-    //     'Accept' => "application/json",
-    //   ],
-    //   'json' => [],
-    // ]);
-    // $data = $response->getBody()->getContents();
-    // dd(json_decode($data));
-
     $is_debit = request('is_debit');
+    
     return new ViewResponse('focus.creditnotes.index', compact('is_debit'));
   }
 

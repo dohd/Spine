@@ -27,7 +27,7 @@
 
     <div class="card">
         <div class="card-body">
-        {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST']) }}
+        {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST', 'id' => 'quoteForm']) }}
             @include('focus.quotes.form')
         {{ Form::close() }}
         </div>
@@ -219,10 +219,10 @@
         let pcent_profit = profit / (estqty * buyprice) * 100;
         pcent_profit = isFinite(pcent_profit)? Math.round(pcent_profit) : 0;
 
-        $('#buyprice-'+id).val(accounting.formatNumber(buyprice));
-        $('#rate-'+id).val(accounting.formatNumber(rate));
-        $('#price-'+id).val(accounting.formatNumber(price));
-        $('#amount-'+id).text(accounting.formatNumber(qty * price));
+        $('#buyprice-'+id).val(accounting.formatNumber(buyprice, 4));
+        $('#rate-'+id).val(accounting.formatNumber(rate, 4));
+        $('#price-'+id).val(accounting.formatNumber(price, 4));
+        $('#amount-'+id).text(accounting.formatNumber(qty * price, 4));
         $('#lineprofit-'+id).text(pcent_profit + '%');
         calcTotal();
     });
@@ -235,12 +235,39 @@
             if (qty > 0) {
                 const rate = accounting.unformat($(this).find('.rate').val());
                 let price = rate * tax;
-                $(this).find('.price').val(accounting.formatNumber(price));
+                $(this).find('.price').val(accounting.formatNumber(price, 4));
                 $(this).find('.rate').change();
             }
         });
     });    
 
+
+    // on currency change
+    let initRate = $('#currency option:selected').attr('currency_rate')*1;
+    $('#currency').change(function() {
+        const currentRate = $(this).find(':selected').attr('currency_rate')*1;
+        if (currentRate > initRate) {
+            $('#quoteTbl tbody tr').each(function() {
+                let purchasePrice = accounting.unformat($(this).find('.buyprice').val())  * initRate;
+                let itemRate = accounting.unformat($(this).find('.rate').val()) * initRate;
+                purchasePrice = purchasePrice / currentRate;
+                itemRate = itemRate / currentRate;
+                $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
+                $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
+            });
+        } else {
+            $('#quoteTbl tbody tr').each(function() {
+                let purchasePrice = accounting.unformat($(this).find('.buyprice').val())  / currentRate;
+                let itemRate = accounting.unformat($(this).find('.rate').val()) / currentRate;
+                purchasePrice = purchasePrice * initRate;
+                itemRate = itemRate * initRate;
+                $(this).find('.buyprice').val(accounting.formatNumber(purchasePrice, 4));
+                $(this).find('.rate').val(accounting.formatNumber(itemRate, 4)).change();
+            });
+        }
+        initRate = currentRate;
+    }); 
+    
     // compute totals
     function calcTotal() {
         let total = 0;
@@ -352,7 +379,14 @@
                 $('#productid-'+i).val(data.id);
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#qty-'+i).val(1);                
+                $('#qty-'+i).val(1); 
+                
+                const currencyRate = $('#currency option:selected').attr('currency_rate');
+                if (currencyRate > 1) {
+                    data.purchase_price = parseFloat(data.purchase_price) / currencyRate;
+                    data.price = parseFloat(data.price) / currencyRate;
+                }
+
                 $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
                 $('#estqty-'+i).val(1);
 

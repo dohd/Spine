@@ -53,7 +53,17 @@ class TaxReportsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()   
             ->addColumn('tax_group', function ($report) {
-                return "{$report->tax_group}%";
+                $tax_group = '';
+                if ($report->sale_subtotal > 0 && $report->tax_group == 0) {
+                    $tax_group = 'Exempted Rated';
+                } elseif ($report->purchase_subtotal > 0 && $report->tax_group == 0) {
+                    $tax_group = 'Zero Rated (0%)';
+                } elseif ($report->tax_group == 8) {
+                    $tax_group = 'Other Rated (8%)';
+                } elseif ($report->tax_group == 16) {
+                    $tax_group = 'General Rated (16%)';
+                }
+                return "{$tax_group} Sales/Purchases";
             }) 
             ->addColumn('sale_tax', function ($report) {
                 return numberFormat($report->sale_tax);

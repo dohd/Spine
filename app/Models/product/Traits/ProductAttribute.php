@@ -20,7 +20,7 @@ trait ProductAttribute
         return '
          '.$this->getViewButtonAttribute("manage-product", "biller.products.show").'
                 '.$this->getEditButtonAttribute("edit-product", "biller.products.edit").'
-                '.$this->getDeleteButtonAttribute("delete-product", "biller.products.destroy",'table').'
+                '.$this->getDeleteButtonAttribute("delete-product", "biller.products.destroy", 'table').'
                 ';
     }
 }

@@ -59,17 +59,19 @@ class QuoteVerifyTableController extends Controller
             })
             ->addColumn('customer', function ($quote) {
                 $customer = $quote->lead? $quote->lead->client_name : '';
-                if ($quote->client) {
-                    $customer = "{$quote->client->company}";
+                if ($quote->customer) {
+                    $customer = "{$quote->customer->company}";
                     if ($quote->branch) $customer .= " - {$quote->branch->name}";
                 }
                 
                 return $customer;
             })
             ->addColumn('total', function ($quote) {
+                if ($quote->currency) return amountFormat($quote->total, $quote->currency->id);
                 return numberFormat($quote->total);
             })
             ->addColumn('verified_total', function ($quote) {
+                if ($quote->currency) return amountFormat($quote->verified_total, $quote->currency->id);
                 return numberFormat($quote->verified_total);
             })
             ->addColumn('lpo_number', function($quote) {

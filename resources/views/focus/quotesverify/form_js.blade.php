@@ -222,9 +222,9 @@
             $('#unit-'+i).val(item.unit); 
             $('#remark-'+i).val(item.remark);
             $('#amount-'+i).val(accounting.formatNumber(item.product_qty));
-            $('#price-'+i).val(accounting.formatNumber(item.product_subtotal)).attr('readonly', true);
-            $('#rateinclusive-'+i).val(accounting.formatNumber(item.product_price));                
-            $('#result-'+i).text(accounting.formatNumber(item.product_qty * item.product_price));
+            $('#price-'+i).val(accounting.formatNumber(item.product_subtotal, 4)).attr('readonly', true);
+            $('#rateinclusive-'+i).val(accounting.formatNumber(item.product_price, 4));                
+            $('#result-'+i).text(accounting.formatNumber(item.product_qty * item.product_price, 4));
         } else {
             $('#quotation tbody').append(productTitleRow(rowIndx));
             // set default values
@@ -271,13 +271,12 @@
         const id = e.target.id;
         const indx = id.split('-')[1];
         const productQty = $('#'+id).val();
-        let productPrice = $('#price-'+indx).val();
-        productPrice = parseFloat(productPrice.replace(/,/g, ''));
+        let productPrice = accounting.unformat($('#price-'+indx).val());
 
         const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-        const rowAmount = productQty * parseFloat(rateInclusive);
-        $('#result-'+indx).text(rowAmount.toFixed(2));
+        $('#rateinclusive-'+indx).val(accounting.formatNumber(rateInclusive, 4));
+        const rowAmount = productQty * rateInclusive;
+        $('#result-'+indx).text(accounting.formatNumber(rowAmount, 4));
         calcTotals();
     }
     // on price input change
@@ -291,8 +290,8 @@
         const price = accounting.unformat($('#'+id).val());
         const rateInclusive = taxRate * price;
 
-        $('#rateinclusive-'+indx).val(rateInclusive.toFixed(2));
-        $('#result-'+indx).text(accounting.formatNumber(qty * rateInclusive));
+        $('#rateinclusive-'+indx).val(accounting.formatNumber(rateInclusive, 4));
+        $('#result-'+indx).text(accounting.formatNumber(qty * rateInclusive, 4));
         calcTotals();
     }
 
@@ -345,11 +344,16 @@
                 $('#unit-'+i).val(data.unit);                
                 $('#amount-'+i).val(1);
 
+                const currency = @json($quote->currency);
+                if (currency && parseFloat(currency['rate']) > 1) {
+                    data.price = parseFloat(data.price) / parseFloat(currency['rate']);
+                }
+
                 const price = accounting.unformat(data.price);
                 const amount = price * taxRate;
-                $('#price-'+i).val(accounting.formatNumber(price)).attr('readonly', true);
-                $('#rateinclusive-'+i).val(accounting.formatNumber(amount));                
-                $('#result-'+i).text(accounting.formatNumber(amount));
+                $('#price-'+i).val(accounting.formatNumber(price, 4)).attr('readonly', true);
+                $('#rateinclusive-'+i).val(accounting.formatNumber(amount, 4));                
+                $('#result-'+i).text(accounting.formatNumber(amount, 4));
                 calcTotals();
             }
         };

@@ -263,9 +263,13 @@
 						<b>Account Name :</b> {{ $resource->bank->name }}<br>
 						<b>Account Number :</b> {{ $resource->bank->number }}<br>
 						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
-						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}
+						<b>Currency :</b> {{ $resource->currency? $resource->currency->code : 'Kenya Shillings' }} &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
+						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }} <br><br>
 					@endisset
+					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
+					@if ($resource->prepared_by)
+						<em>Prepared By : </em><b>{{ $resource->prepared_by }}</b>
+					@endif
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($resource->print_type == 'inclusive')
@@ -284,12 +288,7 @@
 				@endif
 			</tr>
 			<tr>
-				<td colspan="4">
-					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
-					@if ($resource->prepared_by)
-						<em>Prepared By : </em><b>{{ $resource->prepared_by }}</b>
-					@endif
-				</td>
+				<td colspan="4"></td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
 				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 			</tr>

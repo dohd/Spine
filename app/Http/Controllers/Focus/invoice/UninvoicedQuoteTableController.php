@@ -48,6 +48,7 @@ class UninvoicedQuoteTableController extends Controller
     public function __invoke()
     {
         $core = $this->repository->getForVerifyNotInvoicedDataTable();
+        
         $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
         
         return Datatables::of($core)
@@ -65,8 +66,8 @@ class UninvoicedQuoteTableController extends Controller
             })
             ->addColumn('customer', function ($quote) {
                 $customer = $quote->lead? $quote->lead->client_name : '';
-                if ($quote->client) {
-                    $customer = "{$quote->client->company}";
+                if ($quote->customer) {
+                    $customer = "{$quote->customer->company}";
                     if ($quote->branch) $customer .= " - {$quote->branch->name}";
                 }
                 return $customer;
@@ -75,13 +76,20 @@ class UninvoicedQuoteTableController extends Controller
                 return dateFormat($quote->invoicedate);
             })
             ->addColumn('total', function ($quote) {
+                $currency_id = '';
+                if ($quote->currency) {
+                    $currency_id = $quote->currency->id;
+                    return '<span class="currency" currency_id="' .  $currency_id .'">'. amountFormat($quote->total, $quote->currency->id) .'</span>';
+                }
                 return numberFormat($quote->total);
             })
             ->addColumn('verified_total', function ($quote) {
-                return numberFormat($quote->verified_total);
+                return $quote->currency? amountFormat($quote->verified_total, $quote->currency->id) : numberFormat($quote->verified_total);
             })
             ->addColumn('diff_total', function ($quote) {
-                return numberFormat($quote->total - $quote->verified_total);
+                return $quote->currency? 
+                    amountFormat(($quote->total - $quote->verified_total), $quote->currency->id) : 
+                    numberFormat($quote->total - $quote->verified_total);
             })
             ->addColumn('project_tid', function($quote) use($prefixes) {
                 if ($quote->project) 
@@ -89,9 +97,8 @@ class UninvoicedQuoteTableController extends Controller
             })
             ->addColumn('lpo_number', function($quote) {
                 if (!$quote->lpo)  return 'Null:';
-                $amount = numberFormat($quote->lpo->amount);
-                $currency = $quote->currency? $quote->currency->code : '';
-                return $quote->lpo->lpo_no . "<br> {$currency}: {$amount}";
+                $amount = $quote->currency? amountFormat($quote->lpo->amount, $quote->currency->id) : numberFormat($quote->lpo->amount);
+                return $quote->lpo->lpo_no . "<br>" . $amount;
             })
             ->make(true);
     }

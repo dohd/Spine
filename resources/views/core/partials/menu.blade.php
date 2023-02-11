@@ -529,8 +529,19 @@
                         {{-- Stock Transfer --}}
                         @permission('manage-stock-transfer')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                            <a class="dropdown-item " href="{{ route('biller.products.stock_transfer')? '#' : '#' }}"><i class="ft-wind"></i> {{ trans('products.stock_transfer') }}</a>
-                        </li> 
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-wind"></i> {{ trans('products.stock_transfer') }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.stock_transfers.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Transfer Management
+                                    </a>
+                                </li>
+                                @permission('create-stock-transfer')
+                                <li><a class="dropdown-item" href="{{ route('biller.stock_transfers.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Transfer
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
                         @endauth
 
                         {{--asset and equipments  --}}

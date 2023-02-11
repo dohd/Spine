@@ -33,7 +33,7 @@ class QuoteRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
+        $q = $this->query()->with('currency');
         
         $q->when(request('page') == 'pi', fn($q) => $q->where('bank_id', '>', 0));
         $q->when(request('page') == 'qt', fn($q) => $q->where('bank_id', 0));
@@ -102,7 +102,7 @@ class QuoteRepository extends BaseRepository
 
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
-            'verified', 'revision', 'client_ref', 'lpo_id'
+            'verified', 'revision', 'client_ref', 'lpo_id', 'currency_id'
         ]);
     }
 
@@ -112,7 +112,7 @@ class QuoteRepository extends BaseRepository
     public function getForVerifyDataTable()
     {
         // budgeted project quotes or standard quotes
-        $q = $this->query()->whereHas('budget')->orWhere('quote_type', 'standard');
+        $q = $this->query()->with('currency')->whereHas('budget')->orWhere('quote_type', 'standard');
 
         $q->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
@@ -123,7 +123,7 @@ class QuoteRepository extends BaseRepository
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'total', 'bank_id', 'verified',
-            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total'
+            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total', 'currency_id'
         ]);
     }
 
@@ -145,7 +145,7 @@ class QuoteRepository extends BaseRepository
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'date', 
-            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id'
+            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id', 'currency_id'
         ]);
     }
 
@@ -158,7 +158,6 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -190,9 +189,9 @@ class QuoteRepository extends BaseRepository
             return array_replace($v, [
                 'quote_id' => $result->id, 
                 'ins' => $result->ins,
-                'product_price' => numberClean($v['product_price']),
-                'product_subtotal' => numberClean($v['product_subtotal']),
-                'buy_price' => numberClean($v['buy_price']),
+                'product_price' =>  floatval(str_replace(',', '', $v['product_price'])),
+                'product_subtotal' => floatval(str_replace(',', '', $v['product_subtotal'])),
+                'buy_price' => floatval(str_replace(',', '', $v['buy_price'])),
             ]);
         }, $data_items);
         QuoteItem::insert($data_items);
@@ -249,7 +248,7 @@ class QuoteRepository extends BaseRepository
         foreach($data_items as $item) {
             foreach ($item as $key => $val) {
                 if (in_array($key, ['product_price', 'product_subtotal', 'buy_price']))
-                    $item[$key] = numberClean($val);
+                    $item[$key] = floatval(str_replace(',', '', $val));
             }
             $quote_item = QuoteItem::firstOrNew(['id' => $item['id']]);
             $quote_item->fill(array_replace($item, ['quote_id' => $quote['id'], 'ins' => $quote['ins']]));
@@ -332,8 +331,8 @@ class QuoteRepository extends BaseRepository
             $item = array_replace($item, [
                 'quote_id' => $data['id'],
                 'product_qty' => numberClean($item['product_qty']),
-                'product_price' => numberClean($item['product_price']),
-                'product_subtotal' => numberClean($item['product_subtotal']),
+                'product_price' => floatval(str_replace(',', '', $item['product_price'])),
+                'product_subtotal' => floatval(str_replace(',', '', $item['product_subtotal'])),
                 'ins' => auth()->user()->ins
             ]);
             $verify_item = VerifiedItem::firstOrNew(['id' => $item['item_id']]);

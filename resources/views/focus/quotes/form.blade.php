@@ -22,8 +22,9 @@
                                     if ($lead->branch) $customer_name .= " - {$lead->branch->name}";
                                 } else $customer_name = $lead->client_name;
                                 
+                                // create mode
                                 $prefix = $prefixes[1];
-                                if (isset($quote)) $prefix = $prefixes[2];
+                                if (isset($quote)) $prefix = $prefixes[2]; //edit mode
                             @endphp
                             <option 
                                 value="{{ $lead->id }}" 
@@ -76,9 +77,10 @@
                 <div class="input-group">
                     <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
                     @php
-                        $tid = isset($words['edit_mode'])? $lastquote->tid : $lastquote->tid+1;
+                        $tid = isset($words['edit_mode'])? $quote->tid : $lastquote->tid+1;
+                        $tid_prefix = !isset($words['edit_mode'])? $prefixes[0] : ($quote->bank_id? $prefixes[1] : $prefixes[0]);
                     @endphp
-                    {{ Form::text('tid', gen4tid("{$prefixes[0]}-", $tid), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                    {{ Form::text('tid', gen4tid("{$tid_prefix}-", $tid), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
                     <input type="hidden" name="tid" value="{{ $tid }}">
                 </div>
             </div>
@@ -171,9 +173,19 @@
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
-                        @foreach($currencies as $curr)
-                            <option value="{{ $curr->id }}" {{ $curr->id === 1? 'selected' : '' }}>
-                                {{ $curr->symbol }} - {{ $curr->code }}
+                        @foreach ($currencies as $key => $currency)
+                            @php 
+                                $selected = '';
+                                if ($currency->id == @$quote->currency_id) $selected = 'selected';
+                                elseif ($currency->id == 1 && !@$quote) $selected = 'selected';
+                                $rate_label = $currency->rate > 1? "1/" . (+$currency->rate) : '';
+                            @endphp
+                            <option 
+                                value="{{ $currency->id }}" 
+                                currency_rate="{{ +$currency->rate }}" 
+                                {{ $selected }}
+                            >
+                                {{ $currency->code }} {{ $rate_label }}
                             </option>
                         @endforeach
                     </select>
