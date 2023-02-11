@@ -188,18 +188,18 @@ class InvoicesController extends Controller
         $customer_id = $request->customer;
         $quote_ids = explode(',', $request->selected_products);
 
-        if (!$customer_id || !$quote_ids) {
+        if (!$quote_ids) {
             $customers = Customer::where('active', '1')->pluck('company', 'id');
             $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
             $projects = Project::pluck('name', 'id');
-    
-            return redirect()->route('biller.invoices.project_invoice')->with(compact('customers', 'lpos', 'projects'));
+            
+            return redirect()->back()->with(['flash_error' => 'Please filter records by customer!']);
         }
 
         $quotes = Quote::whereIn('id', $quote_ids)->with(['verified_products' => function ($q) {
             $q->orderBy('row_index', 'ASC');
         }])->get();
-        $customer = Customer::find($customer_id);
+        $customer = Customer::find($customer_id) ?: new Customer;
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
         $terms = Term::where('type', 1)->get();  // invoice term type is 1
         $banks = Bank::all();
@@ -209,9 +209,9 @@ class InvoicesController extends Controller
         $last_tid = Invoice::where('ins', $ins)->max('tid');
         $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice', 'purchase_order', 'delivery_note', 'jobcard'], $ins);
 
-        $params = compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes');
-
-        return new ViewResponse('focus.invoices.create_project_invoice', $params);
+        return new ViewResponse('focus.invoices.create_project_invoice',
+            compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes'),
+        );
     }
 
     /**
