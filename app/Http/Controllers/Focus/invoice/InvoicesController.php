@@ -188,12 +188,12 @@ class InvoicesController extends Controller
         $customer_id = $request->customer;
         $quote_ids = explode(',', $request->selected_products);
 
-        if (!$quote_ids) {
+        if (!$customer_id || !$quote_ids) {
             $customers = Customer::where('active', '1')->pluck('company', 'id');
             $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
             $projects = Project::pluck('name', 'id');
             
-            return redirect()->back()->with(['flash_error' => 'Please filter records by customer!']);
+            return redirect()->back()->with('flash_error', 'Please filter records by customer!');
         }
 
         $quotes = Quote::whereIn('id', $quote_ids)->with(['verified_products' => function ($q) {
