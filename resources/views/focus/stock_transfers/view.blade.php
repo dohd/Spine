@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Leave Management')
+@section('title', 'View | Stock Transfer Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Leave Management</h4>
+            <h4 class="content-header-title">Stock Transfer Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.leave.partials.leave-header-buttons')
+                @include('focus.stock_transfers.partials.stock-transfer-header-buttons')
             </div>
         </div>
     </div>
@@ -19,32 +19,27 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-header">
-                    <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="#leaveStatusModal">
+                    {{-- <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="#Stock TransferStatusModal">
                         <i class="fa fa-pencil" aria-hidden="true"></i> Status
-                    </a>
+                    </a> --}}
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
-                            $employee_name = '';
-                            $employee = $leave->employee;
-                            if ($employee) $employee_name = $employee->first_name . ' ' . $employee->last_name;
-                        
                             $details = [
-                                'Employee' => $employee_name,
-                                'Leave Category' => $leave->leave_category? $leave->leave_category->title : '',
-                                'Leave Status' => $leave->status,
-                                'Leave Reason' => $leave->reason,
-                                'Leave Duration' => $leave->qty . ' days',
-                                'Start Date' => dateFormat($leave->start_date),
-                                'End Date' => dateFormat($leave->end_date),
+                                'Stock Transfer Category' => '',
+                                'Stock Transfer Status' => $stock_transfer->status,
+                                'Stock Transfer Reason' => $stock_transfer->reason,
+                                'Stock Transfer Duration' => $stock_transfer->qty . ' days',
+                                'Start Date' => dateFormat($stock_transfer->start_date),
+                                'End Date' => dateFormat($stock_transfer->end_date),
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
                                 <th width="30%">{{ $key }}</th>
                                 <td>
-                                    @if ($key == 'Leave Status')
+                                    @if ($key == 'Stock Transfer Status')
                                         <span class="text-success">{{ $val }}</span>
                                     @else
                                         {{ $val }}
@@ -58,5 +53,4 @@
         </div>
     </div>
 </div>
-@include('focus.leave.partials.leave-status-modal')
 @endsection
