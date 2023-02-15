@@ -25,7 +25,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#tid</th>
+                                        <th>#TFR No.</th>
                                         <th>Note</th>
                                         <th>Source</th>
                                         <th>Destination</th>
@@ -76,7 +76,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'source_id', 'destination_id', 'total'].map(v=> ({data: v, name: v})),
+                    ...['tid', 'note', 'source_location', 'destination_location', 'total'].map(v=> ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
