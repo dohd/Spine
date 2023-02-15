@@ -72,10 +72,9 @@ class StockTransferRepository extends BaseRepository
                     $similar_prod_variation = $prod_variation->replicate();
                     $similar_prod_variation->fill([
                         'warehouse_id' => $result->destination_id,
-                        'qty' => 0,
                         'price' => $item->unit_price,
                     ]);
-                    unset($similar_prod_variation->id);
+                    unset($similar_prod_variation->id, $similar_prod_variation->qty);
                     $similar_prod_variation->save();
                 }
 
@@ -130,8 +129,41 @@ class StockTransferRepository extends BaseRepository
      * @return bool
      */
     public function delete(StockTransfer $stock_transfer)
-    {
-        if ($stock_transfer->delete()) return true;
+    { 
+        DB::beginTransaction();
+
+        // reverse stock state
+        foreach ($stock_transfer->items as $item) {
+            $prod_variation = $item->product_variation;
+            $similar_prod_variation = ProductVariation::where(['parent_id' => $prod_variation->parent_id, 'warehouse_id' => $stock_transfer->destination_id])
+                    ->where('name', 'LIKE', '%'. $prod_variation->name .'%')
+                    ->first();
+
+            if ($prod_variation && $similar_prod_variation) {
+                // apply unit conversion
+                if (isset($prod_variation->product->units)) {
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->increment('qty', $item['qty']);
+                                $similar_prod_variation->decrement('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->increment('qty', $converted_qty);
+                                $similar_prod_variation->decrement('qty', $converted_qty);
+                            }
+                            break;
+                        }
+                    }  
+                } else throw ValidationException::withMessages(['Please attach units to stock items']);     
+            }
+        }
+
+        if ($stock_transfer->delete()) {
+            DB::commit();
+            return true;
+        }
             
         throw new GeneralException(trans('exceptions.backend.stock_transfer.delete_error'));
     }
