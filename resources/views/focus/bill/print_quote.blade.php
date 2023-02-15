@@ -263,7 +263,7 @@
 						<b>Account Name :</b> {{ $resource->bank->name }}<br>
 						<b>Account Number :</b> {{ $resource->bank->number }}<br>
 						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
+						<b>Currency :</b> {{ $resource->currency? $resource->currency->code : 'Kenya Shillings' }} &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
 						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }} <br><br>
 					@endisset
 					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>

@@ -158,7 +158,7 @@
                             </div>
                         </td>
                         <input type="hidden" class="equipId" name="equipment_id[]" value="{{ $row->id }}" disabled>
-                        <input type="hidden" class="contEquipId" name="contracteq_id[]" value="{{ $row->pivot->id }}" disabled>
+                        <input type="hidden" class="contEquipId" name="contracteq_id[]" value="{{ $row->contract_equipment? $row->contract_equipment->id : '' }}" disabled>
                     </tr>
                 @endforeach
             @endisset

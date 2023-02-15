@@ -1,9 +1,17 @@
 <div class="row mb-1">
     <div class="col-4"><label for="payer" class="caption">Customer Name</label>
         <div class="input-group">
+            @php
+                $customer_name = '';
+                if (!$customer->company && $quotes->count() == 1) {
+                    $quote = $quotes->first();
+                    if ($quote->customer) $customer_name = $quote->customer->company;
+                    elseif ($quote->lead) $customer_name = $quote->lead->client_name;
+                } else $customer_name = $customer->company;
+            @endphp
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-            {{ Form::text('customer_name', $customer->company, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
-            <input type="hidden" name="customer_id" value="{{ $customer->id }}" id="customer_id">
+            {{ Form::text('customer_name', $customer_name, ['class' => 'form-control round', 'id' => 'customername', 'readonly']) }}
+            <input type="hidden" name="customer_id" value="{{ $customer->id ?: 0 }}" id="customer_id">
             {{ Form::hidden('taxid', $customer->taxid) }}
         </div>
     </div>

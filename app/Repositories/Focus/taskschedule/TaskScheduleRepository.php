@@ -103,8 +103,8 @@ class TaskScheduleRepository extends BaseRepository
             $is_loaded = ContractEquipment::where([
                 'contract_id' => $taskschedule->contract_id,
                 'schedule_id' => $data['schedule_id'],
-            ])->count();
-            if ($is_loaded) throw ValidationException::withMessages(['Equipments already loaded!']);
+            ])->where('equipment_id', '>', 0)->count();
+            if ($is_loaded) throw ValidationException::withMessages(['Equipments already loaded to this schedule!']);
 
             $prev_schedule_equipments = ContractEquipment::where([
                 'contract_id' => $taskschedule->contract_id,
