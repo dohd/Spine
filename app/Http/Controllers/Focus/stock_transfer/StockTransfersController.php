@@ -60,7 +60,6 @@ class StockTransfersController extends Controller
     public function create()
     {
         $tid = StockTransfer::max('tid');
-
         $warehouses = Warehouse::get(['id', 'title', 'extra']);
         
         return view('focus.stock_transfers.create', compact('tid', 'warehouses'));
@@ -86,7 +85,9 @@ class StockTransfersController extends Controller
      */
     public function edit(StockTransfer $stock_transfer)
     {
-        return view('focus.stock_transfers.edit', compact('stock_transfer', 'leave_categories', 'users'));
+        $warehouses = Warehouse::get(['id', 'title', 'extra']);
+
+        return view('focus.stock_transfers.edit', compact('stock_transfer', 'warehouses'));
     }
 
     /**
