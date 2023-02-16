@@ -20,12 +20,13 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class='form-group'>
-                            {{ Form::label('name', trans('customers.name'), ['class' => 'col-lg-2 control-label']) }}
-                            <div class='col-md-12'>
-                                {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.name')]) }}
+                            {{ Form::label('company', trans('customers.company'),['class' => 'col-lg-6 control-label']) }}
+                            <div class='col-lg-12'>
+                                {{ Form::text('company', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.company') . '*', 'required']) }}
                             </div>
                         </div>
                     </div>
+                    
                     <div class="col-sm-6">
                         <div class='form-group'>
                             {{ Form::label( 'phone', trans('customers.phone'),['class' => 'col-lg-6 control-label']) }}
@@ -44,14 +45,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6">
-                        <div class='form-group'>
-                            {{ Form::label('company', trans('customers.company'),['class' => 'col-lg-6 control-label']) }}
-                            <div class='col-lg-12'>
-                                {{ Form::text('company', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.company') . '*', 'required']) }}
+                   
+                        <div class="col-sm-6">
+                            <div class='form-group'>
+                                {{ Form::label('name', trans('customers.name'), ['class' => 'col-lg-2 control-label']) }}
+                                <div class='col-md-12'>
+                                    {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.name')]) }}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        
+                   
                 </div>
                 <div class='form-group'>
                     {{ Form::label( 'address', trans('customers.address'),['class' => 'col-lg-6 control-label']) }}

@@ -18,21 +18,15 @@
     <div class="content-body">
         <div class="card">
             <div class="card-content">
-                <div class="card-header">
-                    {{-- <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="#Stock TransferStatusModal">
-                        <i class="fa fa-pencil" aria-hidden="true"></i> Status
-                    </a> --}}
-                </div>
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
                             $details = [
-                                'Stock Transfer Category' => '',
-                                'Stock Transfer Status' => $stock_transfer->status,
-                                'Stock Transfer Reason' => $stock_transfer->reason,
-                                'Stock Transfer Duration' => $stock_transfer->qty . ' days',
-                                'Start Date' => dateFormat($stock_transfer->start_date),
-                                'End Date' => dateFormat($stock_transfer->end_date),
+                                'Transfer No' => gen4tid('STR-', $stock_transfer->tid),
+                                'Destination Location' => $stock_transfer->destination_location? $stock_transfer->destination_location->title : '',
+                                'Source Location' => $stock_transfer->source_location? $stock_transfer->source_location->title : '',
+                                'Stock Worth' => numberFormat($stock_transfer->total),
+                                'Note' => $stock_transfer->note,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
@@ -48,6 +42,39 @@
                             </tr>
                         @endforeach
                     </table>
+
+                    <div class="table-responsive">
+                        <table class="table tfr my_stripe_single text-center" id="productsTbl">
+                            <thead>
+                                <tr class="bg-gradient-directional-blue white">
+                                    <th width="5%">#</th>
+                                    <th width="25%">Item Description</th>
+                                    <th width="10%">Stock Qty</th>
+                                    <th width="10%">Qty Transfered</th>
+                                    <th>UoM</th>
+                                    <th>Unit Price</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($stock_transfer->items as $i => $item)
+                                    @php
+                                        $prodvariation = $item->product_variation;
+                                        if (!$prodvariation) continue;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $i+1 }}</td>
+                                        <td>{{ $prodvariation->name }}</td>
+                                        <td>{{ +$prodvariation->qty }}</td>
+                                        <td>{{ +$item->qty }}</td>
+                                        <td>{{ $item->uom }}</td>
+                                        <td>{{ numberFormat($item->unit_price) }}</td>
+                                        <td>{{ numberFormat($item->amount) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>  
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
