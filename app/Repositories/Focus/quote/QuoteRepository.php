@@ -178,7 +178,6 @@ class QuoteRepository extends BaseRepository
         }
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
 
-            
         // close lead
         Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         $result = Quote::create($data);
