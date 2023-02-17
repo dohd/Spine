@@ -46,6 +46,7 @@ use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
+use Egulias\EmailValidator\Warning\QuotedPart;
 use Endroid\QrCode\QrCode;
 use Error;
 use Illuminate\Validation\ValidationException;
@@ -196,9 +197,15 @@ class InvoicesController extends Controller
             return redirect()->back()->with('flash_error', 'Please filter records by customer!');
         }
 
-        $quotes = Quote::whereIn('id', $quote_ids)->with(['verified_products' => function ($q) {
-            $q->orderBy('row_index', 'ASC');
-        }])->get();
+        // set quotes in order of selection
+        $quotes = collect();
+        foreach ($quote_ids as $id) {
+            $quote = Quote::where('id', $id)->with(['verified_products' => function ($q) {
+                $q->orderBy('row_index', 'ASC');
+            }])->first();
+            $quotes->add($quote);
+        }
+
         $customer = Customer::find($customer_id) ?: new Customer;
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
         $terms = Term::where('type', 1)->get();  // invoice term type is 1

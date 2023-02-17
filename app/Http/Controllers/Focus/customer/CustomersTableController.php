@@ -60,8 +60,8 @@ class CustomersTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('name', function ($customer) {
-                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $customer->name . '</a>';
+            ->addColumn('company', function ($customer) {
+                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $customer->company . '</a>';
             })
             ->make(true);
     }

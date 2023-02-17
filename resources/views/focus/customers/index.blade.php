@@ -149,8 +149,8 @@
             },
             columns: [
                 {
-                    data: 'name',
-                    name: 'name'
+                    data: 'company',
+                    name: 'company'
                 },
             ],
             order: [

@@ -209,21 +209,28 @@
         }   
     });
 
+
+    // selected row state
+    const selectedRowState = {};
+    $(document).on('change', '.row-select', function() {
+        const row = $(this).parents('tr');
+        if ($(this).prop('checked')) selectedRowState['_'+row.index()] = $(this).val();
+        else delete selectedRowState[row.index()];
+    });
+
     // submit selected rows
     $(document).on('click', '#add-selected', function(e) {
         e.preventDefault();
-        if (!$('#customer_id').val()) return swal('Filter records by customer');
-            
-        const selected_rows =  [];
-        $('.row-select:checked').each(function() {
-            selected_rows.push($(this).val());
-        });
+        if (!$('#customer_id').val() && $('.row-select:checked').length > 1) 
+            return swal('Filter records by customer');
 
+        const selected_rows = Object.values(selectedRowState);
         if (!selected_rows.length) {
             $('#selected_products').val('');
             return swal('No records Selected');
         }
         $('input#selected_products').val(selected_rows);
+
         swal({
             title: 'Are You  Sure?',
             icon: "warning",
