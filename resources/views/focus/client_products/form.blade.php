@@ -1,8 +1,5 @@
 <div class="form-group row">
-    <div class="col-2">
-        <label for="row_number">Row No.</label>
-        {{ Form::text('row_num', null, ['class' => 'form-control']) }}
-    </div>
+    
     <div class="col-4">
         <label for="customer">Customer</label>
         <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose-customer" required>
@@ -14,16 +11,19 @@
         </select>
     </div>
     <div class="col-2">
-        <label for="contract">Contract Title</label>
+        <label for="row_number">Row No.</label>
+        {{ Form::text('row_num', null, ['class' => 'form-control']) }}
+    </div>
+    <div class="col-2">
+        <label for="contract">Contract Title / Region</label>
         {{ Form::text('contract', null, ['class' => 'form-control', 'required']) }}
     </div>
+</div>
+<div class="form-group row">
     <div class="col-4">
         <label for="description">Product Description</label>
         {{ Form::text('descr', null, ['class' => 'form-control', 'required']) }}
     </div>
-   
-</div>
-<div class="form-group row">
     <div class="col-2">
         <label for="uom">Unit of Measure (UoM)</label>
         {{ Form::text('uom', null, ['class' => 'form-control', 'required']) }}

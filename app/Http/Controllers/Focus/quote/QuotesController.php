@@ -86,7 +86,7 @@ class QuotesController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function store(CreateQuoteRequest $request)
-    {
+    {   
         $request->validate([
             'lead_id' => 'required',
         ]);
@@ -96,7 +96,7 @@ class QuotesController extends Controller
             'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
             'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
             'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
-            'customer_id', 'branch_id', 'bank_id', 'is_repair', 'quote_type'
+            'customer_id', 'branch_id', 'bank_id', 'is_repair', 'quote_type', 'extra_header', 'extra_footer'
         ]);
         $data_items = $request->only([
             'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
@@ -156,7 +156,7 @@ class QuotesController extends Controller
             'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
             'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
             'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
-            'customer_id', 'branch_id', 'bank_id', 'revision', 'is_repair', 'quote_type'
+            'customer_id', 'branch_id', 'bank_id', 'revision', 'is_repair', 'quote_type', 'extra_header', 'extra_footer'
         ]);
         $data_items = $request->only([
             'id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 

@@ -194,10 +194,11 @@
 			</td>
 		</tr>
 	</table><br>
+	
 	<table  class="ref" cellpadding="10">
 		<tr><td colspan="2">Ref : <b>{{ $resource->notes }}</b></td></tr>
-	</table>
-	<br>
+	</table><br>
+	<div>{!! $resource->extra_header !!}</div><br>
 	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
@@ -293,6 +294,7 @@
 				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 			</tr>
 		</tbody>
-	</table>
+	</table><br>
+	<div>{!! $resource->extra_footer !!}</div>
 </body>
 </html>

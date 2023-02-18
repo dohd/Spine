@@ -194,7 +194,7 @@ class InvoicesController extends Controller
             $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
             $projects = Project::pluck('name', 'id');
             
-            return redirect()->back()->with(['flash_error' => 'Please filter records by customer!']);
+            return redirect()->back()->with('flash_error', 'Please filter records by customer!');
         }
 
         // set quotes in order of selection
