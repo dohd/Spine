@@ -111,19 +111,19 @@ class QuoteRepository extends BaseRepository
      */
     public function getForVerifyDataTable()
     {
-        // budgeted project quotes or standard quotes
-        $q = $this->query()->with('currency')->whereHas('budget')->orWhere('quote_type', 'standard');
+        $q = $this->query()->where(function($q) { 
+            $q->whereHas('budget')->orWhere('quote_type', 'standard'); 
+        });
 
         $q->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
         });
-
         $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
         $q->when(request('verify_state'), fn($q) => $q->where('verified', request('verify_state')));
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'total', 'bank_id', 'verified',
-            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total', 'currency_id'
+            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total'
         ]);
     }
 
