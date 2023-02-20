@@ -235,7 +235,8 @@ class TaxReportsController extends Controller
                     $q->where('is_filed', 0);
                 });
             })
-            ->get()->map(function ($v) {
+            ->get()
+            ->map(function ($v) {
                 $note = '';
                 $suppliername = '';
                 $supplier_taxid = '';

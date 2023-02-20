@@ -38,6 +38,10 @@
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 <script>    
+    // initialize html editor
+    editor();
+
+    // ajax config
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
     $('#lead_id').select2({

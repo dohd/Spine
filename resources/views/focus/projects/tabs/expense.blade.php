@@ -24,7 +24,7 @@
                                 <td><a href="{{ route('biller.purchases.show', $item->purchase) }}">{{ gen4tid('DP-', $item->purchase->tid) }}</a></td>
                                 <td>{{ $item->purchase->suppliername }}</td>
                                 <td>{{ $item->purchase->doc_ref_type . ' ' . $item->purchase->doc_ref }}</td>
-                                <td>{{ $item->type }}</td>
+                                <td>{{ $item->type }} {{ $item->account? " : {$item->account->holder}" : '' }}</td>
                                 <td>{{ $item->description }}</td>
                                 <td>{{ $item->uom }}</td>
                                 <td>{{ +$item->qty }}</td>

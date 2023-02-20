@@ -60,7 +60,7 @@
             </div>
             
             <div class="col-3">
-                <label for="customer">Customer Pricing</label>
+                <label for="customer">Pre-agreed Pricing</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                     <select id="price_customer" name="price_customer_id" class="custom-select">
@@ -272,6 +272,9 @@
             <i class="fa fa-wrench"></i> Labour
         </a>
         <a href="javascript:" class="btn btn-warning" id="addMisc"><i class="fa fa-plus"></i> Miscellaneous</a>
+        <a href="javascript:" class="btn btn-purple ml-1" data-toggle="modal" data-target="#extrasModal" id="addExtras">
+            <i class="fa fa-note"></i> Add Extras
+        </a>
     </div>
     <div class="col-3">
         <div>
@@ -298,3 +301,4 @@
     {{ Form::hidden('is_repair', 0) }}
 @endif
 @include('focus.quotes.partials.skillset-modal')
+@include('focus.quotes.partials.extras_modal')

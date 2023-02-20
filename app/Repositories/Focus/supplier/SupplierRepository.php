@@ -6,6 +6,7 @@ use DB;
 use App\Models\supplier\Supplier;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
+use App\Models\Company\Company;
 use App\Models\items\JournalItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\manualjournal\Journal;
@@ -182,6 +183,9 @@ class SupplierRepository extends BaseRepository
         if (isset($data['taxid']) && strlen($data['taxid']) != 11)
             throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
 
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+
         DB::beginTransaction();
 
         $account_data = $input['account_data'];
@@ -280,6 +284,9 @@ class SupplierRepository extends BaseRepository
 
         if (isset($data['taxid']) && strlen($data['taxid']) != 11)
             throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
 
         $account_data = $input['account_data'];
         $data = array_replace($data, [

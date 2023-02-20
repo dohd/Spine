@@ -6,6 +6,7 @@ use App\Models\purchase\Purchase;
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
+use App\Models\Company\Company;
 use App\Models\items\PurchaseItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\product\ProductVariation;
@@ -170,6 +171,9 @@ class PurchaseRepository extends BaseRepository
             ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
         if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
 
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $result = Purchase::create($data);
@@ -279,13 +283,14 @@ class PurchaseRepository extends BaseRepository
             ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
         if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
 
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+
         $prev_note = $purchase->note;
         $result = $purchase->update($data);
 
         $data_items = $input['data_items'];
-        // delete omitted items
-        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
-        $purchase->items()->whereNotIn('id', $item_ids)->delete();
+        $purchase->items()->whereNotIn('id', array_map(fn($v) => $v['id'], $data_items))->delete();
         // create or update purchase item
         foreach ($data_items as $item) {  
             if ($item['type'] == 'Expense' && empty($item['uom'])) 
