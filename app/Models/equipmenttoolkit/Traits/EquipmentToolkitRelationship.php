@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\EquipmentToolkit\Traits;
+namespace App\Models\equipmenttoolkit\Traits;
 
 //use App\Models\Toolkit\SurchargeItems;
 

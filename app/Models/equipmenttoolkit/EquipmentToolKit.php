@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\EquipmentToolkit;
+namespace App\Models\equipmenttoolkit;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\EquipmentToolkit\Traits\EquipmentToolkitAttribute;
-use App\Models\EquipmentToolkit\Traits\EquipmentToolkitRelationship;
+use App\Models\equipmenttoolkit\Traits\EquipmentToolkitAttribute;
+use App\Models\equipmenttoolkit\Traits\EquipmentToolkitRelationship;
 
-class EquipmentToolkit extends Model
+class EquipmentToolKit extends Model
 {
     use ModelTrait,
         EquipmentToolkitAttribute,

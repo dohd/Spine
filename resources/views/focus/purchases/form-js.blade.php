@@ -16,6 +16,18 @@
             }
         }
     }
+    function select2Config2(url, callback) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({q: term, keyword: term}),
+                processResults: callback
+            }
+        }
+    }
 
     // datepicker
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format')}}", autoHide: true})        
@@ -56,6 +68,135 @@
         return {results: data.map(v => ({id: `${v.id}-${v.taxid || ''}`, text: `${v.name} : ${v.email}`}))};
     }
     $('#supplierbox').select2(select2Config(supplierUrl, supplierData));
+
+
+    //Select Quote From quotes
+    $('#quotebox').change(function() {
+        const name = $('#quotebox option:selected').text().split(' : ')[0];
+        const [id, quote_no] = $(this).val().split('-');
+        $('#quoteid').val(quoteid);
+        //$('#quoteid').val(id);
+        $('#quote').val(name);
+        purchaseorderChange();
+    });
+     // load suppliers
+     const quoteUrl = "{{ route('biller.queuerequisitions.select_queuerequisition') }}";
+    function quoteData(data) {
+        return {results: data.map(v => ({id: v.id+'-'+v.quote_no, text: 'Qt-'+v.quote_no+' : '+v.client_branch}))};
+    }
+    $('#quotebox').select2(select2Config2(quoteUrl, quoteData));
+
+    const config = {
+        ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        select2: {
+            allowClear: true,
+        },
+        fetchLpoGoods: (queuerequisition_id, pricelist) => {
+            return $.ajax({
+                url: "{{ route('biller.queuerequisitions.goods') }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: {queuerequisition_id, pricelist},
+            });
+        }
+    };
+
+    $('#quoteselect').change(function () { 
+        const name = $('#quoteselect option:selected').val();
+        const pricelist = $('#pricegroup_id').val();
+        console.log(pricelist);
+        purchaseorderChange(name, pricelist);
+    });
+
+    function purchaseorderChange(value, pricelist) {
+        //const [value1, value2] = $('#quotebox option:selected').val().split('-');
+            const el = value;
+            $('#stockTbl tbody').html('');
+            if (!value) return;
+            config.fetchLpoGoods(value, pricelist).done(data => {
+                data.forEach((v,i) => $('#stockTbl tbody').append(this.productRow(v,i)));
+                if(data.length > 0){
+                    $('#stockTbl tbody').append(this.addRow());
+                }
+            });
+    }
+
+    function productRow(v,i) {
+            return `
+            <tr>
+                <td><input type="text" class="form-control stockname" value="${v.queuerequisition_supplier.descr}" name="name[]" placeholder="Product Name" id='stockname-0'></td>
+                <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="${v.qty_balance}"></td>  
+                <td><input type="text" name="uom[]" id="uom-0" value="${v.uom}" class="form-control uom" required></td> 
+                <td><input type="text" value="${v.queuerequisition_supplier.rate}" class="form-control  price" name="rate[]" id="price-0"></td>
+                <td>
+                    <select class="form-control rowtax" name="itemtax[]" id="rowtax-0">
+                        @foreach ($additionals as $tax)
+                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
+                                {{ $tax->name }}
+                            </option>
+                        @endforeach                                                    
+                    </select>
+                </td>
+                <td><input type="text" class="form-control taxable" value="0"></td>
+                <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td> 
+                <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
+                <input type="hidden" id="stockitemid-0" value="${v.id}" name="item_id[]">
+                <input type="hidden" class="stocktaxr" name="taxrate[]">
+                <input type="hidden" class="stockamountr" name="amount[]">
+                <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
+                <input type="hidden" name="type[]" value="Requisit">
+                <input type="hidden" name="id[]" value="0">
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="text" id="stockdescr-0" value="${v.system_name}" class="form-control descr" name="description[]" placeholder="Product Description">
+                </td>
+                <td><input type="text" class="form-control product_code" value="${v.product_code}" name="product_code[]" id="product_code-0" readonly></td>
+                <td>
+                    <select name="warehouse_id[]" class="form-control warehouse" id="warehouseid">
+                        <option value="">-- Warehouse --</option>
+                        @foreach ($warehouses as $row)
+                            <option value="{{ $row->id }}">{{ $row->title }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td colspan="3">
+                    <input type="text" class="form-control projectstock" value="${v.quote_no}" id="projectstocktext-0" placeholder="Search Project By Name">
+                    {{-- <input type="hidden" name="itemproject_id[]" id="projectstockval-0"> --}}
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            `;
+    }
+    function addRow(){
+        return `
+            <tr class="bg-white">
+                <td>
+                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addstock">
+                        <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
+                    </button>
+                </td>
+                <td colspan="7"></td>
+            </tr>
+            <tr class="bg-white">
+                <td colspan="6" align="right"><b>{{trans('general.total_tax')}}</b></td>                   
+                <td align="left" colspan="2">
+                    {{config('currency.symbol')}} <span id="invtax" class="lightMode">0</span>
+                </td>
+            </tr>
+            <tr class="bg-white">
+                <td colspan="6" align="right">
+                    <b>Inventory Total ({{ config('currency.symbol') }})</b>
+                </td>
+                <td align="left" colspan="2">
+                    <input type="text" class="form-control" name="stock_grandttl" value="0.00" id="stock_grandttl" readonly>
+                    <input type="hidden" name="stock_subttl" value="0.00" id="stock_subttl">
+                    <input type="hidden" name="stock_tax" value="0.00" id="stock_tax">
+                </td>
+            </tr>
+        `;
+    }
 
     // load projects dropdown
     const projectUrl = "{{ route('biller.projects.project_search') }}";

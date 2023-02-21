@@ -185,8 +185,7 @@ class ToolkitController extends Controller
     public function select(Request $request)
     {
         $q = $request->keyword;
-        $tools = Toolkit::where('toolkit_name', 'LIKE', '%'.$q.'%')
-            ->limit(6)->get(['id', 'toolkit_name']);
+        $tools = Toolkit::where('toolkit_name', 'LIKE', '%'.$q.'%')->get(['id', 'toolkit_name']);
 
         return response()->json($tools);
     }

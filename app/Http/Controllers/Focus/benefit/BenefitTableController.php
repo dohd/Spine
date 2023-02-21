@@ -57,9 +57,17 @@ class BenefitTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('employee_name', function ($benefit) {
+                return $benefit->employee_name;
+              // return '<a href="' . route('biller.ji.index') . '?rel_type=2&rel_id=' . $benefit->id . '">' . $benefit->name . '</a>';
+             })
             ->addColumn('name', function ($benefit) {
                   return $benefit->name;
                 // return '<a href="' . route('biller.ji.index') . '?rel_type=2&rel_id=' . $benefit->id . '">' . $benefit->name . '</a>';
+            })
+            ->addColumn('type', function ($benefit) {
+                return $benefit->type;
+              // return '<a href="' . route('biller.ji.index') . '?rel_type=2&rel_id=' . $benefit->id . '">' . $benefit->name . '</a>';
             })
             ->addColumn('amount', function ($benefit) {
                 // return $benefit->users->count('*');

@@ -90,7 +90,7 @@ class PurchaseordersController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
         $order_items = $request->only([
-            'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code'
+            'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code','warehouse_id'
         ]);
 
         $order['ins'] = auth()->user()->ins;
@@ -132,15 +132,13 @@ class PurchaseordersController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
         $order_items = $request->only([
-            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
+            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code','warehouse_id'
         ]);
-
         $order['ins'] = auth()->user()->ins;
         $order['user_id'] = auth()->user()->id;
         // modify and filter items without item_id
         $order_items = modify_array($order_items);
         $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
-
         $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order updated successfully']);

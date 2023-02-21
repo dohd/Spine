@@ -78,8 +78,8 @@
                                         <th>Description</th>
                                         <th>Category Name</th>
                                         <th>product_code</th>
-                                        <th>Unit (Qty)</th>
                                         <th>UOM</th>
+                                        <th>Unit (Qty)</th>
                                         <th>Purchase Price</th>
                                         <th>{{ trans('general.createdat') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -170,11 +170,10 @@
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
                     {data: 'productcategory_id', name: 'productcategory_id'},
-                    {data: 'code', name: 'code'},                    
+                    {data: 'code', name: 'code'}, 
+                    {data: 'unit', name: 'unit'},                   
                     {data: 'qty', name: 'qty'},
-                    {data: 'unit', name: 'unit'},
                     {data: 'purchase_price', name: 'purchase_price'},
-                    {data: 'total', name: 'total'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

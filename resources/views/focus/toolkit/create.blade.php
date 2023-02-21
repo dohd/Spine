@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Toolkit Management | Create')
+@section ('title', 'Service Kit Management | Create')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Toolkit Management</h4>
+            <h4 class="content-header-title">Service Kit Management</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right mr-3">

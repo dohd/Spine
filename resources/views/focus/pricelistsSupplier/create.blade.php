@@ -102,7 +102,10 @@
             $('#productsTbl').on('click', '.click', function (e) {
                 var data = e.target.getAttribute('product_code');
                 $('#code').val(data);
-                //console.log(data);
+                var description = e.target.getAttribute('des');
+                $('#description').val(description);
+                var uom = e.target.getAttribute('uom');
+                $('#uom').val(uom);
             });
             
             if ($('#contract').val()) {

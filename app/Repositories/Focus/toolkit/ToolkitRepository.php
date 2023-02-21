@@ -100,11 +100,12 @@ class ToolkitRepository extends BaseRepository
         $result = $toolkit->update($data);
 
         $data_items = $input['data_items'];
-        
+
         // delete omitted items
         $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
-        //dd($item_ids);
+                //dd($item_id);
         $toolkit->item()->whereNotIn('id', $item_ids)->delete();
+        
         // create or update toolkit item
         foreach ($data_items as $item) {         
             $toolkit_item = ToolkitItems::firstOrNew(['id' => $item['id']]);   

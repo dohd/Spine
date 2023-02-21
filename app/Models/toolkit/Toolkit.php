@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\Toolkit;
+namespace App\Models\toolkit;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Toolkit\Traits\ToolkitAttribute;
-use App\Models\Toolkit\Traits\ToolkitRelationship;
+use App\Models\toolkit\Traits\ToolkitAttribute;
+use App\Models\toolkit\Traits\ToolkitRelationship;
 
 class Toolkit extends Model
 {

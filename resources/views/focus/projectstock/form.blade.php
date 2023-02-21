@@ -6,6 +6,8 @@
         @endphp
         {{ Form::text('quote', $quote_tid . ' - '. $quote->notes, ['class' => 'form-control', 'id' => 'reference', 'disabled']) }}
         {{ Form::hidden('quote_id', $quote->id) }}
+        <input type="hidden" name="client_branch" value="{{$quote->notes}}" id="client_branch">
+        <input type="hidden" data-proj="{{$quote->id}}" value="{{$project->name}}" id="proj">
     </div>
     <div class="col-2">
         <label for="tid">Issuance No.</label>
@@ -27,21 +29,27 @@
     </div>                          
 </div>
 
+
 <div class="table-responsive">
-    <table class="table tfr my_stripe_single text-center" id="productsTbl">
+    <table class="table tfr my_stripe_single" id="productsTbl">
         <thead>
             <tr class="bg-gradient-directional-blue white">
                 <th>#</th>
                 <th>Product</th>
                 <th>UoM</th>
+                <th>Product Code</th>
                 <th>Qty Approved</th>
                 <th>Qty Issued</th>
+                <th>Requisition Approved</th>
                 <th>Warehouse</th>
-                <th width="10%">Qty</th>
+                <th width="10%">Issue Qty</th>
+                <th width="10%">Requisition Qty</th>
+                <th>Requisition Check</th>
             </tr>
         </thead>
         <tbody>   
             @foreach ($budget_items as $i => $item)
+           
                 <tr>
                     <td>{{ $i+1 }}</td>
                     <td>{{ $item->product_name }}</td>
@@ -50,8 +58,10 @@
                             <option value="{{ $item->unit }}">{{ $item->unit }}</option>
                         </select>
                     </td>
-                    <td>{{ +$item->new_qty }}</td>
-                    <td>{{ +$item->issue_qty }}</td>
+                    <td class="text-center">{{$item->product ? $item->product->code : ''}}</td>
+                    <td class="text-center">{{ +$item->new_qty }}</td>
+                    <td class="text-center">{{ +$item->issue_qty }}</td>
+                    <td class="text-center">{{ (+$item->new_qty)-(+$item->issue_qty) }}</td>
                     <td>
                         @php
                             $qty_limit = 0;
@@ -76,11 +86,24 @@
                         </select>
                     </td>
                     <td><input type="text" name="qty[]" id="qty" class="form-control qty"></td>
+                    <td><input type="text" class="form-control qty_balance" data-id="{{$item->id}}" name="qty_balance[]" id="qty_balance"></td>
+                    <td class="text-center"><input type="checkbox" class="status" name="" id="status-{{$i}}"></td>
                     <input type="hidden" name="budget_item_id[]" value="{{ $item->id }}">
                     <input type="hidden" name="product_id[]" value="{{ $product_id }}">
                     <input type="hidden" name="qty_limit[]" value="{{ +$qty_limit }}" class="qty-limit">
                     <input type="hidden" name="stock_qty[]" value="{{ +$stock_qty }}" class="qty-stock">
                     <input type="hidden" name="approved_qty[]" value="{{ +$item->new_qty }}" class="qty-approved">
+                    {{-- Queued Requisition --}}
+                    {{-- @if ($item->product)
+                        
+                        
+                    @endif --}}
+                    <input type="hidden" name="" class="qty_diff" value="{{+$item->new_qty - +$item->issue_qty }}" id="qty_diff">
+                    <input type="hidden" name="system_name[]" id="system_name" value="{{$item->product ? $item->product->name : ''}}">
+                    <input type="hidden" name="product_code[]" id="product_code" value="{{$item->product ? $item->product->code : ''}}">
+                    <input type="hidden" name="item_name[]" class="item_name" value="{{$item->product_name}}" id="item_name-{{$i}}">
+                    <input type="hidden" disabled name="uom[]" class="uom" value="{{$item->unit }}" id="uom-{{$i}}">
+                    
                 </tr>
             @endforeach
         </tbody>                
@@ -93,11 +116,13 @@
         {{ Form::hidden('approved_qty_total', null, ['id' => 'approved_qty_total']) }}
     </div>                          
 </div>
-<div class="row mt-1">                            
+<div class="row mt-1"> 
+                               
     <div class="col-2 ml-auto">  
         {{ Form::submit(@$projectstock? 'Update' : 'Issue Stock', ['class' =>'btn btn-primary btn-lg']) }}
     </div>
 </div>
+
 
 @section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
@@ -113,6 +138,9 @@
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#productsTbl').ready(this.tableReady);
             $('#productsTbl').on('keyup change', '.qty', this.tableEventChange);
+            $('#productsTbl').on('keyup change', '.qty_balance', this.tableRequistionChange);
+             $('.requisition').click(this.requisition);
+                
         },
 
         tableReady() {
@@ -130,6 +158,42 @@
             });
         },
 
+        requisition(e){
+            var project = $('#proj').val();
+            $('#project').val(project);
+            $("#productsTbl tbody input:checked").each(function(){
+            var $this = $(this);
+
+            if($this.is(":checked")){
+                swal({
+                    title: 'Proceed to Stock Requisition?',
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                    showCancelButton: true,
+                },()=>{
+                    //data-toggle="modal" data-target="#exampleModal"
+                    $('#exampleModal').modal('show');
+                    $('#requisitionTbl tbody').html(" ");
+                    var getselected = $('#productsTbl tbody input:checked').parents('tr');
+                    var tr = getselected.clone().appendTo($('#requisitionTbl tbody').add());
+                    tr.find('.qty_balance').prop('readonly', true);
+                    tr.find('.qty').prop('readonly', true);
+                });
+               
+            }else{
+                swal({
+                    title: 'Sorry Cannot Requisit?',
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                    showCancelButton: true,
+                }); 
+            }
+        });
+          
+        },
+
         tableEventChange(event) {
             const el = $(this);
             const qty = parseFloat(el.val());
@@ -141,6 +205,20 @@
                 else if (qty == 0) el.val(1).change();
             }
             Form.qtyAlert(qty, qtyLimit, qtyStock);
+            Form.columnTotals();
+        },
+
+        tableRequistionChange(event) {
+            const el = $(this);
+            const qty = parseFloat(el.val());
+            const row = el.parents('tr');
+            const qtyLimit = parseFloat(row.find('.qty-limit').val());
+            const qtyDiff = parseFloat(row.find('.qty_diff').val());
+            if (event.type == 'change') {
+                if (qty > qtyDiff) el.val(qtyDiff).change();
+                else if (qty == 0) el.val(1).change();
+            }
+            Form.qtyAlert(qty, qtyLimit, qtyDiff);
             Form.columnTotals();
         },
 

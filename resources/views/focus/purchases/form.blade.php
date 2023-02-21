@@ -170,6 +170,16 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group row">
+                <div class="col-6">
+                    <label for="payer" class="caption">Requisition Items</label>                                       
+                    <select class="form-control" id="quoteselect" data-placeholder="Search Quote">
+                        <option value="">-----Select Items-----</option>
+                        <option value="all">All Items</option>
+                    </select>
+                    <input type="hidden" name="quote_id" value="0" id="quoteid">
+                </div>
+            </div>
         </div>
     </div>
 </div>

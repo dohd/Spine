@@ -102,6 +102,14 @@
             </div>
             <div class="col-md-4">
                 <div class='form-group'>
+                    {{ Form::label( 'selling_price', 'Recommended Selling Price',['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('selling_price[]', numberFormat(@$product->standard['selling_price']), ['class' => 'form-control box-size', 'placeholder' => 'Recommended Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class='form-group'>
                     {{ Form::label( 'purchase_price', trans('products.purchase_price'),['class' => 'col control-label']) }}
                     <div class='col'>
                         {{ Form::text('purchase_price[]', numberFormat(@$product->standard['purchase_price']), ['class' => 'form-control box-size', 'placeholder' => trans('products.purchase_price'),'onkeypress'=>"return isNumber(event)"]) }}
@@ -137,7 +145,7 @@
                 <div class='form-group'>
                     {{ Form::label('code', trans('products.code'),['class' => 'col control-label']) }}
                     <div class='col'>
-                        <input type="text" class="form-control box-size" name="code[]" value="{{ @$product->standard['code']}}" @if(isset($product->standard['code'])) readonly @endif placeholder="{{trans('products.code')}}" id="">
+                        <input type="text" class="form-control box-size" name="code[]" value="{{ @$product->standard['code']}}" @if(isset($product->standard['code'])) @endif placeholder="{{trans('products.code')}}" id="">
                         {{-- {{ Form::text('code[]', @$product->standard['code'], ['class' => 'form-control box-size','readonly', 'placeholder' => trans('products.code')]) }} --}}
                     </div>
                 </div>

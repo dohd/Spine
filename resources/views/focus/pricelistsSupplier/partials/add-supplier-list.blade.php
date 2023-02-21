@@ -1,6 +1,6 @@
 
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -30,24 +30,30 @@
             </div>
             <div class="form-group row">
                 <div class="col-6 mt-2">
-                    <label for="description">Product Description</label>
-                    {{ Form::text('descr', null, ['class' => 'form-control', 'required']) }}
+                    <label for="description">Supplier Description</label>
+                    {{ Form::text('descr', null, ['class' => 'form-control', 'required', 'id'=>'descr']) }}
                 </div>
                 <div class="col-6 mt-2">
-                    <label for="code">Product Code.</label>
-                    <input type="text" class="form-control" readonly name="product_code" id="code">
+                    <label for="description">System/Inventory Description</label>
+                    {{ Form::text('descr', null, ['class' => 'form-control', 'readonly', 'id'=>'description']) }}
                 </div>
+                
             </div>
             <div class="form-group row">
                 <div class="col-3 mt-2">
+                    <label for="code">Product Code.</label>
+                    <input type="text" class="form-control" readonly name="product_code" id="code">
+                </div>
+                <div class="col-3 mt-2">
                     <label for="uom">Unit of Measure (UoM)</label>
-                    {{ Form::text('uom', null, ['class' => 'form-control', 'readonly']) }}
+                    {{ Form::text('uom', null, ['class' => 'form-control', 'readonly', 'id'=> 'uom']) }}
                 </div>
                 <div class="col-3 mt-2">
                     <label for="row_number">Row No.</label>
                     {{ Form::text('row_num', null, ['class' => 'form-control']) }}
                 </div>
-                <div class="col-6 mt-2">
+
+                <div class="col-3 mt-2">
                     <label for="rate">Rate (Ksh.) VAT Exclusive</label>
                     {{ Form::text('rate', null, ['class' => 'form-control', 'id' => 'rate', 'required']) }}
                 </div>

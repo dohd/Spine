@@ -36,6 +36,14 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Employee Name</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{$benefit['employee_name']}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
                                             <p>Benefits Name</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
@@ -56,6 +64,22 @@
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
                                             <p>{{$benefit['amount']}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Month</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{$benefit['month']}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Leave Payment Days</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{$benefit['leave_payment_days']}}</p>
                                         </div>
                                     </div>
                                     <div class="row">

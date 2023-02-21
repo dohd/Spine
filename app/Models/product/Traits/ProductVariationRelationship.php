@@ -12,7 +12,6 @@ use App\Models\warehouse\Warehouse;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\pricegroup\PriceGroupVariation;
 use App\Models\supplier_product\SupplierProduct;
-use App\Models\items\PurchaseorderItem;
 
 /**
  * Class ProductRelationship
@@ -75,6 +74,6 @@ trait ProductVariationRelationship
     }
     public function product_supplier()
     {
-        return $this->hasMany(SupplierProduct::class, 'product_code', 'code')->withoutGlobalScopes();
+        return $this->hasOne(SupplierProduct::class, 'product_code', 'code');
     }
 }

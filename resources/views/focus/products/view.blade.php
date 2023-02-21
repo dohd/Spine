@@ -97,6 +97,12 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            Recommended Selling Price</div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            {{ amountFormat($product->standard['selling_price']) }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
                                             {{ trans('products.disrate') }}</div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
                                             {{ numberFormat($product->standard['disrate']) }}
@@ -175,6 +181,12 @@
                                                 {{ trans('products.price') }}</div>
                                             <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
                                                 {{ amountFormat($row->price) }}</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                                Recommended Selling Price</div>
+                                            <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                                {{ amountFormat($row->selling_price) }}</div>
                                         </div>
                                         <div class="row">
                                             <div class="col-3 border-blue-grey border-lighten-5  p-1">

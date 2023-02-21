@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\toolkit\ToolkitRepository;
-use App\Models\equipmenttoolkit\EquipmentToolkit;
+use App\Models\equipmenttoolkit\EquipmentToolKit;
 
 class ToolkitTableController extends Controller
 {
@@ -46,14 +46,17 @@ class ToolkitTableController extends Controller
                 return $name;
             })
             ->addColumn('attached_to', function ($toolkit) {
-                
-                $attached = EquipmentToolkit::where('tool_id',$toolkit->id)->get()->first();
-                if($attached){
-                    $eqId = $attached['equipment_id']; 
-                    //return $eqId;
-                    return '<a href="' . route('biller.equipments.show',$eqId). '">' .'Eq-'. $eqId . '</a>';
+                $link = [];
+                $attached = EquipmentToolKit::where('tool_id',$toolkit->id)->get();
+                foreach ($attached as $attached_item) {
+                    if($attached_item){
+                        $eqId = $attached_item['equipment_id']; 
+                        $link[] = '<a href="' . route('biller.equipments.show',$eqId). '">' .'Eq-'. $eqId . '</a>';
+                        
+                    }
                 }
-               return "Not attached";
+
+                return  '<br>' . implode(', ', array_unique($link));
             })
             
             ->addColumn('created_at', function ($toolkit) {

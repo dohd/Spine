@@ -86,7 +86,7 @@ class BenefitController extends Controller
         //Create the model using repository create method
         $this->repository->create($input);
         //return with successfull messagetrans
-        return new RedirectResponse(route('biller.benefits.index'), ['flash_success' => 'Job Title Created Successfully']);
+        return new RedirectResponse(route('biller.benefits.index'), ['flash_success' => 'Benefit Created Successfully']);
     }
 
     /**

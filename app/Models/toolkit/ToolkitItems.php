@@ -5,14 +5,14 @@ namespace App\Models\toolkit;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 // use App\Models\toolkitItem\Traits\toolkitItemAttribute;
-// use App\Models\toolkitItem\Traits\toolkitItemRelationship;
+use App\Models\toolkit\Traits\ToolkitItemsRelationship;
 
 class ToolkitItems extends Model
 {
-    // use ModelTrait,
-    //     toolkitItemAttribute,
-    //     toolkitItemRelationship {
-    // }
+    use ModelTrait,
+        
+        ToolkitItemsRelationship {
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,

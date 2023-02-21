@@ -37,7 +37,9 @@
                                         <thead>
                                         <tr>
                                             <th>#</th>
+                                            <th>{{ 'Employee Name' }}</th>
                                             <th>{{ 'Benefit Name' }}</th>
+                                            <th>{{ 'Benefit Type' }}</th>
                                             <th>{{ 'Amount Offered' }}</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -94,7 +96,9 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
+                    {data: 'employee_name', name: 'employee_name'},
                     {data: 'name', name: 'name'},
+                    {data: 'type', name: 'type'},
                     {data: 'amount', name: 'amount'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}

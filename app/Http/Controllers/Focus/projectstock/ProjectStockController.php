@@ -9,6 +9,7 @@ use App\Models\product\ProductVariation;
 use App\Models\project\BudgetItem;
 use App\Models\projectstock\Projectstock;
 use App\Models\quote\Quote;
+use App\Models\project\Project;
 use App\Repositories\Focus\projectstock\ProjectStockRepository;
 use DB;
 use Illuminate\Http\Request;
@@ -49,6 +50,7 @@ class ProjectStockController extends Controller
 
         $tid = Projectstock::where('ins', auth()->user()->ins)->max('tid');
         $quote = Quote::find($quote_id);
+        $project = Project::where('id', $quote->project_quote_id)->first();
         
         $budget_items = BudgetItem::where('a_type', 1)->whereHas('budget', function ($q) use($quote_id) { 
             $q->where('quote_id', $quote_id);
@@ -58,7 +60,7 @@ class ProjectStockController extends Controller
             ->whereIn('id', $budget_items->pluck('product_id')->toArray())
             ->with('warehouse')->get();
         
-        return view('focus.projectstock.create', compact('tid', 'quote', 'budget_items', 'stock'));
+        return view('focus.projectstock.create', compact('tid', 'quote', 'budget_items', 'stock', 'project'));
     }
 
     /**

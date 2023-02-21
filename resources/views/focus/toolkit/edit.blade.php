@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Toolkit Management | Update')
+@section ('title', 'Service Kit Management | Update')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Toolkit Management</h4>
+            <h4 class="content-header-title">Service Kit Management</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right mr-3">
@@ -37,23 +37,3 @@
 </div>
 @endsection
 @include("focus.toolkit.form-js")
-{{-- @section('extra-scripts')
-<script>
-    let tableRow = $('#itemTbl div:first').html();
-    $('#itemTbl div:first').remove();
-    let rowIds = 1;
-     $('#addtool').click(function() {
-        rowIds++;
-        let i = rowIds;
-        const html = tableRow.replace(/-0/g, '-'+i);
-        $('#itemTbl').append('<div>' + html + '</div>');
-    });
-
-    $('#itemTbl').on('click', '.remove', removeRow);
-    function removeRow() {
-        const $tr = $(this).parents('div:first');
-        $tr.next().remove();
-        $tr.remove();
-    }
-</script>
-@endsection --}}

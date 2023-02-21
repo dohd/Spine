@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'ToolKit Management')
+@section ('title', 'Service Kit Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class=" mb-0">ToolKit Management </h4>
+            <h4 class=" mb-0">Service Kit Management </h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -27,7 +27,7 @@
                                 <thead>
                                     <tr>
                                         <th>#Id</th>
-                                        <th>Toolkit Name</th>
+                                        <th>Service kit Name</th>
                                         <th>Equipment</th>
                                         <th>Created</th>
                                         <th>{{ trans('labels.general.actions') }}</th>

@@ -16,4 +16,8 @@ trait SupplierProductRelationship
     {
         return $this->hasOne(ProductVariation::class, 'code', 'product_code');
     }
+    public function product()
+    {
+        return $this->hasOne(ProductVariation::class, 'code', 'product_code');
+    }
 }

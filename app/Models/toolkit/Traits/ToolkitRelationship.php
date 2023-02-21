@@ -1,23 +1,17 @@
 <?php
 
-namespace App\Models\Toolkit\Traits;
+namespace App\Models\toolkit\Traits;
 
-use App\Models\Toolkit\ToolkitItems;
+use App\Models\toolkit\ToolkitItems;
 
 /**
  * Class ToolkitorderRelationship
  */
 trait ToolkitRelationship
 {
-   
-
-    // public function items()
-    // {
-    //     return $this->hasMany(ToolkitItems::class, 'item_id','id');
-    // }
 
     public function item()
     {
-        return $this->hasMany(ToolkitItems::class, 'toolkit_id','id');
+        return $this->hasMany(ToolkitItems::class, 'toolkit_id','id')->withoutGlobalScopes();
     }
  }

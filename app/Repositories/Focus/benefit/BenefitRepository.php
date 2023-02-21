@@ -29,7 +29,7 @@ class BenefitRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','type','amount','note','created_at']);
+            ->get(['id','name','type','employee_id','employee_name','leave_payment_days','amount','note','created_at']);
     }
 
     /**
@@ -41,7 +41,17 @@ class BenefitRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        $input = array_map( 'strip_tags', $input);
+        //dd($input);
+        $benefit = $input;
+        foreach ($benefit as $key => $val) {
+            // $rate_keys = [
+            //     'employee_id','employee_name','issue_date','return_date','note','total_cost'
+            // ];
+            if (in_array($key, ['month'], 1))
+                $benefit[$key] = date_for_database($val);
+            
+        }
+        $input = array_map( 'strip_tags', $benefit);
         if (Benefit::create($input)) {
             return true;
         }

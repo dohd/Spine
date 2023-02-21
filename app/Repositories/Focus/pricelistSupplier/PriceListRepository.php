@@ -31,7 +31,7 @@ class PriceListRepository extends BaseRepository
             $q->where(['supplier_id' => request('supplier_id'), 'contract' => request('contract')]);
         })->when(request('supplier_id'), function ($q) {
             $q->where(['supplier_id' => request('supplier_id')]);
-        });
+        })->whereNotNull('descr');
 
         return $q->get();
     }

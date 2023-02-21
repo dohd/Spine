@@ -34,7 +34,7 @@
                             <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Equipment Details</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Serveice Kits Attached</a>
+                            <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Service Kits Attached</a>
                         </li>
                     </ul>
                     <div class="tab-content px-1 pt-1">
@@ -81,8 +81,8 @@
                                     <table class="table table-xs table-bordered">
                                         <thead>
                                             <tr class="item_header bg-gradient-directional-blue white">
-                                                <th width="30%" class="text-center">Servicekit Name</th>
-                                                <th width="70%" class="text-center">Servicekit Items</th>                                    
+                                                <th width="30%">Service Kit Name</th>
+                                                <th width="70%">Service Kit Items</th>                                    
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -92,14 +92,17 @@
                                                     @if ($item)
                                                     <tr>
                                                        
-                                                        <td class="text-center"><a href="{{ route('biller.toolkits.show',$item['id']) }}">{{ $item['toolkit_name'] }}</a></td>
+                                                        <td><a href="{{ route('biller.toolkits.show',$item['id']) }}">{{ $item['toolkit_name'] }}</a></td>
                                                         {{-- <td class="text-center">{{ $item->item }}</td> --}}
-                                                        <td class="text-center">
-                                                            <table class="text-center" width="70%">
+                                                        <td>
+                                                            <table width="100%">
                                                                 <thead>
                                                                    <th>Item Name</th>
                                                                    <th>Code</th>
                                                                    <th>UoM</th>
+                                                                   <th>Quantity</th>
+                                                                   <th>Cost</th>
+                                                                   <th>Available Stock</th>
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach ($item->item as $items)
@@ -107,6 +110,9 @@
                                                                         <td>{{$items->toolname}}</td>
                                                                         <td>{{$items->code}}</td>
                                                                         <td>{{$items->uom}}</td>
+                                                                        <td>{{$items->quantity}}</td>
+                                                                        <td>{{$items->cost}}</td>
+                                                                        <td>{{ $items->equipment_toolkit->qty}}</td>
                                                                     </tr>
                                                                      @endforeach
                                                                 </tbody>
@@ -125,7 +131,6 @@
                             </div>
                         </div>
                     </div>
-                   
                 </div>
             </div>
         </div>

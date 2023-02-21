@@ -73,7 +73,7 @@ class ImportController extends Controller
      */
     public function sample_template($file_name)
     {
-        $file_path = public_path() . '/storage/app/public/sample/' . $file_name . '.csv';
+        $file_path = public_path() . '/storage/app/public/sample/' . $file_name . '.xlsx';
         $file_exists = file_exists($file_path);
         if (!$file_exists) throw ValidationException::withMessages(['Template file does not exist!']);
         

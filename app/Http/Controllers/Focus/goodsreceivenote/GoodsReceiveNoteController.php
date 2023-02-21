@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\supplier\Supplier;
+use App\Models\warehouse\Warehouse;
 use App\Repositories\Focus\goodsreceivenote\GoodsreceivenoteRepository;
 use Illuminate\Http\Request;
 
@@ -44,8 +45,9 @@ class GoodsReceiveNoteController extends Controller
     {
         $tid = Goodsreceivenote::where('ins', auth()->user()->ins)->max('tid');
         $suppliers = Supplier::get(['id', 'name']);
+        $warehouses = Warehouse::all();
 
-        return view('focus.goodsreceivenotes.create', compact('tid', 'suppliers'));
+        return view('focus.goodsreceivenotes.create', compact('tid', 'suppliers', 'warehouses'));
     }
 
     /**

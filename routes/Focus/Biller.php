@@ -216,6 +216,19 @@ Route::group(['namespace' => 'employeesalary'], function () {
     Route::post('employeesalaries/get', 'EmployeeSalariesTableController')->name('employeesalaries.get');
 });
 
+Route::group(['namespace' => 'queuerequisition'], function () {
+    Route::post('queuerequisitions/status', 'QueueRequisitionController@status')->name('queuerequisitions.status');
+    Route::post('queuerequisitions/goods', 'QueueRequisitionController@goods')->name('queuerequisitions.goods');
+    Route::post('queuerequisitions/select_queuerequisition', 'QueueRequisitionController@select_queuerequisition')->name('queuerequisitions.select_queuerequisition');
+    //update_description
+    Route::post('queuerequisitions/update_description', 'QueueRequisitionController@update_description')->name('queuerequisitions.update_description');
+    Route::post('queuerequisitions/select', 'QueueRequisitionController@select')->name('queuerequisitions.select');
+    Route::resource('queuerequisitions', 'QueueRequisitionController');
+    //For Datatable
+    Route::post('queuerequisitions/get', 'QueueRequisitionTableController')->name('queuerequisitions.get');
+    //Route::post('que/get', 'queTableController')->name('que.get');
+});
+
 Route::group(['namespace' => 'equipment'], function () {
     Route::resource('equipments', 'EquipmentsController');
     Route::post('equipments/equipment_load', 'EquipmentsController@equipment_load')->name('equipments.equipment_load');

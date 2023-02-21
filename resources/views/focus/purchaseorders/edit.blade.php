@@ -68,7 +68,7 @@
             $('#pricegroup_id option').each(function () {
                 if (id == $(this).val())
                 priceCustomer = $(this).val();
-                console.log($(this).val());
+               // 
             });
             
             $('#pricegroup_id').val(priceCustomer);
@@ -106,6 +106,7 @@
     $("#project").change(function() {
         const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
         $('#projectexptext-0').val(projectText);
+        $('#projectstocktext-0').val(projectText);
         $('#projectexpval-0').val($(this).val());
     });
     const projectName = "{{ $po->project? $po->project->name : '' }}";
@@ -177,6 +178,9 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+            const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
+            $('#projectstocktext-'+i).val(projectText);
+            $('#projectstockval-'+i).val($("#project option:selected").val());
             taxRule('rowtax-'+i, $('#tax').val());
 
             //Add the previous supplier data            
@@ -184,7 +188,7 @@
                 $('#pricegroup_id option').each(function () {
                     if ($('#supplierid').val() == $(this).val())
                     priceCustomer = $(this).val();
-                    console.log(priceCustomer);
+                    
                 });
                 
                 $('#pricegroup_id').val(priceCustomer);
@@ -252,6 +256,7 @@
         const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
+        $('#product_code-'+i).val(data.product_code);
 
         const purchasePrice = parseFloat(data.purchase_price);
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();

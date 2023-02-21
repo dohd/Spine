@@ -41,7 +41,7 @@ trait PurchaseorderItemRelationship
         return $this->belongsTo(ProductVariation::class, 'item_id');
     }
 
-    public function prod_variate()
+    public function supplierproductgrn()
     {
         return $this->hasOne(ProductVariation::class, 'code', 'product_code');
     }

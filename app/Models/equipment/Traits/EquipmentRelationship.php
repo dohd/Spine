@@ -8,7 +8,7 @@ use App\Models\contractservice\ContractService;
 use App\Models\items\ContractServiceItem;
 use App\Models\items\ServiceItem;
 use App\Models\toolkit\Toolkit;
-use App\Models\EquipmentToolkit\EquipmentToolkit;
+use App\Models\equipmenttoolkit\EquipmentToolKit;
 
 /**
  * Class EquipmentRelationship
@@ -105,10 +105,10 @@ trait EquipmentRelationship
     }
     public function toolkits()
     {
-        return $this->hasManyThrough(Toolkit::class, EquipmentToolkit::class, 'equipment_id', 'id', 'id', 'tool_id')->withoutGlobalScopes();
+        return $this->hasManyThrough(Toolkit::class, EquipmentToolKit::class, 'equipment_id', 'id', 'id', 'tool_id')->withoutGlobalScopes();
     }
     public function toolkit()
     {
-        return $this->hasOneThrough(Toolkit::class, EquipmentToolkit::class)->withoutGlobalScopes();
+        return $this->hasOneThrough(Toolkit::class, EquipmentToolKit::class)->withoutGlobalScopes();
     }
 }

@@ -43,10 +43,6 @@
             const option = `<option value="${data.uom}"  >${data.uom}</option>`;
         $('#uom-'+i).append(option);
         }
-        if(!data.uom){
-            const option = `<option value="0" >0.0</option>`;
-            $('#uom-'+i).append(option);
-        }
 
     }
     $('#itemTbl').on('mouseup', '.toolname', function() {

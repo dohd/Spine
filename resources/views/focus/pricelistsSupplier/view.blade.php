@@ -28,7 +28,7 @@
                                     $details = [ 
                                         'Supplier' => $supplier_product->supplier? $supplier_product->supplier->company : '',
                                         'Product Code' => $supplier_product->product_code,
-                                        'System Description' => $supplier_product->supplier? $supplier_product->products->name : '',
+                                        'System Description' => $supplier_product->products? $supplier_product->products->name : '',
                                         'Contract' => $supplier_product->contract,
                                         'Row Number' => $supplier_product->row_num,
                                         'Supplier Description' => $supplier_product->descr,

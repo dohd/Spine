@@ -23,6 +23,7 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\product\ProductRepository;
 use App\Http\Requests\Focus\product\ManageProductRequest;
 use App\Models\productcategory\Productcategory;
+use App\Models\product\ProductVariation;
 
 /**
  * Class ProductsTableController.
@@ -83,16 +84,19 @@ class SupplierPriceListTableController extends Controller
             })
             ->addColumn('code', function ($product) {
                 $code = $this->standard_product->code;
-               
-                if ($code) 
-                //return ' <button class="btn btn-primary click btn-sm" type="button" data-toggle="modal" data-target="#exampleModal">' . $code . '</button>';
-                 return '<a class="font-weight-bold click" data-toggle="modal" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
+                $variations = ProductVariation::where('code', $this->standard_product->code)->first();
+                $unit = $product->unit;
+                if ($code && $unit) 
+                 return '<a class="font-weight-bold click" data-toggle="modal" uom="'.$unit->code.'" des="'.$variations->name.'" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
+                 elseif ($unit && $code) {
+                    return '<a class="font-weight-bold click" data-toggle="modal" uom="'.$unit->code.'" des="'.$variations->name.'" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
+                 }
             })
             ->addColumn('qty', function ($product) {
                 return $product->variations->sum('qty');       
             })
             ->addColumn('unit', function ($product) {
-                $unit = $this->standard_product->unit;
+                $unit = $product->unit;
                 if ($unit) return $unit->code;  
             })
             ->addColumn('price', function ($product) {

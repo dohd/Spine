@@ -59,3 +59,38 @@
         </div>
     </div>
 @endsection
+@section('extra-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
+ <script>
+
+    // On searching supplier
+    $('#employeebox').change(function() {
+        const name = $('#employeebox option:selected').text().split(' : ')[0];
+        const [id, taxId] = $(this).val().split('-');
+        $('#taxid').val(taxId);
+        $('#employeeid').val(id);
+        $('#employee').val(name);
+    });
+
+    // load employees
+    const employeeUrl = "{{ route('biller.assetissuance.select') }}";
+    function employeeData(data) {
+        return {results: data.map(v => ({id: v.id, text: v.first_name+' : '+v.email}))};
+    }
+    $('#employeebox').select2(select2Config(employeeUrl, employeeData));
+
+    function select2Config(url, callback) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({q: term, keyword: term}),
+                processResults: callback
+            }
+        }
+    }
+    
+</script>   
+@endsection

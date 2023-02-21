@@ -3,7 +3,10 @@
     
         <div class='col-4'>
             {{ Form::label( 'employee_name', 'Employee Name',['class' => 'control-label']) }}
-            {{ Form::text('employee_name', null, ['class' => 'form-control round', 'placeholder' => '']) }}
+            <select class="form-control round" id="employeebox" data-placeholder="Search employee"></select>
+            <input type="hidden" name="employee_id" value="{{ @$benefits->employee_name ?: 1 }}" id="employeeid">
+             <input type="hidden" name="employee_name" value="{{ @$benefits->employee_name?: 1 }}" id="employee">
+            {{-- {{ Form::text('employee_name', null, ['class' => 'form-control round', 'placeholder' => '']) }} --}}
         </div>
         <div class='col-4'>
             {{ Form::label( 'name', 'Benefit Name',['class' => 'control-label']) }}
@@ -11,17 +14,21 @@
         </div>
         <div class='col-4'>
             {{ Form::label( 'type', 'Benefit Type',['class' => 'control-label']) }}
-            {{ Form::text('type', null, ['class' => 'form-control round', 'placeholder' => 'e.g Best Sales']) }}
+            <select class="form-control round" name="type" id="leave-payment" data-placeholder="Leave Payment">
+                <option value="leave_payment">Leave Payment</option>
+                <option value="others">Others</option>
+            </select>
+            {{-- {{ Form::text('type', null, ['class' => 'form-control round', 'placeholder' => 'e.g Best Sales']) }} --}}
         </div>
     </div>
     <div class="form-group row">
         <div class='col-4'>
             {{ Form::label( 'month', 'Month',['class' => 'control-label']) }}
-            {{ Form::text('type', null, ['class' => 'form-control round', 'placeholder' => 'e.g Jan 2022']) }}
+            {{ Form::month('month', null, ['class' => 'form-control round', 'placeholder' => 'e.g Jan 2022']) }}
         </div>
         <div class='col-4'>
             {{ Form::label( 'leave_payment', 'Leave Payment Days',['class' => 'control-label']) }}
-            {{ Form::number('leave_payment', null, ['class' => 'form-control round', 'placeholder' => '1']) }}
+            {{ Form::number('leave_payment_days', null, ['class' => 'form-control round', 'placeholder' => '1']) }}
         </div>
         <div class='col-4'>
             {{ Form::label( 'amount', 'Amount',['class' => 'control-label']) }}

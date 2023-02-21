@@ -1,4 +1,4 @@
-<div class="modal fade" id="dettachEquipment" tabindex="-1" role="dialog" aria-labelledby="dettachEquipment" aria-hidden="true">
+<div class="modal fade" id="dettachEquipment"  role="dialog" aria-labelledby="dettachEquipment" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content w-75">
             <div class="modal-header">
