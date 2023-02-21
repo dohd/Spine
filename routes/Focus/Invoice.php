@@ -4,6 +4,10 @@
  * invoices
  *
  */
+ Route::group(['namespace' => 'standard_invoice'], function () {
+    Route::resource('standard_invoices', 'StandardInvoicesController');
+ });
+
 Route::group(['namespace' => 'invoice'], function () {
     Route::post('bill_status', 'InvoicesController@update_status')->name('bill_status');
     Route::get('pos', 'InvoicesController@pos')->name('invoices.pos');
