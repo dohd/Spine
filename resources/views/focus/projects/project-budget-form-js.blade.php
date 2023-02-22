@@ -240,7 +240,7 @@
                     data: 'keyword=' + request.term,
                     success: function(data) {
                         response(data.map(v => ({
-                            label: v.name,
+                            label: `${v.name} ${v.code? ' - ' + v.code : ''}`,
                             value: v.name,
                             data: v
                         })));
