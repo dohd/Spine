@@ -171,7 +171,7 @@ class StandardInvoiceRepository extends BaseRepository
         // credit Revenue Account (Income)
         $inc_cr_data = array_replace($dr_data, [
             'account_id' => $result->account_id,
-            'credit' => $result->taxable,
+            'credit' => $result->subtotal,
         ]); 
         Transaction::create($inc_cr_data);
 
@@ -189,7 +189,7 @@ class StandardInvoiceRepository extends BaseRepository
         $cog_account = Account::where('system', 'cog')->first(['id']);
         $cog_dr_data = array_replace($dr_data, [
             'account_id' => $cog_account->id,
-            'debit' => $result->taxable,
+            'debit' => $result->subtotal,
         ]); 
         Transaction::create($cog_dr_data);
         
@@ -197,7 +197,7 @@ class StandardInvoiceRepository extends BaseRepository
         $stock_account = Account::where('system', 'stock')->first(['id']);
         $stock_cr_data = array_replace($dr_data, [
             'account_id' => $stock_account->id,
-            'credit' => $result->taxable,
+            'credit' => $result->subtotal,
         ]);
         Transaction::create($stock_cr_data);
 
