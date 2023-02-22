@@ -4,6 +4,7 @@ namespace App\Repositories\Focus\standard_invoice;
 
 use DB;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
 use App\Models\invoice\Invoice;
 use App\Models\items\InvoiceItem;
 use App\Models\transaction\Transaction;
@@ -73,11 +74,11 @@ class StandardInvoiceRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
         // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
+        $data['is_standard'] = 1;
         $duedate = $data['invoicedate'] . ' + ' . $data['validity'] . ' days';
         $data['invoiceduedate'] = date_for_database($duedate);
         foreach ($data as $key => $val) {
@@ -85,9 +86,7 @@ class StandardInvoiceRepository extends BaseRepository
             if (in_array($key, ['total', 'subtotal', 'taxable', 'tax'])) 
                 $data[$key] = numberClean($val);
         }
-        
-        $tid = Invoice::where('ins', auth()->user()->ins)->max('tid');
-        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
+
         $result = Invoice::create($data);
         
         $data_items = modify_array($input['data_items']);
@@ -101,7 +100,7 @@ class StandardInvoiceRepository extends BaseRepository
         InvoiceItem::insert($data_items);
 
         // convert invoice totals to KES
-        $result = $this->convert_totals_to_kes($result);
+        // $result = $this->convert_totals_to_kes($result);
         
         /** accounting */
         $this->post_transaction($result);
@@ -146,33 +145,62 @@ class StandardInvoiceRepository extends BaseRepository
 
     public function post_transaction($result)
     {
-        // credit bank
-        $tr_category = Transactioncategory::where('code', 'chrg')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid');
-        $cr_data = [
-            'tid' => $tid +1,
-            'account_id' => $result->bank_id,
+        // debit Accounts Receivable (Debtors)
+        $account = Account::where('system', 'receivable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $dr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $result['amount'],
-            'tr_date' => date('Y-m-d'),
-            'due_date' => $result['date'],
-            'user_id' => $result['user_id'],
-            'ins' => $result['ins'],
+            'debit' => $result->total,
+            'tr_date' => $result->invoicedate,
+            'due_date' => $result->invoiceduedate,
+            'user_id' => $result->user_id,
+            'note' => $result->notes,
+            'ins' => $result->ins,
             'tr_type' => $tr_category->code,
-            'tr_ref' => $result['id'],
+            'tr_ref' => $result->id,
             'user_type' => 'customer',
             'is_primary' => 1,
-            'note' => $result['note'],
-        ];
-        Transaction::create($cr_data);
-
-        // debit expense account (bank charge)
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $result['expense_id'],
-            'debit' => $result['amount'],
-        ]);
+        ]; 
         Transaction::create($dr_data);
-        aggregate_account_transactions();
+
+        unset($dr_data['debit'], $dr_data['is_primary']);
+
+        // credit Revenue Account (Income)
+        $inc_cr_data = array_replace($dr_data, [
+            'account_id' => $result->account_id,
+            'credit' => $result->taxable,
+        ]); 
+        Transaction::create($inc_cr_data);
+
+        // credit tax (VAT)
+        if ($result->tax > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $tax_cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $result->tax,
+            ]); 
+            Transaction::create($tax_cr_data);
+        }
+
+        // debit COG
+        $cog_account = Account::where('system', 'cog')->first(['id']);
+        $cog_dr_data = array_replace($dr_data, [
+            'account_id' => $cog_account->id,
+            'debit' => $result->taxable,
+        ]); 
+        Transaction::create($cog_dr_data);
+        
+        // credit Inventory
+        $stock_account = Account::where('system', 'stock')->first(['id']);
+        $stock_cr_data = array_replace($dr_data, [
+            'account_id' => $stock_account->id,
+            'credit' => $result->taxable,
+        ]);
+        Transaction::create($stock_cr_data);
+
+        aggregate_account_transactions();        
     }
 }

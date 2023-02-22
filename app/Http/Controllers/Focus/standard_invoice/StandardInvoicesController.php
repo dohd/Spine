@@ -91,12 +91,12 @@ class StandardInvoicesController extends Controller
     public function store(Request $request)
     {
         $data = $request->only([
-            'customer_id', 'invoicedate', 'tax_id', 'bank_id', 'validity', 'account_id', 'currency_id', 'term_id', 'notes', 
+            'customer_id', 'tid', 'invoicedate', 'tax_id', 'bank_id', 'validity', 'account_id', 'currency_id', 'term_id', 'notes', 
             'taxable', 'subtotal', 'tax', 'total'
         ]);
         $data_items = $request->only([
-            'numbering', 'description', 'unit', 'product_qty', 'product_price', 'item_tax_id', 'product_tax', 'product_amount', 
-            'product_id', 'product_subtotal'
+            'numbering', 'description', 'unit', 'product_qty', 'product_price', 'product_tax', 'product_amount', 
+            'product_id'
         ]);
 
         $this->repository->create(compact('data', 'data_items'));

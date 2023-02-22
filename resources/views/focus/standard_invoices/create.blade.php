@@ -25,6 +25,7 @@
                             {{ Form::open(['route' => 'biller.standard_invoices.store', 'method' => 'POST']) }}
                                 @include("focus.standard_invoices.form")
                             {{ Form::close() }}
+                            @include('focus.standard_invoices.partials.add_customer_modal')
                         </div>
                     </div>
                 </div>
