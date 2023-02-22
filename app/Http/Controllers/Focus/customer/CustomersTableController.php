@@ -61,7 +61,8 @@ class CustomersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('company', function ($customer) {
-                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $customer->company . '</a>';
+                $customer_name = $customer->company? $customer->company :  $customer->name;
+                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $customer_name . '</a>';
             })
             ->make(true);
     }
