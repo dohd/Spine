@@ -80,6 +80,10 @@ class QuotesTableController extends Controller
                 if ($quote->currency) return amountFormat($quote->total, $quote->currency->id);
                 return numberFormat($quote->total);
             })   
+            ->addColumn('approved_date', function ($quote) {
+                printlog($quote->approved_date);
+                return $quote->approved_date? dateFormat($quote->approved_date) : '';
+            })
             ->addColumn('lead_tid', function($quote) use($prefixes) {
                 $link = '';
                 if ($quote->lead) {
