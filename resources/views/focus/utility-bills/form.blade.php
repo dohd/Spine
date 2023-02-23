@@ -167,6 +167,7 @@
             const supplier_id = $(this).val();
             if (!supplier_id) return;
 
+            // fetch supplier grn items
             const grnUrl = "{{ route('biller.utility-bills.goods_receive_note') }}";
             $.post(grnUrl, {supplier_id}, data => {
                 data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billItemRow(v,i)));
