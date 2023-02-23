@@ -120,7 +120,7 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         /**accounting */
         if ($result->invoice_no) $this->generate_bill($result); // generate bill
-        else $this->post_transaction($result);  // grn transaction
+        else $this->post_transaction($result); 
         
         if ($result) {
             DB::commit();
@@ -278,10 +278,13 @@ class GoodsreceivenoteRepository extends BaseRepository
             }
         }
 
+        // delete received items
+        $goodsreceivenote->items()->delete();
+
         // update purchase order status
         if ($goodsreceivenote->purchaseorder) {
             $order_goods_qty = $goodsreceivenote->purchaseorder->items->sum('qty');
-            $received_goods_qty = $goodsreceivenote->items->sum('qty');
+            $received_goods_qty = $goodsreceivenote->items()->sum('qty');
             if ($received_goods_qty == 0) $goodsreceivenote->purchaseorder->update(['status' => 'Pending']);
             elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'Partial']);
             else $goodsreceivenote->purchaseorder->update(['status' => 'Complete']); 
@@ -366,7 +369,7 @@ class GoodsreceivenoteRepository extends BaseRepository
      */
     public function invoiced_grn_transaction($utility_bill)
     {
-        // debit Inventory Account (liability)
+        // debit Inventory Account
         $account = Account::where('system', 'stock')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
         $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
@@ -424,7 +427,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $grn->total,
+            'credit' => $grn->subtotal,
             'tr_date' => $grn->date,
             'due_date' => $grn->date,
             'user_id' => $grn->user_id,
@@ -442,7 +445,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         $account = Account::where('system', 'stock')->first(['id']);
         $dr_data = array_replace($cr_data, [
             'account_id' => $account->id,
-            'debit' => $grn->total,
+            'debit' => $grn->subtotal,
         ]);    
         Transaction::create($dr_data);
         aggregate_account_transactions();

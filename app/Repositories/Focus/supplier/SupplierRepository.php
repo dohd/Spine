@@ -77,11 +77,12 @@ class SupplierRepository extends BaseRepository
                 $q->where($params);
             });
         })->orwhere(function ($q) use($params) {
-            // grn bill
-            $q->where('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn_bill', function ($q) use($params) {
-                $q->where($params);
-            })->orwhere('tr_type', 'bill')->where('credit', '>', 0)->whereHas('grn_invoice_bill', function ($q) use($params) {
-                $q->where($params);
+            $q->where('tr_type', 'bill')->where('credit', '>', 0)->where(function  ($q) use($params) {
+                $q->whereHas('grn_bill', function ($q) use($params) {
+                    $q->where($params);
+                })->orWhereHas('grn_invoice_bill', function ($q) use($params) {
+                    $q->where($params);
+                });
             });
         })->orwhere(function ($q) use($supplier) {
             // opening balance

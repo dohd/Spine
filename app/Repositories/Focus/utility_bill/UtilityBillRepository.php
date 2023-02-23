@@ -337,7 +337,7 @@ class UtilityBillRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'debit' => $utility_bill->total,
+            'debit' => $utility_bill->subtotal,
             'tr_date' => $utility_bill->date,
             'due_date' => $utility_bill->due_date,
             'user_id' => $utility_bill->user_id,
@@ -350,24 +350,24 @@ class UtilityBillRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit Accounts Payable (creditors)
+        // debit TAX
         unset($dr_data['debit'], $dr_data['is_primary']);
-        $account = Account::where('system', 'grn')->first(['id']);
-        $cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'credit' => $utility_bill->subtotal,
-        ]);    
-        Transaction::create($cr_data);
-
-        // credit TAX
         if ($utility_bill->tax > 0) {
             $account = Account::where('system', 'tax')->first(['id']);
             $cr_data = array_replace($dr_data, [
                 'account_id' => $account->id,
-                'credit' => $utility_bill->tax,
+                'debit' => $utility_bill->tax,
             ]);
             Transaction::create($cr_data);
         }
+
+        // credit Accounts Payable (creditors)
+        $account = Account::where('system', 'grn')->first(['id']);
+        $cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'credit' => $utility_bill->total,
+        ]);    
+        Transaction::create($cr_data);
         aggregate_account_transactions();
     }    
 }
