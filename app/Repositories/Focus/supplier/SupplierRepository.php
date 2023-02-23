@@ -71,8 +71,8 @@ class SupplierRepository extends BaseRepository
             $q->where('system', 'payable');  
         })->where(function ($q) use($params) {
             // purchase bill
-            $q->where('tr_type', 'bill')->whereHas('bill', function ($q) use($params) { 
-                $q->where('bills.supplier_id', $params['supplier_id']);
+            $q->where('tr_type', 'bill')->whereHas('direct_purchase_bill', function ($q) use($params) { 
+                $q->where($params);
             })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q) use($params) {
                 $q->where($params);
             });

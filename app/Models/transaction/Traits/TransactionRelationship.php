@@ -85,9 +85,9 @@ trait TransactionRelationship
         return $this->hasOneThrough(Purchase::class, UtilityBill::class, 'ref_id', 'id', 'tr_ref', 'ref_id')->withoutGlobalScopes();
     }
 
-    public function purchase_bill()
+    public function direct_purchase_bill()
     {
-        return $this->hasOneThrough(UtilityBill::class, 'tr_ref')->where('document_type', 'direct_purchase')->whereNull('ref_id');
+        return $this->belongsTo(UtilityBill::class, 'tr_ref')->where('document_type', 'direct_purchase');
     }
 
     public function grn_invoice_bill()
