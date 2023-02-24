@@ -120,7 +120,7 @@ class SupplierRepository extends BaseRepository
             return $transactions;
         }
 
-        printlog(queryString($q));
+        // printlog(queryString($q));
 
         return $q->get();
     }
