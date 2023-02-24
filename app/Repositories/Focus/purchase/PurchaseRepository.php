@@ -381,24 +381,27 @@ class PurchaseRepository extends BaseRepository
                 if ($item->type != 'Stock') continue;
                 $prod_variation = $item->productvariation;
                 // apply unit conversion
-                $units = $prod_variation->product->units;
-                foreach ($units as $unit) {
-                    if ($unit->code == $item['uom']) {
-                        if ($unit->unit_type == 'base') {
-                            $prod_variation->decrement('qty', $item['qty']);
-                        } else {
-                            $converted_qty = $item['qty'] * $unit->base_ratio;
-                            $prod_variation->decrement('qty', $converted_qty);
+                if (isset($prod_variation->product->units)) {
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->decrement('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->decrement('qty', $converted_qty);
+                            }
                         }
-                    }
-                }     
+                    }     
+                } else if ($prod_variation) $prod_variation->decrement('qty', $item['qty']);      
+                else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Inventory']); 
             }
 
             // delete bill
             UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
 
             // delete transactions
-            $purchase->transactions()->where('note', $purchase->note)->delete();
+            $purchase->transactions()->where('note', 'LIKE', "%{$purchase->note}%")->delete();
             aggregate_account_transactions();
 
             if ($purchase->delete()) {

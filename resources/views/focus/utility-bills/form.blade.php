@@ -157,9 +157,12 @@
         },
 
         deleteRow() {
-            $(this).parents('tr').remove();
-            const len = $('#documentsTbl tbody tr').length;
-            if (!len) $('#supplier').val('').change();
+            const row = $(this).parents('tr');
+            row.remove();
+            if (!$('table tbody tr:first').length) 
+                $('#supplier').val('').change();
+
+            Form.columnTotals();
         },
 
         supplierChange() {

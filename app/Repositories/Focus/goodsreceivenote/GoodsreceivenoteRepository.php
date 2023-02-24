@@ -79,6 +79,8 @@ class GoodsreceivenoteRepository extends BaseRepository
         $data_items = Arr::only($input, ['qty', 'rate', 'purchaseorder_item_id', 'item_id']);
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
+        if (!$data_items) throw ValidationException::withMessages(['Cannot generate GRN without product qty!']);
+
         foreach ($data_items as $i => $item) {
             $data_items[$i] = array_replace($item, [
                 'goods_receive_note_id' => $result->id,
@@ -106,7 +108,7 @@ class GoodsreceivenoteRepository extends BaseRepository
                     }
                 }
             } elseif ($prod_variation) $prod_variation->increment('qty', $po_item['qty']);
-            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Purchase Order number ' . $po_item->purchaseorder->tid]);
         }
 
         // update purchase order status
@@ -174,7 +176,7 @@ class GoodsreceivenoteRepository extends BaseRepository
                     }
                 }   
             } elseif ($prod_variation) $prod_variation->decrement('qty', $po_item['qty']);      
-            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);     
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Purchase Order number ' . $po_item->purchaseorder->tid]);     
         }
 
         // goods receive note items
@@ -211,7 +213,7 @@ class GoodsreceivenoteRepository extends BaseRepository
                     }
                 }   
             } elseif ($prod_variation) $prod_variation->increment('qty', $po_item['qty']);
-            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' does not exist!']);  
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Purchase Order number ' . $po_item->purchaseorder->tid]);  
         }
 
         // update purchase order status
@@ -402,7 +404,7 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         // credit Accounts Payable (creditors)
         unset($dr_data['debit'], $dr_data['is_primary']);
-        $account = Account::where('system', 'grn')->first(['id']);
+        $account = Account::where('system', 'payable')->first(['id']);
         $cr_data = array_replace($dr_data, [
             'account_id' => $account->id,
             'credit' => $utility_bill->total,

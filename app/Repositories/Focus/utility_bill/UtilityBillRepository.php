@@ -119,6 +119,9 @@ class UtilityBillRepository extends BaseRepository
     
             $data_items = Arr::only($input, ['item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
             $data_items = modify_array($data_items);
+            $data_items = array_filter($data_items, fn($v) => $v['item_qty']);
+            if (!$data_items) throw ValidationException::withMessages(['Cannot generate bill for empty line items!']);
+
             $data_items = array_map(function ($v) use($result) {
                 return [
                     'bill_id' => $result->id,
@@ -142,6 +145,7 @@ class UtilityBillRepository extends BaseRepository
             }
         } catch (\Throwable $th) {
             DB::rollBack();
+            if ($th instanceof ValidationException) throw $th;
             throw new GeneralException('Error Creating Bill');
         }
     }
@@ -213,7 +217,7 @@ class UtilityBillRepository extends BaseRepository
     {     
         DB::beginTransaction();
     
-        Transaction::where(['tr_type' => 'bill', 'note' => $utility_bill->note, 'tr_ref' => $utility_bill->id])->delete();
+        $utility_bill->transactions()->where('note', 'LIKE', "%{$utility_bill->note}%")->delete();
         if ($utility_bill->delete()) {
             DB::commit(); 
             return true;

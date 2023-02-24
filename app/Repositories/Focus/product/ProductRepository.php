@@ -256,6 +256,11 @@ class ProductRepository extends BaseRepository
                 if ($project_stock) $error_msg = 'Product is attached to Issued Project Stock number {$project_stock->tid} !';
                 break;
             }
+            if (isset($product_variation->grn_item->goodsreceivenote)) {
+                $goodsreceivenote = $product_variation->grn_item->goodsreceivenote;
+                if ($goodsreceivenote) $error_msg = 'Product is attached to Goods Receive Note number {$goodsreceivenote->tid} !';
+                break;
+            }
         }
         if ($error_msg) throw new Error($error_msg);
 
