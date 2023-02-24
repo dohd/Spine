@@ -12,6 +12,11 @@ use App\Models\supplier\Supplier;
 
 trait UtilityBillRelationship
 {   
+    public function transactions()
+    {
+        return $this->hasMany(Transactions::class, 'tr_ref')->where('tr_type', 'bill');
+    }
+
     public function payments()
     {
         return $this->hasMany(BillpaymentItem::class, 'bill_id');
