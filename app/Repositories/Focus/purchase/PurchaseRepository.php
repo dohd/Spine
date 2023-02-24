@@ -473,6 +473,7 @@ class PurchaseRepository extends BaseRepository
 
     /**
      * Direct Purchase Transaction
+     * 
      * @param Purchase $purchase
      * @return void
      */

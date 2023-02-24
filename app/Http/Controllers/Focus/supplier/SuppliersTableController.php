@@ -71,6 +71,8 @@ class SuppliersTableController extends Controller
         $core = $this->supplier->getTransactionsForDataTable();
         $core = $core->sortBy('tr_date');
 
+        printlog($core->toArray());
+
         $core2 = collect();
         foreach ($core as $key => $tr) {
             $next_tr = isset($core[$key+1])? $core[$key+1] : '';
@@ -78,7 +80,9 @@ class SuppliersTableController extends Controller
             else $core2->add($tr);
         }
 
-        return Datatables::of($core2)
+        
+
+        return Datatables::of($core)
         ->escapeColumns(['id'])
         ->addIndexColumn()
         ->addColumn('date', function ($tr) {
@@ -92,18 +96,21 @@ class SuppliersTableController extends Controller
         ->addColumn('note', function ($tr) {
             $note = $tr->note;
             if ($tr->tr_type == 'bill') {
-                if ($tr->direct_purchase_bill) {
+                if ($tr->direct_purchase_bill && $tr->direct_purchase_bill->purchase) {
                     // purchase bill
                     $purchase_bill = $tr->direct_purchase_bill;
-                    $note = gen4tid('BILL-', $purchase_bill->tid) . " - {$tr->note} {$purchase_bill->reference}";
+                    $note = gen4tid('BILL-', $purchase_bill->tid) . " - {$tr->note} {$purchase_bill->reference}" . ' ' . $purchase_bill->supplier_id;
+                    $tr->credit = $purchase_bill->total;
                 } elseif ($tr->grn_bill) {
                     // grn bill
                     $grn_bill = $tr->grn_bill;
-                    $note = gen4tid('BILL-', $grn_bill->tid) . " - {$tr->note} {$grn_bill->reference}";
+                    $note = gen4tid('BILL-', $grn_bill->tid) . " - {$tr->note} {$grn_bill->reference}" . ' ' . $grn_bill->supplier_id;
+                    $tr->credit = $grn_bill->total;
                 } elseif ($tr->grn_invoice_bill) {
                     // grn invoice bill
                     $grn_invoice_bill = $tr->grn_invoice_bill;
-                    $note = gen4tid('BILL-', $grn_invoice_bill->tid) . " - {$tr->note} {$grn_invoice_bill->reference}";
+                    $note = gen4tid('BILL-', $grn_invoice_bill->tid) . " - {$tr->note} {$grn_invoice_bill->reference}" . ' ' . $grn_invoice_bill->supplier_id;
+                    $tr->credit = $grn_invoice_bill->total;
                 }
             }
                 

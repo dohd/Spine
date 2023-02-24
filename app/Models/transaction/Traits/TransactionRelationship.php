@@ -87,17 +87,17 @@ trait TransactionRelationship
 
     public function direct_purchase_bill()
     {
-        return $this->belongsTo(UtilityBill::class, 'tr_ref')->where('document_type', 'direct_purchase');
+        return $this->belongsTo(UtilityBill::class, 'tr_ref', 'ref_id')->where('document_type', 'direct_purchase');
     }
 
     public function grn_invoice_bill()
     {
-        return $this->belongsTo(UtilityBill::class, 'tr_ref')->where('document_type', 'goods_receive_note')->whereNull('ref_id');
+        return $this->belongsTo(UtilityBill::class, 'tr_ref')->where('document_type', 'goods_receive_note')->whereNotNull('ref_id');
     }
 
     public function grn_bill()
     {
-        return $this->belongsTo(UtilityBill::class, 'tr_ref')->where('document_type', 'goods_receive_note')->whereNotNull('ref_id');
+        return $this->belongsTo(UtilityBill::class, 'tr_ref')->where('document_type', 'goods_receive_note')->whereNull('ref_id');
     }
 
     public function account()

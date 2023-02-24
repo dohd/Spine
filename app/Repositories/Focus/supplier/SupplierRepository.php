@@ -70,20 +70,24 @@ class SupplierRepository extends BaseRepository
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'payable');  
         })->where(function ($q) use($params) {
-            // purchase bill
-            $q->where('tr_type', 'bill')->whereHas('direct_purchase_bill', function ($q) use($params) { 
-                $q->where($params);
-            })->orWhere('tr_type', 'pmt')->whereHas('bill_payment', function ($q) use($params) {
-                $q->where($params);
-            });
-        })->orwhere(function ($q) use($params) {
-            $q->where('tr_type', 'bill')->where('credit', '>', 0)->where(function  ($q) use($params) {
-                $q->whereHas('grn_bill', function ($q) use($params) {
-                    $q->where($params);
-                })->orWhereHas('grn_invoice_bill', function ($q) use($params) {
+            $q->where('tr_type', 'pmt')->where(function ($q) use($params) {
+                $q->whereHas('bill_payment', function ($q) use($params) {
                     $q->where($params);
                 });
-            });
+            })
+            ->orwhere('tr_type', 'bill')->where(function ($q) use($params) {
+                $q->where('credit', '>', 0)->where(function  ($q) use($params) {
+                    $q->whereHas('direct_purchase_bill', function ($p) use($params) {
+                        $p->where($params)->whereHas('purchase');
+                    })
+                    ->orwhereHas('grn_bill', function ($q) use($params) {
+                        $q->where($params);
+                    })
+                    ->orWhereHas('grn_invoice_bill', function ($q) use($params) {
+                        $q->where($params);
+                    });   
+                });  
+            });                
         })->orwhere(function ($q) use($supplier) {
             // opening balance
             $note = "%{$supplier->id}-supplier Account Opening Balance {$supplier->open_balance_note}%";
@@ -115,6 +119,8 @@ class SupplierRepository extends BaseRepository
 
             return $transactions;
         }
+
+        printlog(queryString($q));
 
         return $q->get();
     }

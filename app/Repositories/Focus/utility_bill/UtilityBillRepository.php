@@ -362,7 +362,7 @@ class UtilityBillRepository extends BaseRepository
         }
 
         // credit Accounts Payable (creditors)
-        $account = Account::where('system', 'grn')->first(['id']);
+        $account = Account::where('system', 'payable')->first(['id']);
         $cr_data = array_replace($dr_data, [
             'account_id' => $account->id,
             'credit' => $utility_bill->total,
