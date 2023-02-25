@@ -974,7 +974,7 @@ function prefixesArray(array $notes, $ins = 1)
 }
 
 // query string
-function queryString($builder) {
+function sqlQuery($builder) {
     if (!$builder) return '';
     $query = str_replace(array('?'), array('\'%s\''), $builder->toSql());
     $query = vsprintf($query, $builder->getBindings());
