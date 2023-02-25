@@ -352,7 +352,7 @@ class PurchaseRepository extends BaseRepository
         $this->generate_bill($purchase);
 
         /** accounting */
-        $purchase->transactions()->where('note', $prev_note)->delete();
+        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id])->where('note', 'LIKE', "%{$prev_note}%")->delete();
         $this->post_transaction($purchase);
 
         if ($result) {
@@ -377,7 +377,7 @@ class PurchaseRepository extends BaseRepository
 
         try {
             // reduce stock
-            foreach ($purchase->items as $item) {
+            foreach ($purchase->items as $i => $item) {
                 if ($item->type != 'Stock') continue;
                 $prod_variation = $item->productvariation;
                 // apply unit conversion
@@ -401,7 +401,7 @@ class PurchaseRepository extends BaseRepository
             UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
 
             // delete transactions
-            $purchase->transactions()->where('note', 'LIKE', "%{$purchase->note}%")->delete();
+            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id])->where('note', 'LIKE', "%{$purchase->note}%")->delete();
             aggregate_account_transactions();
 
             if ($purchase->delete()) {
@@ -410,14 +410,16 @@ class PurchaseRepository extends BaseRepository
             }
         } catch (\Throwable $th) {
             DB::rollBack();
+            if ($th instanceof ValidationException) throw $th;
             throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
         }
     }
 
     /**
-     * Generate Bill
+     * Generate Purchase Bill
+     * 
      * @param Purchase $purchase
-     * @return void
+     * @return $bill
      */
     public function generate_bill($purchase)
     {
@@ -472,6 +474,8 @@ class PurchaseRepository extends BaseRepository
             }, $bill_items_data);
             UtilityBillItem::insert($bill_items_data);
         }
+
+        return $bill;
     }
 
     /**

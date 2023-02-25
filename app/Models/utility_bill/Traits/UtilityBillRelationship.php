@@ -9,12 +9,13 @@ use App\Models\items\TaxReportItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\purchase\Purchase;
 use App\Models\supplier\Supplier;
+use App\Models\transaction\Transaction;
 
 trait UtilityBillRelationship
 {   
     public function transactions()
     {
-        return $this->hasMany(Transactions::class, 'tr_ref')->where('tr_type', 'bill');
+        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'bill');
     }
 
     public function payments()

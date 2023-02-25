@@ -78,7 +78,7 @@ class SupplierRepository extends BaseRepository
             ->orwhere('tr_type', 'bill')->where(function ($q) use($params) {
                 $q->where('credit', '>', 0)->where(function  ($q) use($params) {
                     $q->whereHas('direct_purchase_bill', function ($p) use($params) {
-                        $p->where($params)->whereHas('purchase');
+                        $p->where($params);
                     })
                     ->orwhereHas('grn_bill', function ($q) use($params) {
                         $q->where($params);
@@ -120,7 +120,7 @@ class SupplierRepository extends BaseRepository
             return $transactions;
         }
 
-        // printlog(queryString($q));
+        // printlog(sqlQuery($q));
 
         return $q->get();
     }
