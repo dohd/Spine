@@ -9,6 +9,7 @@ use App\Models\account\Account;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Models\branch\Branch;
+use App\Models\Company\Company;
 use App\Models\invoice\Invoice;
 use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
@@ -265,6 +266,9 @@ class CustomerRepository extends BaseRepository
         if (isset($input['taxid'])) {
             $taxid_exists = Customer::where('taxid', $input['taxid'])->count();
             if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
+
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
         }
 
         $input['open_balance'] = numberClean($input['open_balance']);
@@ -372,6 +376,9 @@ class CustomerRepository extends BaseRepository
         if (isset($input['taxid'])) {
             $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
             if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
+
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
         }
 
         $input = array_replace($input, [

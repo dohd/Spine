@@ -132,9 +132,10 @@ class QuoteRepository extends BaseRepository
      */
     public function getForVerifyNotInvoicedDataTable()
     {
-        $q = $this->query()->where(['verified' => 'Yes', 'invoiced' => 'No'])
-        ->whereNotIn('id', fn($q) => $q->select('quote_id')->from('invoice_items'));
-
+        $q = $this->query();
+        // verified and uninvoiced quotes
+        $q->where(['verified' => 'Yes', 'invoiced' => 'No'])->whereDoesntHave('invoice_product');
+                
         $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
         $q->when(request('lpo_number'), fn($q) => $q->where('lpo_id', request('lpo_number')));
         $q->when(request('project_id'), function ($q) {
