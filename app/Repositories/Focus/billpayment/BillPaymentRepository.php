@@ -304,7 +304,7 @@ class BillPaymentRepository extends BaseRepository
         // decrement supplier on account balance
         if ($billpayment->supplier_id) {
             $payment_type = $billpayment->payment_type;
-            if ($payment_type == 'per_invoice') {
+            if ($payment_type == 'per_invoice' && $billpayment->items->count()) {
                 $unallocated = $billpayment->amount - $billpayment->allocate_ttl;
                 $billpayment->supplier->decrement('on_account', $unallocated);
                 // related payment

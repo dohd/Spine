@@ -73,14 +73,14 @@ class SuppliersTableController extends Controller
         // printlog($core->toArray());
         
         // filter out tr with same tr_ref i.e direct_purchase and bill
-        $bill_tr = [];
-        $res_tr = [];
-        foreach ($core as $tr) {
-            if ($tr->tr_type == 'bill') $bill_tr[$tr->tr_ref] = $tr;
-            else $res_tr[] = $tr;
-        }
+        // $bill_tr = [];
+        // $res_tr = [];
+        // foreach ($core as $tr) {
+        //     if ($tr->tr_type == 'bill') $bill_tr[$tr->tr_ref] = $tr;
+        //     else $res_tr[] = $tr;
+        // }
 
-        $core = collect(array_merge($bill_tr, $res_tr));
+        // $core = collect(array_merge($bill_tr, $res_tr));
         $core = $core->sortBy('tr_date');
 
         // printlog($core->toArray());
@@ -98,28 +98,6 @@ class SuppliersTableController extends Controller
         })
         ->addColumn('note', function ($tr) {
             $note = $tr->note;
-            if ($tr->tr_type == 'bill') {
-                if ($tr->grn_bill) {
-                    // printlog($tr->grn_bill->toArray());
-                    // grn bill
-                    $grn_bill = $tr->grn_bill;
-                    $note = gen4tid('BILL-', $grn_bill->tid) . " - {$tr->note} {$grn_bill->reference}";
-                    // $tr->credit = $grn_bill->total;
-                } elseif ($tr->grn_invoice_bill) {
-                    // printlog($tr->grn_invoice_bill->toArray());
-                    // grn invoice bill
-                    $grn_invoice_bill = $tr->grn_invoice_bill;
-                    $note = gen4tid('BILL-', $grn_invoice_bill->tid) . " - {$tr->note} {$grn_invoice_bill->reference}";
-                    // $tr->credit = $grn_invoice_bill->total;
-                } elseif ($tr->direct_purchase_bill) {
-                    // printlog($tr->direct_purchase_bill->toArray());
-                    // purchase bill
-                    $purchase_bill = $tr->direct_purchase_bill;
-                    $note = gen4tid('BILL-', $purchase_bill->tid) . " - {$tr->note} {$purchase_bill->reference}";
-                    // $tr->credit = $purchase_bill->total;
-                }
-            }
-                
             return $note;
         })
         ->addColumn('bill_amount', function ($tr) {
