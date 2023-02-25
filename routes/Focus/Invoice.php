@@ -5,6 +5,7 @@
  *
  */
  Route::group(['namespace' => 'standard_invoice'], function () {
+    Route::post('standard_invoices/customer/create', 'StandardInvoicesController@create_customer')->name('invoices.create_customer');
     Route::resource('standard_invoices', 'StandardInvoicesController');
  });
 

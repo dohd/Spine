@@ -88,6 +88,8 @@
         <select class="custom-select" name="currency_id" id="currency" data-placeholder="{{trans('tasks.assign')}}" required>
             @foreach ($currencies as $currency)
                 @php 
+                    if ($currency->rate != 1) continue;
+
                     $selected = '';
                     if ($currency->id == @$quote->currency_id) $selected = 'selected';
                     elseif ($currency->id == 1 && !@$quote) $selected = 'selected';
@@ -193,17 +195,19 @@
     <div class="col-2 ml-auto">
         <label for="grandtotal">Grand Total</label>
         {{ Form::text('total', null, ['class' => 'form-control', 'id' => 'total', 'readonly']) }}
-    </div>                                    
-    <div class="row mt-1">
-        <div class="col-4 ml-auto mr-auto">
-            <div class="row no-gutters mt-1">
-                <div class="col-2 pl-1">
-                    <a href="{{ route('biller.invoices.uninvoiced_quote') }}" class="btn btn-danger block">Cancel</a>    
+    </div>      
+
+    <!-- submit buttons -->                             
+    <div class="row form-group">
+        <div class="col-sm-3 ml-auto mr-auto">
+            <div class="input-group">
+                <div class="col-sm-6">
+                    <a href="{{ route('biller.invoices.index') }}" class="btn btn-danger block">Cancel</a>    
                 </div>
-                <div class="col-2 ml-1">
-                    {{ Form::submit(@$invoice? 'Update' : 'Generate', ['class' => 'btn btn-primary block text-white mr-1']) }}    
+                <div class="col-sm-6">
+                    {{ Form::submit('Submit', ['class' => 'btn btn-primary block text-white mr-1']) }}    
                 </div>
-            </div>            
+            </div>
         </div>        
     </div>
 </div>
