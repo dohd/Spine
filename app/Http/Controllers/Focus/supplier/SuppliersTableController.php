@@ -69,7 +69,21 @@ class SuppliersTableController extends Controller
     public function invoke_transaction()
     {
         $core = $this->supplier->getTransactionsForDataTable();
+
+        // printlog($core->toArray());
+        
+        // filter out tr with same tr_ref i.e direct_purchase and bill
+        // $bill_tr = [];
+        // $res_tr = [];
+        // foreach ($core as $tr) {
+        //     if ($tr->tr_type == 'bill') $bill_tr[$tr->tr_ref] = $tr;
+        //     else $res_tr[] = $tr;
+        // }
+
+        // $core = collect(array_merge($bill_tr, $res_tr));
         $core = $core->sortBy('tr_date');
+
+        // printlog($core->toArray());
 
         return Datatables::of($core)
         ->escapeColumns(['id'])
@@ -84,23 +98,6 @@ class SuppliersTableController extends Controller
         })
         ->addColumn('note', function ($tr) {
             $note = $tr->note;
-            if ($tr->tr_type == 'bill') {
-                if ($tr->bill) {
-                    // purchase bill
-                    $purchase = $tr->bill;
-                    $purchase_bill = $purchase->bill;
-                    if ($purchase_bill) $note = gen4tid('BILL-', $purchase_bill->tid) . " - {$tr->note} {$purchase_bill->reference}";
-                } elseif ($tr->grn_bill) {
-                    // grn bill
-                    $grn_bill = $tr->grn_bill;
-                    $note = gen4tid('BILL-', $grn_bill->tid) . " - {$tr->note} {$grn_bill->reference}";
-                } elseif ($tr->grn_invoice_bill) {
-                    // grn invoice bill
-                    $grn_invoice_bill = $tr->grn_invoice_bill;
-                    $note = gen4tid('BILL-', $grn_invoice_bill->tid) . " - {$tr->note} {$grn_invoice_bill->reference}";
-                }
-            }
-                
             return $note;
         })
         ->addColumn('bill_amount', function ($tr) {

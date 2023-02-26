@@ -58,9 +58,12 @@ class GoodsReceiveNoteController extends Controller
      */
     public function store(Request $request)
     {
-        $this->respository->create($request->except('_token'));
+        $grn = $this->respository->create($request->except('_token'));
 
-        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Note Created Successfully']);
+        $msg = 'Goods Received Note Created Successfully With DNote';
+        if ($grn->invoice_no) $msg = 'Goods Received Note Created Successfully With Invoice';
+
+        return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => $msg]);
     }
 
     /**

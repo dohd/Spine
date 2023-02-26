@@ -21,7 +21,7 @@
 
     <div class="col-2">
         <label for="tid" class="caption">Invoice No.</label>
-        {{ Form::text('tid', @$tid+1, ['class' => 'form-control round', 'disabled']) }}
+        {{ Form::text('tid', @$tid+1, ['class' => 'form-control round', 'readonly']) }}
     </div>
 
     <div class="col-2">
@@ -171,8 +171,6 @@
                     </div> 
                 </td>
                 <input type="hidden" class="form-control prod-id" name="product_id[]">
-                
-                <input type="hidden" class="form-control prod-subtotal" name="product_subtotal[]">
             </tr>
         </tbody>
     </table>
@@ -210,8 +208,6 @@
     </div>
 </div>
 
-@include('focus.standard_invoices.partials.add_customer_modal')
-
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 
@@ -232,8 +228,8 @@
     $(document).on('click', '.add-row, .remove-row', function() {
         if ($(this).is('.add-row')) {
             rowCount++;
-            $('#products_tbl tbody').append(`<tr>${initRow}</tr>`);
-            const row = $('#products_tbl tbody tr:last');
+            $(this).closest('tr').after(`<tr>${initRow}</tr>`);
+            const row = $(this).closest('tr').next();
             row.find('.name').autocomplete(autoCompleteConfig());
             // limit line item tax options
             const taxRate = parseFloat($('#tax').val());

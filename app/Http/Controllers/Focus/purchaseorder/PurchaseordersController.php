@@ -176,7 +176,11 @@ class PurchaseordersController extends Controller
     public function goods(Request $request)
     {
         $purchaseorder = Purchaseorder::find(request('purchaseorder_id'));
-        $stock_goods = $purchaseorder? $purchaseorder->goods()->where('type', 'Stock')->get() : [];
+        $stock_goods = $purchaseorder? $purchaseorder->goods()->where('type', 'Stock')->get() : collect();
+        $stock_goods = $stock_goods->map(function($v) {
+            if ($v->productvariation) $v->description .= " - {$v->productvariation->code}";
+            return $v;
+        });
 
         return response()->json($stock_goods);
     }

@@ -87,11 +87,6 @@ trait PurchaseRelationship
         return $this->belongsTo('App\Models\term\Term')->withoutGlobalScopes();
     }
 
-    public function transactions()
-    {
-        return $this->hasMany('App\Models\transaction\Transaction', 'tr_ref')->where('tr_type', 'bill');
-    }
-
     public function attachment()
     {
         return $this->hasMany('App\Models\items\MetaEntry', 'rel_id')->where('rel_type', '=', 9)->withoutGlobalScopes();

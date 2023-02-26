@@ -157,9 +157,12 @@
         },
 
         deleteRow() {
-            $(this).parents('tr').remove();
-            const len = $('#documentsTbl tbody tr').length;
-            if (!len) $('#supplier').val('').change();
+            const row = $(this).parents('tr');
+            row.remove();
+            if (!$('table tbody tr:first').length) 
+                $('#supplier').val('').change();
+
+            Form.columnTotals();
         },
 
         supplierChange() {
@@ -167,6 +170,7 @@
             const supplier_id = $(this).val();
             if (!supplier_id) return;
 
+            // fetch supplier grn items
             const grnUrl = "{{ route('biller.utility-bills.goods_receive_note') }}";
             $.post(grnUrl, {supplier_id}, data => {
                 data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billItemRow(v,i)));

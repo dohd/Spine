@@ -180,16 +180,17 @@ class UtilityBillController extends Controller
         // decrement grn items qty by billed items qty        
         $bill_items = UtilityBillItem::whereHas('bill', function ($q) {
             $q->where('supplier_id', request('supplier_id'));
-        })->get();
+        })->get()->toArray();
         foreach ($bill_items as $bill_item) {
             foreach ($grn_items as $i => $grn_item) {
-                $is_equal = trim($grn_item['note']) == trim($bill_item['note']);
-                if ($is_equal) $grn_items[$i]['qty'] -= $bill_item['qty'];
+                if ($grn_item['id'] == $bill_item['ref_id']) {
+                    $grn_items[$i]['qty'] -= $bill_item['qty'];
+                }
             }
-        }
+        } 
         $grn_items = array_filter($grn_items, fn($v) => $v['qty'] > 0);
 
-        return response()->json($grn_items);
+        return response()->json([...$grn_items]);
     }
 
     /**

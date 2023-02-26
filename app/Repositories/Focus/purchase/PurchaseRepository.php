@@ -370,7 +370,7 @@ class PurchaseRepository extends BaseRepository
         $this->generate_bill($purchase);
 
         /** accounting */
-        $purchase->transactions()->where('note', $prev_note)->delete();
+        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id])->where('note', 'LIKE', "%{$prev_note}%")->delete();
         $this->post_transaction($purchase);
 
         if ($result) {
@@ -395,28 +395,31 @@ class PurchaseRepository extends BaseRepository
 
         try {
             // reduce stock
-            foreach ($purchase->items as $item) {
+            foreach ($purchase->items as $i => $item) {
                 if ($item->type != 'Stock') continue;
                 $prod_variation = $item->productvariation;
                 // apply unit conversion
-                $units = $prod_variation->product->units;
-                foreach ($units as $unit) {
-                    if ($unit->code == $item['uom']) {
-                        if ($unit->unit_type == 'base') {
-                            $prod_variation->decrement('qty', $item['qty']);
-                        } else {
-                            $converted_qty = $item['qty'] * $unit->base_ratio;
-                            $prod_variation->decrement('qty', $converted_qty);
+                if (isset($prod_variation->product->units)) {
+                    $units = $prod_variation->product->units;
+                    foreach ($units as $unit) {
+                        if ($unit->code == $item['uom']) {
+                            if ($unit->unit_type == 'base') {
+                                $prod_variation->decrement('qty', $item['qty']);
+                            } else {
+                                $converted_qty = $item['qty'] * $unit->base_ratio;
+                                $prod_variation->decrement('qty', $converted_qty);
+                            }
                         }
-                    }
-                }     
+                    }     
+                } else if ($prod_variation) $prod_variation->decrement('qty', $item['qty']);      
+                else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Inventory']); 
             }
 
             // delete bill
             UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
 
             // delete transactions
-            $purchase->transactions()->where('note', $purchase->note)->delete();
+            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id])->where('note', 'LIKE', "%{$purchase->note}%")->delete();
             aggregate_account_transactions();
 
             if ($purchase->delete()) {
@@ -425,14 +428,16 @@ class PurchaseRepository extends BaseRepository
             }
         } catch (\Throwable $th) {
             DB::rollBack();
+            if ($th instanceof ValidationException) throw $th;
             throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
         }
     }
 
     /**
-     * Generate Bill
+     * Generate Purchase Bill
+     * 
      * @param Purchase $purchase
-     * @return void
+     * @return $bill
      */
     public function generate_bill($purchase)
     {
@@ -487,10 +492,13 @@ class PurchaseRepository extends BaseRepository
             }, $bill_items_data);
             UtilityBillItem::insert($bill_items_data);
         }
+
+        return $bill;
     }
 
     /**
      * Direct Purchase Transaction
+     * 
      * @param Purchase $purchase
      * @return void
      */

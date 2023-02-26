@@ -2,6 +2,7 @@
 
 namespace App\Models\product\Traits;
 
+use App\Models\items\GoodsreceivenoteItem;
 use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
 use App\Models\productvariable\Productvariable;
@@ -11,6 +12,11 @@ use App\Models\productvariable\Productvariable;
  */
 trait ProductRelationship
 {
+    public function grn_item()
+    {
+        return $this->hasOne(GoodsreceivenoteItem::class, 'item_id');
+    }
+
     public function units()
     {
         return $this->belongsToMany(Productvariable::class, 'product_unit', 'product_id', 'product_variable_id');

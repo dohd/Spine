@@ -52,7 +52,7 @@
            
                 <tr>
                     <td>{{ $i+1 }}</td>
-                    <td>{{ $item->product_name }}</td>
+                    <td>{{ $item->product_name }} {{ @$item->product? ' - ' . $item->product->code : ''}}</td>
                     <td>
                         <select name="unit[]" id="unit" class="custom-select unit">
                             <option value="{{ $item->unit }}">{{ $item->unit }}</option>

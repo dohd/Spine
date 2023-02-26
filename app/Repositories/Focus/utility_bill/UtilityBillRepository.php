@@ -119,6 +119,9 @@ class UtilityBillRepository extends BaseRepository
     
             $data_items = Arr::only($input, ['item_ref_id', 'item_note', 'item_qty', 'item_subtotal', 'item_tax', 'item_total']);
             $data_items = modify_array($data_items);
+            $data_items = array_filter($data_items, fn($v) => $v['item_qty']);
+            if (!$data_items) throw ValidationException::withMessages(['Cannot generate bill for empty line items!']);
+
             $data_items = array_map(function ($v) use($result) {
                 return [
                     'bill_id' => $result->id,
@@ -142,6 +145,7 @@ class UtilityBillRepository extends BaseRepository
             }
         } catch (\Throwable $th) {
             DB::rollBack();
+            if ($th instanceof ValidationException) throw $th;
             throw new GeneralException('Error Creating Bill');
         }
     }
@@ -213,7 +217,7 @@ class UtilityBillRepository extends BaseRepository
     {     
         DB::beginTransaction();
     
-        Transaction::where(['tr_type' => 'bill', 'note' => $utility_bill->note, 'tr_ref' => $utility_bill->id])->delete();
+        $utility_bill->transactions()->where('note', 'LIKE', "%{$utility_bill->note}%")->delete();
         if ($utility_bill->delete()) {
             DB::commit(); 
             return true;
@@ -337,7 +341,7 @@ class UtilityBillRepository extends BaseRepository
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'debit' => $utility_bill->total,
+            'debit' => $utility_bill->subtotal,
             'tr_date' => $utility_bill->date,
             'due_date' => $utility_bill->due_date,
             'user_id' => $utility_bill->user_id,
@@ -350,24 +354,24 @@ class UtilityBillRepository extends BaseRepository
         ];
         Transaction::create($dr_data);
 
-        // credit Accounts Payable (creditors)
+        // debit TAX
         unset($dr_data['debit'], $dr_data['is_primary']);
-        $account = Account::where('system', 'grn')->first(['id']);
-        $cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'credit' => $utility_bill->subtotal,
-        ]);    
-        Transaction::create($cr_data);
-
-        // credit TAX
         if ($utility_bill->tax > 0) {
             $account = Account::where('system', 'tax')->first(['id']);
             $cr_data = array_replace($dr_data, [
                 'account_id' => $account->id,
-                'credit' => $utility_bill->tax,
+                'debit' => $utility_bill->tax,
             ]);
             Transaction::create($cr_data);
         }
+
+        // credit Accounts Payable (creditors)
+        $account = Account::where('system', 'payable')->first(['id']);
+        $cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'credit' => $utility_bill->total,
+        ]);    
+        Transaction::create($cr_data);
         aggregate_account_transactions();
     }    
 }

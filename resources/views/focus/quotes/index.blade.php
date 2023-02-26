@@ -72,7 +72,8 @@
                                 <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
                                 <th>Customer - Branch</th>   
                                 <th>Title</th>                                                                       
-                                <th>{{ trans('general.amount') }}</th>
+                                <th>Amount</th>
+                                <th>Approval Date</th>
                                 <th>Client Ref</th>                                
                                 <th>Ticket No</th>
                                 <th>Invoice No</th>
@@ -147,7 +148,7 @@
                         name: 'id'
                     },
                     ...[
-                        'date', 'tid', 'customer', 'notes', 'total', 'client_ref', 'lead_tid', 'invoice_tid'
+                        'date', 'tid', 'customer', 'notes', 'total', 'approved_date', 'client_ref', 'lead_tid', 'invoice_tid'
                     ].map(v => ({data: v, name: v})),
                     {
                         data: 'actions',
@@ -158,7 +159,7 @@
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: 5 },
-                    { type: "custom-date-sort", targets: 1 }
+                    { type: "custom-date-sort", targets: [1,6] }
                 ],
                 order:[[0, 'desc']],
                 searchDelay: 500,

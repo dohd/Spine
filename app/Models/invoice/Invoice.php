@@ -29,17 +29,13 @@ class Invoice extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -72,6 +68,15 @@ class Invoice extends Model
         parent::boot();
         static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', auth()->user()->ins);
+        });
+
+        static::creating(function ($instance) {
+            $instance->fill([
+                'user_id' => auth()->user()->id,
+                'ins' => auth()->user()->ins,
+                'tid' => Invoice::getTid() + 1,
+            ]);
+            return $instance;
         });
     }
 
