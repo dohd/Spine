@@ -75,6 +75,7 @@
     $('form').on('change', '#lead_id, #reference', function() {
         if ($(this).is('#lead_id')) {
             const opt = $('#lead_id option:selected');
+            $('#attention').val(opt.attr('assign_to'));
             $('#subject').val(opt.attr('title'));
             $('#client_ref').val(opt.attr('client_ref'));
             $('#branch_id').val(opt.attr('branch_id'));
