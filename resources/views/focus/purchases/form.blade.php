@@ -15,7 +15,10 @@
                     </div>
                 </div>
                 <div class="col-7">
-                    <label for="payer" class="caption">Search Supplier</label>                                       
+                    <label for="payer" class="caption">Search Supplier</label> 
+                    <a href="{{ route('biller.suppliers.create') }}" class="btn btn-blue btn-sm round float-right add-supplier">
+                        <i class="fa fa-plus-circle"></i> supplier
+                    </a>                                     
                     <select class="form-control" id="supplierbox" data-placeholder="Search Supplier" disabled></select>
                     <input type="hidden" name="supplier_id" value="{{ @$purchase->supplier_id ?: 1 }}" id="supplierid">
                 </div>
