@@ -61,6 +61,8 @@ class TermRepository extends BaseRepository
     {
          $input['title'] = strip_tags( $input['title']);
             $input['terms'] = clean($input['terms']);
+
+        unset($input['files']);
         if ($term->update($input))
             return true;
 

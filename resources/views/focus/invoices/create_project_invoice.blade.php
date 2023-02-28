@@ -103,7 +103,7 @@
                 });
             }
         }
-    }).trigger('change');   
+    }).trigger('change'); 
     
 </script>
 @endsection

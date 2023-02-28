@@ -62,5 +62,17 @@
         $('#total').val(accounting.formatNumber(total));
     });
     $('#tax_id').change();
+
+
+    /**
+     * Standard Invoice
+     * */
+    const isStdInvoice = @json(@$invoice->is_standard);
+    if (isStdInvoice) {
+        $('#quoteTbl thead tr:first th:eq(1)').remove();
+        $('#quoteTbl tbody tr').each(function() {
+            $(this).find('td:eq(1)').remove();
+        });
+    }
 </script>
 @endsection

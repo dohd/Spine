@@ -24,12 +24,14 @@ use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
 use App\Models\additional\Additional;
 use App\Models\bank\Bank;
+use App\Models\Company\Company;
 use App\Models\currency\Currency;
 use App\Models\customer\Customer;
 use App\Models\invoice\Invoice;
 use App\Models\term\Term;
 use App\Repositories\Focus\standard_invoice\StandardInvoiceRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 /**
  * BanksController
@@ -166,5 +168,38 @@ class StandardInvoicesController extends Controller
     public function show(Invoice $invoice, Request $request)
     {
         return new ViewResponse('focus.invoices.view', compact('charge'));
+    }
+
+    /**
+     * Create Customer
+     */
+    public function create_customer(Request $request)
+    {
+        // dd(request()->all());
+        $request->validate([
+            'company' => 'required',
+            'email' => 'required',
+        ]);
+
+        $input = $request->only(['company', 'name', 'email', 'phone', 'address', 'tax_pin']);
+
+        $email_exists = Customer::where('email', $input['email'])->count();
+        if ($email_exists) throw ValidationException::withMessages(['Email already exists!']);
+
+        $is_company = Customer::where('company', $input['company'])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
+
+        if (isset($input['tax_pin'])) {
+            $taxid_exists = Customer::where('taxid', $input['tax_pin'])->count();
+            if ($taxid_exists) throw ValidationException::withMessages(['Tax Pin already exists!']);
+
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+        } 
+        
+        $input['taxid'] = $input['tax_pin'];
+        unset($input['tax_pin']);
+        if (Customer::create($input)) return redirect()->back()->with('flash_success', 'Customer Created Successfully');
+        throw ValidationException::withMessages(['Error creating customer']);
     }
 }

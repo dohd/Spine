@@ -62,12 +62,15 @@ class LeadRepository extends BaseRepository
     public function update(Lead $lead, array $data)
     {
         DB::beginTransaction();
-
-        $params = ['customer_id' => @$data['customer_id'], 'branch_id' => @$data['branch_id']];
-        if ($lead->quote) $lead->quote->update($params);
-        if ($lead->djc) $lead->djc->update($params);
-
+        
         $result = $lead->update($data);
+        // update attached quote and djc
+        foreach ($lead->quotes as $quote) {
+            $quote->update(['customer_id' => $lead->client_id, 'branch_id' => $lead->branch_id]);
+        }
+        foreach ($lead->djcs as $djc) {
+            $djc->update(['client_id' => $lead->client_id, 'branch_id' => $lead->branch_id]);
+        }
 
         if ($result) {
             DB::commit();

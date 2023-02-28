@@ -132,88 +132,95 @@
     </div>
 </div>
 
-<table id="quoteTbl" class="table-responsive tfr my_stripe_single pb-1">
-    <thead>
-        <tr class="item_header bg-gradient-directional-blue white">
-            <th class="text-center">#</th>
-            <th width="25%" class="text-center">Reference</th>
-            <th width="35%" class="text-center">Item Description</th>
-            <th width="10%" class="text-center">UoM</th>
-            <th width="10%" class="text-center">Qty</th>
-            <th width="10%" class="text-center">Rate (VAT Exc)</th>
-            <th width="10%" class="text-center">Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (isset($quotes))
-            {{-- create invoice items --}}
-            @foreach($quotes as $k => $val)
-                @php
-                    // Reference details
-                    $tid = gen4tid($val->bank_id? "{$prefixes[2]}-" : "{$prefixes[1]}-", $val->tid);
-                    if ($val->revision) $tid .= $val->revision;
-                    $lpo_no = $val->lpo ? "{$prefixes[3]}-{$val->lpo->lpo_no}" : '';
-                    $client_ref = $val->client_ref;
-                    $branch_name = $val->branch? "{$val->branch->name} ({$val->branch->branch_code})" : '';
-                    $djc_ref = $val->reference? "Djc-{$val->reference}" : '';
-                    
-                    // Description details
-                    $jcs = [];
-                    foreach($val->verified_jcs as $jc) {
-                        if ($jc->type == 2) $jcs[] = "{$prefixes[4]}-{$jc->reference}";
-                        else $jcs[] = "{$prefixes[5]}-{$jc->reference}";
-                    }
+<div class="table-responsive">
+    <table id="quoteTbl" class="table tfr my_stripe_single pb-1">
+        <thead>
+            <tr class="item_header bg-gradient-directional-blue white">
+                <th width="6%">#</th>
+                <th width="25%">Reference</th>
+                <th width="35%">Item Description</th>
+                <th width="10%">UoM</th>
+                <th width="10%">Qty</th>
+                <th width="10%">Rate (VAT Exc)</th>
+                <th width="10%">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (isset($quotes))
+                {{-- create invoice items --}}
+                @foreach($quotes as $k => $val)
+                    @php
+                        // Reference details
+                        $tid = gen4tid($val->bank_id? "{$prefixes[2]}-" : "{$prefixes[1]}-", $val->tid);
+                        if ($val->revision) $tid .= $val->revision;
+                        $lpo_no = $val->lpo ? "{$prefixes[3]}-{$val->lpo->lpo_no}" : '';
+                        $client_ref = $val->client_ref;
+                        $branch_name = $val->branch? "{$val->branch->name} ({$val->branch->branch_code})" : '';
+                        $djc_ref = $val->reference? "Djc-{$val->reference}" : '';
+                        
+                        // Description details
+                        $jcs = [];
+                        foreach($val->verified_jcs as $jc) {
+                            if ($jc->type == 2) $jcs[] = "{$prefixes[4]}-{$jc->reference}";
+                            else $jcs[] = "{$prefixes[5]}-{$jc->reference}";
+                        }
+    
+                        // Table values
+                        $price = number_format($val->subtotal, 4);
+                        $project_id = $val->project_quote ? $val->project_quote->project_id : '';
+    
+                        $title = $val->notes;
+                        $jcs = implode(', ', $jcs);
+                        $description = implode(';', [$title, $djc_ref, $jcs]);
+                        $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]); 
+                    @endphp
+                    <tr>
+                        <td class="num pl-2">{{ $k+1 }}</td>                                            
+                        <td><textarea class="form-control ref" name="reference[]" id="reference-{{ $k }}" rows="5" readonly>{{ $reference }}</textarea></td>
+                        <td><textarea class="form-control descr" name="description[]" id="description-{{ $k }}" rows="5">{{ $description }}</textarea></td>
+                        <td><input type="text" class="form-control unit" name="unit[]" id="unit-{{ $k }}" value="Lot" readonly></td>
+                        <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
+                        <td><input type="text" class="form-control rate" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
+                        <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ $price }}</span></strong></td>
+                        
+                        <input type="hidden" class="subtotal" value="{{ $price }}" id="initprice-{{ $k }}" disabled>
+                        <input type="hidden" class="num-val" name="numbering[]" id="num-{{ $k }}">
+                        <input type="hidden" class="row-index" name="row_index[]" id="rowindex-{{ $k }}">
+                        <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $val->id }}" id="quoteid-{{ $k }}">
+                        <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $val->branch_id }}" id="branchid-{{ $k }}">
+                        <input type="hidden" class="project-id" name="project_id[]" value="{{ $project_id }}" id="projectid-{{ $k }}">
+                    </tr>
+                @endforeach
+            @else        
+                {{-- edit invoice items --}}
+                @foreach ($invoice->products as $k => $item)
+                    <tr>
+                        <td class="num pl-2">{{ $k+1 }}</td>                                            
+                        <td><textarea class="form-control ref" name="reference[]" id="reference-{{ $k }}" rows="5">{{ $item->reference }}</textarea></td>
+                        <td><textarea class="form-control descr" name="description[]" id="description-{{ $k }}" rows="5">{{ $item->description }}</textarea></td>
+                        <td><input type="text" class="form-control unit" name="unit[]" id="unit-{{ $k }}" value="{{ $item->unit }}" readonly></td>
+                        <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="{{ +$item->product_qty }}" readonly></td>
 
-                    // Table values
-                    $price = number_format($val->subtotal, 4);
-                    $project_id = $val->project_quote ? $val->project_quote->project_id : '';
-
-                    $title = $val->notes;
-                    $jcs = implode(', ', $jcs);
-                    $description = implode(';', [$title, $djc_ref, $jcs]);
-                    $reference = '' . implode('; ', [$branch_name, $tid, $lpo_no, $client_ref]); 
-                @endphp
-                <tr>
-                    <td class="num">{{ $k+1 }}</td>                                            
-                    <td><textarea class="form-control ref" name="reference[]" id="reference-{{ $k }}" rows="5" readonly>{{ $reference }}</textarea></td>
-                    <td><textarea class="form-control descr" name="description[]" id="description-{{ $k }}" rows="5">{{ $description }}</textarea></td>
-                    <td><input type="text" class="form-control unit" name="unit[]" id="unit-{{ $k }}" value="Lot" readonly></td>
-                    <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="1" readonly></td>
-                    <td><input type="text" class="form-control rate" name="product_price[]" value="{{ $price }}" id="product_price-{{ $k }}" readonly></td>
-                    <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ $price }}</span></strong></td>
-                    
-                    <input type="hidden" class="subtotal" value="{{ $price }}" id="initprice-{{ $k }}" disabled>
-                    <input type="hidden" class="num-val" name="numbering[]" id="num-{{ $k }}">
-                    <input type="hidden" class="row-index" name="row_index[]" id="rowindex-{{ $k }}">
-                    <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $val->id }}" id="quoteid-{{ $k }}">
-                    <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $val->branch_id }}" id="branchid-{{ $k }}">
-                    <input type="hidden" class="project-id" name="project_id[]" value="{{ $project_id }}" id="projectid-{{ $k }}">
-                </tr>
-            @endforeach
-        @else        
-            {{-- edit invoice items --}}
-            @foreach ($invoice->products as $k => $item)
-                <tr>
-                    <td class="num">{{ $k+1 }}</td>                                            
-                    <td><textarea class="form-control ref" name="reference[]" id="reference-{{ $k }}" rows="5">{{ $item->reference }}</textarea></td>
-                    <td><textarea class="form-control descr" name="description[]" id="description-{{ $k }}" rows="5">{{ $item->description }}</textarea></td>
-                    <td><input type="text" class="form-control unit" name="unit[]" id="unit-{{ $k }}" value="{{ $item->unit }}" readonly></td>
-                    <td><input type="text" class="form-control qty" name="product_qty[]" id="product_qty-{{ $k }}" value="{{ +$item->product_qty }}" readonly></td>
-                    <td><input type="text" class="form-control rate" name="product_price[]" value="{{ number_format($item->product_price, 4) }}" id="product_price-{{ $k }}" readonly></td>
-                    <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ number_format($item->product_price * $item->product_qty, 4) }}</span></strong></td>
-
-                    <input type="hidden"  class="subtotal" value="{{ $item->product_price }}" id="initprice-{{ $k }}" disabled>
-                    <input type="hidden" class="num-val" name="numbering[]" value="{{ $item->numbering }}" id="num-{{ $k }}">
-                    <input type="hidden" class="row-index" name="row_index[]" value="{{ $item->row_index }}" id="rowindex-{{ $k }}">
-                    <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $item->quote_id }}" id="quoteid-{{ $k }}">
-                    <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $item->branch_id }}" id="branchid-{{ $k }}">
-                    <input type="hidden" class="project-id" name="project_id[]" value="{{ $item->project_id }}" id="projectid-{{ $k }}">
-                    <input type="hidden" name="id[]" value="{{ $item->id }}">
-                </tr>
-            @endforeach
-        @endif
-    </tbody>
-</table>
+                        @php
+                            $unit_cost = number_format($item->product_price, 4);
+                            $net_cost = number_format($item->product_price * $item->product_qty, 4);
+                        @endphp
+                        <td><input type="text" class="form-control rate" name="product_price[]" value="{{ $unit_cost }}" id="product_price-{{ $k }}" readonly></td>
+                        <td><strong><span class='ttlText amount' id="result-{{ $k }}">{{ $net_cost }}</span></strong></td>
+    
+                        <input type="hidden"  class="subtotal" value="{{ $item->product_price }}" id="initprice-{{ $k }}" disabled>
+                        <input type="hidden" class="num-val" name="numbering[]" value="{{ $item->numbering }}" id="num-{{ $k }}">
+                        <input type="hidden" class="row-index" name="row_index[]" value="{{ $item->row_index }}" id="rowindex-{{ $k }}">
+                        <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $item->quote_id }}" id="quoteid-{{ $k }}">
+                        <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $item->branch_id }}" id="branchid-{{ $k }}">
+                        <input type="hidden" class="project-id" name="project_id[]" value="{{ $item->project_id }}" id="projectid-{{ $k }}">
+                        <input type="hidden" name="id[]" value="{{ $item->id }}">
+                    </tr>
+                @endforeach
+            @endif
+        </tbody>
+    </table>    
+</div>
 
 <div class="form-group">
     <div class="col-2 ml-auto">

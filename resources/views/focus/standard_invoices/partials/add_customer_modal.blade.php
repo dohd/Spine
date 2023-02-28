@@ -8,7 +8,7 @@
                 </button>
             </div>
 
-            <form action="">
+            <form action="{{ route('biller.invoices.create_customer') }}" method="POST">
                 @csrf
                 <div class="modal-body">                    
                     <div class="row mb-1">

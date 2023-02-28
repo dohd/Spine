@@ -32,6 +32,7 @@
                                 client_ref="{{ $lead->client_ref }}"
                                 customer_id="{{ $lead->client_id }}"
                                 branch_id="{{ $lead->branch_id }}"
+                                assign_to="{{ $lead->assign_to }}"
                                 {{ $lead->id == @$quote->lead_id ? 'selected' : '' }}
                             >
                                 {{ gen4tid("{$prefix}-", $lead->reference) }} - {{ $customer_name }} - {{ $lead->title }}
@@ -228,7 +229,7 @@
                         <option value="">-- Select Bank --</option>
                         @foreach ($banks as $bank)
                         <option value="{{ $bank->id }}" {{ $bank->id == @$quote->bank_id ? 'selected' : '' }}>
-                            {{ $bank->bank }}
+                            {{ $bank->bank }} - {{ $bank->note }}
                         </option>
                         @endforeach                                            
                     </select>
@@ -268,12 +269,12 @@
     <div class="col-9">
         <a href="javascript:" class="btn btn-success" id="addProduct"><i class="fa fa-plus-square"></i> Add Product</a>
         <a href="javascript:" class="btn btn-primary" id="addTitle"><i class="fa fa-plus-square"></i> Add Title</a>
-        <a href="javascript:" class="btn btn-secondary ml-1" data-toggle="modal" data-target="#skillModal" id="addSkill">
+        <a href="javascript:" class="btn btn-secondary ml-1 d-none" data-toggle="modal" data-target="#skillModal" id="addSkill">
             <i class="fa fa-wrench"></i> Labour
         </a>
-        <a href="javascript:" class="btn btn-warning" id="addMisc"><i class="fa fa-plus"></i> Miscellaneous</a>
+        <a href="javascript:" class="btn btn-warning" id="addMisc"><i class="fa fa-plus"></i> Expense & Misc</a>
         <a href="javascript:" class="btn btn-purple ml-1" data-toggle="modal" data-target="#extrasModal" id="addExtras">
-            <i class="fa fa-note"></i> Add Extras
+            <i class="fa fa-plus"></i> Header & Footer
         </a>
     </div>
     <div class="col-3">

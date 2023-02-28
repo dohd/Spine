@@ -10,6 +10,7 @@ use App\Models\items\InvoiceItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class InvoiceRepository.
@@ -90,6 +91,9 @@ class StandardInvoiceRepository extends BaseRepository
         $result = Invoice::create($data);
         
         $data_items = modify_array($input['data_items']);
+        $data_items = array_filter($data_items, fn($v) => $v['product_qty']);
+        if (!$data_items) throw ValidationException::withMessages(['Cannot Invoice without product line items!']);
+
         foreach ($data_items as $k => $item) {
             foreach ($item as $j => $value) {
                 if (in_array($j, ['product_price', 'product_tax', 'product_amount'])) 
