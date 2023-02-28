@@ -40,6 +40,13 @@
         {{ Form::text('branch', null, ['class' => 'form-control round', 'placeholder' => trans('banks.branch')]) }}
     </div>
 </div>
+<div class='form-group'>
+    {{ Form::label('paybill', 'Paybill Details',['class' => 'col-lg-2 control-label']) }}
+    <div class='col-lg-10'>
+        {{ Form::text('paybill', null, ['class' => 'form-control round', 'placeholder' => 'Bank Paybill']) }}
+    </div>
+</div>
+
 
 <div class='form-group'>
     {{ Form::label( 'enable', trans('banks.enable'),['class' => 'col-lg-2 control-label']) }}

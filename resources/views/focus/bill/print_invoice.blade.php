@@ -233,8 +233,16 @@
 		<thead>
 			<tr>
 				<td width="6%">No.</td>
-				<td width="24%">REFERENCE</td>
-				<td width="24%">DESCRIPTION</td>
+				@php
+					$product = $resource->products->first();
+				@endphp
+				@if ($product && $product->reference)
+					<td width="24%">REFERENCE</td>
+					<td width="24%">DESCRIPTION</td>
+				@else
+					<td colspan="2">DESCRIPTION</td>
+				@endif
+				
 				<td width="8%">QTY</td>
 				<td width="8%">UoM</td>
 				<td width="14%">RATE</td>
@@ -251,9 +259,15 @@
 		<tbody>
 			@foreach($resource->products as $k => $val)
 				<tr>
-					<td>{{ $val->numbering ?: $k+1 }}</td>					
-					<td>{{ $val->reference }}</td>
-					<td>{{ $val->description }}</td>
+					<td>{{ $val->numbering ?: $k+1 }}</td>
+
+					@if ($product && $product->reference)
+						<td>{{ $val->reference }}</td>
+						<td>{{ $val->description }}</td>
+					@else
+						<td colspan="2">{{ $val->description }}</td>
+					@endif
+			
 					<td class="align-c">{{ $val->product_qty > 0? +$val->product_qty : '' }}</td>
 					<td class="align-c">{{ $val->unit }}</td>
 					<td class="align-r">{{ $val->product_price > 0? numberFormat($val->product_price) : '' }}</td>
@@ -263,9 +277,19 @@
 			<!-- 20 dynamic empty rows -->
 			@for ($i = count($resource->products); $i < 5; $i++)
 				<tr>
-					@for($j = 0; $j < 7; $j++) 
-						<td></td>
-					@endfor
+					@if ($product && !$product->reference)
+						@for($j = 0; $j < 6; $j++)
+							@if ($j == 1)
+								<td colspan="2"></td>
+							@else
+								<td></td>
+							@endif
+						@endfor
+					@else
+						@for($j = 0; $j < 7; $j++)
+							<td></td>
+						@endfor
+					@endif
 				</tr>
 			@endfor
 			<!--  -->
