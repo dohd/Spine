@@ -23,7 +23,7 @@
                     </div>
                     <div class="row mb-1">
                         <div class="col-6">
-                            <label for="email" class="caption">Email*</label>
+                            <label for="email" class="caption">Email</label>
                             {{ Form::text('email', null, ['class' => 'form-control']) }}
                         </div>
                         <div class="col-6">

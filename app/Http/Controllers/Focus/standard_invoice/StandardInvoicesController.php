@@ -178,7 +178,6 @@ class StandardInvoicesController extends Controller
         // dd(request()->all());
         $request->validate([
             'company' => 'required',
-            'email' => 'required',
         ]);
 
         $input = $request->only(['company', 'name', 'email', 'phone', 'address', 'tax_pin']);
