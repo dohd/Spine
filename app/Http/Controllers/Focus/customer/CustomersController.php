@@ -85,8 +85,6 @@ class CustomersController extends Controller
     {
         $request->validate([
             'company' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
         ]);
 
         // extract input fields
@@ -129,8 +127,6 @@ class CustomersController extends Controller
     {
         $request->validate([
             'company' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
         ]);
         // extract input fields
         $input = $request->except(['_token', 'ins', 'balance']);

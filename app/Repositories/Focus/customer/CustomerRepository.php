@@ -267,7 +267,7 @@ class CustomerRepository extends BaseRepository
             $taxid_exists = Customer::where('taxid', $input['taxid'])->count();
             if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
 
-            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->count();
             if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
         }
 
@@ -377,7 +377,7 @@ class CustomerRepository extends BaseRepository
             $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
             if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
 
-            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->count();
             if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
         }
 
