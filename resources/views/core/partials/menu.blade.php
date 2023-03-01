@@ -288,16 +288,7 @@
                             </ul>
                         </li>
                          @endauth 
-                        {{-- project --}}
-                        @permission('manage-project') 
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> {{ trans('labels.backend.projects.management') }}</a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
-                                </li>
-                            </ul>
-                        </li>
-                        @endauth 
+                        
                         {{-- verification --}}
                          @permission('manage-quote-verify') 
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Job Verification</a>
@@ -878,8 +869,20 @@
             {{-- maintenace project module --}}
             @if(access()->allow('maintenance-project'))
                 <li class="dropdown nav-item" data-menu="dropdown">
-                    <a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-briefcase"></i><span>Maintenance Project</span></a>
+                    <a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="fa fa-industry"></i><span>Project Management</span></a>
                     <ul class="dropdown-menu">
+                        {{-- project --}}
+                        @permission('manage-project') 
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Projects</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endauth 
+                        <hr>
+
                         @permission('manage-equipment-category')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Equipment Category</a>
                             <ul class="dropdown-menu">
@@ -895,7 +898,7 @@
                         </li>
                         @endauth
                         @permission('manage-equipment')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i> Equipment</a>
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-tag"></i>Maintenance Equipments</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.equipments.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Equipment
                                     </a>

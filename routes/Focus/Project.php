@@ -17,6 +17,9 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/log_history', 'ProjectsController@log_history')->name('projects.log_history');
   Route::post('projects/notes', 'ProjectsController@notes')->name('projects.notes');
   Route::post('projects/invoices', 'ProjectsController@invoices')->name('projects.invoices');
+  Route::post('projects/quotes_select', 'ProjectsController@quotes_select')->name('projects.quotes_select');
+  Route::post('projects/detach_quote', 'ProjectsController@detach_quote')->name('projects.detach_quote');
+  Route::post('projects/detach_budget', 'ProjectsController@detach_budget')->name('projects.detach_budget');
 
   // project budget
   Route::get('projects/budget/{quote}', 'ProjectsController@create_project_budget')->name('projects.create_project_budget');
@@ -24,6 +27,13 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/budget_store', 'ProjectsController@store_project_budget')->name('projects.store_project_budget');
   Route::post('projects/budget_update/{budget}', 'ProjectsController@update_project_budget')->name('projects.update_project_budget');
   Route::post('projects/budget_tool_update/{budget}', 'ProjectsController@update_budget_tool')->name('projects.update_budget_tool');
+});
+
+// project budget
+Route::group(['namespace' => 'budget'], function () {
+  Route::resource('budgets', 'BudgetsController');
+  // data table
+  Route::post('budgets/get', 'BudgetsTableController')->name('budgets.get');
 });
 
 // project task schedules

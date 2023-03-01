@@ -30,16 +30,15 @@
                 </select>
             </fieldset>
             <fieldset class="form-group col-md-4">
-
                 <select class="form-control  select-box" name="tags[]" id="tags"
                         data-placeholder="{{trans('tags.select')}}" multiple>
-
                     @foreach($tasks->tags as $tag)
                         <option value="{{$tag['id']}}" selected>{{$tag['name']}}</option>
                     @endforeach
+                    {{--                     
                     @foreach($mics->where('section','=',1) as $tag)
                         <option value="{{$tag['id']}}">{{$tag['name']}}</option>
-                    @endforeach
+                    @endforeach --}}
                 </select>
             </fieldset>
         </div>
@@ -107,19 +106,40 @@
         </div>
 
 
-        <fieldset class="form-group position-relative has-icon-left">
+        <div class="row">
+            <div class="col-6">
+                <fieldset class="form-group position-relative has-icon-left">
+                    <select class="form-control  select-box" name="employees[]" id="employee"
+                            data-placeholder="{{trans('tasks.assign')}}" multiple>
+                        {{-- @foreach($tasks->users as $employee)
+                            <option value="{{$employee['id']}}"
+                                    selected>{{$employee['first_name']}} {{$employee['last_name']}}</option>
+                        @endforeach --}}
+                        @foreach($employees as $employee)
+                            <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
+                        @endforeach
+                    </select>
+                </fieldset>
+            </div>
+            <div class="col-6">
+                <div class="col-6">
+                    <select class="custom-select" name="milestone_id" id="milestone"
+                            data-placeholder="{{trans('tasks.assign')}}">
+                            <option value="">-- select milestone --</option>
+                            
+                        @foreach($tasks->milestone()->get() as $milestone)
+                            <option value="{{ $milestone->id }}" {{ $milestone->id == $tasks->milestone_id? 'selected' : '' }}>
+                                {{ $milestone->name }} 
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
 
-            <select class="form-control  select-box" name="employees[]" id="employee"
-                    data-placeholder="{{trans('tasks.assign')}}" multiple>
-                @foreach($tasks->users as $employee)
-                    <option value="{{$employee['id']}}"
-                            selected>{{$employee['first_name']}} {{$employee['last_name']}}</option>
-                @endforeach
-                @foreach($employees as $employee)
-                    <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
-                @endforeach
-            </select>
-        </fieldset>
+        </div>
+       
+
+
         @if(isset($project->id))  <input name="projects[]" type="hidden"
                                          value="{{$project->id}}"> @elseif(isset($project_select[0]))
             <fieldset class="form-group position-relative has-icon-left">

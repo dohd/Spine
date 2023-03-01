@@ -90,7 +90,8 @@ class ProjectsTableController extends Controller
                 return dateFormat($project->end_date);
             })
             ->addColumn('status', function ($project) {
-                return ucfirst($project->status);
+                if ($project->misc)
+                return ucfirst($project->misc->name);
             })
             ->addColumn('actions', function ($project) {
                 return $project->action_buttons;

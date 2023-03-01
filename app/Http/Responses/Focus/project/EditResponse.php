@@ -32,13 +32,21 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $project = $this->project;
+        // $project = $this->project;
+
+        // $mics = Misc::all();
+        // $employees = Hrm::all();
+        // $accounts = Account::where('account_type', 'Income')->get();
+        // $branch = Branch::find($project->branch_id, ['id', 'name']);
+
+        // return view('focus.projects.edit', compact('mics', 'employees', 'project', 'accounts', 'branch'));
 
         $mics = Misc::all();
+        $statuses = Misc::where('section', 2)->get();
+        $tags = Misc::where('section', 1)->get();
         $employees = Hrm::all();
-        $accounts = Account::where('account_type', 'Income')->get();
-        $branch = Branch::find($project->branch_id, ['id', 'name']);
+        $project = $this->project;
 
-        return view('focus.projects.edit', compact('mics', 'employees', 'project', 'accounts', 'branch'));
+        return view('focus.projects.edit-main',compact('mics','employees','project', 'statuses', 'tags'));
     }
 }
