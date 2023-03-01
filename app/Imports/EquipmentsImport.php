@@ -75,7 +75,7 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
                 $tid++;
             }
         }
-
+        
         if (!$row_count) throw new Error('Please fill template with required data');
         $this->row_count = $row_count;
     }

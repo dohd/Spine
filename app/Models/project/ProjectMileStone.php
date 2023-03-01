@@ -8,25 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectMileStone extends Model
 {
-        use ModelTrait,
-    	MileStoneRelationship{}
+    use ModelTrait,
+        MileStoneRelationship {
+    }
     protected $table = 'project_milestones';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -54,5 +51,22 @@ class ProjectMileStone extends Model
         parent::__construct($attributes);
     }
 
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
 
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
+    }
 }

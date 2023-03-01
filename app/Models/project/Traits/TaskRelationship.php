@@ -7,6 +7,7 @@ use App\Models\event\EventRelation;
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\project\Project;
+use App\Models\project\ProjectMileStone;
 use App\Models\project\ProjectRelations;
 use App\Models\project\TaskRelations;
 
@@ -15,6 +16,10 @@ use App\Models\project\TaskRelations;
  */
 trait TaskRelationship
 {
+    public function milestone()
+    {
+        return $this->belongsTo(ProjectMileStone::class, 'milestone_id');
+    }
 
     public function tags()
     {

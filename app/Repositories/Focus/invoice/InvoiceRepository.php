@@ -42,6 +42,16 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
+        // project filter
+        $q->when(request('project_id'), function($q) {
+            $q->whereHas('quotes', function($q) {
+                $q->whereHas('project', function($q) {
+                    $q->where('projects.id', request('project_id'));
+                });
+            });
+        });
+
+
         // customer and status filter
         $q->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));

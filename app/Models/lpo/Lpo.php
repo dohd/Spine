@@ -23,7 +23,6 @@ class Lpo extends Model
         'id'
     ];
 
-    // relations
     public function quotes()
     {
         return $this->hasMany(Quote::class);

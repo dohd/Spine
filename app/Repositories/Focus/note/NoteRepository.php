@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\note;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\note\Note;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class NoteRepository.
@@ -29,13 +26,14 @@ class NoteRepository extends BaseRepository
     {
 
         $q = $this->query();
-        if (request('p')) {
-            $q->whereHas('project', function ($s) {
-                return $s->where('project_id', '=', request('p', 0));
+        printlog(request('project_id') . ' project_id');
+
+        if (request('project_id')) {
+            $q->whereHas('project', function ($q) {
+                return $q->where('project_id', request('project_id'));
             });
-        } else {
-            $q->where('section', '=',0);
-        }
+        } else $q->where('section', 0);
+
         return $q->get(['id','title','created_at']);
     }
 

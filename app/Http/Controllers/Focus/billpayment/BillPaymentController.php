@@ -44,7 +44,7 @@ class BillPaymentController extends Controller
             }
         }
         // delete purchases (frontfreeze, sahara)
-        $billpayments = Billpayment::whereIn('supplier_id', [7,8])->get();
+        $billpayments = Billpayment::whereIn('supplier_id', [8])->get();
         foreach ($billpayments as $key => $payment) {
             // $this->repository->delete($payment);
         }

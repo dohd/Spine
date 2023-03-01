@@ -298,7 +298,7 @@ class BillPaymentRepository extends BaseRepository
      */
     public function delete(Billpayment $billpayment)
     {     
-        // dd($billpayment->toArray());
+        // dd($billpayment->id);
         DB::beginTransaction();
        
         // decrement supplier on account balance

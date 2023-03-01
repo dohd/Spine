@@ -27,6 +27,11 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
+    public function misc()
+    {
+        return $this->belongsTo(Misc::class, 'status');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'ended_by');
@@ -49,7 +54,7 @@ trait ProjectRelationship
 
     public function quotes()
     {
-        return $this->hasManyThrough(Quote::class, ProjectQuote::class);
+        return $this->hasManyThrough(Quote::class, ProjectQuote::class, 'project_id', 'id', 'id', 'quote_id');
     }
 
     public function rjc()
@@ -124,6 +129,11 @@ trait ProjectRelationship
     public function events()
     {
         return $this->hasOneThrough(Event::class, EventRelation::class, 'r_id', 'id', 'id', 'event_id')->where('related', '=', 1)->withoutGlobalScopes();
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     public function customer_project()
