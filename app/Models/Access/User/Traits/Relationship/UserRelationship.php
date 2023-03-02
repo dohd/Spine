@@ -6,6 +6,8 @@ use App\Models\Access\User\SocialLogin;
 use App\Models\Company\Company;
 use App\Models\leave\Leave;
 use App\Models\System\Session;
+use App\Models\Access\Permission\PermissionUser;
+use App\Models\Access\Permission\Permission;
 
 /**
  * Class UserRelationship.
@@ -46,5 +48,13 @@ trait UserRelationship
     public function permissions()
     {
         return $this->belongsToMany(config('access.permission'), config('access.permission_user_table'), 'user_id', 'permission_id');
+    }
+
+    public function user_associated_permission()
+    {
+        //user current permission
+        //  return $this->hasManyThrough(Permission::class, PermissionUser::class, 'permission_id','id', 'id','user_id')->withoutGlobalScopes();
+
+        return $this->belongsToMany(Permission::class, PermissionUser::class, 'user_id', 'permission_id', 'id', 'id')->withoutGlobalScopes();
     }
 }

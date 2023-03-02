@@ -190,7 +190,7 @@ class InvoiceRepository extends BaseRepository
         $bill_items = array_map(function ($v) { 
             return [
                 'id' => $v['id'],
-                'reference' => $v['reference'], 
+                'reference' => isset($v['reference'])? $v['reference'] : '', 
                 'description' => $v['description']
             ];
         }, $bill_items);
