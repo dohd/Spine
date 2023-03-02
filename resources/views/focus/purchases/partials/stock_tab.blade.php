@@ -2,6 +2,7 @@
     <table class="table-responsive tfr my_stripe" id="stockTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
+                <th width="10%">#</th>
                 <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="10%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="10%" class="text-center">UoM</th>
@@ -15,6 +16,7 @@
         <tbody>
             <!-- layout -->
             <tr>
+                <td><input type="text" class="form-control increment" value="1" id="increment-0" disabled></td>
                 <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0' autocomplete="off"></td>
                 <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="1"></td>  
                 <td><select name="uom[]" id="uom-0" class="form-control uom"></select></td>  
@@ -62,6 +64,7 @@
                 @foreach ($purchase->products as $item)
                     @if ($item->type == 'Stock')
                         <tr>
+                            <td><input type="text" class="form-control increment" value="{{$i+1}}" id="increment-{{$i}}" disabled></td>
                             <td><input type="text" class="form-control stockname" name="name[]" value="{{ $item->description }}" placeholder="Product Name" id='stockname-{{$i}}'></td>
                             <td><input type="text" class="form-control qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="qty-{{$i}}"></td>    
                             <td>

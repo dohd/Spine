@@ -363,6 +363,7 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+            $('#increment-'+i).val(i+1);
             $('.projectstock').autocomplete(predict(projectUrl, projectStockSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectstocktext-'+i).val(projectText);
@@ -509,6 +510,7 @@
 
             $('#expTbl tbody tr:eq(-3)').before(html);
             $('.accountname').autocomplete(predict(expUrl, expSelect));
+            $('#expenseinc-'+i).val(i+1);
             $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectexptext-'+i).val(projectText);
@@ -622,6 +624,7 @@
 
             $('#assetTbl tbody tr:eq(-3)').before(html);
             $('.assetname').autocomplete(predict(assetUrl, assetSelect));
+            $('#assetinc-'+i).val(i+1);
             $('.projectasset').autocomplete(predict(projectUrl, projectAssetSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectassettext-'+i).val(projectText);

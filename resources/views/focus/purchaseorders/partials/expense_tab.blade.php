@@ -2,6 +2,7 @@
     <table class="table-responsive tfr my_stripe" id="expTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-danger white">
+                <th width="10%">#</th>
                 <th width="30%" class="text-center">Ledger Name</th>
                 <th width="7%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="7%" class="text-center">UoM</th>
@@ -15,6 +16,7 @@
         <tbody>
             <!-- layout -->
             <tr>
+                <td><input type="text" class="form-control" value="1" id="expenseinc-0" disabled></td>
                 <td><input type="text" class="form-control accountname" name="name[]" placeholder="Enter Ledger" id="accountname-0"></td>
                 <td><input type="text" class="form-control exp_qty" name="qty[]" id="expqty-0" value="1"></td>
                 <td><input type="text" class="form-control uom" name="uom[]" id="uom-0"></td>                    
@@ -54,6 +56,7 @@
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Expense')
                         <tr>
+                            <td><input type="text" class="form-control" value="{{$i+1}}" id="expenseinc-{{$i}}" disabled></td>
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" placeholder="Enter Ledger" id="accountname-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    

@@ -2,6 +2,7 @@
     <table class="table-responsive tfr my_stripe" id="assetTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-success white">
+                <th width="10%">#</th>
                 <th width="30%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="8%" class="text-center">UoM</th>
@@ -15,6 +16,7 @@
         <tbody>
             <!-- layout -->
             <tr>
+                <td><input type="text" class="form-control" value="1" id="assetinc-0" disabled></td>
                 <td><input type="text" class="form-control assetname" name="name[]" id="assetname-0" placeholder="Asset Or Equipment" autocomplete="off"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
                 <td><input type="text" class="form-control asset_uom" name="uom[]" id="assetuom-0"></td>
@@ -55,6 +57,7 @@
                 @foreach ($purchase->products as $item)
                     @if ($item->type == 'Asset')
                         <tr>
+                            <td><input type="text" class="form-control" value="{{$i+1}}" id="assetinc-{{$i}}" disabled></td>
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" id="assetname-{{$i}}" placeholder="Asset Or Equipment"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_uom" name="uom[]" value="{{ $item->uom }}" id="assetuom-{{$i}}"></td>
