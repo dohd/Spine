@@ -82,13 +82,13 @@
                 </div>
             </div>
             <div class="form-group row">
-                <div class="col-6"><label for="reminder_date" class="caption">Event Reminder Date</label>
+                <div class="col-6"><label for="reminder_date" class="caption">Reminder Start Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                         <input type="datetime-local" name="reminder_date" id="reminder_date" class="form-control" disabled/>
                     </div>
                 </div>
-                <div class="col-6"><label for="client_ref" class="caption">Event Exact Date</label>
+                <div class="col-6"><label for="client_ref" class="caption">Event Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                         <input type="datetime-local" name="exact_date" id="exact_date" class="form-control" disabled/>
