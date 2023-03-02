@@ -63,6 +63,7 @@ Route::group(['namespace' => 'role'], function () {
 });
 Route::group(['namespace' => 'salary'], function () {
     Route::post('salary/renew_contract', 'SalaryController@renew_contract')->name('salary.renew_contract');
+    Route::post('salary/terminate_contract', 'SalaryController@terminate_contract')->name('salary.terminate_contract');
     Route::post('salary/select', 'SalaryController@select')->name('salary.select');
     Route::resource('salary', 'SalaryController');
     //For Datatable

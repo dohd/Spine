@@ -12,15 +12,18 @@
                     <div class="form-group">
                         <label for="status">Reminder Date</label>
                         <div class='col'>
-                            {{ Form::text('reminder_date', null, ['class' => 'form-control box-size datepicker', 'id'=>'reminder_date']) }}
+                            {{-- {{ Form::text('reminder_date', null, ['class' => 'form-control box-size datepicker', 'id'=>'reminder_date']) }} --}}
+                            <input type="datetime-local" name="reminder_date" id="datetime" class="form-control" />
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="reason">Exact Date</label>
                         <div class='col'>
-                            {{ Form::text('exact_date', null, ['class' => 'form-control box-size datepicker', 'id'=>'exact-date']) }}
+                            {{-- {{ Form::text('exact_date', null, ['class' => 'form-control box-size datepicker', 'id'=>'exact-date']) }} --}}
+                            <input type="datetime-local" name="exact_date" id="exact_date" class="form-control" />
                         </div>
                     </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -31,6 +34,7 @@
     </div>
 </div>
 @section('extra-scripts')
+
 <script>
     $('.datepicker').datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
     $('#exact-date').datepicker('setDate', new Date());

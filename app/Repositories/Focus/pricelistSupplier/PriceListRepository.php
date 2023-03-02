@@ -46,6 +46,7 @@ class PriceListRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
+        unset($input['description']);
         $input['rate'] = numberClean($input['rate']);
         $result = SupplierProduct::create($input);
         if ($result) return $result;

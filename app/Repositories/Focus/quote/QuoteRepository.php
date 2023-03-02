@@ -123,7 +123,7 @@ class QuoteRepository extends BaseRepository
         
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'total', 'bank_id', 'verified',
-            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total'
+            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total','project_closure_date'
         ]);
     }
 
@@ -317,6 +317,7 @@ class QuoteRepository extends BaseRepository
             'verification_date' => date('Y-m-d'),
             'verified_by' => auth()->user()->id,
             'gen_remark' => $data['gen_remark'],
+            'project_closure_date' => date_for_database($data['project_closure_date']),
             'verified_amount' => numberClean($data['subtotal']),
             'verified_total' => numberClean($data['total']),
             'verified_tax' => numberClean($data['tax']), 

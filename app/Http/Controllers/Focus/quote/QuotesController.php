@@ -259,7 +259,7 @@ class QuotesController extends Controller
     public function storeverified(ManageQuoteRequest $request)
     {
         //filter request input fields
-        $data = $request->only(['id', 'verify_no', 'gen_remark', 'total', 'tax', 'subtotal']);
+        $data = $request->only(['id', 'verify_no', 'gen_remark','project_closure_date', 'total', 'tax', 'subtotal']);
         $data_items = $request->only([
             'remark', 'row_index', 'item_id', 'a_type', 'numbering', 'product_id', 
             'product_name', 'product_qty', 'product_price', 'product_subtotal', 'unit'
@@ -292,7 +292,8 @@ class QuotesController extends Controller
             'verified' => 'No', 
             'verification_date' => null,
             'verified_by' => null,
-            'gen_remark' => null
+            'gen_remark' => null,
+            'project_closure_date' => null
         ]);
 
         return response()->noContent();

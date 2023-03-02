@@ -33,7 +33,7 @@
         <label for="system_descr">System Description</label>
         <input type="text" class="form-control" @isset($supplier_product)
             {{$supplier_product->products->name}}
-        @endisset name="" value="{{$supplier_product->products->name}}" id="" readonly>
+        @endisset value="{{$supplier_product->products->name}}" id="" readonly>
     </div>
     <div class="col-2">
         <label for="code">Product Code</label>

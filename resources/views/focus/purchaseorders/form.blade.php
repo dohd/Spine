@@ -147,7 +147,7 @@
                 <div class="col-12">
                     <label for="payer" class="caption">Requisition Items</label>                                       
                     <select class="form-control" id="quoteselect" data-placeholder="Search Quote">
-                        <option value="">-----select-----</option>
+                        <option value="">-----Select Requisition Items-----</option>
                         <option value="all">All Items</option>
                     </select>
                     <input type="hidden" name="quote_id" value="0" id="quoteid">

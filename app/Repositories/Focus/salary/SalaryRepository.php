@@ -29,7 +29,7 @@ class salaryRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','contract_type','employee_id','employee_name','basic_pay','duration','start_date','created_at']);
+            ->get(['id','contract_type','employee_id','employee_name','basic_pay','status','duration','start_date','created_at']);
     }
 
     /**

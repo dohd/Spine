@@ -53,6 +53,7 @@
         $('#taxid').val(taxId);
         $('#supplierid').val(id);
         $('#supplier').val(name);
+        $('#quoteselect').val('').change();
         let priceCustomer = '';
             $('#pricegroup_id option').each(function () {
                 if (id == $(this).val())
@@ -105,7 +106,6 @@
     $('#quoteselect').change(function () { 
         const name = $('#quoteselect option:selected').val();
         const pricelist = $('#pricegroup_id').val();
-        console.log(pricelist);
         purchaseorderChange(name, pricelist);
     });
 
@@ -115,22 +115,24 @@
             $('#stockTbl tbody').html('');
             if (!value) return;
             config.fetchLpoGoods(value, pricelist).done(data => {
-                data.forEach((v,i) => $('#stockTbl tbody').append(this.productRow(v,i)));
+                data.forEach((v,i) => {
+                    $('#stockTbl tbody').append(this.productRow(v,i));
+                    $('.projectstock').autocomplete(predict(projectUrl, projectStockSelect));
+                });
                 if(data.length > 0){
                     $('#stockTbl tbody').append(this.addRow());
                 }
             });
     }
-
-    function productRow(v,i) {
+   function productRow(v,i) {
             return `
             <tr>
-                <td><input type="text" class="form-control stockname" value="${v.queuerequisition_supplier.descr}" name="name[]" placeholder="Product Name" id='stockname-0'></td>
-                <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="${v.qty_balance}"></td>  
-                <td><input type="text" name="uom[]" id="uom-0" value="${v.uom}" class="form-control uom" required></td> 
-                <td><input type="text" value="${v.queuerequisition_supplier.rate}" class="form-control  price" name="rate[]" id="price-0"></td>
+                <td><input type="text" class="form-control stockname" value="${v.queuerequisition_supplier.descr}" name="name[]" placeholder="Product Name" id='stockname-${i+1}'></td>
+                <td><input type="text" class="form-control qty" name="qty[]" id="qty-${i+1}" value="${v.qty_balance}"></td>  
+                <td><input type="text" name="uom[]" id="uom-${i+1}" value="${v.uom}" class="form-control uom" required></td> 
+                <td><input type="text" value="${v.queuerequisition_supplier.rate}" class="form-control  price" name="rate[]" id="price-${i+1}"></td>
                 <td>
-                    <select class="form-control rowtax" name="itemtax[]" id="rowtax-0">
+                    <select class="form-control rowtax" name="itemtax[]" id="rowtax-${i+1}">
                         @foreach ($additionals as $tax)
                             <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
                                 {{ $tax->name }}
@@ -139,20 +141,20 @@
                     </select>
                 </td>
                 <td><input type="text" class="form-control taxable" value="0"></td>
-                <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-0">0</span></b></td> 
+                <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-${i+1}">0</span></b></td> 
                 <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
                 <input type="hidden" id="stockitemid-0" value="${v.id}" name="item_id[]">
                 <input type="hidden" class="stocktaxr" name="taxrate[]">
                 <input type="hidden" class="stockamountr" name="amount[]">
-                <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
                 <input type="hidden" name="type[]" value="Requisit">
                 <input type="hidden" name="id[]" value="0">
+                <input type="hidden" value="${i+1}">
             </tr>
             <tr>
                 <td colspan="2">
                     <input type="text" id="stockdescr-0" value="${v.system_name}" class="form-control descr" name="description[]" placeholder="Product Description">
                 </td>
-                <td><input type="text" class="form-control product_code" value="${v.product_code}" name="product_code[]" id="product_code-0" readonly></td>
+                <td><input type="text" class="form-control product_code" value="${v.product_code}" name="product_code[]" id="product_code-${i+1}" readonly></td>
                 <td>
                     <select name="warehouse_id[]" class="form-control warehouse" id="warehouseid">
                         <option value="">-- Warehouse --</option>
@@ -162,8 +164,8 @@
                     </select>
                 </td>
                 <td colspan="3">
-                    <input type="text" class="form-control projectstock" value="${v.quote_no}" id="projectstocktext-0" placeholder="Search Project By Name">
-                    {{-- <input type="hidden" name="itemproject_id[]" id="projectstockval-0"> --}}
+                    <input type="text" class="form-control projectstock" value="${v.quote_no}" id="projectstocktext-${i+1}" placeholder="Search Project By Name">
+                    <input type="hidden" name="itemproject_id[]" id="projectstockval-${i+1}" >
                 </td>
                 <td colspan="6"></td>
             </tr>
@@ -197,6 +199,7 @@
             </tr>
         `;
     }
+
 
     // load projects dropdown
     const projectUrl = "{{ route('biller.projects.project_search') }}";

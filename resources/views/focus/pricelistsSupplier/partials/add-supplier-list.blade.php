@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-6 mt-2">
                     <label for="description">System/Inventory Description</label>
-                    {{ Form::text('descr', null, ['class' => 'form-control', 'readonly', 'id'=>'description']) }}
+                    {{ Form::text('description', null, ['class' => 'form-control', 'readonly', 'id'=>'description']) }}
                 </div>
                 
             </div>

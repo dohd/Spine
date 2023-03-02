@@ -38,6 +38,10 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-2">
+                                <div class="mb-2">Total Cost</div>                           
+                                <div class="good-worth">0.00</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -58,6 +62,7 @@
                                         <th>Purchase Type</th>
                                         <th>Dnote</th>
                                         <th>Date</th>
+                                        <th>Total</th>
                                         <th>Note</th>                                        
                                         <th>Action</th>
                                     </tr>
@@ -120,7 +125,15 @@
                     data: {
                         invoice_status: $('#inv_status').val(),
                         supplier_id: $('#supplier').val(),
-                    }
+                    },
+                    dataSrc: ({data}) => {
+                        $('.good-worth').text('0.00');
+                        if (data.length && data[0].aggregate) {
+                            const aggr = data[0].aggregate;
+                            $('.good-worth').text(aggr.good_worth);
+                        }
+                        return data;
+                    },
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
@@ -129,6 +142,7 @@
                     {data: 'purchase_type', name: 'purchase_type'},
                     {data: 'dnote', name: 'dnote'},
                     {data: 'date', name: 'date'},
+                    {data: 'total', name: 'total'},
                     {data: 'note', name: 'note'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

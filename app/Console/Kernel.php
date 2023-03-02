@@ -28,10 +28,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('message:notify')
-                 ->everyMinute();
-        // $schedule->call(function (){
-        //     Log::info("call every min");
-        // })->everyMinute();
+                 ->daily();
     }
 
     /**

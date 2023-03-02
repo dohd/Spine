@@ -170,5 +170,17 @@ class SalaryController extends Controller
         $renew_contract->update();
         return new RedirectResponse(route('biller.salary.index'), ['flash_success' => 'Contract Renewed Successfully!!']);
     }
-
+    public function terminate_contract(Request $request)
+    {
+        //dd($request->all());
+        $terminate_contract = Salary::find($request->id);
+        $terminate_date = date_for_database($request->terminate_date);
+        if($terminate_contract->status == 'ongoing'){
+            $terminate_contract->status = $request->status;
+            $terminate_contract->update();
+            return new RedirectResponse(route('biller.salary.index'), ['flash_success' => 'Contract Terminated Successfully!!']);
+        }
+        
+        return new RedirectResponse(route('biller.salary.index'), ['flash_error' => 'Contract Cannot be Terminated!!']);
+    }
 }

@@ -77,12 +77,15 @@ class QuoteVerifyTableController extends Controller
             ->addColumn('lpo_number', function($quote) {
                 if ($quote->lpo) return 'lpo - ' . $quote->lpo->lpo_no;
             })
+            ->addColumn('approved_date', function($quote) {
+                return $quote->approved_date? dateFormat($quote->approved_date) : '';
+            })
             ->addColumn('project_tid', function($quote) use($prefixes) {
                 if ($quote->project) 
                 return gen4tid("{$prefixes[2]}-", $quote->project->tid);
             })
-            ->addColumn('date', function($quote) {
-                return dateFormat($quote->date);
+            ->addColumn('project_closure_date', function($quote) {
+                return $quote->project_closure_date? dateFormat($quote->project_closure_date) : '';
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);

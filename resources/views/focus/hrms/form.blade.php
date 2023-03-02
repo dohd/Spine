@@ -270,6 +270,16 @@
                         {{ Form::text('position', null, ['class' => 'form-control box-size', 'placeholder' => 'Position']) }}
                     </div>
                 </div>
+                <div class="col-4">
+                    <label for="purchaseorder" class="caption">Position</label>
+                    <select name="purchaseorder_id" id="purchaseorder" class="custom-select">
+                        @isset($goodsreceivenote)
+                            <option value="{{ $goodsreceivenote->purchaserder_id }}">
+                                {{ $goodsreceivenote->purchaseorder? $goodsreceivenote->purchaseorder->note : '' }}
+                            </option>
+                        @endisset
+                    </select>
+                </div> 
 
                 <div class='form-group'>
                     {{ Form::label( 'employement_date', 'Date Of Employement',['class' => 'col-lg-2 control-label']) }}

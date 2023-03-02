@@ -49,6 +49,11 @@ class GoodsReceiveNoteTableController extends Controller
     {
         $core = $this->repository->getForDataTable();
 
+        $good_worth = 0;
+        $good_worth = $core->sum('total');
+        $good_worth = amountFormat($good_worth);
+        $aggregate = compact('good_worth');
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
@@ -73,8 +78,14 @@ class GoodsReceiveNoteTableController extends Controller
             ->addColumn('date', function ($grn) {
                 return dateFormat($grn->date);
             })
+            ->addColumn('total', function ($grn) {
+                return amountFormat($grn->total);
+            })
             ->addColumn('actions', function ($grn) {
                 return $grn->action_buttons;
+            })
+            ->addColumn('aggregate', function () use($aggregate) {
+                return $aggregate;
             })
             ->make(true);
     }

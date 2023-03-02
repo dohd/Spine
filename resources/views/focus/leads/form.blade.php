@@ -72,6 +72,29 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group row">
+                <div class='col-md-12'>
+                    <div class='col m-1'>
+                                                
+                        <input type="checkbox" id="add-reminder" value="checked">
+                        <label for="client-type">Add Reminder</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-6"><label for="reminder_date" class="caption">Event Reminder Date</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                        <input type="datetime-local" name="reminder_date" id="reminder_date" class="form-control" disabled/>
+                    </div>
+                </div>
+                <div class="col-6"><label for="client_ref" class="caption">Event Exact Date</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+                        <input type="datetime-local" name="exact_date" id="exact_date" class="form-control" disabled/>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -136,6 +159,7 @@
                         {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference No.', 'id' => 'client_ref', 'maxlength' => 30]) }}
                     </div>
                 </div>
+               
             </div>
             <div class="form-group row">
                 <div class="col-12"><label for="refer_no" class="caption">Note</label>

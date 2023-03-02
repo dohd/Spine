@@ -43,7 +43,7 @@ class PurchaseRepository extends BaseRepository
         $q->when(request('supplier_id'), function($q) {
             $q->where('supplier_id', request('supplier_id'));
         });
-
+        $q->whereNotBetween('tid', [3558, 7216]);
         return $q->get();
     }
 
@@ -267,7 +267,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function update($purchase, array $input)
     {
-        // dd($input);
+         dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];

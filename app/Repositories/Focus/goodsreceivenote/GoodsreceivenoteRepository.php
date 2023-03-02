@@ -319,7 +319,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             'reference_type' => 'invoice',
             'document_type' => 'goods_receive_note',
             'ref_id' => $grn->id,
-            'date' => $grn->date,
+            'date' => $grn->invoice_date,
             'due_date' => $grn->date,
             'subtotal' => $grn->subtotal,
             'tax_rate' => $grn->tax_rate,

@@ -21,15 +21,17 @@
             <table class="table tfr my_stripe_single text-center mt-5" id="requisitionTbl">
                 <thead>
                     <tr class="bg-gradient-directional-blue white">
-                        <th>#</th>
-                        <th>Product</th>
-                        <th>UoM</th>
-                        <th>Qty Approved</th>
-                        <th>Qty Issued</th>
-                        <th>Warehouse</th>
-                        <th width="10%">Qty</th>
-                        <th width="10%">Qty Balance</th>
-                        <th>Actions</th>
+                      <th>#</th>
+                      <th>Product</th>
+                      <th>UoM</th>
+                      <th>Product Code</th>
+                      <th>Qty Approved</th>
+                      <th>Qty Issued</th>
+                      <th>Requisition Approved</th>
+                      <th>Warehouse</th>
+                      <th width="10%">Issue Qty</th>
+                      <th width="10%">Requisition Qty</th>
+                      <th>Requisition Check</th>
                     </tr>
                 </thead>
                 <tbody></tbody>

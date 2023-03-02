@@ -1,13 +1,13 @@
 <div class="form-group row">
     <div class="col-6">
-        <label for="quote">{{ $quote->bank_id? '#Proforma Invoice' : '#Quote' }}</label>
+        <label for="quote">{{ @$quote->bank_id? '#Proforma Invoice' : '#Quote' }}</label>
         @php
-            $quote_tid = gen4tid($quote->bank_id? 'PI-' : 'Qt-', $quote->tid);
+            $quote_tid = gen4tid(@$quote->bank_id? 'PI-' : 'Qt-', @$quote->tid);
         @endphp
-        {{ Form::text('quote', $quote_tid . ' - '. $quote->notes, ['class' => 'form-control', 'id' => 'reference', 'disabled']) }}
-        {{ Form::hidden('quote_id', $quote->id) }}
-        <input type="hidden" name="client_branch" value="{{$quote->notes}}" id="client_branch">
-        <input type="hidden" data-proj="{{$quote->id}}" value="{{$project->name}}" id="proj">
+        {{ Form::text('quote', @$quote_tid . ' - '. @$quote->notes, ['class' => 'form-control', 'id' => 'reference', 'disabled']) }}
+        {{ Form::hidden('quote_id', @$quote->id) }}
+        <input type="hidden" name="client_branch" value="{{@$quote->notes}}" id="client_branch">
+        <input type="hidden" data-proj="{{@$quote->id}}" value="{{@$project->name}}" id="proj">
     </div>
     <div class="col-2">
         <label for="tid">Issuance No.</label>
@@ -172,7 +172,6 @@
                     dangerMode: true,
                     showCancelButton: true,
                 },()=>{
-                    //data-toggle="modal" data-target="#exampleModal"
                     $('#exampleModal').modal('show');
                     $('#requisitionTbl tbody').html(" ");
                     var getselected = $('#productsTbl tbody input:checked').parents('tr');

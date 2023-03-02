@@ -103,11 +103,18 @@
                 </div>              
             </div>   
             <div class="form-group row">
-                <div class="col-12">
+                <div class="col-6">
                     <label for="gen_remark" class="caption">General Remark</label>
                     {{ Form::text('gen_remark', null, ['class' => 'form-control', 'id' => 'gen_remark']) }}
                 </div>
+                <div class="col-6">
+                    <label for="project_closure_date" class="caption">Project Closure Date</label>
+                    {{ Form::text('project_closure_date', null, ['class' => 'form-control datepicker', 'id' => 'project_closure_date']) }}
+                </div>
             </div>   
+            <div class="form-group row">
+                
+            </div>
         </div>
     </div>                        
 </div>                  

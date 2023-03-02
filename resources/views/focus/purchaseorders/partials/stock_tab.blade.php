@@ -2,6 +2,7 @@
     <table class="table-responsive tfr my_stripe" id="stockTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
+                <th width="10%">#</th>
                 <th width="35%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="7%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="7%" class="text-center">UoM</th>
@@ -15,6 +16,7 @@
         <tbody>
             <!-- layout -->
             <tr>
+                <td><input type="text" class="form-control increment" value="0" id="increment-0" disabled></td>
                 <td><input type="text" class="form-control stockname" name="name[]" placeholder="Product Name" id='stockname-0'></td>
                 <td><input type="text" class="form-control qty" name="qty[]" id="qty-0" value="1"></td>  
                 <td><select name="uom[]" id="uom-0" class="form-control uom" required></select></td> 
@@ -34,7 +36,7 @@
                 <input type="hidden" id="stockitemid-0" name="item_id[]">
                 <input type="hidden" class="stocktaxr" name="taxrate[]">
                 <input type="hidden" class="stockamountr" name="amount[]">
-                <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
+                {{-- <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0"> --}}
                 <input type="hidden" name="type[]" value="Stock">
                 <input type="hidden" name="id[]" value="0">
             </tr>
@@ -58,7 +60,7 @@
                         </select>
                     </div> --}}
                     <input type="text" class="form-control projectstock" id="projectstocktext-0" placeholder="Search Project By Name">
-                    {{-- <input type="hidden" name="itemproject_id[]" id="projectstockval-0"> --}}
+                    <input type="hidden" name="itemproject_id[]" id="projectstockval-0">
                 </td>
                 <td colspan="6"></td>
             </tr>

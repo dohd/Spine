@@ -56,7 +56,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Date</th>
+                                        <th>Verification Date</th>
                                         <th># Quote / PI</th>
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th>Title</th>                                            
@@ -64,6 +64,7 @@
                                         <th>Verified</th>
                                         <th>Project No</th>
                                         <th>LPO No</th>
+                                        <th>Approval Date</th>
                                         <th>Client Ref</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -144,8 +145,8 @@
                         name: 'id'
                     },
                     {
-                        data: 'date',
-                        name: 'date'
+                        data: 'project_closure_date',
+                        name: 'project_closure_date'
                     },
                     {
                         data: 'tid',
@@ -175,7 +176,10 @@
                         data: 'lpo_number',
                         name: 'lpo_number'
                     },
-                    
+                    {
+                        data: 'approved_date',
+                        name: 'approved_date'
+                    },
                     {
                         data: 'client_ref',
                         name: 'client_ref'
@@ -189,6 +193,7 @@
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: [4, 5] },
+                    { type: "custom-date-sort", targets:[2, 9] }
                 ],
                 order: [[0, "desc"]],
                 searchDelay: 500,

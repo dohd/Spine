@@ -48,6 +48,10 @@
         {{ Form::text('invoice_no', null, ['class' => 'form-control', 'id' => 'invoice_no', 'disabled']) }}
     </div>  
     <div class="col-2">
+        <label for="invoice" class="caption">Invoice Date</label>
+        {{ Form::text('invoice_date', null, ['class' => 'form-control datepicker', 'id' => 'invoice_date', 'disabled']) }}
+    </div>
+    <div class="col-2">
         <label for="tax" class="caption">TAX %</label>
         <select name="tax_rate" id="tax_rate" class="custom-select">
             @foreach ([0, 16, 8] as $val)

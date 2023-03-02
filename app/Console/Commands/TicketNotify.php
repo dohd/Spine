@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Notifications\TicketNotification;
 use Carbon\Carbon;
 use App\Models\hrm\Hrm;
+use App\Models\Access\User\User;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Console\Command;
 
@@ -44,31 +45,20 @@ class TicketNotify extends Command
      */
     public function handle()
     {
-        //Log::info(Auth::id());
-        $leads = DB::table('leads')->get();
-        foreach($leads as $lead) {
-           // $diffInDays = $lead->reminder_date->diff(Carbon::now())->days;
-           $ticketDate = Carbon::parse($lead->reminder_date);
-           $todayDate = Carbon::parse(Carbon::now()->toDateString());
-            if ($ticketDate->eq($todayDate)) {
-                Log::info('They are equal');
-                $ticket_user = DB::table('users')->where('id', $lead->user_id)->get();
-                Log::info($ticket_user);
-                // foreach ($ticket_user as $ticket_users) {
-                //     var_dump($ticket_user);
-                //     Log::info($ticket_users);
-                //     $ticket_users->notify(new TicketNotification($lead->reference));
-                //     // Log::info($ticket_users);
-                //     //  Notification::send($ticket_users, new TicketNotification($lead->reference));
-                // }
-                Log::info($lead->reference);
-               // Notification::send($ticket_user, new TicketNotification($lead->reference));
-               $ticket_user->each->notify(new TicketNotification($lead->reference));
+        
+        $leads = Lead::whereDate('reminder_date', '<=', Carbon::today())->whereDate('exact_date','>=', Carbon::today())->withoutGlobalScopes()->get();
+        if (is_object($leads)) {
+            $users = User::whereHas('user_associated_permission', function($query){
+                $query->where('name', 'create-lead');
+            })->withoutGlobalScopes()->get();
+            foreach ($leads as $lead) {
+    
+                foreach($users as $user){
+                    $user->notify(new TicketNotification($lead));
+                }
+               
             }
-           // Log::info('They are NOT equal');
-            
-
-            //$lead->notify("Your deadline is in $diffInDays day!");
         }
+       
     }
 }

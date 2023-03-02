@@ -38,7 +38,9 @@
                                         <tr>
                                             <th>#</th>
                                             <th>{{ trans('banks.name') }}</th>
+                                            <th>Branch</th>
                                             <th>{{ trans('banks.number') }}</th>
+                                            <th>Note</th>
                                             <th>{{ trans('banks.enable') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -84,7 +86,9 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
+                    {data: 'branch', name: 'branch'},
                     {data: 'number', name: 'number'},
+                    {data: 'note', name: 'note'},
                     {data: 'enable', name: 'enable'},
 
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}

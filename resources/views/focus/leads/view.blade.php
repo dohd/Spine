@@ -28,7 +28,16 @@
                 </a> 
                 <a href="#" class="btn btn-danger btn-sm mr-1" data-toggle="modal" data-target="#reminderModal">
                     <i class="fa fa-bell-o" aria-hidden="true"></i> Add Reminder
-                </a>               
+                </a>     
+                    
+                @if (!$days)
+                <span class="text-success float-right">Notification Not Set</span>
+                @elseif ($days > 10)
+                <span class="text-primary float-right"><b>{{$days}}</b>: Days Remaining</span>
+                @elseif($days < 10)
+                <span class="text-danger float-right"><b>{{$days}}</b>: Days Remaining</span>
+                
+                @endif    
             </div>
             
             <h5 class="card-title mt-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>

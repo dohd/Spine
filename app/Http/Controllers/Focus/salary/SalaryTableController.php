@@ -61,7 +61,7 @@ class SalaryTableController extends Controller
                 return $salary->employee_name;
              })
             ->addColumn('basic_pay', function ($salary) {
-                  return $salary->basic_pay;
+                  return amountFormat($salary->basic_pay);
             })
             ->addColumn('contract_type', function ($salary) {
                 return $salary->contract_type;
@@ -70,14 +70,7 @@ class SalaryTableController extends Controller
                 return $salary->duration;
             })
             ->addColumn('status', function ($salary) {
-                
-                if(Carbon::parse($salary->start_date)->addMonth($salary->duration) <= Carbon::now()){
-                    return 'Expired';
-                }
-                    
-                else{
-                    return 'Ongoing';
-                }
+                return $salary->status;
             })
             ->addColumn('actions', function ($salary) {
                 return $salary->action_buttons;

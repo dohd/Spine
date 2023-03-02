@@ -24,7 +24,6 @@
                     {{ Form::open(['route' => 'biller.projectstock.store', 'method' => 'POST']) }}
                         @include('focus.projectstock.form')
                     {{ Form::close() }}
-                    {{-- //data-toggle="modal" data-target="#exampleModal" --}}
                     <div class="col-2 float-start center">
                         <button type="button" class="btn btn-secondary btn-lg requisition"  id="requisition">Requisition</button>
                     </div>

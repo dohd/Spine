@@ -30,6 +30,7 @@
                     <div class="col-12">
                         <div class="card-header">
                             <button class="btn btn-primary" id="renew_contract" data-toggle="modal" data-target="#renew">Renew</button>
+                            <button class="btn btn-danger ml-5" id="terminate_contract" data-toggle="modal" data-target="#terminate">Terminate</button>
                         </div>
                         <div class="card">
 
@@ -50,7 +51,7 @@
                                             <p>Basic Pay</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$salary['basic_pay']}}</p>
+                                            <p>{{amountFormat($salary['basic_pay'])}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -66,7 +67,7 @@
                                             <p>House Allowance</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$salary['house_allowance']}}</p>
+                                            <p>{{amountFormat($salary['house_allowance'])}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -74,7 +75,7 @@
                                             <p>Transport Allowance</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$salary['transport_allowance']}}</p>
+                                            <p>{{amountFormat($salary['transport_allowance'])}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -82,7 +83,7 @@
                                             <p>Directors Fee</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$salary['directors_fee']}}</p>
+                                            <p>{{amountFormat($salary['directors_fee'])}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -112,6 +113,7 @@
                 </div>
             </div>
         </div>
+        @include('focus.salary.partials.terminate-contract')
     </div>
     @include('focus.salary.partials.add-renew')
 @endsection
@@ -120,7 +122,6 @@
     <script>
         $('#renew_contract').click(function (e) { 
             var name = $('#salary_employee').val();
-            console.log(name);
             $('#employee').val(name);
         });
     </script>
