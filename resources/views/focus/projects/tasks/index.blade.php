@@ -5,6 +5,7 @@
 @section('page-header')
     <h1>{{ trans('labels.backend.tasks.management') }}</h1>
 @endsection
+
 @section('content')
     <div class="">
         <div class="sidebar-left">
@@ -12,14 +13,14 @@
                 <div class="sidebar-content sidebar-todo">
                     <div class="card">
                         <div class="card-body">
-                            @permission('task-create')
-                            <div class="form-group form-group-compose text-center">
-                                <button type="button" class="btn btn-info btn-block" id="addt" data-toggle="modal"
-                                        data-target="#AddTaskModal">
-                                    {{trans('tasks.new_task')}}
-                                </button>
-                            </div>
+                            @permission('create-task')
+                                <div class="form-group form-group-compose text-center">
+                                    <button type="button" class="btn btn-info btn-block" id="addt" data-toggle="modal" data-target="#AddTaskModal">
+                                        {{trans('tasks.new_task')}}
+                                    </button>
+                                </div>
                             @endauth
+
                             <div class="sidebar-todo-container">
                                 <h6 class="text-muted text-bold-500 my-1"></h6>
                                 <div class="list-group list-group-messages">
@@ -40,20 +41,18 @@
                                         <span>{{trans('general.messages')}}</span>
                                         <span class="badge badge-danger badge-pill float-right">{{Auth::user()->newThreadsCount()}}</span>
                                     </a>
-
                                 </div>
 
-                                @permission('misc-manage')
-                                <h6 class="text-muted text-bold-500 my-1">{{trans('general.tags')}}</h6>
-                                <div class="list-group list-group-messages">
-                                    @foreach($mics->where('section','=',1) as $row)
-
-                                        <a href="#" class="list-group-item list-group-item-action border-0">
-                                            <i class="ft-circle mr-1" style="color: {{$row['color']}}"></i>
-                                            <span> {{$row['name']}} </span>
-                                        </a>
-                                    @endforeach
-                                </div>
+                                @permission('manage-misc')
+                                    <h6 class="text-muted text-bold-500 my-1">{{trans('general.tags')}}</h6>
+                                    <div class="list-group list-group-messages">
+                                        @foreach($mics->where('section','=',1) as $row)
+                                            <a href="#" class="list-group-item list-group-item-action border-0">
+                                                <i class="ft-circle mr-1" style="color: {{$row['color']}}"></i>
+                                                <span> {{$row['name']}} </span>
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 @endauth
                             </div>
                         </div>
@@ -68,7 +67,7 @@
                 <div class="content-body">
                     <div class="content-overlay"></div>
                     <!-- Modal -->
-                    @include('focus.projects.modal.task_new')
+                    {{-- @include('focus.projects.modal.task_new') --}}
                     <div class="card todo-details rounded-0">
                         <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
                         <div class="search">
@@ -113,11 +112,13 @@
     <input type="hidden" id="loader_url" value="{{route('biller.tasks.load')}}">
     @include('focus.projects.modal.task_view')
 @endsection
+
 @section('after-styles')
     {{ Html::style('core/app-assets/css-'.visual().'/pages/app-todo.css') }}
     {{ Html::style('core/app-assets/css-'.visual().'/plugins/forms/checkboxes-radios.css') }}
     {!! Html::style('focus/css/bootstrap-colorpicker.min.css') !!}
 @endsection
+
 @section('after-scripts')
     {{ Html::script(mix('js/dataTable.js')) }}
     {{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}

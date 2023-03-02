@@ -587,7 +587,7 @@
     @include('focus.projects.modal.delete_2')
 
     {{-- @if(access()->allow('task-create'))  --}}
-        @include('focus.projects.modal.task_new') 
+        {{-- @include('focus.projects.modal.task_new', ['project' => $project])  --}}
     {{-- @endif --}}
 @endsection
 
