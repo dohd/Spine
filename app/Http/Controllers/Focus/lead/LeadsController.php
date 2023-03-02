@@ -29,6 +29,8 @@ use App\Http\Requests\Focus\lead\ManageLeadRequest;
 use App\Models\branch\Branch;
 use App\Models\customer\Customer;
 use App\Models\lead\Lead;
+use Carbon\Carbon;
+
 
 /**
  * ProductcategoriesController
@@ -84,6 +86,7 @@ class LeadsController extends Controller
      */
     public function store(ManageLeadRequest $request)
     {
+        //dd($request->all());
         $request->validate([
             'reference' => 'required',
             'date_of_request' => 'required',
@@ -171,7 +174,14 @@ class LeadsController extends Controller
      */
     public function show(Lead $lead, Request $request)
     {
-        return new ViewResponse('focus.leads.view', compact('lead'));
+        $days = '';
+        if ($lead->exact_date) {
+            $exact = Carbon::parse($lead->exact_date);
+            $difference = $exact->diff(Carbon::now());
+            $days = $difference->days;
+            return new ViewResponse('focus.leads.view', compact('lead', 'days'));
+        }
+        return new ViewResponse('focus.leads.view', compact('lead', 'days'));
     }
 
     // fetch lead details with specific lead_id
@@ -203,6 +213,16 @@ class LeadsController extends Controller
         $status = $request->status;
         $reason = $request->reason;
         $lead->update(compact('status', 'reason'));
+
+        return redirect()->back();
+    }
+
+    public function update_reminder(Lead $lead, Request $request)
+    {
+        // dd($lead);
+        $reminder_date = $request->reminder_date;
+        $exact_date = $request->exact_date;
+        $lead->update(compact('reminder_date', 'exact_date'));
 
         return redirect()->back();
     }
