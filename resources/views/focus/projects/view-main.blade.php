@@ -586,9 +586,9 @@
     @include('focus.projects.modal.note_new')
     @include('focus.projects.modal.delete_2')
 
-    {{-- @if(access()->allow('task-create'))  --}}
-        {{-- @include('focus.projects.modal.task_new', ['project' => $project])  --}}
-    {{-- @endif --}}
+    @if(access()->allow('create-task')) 
+        @include('focus.projects.modal.task_new', ['project' => $project]) 
+    @endif
 @endsection
 
 @section('after-styles')

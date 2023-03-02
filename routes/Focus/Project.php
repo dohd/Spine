@@ -70,8 +70,9 @@ Route::group(['namespace' => 'contract'], function () {
 
 // project
 Route::group(['namespace' => 'project'], function () {
-  Route::resource('projects', 'ProjectsController');
+  
   Route::post('projects/search', 'ProjectsController@search')->name('projects.search');
+  Route::resource('projects', 'ProjectsController');
   // data table
   Route::post('projects/get', 'ProjectsTableController')->name('projects.get');
   Route::post('projects/project_load_select', 'ProjectsController@project_load_select')->name('projects.project_load_select');

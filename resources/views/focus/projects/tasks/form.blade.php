@@ -1,5 +1,4 @@
 <form id="data_form_task" class="todo-input">
-
     <div class="card-body">
         <div class="row">
             <fieldset class="form-group col-12">
@@ -102,14 +101,12 @@
                     @endif
                 </div>
             </div>
-
         </div>
 
-
-        <div class="row">
+        <div class="row fom-group">
             <div class="col-6">
                 <fieldset class="form-group position-relative has-icon-left">
-                    <select class="form-control  select-box" name="employees[]" id="employee"
+                    <select class="form-control select-box" name="employees[]" id="employee"
                             data-placeholder="{{trans('tasks.assign')}}" multiple>
                         {{-- @foreach($tasks->users as $employee)
                             <option value="{{$employee['id']}}"
@@ -122,23 +119,16 @@
                 </fieldset>
             </div>
             <div class="col-6">
-                <div class="col-6">
-                    <select class="custom-select" name="milestone_id" id="milestone"
-                            data-placeholder="{{trans('tasks.assign')}}">
-                            <option value="">-- select milestone --</option>
-                            
-                        @foreach($tasks->milestone()->get() as $milestone)
-                            <option value="{{ $milestone->id }}" {{ $milestone->id == $tasks->milestone_id? 'selected' : '' }}>
-                                {{ $milestone->name }} 
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                <select class="form-control select-box" name="milestone_id" id="milestone" data-placeholder="{{trans('tasks.assign')}}">
+                    <option value="">-- Choose Milestone --</option>
+                    @foreach($tasks->milestone()->get() as $milestone)
+                        <option value="{{ $milestone->id }}" {{ $milestone->id == $tasks->milestone_id? 'selected' : '' }}>
+                            {{ $milestone->name }} 
+                        </option>
+                    @endforeach
+                </select>
             </div>
-
         </div>
-       
-
 
         @if(isset($project->id))  <input name="projects[]" type="hidden"
                                          value="{{$project->id}}"> @elseif(isset($project_select[0]))
