@@ -69,21 +69,7 @@ class SuppliersTableController extends Controller
     public function invoke_transaction()
     {
         $core = $this->supplier->getTransactionsForDataTable();
-
-        // printlog($core->toArray());
-        
-        // filter out tr with same tr_ref i.e direct_purchase and bill
-        // $bill_tr = [];
-        // $res_tr = [];
-        // foreach ($core as $tr) {
-        //     if ($tr->tr_type == 'bill') $bill_tr[$tr->tr_ref] = $tr;
-        //     else $res_tr[] = $tr;
-        // }
-
-        // $core = collect(array_merge($bill_tr, $res_tr));
         $core = $core->sortBy('tr_date');
-
-        // printlog($core->toArray());
 
         return Datatables::of($core)
         ->escapeColumns(['id'])

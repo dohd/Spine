@@ -72,7 +72,7 @@
                                         <th>#Order No</th>
                                         <th>{{ trans('suppliers.supplier') }}</th>
                                         <th>Note</th>
-                                        <th>Items Ordered</th>
+                                        <th>Product Types</th>
                                         <th>{{ trans('general.amount') }}</th>
                                         <th>Date</th>
                                         <th>{{ trans('general.status') }}</th>

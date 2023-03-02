@@ -159,9 +159,7 @@ class UtilityBillController extends Controller
     public function goods_receive_note(Request $request)
     {
         $grn_items = GoodsreceivenoteItem::whereHas('goodsreceivenote', function ($q) {
-            $q->whereNull('invoice_no')->whereHas('purchaseorder', function ($q) {
-                $q->where('supplier_id', request('supplier_id'));
-            });
+            $q->whereNull('invoice_no')->whereHas('purchaseorder', fn ($q) =>$q->where('supplier_id', request('supplier_id')));
         })->with([
             'purchaseorder_item' => fn($q) => $q->select(['id', 'description', 'uom']),
             'goodsreceivenote' => fn($q) => $q->select(['id', 'dnote', 'date']),
@@ -173,14 +171,13 @@ class UtilityBillController extends Controller
             'qty' => $v->qty,
             'rate' => $v->rate,
             'tax' => $v->tax_rate,
-            'total' => $v->tax_rate == 0? ($v->qty * $v->rate) : (($v->qty * $v->rate) * (1 + $v->tax_rate)),
+            'total' => ($v->tax_rate == 0? ($v->qty * $v->rate) : ($v->qty * $v->rate) * (1 + $v->tax_rate)),
             'goodsreceivenote_id' => $v->goodsreceivenote->id,
         ])->toArray();
 
-        // decrement grn items qty by billed items qty        
-        $bill_items = UtilityBillItem::whereHas('bill', function ($q) {
-            $q->where('supplier_id', request('supplier_id'));
-        })->get()->toArray();
+        // decrement grn items qty by billed qty        
+        $bill_items = UtilityBillItem::whereHas('bill', fn($q) => $q->where('supplier_id', request('supplier_id')))
+            ->get()->toArray();
         foreach ($bill_items as $bill_item) {
             foreach ($grn_items as $i => $grn_item) {
                 if ($grn_item['id'] == $bill_item['ref_id']) {
@@ -188,9 +185,9 @@ class UtilityBillController extends Controller
                 }
             }
         } 
-        $grn_items = array_filter($grn_items, fn($v) => $v['qty'] > 0);
-
-        return response()->json([...$grn_items]);
+        $grn_items = array_values(array_filter($grn_items, fn($v) => $v['qty'] > 0));
+        
+        return response()->json($grn_items);
     }
 
     /**

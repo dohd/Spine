@@ -28,8 +28,8 @@ class Goodsreceivenote extends Model
      * @var array
      */
     protected $fillable = [
-        'tid', 'supplier_id', 'purchaseorder_id', 'tax_rate', 'subtotal', 'tax', 'total', 'date', 'note', 
-        'dnote', 'invoice_no', 'user_id', 'ins'
+        'tid', 'supplier_id', 'purchaseorder_id', 'tax_rate', 'subtotal', 'tax', 'total', 'date',
+        'invoice_date', 'note', 'dnote', 'invoice_no', 'user_id', 'ins'
     ];
 
     /**
