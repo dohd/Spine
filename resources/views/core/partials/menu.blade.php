@@ -208,7 +208,7 @@
                                 {{ trans('general.tasks')}}</a><a class="dropdown-item" href="{{route('biller.attendance')}}"><i class="ft-activity"></i>
                                 {{ trans('hrms.attendance')}}</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ route('biller.logout') }}"><i class="ft-power"></i> {{ trans('navs.general.logout') }}</a>
+                            <a class="dropdown-item" href="{{ route('biller.logout', 'auth=1') }}"><i class="ft-power"></i> {{ trans('navs.general.logout') }}</a>
                         </div>
                     </li>
                 </ul>
