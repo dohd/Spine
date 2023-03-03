@@ -62,9 +62,7 @@
                 <div class="content-header row">
                 </div>
                 <div class="content-body">
-                    <div class="content-overlay"></div>
-                    <!-- Modal -->
-                    @include('focus.projects.modal.task_new')
+                    <div class="content-overlay"></div>                    
                     <div class="card todo-details rounded-0">
                         <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
                         <div class="search"></div>
@@ -98,6 +96,8 @@
     <div class="sidenav-overlay"></div>
     <div class="drag-target"></div>
     <input type="hidden" id="loader_url" value="{{route('biller.tasks.load')}}">
+
+    @include('focus.projects.modal.task_new')
     @include('focus.projects.modal.task_view')
 @endsection
 
@@ -158,10 +158,6 @@
         function trigger(data) {
             $(data.row).prependTo("table > tbody");
             $("#data_form_task").trigger('reset');
-        }
-
-        // fetch milestones
-        $.post();
-        
+        }        
     </script>
 @endsection

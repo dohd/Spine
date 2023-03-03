@@ -81,4 +81,14 @@ class Hrm extends Model
             $this->attributes['password'] = bcrypt($password);
         }
     }
+
+    /**
+     * Concatenate first_name and last_name column
+     * 
+     * @return string
+     */
+    public function getFullnameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
 }
