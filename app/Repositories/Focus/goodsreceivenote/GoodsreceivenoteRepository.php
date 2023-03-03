@@ -64,7 +64,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         DB::beginTransaction();
         
         foreach ($input as $key => $val) {
-            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['date', 'invoice_date'])) $input[$key] = date_for_database($val);
             if (in_array($key, ['tax_rate', 'subtotal', 'tax', 'total'])) 
                 $input[$key] = numberClean($val);
             if (in_array($key, ['qty', 'rate'])) 
@@ -146,7 +146,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         DB::beginTransaction();
         // sanitize
         foreach ($input as $key => $val) {
-            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['date', 'invoice_date'])) $input[$key] = date_for_database($val);
             if (in_array($key, ['tax_rate', 'subtotal', 'tax', 'total'])) 
                 $input[$key] = numberClean($val);
             if (in_array($key, ['qty', 'rate'])) 
@@ -320,7 +320,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             'document_type' => 'goods_receive_note',
             'ref_id' => $grn->id,
             'date' => $grn->invoice_date,
-            'due_date' => $grn->date,
+            'due_date' => $grn->invoice_date,
             'subtotal' => $grn->subtotal,
             'tax_rate' => $grn->tax_rate,
             'tax' => $grn->tax,
@@ -349,7 +349,6 @@ class GoodsreceivenoteRepository extends BaseRepository
 
             // accounting
             Transaction::where(['tr_type' => 'bill', 'tr_ref' => $bill->id, 'note' => $bill->prev_note])->delete();
-            $this->invoiced_grn_transaction($bill);
         } else {
             // create bill
             $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
@@ -360,10 +359,9 @@ class GoodsreceivenoteRepository extends BaseRepository
                 return $v;
             }, $grn_items);
             UtilityBillItem::insert($bill_items_data);
-
-            // accounting
-            $this->invoiced_grn_transaction($bill);
         }        
+        // accounting
+        $this->invoiced_grn_transaction($bill);
     }
 
     /**

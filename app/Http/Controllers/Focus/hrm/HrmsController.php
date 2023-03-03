@@ -282,8 +282,6 @@ class HrmsController extends Controller
         $emp_role = $request->post('rid');
         $create = $request->post('create');
 
-        printlog($emp_role, $create);
-
         $permissions_all = \App\Models\Access\Permission\Permission::orWhereHas('roles', function ($q) use ($emp_role) {
             return $q->where('role_id', '=', $emp_role);
         })->get()->toArray();

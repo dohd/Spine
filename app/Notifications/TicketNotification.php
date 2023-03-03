@@ -12,14 +12,10 @@ class TicketNotification extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     *
-     * @return void
-     */
+    protected $user;
+    protected $message;
 
-     protected $user;
-     protected $message;
+    protected $lead;
 
     public function __construct(Lead $lead)
     {
@@ -47,9 +43,9 @@ class TicketNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('The introduction to the notification.')
+            ->action('Notification Action', url('/'))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -61,15 +57,15 @@ class TicketNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-           // 'reference' => $this->reference
+            // 'reference' => $this->reference
 
-           'data'=>[
+            'data' => [
                 'title' => 'The Lead ticket number ',
-                'data' => 'TKT-'.$this->lead->reference,
-                'background'=>  $this->lead->note,
+                'data' => 'TKT-' . $this->lead->reference,
+                'background' =>  $this->lead->note,
                 'icon' => $this->lead->exact_date,
             ],
-           
+
         ];
     }
 }

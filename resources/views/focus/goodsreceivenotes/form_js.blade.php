@@ -39,6 +39,8 @@
                     $('#invoice_no').attr('disabled', false);
                     $('#invoice_date').attr('disabled', false);
                     $('#invoice_status option:eq(0)').remove();
+                    $('#invoice_no').attr('disabled', false);
+                    $('#invoice_date').attr('disabled', false);
                 } else {
                     $('#invoice_status option:eq(1)').remove();
                 }

@@ -214,9 +214,12 @@ class ProductsController extends Controller
             $products = SupplierProduct::where('supplier_id', request('pricegroup_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
-                    //dd($v);
+                    $item = '';
+                    if ($v->row_num) {
+                        $item = $v->row_num;
+                    }
                     return $v->fill([
-                        'name' => "{$v->descr} ({$v->row_num})",
+                        'name' => "{$v->descr} - {$item}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => $v->rate,

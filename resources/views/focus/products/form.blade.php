@@ -102,14 +102,6 @@
             </div>
             <div class="col-md-4">
                 <div class='form-group'>
-                    {{ Form::label( 'selling_price', 'Recommended Selling Price',['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('selling_price[]', numberFormat(@$product->standard['selling_price']), ['class' => 'form-control box-size', 'placeholder' => 'Recommended Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class='form-group'>
                     {{ Form::label( 'purchase_price', trans('products.purchase_price'),['class' => 'col control-label']) }}
                     <div class='col'>
                         {{ Form::text('purchase_price[]', numberFormat(@$product->standard['purchase_price']), ['class' => 'form-control box-size', 'placeholder' => trans('products.purchase_price'),'onkeypress'=>"return isNumber(event)"]) }}
@@ -118,9 +110,18 @@
             </div>
             <div class="col-md-4">
                 <div class='form-group'>
-                    {{ Form::label( 'qty', trans('products.qty'),['class' => 'col control-label']) }}
+                    {{ Form::label( 'selling_price', 'Recommended Selling Price',['class' => 'col control-label']) }}
                     <div class='col'>
-                        <input type="text" class="form-control box-size" value="{{numberFormat(@$product->standard['qty'])}}" name="qty[]" @if(isset($product->standard['qty'])) readonly @endif id="" onkeypress="return isNumber(event)">
+                        {{ Form::text('selling_price[]', numberFormat(@$product->standard['selling_price']), ['class' => 'form-control box-size', 'placeholder' => 'Recommended Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
+                    </div>
+                </div>
+            </div>
+           
+            <div class="col-md-4">
+                <div class='form-group'>
+                    {{-- {{ Form::label( 'qty', trans('products.qty'),['class' => 'col control-label']) }} --}}
+                    <div class='col'>
+                        <input type="hidden" class="form-control box-size" value="{{numberFormat(@$product->standard['qty'] ? @$product->standard['qty'] : '0' ) }}" name="qty[]" @if(isset($product->standard['qty'])) readonly @endif id="" onkeypress="return isNumber(event)">
                         {{-- {{ Form::text('qty[]', numberFormat(@$product->standard['qty']), ['class' => 'form-control box-size','readonly', 'placeholder' => trans('products.qty'),'onkeypress'=>"return isNumber(event)"]) }} --}}
                     </div>
                 </div>

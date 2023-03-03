@@ -53,7 +53,7 @@ class InvoicePaymentsTableController extends Controller
     {
         $core = $this->repository->getForDataTable();
         $prefixes = prefixesArray(['invoice'], auth()->user()->ins);
-        printlog($core->toArray());
+        
         // aggregate
         $amount_total = $core->sum('amount');
         $unallocated_total = $amount_total - $core->sum('allocate_ttl');

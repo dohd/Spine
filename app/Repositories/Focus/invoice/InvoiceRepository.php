@@ -42,6 +42,16 @@ class InvoiceRepository extends BaseRepository
             ]);
         }
 
+        // project filter
+        $q->when(request('project_id'), function($q) {
+            $q->whereHas('quotes', function($q) {
+                $q->whereHas('project', function($q) {
+                    $q->where('projects.id', request('project_id'));
+                });
+            });
+        });
+
+
         // customer and status filter
         $q->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));
@@ -180,7 +190,7 @@ class InvoiceRepository extends BaseRepository
         $bill_items = array_map(function ($v) { 
             return [
                 'id' => $v['id'],
-                'reference' => $v['reference'], 
+                'reference' => isset($v['reference'])? $v['reference'] : '', 
                 'description' => $v['description']
             ];
         }, $bill_items);

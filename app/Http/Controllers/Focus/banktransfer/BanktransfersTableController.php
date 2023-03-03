@@ -67,7 +67,6 @@ class BanktransfersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('account', function ($banktransfer) {
-                printlog($banktransfer);
                 return $banktransfer->holder;
             })
             ->addColumn('debit', function ($banktransfer) {

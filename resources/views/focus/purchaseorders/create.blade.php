@@ -72,7 +72,6 @@
         $('#taxid').val(taxId);
         $('#supplierid').val(id);
         $('#supplier').val(name);
-        $('#quoteselect').val('').change();
         let priceCustomer = '';
             $('#pricegroup_id option').each(function () {
                 if (id == $(this).val())

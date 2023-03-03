@@ -108,6 +108,14 @@
                         <th>Created at</th>
                         <td>{{ dateFormat($lead->created_at) }}</td>
                     </tr>
+                    <tr>
+                        <th>Reminder Start Date</th>
+                        <td>{{ $lead->reminder_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Event Date</th>
+                        <td>{{ $lead->exact_date}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

@@ -11,6 +11,7 @@ use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
 use App\Models\project\BudgetSkillset;
+use App\Models\project\Project;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -97,9 +98,14 @@ class QuoteRepository extends BaseRepository
                     break;
             }
         }
-
         $q->when($status, fn($q) => $q->where('status', '!=', 'cancelled'));
 
+        // project quote filter
+        $q->when(request('project_id'), function($q) {
+            if (request('quote_ids')) $q->whereIn('id', explode(',', request('quote_ids')));
+            else $q->whereIn('id', [0]);
+        });
+        
         return $q->get([
             'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
             'verified', 'revision', 'client_ref', 'lpo_id', 'currency_id', 'approved_date'

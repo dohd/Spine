@@ -45,7 +45,6 @@ class SupplierPricelistImport implements ToCollection, WithBatchInserts, WithVal
         foreach ($rows as $i => $row) {
             $row = $row->toArray();
             $row = array_slice($row, 0, count($columns));
-            printlog($row);
             if ($i == 0) {
                 $omitted_cols = array_diff($columns, $row);
                 if ($omitted_cols) throw new Error('Column label mismatch: ' . implode(', ',$omitted_cols));

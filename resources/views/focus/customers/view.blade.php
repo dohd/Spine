@@ -158,7 +158,7 @@
                     type: 'post',
                     data: {customer_id: "{{ $customer->id }}" },
                 },
-                columns: [{ data: 'name', name: 'name'}],
+                columns: [{ data: 'company', name: 'company'}],
                 order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'frt',
