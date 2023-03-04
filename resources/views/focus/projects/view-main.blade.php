@@ -424,7 +424,7 @@
                                 <button type="button" class="btn btn-info float-right mr-2" id="addbudget" data-toggle="modal"
                                         data-target="#AddBudgetModal"><i class="fa fa-plus-circle"></i> Add
                                 </button>
-                                <table id="budgetsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <table id="budgetsTbl_" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>

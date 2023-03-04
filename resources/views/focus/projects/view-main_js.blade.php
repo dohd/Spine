@@ -285,42 +285,42 @@
         if ($('#budgetsTbl tbody tr').length) 
             $('#budgetsTbl').DataTable().destroy();
 
-        // $('#budgetsTbl_').dataTable({
-        //     processing: true,
-        //     responsive: true,
-        //     stateSave: true,
-        //     language: {@lang('datatable.strings')},
-        //     ajax: {
-        //         url: "{{ route('biller.budgets.get') }}",
-        //         type: 'POST',
-        //         data: {project_id: @json(@$project->id)},
-        //         dataSrc: ({data}) => {
-        //             data = data.map(v => {
-        //                 const url = "{{ route('biller.projects.detach_quote', ['project_id' => $project->id]) }}" + `&quote_id=${v.id}`;
-        //                 v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
-        //                 return v;
-        //             });
-        //             return data;
-        //         }
-        //     },
-        //     columns: [{
-        //             data: 'DT_Row_Index',
-        //             name: 'id'
-        //         },
-        //         ...[
-        //             'tid', 'customer', 'note', 'quote_total', 'budget_total',
-        //         ].map(v => ({data: v, name: v})),
-        //         {data: 'actions', name: 'actions', searchable: false, sortable: false}
-        //     ],
-        //     columnDefs: [
-        //         { type: "custom-number-sort", targets: 5 },
-        //         { type: "custom-date-sort", targets: 1 }
-        //     ],
-        //     order:[[0, 'desc']],
-        //     searchDelay: 500,
-        //     dom: 'Blfrtip',
-        //     buttons: ['csv', 'excel', 'print'],
-        // });
+        $('#budgetsTbl').dataTable({
+            processing: true,
+            responsive: true,
+            stateSave: true,
+            language: {@lang('datatable.strings')},
+            ajax: {
+                url: "{{ route('biller.budgets.get') }}",
+                type: 'POST',
+                data: {project_id: @json(@$project->id)},
+                dataSrc: ({data}) => {
+                    data = data.map(v => {
+                        const url = "{{ route('biller.projects.detach_quote', ['project_id' => $project->id]) }}" + `&quote_id=${v.id}`;
+                        v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
+                        return v;
+                    });
+                    return data;
+                }
+            },
+            columns: [{
+                    data: 'DT_Row_Index',
+                    name: 'id'
+                },
+                ...[
+                    'tid', 'customer', 'note', 'quote_total', 'budget_total',
+                ].map(v => ({data: v, name: v})),
+                {data: 'actions', name: 'actions', searchable: false, sortable: false}
+            ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: 5 },
+                { type: "custom-date-sort", targets: 1 }
+            ],
+            order:[[0, 'desc']],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons: ['csv', 'excel', 'print'],
+        });
     }    
 
     /**Fetch Invoices */
