@@ -179,7 +179,7 @@ class TasksController extends Controller
 
         foreach (status_list() as $row) {
             if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
-            $task->status_list .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
+            else $task->status_list .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
         }
 
         return response()->json($task->only('id', 'name', 'status', 'start', 'duedate', 'description', 'short_desc', 'priority', 'creator', 'assigned', 'status', 'status_list'));

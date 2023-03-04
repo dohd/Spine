@@ -26,7 +26,6 @@ $(document).on('click', '.view_task', function() {
     const url = "{{ route('biller.tasks.load') }}";
     const task_id = $(this).attr('data-id');
     $.post(url, {task_id}, data => {
-        console.log(data)
         $('#t_name').html(data.name);
         $('#t_start').html(data.start)
         $('#t_end').html(data.duedate);
