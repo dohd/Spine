@@ -445,7 +445,7 @@
                         <div class="tab-pane" id="tab_data11" aria-labelledby="tab11" role="tabpanel">
                             <div class="card-body">
                                 <h4>Labour</h4>
-                                <table id="budgetsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <table id="labourTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -462,7 +462,7 @@
                                     <tbody></tbody>
                                 </table>
                                 <h4>Issued Stock</h4>
-                                <table id="budgetsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <table id="stockTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -479,7 +479,7 @@
                                     <tbody></tbody>
                                 </table>
                                 <h4>Purchased Stock</h4>
-                                <table id="budgetsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <table id="purchaseTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
