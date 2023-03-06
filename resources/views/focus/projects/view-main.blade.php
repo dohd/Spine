@@ -431,8 +431,8 @@
                                             <th>Tr No.</th>
                                             <th>Customer - Branch</th>
                                             <th>Title</th>
-                                            <th>Quoted Amount</th>
-                                            <th>Budget Amount</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>

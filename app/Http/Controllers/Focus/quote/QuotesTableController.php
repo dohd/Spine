@@ -90,6 +90,19 @@ class QuotesTableController extends Controller
                 }
                 return $link;
             })
+            ->addColumn('quote_budget', function ($quote) {
+                //dd($quote);
+                $links = '';
+                $tid = gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid);
+                $status = $quote->budget? 'budgeted' : 'pending';
+                // $links .= '<buttion data_id="'.$quote.'" data-toggle="modal"
+                // data-target="#AddBudgetModal" class="quote-data" id="quote-data" title="Budget">
+                //     <b>'. $tid . '</b></button> :'. $status .'<br>';
+                $links .= '<a href="'. route('biller.projects.create_project_budget', $quote). '" data-toggle="tooltip" title="Budget">
+                <b>'. $tid . '</b></a> :'. $status .'<br>';
+                return $links;
+                    
+            })
             ->addColumn('invoice_tid', function ($quote) use($prefixes) {
                 $inv_product = $quote->invoice_product;
                 if ($inv_product) return gen4tid("{$prefixes[3]}-", $inv_product->invoice->tid);

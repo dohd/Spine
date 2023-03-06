@@ -42,6 +42,7 @@
             }
         });
     });
+    
 
     // milestone submit
     $("#submit-data_mile_stone").on("click", function () {
@@ -254,7 +255,19 @@
                 dataSrc: ({data}) => {
                     data = data.map(v => {
                         const url = "{{ route('biller.projects.detach_quote', ['project_id' => $project->id]) }}" + `&quote_id=${v.id}`;
-                        v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
+                        const create_url = "{{ url('projects/budget/') }}" +`/${v.id}`;
+                        //v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
+                        v['actions'] = `
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Action
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item create" href="${create_url}">Create</a>
+                                        <a class="dropdown-item removeItem text-danger" href="${url}">Remove</a>
+                                    </div>
+                                </div> 
+                        `;
                         return v;
                     });
                     return data;
@@ -281,9 +294,12 @@
     }    
 
     /**Fetch budget */
+   
+    
     function budgets() {
-        if ($('#budgetsTbl tbody tr').length) 
-            $('#budgetsTbl').DataTable().destroy();
+        if ($('#budgetsTbl tbody tr').length) return;        
+        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
+        quoteIds = quoteIds.join(',');
 
         $('#budgetsTbl').dataTable({
             processing: true,
@@ -291,13 +307,27 @@
             stateSave: true,
             language: {@lang('datatable.strings')},
             ajax: {
-                url: "{{ route('biller.budgets.get') }}",
+                url: "{{ route('biller.quotes.get') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id)},
+                data: {project_id: @json(@$project->id), quote_ids: quoteIds},
                 dataSrc: ({data}) => {
                     data = data.map(v => {
-                        const url = "{{ route('biller.projects.detach_quote', ['project_id' => $project->id]) }}" + `&quote_id=${v.id}`;
-                        v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
+                        const url = "{{ route('biller.projects.detach_budget', ['project_id' => $project->id]) }}" + `&quote_id=${v.id}`;
+                        const editUrl = "{{ url('projects/budget/') }}" +`/${v.id}`;
+                        // v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
+                        v['actions'] = `
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Action
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item edit" href="${editUrl}">Edit</a>
+                                        <a class="dropdown-item view" data-id="${v.id}"  href="javascript:void(0);">View</a>
+                                        <a class="dropdown-item removeItem text-danger" href="${url}">Remove</a>
+                                    </div>
+                                </div> 
+                        `;
+                        
                         return v;
                     });
                     return data;
@@ -308,7 +338,7 @@
                     name: 'id'
                 },
                 ...[
-                    'tid', 'customer', 'note', 'quote_total', 'budget_total',
+                    'tid', 'customer', 'notes', 'total','quote_budget'
                 ].map(v => ({data: v, name: v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
@@ -321,7 +351,82 @@
             dom: 'Blfrtip',
             buttons: ['csv', 'excel', 'print'],
         });
-    }    
+    }
+    $('#budgetsTbl tbody').on('click', '.view',  function(e){
+        var id = e.target.getAttribute('data-id');
+
+        $.ajax({
+            method: "GET",
+            url: "{{ route('biller.projects.view_budget')}}",
+            data: {
+                id : id,
+            },
+            
+            success: function (response) {
+               if (response.id) {
+                swal({
+                    title: 'Quote is Not Budgeted?',
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                    showCancelButton: true,
+                }, () =>{ return;}); 
+                //data-toggle="modal" data-target="#AddBudgetModal"
+                //
+                return;
+               }
+               $('#AddBudgetModal').modal('show');
+               $('#customer').val(response.customer);
+               $('#branch').val(response.branch);
+               if(response.quote.approval_note)
+                    $('#subject').val(response.quote.approval_note);
+               $('#date').val(response.quote.date);
+               $('#tid').val('QT-'+response.quote.tid);
+               $('#client_ref').val(response.quote.client_ref);
+               $('#quote_total').val(response.budget.quote_total)
+               $('#budget-total').val(response.budget.budget_total);
+               $('#labour-total').val(response.skillset.labour_total);
+               //Budget Items modal view
+               $.each(response.budget_items, function(key, value) {
+                var row = $('<tr>');
+                var numbering = $('<td>').text(value.numbering);
+                var product_name = $('<td>').text(value.product_name);
+                var approved_qty = $('<td>').text(value.product_qty);
+                var unit = $('<td>').text(value.unit);
+                var new_qty = $('<td>').text(value.new_qty);
+                var price = $('<td>').text(value.price);
+                var amount = $('<td>').text(value.price * value.new_qty);
+                
+                row.append(numbering);
+                row.append(product_name);
+                row.append(approved_qty);
+                row.append(unit);
+                row.append(new_qty);
+                row.append(price);
+                row.append(amount);
+                $('#AddBudgetModal').find('#budgetviewTbl tbody').append(row);
+                });
+                //Budget Skillset modal View
+                $.each(response.skillset, function(key, value) {
+                var row = $('<tr>');
+                var numbering = $('<td>').text(value.numbering);
+                var skill = $('<td>').text(value.skill);
+                var charge = $('<td>').text(value.charge);
+                var hours = $('<td>').text(value.hours);
+                var no_technician = $('<td>').text(value.no_technician);
+                var amount = $('<td>').text(value.charge * value.hours * value.no_technician);
+                
+                row.append(numbering);
+                row.append(skill);
+                row.append(charge);
+                row.append(hours);
+                row.append(no_technician);
+                row.append(amount);
+                $('#AddBudgetModal').find('#budgetviewskillsetTbl tbody').append(row);
+                });
+            }
+        });
+    });       
 
     /**Fetch Invoices */
     function invoices() {
