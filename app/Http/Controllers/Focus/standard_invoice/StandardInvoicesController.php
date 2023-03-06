@@ -182,19 +182,17 @@ class StandardInvoicesController extends Controller
 
         $input = $request->only(['company', 'name', 'email', 'phone', 'address', 'tax_pin']);
 
-        $email_exists = Customer::where('email', $input['email'])->count();
-        if ($email_exists) throw ValidationException::withMessages(['Email already exists!']);
-
         $is_company = Customer::where('company', $input['company'])->count();
         if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
 
-        if (isset($input['tax_pin'])) {
-            $taxid_exists = Customer::where('taxid', $input['tax_pin'])->count();
-            if ($taxid_exists) throw ValidationException::withMessages(['Tax Pin already exists!']);
+        $email_exists = Customer::where('email', $input['email'])->whereNotNull('email')->count();
+        if ($email_exists) throw ValidationException::withMessages(['Email already exists!']);
 
-            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
-        } 
+        $taxid_exists = Customer::where('taxid', $input['tax_pin'])->whereNotNull('taxid')->count();
+        if ($taxid_exists) throw ValidationException::withMessages(['Tax Pin already exists!']);
+
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->whereNotNull('taxid')->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
         
         $input['taxid'] = $input['tax_pin'];
         unset($input['tax_pin']);
