@@ -41,13 +41,16 @@
     <div class="col-2">
         {{ Form::label('unit', trans('products.stock_type'),['class' => 'control-label']) }}
         <select class="custom-select" name="stock_type">
-            @foreach (['general', 'consumable', 'service', ] as $i => $val)
-                <option value="{{ $i }}" {{ @$product->stock_type == $val? 'selected' : '' }}>
+            {{-- @foreach (['general', 'consumable', 'service' ] as $i => $val)
+                <option value="{{ $i }}" {{ @$product->stock_type == $val ? 'selected' : '' }}>
                     {{ ucfirst($val) }}
                 </option>
-            @endforeach
+            @endforeach --}}
+            <option value="1" {{ @$product->stock_type == 'general' ? 'selected' : '' }}>General</option>
+            <option value="2" {{ @$product->stock_type == 'consumable' ? 'selected' : '' }}>Consumable</option>
+            <option value="3" {{ @$product->stock_type == 'service' ? 'selected' : '' }}>Service</option>
         </select>
-    </div>
+    </div> 
 
     <div class="col-2">
         <label for="sku">Stock Keeping Unit (SKU)</label>
@@ -94,25 +97,27 @@
         <div class="row">
             <div class="col-md-4">
                 <div class='form-group'>
-                    {{ Form::label( 'price', 'Product Selling Price',['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('price[]', numberFormat(@$product->standard['price']), ['class' => 'form-control box-size', 'placeholder' => 'Product Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class='form-group'>
-                    {{ Form::label( 'purchase_price', trans('products.purchase_price'),['class' => 'col control-label']) }}
+                    {{ Form::label( 'purchase_price', 'Product Buying Price',['class' => 'col control-label']) }}
                     <div class='col'>
                         {{ Form::text('purchase_price[]', numberFormat(@$product->standard['purchase_price']), ['class' => 'form-control box-size', 'placeholder' => trans('products.purchase_price'),'onkeypress'=>"return isNumber(event)"]) }}
                     </div>
                 </div>
             </div>
+            
+            
             <div class="col-md-4">
                 <div class='form-group'>
-                    {{ Form::label( 'selling_price', 'Recommended Selling Price',['class' => 'col control-label']) }}
+                    {{ Form::label( 'selling_price', 'Minimum Selling Price',['class' => 'col control-label']) }}
                     <div class='col'>
                         {{ Form::text('selling_price[]', numberFormat(@$product->standard['selling_price']), ['class' => 'form-control box-size', 'placeholder' => 'Recommended Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class='form-group'>
+                    {{ Form::label( 'price', 'Recommended Selling Price',['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('price[]', numberFormat(@$product->standard['price']), ['class' => 'form-control box-size', 'placeholder' => 'Product Selling Price'.'*','required'=>'required','onkeypress'=>"return isNumber(event)"]) }}
                     </div>
                 </div>
             </div>
