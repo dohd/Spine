@@ -91,7 +91,7 @@ data-open="click" data-menu="horizontal-menu" data-col="content-detached-right-s
 @include('focus.projects.modal.milestone_new')
 @include('focus.projects.modal.log_new')
 @include('focus.projects.modal.note_new')
-@if (access()->allow('task-create'))
+@if (access()->allow('create-task'))
     @include('focus.projects.modal.task_new')
 @endif
 @include('focus.projects.modal.delete_2')
