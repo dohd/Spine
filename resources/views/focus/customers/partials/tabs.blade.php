@@ -21,7 +21,7 @@
         <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
             @php
                 $labels = [
-                    'Name', 'Phone', 'Email', 'Address', 'Company', 'City', 'Region', 'Country', 'PostBox',
+                    'Company', 'Phone', 'Email', 'Address', 'Contact Name' => 'name', 'City', 'Region', 'Country', 'PostBox',
                     'Tax ID' => 'taxid',  
                     'Contact Person Info' => 'contact_person_info'
                 ];

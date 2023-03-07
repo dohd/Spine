@@ -20,9 +20,9 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class='form-group'>
-                            {{ Form::label('company', trans('customers.company'),['class' => 'col-lg-6 control-label']) }}
+                            {{ Form::label('company', 'Company Name',['class' => 'col-lg-6 control-label']) }}
                             <div class='col-lg-12'>
-                                {{ Form::text('company', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.company') . '*', 'required']) }}
+                                {{ Form::text('company', null, ['class' => 'form-control box-size', 'placeholder' => 'Company Name' . '*', 'required']) }}
                             </div>
                         </div>
                     </div>
@@ -45,23 +45,24 @@
                             </div>
                         </div>
                     </div>
-                   
-                        <div class="col-sm-6">
-                            <div class='form-group'>
-                                {{ Form::label('name', trans('customers.name'), ['class' => 'col-lg-2 control-label']) }}
-                                <div class='col-md-12'>
-                                    {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.name')]) }}
-                                </div>
+                    <div class="col-sm-6">
+                        <div class='form-group'>
+                            {{ Form::label('name', 'Contact Name', ['class' => 'col-lg-2 control-label']) }}
+                            <div class='col-md-12'>
+                                {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.name')]) }}
                             </div>
                         </div>
-                        
-                   
-                </div>
-                <div class='form-group'>
-                    {{ Form::label( 'address', trans('customers.address'),['class' => 'col-lg-6 control-label']) }}
-                    <div class='col-lg-12'>
-                        {{ Form::text('address', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.address')]) }}
                     </div>
+                </div>
+                <div class='row'>
+                    <div class="col-sm-6">
+                        <div class='form-group'>
+                            {{ Form::label( 'address', trans('customers.address') . ' (P.O Box, City)', ['class' => 'col-lg-6 control-label']) }}
+                            <div class='col-sm-12'>
+                                {{ Form::text('address', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.address') . ' (P.O Box, City)']) }}
+                            </div>
+                        </div>  
+                    </div>                                      
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
@@ -92,36 +93,14 @@
                     </div>
                     <div class="col-sm-6">
                         <div class='form-group'>
-                            {{ Form::label( 'postbox', trans('customers.postbox'),['class' => 'col-lg-6 control-label']) }}
+                            {{ Form::label( 'postbox', 'Company Location',['class' => 'col-lg-6 control-label']) }}
                             <div class='col-md-12'>
-                                {{ Form::text('postbox', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.postbox')]) }}
+                                {{ Form::text('postbox', null, ['class' => 'form-control box-size', 'placeholder' => 'Location']) }}
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    {{-- 
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            {{ Form::label( 'gid', trans('customers.gid'),['class' => 'col-lg-6 control-label']) }}
-                            <div class='col-lg-12'>
-                                <select class="form-control select-box col-12" name="groups[]" id="groups" multiple="multiple" data-placeholder="{{trans('customers.gid')}}">
-                                    @if (@$current_groups) 
-                                        @foreach($current_groups as $group)
-                                            <option value="{{$group->group_data->id}}" selected>{{$group->group_data->title}}</option>
-                                        @endforeach
-                                    @endif
-                                    @if (@$customergroups_groups) 
-                                        @foreach ($customergroups as $item)
-                                            <option value="{{$item->id}}">{{$item->title}}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    --}}
-
                     <div class="col-sm-6">
                         <div class='form-group'>
                             {{ Form::label('taxid', trans('customers.taxid'),['class' => 'col-lg-6 control-label']) }}
