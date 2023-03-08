@@ -323,6 +323,8 @@ Route::group(['namespace' => 'projectequipment'], function () {
     //For Datatable
     Route::post('projectequipments/get', 'ProjectequipmentsTableController')->name('projectequipments.get');
 });
+
+// quotes
 Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/convert', 'QuotesController@convert')->name('quotes.convert');
     Route::post('quotes/approve_quote/{quote}', 'QuotesController@approve_quote')->name('quotes.approve_quote');
@@ -345,6 +347,15 @@ Route::group(['namespace' => 'quote'], function () {
     //For Datatable
     Route::post('quotes/get_project', 'QuoteVerifyTableController')->name('quotes.get_project');
     Route::post('quotes/get', 'QuotesTableController')->name('quotes.get');
+});
+
+// partial verification
+Route::group(['namespace' => 'verification'], function () {
+    Route::get('verifications/quote_index', 'VerificationsController@quote_index')->name('verifications.quote_index');
+    Route::resource('verifications', 'VerificationsController');
+    //For Datatable
+    Route::post('verifications/get', 'VerificationsTableController')->name('verifications.get');
+    Route::post('verifications/quotes/get', 'VerificationQuotesTableController')->name('verifications.get_quotes');
 });
 
 Route::group(['namespace' => 'region'], function () {

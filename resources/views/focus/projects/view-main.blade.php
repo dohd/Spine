@@ -241,7 +241,7 @@
                                     $total = count($project->milestones);
                                 @endphp
                                 @foreach ($project->milestones as $row)
-                                    <li class="{!! (!$flag)? timeline-inverted : '' !!}" id="m_{{$row['id']}}">
+                                    <li class="{!! (!$flag)? 'timeline-inverted' : '' !!}" id="m_{{$row['id']}}">
                                         <div class="timeline-badge"
                                                 style="background-color:@if ($row['color']) {{$row['color']}} @else #0b97f4  @endif;">{{$total}}</div>
                                         <div class="timeline-panel">
