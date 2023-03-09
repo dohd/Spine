@@ -65,11 +65,12 @@
     }
 
     // initialize datepicker
-    $('.datepicker')
-    .datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-    $('#referencedate').datepicker('setDate', new Date());
-    $('#date').datepicker('setDate', new Date());
-
+    $('.datepicker').each(function() {
+        const d = $(this).val();
+        $(this).datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
+        .datepicker('setDate', new Date(d))
+    });
+    
     // On change lead and djc
     const subject = {title: '', djc: ''};
     $('form').on('change', '#lead_id, #reference', function() {
