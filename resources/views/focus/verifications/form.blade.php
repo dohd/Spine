@@ -1,10 +1,10 @@
 @php
-    $quote = auth()->user();
     $label = $quote->bank_id ? 'PI' : 'Quote';
     $prefixes = prefixesArray(['quote', 'proforma_invoice'], $quote->ins);
 @endphp
 <div class="row">
-    {{ Form::hidden('id', $quote->id) }}
+    <input type="hidden" name="id" value="{{ $quote->id }}">
+
     <div class="col-6 cmp-pnl">
         <div id="customerpanel" class="inner-cmp-pnl">
             <div class="form-group row">
@@ -27,7 +27,7 @@
                     <label for="date" class="caption">{{ $label }} Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                        {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id'=>'date', 'disabled']) }}
+                        {{ Form::text('date', @$quote->date, ['class' => 'form-control round datepicker', 'id'=>'date', 'disabled']) }}
                     </div>
                 </div>                                
             </div>
@@ -53,7 +53,7 @@
             <div class="form-group row">
                 <div class="col-12">
                     <label for="subject" class="caption">Subject / Title</label>
-                    {{ Form::text('notes', null, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
+                    {{ Form::text('notes', @$quote->notes, ['class' => 'form-control', 'id'=>'subject', 'disabled']) }}
                 </div>
             </div>  
         </div>
@@ -71,21 +71,21 @@
                     <label for="client_ref" class="caption">Client Ref / Callout ID</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                        {{ Form::text('client_ref', null, ['class' => 'form-control round', 'placeholder' => 'Client Reference', 'id' => 'client_ref', 'disabled']) }}
+                        {{ Form::text('client_ref', @$quote->client_ref, ['class' => 'form-control round', 'placeholder' => 'Client Reference', 'id' => 'client_ref', 'disabled']) }}
                     </div>
                 </div>   
                 <div class="col-4">
                     <label for="invocieno" class="caption">Djc Reference</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('reference', null, ['class' => 'form-control round', 'disabled']) }}
+                        {{ Form::text('reference', @$quote->reference, ['class' => 'form-control round', 'disabled']) }}
                     </div>
                 </div>
                 <div class="col-4">
                     <label for="reference_date" class="caption">Reference Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                        {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id'=>'reference-date', 'disabled']) }}
+                        {{ Form::text('reference_date', @$quote->reference_date, ['class' => 'form-control round datepicker', 'id'=>'reference-date', 'disabled']) }}
                     </div>
                 </div>             
             </div>
@@ -113,22 +113,92 @@
     </div>                        
 </div>                  
 
-<div>                            
-    <table id="quotation" class="table-responsive tfr my_stripe_single pb-2 text-center">
+<div class="table-responsive">                            
+    <table id="productsTbl" class="table tfr my_stripe_single pb-2 text-center">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white">
                 <th width="5%">#</th>
-                <th width="35%">Item Name</th>
+                <th width="20%">Item Name</th>
                 <th width="7%">UoM</th>
                 <th width="7%">Qty</th>
-                <th width="10%">{{trans('general.rate')}}</th>
-                <th width="10%">{{trans('general.rate')}} (VAT Inc)</th>
-                <th width="10%">{{trans('general.amount')}} </th>
+                <th width="10%">Price</th>
+                <th width="15%">Tax Rate</th>
+                <th width="10%">Amount</th>
                 <th width="12%">Remark</th>
                 <th width="5%">Action</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            {{-- Product Row Template --}}
+            <tr>
+                <td><input type="text" class="form-control num" name="numbering[]"></td>
+                <td>
+                    <textarea class="form-control prodname" name="product_name[]" placeholder="{{trans('general.enter_product')}}"></textarea>  
+                </td>
+                <td><input type="text" class="form-control unit" name="unit[]"></td>                
+                <td><input type="text" class="form-control qty" name="product_qty[]"></td>
+                <td><input type="text" class="form-control price" name="product_subtotal[]" readonly></td>
+                <td>
+                    <div class="row no-gutters">
+                        <div class="col-6">
+                            <select class="custom-select taxid" name='item_tax_id[]'>
+                                @foreach ($additionals as $row)
+                                    <option value="{{ +$row->value }}">
+                                        {{ $row->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-6"><input type="text" class="form-control prodtax" name="product_tax[]" readonly></div>
+                    </div>                  
+                </td>
+                <td><input type="text" class="form-control amount" amount="amount[]"></td>
+                <td><textarea class="form-control remark" name="remark[]"></textarea></td>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item up" href="javascript:">Up</a>
+                            <a class="dropdown-item down" href="javascript:">Down</a>
+                            <a class="dropdown-item remove text-danger" href="javascript:">Remove</a>
+                        </div>
+                    </div>   
+                </td>
+                <input type="hidden" name="row_index[]" class="index">
+                <input type="hidden" name="a_type[]" value="1" class="type">
+                <input type="hidden" name="product_id[]">
+                <input type="hidden" name="item_id[]" class="itemid">
+            </tr>
+
+            {{-- Title Row Template --}}
+            <tr>
+                <td><input type="text" class="form-control num" name="numbering[]"></td>
+                <td colspan="7"><input type="text" class="form-control prodname" name="product_name[]" placeholder="Enter Title Or Heading"></td>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item up" href="javascript:">Up</a>
+                            <a class="dropdown-item down" href="javascript:">Down</a>
+                            <a class="dropdown-item remove text-danger" href="javascript:">Remove</a>
+                        </div>
+                    </div>   
+                </td>
+                <input type="hidden" name="row_index[]" value="0">
+                <input type="hidden" name="product_id[]">
+                <input type="hidden" name="remark[]">
+                <input type="hidden" name="unit[]" value="">
+                <input type="hidden" name="product_qty[]">
+                <input type="hidden" name="product_price[]">
+                <input type="hidden" name="product_subtotal[]">
+                <input type="hidden" name="a_type[]" value="2">
+                <input type="hidden" name="item_id[]">
+            </tr>
+        </tbody>
     </table>
 
     <div class="row">
@@ -139,54 +209,89 @@
             <a href="javascript:" class="btn btn-primary" aria-label="Left Align" id="add-title">
                 <i class="fa fa-plus-square"></i> Title
             </a>
-
-            <div class="form-group row pt-2">
-                <div class="col-sm-12">
-                    <table id="jobcardTbl" class="table-responsive pb-2 tfr text-center">
-                        <thead class="bg-gradient-directional-blue white pb-1">
-                            <tr>
-                                <th width="10%">Type</th>
-                                <th width="12%">Ref No</th>                                                    
-                                <th width="12%">Date</th>
-                                <th width="15%">Technician</th>
-                                <th width="15%">Equipment</th>
-                                <th width="12%">Location</th>
-                                <th width="16%">Fault</th>
-                                <th width="5%">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                    <a href="javascript:" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
-                        <i class="fa fa-plus-square"></i>  Jobcard / DNote
-                    </a>                                            
+            <br>
+            <div class="form-group row pt-5">
+                <div class="col-sm-11">
+                    <div class="table-responsive">
+                        <table id="jobcardsTbl" class="table pb-2 tfr text-center">
+                            <thead class="bg-gradient-directional-blue white pb-1">
+                                <tr>
+                                    <th width="10%">Type</th>
+                                    <th width="12%">Ref No</th>                                                    
+                                    <th width="12%">Date</th>
+                                    <th width="15%">Technician</th>
+                                    <th width="15%">Equipment</th>
+                                    <th width="12%">Location</th>
+                                    <th width="16%">Fault</th>
+                                    <th width="5%">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- Jobacard/DNote Row Template --}}
+                                <tr>
+                                    <td>
+                                        <select class="custom-select jtype" name="type[]">
+                                            <option value="1" selected>Jobcard</option>
+                                            <option value="2">DNote</option> 
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control jc_ref" name="reference[]"></td>
+                                    <td><input type="text" class="form-control jc_date" name="date[]"></td>
+                                    <td><input type="text" class="form-control jc_tech" name="technician[]"></td>
+                                    <td><textarea class="form-control jc_equip" name="equipment[]"></textarea>
+                                    <td><input type="text jc_loc" class="form-control" name="location[]"></td>
+                                    <td>
+                                        <select class="custom-select jc_fault" name="fault[]">
+                                            <option value="none">None</option>
+                                            <option value="faulty_compressor">Faulty Compressor</option>
+                                            <option value="faulty_pcb">Faulty PCB</option>
+                                            <option value="leakage_arrest">Leakage Arrest</option>
+                                            <option value="electrical_fault">Electrical Fault</option>
+                                            <option value="drainage">Drainage</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </td>
+                                    <td><a href="javascript:" class="btn btn-primary btn-md remove" type="button">Remove</a></td>
+                                    <input type="hidden" name="equipment_id[]" class="jc_equipid">
+                                    <input type="hidden" name="jcitem_id[]">
+                                </tr>
+                            </tbody>
+                        </table>
+                        <a href="javascript:" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
+                            <i class="fa fa-plus-square"></i>  Jobcard / DNote
+                        </a> 
+                    </div>
                 </div>
             </div>     
         </div>
 
         <div class="col-2 col-xs-5 invoice-block pull-right">
-            <div class="form-group">
+            <div>
+                <label>Taxable Amount</label>
+                {{ Form::text('taxable', null, ['class' => 'form-control', 'id' => 'taxable', 'readonly']) }}
+            </div>
+            <div>
                 <label>Subtotal</label>
-                <div class="input-group m-bot15">
-                    <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
-                </div>
+                {{ Form::text('subtotal', null, ['class' => 'form-control', 'id' => 'subtotal', 'readonly']) }}
             </div>
-            <div class="form-group">
-                <label>{{trans('general.total_tax')}}</label>
-                <div class="input-group m-bot15">
-                    <input type="text" name="tax" id="tax" class="form-control" readonly>
-                </div>
+            <div>
+                <label>Tax</label>
+                {{ Form::text('tax', null, ['class' => 'form-control', 'id' => 'tax', 'readonly']) }}
             </div>
-            <div class="form-group">
-                <label>{{trans('general.grand_total')}}</label>
-                <div class="input-group m-bot15">
-                    <input type="text" name="total" class="form-control" id="total" placeholder="Total" readonly>
-                </div>
+            <div>
+                <label>Total</label>
+                {{ Form::text('total', null, ['class' => 'form-control', 'id' => 'total', 'readonly']) }}
             </div>
-            <button type="button" class="btn btn-danger" aria-label="Left Align" id="reset-items">
-                <i class="fa fa-trash"></i> Undo
-            </button>
-            {{ Form::submit('Submit', ['class' => 'btn btn-success']) }}
+            <div class="mt-1">
+                <div class="edit-form-btn">
+                    {{ link_to_route('biller.verifications.quote_index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md mr-1']) }}
+                    {{ Form::submit(@$verification? 'Update' : 'Generate', ['class' => 'btn btn-primary btn-md']) }}
+                </div> 
+            </div>
         </div>
     </div>
 </div>
+
+@section('after-scripts')
+    @include('focus.verifications.form_js')
+@endsection

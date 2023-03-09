@@ -53,14 +53,14 @@
                             </tr>
                         </tbody>
                     </table>
+                    {{-- Form Redirect to Create Stock Issuance --}}
+                    <form action="{{ route('biller.projectstock.create') }}">
+                        <input type="hidden" name="quote_id" id="quote">
+                    </form>  
                 </div>
             </div>
         </div>             
     </div>
-
-    {{ Form::open(['route' => 'biller.projectstock.create', 'method' => 'GET']) }}
-        {{ Form::hidden('quote_id', null, ['id' => 'quote']) }}
-    {{ Form::close() }}
 </div>
 @endsection
 

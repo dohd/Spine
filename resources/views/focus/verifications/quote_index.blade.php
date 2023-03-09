@@ -1,24 +1,13 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Job Verification')
+@section ('title', 'Verification Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row">
         <div class="content-header-left col-md-6 col-12 mb-2">
             <h4 class="content-header-title">Verification Management</h4>
-        </div>   
-        <div class="content-header-right col-md-6 col-12">
-            <div class="media width-250 float-right">
-                <div class="media-body media-right text-right">
-                    <div class="btn-group">
-                        <a href="{{ route('biller.rjcs.index') }}" class="btn btn-success">
-                            <i class="fa fa-list-alt"></i> Rjc
-                        </a>                         
-                    </div>
-                </div>
-            </div>
-        </div>                     
+        </div>                      
     </div>
     
     <div class="content-body">
@@ -50,7 +39,6 @@
                                     <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
                                 </div>
                             </div>
-                            
                             <hr>
                             <table id="quotesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
@@ -73,6 +61,10 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            {{-- Form Redirect to Create Verification --}}
+                            <form action="{{ route('biller.verifications.create') }}">
+                                <input type="hidden" name="quote_id" id="quote">
+                            </form>  
                         </div>
                     </div>
                 </div>
@@ -93,10 +85,11 @@
     };
 
     const Index = {
-        init(config) {
+        init() {
             $.ajaxSetup(config.ajaxSetup);
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
 
+            $('#quotesTbl').on('change', '.select-row', this.selectRow);
             $('#verify_state').change(this.verifyStateChange);
             $('#search').click(this.searchDateClick);
             this.drawDataTable();
@@ -105,7 +98,7 @@
         verifyStateChange() {
             const el = $(this);
             $('#quotesTbl').DataTable().destroy();
-            return Index.drawDataTable({verify_state: el.val()});
+            return Index.drawDataTable();
         },
 
         searchDateClick() {
@@ -122,49 +115,48 @@
             });
         },
 
-        drawDataTable(params={}) {
+        selectRow() {
+            const el = $(this);
+            if (el.prop('checked')) {
+                $('#quote').val(el.val());
+                $('#quotesTbl tbody tr').each(function() {
+                    if ($(this).find('.select-row').val() != el.val()) {
+                        $(this).find('.select-row').prop('checked', false);
+                    }
+                });
+            } else {
+                $('#quote').val('');
+                $('#quotesTbl tbody tr').each(function() {
+                    $(this).find('.select-row').prop('checked', false);
+                });
+            }
+            if ($('#quote').val()) {
+                swal({
+                    title: 'Partially Verify?',
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                    showCancelButton: true,
+                }, () => $('form').submit()); 
+            }
+        },
+
+        drawDataTable() {
             $('#quotesTbl').dataTable({
                 processing: true,
                 responsive: true,
                 stateSave: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: '{{ route("biller.verifications.") }}',
+                    url: '{{ route("biller.verifications.get_quotes") }}',
                     type: 'post',
                     data: {},
                 },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'notes',
-                        name: 'notes'
-                    },
-                    {
-                        data: 'total',
-                        name: 'total'
-                    },
-                    {
-                        data: 'verified_total',
-                        name: 'verified_total'
-                    },
-                    {
-                        data: 'project_tid',
-                        name: 'project_tid'
-                    },
-                    {
-                        data: 'lpo_number',
-                        name: 'lpo_number'
-                    },
+                columns: [
+                    {data: 'checkbox',  searchable: false,  sortable: false},
+                    ...[
+                        'tid', 'customer', 'notes', 'total', 'verified_total', 'project_tid', 'lpo_number'
+                    ].map(v => ({data: v, name: v})),
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: [4, 5] },
@@ -177,6 +169,6 @@
         }
     };
 
-    $(() => Index.init(config));
+    $(() => Index.init());
 </script>
 @endsection

@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Verification Management</h4>
+            <h4 class="content-header-title">Partial Job Verification</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">

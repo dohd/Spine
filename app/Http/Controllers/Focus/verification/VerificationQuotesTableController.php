@@ -53,6 +53,9 @@ class VerificationQuotesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('checkbox', function ($quote) {
+                return '<input type="checkbox" class="select-row" value="'. $quote->id .'">';
+            })
             ->addColumn('tid', function ($quote) use($prefixes) {
                 $tid = gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);
                 return '<a class="font-weight-bold" href="'. route('biller.quotes.show',$quote) .'">'. $tid . $quote->revision .'</a>';

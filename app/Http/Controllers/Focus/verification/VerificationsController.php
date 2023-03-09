@@ -20,7 +20,11 @@ namespace App\Http\Controllers\Focus\verification;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\additional\Additional;
+use App\Models\items\VerifiedItem;
+use App\Models\quote\Quote;
 use App\Models\verification\Verification;
+use App\Models\verifiedjcs\VerifiedJc;
 use App\Repositories\Focus\verification\VerificationRepository;
 use Illuminate\Http\Request;
 
@@ -54,9 +58,18 @@ class VerificationsController extends Controller
      * Show the form for creating a new resource.
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('focus.verifications.create');
+        $quote = Quote::find($request->quote_id);
+        $products = VerifiedItem::where('quote_id', $quote->id)->get();
+        $jobcards = VerifiedJc::where('quote_id', $quote->id)->with('equipment')->get();
+        if (!$products->count()) $products = $quote->products;
+
+        $additionals = Additional::query()->when($quote->tax_id > 0, function($q) use($quote) {
+            $q->where('value', 0)->orWhere('value', $quote->tax_id);
+        })->when($quote->tax_id == 0, fn($q) => $q->where('value', 0))->get();
+
+        return view('focus.verifications.create', compact('quote', 'products', 'jobcards', 'additionals'));
     }
 
     /**
