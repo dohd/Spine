@@ -4,13 +4,12 @@
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
     };
-
     // ajax setup
     $.ajaxSetup(config.ajax);
 
     // Intialize datepicker
     $('.datepicker').each(function() {
-        const d = $(this).attr('value');
+        let d = $(this).attr('value') ? $(this).attr('value') : new Date();
         $(this).datepicker(config.date).datepicker('setDate', new Date(d));
     });
 
@@ -42,7 +41,7 @@
     const initProductRow = $('#productsTbl tbody tr:first').html();
     const initTitleRow = $('#productsTbl tbody tr:last').html();
     $('#productsTbl tbody tr').remove();
-    const quoteItems = @json($products);
+    const quoteItems = @json($quote->products);
     quoteItems.forEach((v,i) => {
         // product type
         if (v.a_type == 1) {
@@ -79,7 +78,7 @@
     });    
 
     // on add product
-    $('#add-product').click(function() {
+    $('#addProduct').click(function() {
         $('#productsTbl tbody').append(`<tr>${initProductRow}</tr>`);
         const el =  $('#productsTbl tbody tr:last');
         el.find('.prodname').autocomplete(productAutocomplete());
@@ -176,11 +175,12 @@
         };
     }
     
+
     /**
-     * Equipments Logic
+     * Equipments
      **/
     // on change row type
-    $('#jobcardsTbl').on('change', '.type', function() {
+    $('#jobcardsTbl').on('change', '.jc_type', function() {
         const el = $(this).parents('tr');
         if ($(this).val() == 2) {
             // dnote row
@@ -189,40 +189,33 @@
             el.find('.jc_loc').addClass('invisible');
         } else {
             // jobcard row
-            el.find('.jc_fault').addClass('invisible');
-            el.find('.jc_equip').addClass('invisible');
-            el.find('.jc_loc').addClass('invisible');
+            el.find('.jc_fault').removeClass('invisible');
+            el.find('.jc_equip').removeClass('invisible');
+            el.find('.jc_loc').removeClass('invisible');
         }
     });
     
-    // set product rows
-    const initProductRow = $('#productsTbl tbody tr:first').html();
-    $('#productsTbl tbody tr').remove();
-
     // add job card row
-    $('#add-jobcard').click(function() {
-
-
-
-
-
-        const i = jcIndex;
-        $('#jobcardTbl tbody').append(jobCardRow(i));
-        $('#equip-'+i).autocomplete(autocompleteEquip(i));
-        $('#date-'+i).datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
-        .datepicker('setDate', new Date());
-        jcIndex++;
+    const initJobcardRow = $('#jobcardsTbl tbody tr:first').html();
+    $('.jc_equip:first').autocomplete(equipmentAutocomplete());
+    $('#addJobcard').click(function() {
+        $('#jobcardsTbl tbody').append(`<tr>${initJobcardRow}</tr>`);
+        const el = $('#jobcardsTbl tbody tr:last');
+        el.find('.jc_equip').autocomplete(equipmentAutocomplete());
+        el.find('.jc_date').datepicker(config.date).datepicker('setDate', new Date());
     });
-
     // remove job card row
-    $('#jobcardTbl').on('click', '.removeJc', function() {
-        const row = $(this).parents('tr:first');
-        if (confirm('Are you sure ?')) row.remove();
+    $('#jobcardsTbl').on('click', '.remove', function() {
+        const row = $(this).parents('tr');
+        if (confirm('Are you sure ?')) {
+            if (!row.siblings().length) $('#addJobcard').click();
+            row.remove();
+        }
     });
 
     // equipment autocomplete
     let focusEquipmentRow;
-    $('#equipmentsTbl').on('keyup', '.jc_equip', function() {
+    $('#jobcardsTbl').on('keyup', '.jc_equip', function() {
         focusEquipmentRow = $(this).parents('tr');
     });
     function equipmentAutocomplete() {
@@ -256,14 +249,9 @@
             select: (event, ui) => {
                 const {data} = ui.item;
                 const el = focusEquipmentRow;
-
                 el.find('.jc_equipid').val(data.id);
                 el.find('.jc_equip').val(data.make_type);
                 el.find('.jc_loc').val(data.location);
-
-                // $('#equipmentid-'+i).val(data.id);
-                // $('#equip-'+i).val(data.make_type);
-                // $('#location-'+i).val(data.location);
             }
         };
     }    

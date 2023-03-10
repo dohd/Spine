@@ -48,7 +48,7 @@
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th>Title</th>                                            
                                         <th>{{ trans('general.amount') }}</th>
-                                        <th>Verified</th>
+                                        <th>Verified Amount</th>
                                         <th>Project No</th>
                                         <th>LPO No</th>
                                     </tr>

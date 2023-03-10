@@ -6,6 +6,7 @@ use App\Exceptions\GeneralException;
 use App\Models\quote\Quote;
 use App\Models\verification\Verification;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Arr;
 
 class VerificationRepository extends BaseRepository
 {
@@ -29,7 +30,7 @@ class VerificationRepository extends BaseRepository
 
     public function getForVerificationQuoteDataTable()
     {
-        $q = Quote::query();
+        $q = Quote::query()->whereColumn('total', '>', 'verified_total');
             
         return $q->get();
     }
@@ -43,7 +44,17 @@ class VerificationRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        dd($input);
+        // dd($input);
+        $data = Arr::only($input, ['quote_id', 'customer_id', 'branch_id', 'note', 'taxable', 'subtotal', 'tax', 'total']);
+        $data_items = Arr::only($input, [
+            'numbering', 'product_name', 'unit', 'item_tax_id', 'product_qty', 'product_subtotal', 'product_tax', 'product_total', 'remark', 
+            'row_index', 'a_type', 'product_id', 'quote_item_id'
+        ]);
+        $jc_data_items = Arr::only($input, ['type', 'reference', 'date', 'technician', 'equipment', 'location', 'fault', 'equipment_id']);
+        dd($input, $data, $data_items, $jc_data_items);
+
+
+
             
         throw new GeneralException(trans('exceptions.backend.leave_category.create_error'));
     }

@@ -3,7 +3,7 @@
     $prefixes = prefixesArray(['quote', 'proforma_invoice'], $quote->ins);
 @endphp
 <div class="row">
-    <input type="hidden" name="id" value="{{ $quote->id }}">
+    <input type="hidden" name="quote_id" value="{{ $quote->id }}">
 
     <div class="col-6 cmp-pnl">
         <div id="customerpanel" class="inner-cmp-pnl">
@@ -38,7 +38,7 @@
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
                         {{ Form::text('client', @$quote->customer->name, ['class' => 'form-control round', 'id' => 'client', 'disabled']) }}
-                        <input type="hidden" name="client_id" value="{{ @$quote->customer_id }}" id="client_id">
+                        <input type="hidden" name="customer_id" value="{{ @$quote->customer_id }}" id="client_id">
                     </div>
                 </div>
                 <div class="col-5">
@@ -105,8 +105,8 @@
             </div>   
             <div class="form-group row">
                 <div class="col-12">
-                    <label for="gen_remark" class="caption">General Remark</label>
-                    {{ Form::text('gen_remark', null, ['class' => 'form-control', 'id' => 'gen_remark']) }}
+                    <label for="note" class="caption">General Remark</label>
+                    {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
                 </div>
             </div>   
         </div>
@@ -152,7 +152,7 @@
                         <div class="col-6"><input type="text" class="form-control prodtax" name="product_tax[]" readonly></div>
                     </div>                  
                 </td>
-                <td><input type="text" class="form-control amount" amount="amount[]"></td>
+                <td><input type="text" class="form-control amount" name="product_total[]"></td>
                 <td><textarea class="form-control remark" name="remark[]"></textarea></td>
                 <td class="text-center">
                     <div class="dropdown">
@@ -169,7 +169,7 @@
                 <input type="hidden" name="row_index[]" class="index">
                 <input type="hidden" name="a_type[]" value="1" class="type">
                 <input type="hidden" name="product_id[]">
-                <input type="hidden" name="item_id[]" class="itemid">
+                <input type="hidden" name="quote_item_id[]" class="itemid">
             </tr>
 
             {{-- Title Row Template --}}
@@ -193,17 +193,19 @@
                 <input type="hidden" name="remark[]">
                 <input type="hidden" name="unit[]" value="">
                 <input type="hidden" name="product_qty[]">
-                <input type="hidden" name="product_price[]">
+                <input type="hidden" name="product_taxrate[]">
+                <input type="hidden" name="product_tax[]">
+                <input type="hidden" name="product_total[]">
                 <input type="hidden" name="product_subtotal[]">
                 <input type="hidden" name="a_type[]" value="2">
-                <input type="hidden" name="item_id[]">
+                <input type="hidden" name="quote_item_id[]">
             </tr>
         </tbody>
     </table>
 
     <div class="row">
         <div class="col-10 col-xs-7">
-            <a href="javascript:" class="btn btn-success mr-1" aria-label="Left Align" id="add-product">
+            <a href="javascript:" class="btn btn-success mr-1" aria-label="Left Align" id="addProduct">
                 <i class="fa fa-plus-square"></i> Product
             </a>
             <a href="javascript:" class="btn btn-primary" aria-label="Left Align" id="add-title">
@@ -230,16 +232,16 @@
                                 {{-- Jobacard/DNote Row Template --}}
                                 <tr>
                                     <td>
-                                        <select class="custom-select jtype" name="type[]">
+                                        <select class="custom-select jc_type" name="type[]">
                                             <option value="1" selected>Jobcard</option>
                                             <option value="2">DNote</option> 
                                         </select>
                                     </td>
                                     <td><input type="text" class="form-control jc_ref" name="reference[]"></td>
-                                    <td><input type="text" class="form-control jc_date" name="date[]"></td>
+                                    <td><input type="text" class="form-control datepicker jc_date" name="date[]"></td>
                                     <td><input type="text" class="form-control jc_tech" name="technician[]"></td>
                                     <td><textarea class="form-control jc_equip" name="equipment[]"></textarea>
-                                    <td><input type="text jc_loc" class="form-control" name="location[]"></td>
+                                    <td><input type="text" class="form-control jc_loc" name="location[]"></td>
                                     <td>
                                         <select class="custom-select jc_fault" name="fault[]">
                                             <option value="none">None</option>
@@ -257,7 +259,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <a href="javascript:" class="btn btn-success" aria-label="Left Align" id="add-jobcard">
+                        <a href="javascript:" class="btn btn-success" aria-label="Left Align" id="addJobcard">
                             <i class="fa fa-plus-square"></i>  Jobcard / DNote
                         </a> 
                     </div>
@@ -285,7 +287,7 @@
             <div class="mt-1">
                 <div class="edit-form-btn">
                     {{ link_to_route('biller.verifications.quote_index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md mr-1']) }}
-                    {{ Form::submit(@$verification? 'Update' : 'Generate', ['class' => 'btn btn-primary btn-md']) }}
+                    {{ Form::submit(@$verification? 'Update' : 'Submit', ['class' => 'btn btn-primary btn-md']) }}
                 </div> 
             </div>
         </div>

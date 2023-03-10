@@ -61,15 +61,12 @@ class VerificationsController extends Controller
     public function create(Request $request)
     {
         $quote = Quote::find($request->quote_id);
-        $products = VerifiedItem::where('quote_id', $quote->id)->get();
-        $jobcards = VerifiedJc::where('quote_id', $quote->id)->with('equipment')->get();
-        if (!$products->count()) $products = $quote->products;
 
         $additionals = Additional::query()->when($quote->tax_id > 0, function($q) use($quote) {
             $q->where('value', 0)->orWhere('value', $quote->tax_id);
         })->when($quote->tax_id == 0, fn($q) => $q->where('value', 0))->get();
 
-        return view('focus.verifications.create', compact('quote', 'products', 'jobcards', 'additionals'));
+        return view('focus.verifications.create', compact('quote', 'additionals'));
     }
 
     /**
