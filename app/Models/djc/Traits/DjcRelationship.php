@@ -18,12 +18,12 @@ trait DjcRelationship
 
      public function client()
      {
-          return $this->hasOneThrough(Customer::class, Lead::class, 'id', 'id', 'lead_id', 'client_id')->withoutGlobalScopes();
+          return $this->belongsTo(Customer::class, 'client_id');
      }
 
      public function branch()
      {
-          return $this->hasOneThrough(Branch::class, Lead::class, 'id', 'id', 'lead_id', 'branch_id')->withoutGlobalScopes();
+          return $this->belongsTo(Branch::class, 'branch_id');
      }
 
      public function items()
