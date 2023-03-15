@@ -31,10 +31,9 @@ class ImportController extends Controller
     public function index(ManageReports $request, $type)
     {
         $labels = [
-            'customers' => trans('import.import_customers'),
+            'customer' => trans('import.import_customers'),
             'products' => trans('import.import_products'),
             'accounts' => trans('import.import_accounts'),
-            'transactions' => trans('import.import_transactions'),
             'equipments' => 'Import Equipments',
             'client_pricelist' => 'Import Client Pricelist',
             'supplier_pricelist' => 'Import Supplier Pricelist',
@@ -81,7 +80,6 @@ class ImportController extends Controller
             'customer' => new \App\Imports\CustomersImport($data),
             'products' => new \App\Imports\ProductsImport($data),
             'accounts' => new \App\Imports\AccountsImport($data),
-            'transactions' => new \App\Imports\TransactionsImport($data),
             'equipments' => new \App\Imports\EquipmentsImport($data),
             'client_pricelist' => new \App\Imports\ClientPricelistImport($data),
             'supplier_pricelist' => new \App\Imports\SupplierPricelistImport($data),

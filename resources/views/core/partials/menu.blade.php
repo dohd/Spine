@@ -1283,11 +1283,7 @@
                                             <i class="fa fa-file-excel-o"></i> Accounts
                                         </a>
                                     </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{route('biller.import.general',['transactions'])}}">
-                                            <i class="fa fa-file-excel-o"></i> Transactions
-                                        </a>
-                                    </li>
+                                
                                     <li>
                                         <a class="dropdown-item" href="{{route('biller.import.general',['equipments'])}}">
                                             <i class="fa fa-file-excel-o"></i> Equipments
