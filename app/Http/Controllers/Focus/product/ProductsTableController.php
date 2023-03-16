@@ -108,6 +108,13 @@ class ProductsTableController extends Controller
             ->addColumn('created_at', function ($product) {
                 return dateFormat($product->created_at);
             })
+            ->addColumn('expiry', function ($product) {
+                $expiry = $this->standard_product->expiry;
+                if ($expiry) {
+                    return dateFormat($expiry);
+                }
+               return '';
+            })
             ->addColumn('actions', function ($product) {
                 return $product->action_buttons;
             })

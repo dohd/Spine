@@ -96,7 +96,6 @@
                             <input type="hidden" id="stockitemid-{{$i}}" name="item_id[]" value="{{ $item->item_id }}">
                             <input type="hidden" class="stocktaxr" name="taxrate[]" value="{{ (float) $item->taxrate }}">
                             <input type="hidden" class="stockamountr" name="amount[]" value="{{ (float) $item->amount }}">
-                            <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="0">
                             <input type="hidden" name="type[]" value="Stock">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
@@ -116,7 +115,9 @@
                                 </select>
                             </td>
                             <td colspan="4">
-                                <input type="text" class="form-control projectstock" value="{{ $item->project ? $item->project->name : '' }}" id="projectstocktext-0" placeholder="Search Project By Name">
+                                
+                                <input type="text" class="form-control projectstock" value="{{ $item->project ? 'QT-'.$item->project->quotes()->first()->tid.' '.$item->project->name : '' }}" id="projectstocktext-{{$i}}" placeholder="Search Project By Name">
+                                <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="{{ $item->itemproject_id ? $item->itemproject_id : '0' }}" id="projectstockval-{{$i}}">
                             </td>
                             <td colspan="6"></td>
                         </tr>

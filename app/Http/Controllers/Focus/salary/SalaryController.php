@@ -167,6 +167,7 @@ class SalaryController extends Controller
         $start_date = date_for_database($request->start_date);
         $renew_contract->start_date = $start_date;
         $renew_contract->duration = $request->duration;
+        $renew_contract->status = 'ongoing';
         $renew_contract->update();
         return new RedirectResponse(route('biller.salary.index'), ['flash_success' => 'Contract Renewed Successfully!!']);
     }

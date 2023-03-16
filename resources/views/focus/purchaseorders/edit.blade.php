@@ -166,7 +166,9 @@
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
     $('#stockTbl tbody tr:lt(2)').remove(); 
     const stockUrl = "{{ route('biller.products.purchase_search') }}"
+    const projectstockUrl = "{{ route('biller.projects.project_search') }}"
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+    $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
             stockRowId++;
@@ -178,6 +180,7 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+            $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectstocktext-'+i).val(projectText);
             $('#projectstockval-'+i).val($("#project option:selected").val());
@@ -275,7 +278,39 @@
         const id = $(this).attr('id').split('-')[1];
         if ($(this).is('.stockname')) stockNameRowId = id;
     });    
-
+    function prediction(url, callback) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url,
+                    dataType: "json",
+                    method: "POST",
+                    data: {keyword: request.term, projectstock: $('#projectstock').val()},
+                    success: function(data) {
+                        response(data.map(v => ({
+                            label: v.name,
+                            value: v.name,
+                            data: v
+                        })));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: callback
+        };
+    }
+    // stock select autocomplete
+    let projectStockRowId = 0;
+    function projectstockSelect(event, ui) {
+        const {data} = ui.item;
+        const i = projectStockRowId;
+        $('#projectstockval-'+i).val(data.id);
+    }
+    $('#stockTbl').on('mouseup', '.projectstock', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.projectstock')) projectStockRowId = id;
+    });
     
     /**
      * Expense Tab

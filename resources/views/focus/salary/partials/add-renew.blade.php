@@ -51,11 +51,11 @@
             <div class="form-group row">
                 <div class="col-4">
                     {{ Form::label( 'start_date', 'Start Date',['class' => 'control-label']) }}
-                    {{ Form::date('start_date', null, ['class' => 'form-control round', 'placeholder' => '']) }}
+                    {{ Form::date('start_date', null, ['class' => 'form-control round', 'placeholder' => '','required']) }}
                 </div>
                 <div class="col-4">
                     {{ Form::label( 'duration', 'Duration',['class' => 'control-label']) }}
-                    {{ Form::number('duration', null, ['class' => 'form-control round', 'placeholder' => '1']) }}
+                    {{ Form::number('duration', null, ['class' => 'form-control round', 'placeholder' => '1', 'required']) }}
                 </div>
                 
             </div>

@@ -92,6 +92,7 @@
                     <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tr>
                             <th>Product Description</th>
+                            <th>Product Code</th>
                             <th>Quantity</th>
                             <th>UoM</th>
                             <th>Price</th>
@@ -103,6 +104,7 @@
                                 @if ($item->type == 'Stock')
                                     <tr>
                                         <td>{{ $item->description }}</td>
+                                        <td>{{ $item->product_code }}</td>
                                         <td>{{ number_format($item->qty, 1) }}</td>
                                         <td>{{ $item->uom }}</td>
                                         <td>{{ number_format($item->rate, 2) }}</td>                                        

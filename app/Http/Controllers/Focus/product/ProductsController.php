@@ -178,7 +178,7 @@ class ProductsController extends Controller
         $productvariations = ProductVariation::where(function ($q) {
             $q->whereHas('product', function ($q) {
                 $q->where('name', 'LIKE', '%' . request('keyword') . '%');
-            })->orWhere('name', 'LIKE', '%' . request('keyword') . '%');
+            })->orWhere('name', 'LIKE', '%' . request('keyword') . '%')->orWhere('code', 'LIKE', '%' . request('keyword') . '%');
         })
         ->with(['warehouse' => function ($q) {
             $q->select(['id', 'title']);

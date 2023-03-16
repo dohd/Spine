@@ -81,7 +81,7 @@
                                         <th>UOM</th>
                                         <th>Unit (Qty)</th>
                                         <th>Purchase Price</th>
-                                        <th>{{ trans('general.createdat') }}</th>
+                                        <th>Expiry Date</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -174,7 +174,7 @@
                     {data: 'unit', name: 'unit'},                   
                     {data: 'qty', name: 'qty'},
                     {data: 'purchase_price', name: 'purchase_price'},
-                    {data: 'created_at', name: 'created_at'},
+                    {data: 'expiry', name: 'expiry'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
