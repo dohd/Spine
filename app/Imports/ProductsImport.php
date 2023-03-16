@@ -45,7 +45,7 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
                 if (empty($row[3])) throw new \Error('Unit is required on row no. $row_num');
 
                 $unit = Productvariable::where(['code' => $row[3], 'unit_type' => 'base'])->first();
-                $product = new  Product([
+                $product = Product::create([
                     'productcategory_id' => $category_id,
                     'name' => $row[0],
                     'taxrate' => numberClean($row[1]),
@@ -54,8 +54,7 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
                     'code_type' => $row[10],
                     'ins' => $this->data['ins'],
                 ]);
-                $product->save();
-                $prodvariation = new ProductVariation([
+                $prodvariation = ProductVariation::create([
                     'parent_id' => $product->id,
                     'name' => $product->name,
                     'warehouse_id' => $warehouse_id,
@@ -69,7 +68,6 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
                     'expiry' => date_for_database($row[12]),
                     'ins' => $product->ins,
                 ]);
-                $prodvariation->save();
                 ++$this->rows;
             }            
         }
