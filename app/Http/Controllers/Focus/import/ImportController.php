@@ -32,6 +32,7 @@ class ImportController extends Controller
     {
         $labels = [
             'customer' => trans('import.import_customers'),
+            'supplier' => 'Import Suppliers',
             'products' => trans('import.import_products'),
             'accounts' => trans('import.import_accounts'),
             'equipments' => 'Import Equipments',
@@ -78,6 +79,7 @@ class ImportController extends Controller
         $data['ins'] = auth()->user()->ins;
         $models = [
             'customer' => new \App\Imports\CustomersImport($data),
+            'supplier' => new \App\Imports\SuppliersImport($data),
             'products' => new \App\Imports\ProductsImport($data),
             'accounts' => new \App\Imports\AccountsImport($data),
             'equipments' => new \App\Imports\EquipmentsImport($data),

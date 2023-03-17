@@ -1274,6 +1274,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['supplier'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Suppliers
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item" href="{{route('biller.import.general',['products'])}}">
                                             <i class="fa fa-file-excel-o"></i> Products
                                         </a>
