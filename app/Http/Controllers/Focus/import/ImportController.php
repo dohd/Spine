@@ -96,18 +96,17 @@ class ImportController extends Controller
             ini_set('memory_limit', -1);
 
             Excel::import($model, Storage::disk('public')->path($file_path));
+
+            $row_count = $model->getRowCount();
+            if (!$row_count) trigger_error('{$row_count} rows imported');
+            Storage::disk('public')->delete($file_path);
+
             DB::commit();
+            return redirect()->back()->with('flash_success', trans('import.import_process_success') . " {$row_count} rows imported successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             Storage::disk('public')->delete($file_path);
-            printlog($e->getMessage());
-            throw ValidationException::withMessages([trans('import.import_process_failed') . ' OR Try a different file format']);
+            return redirect()->back()->with('flash_error', trans('import.import_process_failed'));
         }
-
-        $row_count = $model->getRowCount();
-        if (!$row_count) throw ValidationException::withMessages([trans('import.import_process_failed') . " {$row_count} rows imported"]);
-        Storage::disk('public')->delete($file_path);
-
-        return redirect()->back()->with('flash_success', trans('import.import_process_success') . " {$row_count} rows imported successfully");
     }    
 }
