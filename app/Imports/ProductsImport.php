@@ -31,7 +31,7 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
     {
         // dd($rows);
         if (empty($this->data['category_id']) || empty($this->data['warehouse_id']))
-            throw new \Error('Category or Warehouse is required!');
+            trigger_error('Category or Warehouse is required!');
             
         $category_id = $this->data['category_id'];
         $warehouse_id = $this->data['warehouse_id'];
