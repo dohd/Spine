@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\equipment\Equipment;
-use Error;
+use App\Models\equipmentcategory\EquipmentCategory;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -14,9 +14,9 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
 {
     /**
      *
-     * @var int $row_count
+     * @var int $rows
      */
-    private $row_count = 0;
+    private $rows = 0;
 
     /**
      *
@@ -35,56 +35,50 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
      * @return void
      */
     public function collection(Collection $rows)
-    {        
-        $columns = [
-            'equip_serial','unique_id','capacity','location','machine_gas','make_and_type',
-            'model_and_model_no','equipment_category_id','service_rate','building','floor'
-        ];
-        $tid = Equipment::where('ins', auth()->user()->ins)->max('tid') + 1;
+    {   
+        // dd($rows);
+        if (empty($this->data['customer_id'])) trigger_error('Customer is required!');
 
-        $row_count = 0;
-        $label_count = count($columns);
-        foreach ($rows as $i => $row) {
-            $row = array_slice($row->toArray(), 0, $label_count);
-            
-            if ($i == 0) {
-                $omitted_cols = array_diff($columns, $row);
-                if ($omitted_cols) throw new Error('Please check uploaded template! Template column label mismatch: ' . implode(', ', $omitted_cols));
-                continue;
-            }
+        $equip_data = [];
+        $tid = Equipment::where('ins', $this->data['ins'])->max('tid')+1;
+        foreach ($rows as $key => $row) {
+            $row_num = $key+1;
+            if ($row_num == 1 && $row->count() < 11) {
+                trigger_error('Missing columns! Use latest CSV file template.');
+            } elseif ($row_num > 1) {
+                if (empty($row[0])) trigger_error('Equipment Category is required!');
 
-            $row_data = array_combine($columns, $row);
-            $row_data = array_replace($row_data, [
-                'make_type' => $row_data['make_and_type'],
-                'model' => $row_data['model_and_model_no'],
-                'tid' => $tid,
-                'customer_id' => $this->data['customer_id'],
-                'branch_id' => $this->data['branch_id'],
-                'ins' => auth()->user()->ins,
-            ]);
-            unset($row_data['make_and_type'], $row_data['model_and_model_no']);
-            foreach ($row_data as $key => $val) {
-                if ($key == 'service_rate') 
-                    $row_data[$key] = numberClean($row_data['service_rate']);
-                if (strcasecmp($val, 'null') == 0) $row_data[$key] = null;
-            }
+                $category = EquipmentCategory::where('name', 'LIKE', $row[0])->first();
+                if (!$category) $category = EquipmentCategory::create(['name' => $row[0], 'ins' => $this->data['ins']]);
 
-            $result = Equipment::create($row_data);
-            if ($result) {
-                $row_count++;
+                $equip_data[] = [
+                    'equipment_category_id' => $category->id,
+                    'customer_id' => $this->data['customer_id'],
+                    'branch_id' => isset($this->data['branch_id'])? $this->data['branch_id'] : null,
+                    'equip_serial' => $row[1],
+                    'unique_id' => $row[2],
+                    'capacity' => $row[3],
+                    'location' => $row[4],
+                    'machine_gas' => $row[5],
+                    'make_type' => $row[6],
+                    'model' => $row[7],
+                    'service_rate' => numberClean($row[8]),
+                    'building' => $row[9],
+                    'floor' => $row[10],
+                    'tid' => $tid,
+                    'ins' => $this->data['ins'],
+                ];
                 $tid++;
-            }
+                ++$this->rows;
+            }            
         }
-        
-        if (!$row_count) throw new Error('Please fill template with required data');
-        $this->row_count = $row_count;
+        Equipment::insert($equip_data);
     }
 
     public function rules(): array
     {
         return [
             '0' => 'required|string',
-            '1' => 'required',
         ];
     }
 
@@ -95,11 +89,11 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
 
     public function getRowCount(): int
     {
-        return $this->row_count;
+        return $this->rows;
     }
 
     public function startRow(): int
     {
-        return 2;
+        return 1;
     }
 }

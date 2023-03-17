@@ -59,7 +59,7 @@ class ImportController extends Controller
 
         $extension = File::extension($request->import_file->getClientOriginalName());
         if (!in_array($extension, ['xlsx', 'xls', 'csv'])) 
-            throw ValidationException::withMessages([trans('import.import_invalid_file')]);
+            throw ValidationException::withMessages(['File extension unsupported!']);
 
         $file = $request->file('import_file');
         $file_name = $file->getClientOriginalName();
