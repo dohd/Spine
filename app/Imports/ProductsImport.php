@@ -39,10 +39,10 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
         foreach ($rows as $key => $row) {
             $row_num = $key+1;
             if ($row_num == 1 && $row->count() < 13) {
-                throw new \Error('Missing columns! Use latest CSV file template.');
+                trigger_error('Missing columns! Use latest CSV file template.');
             } elseif ($row_num > 1) {
-                if (empty($row[0])) throw new \Error('Product Name is required on row no. $row_num');
-                if (empty($row[3])) throw new \Error('Unit is required on row no. $row_num');
+                if (empty($row[0])) trigger_error('Product Name is required on row no. $row_num');
+                if (empty($row[3])) trigger_error('Unit is required on row no. $row_num');
 
                 $unit = Productvariable::where(['code' => $row[3], 'unit_type' => 'base'])->first();
                 $product = Product::create([
@@ -54,7 +54,7 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
                     'code_type' => $row[10],
                     'ins' => $this->data['ins'],
                 ]);
-                $prodvariation = ProductVariation::create([
+                ProductVariation::create([
                     'parent_id' => $product->id,
                     'name' => $product->name,
                     'warehouse_id' => $warehouse_id,
@@ -77,7 +77,7 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
     {
         return [
             '0' => 'required|string',
-            '1' => 'required',
+            '3' => 'required|string',
         ];
     }
 
@@ -93,6 +93,6 @@ class ProductsImport implements ToCollection, WithBatchInserts, WithValidation, 
 
     public function startRow(): int
     {
-        return 2;
+        return 1;
     }
 }
