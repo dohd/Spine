@@ -94,7 +94,11 @@ class ProjectsController extends Controller
 
         $data['ins'] = auth()->user()->ins;
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.projects.index'), ['flash_error' => 'Error Creating Project']);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
     }
@@ -125,7 +129,11 @@ class ProjectsController extends Controller
         $data = $request->except(['_token', 'main_quote', 'other_quote']);
         $data_items = array_merge([$request->main_quote], ...array_values($request->only('other_quote')));
 
-        $this->repository->update($project, compact('data', 'data_items'));
+        try {
+            $this->repository->update($project, compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.projects.index'), ['flash_error' => 'Error Updating Project']);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
     }
@@ -139,7 +147,11 @@ class ProjectsController extends Controller
      */
     public function destroy(Project $project)
     {
-        $this->repository->delete($project);
+        try {
+            $this->repository->delete($project);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.projects.index'), ['flash_error' => 'Error Deleting Project']);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.deleted')]);
     }

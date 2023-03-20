@@ -72,7 +72,11 @@ class StockTransfersController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_error' => 'Error Creating Stock Transfer']);
+        }
 
         return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_success' => 'Stock Transfer Created Successfully']);
     }
@@ -99,7 +103,11 @@ class StockTransfersController extends Controller
      */
     public function update(Request $request, StockTransfer $stock_transfer)
     {
-        $this->repository->update($stock_transfer, $request->except('_token'));
+        try {
+            $this->repository->update($stock_transfer, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_error' => 'Error Updating StockTransfer']);
+        }
 
         return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_success' => 'StockTransfer Updated Successfully']);
     }
@@ -112,7 +120,11 @@ class StockTransfersController extends Controller
      */
     public function destroy(StockTransfer $stock_transfer)
     {
-        $this->repository->delete($stock_transfer);
+        try {
+            $this->repository->delete($stock_transfer);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_error' => 'Error Deleting StockTransfer']);
+        }
 
         return new RedirectResponse(route('biller.stock_transfers.index'), ['flash_success' => 'StockTransfer Deleted Successfully']);
     }

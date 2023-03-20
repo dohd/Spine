@@ -59,7 +59,11 @@ class UtilityBillController extends Controller
      */
     public function store(Request $request)
     {
-        $this->respository->create($request->except('_token'));
+        try {
+            $this->respository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.utility-bills.index'), ['flash_error' => 'Error Creating Bill']);
+        }
 
         return new RedirectResponse(route('biller.utility-bills.index'), ['flash_success' => 'Bill Created Successfully']);
     }

@@ -94,12 +94,16 @@ class SuppliersController extends Controller
 
         $data['ins'] = auth()->user()->ins;
 
-        $result = $this->repository->create(compact('data', 'account_data', 'payment_data'));
+        try {
+            $result = $this->repository->create(compact('data', 'account_data', 'payment_data'));
 
-        if ($request->ajax()) {
-            $result['random_password'] = null;
-            return response()->json($result);
-        } 
+            if ($request->ajax()) {
+                $result['random_password'] = null;
+                return response()->json($result);
+            } 
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.suppliers.index'), ['flash_error' => 'Error Creating Supplier']);
+        }
 
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.created')]);
     }
@@ -137,7 +141,11 @@ class SuppliersController extends Controller
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
 
-        $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));        
+        try {
+            $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.suppliers.index'), ['flash_error' => 'Error Updating Supplier']);
+        }        
        
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.updated')]);
     }
@@ -151,7 +159,11 @@ class SuppliersController extends Controller
      */
     public function destroy(Supplier $supplier)
     {
-        $this->repository->delete($supplier);
+        try {
+            $this->repository->delete($supplier);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.suppliers.index'), ['flash_error' => 'Error Deleting Supplier']);
+        }
 
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.deleted')]);
     }

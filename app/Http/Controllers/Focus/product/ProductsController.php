@@ -90,7 +90,11 @@ class ProductsController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
-        $this->repository->create($request->except(['_token']));
+        try {
+            $this->repository->create($request->except(['_token']));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.products.index'), ['flash_error' => 'Error Creating Product']);
+        }
 
         return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.created')]);
     }
@@ -116,7 +120,11 @@ class ProductsController extends Controller
      */
     public function update(EditProductRequest $request, Product $product)
     {
-        $this->repository->update($product, $request->except(['_token']));
+        try {
+            $this->repository->update($product, $request->except(['_token']));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.products.index'), ['flash_error' => 'Error updating Product']);
+        }
         
         return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.updated')]);
     }

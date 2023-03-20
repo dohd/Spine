@@ -90,7 +90,11 @@ class WithholdingsController extends Controller
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['paid']; });
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.withholdings.index'), ['flash_error' => 'Error Creating Withholding Certificate']);
+        }
 
        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Created Successfully']);
     }
@@ -118,7 +122,11 @@ class WithholdingsController extends Controller
      */
     public function update(StoreWithholdingRequest $request, Withholding $withholding)
     {
-        $this->repository->update($withholding, $request->except('_token'));
+        try {
+            $this->repository->update($withholding, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.withholdings.index'), ['flash_error' => 'Error Updating Withholding Certificate']);
+        }
 
         return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Updated Successfully']);
     }
@@ -132,7 +140,11 @@ class WithholdingsController extends Controller
      */
     public function destroy(Withholding $withholding)
     {
-        $this->repository->delete($withholding);
+        try {
+            $this->repository->delete($withholding);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Error Deleting Withholding Certificate']);
+        }
 
         return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Deleted Successfully']);
     }
