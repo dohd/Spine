@@ -73,7 +73,11 @@ class TaskSchedulesController extends Controller
         $data_items = array_map(fn($v) => ['equipment_id' => $v], explode(',', request('equipment_ids')));
         if (!$data_items) throw ValidationException::withMessages(['equipments required!']);
     
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.taskschedules.index'), ['flash_error' => 'Errorn loading Task Schedule Equipments']);
+        }
         
         return new RedirectResponse(route('biller.taskschedules.index'), ['flash_success' => 'Task Schedule Equipments loaded successfully']);
     }
@@ -128,7 +132,11 @@ class TaskSchedulesController extends Controller
         $data_items = array_map(fn($v) => ['id' => $v], explode(',', request('equipment_ids')));
         if (!$data_items) throw ValidationException::withMessages(['equipments required!']);
 
-        $this->repository->update($taskschedule, compact('data', 'data_items'));
+        try {
+            $this->repository->update($taskschedule, compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.taskschedules.index'), ['flash_error' => 'Error Updating Task Schedule']);
+        }
 
         return new RedirectResponse(route('biller.taskschedules.index'), ['flash_success' => 'Task Schedule updated successfully']);        
     }
@@ -141,10 +149,14 @@ class TaskSchedulesController extends Controller
      */
     public function destroy(TaskSchedule $taskschedule)
     {
-        $result = $this->repository->delete($taskschedule);
+        try {
+            $result = $this->repository->delete($taskschedule);
 
-        $msg = ['flash_success' => 'Task Schedule deleted successfully'];
-        if (!$result) $msg = ['flash_error' => 'Task Schedule has a service report!'];
+            $msg = ['flash_success' => 'Task Schedule deleted successfully'];
+            if (!$result) $msg = ['flash_error' => 'Task Schedule has a service report!'];
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.taskschedules.index'), $msg);
+        }
 
         return new RedirectResponse(route('biller.taskschedules.index'), $msg);
     }

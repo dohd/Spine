@@ -90,8 +90,12 @@ class CurrenciesController extends Controller
         ]);
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.currencies.index'), ['flash_error' => 'Error Creating Currencies']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.currencies.index'), ['flash_success' => trans('alerts.backend.currencies.created')]);
     }
@@ -128,8 +132,12 @@ class CurrenciesController extends Controller
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($currency, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($currency, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.currencies.index'), ['flash_error' => 'Error Updating Currencies']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.currencies.index'), ['flash_success' => trans('alerts.backend.currencies.updated')]);
     }
@@ -143,11 +151,16 @@ class CurrenciesController extends Controller
      */
     public function destroy(Currency $currency, ManageCompanyRequest $request)
     {
-        //Calling the delete method on repository
-        $result = $this->repository->delete($currency);
-        //returning with successfull message
-        if ($result) return new RedirectResponse(route('biller.currencies.index'), ['flash_success' => trans('alerts.backend.currencies.deleted')]);
+       try {
+         //Calling the delete method on repository
+         $this->repository->delete($currency);
+       } catch (\Throwable $th) {
         return new RedirectResponse(route('biller.currencies.index'), ['flash_error' => trans('meta.delete_error')]);
+       }
+        //returning with successfull message
+        // if ($result) return new RedirectResponse(route('biller.currencies.index'), ['flash_success' => trans('alerts.backend.currencies.deleted')]);
+        // return new RedirectResponse(route('biller.currencies.index'), ['flash_error' => trans('meta.delete_error')]);
+        return new RedirectResponse(route('biller.currencies.index'), ['flash_success' => trans('alerts.backend.currencies.deleted')]);
     }
 
     /**

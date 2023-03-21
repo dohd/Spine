@@ -80,8 +80,12 @@ class TermsController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.terms.index'), ['flash_error' => 'Error Creating Terms']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.created')]);
     }
@@ -109,8 +113,12 @@ class TermsController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($term, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($term, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.terms.index'), ['flash_error' => 'Error Updating Terms']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.updated')]);
     }

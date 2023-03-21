@@ -95,7 +95,11 @@ class OpeningStockController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.opening_stock.index'), ['flash_error' => 'Error Creating Opening Stock']);
+        }
 
         return new RedirectResponse(route('biller.opening_stock.index'), ['flash_success' => 'Opening Stock Created Successfully']);
     }
@@ -122,7 +126,11 @@ class OpeningStockController extends Controller
      */
     public function update(Request $request, OpeningStock $opening_stock)
     {
-        $this->repository->update($opening_stock, $request->except('_token'));
+        try {
+            $this->repository->update($opening_stock, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.opening_stock.index'), ['flash_error' => 'Error Updating Opening Stock']);
+        }
 
         return new RedirectResponse(route('biller.opening_stock.index'), ['flash_success' => 'Opening Stock Updated Successfully']);
     }
@@ -135,7 +143,11 @@ class OpeningStockController extends Controller
      */
     public function destroy(OpeningStock $opening_stock)
     {
-        $this->repository->delete($opening_stock);
+        try {
+            $this->repository->delete($opening_stock);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.opening_stock.index'), ['flash_error' => 'Error Deleting Opening Stock']);
+        }
 
         return new RedirectResponse(route('biller.opening_stock.index'), ['flash_success' => 'Opening Stock Deleted Successfully']);
     }

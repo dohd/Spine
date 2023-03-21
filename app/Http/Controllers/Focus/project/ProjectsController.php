@@ -225,7 +225,11 @@ class ProjectsController extends Controller
         $data_items = modify_array($data_items);
         $data_skillset = modify_array($data_skillset);
 
-        $this->repository->create_budget(compact('data', 'data_items', 'data_skillset'));
+        try {
+            $this->repository->create_budget(compact('data', 'data_items', 'data_skillset'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.projects.index'), ['flash_error' => 'Error Creating Budget']);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Budget created successfully']);
     }
@@ -248,7 +252,11 @@ class ProjectsController extends Controller
         $data_items = modify_array($data_items);
         $data_skillset = modify_array($data_skillset);
 
-        $this->repository->update_budget($budget, compact('data', 'data_items', 'data_skillset'));
+        try {
+            $this->repository->update_budget($budget, compact('data', 'data_items', 'data_skillset'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.projects.index'), ['flash_error' => 'Error Updating Project Budget']);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project Budget updated successfully']);
     }

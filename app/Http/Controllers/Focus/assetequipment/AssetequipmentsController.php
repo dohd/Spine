@@ -94,7 +94,11 @@ class AssetequipmentsController extends Controller
 
         $input['ins'] = auth()->user()->ins;
 
-        $this->repository->create($input);
+        try {
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.assetequipments.index'), ['flash_error' => 'Error Creating Asset Equipment']);
+        }
 
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Created']);
     }
@@ -128,7 +132,12 @@ class AssetequipmentsController extends Controller
         // extract request input
         $input = $request->except(['_token', 'ins']);
 
-        $this->repository->update($assetequipment, $input);
+        
+        try {
+            $this->repository->update($assetequipment, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.assetequipments.index'), ['flash_error' => 'Error Updating Asset Equipment']);
+        }
 
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Updated']);
     }
@@ -142,7 +151,12 @@ class AssetequipmentsController extends Controller
      */
     public function destroy(Assetequipment $assetequipment)
     {
-        $this->repository->delete($assetequipment);
+        
+        try {
+            $this->repository->delete($assetequipment);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.assetequipments.index'), ['flash_error' => 'Error Deleting Asset Equipment']);
+        }
 
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Deleted']);
     }

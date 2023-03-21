@@ -91,7 +91,11 @@ class LoansController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except(['_token']));
+        try {
+            $this->repository->create($request->except(['_token']));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.loans.index'), ['flash_error' => 'Error Creating Loan']);
+        }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan Created Successfully']);
     }
@@ -105,7 +109,11 @@ class LoansController extends Controller
      */
     public function update(Request $request, Loan $loan)
     {
-        $this->repository->update($loan, $request->except(['_token']));
+        try {
+            $this->repository->update($loan, $request->except(['_token']));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.loans.index'), ['flash_error' => 'Error Updating Loan']);
+        }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan Updated Successfully']);
     }
@@ -130,7 +138,11 @@ class LoansController extends Controller
      */
     public function destroy(Loan $loan)
     {
-        $this->repository->delete($loan);
+        try {
+            $this->repository->delete($loan);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.loans.index'), ['flash_error' => 'Error Deleting Loan']);
+        }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan Deleted Successfully']);
     }

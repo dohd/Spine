@@ -75,7 +75,11 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.attendances.index'), ['flash_error' => 'Error Creating Attendance']);
+        }
 
         return new RedirectResponse(route('biller.attendances.index'), ['flash_success' => 'Attendance Created Successfully']);
     }
@@ -102,7 +106,12 @@ class AttendanceController extends Controller
      */
     public function update(Request $request, Attendance $attendance)
     {
-        $this->repository->update($attendance, $request->except('_token'));
+        
+        try {
+            $this->repository->update($attendance, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.attendances.index'), ['flash_error' => 'Error Updating Attendance']);
+        }
 
         return new RedirectResponse(route('biller.attendances.index'), ['flash_success' => 'Attendance Updated Successfully']);
     }
@@ -115,7 +124,11 @@ class AttendanceController extends Controller
      */
     public function destroy(Attendance $attendance)
     {
-        $this->repository->delete($attendance);
+        try {
+            $this->repository->delete($attendance);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.attendances.index'), ['flash_error' => 'Error Deleting Attendance']);
+        }
 
         return new RedirectResponse(route('biller.attendances.index'), ['flash_success' => 'Attendance Deleted Successfully']);
     }

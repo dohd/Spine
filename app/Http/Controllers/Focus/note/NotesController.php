@@ -83,8 +83,12 @@ class NotesController extends Controller
         $input = $request->only(['title', 'content']);
         $input['ins'] = auth()->user()->ins;
         $input['user_id'] = auth()->user()->id;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.notes.index'), ['flash_error' => 'Error Creating Notes']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.created')]);
     }
@@ -113,8 +117,12 @@ class NotesController extends Controller
         //Input received from the request
 
         $input = $request->only(['title', 'content']);
-        //Update the model using repository update method
-        $this->repository->update($note, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($note, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.notes.index'), ['flash_error' => 'Error Updating Notes']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.updated')]);
     }

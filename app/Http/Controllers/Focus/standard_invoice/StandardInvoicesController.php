@@ -101,7 +101,11 @@ class StandardInvoicesController extends Controller
             'product_id'
         ]);
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.invoices.index'), ['flash_error' => 'Error Creating Invoice']);
+        }
 
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully created']);
     }

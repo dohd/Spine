@@ -81,8 +81,12 @@ class TransactioncategoriesController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_error' => 'Error Creating Transaction Category']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.created')]);
     }
@@ -110,8 +114,12 @@ class TransactioncategoriesController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($transactioncategory, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($transactioncategory, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_error' => 'Error Updating Transaction Categories']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.updated')]);
     }

@@ -81,8 +81,12 @@ class TemplatesController extends Controller
     {
         //Input received from the request
         $input = $request->only(['title', 'body']);
-        //Update the model using repository update method
-        $this->repository->update($template, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($template, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.templates.index'), ['flash_error' => 'Error Updating Template']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.templates.index'), ['flash_success' => trans('alerts.backend.templates.updated')]);
     }

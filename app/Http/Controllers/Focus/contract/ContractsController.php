@@ -74,7 +74,11 @@ class ContractsController extends Controller
         $schedule_data = modify_array($schedule_data);
         $equipment_data = modify_array($equipment_data);
 
-        $this->repository->create(compact('contract_data', 'schedule_data', 'equipment_data'));
+        try {
+            $this->repository->create(compact('contract_data', 'schedule_data', 'equipment_data'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.contracts.index'), ['flash_error' => 'Error Creating Contract']);
+        }
 
         return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract created successfully']);
     }
@@ -134,8 +138,11 @@ class ContractsController extends Controller
         $equipment_data = modify_array($equipment_data); 
         if (!$equipment_data) throw ValidationException::withMessages(['contract equipments required!']);
             
-        $this->repository->update($contract, compact('contract_data', 'schedule_data', 'equipment_data'));
-
+        try {
+            $this->repository->update($contract, compact('contract_data', 'schedule_data', 'equipment_data'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.contracts.index'), ['flash_error' => 'Error Updating Contract']);
+        }
         return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract edited successfully']);
     }
 
@@ -145,7 +152,11 @@ class ContractsController extends Controller
      */
     public function destroy(Contract $contract)
     {
-        $this->repository->delete($contract);
+        try {
+            $this->repository->delete($contract);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.contracts.index'), ['flash_error' => 'Error Deleting Contract']);
+        }
 
         return new RedirectResponse(route('biller.contracts.index'), ['flash_success' => 'Contract deleted successfully']);
     }

@@ -70,15 +70,20 @@ class CreditNotesController extends Controller
     $data['ins'] = auth()->user()->ins;
     $data['user_id'] = auth()->user()->id;
 
-    $result = $this->repository->create($data);
 
-    $msg = 'Credit Note created successfully';
-    $route = route('biller.creditnotes.index');
-    if ($result['is_debit']) {
-      $msg = 'Debit Note created successfully';
-      $route = route('biller.creditnotes.index', 'is_debit=1');
+    try {
+      $result = $this->repository->create($data);
+
+      $msg = 'Credit Note created successfully';
+      $route = route('biller.creditnotes.index');
+      if ($result['is_debit']) {
+        $msg = 'Debit Note created successfully';
+        $route = route('biller.creditnotes.index', 'is_debit=1');
+      }
+  
+    } catch (\Throwable $th) {
+      return new RedirectResponse($route, ['flash_error' => 'Error Creating Credit Notes']);
     }
-
     return new RedirectResponse($route, ['flash_success' => $msg]);
   }
 
@@ -128,13 +133,17 @@ class CreditNotesController extends Controller
     $data['ins'] = auth()->user()->ins;
     $data['user_id'] = auth()->user()->id;
 
-    $this->repository->update($creditnote, $data);
+    try {
+      $this->repository->update($creditnote, $data);
 
-    $msg = 'Credit Note updated successfully';
-    $route = route('biller.creditnotes.index');
-    if ($creditnote['is_debit']) {
-      $msg = 'Debit Note updated successfully';
-      $route = route('biller.creditnotes.index', 'is_debit=1');
+      $msg = 'Credit Note updated successfully';
+      $route = route('biller.creditnotes.index');
+      if ($creditnote['is_debit']) {
+        $msg = 'Debit Note updated successfully';
+        $route = route('biller.creditnotes.index', 'is_debit=1');
+      }
+    } catch (\Throwable $th) {
+      return new RedirectResponse($route, ['flash_error' => 'Error Updating Credit Notes']);
     }
 
     return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -148,13 +157,17 @@ class CreditNotesController extends Controller
    */
   public function destroy(CreditNote $creditnote)
   {
-    $this->repository->delete($creditnote);
+    try {
+      $this->repository->delete($creditnote);
 
-    $msg = 'Credit Note updated successfully';
-    $route = route('biller.creditnotes.index');
-    if ($creditnote['is_debit']) {
-      $msg = 'Debit Note updated successfully';
-      $route = route('biller.creditnotes.index', 'is_debit=1');
+      $msg = 'Credit Note updated successfully';
+      $route = route('biller.creditnotes.index');
+      if ($creditnote['is_debit']) {
+        $msg = 'Debit Note updated successfully';
+        $route = route('biller.creditnotes.index', 'is_debit=1');
+      }
+    } catch (\Throwable $th) {
+      return new RedirectResponse($route, ['flash_error' => 'Error Deleting Credit Notes']);
     }
 
     return new RedirectResponse($route, ['flash_success' => $msg]);

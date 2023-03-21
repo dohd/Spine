@@ -89,7 +89,11 @@ class ChargesController extends Controller
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
 
-        $this->repository->create($data);
+        try {
+            $this->repository->create($data);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.charges.index'), ['flash_error' => 'Error Creating Charge']);
+        }
 
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully created']);
     }
@@ -122,8 +126,12 @@ class ChargesController extends Controller
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($charge, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($charge, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.charges.index'), ['flash_error' => 'Error Updating Charge']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully updated']);
     }
@@ -137,8 +145,12 @@ class ChargesController extends Controller
      */
     public function destroy(Charge $charge, StoreChargeRequest  $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($charge);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($charge);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.charges.index'), ['flash_error' => 'Error Deleting Charge']);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully deleted']);
     }

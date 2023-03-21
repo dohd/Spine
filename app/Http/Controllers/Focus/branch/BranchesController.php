@@ -93,7 +93,11 @@ class BranchesController extends Controller
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
 
-        $id = $this->repository->create($input);
+        try {
+            $id = $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.branches.index'), ['flash_error' => 'Error Creating Branch']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Created' . ' <a href="' . route('biller.branches.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
     }
@@ -135,7 +139,11 @@ class BranchesController extends Controller
         //Input received from the request
         $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone', 'branch_code']);
         //Update the model using repository update method
-        $this->repository->update($branch, $input);
+        try {
+            $this->repository->update($branch, $input);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.branches.index'), ['flash_error' => 'Error Updating Branch']);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Updated'  . ' <a href="' . route('biller.branches.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
     }
@@ -149,10 +157,14 @@ class BranchesController extends Controller
      */
     public function destroy(Branch $branch)
     {
-        $res = $this->repository->delete($branch);
+        try {
+            $res = $this->repository->delete($branch);
 
-        $params = ['flash_success' => 'Branch successfully deleted'];
-        if (!$res) $params = ['flash_error' => 'Branch attached to Ticket'];
+            $params = ['flash_success' => 'Branch successfully deleted'];
+            if (!$res) $params = ['flash_error' => 'Branch attached to Ticket'];
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.branches.index'), $params);
+        }
 
         return new RedirectResponse(route('biller.branches.index'), $params);
     }

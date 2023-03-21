@@ -103,7 +103,11 @@ class BillPaymentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.billpayments.index'), ['flash_error' => 'Error Creating Bill Payment']);
+        }
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Created Successfully']);
     }
@@ -142,7 +146,12 @@ class BillPaymentController extends Controller
      */
     public function update(Request $request, Billpayment $billpayment)
     {
-        $this->repository->update($billpayment, $request->except('_token', 'balance'));
+        
+        try {
+            $this->repository->update($billpayment, $request->except('_token', 'balance'));
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.billpayments.index'), ['flash_error' => 'Error Updating Bill Payment']);
+        }
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Updated Successfully']);
     }
@@ -155,7 +164,12 @@ class BillPaymentController extends Controller
      */
     public function destroy(Billpayment $billpayment)
     {
-        $this->repository->delete($billpayment);
+        
+        try {
+            $this->repository->delete($billpayment);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.billpayments.index'), ['flash_error' => 'Error Deleting Bill Payment']);
+        }
 
         return new RedirectResponse(route('biller.billpayments.index'), ['flash_success' => 'Bill Payment Deleted Successfully']);
     }
