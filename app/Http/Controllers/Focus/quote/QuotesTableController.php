@@ -94,12 +94,8 @@ class QuotesTableController extends Controller
                 //dd($quote);
                 $links = '';
                 $tid = gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid);
-                $status = $quote->budget? 'budgeted' : 'pending';
-                // $links .= '<buttion data_id="'.$quote.'" data-toggle="modal"
-                // data-target="#AddBudgetModal" class="quote-data" id="quote-data" title="Budget">
-                //     <b>'. $tid . '</b></button> :'. $status .'<br>';
-                $links .= '<a href="'. route('biller.projects.create_project_budget', $quote). '" data-toggle="tooltip" title="Budget">
-                <b>'. $tid . '</b></a> :'. $status .'<br>';
+                $status = $quote->budget? 'Budgeted' : 'Not Budgeted';
+                $links .= '<b>'.$status.'</b>';
                 return $links;
                     
             })
@@ -109,6 +105,28 @@ class QuotesTableController extends Controller
             })
             ->addColumn('sum_total', function ($quote) use($sum_total) {
                 return $sum_total;
+            })
+            ->addColumn('stats', function ($quote) {
+                if($quote->budget){
+                    return '<div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Action
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item quote_delete text-danger" href="${url}">Dettach</a>
+                                </div>
+                            </div> ';
+                }
+                return '<div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Action
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item create" href="'. route('biller.projects.create_project_budget', $quote). '">Create Budget</a>
+                                <a class="dropdown-item quote_delete text-danger" href="${url}">Delete</a>
+                            </div>
+                        </div> 
+                ';
             })
             ->addColumn('actions', function ($quote) {
                 $action_buttons = $quote->action_buttons;

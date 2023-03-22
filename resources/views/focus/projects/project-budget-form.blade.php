@@ -2,6 +2,10 @@
 <div class="form-group row">
     <div class="col-12">
         <h3 class="title">Generate Budget</h3>  
+        @php
+            $project_id = App\Models\project\ProjectQuote::where('quote_id', $quote->id)->first()->project_id;
+        @endphp
+        
     </div>
 </div>
 
@@ -124,7 +128,8 @@
                 </span>
             </div>
             <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
-        </div>                            
+        </div>     
+        <a href="{{url('projects',[$project_id])}}" class="btn btn-danger btn-lg float-start">Cancel</a>                       
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
     </div>                              
 </div>

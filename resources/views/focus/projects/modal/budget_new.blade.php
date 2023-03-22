@@ -55,7 +55,7 @@
                             <div class="card">
                                 <table id="budgetviewTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="80%">
                                     <thead>
-                                        <tr>
+                                        <tr class="item_header bg-gradient-directional-blue white">
                                             <th>#</th>
                                             <th width="35%" >Product</th>
                                             <th>Approved Qty</th>
@@ -72,51 +72,61 @@
 
                         <div class="content-body mt-5">
                             <div class="card">
-                                <table id="budgetviewskillsetTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="50%">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Skill Type</th>
-                                            <th>Charge</th>
-                                            <th>Work Hrs</th>
-                                            <th>Count Technician</th>
-                                            <th>Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>            
+                                <div class="form-group row">
+                                    <div class="col-8">
+                                        <table id="budgetviewskillsetTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="50%">
+                                            <thead>
+                                                <tr class="item_header bg-gradient-directional-blue white">
+                                                    <th>#</th>
+                                                    <th>Skill Type</th>
+                                                    <th>Charge</th>
+                                                    <th>Work Hrs</th>
+                                                    <th>Count Technician</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table> 
+                                        <div class="form-group float-right mt-1">
+                                            <div><label for="budget-total">Total Amount</label></div>
+                                            <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <div><label for="tool">Extra Note</label></div>
+                                            <textarea name="note" id="note" cols="45" rows="6" class="form-control html_editor" readonly>
+                                                @isset($budget)
+                                                    {{ $budget->note }}
+                                                @endisset
+                                            </textarea>   
+                                        </div>  
+
+                                        <div class="form-group">
+                                            <div>
+                                                <label for="quote_total">Quote Total</label>
+                                                <span class="text-danger">(VAT Exc)</span>
+                                            </div>
+                                            {{ Form::text('quote_total', null, ['class' => 'form-control', 'id' => 'quote_total', 'readonly']) }}
+                                        </div>
+                                        <div class="form-group">
+                                            <div>
+                                                <label for="budget-total">Budget Total</label>&nbsp;
+                                                <span class="text-primary font-weight-bold">
+                                                    (E.P: &nbsp;<span class="text-dark profit">0</span>)
+                                                </span>
+                                            </div>
+                                            <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
+                                        </div>     
+                                    </div>
+                                </div>           
                             </div>
                         </div>
                         <div class="content-body">
                            <div class="col-4 float-right">
-                            <div class="form-group">
-                                <div><label for="budget-total">Total Amount</label></div>
-                                <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
-                            </div>
-                            <div class="form-group">
-                                <div><label for="tool">Extra Note</label></div>
-                                <textarea name="note" id="note" cols="45" rows="6" class="form-control html_editor" readonly>
-                                    @isset($budget)
-                                        {{ $budget->note }}
-                                    @endisset
-                                </textarea>   
-                            </div>                        
-                            <div class="form-group">
-                                <div>
-                                    <label for="quote_total">Quote Total</label>
-                                    <span class="text-danger">(VAT Exc)</span>
-                                </div>
-                                {{ Form::text('quote_total', null, ['class' => 'form-control', 'id' => 'quote_total', 'readonly']) }}
-                            </div>
-                            <div class="form-group">
-                                <div>
-                                    <label for="budget-total">Budget Total</label>&nbsp;
-                                    <span class="text-primary font-weight-bold">
-                                        (E.P: &nbsp;<span class="text-dark profit">0</span>)
-                                    </span>
-                                </div>
-                                <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
-                            </div>     
+                            
+                                                  
+                           
                             </div> 
                         </div>
                     </div>

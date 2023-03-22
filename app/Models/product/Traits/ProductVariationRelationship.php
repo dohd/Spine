@@ -42,6 +42,11 @@ trait ProductVariationRelationship
         return $this->belongsTo(Product::class, 'parent_id');
     }
 
+    public function quote_service_items()
+    {
+        return $this->belongsTo(Product::class, 'parent_id')->where('stock_type', 'service');
+    }
+
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);

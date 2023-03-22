@@ -25,6 +25,12 @@ class BudgetRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        // project quote filter
+        $q->when(request('project_id'), function($q) {
+            if (request('quote_ids')) $q->whereIn('quote_id', explode(',', request('quote_ids')));
+            else $q->whereIn('id', [0]);
+        });
             
         return $q->get();
     }
