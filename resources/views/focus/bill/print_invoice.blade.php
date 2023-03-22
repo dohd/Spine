@@ -305,9 +305,10 @@
 					@endif
 					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
 				</td>
+				{{-- ETR QR-code --}}
 				<td colspan="2" class="bd-t" rowspan="3" style="border-left: hidden; padding-top: 1em;">
 					{{-- Storage::path("public{$dir_sep}qr{$dir_sep}{$resource->etr_qrcode}") --}}
-					<img src="{{ '' }}" style="object-fit:contain" width="10%"/>
+					{{-- <img src="{{ '' }}" style="object-fit:contain" width="10%"/> --}}
 				</td>
 				<td class="bd align-r">Sub Total:</td>
 				@if ($resource->print_type == 'inclusive')
