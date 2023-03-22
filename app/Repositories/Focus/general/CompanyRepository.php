@@ -47,55 +47,53 @@ class CompanyRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(array $data)
+    public function update(array $input)
     {
-        $input = array_map('strip_tags', $data['data']);
         // dd($input);
+        $data = array_map('strip_tags', $input['data']);
 
-        if (isset($input['logo'])) 
-            $input['logo'] = $this->uploadPicture($input['logo'], $this->file_picture_path);
-        if (isset($input['icon'])) 
-            $input['icon'] = $this->uploadPicture($input['icon'], $this->file_icon_path);
-        if (isset($input['theme_logo'])) 
-            $input['theme_logo'] = $this->uploadPicture($input['theme_logo'], $this->file_header_path);
-        
-        $company = Company::find(auth()->user()->ins);
-        if (!$company) return false;
+        if (isset($data['logo']))
+            $data['logo'] = $this->uploadPicture($input['data']['logo'], $this->file_picture_path);
+        if (isset($data['icon']))
+            $data['icon'] = $this->uploadPicture($input['data']['icon'], $this->file_icon_path);
+        if (isset($data['theme_logo']))
+            $data['theme_logo'] = $this->uploadPicture($input['data']['theme_logo'], $this->file_header_path);
 
-        $result = $company->update($input);
-        if (isset($data['data2']['custom_field'])) {
-            $fields = [];
-            $ids = [];    
-            foreach ($data['data2']['custom_field'] as $key => $value) {
-                $ids[] = $key;
-                $fields[] = [
-                    'custom_field_id' => $key, 
-                    'rid' => $company->ins, 
-                    'module' => 6, 
-                    'data' => strip_tags($value), 
+        DB::beginTransaction();
+
+        $company = Company::findOrFail(auth()->user()->ins);
+        $company->update($data);
+
+        if (isset($input['data2']['custom_field'])) {
+            $custom = ['ids' => [], 'fields' => []];
+            foreach ($input['data2']['custom_field'] as $key => $value) {
+                $custom['ids'][] = $key;
+                $custom['fields'][] = [
+                    'custom_field_id' => $key,
+                    'rid' => $company->ins,
+                    'module' => 6,
+                    'data' => strip_tags($value),
                     'ins' => $company->ins
                 ];
             }
-
-            CustomEntry::whereIn('custom_field_id', $ids)->where('rid', $company->ins)->delete();
-            CustomEntry::insert($fields);
+            CustomEntry::whereIn('custom_field_id', $custom['ids'])->where('rid', $company->ins)->delete();
+            CustomEntry::insert($custom['fields']);
         }
         
-        if ($result) return true;
-        
-        throw new GeneralException(trans('exceptions.backend.hrms.update_error'));
+        DB::commit();
+        return true;
     }
 
     /*
-* Upload logo image
-*/
+    * Upload logo image
+    */
     public function uploadPicture($logo, $path)
     {
         $name = time() . $logo->getClientOriginalName();
         $file_name = strlen($name) > 20 ? substr($name, 0, 20) . '.' . $logo->getClientOriginalExtension() : $name;
-        $image_name = $file_name;
-        $this->storage->put($path . $image_name, file_get_contents($logo->getRealPath()));
-        return $image_name;
+        $this->storage->put("{$path}{$file_name}", file_get_contents($logo->getRealPath()));
+        
+        return $file_name;
     }
 
     public function billing_settings($data)
