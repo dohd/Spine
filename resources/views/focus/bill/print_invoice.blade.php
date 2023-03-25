@@ -154,13 +154,9 @@
 		</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
-		@php
-			$dir_sep = DIRECTORY_SEPARATOR;
-		@endphp
 	<table class="header-table">
 		<tr>
 			<td>
-				{{-- {{ Storage::path("public{$dir_sep}img{$dir_sep}company{$dir_sep}{$company->logo}") }} --}}
 				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%" />
 			</td>
 		</tr>
@@ -233,19 +229,20 @@
 		<thead>
 			<tr>
 				<td width="6%">No.</td>
-				@php
-					$product = $resource->products->first();
-				@endphp
-				@if ($product && $product->reference)
+
+				@if (count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference'])
+					<td colspan="2">DESCRIPTION</td>
+				@elseif ($resource->products->first() && empty($resource->products->first()->reference))
+					<td colspan="2">DESCRIPTION</td>
+				@else
 					<td width="24%">REFERENCE</td>
 					<td width="24%">DESCRIPTION</td>
-				@else
-					<td colspan="2">DESCRIPTION</td>
 				@endif
-				
+
 				<td width="8%">QTY</td>
 				<td width="8%">UoM</td>
 				<td width="14%">RATE</td>
+
 				@php
 					$code = '';
 					$inv_product = 	$resource->products->first();
@@ -257,27 +254,40 @@
 			</tr>
 		</thead>
 		<tbody>
-			@foreach($resource->products as $k => $val)
+			<!-- Product rows -->
+			@foreach($resource->products as $i => $item)
 				<tr>
-					<td>{{ $val->numbering ?: $k+1 }}</td>
+					<td>{{ $item->numbering ?: $i+1 }}</td>
 
-					@if ($product && $product->reference)
-						<td>{{ $val->reference }}</td>
-						<td>{{ $val->description }}</td>
+					@if (count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference'])
+						<td colspan="2">{{ $item->description }}</td>
+					@elseif ($resource->products->first() && empty($resource->products->first()->reference))
+						<td colspan="2">{{ $item->description }}</td>
 					@else
-						<td colspan="2">{{ $val->description }}</td>
+						<td>{{ $item->reference }}</td>
+						<td>{{ $item->description }}</td>
 					@endif
 			
-					<td class="align-c">{{ $val->product_qty > 0? +$val->product_qty : '' }}</td>
-					<td class="align-c">{{ $val->unit }}</td>
-					<td class="align-r">{{ $val->product_price > 0? numberFormat($val->product_price) : '' }}</td>
-					<td class="align-r">{{ $val->product_qty > 0? numberFormat($val->product_qty * $val->product_price) : '' }}</td>
+					<td class="align-c">{{ $item->product_qty > 0? +$item->product_qty : '' }}</td>
+					<td class="align-c">{{ $item->unit }}</td>
+					<td class="align-r">{{ $item->product_price > 0? numberFormat($item->product_price) : '' }}</td>
+					<td class="align-r">{{ $item->product_qty > 0? numberFormat($item->product_qty * $item->product_price) : '' }}</td>
 				</tr>
 			@endforeach
-			<!-- 20 dynamic empty rows -->
+			<!-- End Product rows -->
+
+			<!-- Empty rows -->
 			@for ($i = count($resource->products); $i < 5; $i++)
 				<tr>
-					@if ($product && !$product->reference)
+					@if (count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference'])
+						@for($j = 0; $j < 6; $j++)
+							@if ($j == 1)
+								<td colspan="2"></td>
+							@else
+								<td></td>
+							@endif
+						@endfor
+					@elseif ($resource->products->first() && empty($resource->products->first()->reference))
 						@for($j = 0; $j < 6; $j++)
 							@if ($j == 1)
 								<td colspan="2"></td>
@@ -292,7 +302,8 @@
 					@endif
 				</tr>
 			@endfor
-			<!--  -->
+			<!-- End Empty rows -->
+
 			<tr>
 				<td colspan="3" class="bd-t" rowspan="3">
 					@if ($resource->bank)
@@ -307,7 +318,7 @@
 				</td>
 				{{-- ETR QR-code --}}
 				<td colspan="2" class="bd-t" rowspan="3" style="border-left: hidden; padding-top: 1em;">
-					{{-- Storage::path("public{$dir_sep}qr{$dir_sep}{$resource->etr_qrcode}") --}}
+					{{-- Storage::path("public/qr/{$resource->etr_qrcode}") --}}
 					{{-- <img src="{{ '' }}" style="object-fit:contain" width="10%"/> --}}
 				</td>
 				<td class="bd align-r">Sub Total:</td>
