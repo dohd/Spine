@@ -56,9 +56,6 @@ class UserController extends Controller
         return new ViewResponse('focus.projects.tasks.index', compact('mics', 'employees', 'project_select'));
     }
 
-    /**
-     * User Profile
-     */
     public function profile()
     {
         $hrm = Hrm::find(auth()->user()->id);
@@ -79,35 +76,31 @@ class UserController extends Controller
         return view('focus.user.profile', compact('hrm'));
     }
 
+    /**
+     * Edit user profile
+     */
     public function edit_profile(Request $request)
     {
-        if ($request->post()) {
-            $hrm = Hrm::find(auth()->user()->id);
-            $hrm->first_name = $request->first_name;
-            $hrm->last_name = $request->last_name;
+        $hrm = Hrm::find(auth()->user()->id);
+        if (!$request->post()) return view('focus.user.edit_profile', ['hrms' => $hrm]);
 
+        $request->validate(['first_name' => 'required', 'last_name' => 'required']);
 
-            if ($request->picture) {
-                $hrm->picture = $this->attachment($request, 'picture');
-            }
-            if ($request->signature) {
-                $hrm->signature = $this->attachment($request, 'signature');
-            }
+        try {
+            $hrm->fill($request->only('first_name', 'last_name'));
+            if ($request->picture) $hrm->picture = $this->attachment($request, 'picture');
+            if ($request->signature) $hrm->signature = $this->attachment($request, 'signature');
             $hrm->save();
-            $profile = UserProfile::where('user_id', '=', $hrm->id)->first();
-            $profile->contact = $request->contact;
-            $profile->company = $request->company;
-            $profile->address_1 = $request->address_1;
-            $profile->city = $request->city;
-            $profile->state = $request->state;
-            $profile->country = $request->country;
-            $profile->postal = $request->postal;
-            $profile->tax_id = $request->tax_id;
+
+            // update or create profile
+            $profile = UserProfile::firstOrNew(['user_id' => $hrm->id]);
+            $profile->fill($request->only('contact', 'company', 'address_1', 'city', 'state', 'country', 'postal', 'tax_id'));
             $profile->save();
+
             return new RedirectResponse(route('biller.profile'), ['flash_success' => trans('alerts.backend.users.updated')]);
+        } catch (\Throwable $th) {
+            return new RedirectResponse(route('biller.profile'), ['flash_error' => 'Error Updating User Profile']);
         }
-        $hrms = Hrm::find(auth()->user()->id);
-        return view('focus.user.edit_profile', compact('hrms'));
     }
 
     /**
