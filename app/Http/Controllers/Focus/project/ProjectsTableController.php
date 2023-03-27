@@ -48,9 +48,9 @@ class ProjectsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->repository->getForDataTable();
+        $query = $this->repository->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function($project) {

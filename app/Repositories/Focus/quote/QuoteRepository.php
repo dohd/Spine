@@ -4,14 +4,11 @@ namespace App\Repositories\Focus\quote;
 
 use App\Models\items\QuoteItem;
 use App\Models\items\VerifiedItem;
-
 use App\Models\quote\Quote;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-
 use App\Models\lead\Lead;
 use App\Models\project\BudgetSkillset;
-use App\Models\project\Project;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -106,10 +103,7 @@ class QuoteRepository extends BaseRepository
             else $q->whereIn('id', [0]);
         });
         
-        return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
-            'verified', 'revision', 'client_ref', 'lpo_id', 'currency_id', 'approved_date'
-        ]);
+        return $q;
     }
 
     /**
@@ -127,10 +121,7 @@ class QuoteRepository extends BaseRepository
         $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
         $q->when(request('verify_state'), fn($q) => $q->where('verified', request('verify_state')));
         
-        return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'total', 'bank_id', 'verified',
-            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total'
-        ]);
+        return $q;
     }
 
     /**

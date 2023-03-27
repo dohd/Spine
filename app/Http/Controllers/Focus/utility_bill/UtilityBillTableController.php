@@ -47,17 +47,18 @@ class UtilityBillTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = $this->repository->getForDataTable();
+        $query = $this->repository->getForDataTable();
 
         // aggregate
-        $amount_total = $core->sum('total');
-        $balance_total = $amount_total - $core->sum('amount_paid');
+        $query_1 = clone $query;
+        $amount_total = $query_1->sum('total');
+        $balance_total = $amount_total - $query_1->sum('amount_paid');
         $aggregate = [
             'amount_total' => numberFormat($amount_total),
             'balance_total' => numberFormat($balance_total),
         ];   
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->addColumn('tid', function ($utility_bill) {

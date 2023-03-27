@@ -50,20 +50,21 @@ class InvoicesTableController extends Controller
      */
     public function __invoke(ManageInvoiceRequest $request)
     {
-        $core = $this->invoice->getForDataTable();
+        $query = $this->invoice->getForDataTable();
 
         $ins = auth()->user()->ins;
         $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice'], $ins);
 
         // aggregate
-        $amount_total = $core->sum('total');
-        $balance_total = $amount_total - $core->sum('amountpaid');
+        $query_1 = clone $query;
+        $amount_total = $query_1->sum('total');
+        $balance_total = $amount_total - $query_1->sum('amountpaid');
         $aggregate = [
             'amount_total' => numberFormat($amount_total),
             'balance_total' => numberFormat($balance_total),
         ];        
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($invoice) {

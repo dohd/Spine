@@ -47,12 +47,12 @@ class DjcsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->djc->getForDataTable();
+        $query = $this->djc->getForDataTable();
 
         $ins = auth()->user()->ins;
         $prefixes = prefixesArray(['djc_report', 'lead'], $ins);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function($djc) use($prefixes) {
@@ -70,8 +70,8 @@ class DjcsTableController extends Controller
                 }
                 return $link;
             })
-            ->addColumn('created_at', function ($djc) {
-                return dateFormat($djc->created_at);
+            ->addColumn('report_date', function ($djc) {
+                return dateFormat($djc->report_date);
             })
             ->addColumn('lead_tid', function($djc) use($prefixes) {
                 if ($djc->lead)

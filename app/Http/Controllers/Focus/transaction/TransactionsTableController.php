@@ -59,17 +59,18 @@ class TransactionsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->transaction->getForDataTable();
+        $query = $this->transaction->getForDataTable();
 
         // balance group
-        $result = $core;
+        $query_1 = clone $query;
+        $result = $query_1->get();
         $this->balance_groups = $result->groupBy('tid')->reduce(function ($init, $v) {
             $balance = round($v->sum('credit') - $v->sum('debit'));
             if ($balance) $init[] = (object) ['tid' => $v->first()->tid, 'balance' => $balance];
             return $init;
         }, []);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($tr) {

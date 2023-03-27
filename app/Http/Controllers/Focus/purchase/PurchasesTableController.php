@@ -51,9 +51,9 @@ class PurchasesTableController extends Controller
      */
     public function __invoke(ManagePurchaseRequest $request)
     {
-        $core = $this->purchase->getForDataTable();
+        $query = $this->purchase->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->addIndexColumn()
             ->escapeColumns(['id'])
             ->addColumn('tid', function ($purchase) {

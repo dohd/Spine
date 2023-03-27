@@ -47,14 +47,15 @@ class QuotesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->repository->getForDataTable();
+        $query = $this->repository->getForDataTable();
 
-        $sum_total = numberFormat($core->sum('total'));
+        $query_1 = clone $query;
+        $sum_total = numberFormat($query_1->sum('total'));
 
         $ins = auth()->user()->ins;
         $prefixes = prefixesArray(['quote', 'proforma_invoice', 'lead', 'invoice'], $ins);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($quote) use($prefixes) {               

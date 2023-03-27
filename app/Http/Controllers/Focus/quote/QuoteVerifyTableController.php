@@ -47,10 +47,10 @@ class QuoteVerifyTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->quote->getForVerifyDataTable();
+        $query = $this->quote->getForVerifyDataTable();
         $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($quote) use($prefixes) {

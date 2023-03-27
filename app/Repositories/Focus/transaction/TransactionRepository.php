@@ -49,10 +49,7 @@ class TransactionRepository extends BaseRepository
             $q->where('tid', request('tr_tid', 0))->where('id', '!=', request('tr_id', 0));
         }
 
-        return $q->get([
-            'id', 'tid', 'note', 'trans_category_id', 'debit', 'credit', 'account_id', 
-            'tr_date', 'user_type', 'tr_type', 'tr_ref', 'created_at'
-        ]);
+        return $q;
     }
 
     /**

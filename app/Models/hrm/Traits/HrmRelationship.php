@@ -11,7 +11,6 @@ use App\Models\Access\User\UserProfile;
 use App\Models\employee\RoleUser;
 use App\Models\employeesalary\EmployeeSalary;
 use App\Models\hrm\HrmMeta;
-use App\Models\project\Project;
 use App\Models\quote\Quote;
 use App\Models\transaction\Transaction;
 
