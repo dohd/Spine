@@ -230,9 +230,10 @@
 			<tr>
 				<td width="6%">No.</td>
 
-				@if (count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference'])
-					<td colspan="2">DESCRIPTION</td>
-				@elseif ($resource->products->first() && empty($resource->products->first()->reference))
+				@if (
+					(count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference']) ||
+					($resource->products->first() && !$resource->products->first()->reference)
+				)
 					<td colspan="2">DESCRIPTION</td>
 				@else
 					<td width="24%">REFERENCE</td>
@@ -259,9 +260,10 @@
 				<tr>
 					<td>{{ $item->numbering ?: $i+1 }}</td>
 
-					@if (count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference'])
-						<td colspan="2">{{ $item->description }}</td>
-					@elseif ($resource->products->first() && empty($resource->products->first()->reference))
+					@if (
+						(count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference']) ||
+						($resource->products->first() && !$resource->products->first()->reference)
+					)
 						<td colspan="2">{{ $item->description }}</td>
 					@else
 						<td>{{ $item->reference }}</td>
@@ -279,15 +281,10 @@
 			<!-- Empty rows -->
 			@for ($i = count($resource->products); $i < 5; $i++)
 				<tr>
-					@if (count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference'])
-						@for($j = 0; $j < 6; $j++)
-							@if ($j == 1)
-								<td colspan="2"></td>
-							@else
-								<td></td>
-							@endif
-						@endfor
-					@elseif ($resource->products->first() && empty($resource->products->first()->reference))
+					@if (
+						(count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference']) ||
+						($resource->products->first() && !$resource->products->first()->reference)
+					)
 						@for($j = 0; $j < 6; $j++)
 							@if ($j == 1)
 								<td colspan="2"></td>
