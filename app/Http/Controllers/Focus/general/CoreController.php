@@ -46,11 +46,11 @@ class CoreController extends Controller
     {
         if (!$user->isConfirmed()) {
             access()->logout();
-            throw new GeneralException(trans('exceptions.frontend.auth.confirmation.resend', ['user_id' => $user->id]), true);
+            trigger_error(trans('exceptions.frontend.auth.confirmation.resend', ['user_id' => $user->id]));
         }
         if (!$user->isActive()) {
             access()->logout();
-            throw new GeneralException(trans('exceptions.frontend.auth.deactivated'));
+            trigger_error(trans('exceptions.frontend.auth.deactivated'));
         }
     }
 

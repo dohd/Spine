@@ -1,67 +1,53 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.hrms.management') . ' | ' . trans('labels.backend.hrms.edit'))
-
-@section('page-header')
-    <h1>
-        {{ trans('labels.backend.hrms.management') }}
-        <small>{{ trans('labels.backend.hrms.edit') }}</small>
-    </h1>
-@endsection
+@section ('title', 'Update Password' . ' | ' . trans('labels.backend.hrms.edit'))
 
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ trans('menus.backend.access.users.change-password') }}</h4>
+<div class="content-wrapper">
+    <div class="content-header row mb-2">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">{{ trans('menus.backend.access.users.change-password') }}</h4>
+        </div>
+    </div>
 
-                </div>
-
-            </div>
-            <div class="content-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div id="errors" class="well"></div>
-                            <div class="card-content">
-                                {{ Form::open(['route' => ['biller.change_profile_password'], 'class' => 'form-horizontal', 'method' => 'post']) }}
-
-                                <div class="form-group">
-                                    {{ Form::label('old_password', trans('validation.attributes.frontend.register-user.old_password'), ['class' => 'col-md-4 control-label']) }}
-                                    <div class="col-md-6">
-                                        {{ Form::input('password', 'old_password', null, ['class' => 'form-control', 'id'=>'old_password','placeholder' => trans('validation.attributes.frontend.register-user.old_password')]) }}
-                                    </div>
+    <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div id="errors" class="well"></div>
+                    <div class="card-content p-2">
+                        {{ Form::open(['route' => ['biller.change_profile_password'], 'class' => 'form-horizontal', 'method' => 'post']) }}
+                            <div class="form-group">
+                                {{ Form::label('old_password', trans('validation.attributes.frontend.register-user.old_password'), ['class' => 'col-md-4 control-label']) }}
+                                <div class="col-md-6">
+                                    {{ Form::input('password', 'old_password', null, ['class' => 'form-control', 'id'=>'old_password','placeholder' => trans('validation.attributes.frontend.register-user.old_password')]) }}
                                 </div>
-
-                                <div class="form-group">
-                                    {{ Form::label('password', trans('validation.attributes.frontend.register-user.new_password'), ['class' => 'col-md-4 control-label']) }}
-                                    <div class="col-md-6">
-                                        {{ Form::input('password', 'password', null, ['class' => 'form-control',  'id'=>'new_password','placeholder' => trans('validation.attributes.frontend.register-user.new_password')]) }}
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    {{ Form::label('password_confirmation', trans('validation.attributes.frontend.register-user.new_password_confirmation'), ['class' => 'col-md-4 control-label']) }}
-                                    <div class="col-md-6">
-                                        {{ Form::input('password', 'password_confirmation', null, ['class' => 'form-control', 'id'=>'password_confirmation', 'placeholder' => trans('validation.attributes.frontend.register-user.new_password_confirmation')]) }}
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="col-md-6 col-md-offset-4">
-                                        {{ Form::submit(trans('labels.general.buttons.update'), ['class' => 'btn btn-primary', 'id' => 'change-password']) }}
-                                    </div>
-                                </div>
-
-                                {{ Form::close() }}
                             </div>
-                        </div>
+                            <div class="form-group">
+                                {{ Form::label('password', trans('validation.attributes.frontend.register-user.new_password'), ['class' => 'col-md-4 control-label']) }}
+                                <div class="col-md-6">
+                                    {{ Form::input('password', 'password', null, ['class' => 'form-control',  'id'=>'new_password','placeholder' => trans('validation.attributes.frontend.register-user.new_password')]) }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                {{ Form::label('password_confirmation', trans('validation.attributes.frontend.register-user.new_password_confirmation'), ['class' => 'col-md-4 control-label']) }}
+                                <div class="col-md-6">
+                                    {{ Form::input('password', 'password_confirmation', null, ['class' => 'form-control', 'id'=>'password_confirmation', 'placeholder' => trans('validation.attributes.frontend.register-user.new_password_confirmation')]) }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-12">
+                                    {{ link_to_route('biller.profile', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md col-1 mr-1']) }}
+                                    {{ Form::submit(trans('labels.general.buttons.update'), ['class' => 'btn btn-primary col-1', 'id' => 'change-password']) }}
+                                </div>
+                            </div>
+                        {{ Form::close() }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('after-scripts')
@@ -84,22 +70,21 @@
                 failConsecutive: true,
                 confirmField: "#password_confirmation"
             }, function (element, valid, match, failedCases) {
-
                 $("#errors").html("<pre>" + failedCases.join("\n") + "</pre>");
-
-                if (valid) $(element).css("border", "2px solid green");
-                if (!valid) {
+                if (valid) {
+                    $(element).css("border", "2px solid green");
+                } else {
                     $(element).css("border", "2px solid red");
                     $("#e_btn").prop('disabled', true);
                 }
+                
                 if (valid && match) {
                     $("#password_confirmation").css("border", "2px solid green");
                     $("#e_btn").prop('disabled', false);
+                } else {
+                    $("#password_confirmation").css("border", "2px solid red");
                 }
-                if (!valid || !match) $("#password_confirmation").css("border", "2px solid red");
             });
         });
-
-
     </script>
 @endsection
