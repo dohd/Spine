@@ -101,7 +101,8 @@ class UserController extends Controller
 
         try {
             $user = Hrm::findOrFail(auth()->user()->id);
-            if (!Hash::check($request['old_password'], $user->password)) trigger_error('Old password is invalid!');
+            if (!Hash::check($request['old_password'], $user->password)) 
+                return redirect()->back()->with('flash_error', 'Old password is invalid');
             $user->update(['password' => $request->password]);
 
             // email notify
