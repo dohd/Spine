@@ -69,7 +69,11 @@ class ProjectStockController extends Controller
      */
     public function store(Request $request)
     {
-        $this->respository->create($request->except('_token'));
+        try {
+            $this->respository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Issuing Stock', $th);
+        }
 
         return new RedirectResponse(route('biller.projectstock.index'), ['flash_success' => 'Project Stock Created Successfully']);
     }
@@ -105,7 +109,11 @@ class ProjectStockController extends Controller
      */
     public function update(Request $request, Projectstock $projectstock)
     {
-        $this->respository->update($projectstock, $request->except('_token'));
+        try {
+            $this->respository->update($projectstock, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Project Stock', $th);
+        }
 
         return new RedirectResponse(route('biller.projectstock.index'), ['flash_success' => 'Project Stock  Updated Successfully']);
     }
@@ -118,7 +126,11 @@ class ProjectStockController extends Controller
      */
     public function destroy(Projectstock $projectstock)
     {
-        $this->respository->delete($projectstock);
+        try {
+            $this->respository->delete($projectstock);
+        } catch (\Throwable $th) {
+            return errorHandler('Error deleting Project Stock', $th);
+        }
 
         return new RedirectResponse(route('biller.projectstock.index'), ['flash_success' => 'Project Stock Deleted Successfully']);
     }

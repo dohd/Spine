@@ -90,7 +90,11 @@ class ProductsController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
-        $this->repository->create($request->except(['_token']));
+        try {
+            $this->repository->create($request->except(['_token']));
+        } catch (\Throwable $th) {
+            return errorHandler($th, 'Error Creating Product');
+        }
 
         return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.created')]);
     }
@@ -116,7 +120,11 @@ class ProductsController extends Controller
      */
     public function update(EditProductRequest $request, Product $product)
     {
-        $this->repository->update($product, $request->except(['_token']));
+        try {
+            $this->repository->update($product, $request->except(['_token']));
+        } catch (\Throwable $th) {
+            return errorHandler($th, 'Error Updating Product');
+        }
         
         return new RedirectResponse(route('biller.products.index'), ['flash_success' => trans('alerts.backend.products.updated')]);
     }
@@ -132,7 +140,7 @@ class ProductsController extends Controller
         try {
             $this->repository->delete($product);
         } catch (\Throwable $th) {
-            return json_encode(['status' => 'Error', 'message' => $th->getMessage()]);
+            return errorHandler($th, 'Error Deleting Product');
         }
         
         return json_encode(['status' => 'Success', 'message' => trans('alerts.backend.products.deleted')]);

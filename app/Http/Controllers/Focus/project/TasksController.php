@@ -85,7 +85,11 @@ class TasksController extends Controller
      */
     public function store(CreateTaskRequest $request)
     {
-        $result = $this->repository->create($request->except(['_token', 'ins']));
+        try {
+            $result = $this->repository->create($request->except(['_token', 'ins']));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Tasks', $th);
+        }
 
         // mail alert
         $feature = feature(11);
@@ -138,8 +142,12 @@ class TasksController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($task, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($task, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Tasks', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.tasks.index'), ['flash_success' => trans('alerts.backend.tasks.updated')]);
     }
@@ -153,8 +161,12 @@ class TasksController extends Controller
      */
     public function destroy(Task $task, DeleteTaskRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($task);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($task);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Tasks', $th);
+        }
 
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.tasks.deleted')));
     }

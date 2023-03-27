@@ -85,7 +85,12 @@ class EquipmentCategoriesController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
          
-        $id = $this->repository->create($input);
+        
+        try {
+            $id = $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Region', $th);
+        }
 
         return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Region  Successfully Created' . ' <a href="' . route('biller.equipmentcategories.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipmentcategories.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipmentcategories.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
     }
@@ -125,7 +130,11 @@ class EquipmentCategoriesController extends Controller
         //Input received from the request
         $input = $request->only(['name']);
 
-        $this->repository->update($equipmentcategory, $input);
+        try {
+            $this->repository->update($equipmentcategory, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Equipment Category', $th);
+        }
 
         return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Equipment category updated successfully']);
     }
@@ -139,7 +148,11 @@ class EquipmentCategoriesController extends Controller
      */
     public function destroy(EquipmentCategory $equipmentcategory)
     {
-        $this->repository->delete($equipmentcategory);
+        try {
+            $this->repository->delete($equipmentcategory);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Equipment Category', $th);
+        }
 
         return new RedirectResponse(route('biller.equipmentcategories.index'), ['flash_success' => 'Equipment category deleted successfully']);
     }

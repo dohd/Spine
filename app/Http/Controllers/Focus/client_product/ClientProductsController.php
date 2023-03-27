@@ -61,7 +61,11 @@ class ClientProductsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Client PriceList', $th);
+        }
 
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Created Successfully']);
     }
@@ -101,8 +105,12 @@ class ClientProductsController extends Controller
      */
     public function update($id, Request $request)
     {
-        $client_product = ClientProduct::find($id);
-        $this->repository->update($client_product, $request->except('_token'));
+        try {
+            $client_product = ClientProduct::find($id);
+            $this->repository->update($client_product, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Client PriceList', $th);
+        }
 
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Updated Successfully']);
     }
@@ -115,13 +123,17 @@ class ClientProductsController extends Controller
      */
     public function destroy($id, Request $request)
     {
-        if ($id == 0) {
-            $request->validate(['customer_id' => 'required']);
-            $this->repository->mass_delete($request->except('_token'));
-        } else {
-            $client_product = ClientProduct::find($id);
-            $this->repository->delete($client_product);    
-        }
+       try {
+            if ($id == 0) {
+                $request->validate(['customer_id' => 'required']);
+                $this->repository->mass_delete($request->except('_token'));
+            } else {
+                $client_product = ClientProduct::find($id);
+                $this->repository->delete($client_product);    
+            }
+       } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Client PriceList', $th);
+       }
             
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);
     }

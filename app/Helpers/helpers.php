@@ -12,6 +12,21 @@ if (!function_exists('errorHandler')) {
     }
 }
 
+
+/**
+ * General Error Handling
+ **/
+if (!function_exists('errorHandler')) {
+    function errorHandler($msg = 'Internal Server Error! Please try again later!', $exception=null) {
+        if ($exception) {
+            Log::error($exception->getMessage() . ' {user_id: '. auth()->user()->id .'}' . ' at ' . $exception->getFile() . ':' . $exception->getLine());
+        }
+        return redirect()->back()->with('flash_error', $msg);
+    }    
+}
+
+
+
 /**
  * Henerate UUID.
  *

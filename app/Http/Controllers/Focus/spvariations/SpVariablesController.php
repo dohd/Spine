@@ -88,8 +88,12 @@ class SpVariablesController extends Controller
         $sprices['pricegroup_id'] = numberClean($request->input('pricegroup_id'));
         $sprices['ins'] = auth()->user()->ins;
 
+        try {
+            $result = $this->repository->create(compact('sprices'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Selling Price', $th);
+        }
 
-      $result = $this->repository->create(compact('sprices'));
         return new RedirectResponse(route('biller.pricegroups.index'), ['flash_success' => 'Selling Price Created Successfully']);
     }
 
@@ -116,8 +120,12 @@ class SpVariablesController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($warehouse, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($warehouse, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Selling Price', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.spvariables.index'), ['flash_success' => trans('alerts.backend.spvariables.updated')]);
     }
@@ -131,8 +139,12 @@ class SpVariablesController extends Controller
      */
     public function destroy(Warehouse $warehouse, StoreSpVariableRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($warehouse);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($warehouse);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Selling Prices', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.spvariables.index'), ['flash_success' => trans('alerts.backend.spvariables.deleted')]);
     }

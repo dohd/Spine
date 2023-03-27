@@ -70,7 +70,11 @@ class BudgetsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Budget!', $th);
+        }
 
         return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Created Successfully']);
     }
@@ -95,7 +99,11 @@ class BudgetsController extends Controller
      */
     public function update(Request $request, Budget $budget)
     {
-        $this->repository->update($budget, $request->except('_token'));
+        try {
+            $this->repository->update($budget, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Budget!', $th);
+        }
 
         return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Updated Successfully']);
     }
@@ -108,7 +116,12 @@ class BudgetsController extends Controller
      */
     public function destroy(Budget $budget)
     {
-        $this->repository->delete($budget);
+        try {
+            $this->repository->delete($budget);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Budget!', $th);
+        }
+        
 
         return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Deleted Successfully']);
     }

@@ -112,7 +112,11 @@ class HrmsController extends Controller
 
         $input['employee']['ins'] = auth()->user()->ins;
 
-        $this->repository->create($input);
+        try {
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Employee', $th);
+        }
 
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.created')]);
     }
@@ -156,7 +160,11 @@ class HrmsController extends Controller
 
         $input['employee']['ins'] = auth()->user()->ins;
 
-        $this->repository->update($hrm, $input);
+        try {
+            $this->repository->update($hrm, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Employee', $th);
+        }
 
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.updated')]);
     }
@@ -170,7 +178,11 @@ class HrmsController extends Controller
      */
     public function destroy(Hrm $hrm)
     {
-        $this->repository->delete($hrm);
+        try {
+            $this->repository->delete($hrm);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Employee', $th);
+        }
         
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.deleted')]);
     }

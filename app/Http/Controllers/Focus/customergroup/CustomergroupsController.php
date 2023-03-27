@@ -86,8 +86,12 @@ class CustomergroupsController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $id = $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $id = $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Customer Groups', $th);
+        }
         //return with successfull message
 
         return new RedirectResponse(route('biller.customergroups.show', [$id]), ['flash_success' => trans('alerts.backend.customergroups.created') . ' <a href="' . route('biller.customergroups.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customergroups.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customergroups.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
@@ -119,8 +123,12 @@ class CustomergroupsController extends Controller
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($customergroup, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($customergroup, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Customer Groups', $th);
+        }
         //return with successfull message
 
         return new RedirectResponse(route('biller.customergroups.show', [$customergroup->id]), ['flash_success' => trans('alerts.backend.customergroups.updated') . ' <a href="' . route('biller.customergroups.show', [$customergroup->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customergroups.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customergroups.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
@@ -135,8 +143,12 @@ class CustomergroupsController extends Controller
      */
     public function destroy(Customergroup $customergroup, DeleteCustomergroupRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($customergroup);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($customergroup);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Customer Groups', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.customergroups.index'), ['flash_success' => trans('alerts.backend.customergroups.deleted')]);
     }

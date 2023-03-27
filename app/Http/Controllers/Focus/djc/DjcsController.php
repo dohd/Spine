@@ -104,12 +104,14 @@ class DjcsController extends Controller
 
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
-
-        $result = $this->repository->create(compact('data', 'data_items'));
-
-        // print preview 
-        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
-
+        try {
+            $result = $this->repository->create(compact('data', 'data_items'));
+            // print preview 
+            $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Djcs Report', $th);
+        }
+       
         return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created' . $msg]);
     }
 
@@ -154,11 +156,15 @@ class DjcsController extends Controller
 
         $data_items = modify_array($data_items);
 
-        $result = $this->repository->update($djc, compact('data', 'data_items'));
+       try {
+            $result = $this->repository->update($djc, compact('data', 'data_items'));
 
-        // print preview 
-        $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
+            // print preview 
+            $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
 
+       } catch (\Throwable $th) {
+        return errorHandler('Error Updating Djcs Report', $th);
+       }
         return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated' . $msg]);
     }
 
@@ -171,7 +177,11 @@ class DjcsController extends Controller
      */
     public function destroy(Djc $djc)
     {
-        $this->repository->delete($djc);
+        try {
+            $this->repository->delete($djc);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Djcs Report', $th);
+        }
         
         return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc deleted successfully']);
     }

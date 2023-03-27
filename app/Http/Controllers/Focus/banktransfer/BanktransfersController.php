@@ -86,7 +86,11 @@ class BanktransfersController extends Controller
             'debit_account_id' => 'required|different:account_id',
         ]);
 
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Money Transfer!', $th);
+        }
 
         return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Transfer Created Successfully']);
     }
@@ -118,7 +122,12 @@ class BanktransfersController extends Controller
             'debit_account_id' => 'required|different:account_id',
         ]);
 
-        $this->repository->update($banktransfer, $request->except('_token'));
+        
+        try {
+            $this->repository->update($banktransfer, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Money Transfer!', $th);
+        }
 
         return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Updated Successfully']);
     }
@@ -132,7 +141,12 @@ class BanktransfersController extends Controller
      */
     public function destroy(Banktransfer $banktransfer)
     {
-        $this->repository->delete($banktransfer);
+        
+        try {
+            $this->repository->delete($banktransfer);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Money Transfer!', $th);
+        }
 
         return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Deleted Successfully']);
     }

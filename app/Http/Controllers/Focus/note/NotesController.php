@@ -83,8 +83,12 @@ class NotesController extends Controller
         $input = $request->only(['title', 'content']);
         $input['ins'] = auth()->user()->ins;
         $input['user_id'] = auth()->user()->id;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Notes', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.created')]);
     }
@@ -113,8 +117,12 @@ class NotesController extends Controller
         //Input received from the request
 
         $input = $request->only(['title', 'content']);
-        //Update the model using repository update method
-        $this->repository->update($note, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($note, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Notes', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.updated')]);
     }
@@ -128,8 +136,13 @@ class NotesController extends Controller
      */
     public function destroy(Note $note, EditNoteRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($note);
+        
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($note);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Notes', $th);
+        }
         //returning with successfull message
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.notes.deleted')));
     }

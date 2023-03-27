@@ -87,7 +87,11 @@ class WarehousesController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Product Location', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Created Successfully']);
     }
@@ -116,7 +120,11 @@ class WarehousesController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         //Update the model using repository update method
-        $this->repository->update($warehouse, $input);
+        try {
+            $this->repository->update($warehouse, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Product Location', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Updated Successfully']);
     }
@@ -131,7 +139,11 @@ class WarehousesController extends Controller
     public function destroy(Warehouse $warehouse, StoreWarehouseRequest $request)
     {
         //Calling the delete method on repository
-        $this->repository->delete($warehouse);
+        try {
+            $this->repository->delete($warehouse);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Product Location', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Deleted Successfully']);
     }

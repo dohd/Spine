@@ -81,7 +81,11 @@ class ContractServicesController extends Controller
         $data_items = modify_array($data_items);
         if (!$data_items) throw ValidationException::withMessages(['Cannot create report without equipments!']);
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Contract Service Report', $th);
+        }
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report created successfully']);
     }
@@ -130,7 +134,11 @@ class ContractServicesController extends Controller
         $data_items = modify_array($data_items);
         if (!$data_items) throw ValidationException::withMessages(['Cannot create report without equipments!']);
 
-        $this->repository->update($contractservice, compact('data', 'data_items'));
+        try {
+            $this->repository->update($contractservice, compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Contract Service Report', $th);
+        }
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report updated successfully']);
     }
@@ -143,7 +151,11 @@ class ContractServicesController extends Controller
      */
     public function destroy(ContractService $contractservice)
     {
-        $this->repository->delete($contractservice);
+        try {
+            $this->repository->delete($contractservice);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Contract Service Report', $th);
+        }
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report deleted successfully']);
     }

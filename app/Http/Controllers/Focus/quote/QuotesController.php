@@ -110,18 +110,22 @@ class QuotesController extends Controller
         $data_items = modify_array($data_items);
         $skill_items = modify_array($skill_items);
 
-        $result = $this->repository->create(compact('data', 'data_items', 'skill_items'));
+        try {
+            $result = $this->repository->create(compact('data', 'data_items', 'skill_items'));
 
-        $route = route('biller.quotes.index');
-        $msg = trans('alerts.backend.quotes.created');
-        if ($result['bank_id']) {
-            $route = route('biller.quotes.index', 'page=pi');
-            $msg = 'Proforma Invoice created successfully';
-        }
+            $route = route('biller.quotes.index');
+            $msg = trans('alerts.backend.quotes.created');
+            if ($result['bank_id']) {
+                $route = route('biller.quotes.index', 'page=pi');
+                $msg = 'Proforma Invoice created successfully';
+            }
 
-        // print preview url
-        $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
-        $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+            // print preview url
+            $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
+            $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Proforma Invoice', $th);
+        } 
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
     }
@@ -170,18 +174,22 @@ class QuotesController extends Controller
         $data_items = modify_array($data_items);
         $skill_items = modify_array($skill_items);
 
-        $result = $this->repository->update($quote, compact('data', 'data_items', 'skill_items'));
+        try {
+            $result = $this->repository->update($quote, compact('data', 'data_items', 'skill_items'));
 
-        $route = route('biller.quotes.index');
-        $msg = trans('alerts.backend.quotes.updated');
-        if ($result['bank_id']) {
-            $route = route('biller.quotes.index', 'page=pi');
-            $msg = 'Proforma Invoice updated successfully';
-        }
+            $route = route('biller.quotes.index');
+            $msg = trans('alerts.backend.quotes.updated');
+            if ($result['bank_id']) {
+                $route = route('biller.quotes.index', 'page=pi');
+                $msg = 'Proforma Invoice updated successfully';
+            }
 
-        // print preview url
-        $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
-        $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';        
+            // print preview url
+            $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
+            $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Proforma Invoice', $th);
+        }        
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
     }
@@ -197,13 +205,17 @@ class QuotesController extends Controller
     {
         $type = $quote->bank_id > 0? 'pi' : 'quote';
 
-        $this->repository->delete($quote);
+        try {
+            $this->repository->delete($quote);
 
-        $link = route('biller.quotes.index');
-        $msg = trans('alerts.backend.quotes.deleted');
-        if ($type == 'pi') {
-            $link = route('biller.quotes.index', 'page=pi');
-            $msg = 'Proforma Invoice Successfully Deleted';
+            $link = route('biller.quotes.index');
+            $msg = trans('alerts.backend.quotes.deleted');
+            if ($type == 'pi') {
+                $link = route('biller.quotes.index', 'page=pi');
+                $msg = 'Proforma Invoice Successfully Deleted';
+            }
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Proforma Invoice', $th);
         }
 
         return new RedirectResponse($link, ['flash_success' => $msg]);
@@ -269,7 +281,11 @@ class QuotesController extends Controller
         $data_items = modify_array($data_items);
         $job_cards = modify_array($job_cards);
 
-        $result = $this->repository->verify(compact('data', 'data_items', 'job_cards'));
+        try {
+            $result = $this->repository->verify(compact('data', 'data_items', 'job_cards'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Verifying Quote', $th);
+        }
 
         $tid = $result->tid;
         if ($result->bank_id) $tid = gen4tid('PI-', $tid);

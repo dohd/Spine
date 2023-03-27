@@ -71,7 +71,11 @@ class PurchaseRequestsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token', 'files'));
+        try {
+            $this->repository->create($request->except('_token', 'files'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Purchase Requisition', $th);
+        }
 
         return new RedirectResponse(route('biller.purchase_requests.index'), ['flash_success' => 'Purchase Requisition Created Successfully']);
     }
@@ -98,7 +102,12 @@ class PurchaseRequestsController extends Controller
      */
     public function update(Request $request, PurchaseRequest $purchase_request)
     {
-        $this->repository->update($purchase_request, $request->except('_token'));
+        
+        try {
+            $this->repository->update($purchase_request, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Purchase Requisition', $th);
+        }
 
         return new RedirectResponse(route('biller.purchase_requests.index'), ['flash_success' => 'Purchase Requisition Updated Successfully']);
     }
@@ -111,7 +120,12 @@ class PurchaseRequestsController extends Controller
      */
     public function destroy(PurchaseRequest $purchase_request)
     {
-        $this->repository->delete($purchase_request);
+        
+        try {
+            $this->repository->delete($purchase_request);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Purchase Requisition', $th);
+        }
 
         return new RedirectResponse(route('biller.purchase_requests.index'), ['flash_success' => 'Purchase Requisition Deleted Successfully']);
     }

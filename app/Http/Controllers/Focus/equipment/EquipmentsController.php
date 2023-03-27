@@ -85,7 +85,11 @@ class EquipmentsController extends Controller
      */
     public function store(StoreEquipmentRequest $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Equipment', $th);
+        }
 
         return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment Created Successfully']);
     }
@@ -111,7 +115,11 @@ class EquipmentsController extends Controller
      */
     public function update(StoreEquipmentRequest $request, Equipment $equipment)
     {
-        $this->repository->update($equipment, $request->except('_token'));
+        try {
+            $this->repository->update($equipment, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Equipment', $th);
+        }
 
         return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment  Updated Successfully']);
     }
@@ -126,7 +134,11 @@ class EquipmentsController extends Controller
     public function destroy(Equipment $equipment)
     {
 
-        $this->repository->delete($equipment);
+        try {
+            $this->repository->delete($equipment);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Equipments, $th');
+        }
 
         return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment Deleted Successfully']);
     }

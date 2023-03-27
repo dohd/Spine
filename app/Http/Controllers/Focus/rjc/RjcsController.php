@@ -89,12 +89,17 @@ class RjcsController extends Controller
 
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
+        
+        try {
+            
+            $result = $this->repository->create(compact('data', 'data_items'));
 
-        $result = $this->repository->create(compact('data', 'data_items'));
-
-        // print preview
-        $valid_token = token_validator('', 'd' . $result->id, true);
-        $msg = ' <a href="'. route('biller.print_rjc', [$result->id, 11, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+            // print preview
+            $valid_token = token_validator('', 'd' . $result->id, true);
+            $msg = ' <a href="'. route('biller.print_rjc', [$result->id, 11, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Rjc Report', $th);
+        }
 
         return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report Successfully Created' . $msg]);
     }    
@@ -169,11 +174,15 @@ class RjcsController extends Controller
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
 
-        $result = $this->repository->update($rjc, compact('data', 'data_items'));
+        try {
+            $result = $this->repository->update($rjc, compact('data', 'data_items'));
 
-        // print preview
-        $valid_token = token_validator('', 'd' . $result->id, true);
-        $msg = ' <a href="'. route('biller.print_rjc', [$result->id, 11, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+            // print preview
+            $valid_token = token_validator('', 'd' . $result->id, true);
+            $msg = ' <a href="'. route('biller.print_rjc', [$result->id, 11, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Rjc Report', $th);
+        } 
         
         return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report Successfully Updated' . $msg]);
     }
@@ -186,7 +195,11 @@ class RjcsController extends Controller
      */
     public function destroy(Rjc $rjc)
     {
-        $this->repository->delete($rjc);
+        try {
+            $this->repository->delete($rjc);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Rjc Report', $th);
+        }
 
         return new RedirectResponse(route('biller.rjcs.index'), ['flash_success' => 'Rjc Report Successfully Deleted']);
     }

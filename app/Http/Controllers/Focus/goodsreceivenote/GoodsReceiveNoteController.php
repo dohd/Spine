@@ -56,10 +56,14 @@ class GoodsReceiveNoteController extends Controller
      */
     public function store(Request $request)
     {
-        $grn = $this->respository->create($request->except('_token'));
+        try {
+            $grn = $this->respository->create($request->except('_token'));
 
-        $msg = 'Goods Received Note Created Successfully With DNote';
-        if ($grn->invoice_no) $msg = 'Goods Received Note Created Successfully With Invoice';
+            $msg = 'Goods Received Note Created Successfully With DNote';
+            if ($grn->invoice_no) $msg = 'Goods Received Note Created Successfully With Invoice';
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Goods Received Note', $th);
+        }
 
         return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => $msg]);
     }
@@ -97,7 +101,11 @@ class GoodsReceiveNoteController extends Controller
      */
     public function update(Request $request, Goodsreceivenote $goodsreceivenote)
     {
-        $this->respository->update($goodsreceivenote, $request->except('_token'));
+        try {
+            $this->respository->update($goodsreceivenote, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Goods Received Note', $th);
+        }
 
         return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Note Updated Successfully']);
     }
@@ -110,7 +118,11 @@ class GoodsReceiveNoteController extends Controller
      */
     public function destroy(Goodsreceivenote $goodsreceivenote)
     {
-        $this->respository->delete($goodsreceivenote);
+        try {
+            $this->respository->delete($goodsreceivenote);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Goods Received Note', $th);
+        }
 
         return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Note Deleted Successfully']);
     }
