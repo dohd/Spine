@@ -84,7 +84,7 @@ class UsergatewayentriesController extends Controller
             //Create the model using repository create method
         $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.usergatewayentries.index'), ['flash_error' => 'Error Creating User Gateway Entries']);
+            return errorHandler('Error Creating User Gateways Entries', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.usergatewayentries.index'), ['flash_success' => trans('alerts.backend.usergatewayentries.created')]);
@@ -117,7 +117,7 @@ class UsergatewayentriesController extends Controller
             //Update the model using repository update method
             $this->repository->update($usergatewayentry, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.usergatewayentries.index'), ['flash_error' => 'Error Updating User Gateway Entries']);
+            return errorHandler('Error Updating User Gateways Entries', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.usergatewayentries.index'), ['flash_success' => trans('alerts.backend.usergatewayentries.updated')]);
@@ -136,7 +136,7 @@ class UsergatewayentriesController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($usergatewayentry);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.usergatewayentries.index'), ['flash_error' => 'Error Deleting User Gateway Entries']);
+            return errorHandler('Error Deleting User Gateways Entries', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.usergatewayentries.index'), ['flash_success' => trans('alerts.backend.usergatewayentries.deleted')]);

@@ -73,7 +73,7 @@ class AdvancePaymentController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.advance_payments.index'), ['flash_error' => 'Error Creating Advance Payment']);
+            return errorHandler('Error Creating Advance Payment!', $th);
         }
 
         return new RedirectResponse(route('biller.advance_payments.index'), ['flash_success' => 'Advance Payment Created Successfully']);
@@ -105,7 +105,7 @@ class AdvancePaymentController extends Controller
         try {
             $this->repository->update($advance_payment, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.advance_payments.index'), ['flash_error' => 'Error Updating Advance Payment']);
+            return errorHandler('Error Updating Advance Payment!', $th);
         }
 
         return new RedirectResponse(route('biller.advance_payments.index'), ['flash_success' => 'Advance Payment Updated Successfully']);
@@ -123,7 +123,7 @@ class AdvancePaymentController extends Controller
         try {
             $this->repository->delete($advance_payment);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.advance_payments.index'), ['flash_error' => 'Error Deleting Advance Payment']);
+            return errorHandler('Error Deleting Advance Payment!', $th);
         }
 
         return new RedirectResponse(route('biller.advance_payments.index'), ['flash_success' => 'Advance Payment Deleted Successfully']);

@@ -102,7 +102,7 @@ class AccountsController extends Controller
         try {
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.accounts.index'), ['flash_error' => 'Error Creating Accounts']);
+            return errorHandler('Error Creating Accounts!', $th);
         }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.created')]);
@@ -138,7 +138,7 @@ class AccountsController extends Controller
         try {
             $this->repository->update($account, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.accounts.index'), ['flash_error' => 'Error Updating Accounts']);
+            return errorHandler('Error Updating Accounts!', $th);
         }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.updated')]);
@@ -157,7 +157,7 @@ class AccountsController extends Controller
         try {
             $this->repository->delete($account);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.accounts.index'), ['flash_error' => 'Error Deleting Accounts']);
+            return errorHandler('Error Deleting Accounts!', $th);
         }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.deleted')]);

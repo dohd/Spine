@@ -100,7 +100,7 @@ class TagsController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.tags.index'), ['flash_error' => 'Error Creating Tags']);
+            return errorHandler('Error Creating Tags', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.tags.index'), ['flash_success' => trans('alerts.backend.tags.created')]);
@@ -133,7 +133,7 @@ class TagsController extends Controller
             //Update the model using repository update method
             $this->repository->update($tag, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.tags.index'), ['flash_error' => 'Error Updated Tags']);
+            return errorHandler('Error Updated Tags', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.tags.index'), ['flash_success' => trans('alerts.backend.tags.updated')]);
@@ -152,7 +152,7 @@ class TagsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($tag);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.tags.index'), ['flash_error' => 'Error Deleted Tags']);
+            return errorHandler('Error Deleted Tags', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.tags.index'), ['flash_success' => trans('alerts.backend.tags.deleted')]);

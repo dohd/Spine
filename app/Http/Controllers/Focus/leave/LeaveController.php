@@ -79,7 +79,7 @@ class LeaveController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.leave.index'), ['flash_error' => 'Error Creating Leave']);
+            errorHandler('Error Creating Leave', $th);
         }
         return new RedirectResponse(route('biller.leave.index'), ['flash_success' => 'Leave Created Successfully']);
     }
@@ -110,7 +110,7 @@ class LeaveController extends Controller
         try {
             $this->repository->update($leave, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.leave.index'), ['flash_error' => 'Error Updating Leave']);
+            return errorHandler('Error Updating Leave', $th);
         }
 
         return new RedirectResponse(route('biller.leave.index'), ['flash_success' => 'Leave Updated Successfully']);
@@ -127,7 +127,7 @@ class LeaveController extends Controller
         try {
             $this->repository->delete($leave);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.leave.index'), ['flash_error' => 'Error Deleting Leave']);
+            return errorHandler('Error Deleting Leave', $th);
         }
 
         return new RedirectResponse(route('biller.leave.index'), ['flash_success' => 'Leave Deleted Successfully']);

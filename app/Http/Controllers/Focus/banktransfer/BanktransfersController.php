@@ -89,7 +89,7 @@ class BanktransfersController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.banktransfers.index'), ['flash_error' => 'Error Creating Money Transfer']);
+            return errorHandler('Error Creating Money Transfer!', $th);
         }
 
         return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Transfer Created Successfully']);
@@ -126,7 +126,7 @@ class BanktransfersController extends Controller
         try {
             $this->repository->update($banktransfer, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.banktransfers.index'), ['flash_error' => 'Error Updating Money Transfer']);
+            return errorHandler('Error Updating Money Transfer!', $th);
         }
 
         return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Updated Successfully']);
@@ -145,7 +145,7 @@ class BanktransfersController extends Controller
         try {
             $this->repository->delete($banktransfer);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.banktransfers.index'), ['flash_error' => 'Error Deleting Money Transfer']);
+            return errorHandler('Error Deleting Money Transfer!', $th);
         }
 
         return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Deleted Successfully']);

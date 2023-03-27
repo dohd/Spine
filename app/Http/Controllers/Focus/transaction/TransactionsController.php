@@ -137,7 +137,11 @@ class TransactionsController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
-        $result = $this->repository->delete($transaction);
+        try {
+            $result = $this->repository->delete($transaction);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Transactions', $th);
+        }
 
         $msg = ['flash_success' => 'Transaction deleted successfully'];
         if (!$result) $msg = ['flash_error' => 'Reconciled transaction cannot be deleted'];
@@ -181,8 +185,12 @@ class TransactionsController extends Controller
         $input = $request->except('_token');
         $input['user_id'] = auth()->user()->id;
     
-        //Update the model using repository update method
-        $this->repository->update($transaction, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($transaction, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Transactions', $th);
+        }
 
         return redirect()->back()->with(['flash_success' => 'Transaction updated successfully']);
     }

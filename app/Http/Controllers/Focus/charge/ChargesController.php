@@ -92,7 +92,7 @@ class ChargesController extends Controller
         try {
             $this->repository->create($data);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.charges.index'), ['flash_error' => 'Error Creating Charge']);
+            return errorHandler('Error Creating Charge', $th);
         }
 
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully created']);
@@ -130,7 +130,7 @@ class ChargesController extends Controller
             //Update the model using repository update method
             $this->repository->update($charge, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.charges.index'), ['flash_error' => 'Error Updating Charge']);
+            return errorHandler('Error Updating Charge', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully updated']);
@@ -149,7 +149,7 @@ class ChargesController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($charge);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.charges.index'), ['flash_error' => 'Error Deleting Charge']);
+            return errorHandler('Error Deleting Charge', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully deleted']);

@@ -84,7 +84,7 @@ class ContractServicesController extends Controller
         try {
             $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.contractservices.index'), ['flash_error' => 'Error Creating Contract Service Report']);
+            return errorHandler('Error Creating Contract Service Report', $th);
         }
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report created successfully']);
@@ -137,7 +137,7 @@ class ContractServicesController extends Controller
         try {
             $this->repository->update($contractservice, compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.contractservices.index'), ['flash_error' => 'Error Updating Contract Service Report']);
+            return errorHandler('Error Updating Contract Service Report', $th);
         }
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report updated successfully']);
@@ -154,7 +154,7 @@ class ContractServicesController extends Controller
         try {
             $this->repository->delete($contractservice);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.contractservices.index'), ['flash_error' => 'Error Deleting Contract Service Report']);
+            return errorHandler('Error Deleting Contract Service Report', $th);
         }
 
         return new RedirectResponse(route('biller.contractservices.index'), ['flash_success' => 'Contract Service Report deleted successfully']);

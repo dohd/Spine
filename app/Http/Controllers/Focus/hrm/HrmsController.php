@@ -115,7 +115,7 @@ class HrmsController extends Controller
         try {
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.hrms.index'), ['flash_error' => 'Error Creating Employee']);
+            return errorHandler('Error Creating Employee', $th);
         }
 
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.created')]);
@@ -163,7 +163,7 @@ class HrmsController extends Controller
         try {
             $this->repository->update($hrm, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.hrms.index'), ['flash_error' => 'Error Updating Employee']);
+            return errorHandler('Error Updating Employee', $th);
         }
 
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.updated')]);
@@ -181,7 +181,7 @@ class HrmsController extends Controller
         try {
             $this->repository->delete($hrm);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.hrms.index'), ['flash_error' => 'Error Deleting Employee']);
+            return errorHandler('Error Deleting Employee', $th);
         }
         
         return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.deleted')]);

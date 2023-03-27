@@ -93,7 +93,7 @@ class WithholdingsController extends Controller
         try {
             $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.withholdings.index'), ['flash_error' => 'Error Creating Withholding Certificate']);
+            return errorHandler('Error Creating Withholding Certificate', $th);
         }
 
        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Created Successfully']);
@@ -125,7 +125,7 @@ class WithholdingsController extends Controller
         try {
             $this->repository->update($withholding, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.withholdings.index'), ['flash_error' => 'Error Updating Withholding Certificate']);
+            return errorHandler('Error Updating Withholding Certificate', $th);
         }
 
         return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Updated Successfully']);
@@ -143,7 +143,7 @@ class WithholdingsController extends Controller
         try {
             $this->repository->delete($withholding);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Error Deleting Withholding Certificate']);
+            return errorHandler('Error Deleting Withholding Certificate', $th);
         }
 
         return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Deleted Successfully']);

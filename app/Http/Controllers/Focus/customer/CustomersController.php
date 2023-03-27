@@ -97,7 +97,7 @@ class CustomersController extends Controller
         try {
             $result = $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customers.index'), ['flash_error' => 'Error Creating Customer']);
+            return errorHandler('Error Creating Customers', $th);
         }
 
         if (!$result) return redirect()->back();
@@ -138,7 +138,7 @@ class CustomersController extends Controller
         try {
             $this->repository->update($customer, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customers.show', $customer), ['flash_error' => 'Error Updating Customer']);
+            return errorHandler('Error Updating Customers', $th);
         }
 
         return new RedirectResponse(route('biller.customers.show', $customer), ['flash_success' => trans('alerts.backend.customers.updated')]);
@@ -156,7 +156,7 @@ class CustomersController extends Controller
         try {
             $this->repository->delete($customer);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customers.index'), ['flash_error' => 'Error Deleting Customer']);
+            return errorHandler('Error Deleting Customers', $th);
         }
 
         return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);

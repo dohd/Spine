@@ -86,7 +86,7 @@ class DepartmentsController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.departments.index'), ['flash_error' => 'Error Creating Departments']);
+            return errorHandler('Error Creating Departments', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.departments.index'), ['flash_success' => trans('alerts.backend.departments.created')]);
@@ -119,7 +119,7 @@ class DepartmentsController extends Controller
             //Update the model using repository update method
             $this->repository->update($department, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.departments.index'), ['flash_error' => 'Error Updating Departments']);
+            return errorHandler('Error Updating Departments', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.departments.index'), ['flash_success' => trans('alerts.backend.departments.updated')]);
@@ -138,7 +138,7 @@ class DepartmentsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($department);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.departments.index'), ['flash_error' => 'Error Deleting Departments']);
+            return errorHandler('Error Deleting Departments', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.departments.index'), ['flash_success' => trans('alerts.backend.departments.deleted')]);

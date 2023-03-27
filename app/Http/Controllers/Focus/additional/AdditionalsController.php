@@ -85,7 +85,7 @@ class AdditionalsController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.additionals.index'), ['flash_error' => 'Error Creating Additionals']);
+            return errorHandler('Error Creating Addittionals!',$th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.additionals.index'), ['flash_success' => trans('alerts.backend.additionals.created')]);
@@ -119,7 +119,7 @@ class AdditionalsController extends Controller
             //Update the model using repository update method
             $this->repository->update($additional, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.additionals.index'), ['flash_error' => 'Error Updating Additionals']);
+            return errorHandler('Error Updating Additionals!', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.additionals.index'), ['flash_success' => trans('alerts.backend.additionals.updated')]);
@@ -139,7 +139,7 @@ class AdditionalsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($additional);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.additionals.index'), ['flash_error' => 'Error Deleting Additionals']);
+            return errorHandler('Error Deleting Additionals!', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.additionals.index'), ['flash_success' => trans('alerts.backend.additionals.deleted')]);

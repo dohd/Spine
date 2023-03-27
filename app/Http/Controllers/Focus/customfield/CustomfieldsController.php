@@ -84,7 +84,7 @@ class CustomfieldsController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customfields.index'), ['flash_error' => 'Error Creating Custom Fields']);
+            return errorHandler('Error Creating Custom Fields', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.customfields.index'), ['flash_success' => trans('alerts.backend.customfields.created')]);
@@ -117,7 +117,7 @@ class CustomfieldsController extends Controller
             //Update the model using repository update method
             $this->repository->update($customfield, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customfields.index'), ['flash_error' => 'Error Updating Custom Fields']);
+            return errorHandler('Error Updating Custom Fields', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.customfields.index'), ['flash_success' => trans('alerts.backend.customfields.updated')]);
@@ -136,7 +136,7 @@ class CustomfieldsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($customfield);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customfields.index'), ['flash_error' => 'Error Deleting Custom Fields']);
+            return errorHandler('Error Deleting Custom Fields', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.customfields.index'), ['flash_success' => trans('alerts.backend.customfields.deleted')]);

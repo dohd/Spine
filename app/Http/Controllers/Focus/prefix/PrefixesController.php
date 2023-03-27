@@ -86,7 +86,7 @@ class PrefixesController extends Controller
             //Update the model using repository update method
             $this->repository->update($prefix, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.prefixes.index'), ['flash_error' => 'Error Updating Prefixes']);
+            return errorHandler('Error Updating Prefixes', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.prefixes.index'), ['flash_success' => trans('alerts.backend.prefixes.updated')]);

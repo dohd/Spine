@@ -62,7 +62,7 @@ class UtilityBillController extends Controller
         try {
             $this->respository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.utility-bills.index'), ['flash_error' => 'Error Creating Bill']);
+            return errorHandler('Error Creating Bill', $th);
         }
 
         return new RedirectResponse(route('biller.utility-bills.index'), ['flash_success' => 'Bill Created Successfully']);
@@ -111,7 +111,11 @@ class UtilityBillController extends Controller
      */
     public function update(Request $request, UtilityBill $utility_bill)
     {
-        $this->respository->update($utility_bill, $request->except('_token'));
+        try {
+            $this->respository->update($utility_bill, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Bill', $th);
+        }
 
         return new RedirectResponse(route('biller.utility-bills.index'), ['flash_success' => 'Bill Updated Successfully']);
     }
@@ -124,7 +128,11 @@ class UtilityBillController extends Controller
      */
     public function destroy(UtilityBill $utility_bill)
     {
-        $this->respository->delete($utility_bill);
+        try {
+            $this->respository->delete($utility_bill);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Bill', $th);
+        }
 
         return new RedirectResponse(route('biller.utility-bills.index'), ['flash_success' => 'Bill Deleted Successfully']);
     }
@@ -149,7 +157,11 @@ class UtilityBillController extends Controller
      */
     public function store_kra_bill(Request $request)
     {
-        $this->respository->create_kra($request->except('_token'));
+        try {
+            $this->respository->create_kra($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating KRA Bill', $th);
+        }
 
         return new RedirectResponse(route('biller.utility-bills.index'), ['flash_success' => 'KRA Bill Created Successfully']);
     }

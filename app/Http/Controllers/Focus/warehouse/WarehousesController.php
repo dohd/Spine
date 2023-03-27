@@ -90,7 +90,7 @@ class WarehousesController extends Controller
         try {
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.warehouses.index'), ['flash_error' => 'Error Creating Product Location']);
+            return errorHandler('Error Creating Product Location', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Created Successfully']);
@@ -123,7 +123,7 @@ class WarehousesController extends Controller
         try {
             $this->repository->update($warehouse, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.warehouses.index'), ['flash_error' => 'Error Updating Product Location']);
+            return errorHandler('Error Updating Product Location', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Updated Successfully']);
@@ -142,7 +142,7 @@ class WarehousesController extends Controller
         try {
             $this->repository->delete($warehouse);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Error Deleting Product Location']);
+            return errorHandler('Error Deleting Product Location', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.warehouses.index'), ['flash_success' => 'Product Location Deleted Successfully']);

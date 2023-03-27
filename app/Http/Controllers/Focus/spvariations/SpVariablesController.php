@@ -91,7 +91,7 @@ class SpVariablesController extends Controller
         try {
             $result = $this->repository->create(compact('sprices'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricegroups.index'), ['flash_error' => 'Error Creating Selling Price']);
+            return errorHandler('Error Creating Selling Price', $th);
         }
 
         return new RedirectResponse(route('biller.pricegroups.index'), ['flash_success' => 'Selling Price Created Successfully']);
@@ -124,7 +124,7 @@ class SpVariablesController extends Controller
             //Update the model using repository update method
             $this->repository->update($warehouse, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.spvariables.index'), ['flash_error' => 'Error Updating Selling Price']);
+            return errorHandler('Error Updating Selling Price', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.spvariables.index'), ['flash_success' => trans('alerts.backend.spvariables.updated')]);
@@ -143,7 +143,7 @@ class SpVariablesController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($warehouse);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.spvariables.index'), ['flash_error' => 'Error Deleting Selling Prices']);
+            return errorHandler('Error Deleting Selling Prices', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.spvariables.index'), ['flash_success' => trans('alerts.backend.spvariables.deleted')]);

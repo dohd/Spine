@@ -149,10 +149,7 @@ class MakepaymentsController extends Controller
         try {
             $result = $this->repository->create(compact('invoice', 'debit_entry'));
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 'Error', 
-                'message' => 'Error Creating MakePayment'
-            ]);
+            return errorHandler('Error Creating MakePayments', $th);
         }
 
         return response()->json([

@@ -94,7 +94,7 @@ class LoansController extends Controller
         try {
             $this->repository->create($request->except(['_token']));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.loans.index'), ['flash_error' => 'Error Creating Loan']);
+            return errorHandler('Error Creating Loan', $th);
         }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan Created Successfully']);
@@ -112,7 +112,7 @@ class LoansController extends Controller
         try {
             $this->repository->update($loan, $request->except(['_token']));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.loans.index'), ['flash_error' => 'Error Updating Loan']);
+            return errorHandler('Error Updating Loan', $th);
         }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan Updated Successfully']);
@@ -141,7 +141,7 @@ class LoansController extends Controller
         try {
             $this->repository->delete($loan);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.loans.index'), ['flash_error' => 'Error Deleting Loan']);
+            return errorHandler('Error Deleting Loan', $th);
         }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loan Deleted Successfully']);
@@ -181,7 +181,11 @@ class LoansController extends Controller
             return $item['paid'];
         });
 
-        $result = $this->repository->store_loans(compact('data', 'data_items'));
+        try {
+            $result = $this->repository->store_loans(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Loans Payment', $th);
+        }
 
         return new RedirectResponse(route('biller.loans.index'), ['flash_success' => 'Loans payment successfully received']);
     }

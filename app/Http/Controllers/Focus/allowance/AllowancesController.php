@@ -86,7 +86,7 @@ class AllowancesController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.allowances.index'), ['flash_error' => 'Error Creating Allowances']);
+            return errorHandler($th, 'Error Creating Allowances!');
         }
         //return with successfull message
         return new RedirectResponse(route('biller.allowances.index'), ['flash_success' => trans('alerts.backend.allowance.created')]);
@@ -120,7 +120,7 @@ class AllowancesController extends Controller
            //Update the model using repository update method
             $this->repository->update($allowance, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.allowances.index'), ['flash_error' => 'Error Updating Allowances']);
+            return errorHandler($th, 'Error Updating Allowances!');
         }
         //return with successfull message
         return new RedirectResponse(route('biller.allowances.index'), ['flash_success' => trans('alerts.backend.departments.updated')]);
@@ -140,7 +140,7 @@ class AllowancesController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($allowance);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.allowances.index'), ['flash_error' => 'Error Deleting Allowances']);
+            return errorHandler($th, 'Error Deleting Allowances!');
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.allowances.index'), ['flash_success' => trans('alerts.backend.allowance.deleted')]);

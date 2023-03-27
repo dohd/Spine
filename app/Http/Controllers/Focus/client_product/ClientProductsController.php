@@ -64,7 +64,7 @@ class ClientProductsController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.client_products.index'), ['flash_error' => 'Error creating Client Pricelist']);
+            return errorHandler('Error Creating Client PriceList', $th);
         }
 
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Created Successfully']);
@@ -109,7 +109,7 @@ class ClientProductsController extends Controller
             $client_product = ClientProduct::find($id);
             $this->repository->update($client_product, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.client_products.index'), ['flash_error' => 'Error Updating Client Pricelist']);
+            return errorHandler('Error Updating Client PriceList', $th);
         }
 
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Updated Successfully']);
@@ -132,7 +132,7 @@ class ClientProductsController extends Controller
                 $this->repository->delete($client_product);    
             }
        } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.client_products.index'), ['flash_error' => 'Error Deleting Client Pricelist']);
+            return errorHandler('Error Deleting Client PriceList', $th);
        }
             
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);

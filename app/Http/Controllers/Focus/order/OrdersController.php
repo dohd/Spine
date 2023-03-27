@@ -144,7 +144,7 @@ class OrdersController extends Controller
         try {
             $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
         } catch (\Throwable $th) {
-            echo json_encode(array('status' => 'Error', 'message' => 'Error Creating Order'));
+            echo errorHandler('Error Creating Orders', $th);
         }
         //return with successfull message
 
@@ -193,7 +193,7 @@ class OrdersController extends Controller
         try {
             $result = $this->repository->update($order, compact('invoice', 'invoice_items', 'data2'));
         } catch (\Throwable $th) {
-            echo json_encode(array('status' => 'Error', 'message' => 'Error Updating Orders'));
+            echo errorHandler('Error Updating Orders', $th);
         }
 
         //return with successfull message
@@ -214,7 +214,7 @@ class OrdersController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($order);
         } catch (\Throwable $th) {
-            return json_encode(array('status' => 'Error', 'message' => 'Error Deleting Orders'));
+            return errorHandler('Error Deleting Orders', $th);
         }
         //returning with successfull message
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.orders.deleted')));

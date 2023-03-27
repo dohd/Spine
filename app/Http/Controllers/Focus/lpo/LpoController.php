@@ -54,7 +54,7 @@ class LpoController extends Controller
         try {
             Lpo::create($data);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.lpo.index'), ['flash_error' => 'Error Creating LPO']);
+            return errorHandler('Error Creating LPO', $th);
         }
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO created successfully']);
@@ -109,7 +109,7 @@ class LpoController extends Controller
         try {
             Lpo::find($lpo_id)->update($data);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.lpo.index'), ['flash_error' => 'Error Updating LPO']);
+            return errorHandler('Error Updating LPO', $th);
         }
 
         return new RedirectResponse(route('biller.lpo.index'), ['flash_success' => 'LPO updated successfully']);
@@ -138,7 +138,11 @@ class LpoController extends Controller
         if (count($lpo->quotes))
             return response()->json(['status' => 'Error', 'message' => ' LPO attached to Quote / Proforma Invoice'], 403);
         
-        $lpo->delete();        
+        try {
+            $lpo->delete(); 
+        } catch (\Throwable $th) {
+            return errorHander('Error Deleting LPO', $th);
+        }       
         return response()->noContent();
     }
 

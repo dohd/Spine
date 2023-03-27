@@ -82,7 +82,7 @@ class RoleController extends Controller
         try {
             $this->roles->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.role.index'), ['flash_error' => 'Error Creating Role']);
+            return errorHandler('Error Creating Role', $th);
         }
 
         return new RedirectResponse(route('biller.role.index'), ['flash_success' => trans('alerts.backend.roles.created')]);
@@ -117,7 +117,7 @@ class RoleController extends Controller
             if (auth()->user()->ins == $role->ins) 
             $this->roles->update($role, $request->except('_token'));
        } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.role.index'), ['flash_error' => 'Error Updating Roles']);
+            return errorHandler('Error Updating Roles', $th);
        }
 
         return new RedirectResponse(route('biller.role.index'), ['flash_success' => trans('alerts.backend.roles.updated')]);
@@ -134,7 +134,7 @@ class RoleController extends Controller
         try {
             if (auth()->user()->ins == $role->ins) $this->roles->delete($role);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.role.index'), ['flash_error' => 'Error Deleting Roles']);
+            return errorHandler('Error Deleting Roles', $th);
         }
 
         return new RedirectResponse(route('biller.role.index'), ['flash_success' => trans('alerts.backend.roles.deleted')]);

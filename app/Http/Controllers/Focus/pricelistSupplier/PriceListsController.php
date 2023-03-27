@@ -64,7 +64,7 @@ class PriceListsController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_error' => 'Error creating Supplier Pricelist']);
+            return errorHandler($th, 'Error creating Supplier Pricelist');
         }
 
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Created Successfully']);
@@ -109,7 +109,7 @@ class PriceListsController extends Controller
             $supplier_product = SupplierProduct::find($id);
             $this->repository->update($supplier_product, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_error' => 'Error Updating Supplier Pricelist']);
+            return errorHandler($th, 'Error Updating Supplier Pricelist');
         }
 
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Updated Successfully']);
@@ -132,7 +132,7 @@ class PriceListsController extends Controller
                 $this->repository->delete($supplier_product);    
             }
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_error' => 'Error deleting Supplier Pricelist']);
+            return errorHandler($th, 'Error Deleting Supplier Pricelist');
         }
             
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);

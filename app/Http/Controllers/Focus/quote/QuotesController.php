@@ -124,7 +124,7 @@ class QuotesController extends Controller
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
         } catch (\Throwable $th) {
-            return new RedirectResponse($route, ['flash_error' => $msg]);
+            return errorHandler('Error creating Proforma Invoice', $th);
         } 
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -188,7 +188,7 @@ class QuotesController extends Controller
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
         } catch (\Throwable $th) {
-            return new RedirectResponse($route, ['flash_error' => $msg]);
+            return errorHandler('Error Updating Proforma Invoice', $th);
         }        
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -215,7 +215,7 @@ class QuotesController extends Controller
                 $msg = 'Proforma Invoice Successfully Deleted';
             }
         } catch (\Throwable $th) {
-            return new RedirectResponse($link, ['flash_error' => $msg]);
+            return errorHandler('Error Deleting Proforma Invoice', $th);
         }
 
         return new RedirectResponse($link, ['flash_success' => $msg]);
@@ -281,7 +281,11 @@ class QuotesController extends Controller
         $data_items = modify_array($data_items);
         $job_cards = modify_array($job_cards);
 
-        $result = $this->repository->verify(compact('data', 'data_items', 'job_cards'));
+        try {
+            $result = $this->repository->verify(compact('data', 'data_items', 'job_cards'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Verifying Quote', $th);
+        }
 
         $tid = $result->tid;
         if ($result->bank_id) $tid = gen4tid('PI-', $tid);

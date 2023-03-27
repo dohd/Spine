@@ -89,12 +89,16 @@ class ProjectequipmentsController extends Controller
          if (!empty($request->input('selected_products'))) {
          $data['equipment_id'] = explode(',', $request->input('selected_products'));
          $data['action'] = 1;
-     }
+        }
        
          $data['ins'] = auth()->user()->ins;
          $data['loaded_by'] = auth()->user()->id;
 
-          $transaction = $this->repository->create(compact('data'));
+          try {
+            $transaction = $this->repository->create(compact('data'));
+          } catch (\Throwable $th) {
+            return errorHandler('Error Creating Project Equipment', $th);
+          }
 
          echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.equipments.created') . ' <a href="' . route('biller.jobschedules.index', [$returnvalue]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
 
@@ -137,8 +141,12 @@ class ProjectequipmentsController extends Controller
         ]);
         //Input received from the request
         $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
-        //Update the model using repository update method
-        $this->repository->update($branch, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($branch, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Project Equipment', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Updated'  . ' <a href="' . route('biller.branches.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
 
@@ -193,8 +201,12 @@ class ProjectequipmentsController extends Controller
     {
 
         //dd($branch);
-        //Calling the delete method on repository
+        try {
+            //Calling the delete method on repository
         $this->repository->delete($projectequipment);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Equipments', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.projectequipments.index'), ['flash_success' => 'Equipments Successfully Deleted']);
     }

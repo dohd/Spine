@@ -85,7 +85,7 @@ class TransactioncategoriesController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_error' => 'Error Creating Transaction Category']);
+            return errorHandler('Error Creating Transaction Category', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.created')]);
@@ -118,7 +118,7 @@ class TransactioncategoriesController extends Controller
             //Update the model using repository update method
             $this->repository->update($transactioncategory, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_error' => 'Error Updating Transaction Categories']);
+            return errorHandler('Error Updating Transaction Categories', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.updated')]);
@@ -133,8 +133,12 @@ class TransactioncategoriesController extends Controller
      */
     public function destroy(Transactioncategory $transactioncategory, ManageCompanyRequest $request)
     {
-        //Calling the delete method on repository
-        $result = $this->repository->delete($transactioncategory);
+        try {
+            //Calling the delete method on repository
+            $result = $this->repository->delete($transactioncategory);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Transaction Categories', $th);
+        }
         //returning with successfull message
         if ($result) return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.deleted')]);
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_error' => trans('meta.delete_error')]);

@@ -104,7 +104,7 @@ class StandardInvoicesController extends Controller
         try {
             $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.invoices.index'), ['flash_error' => 'Error Creating Invoice']);
+            return errorHandler('Error Creating Invoice', $th);
         }
 
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully created']);
@@ -139,8 +139,12 @@ class StandardInvoicesController extends Controller
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($invoice, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($invoice, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Standard Invoice', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully updated']);
     }
@@ -154,10 +158,14 @@ class StandardInvoicesController extends Controller
      */
     public function destroy(Invoice $invoice, Request  $request)
     {
-        dd($invoice);
+        //dd($invoice);
 
-        //Calling the delete method on repository
-        $this->repository->delete($invoice);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($invoice);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Standard Invoice', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully deleted']);
     }

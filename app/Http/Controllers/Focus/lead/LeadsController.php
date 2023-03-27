@@ -104,7 +104,7 @@ class LeadsController extends Controller
         try {
             $this->repository->create($data);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.leads.index'), ['flash_error' => 'Error Creating Ticket']);
+            return errorHandler('Error Craeting Ticket!', $th);
         }
         
         return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Created']);
@@ -153,7 +153,7 @@ class LeadsController extends Controller
         try {
             $this->repository->update($lead, $data);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.leads.index'), ['flash_error' => 'Error Updating Ticket']);
+            return errorHandler('Error Updating Ticket!', $th);
         } 
         
         return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Updated']);
@@ -170,7 +170,7 @@ class LeadsController extends Controller
         try {
             $this->repository->delete($lead);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.leads.index'), ['flash_error' => 'Error Deleting Ticket']);
+            return errorHandler('Error Deleting Ticket!', $th);
         } 
 
         return new RedirectResponse(route('biller.leads.index'), ['flash_success' => 'Ticket Successfully Deleted']);

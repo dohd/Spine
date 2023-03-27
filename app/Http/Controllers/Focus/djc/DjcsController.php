@@ -109,7 +109,7 @@ class DjcsController extends Controller
             // print preview 
             $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_error' => 'Error Creating Djc Report' . $msg]);
+            return errorHandler('Error Creating Djcs Report', $th);
         }
        
         return new RedirectResponse(route('biller.djcs.index', [$result['id']]), ['flash_success' => 'Djc Report Created' . $msg]);
@@ -163,7 +163,7 @@ class DjcsController extends Controller
             $msg = ' <a href="'. route('biller.print_djc', [$result->id, 10, token_validator('', "d{$result->id}", true), 1]) .'" class="invisible" id="printpreview"></a>'; 
 
        } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.djcs.index'), ['flash_error' => 'Error Updating Djc Report' . $msg]);
+        return errorHandler('Error Updating Djcs Report', $th);
        }
         return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc report updated' . $msg]);
     }
@@ -180,7 +180,7 @@ class DjcsController extends Controller
         try {
             $this->repository->delete($djc);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.djcs.index'), ['flash_error' => 'Error deleting Djc Report']);
+            return errorHandler('Error Deleting Djcs Report', $th);
         }
         
         return new RedirectResponse(route('biller.djcs.index'), ['flash_success' => 'Djc deleted successfully']);

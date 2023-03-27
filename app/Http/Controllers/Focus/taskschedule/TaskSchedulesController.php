@@ -76,7 +76,7 @@ class TaskSchedulesController extends Controller
         try {
             $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.taskschedules.index'), ['flash_error' => 'Errorn loading Task Schedule Equipments']);
+            return errorHandler('Error loading Task Schedule Equipments', $th);
         }
         
         return new RedirectResponse(route('biller.taskschedules.index'), ['flash_success' => 'Task Schedule Equipments loaded successfully']);
@@ -135,7 +135,7 @@ class TaskSchedulesController extends Controller
         try {
             $this->repository->update($taskschedule, compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.taskschedules.index'), ['flash_error' => 'Error Updating Task Schedule']);
+            return errorHandler('Error Updating Task Schedule', $th);
         }
 
         return new RedirectResponse(route('biller.taskschedules.index'), ['flash_success' => 'Task Schedule updated successfully']);        
@@ -155,7 +155,7 @@ class TaskSchedulesController extends Controller
             $msg = ['flash_success' => 'Task Schedule deleted successfully'];
             if (!$result) $msg = ['flash_error' => 'Task Schedule has a service report!'];
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.taskschedules.index'), $msg);
+            return errorHandler('Error Deleting Task Schedule', $th);
         }
 
         return new RedirectResponse(route('biller.taskschedules.index'), $msg);

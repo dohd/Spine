@@ -101,7 +101,7 @@ class MiscsController extends Controller
             //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.miscs.index'), ['flash_error' => 'Error Creating Miscs']);
+            return errorHandler('Error Creating Miscs', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.miscs.index') . '?module=' . $request->section, ['flash_success' => trans('alerts.backend.miscs.created')]);
@@ -134,7 +134,7 @@ class MiscsController extends Controller
             //Update the model using repository update method
             $this->repository->update($misc, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.miscs.index'), ['flash_error' => 'Error Updating Miscs']);
+            return errorHandler('Error Updating Miscs', $th);
         }
         //return with successfull message
         if ($misc->section == 2) return new RedirectResponse(route('biller.miscs.index') . '?module=task', ['flash_success' => trans('alerts.backend.miscs.updated')]);
@@ -154,7 +154,7 @@ class MiscsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($misc);
         } catch (\Throwable $th) {
-            return json_encode(array('status' => 'Error', 'message' => 'Error Deleting Miscs'));
+            return errorHandler('Error Deleting Miscs', $th);
         }
         //returning with successfull message
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.miscs.deleted')));

@@ -102,7 +102,7 @@ class SuppliersController extends Controller
                 return response()->json($result);
             } 
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.suppliers.index'), ['flash_error' => 'Error Creating Supplier']);
+            return errorHandler('Error Creating Supplier', $th);
         }
 
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.created')]);
@@ -144,7 +144,7 @@ class SuppliersController extends Controller
         try {
             $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.suppliers.index'), ['flash_error' => 'Error Updating Supplier']);
+            return errorHandler('Error Updating Supplier', $th);
         }        
        
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.updated')]);
@@ -162,7 +162,7 @@ class SuppliersController extends Controller
         try {
             $this->repository->delete($supplier);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.suppliers.index'), ['flash_error' => 'Error Deleting Supplier']);
+            return errorHandler('Error Deleting Supplier', $th);
         }
 
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.deleted')]);

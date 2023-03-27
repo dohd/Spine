@@ -88,7 +88,11 @@ class ProductcategoriesController extends Controller
         //Create the model using repository create method
          if ($input['rel_id'] == 0) $input['c_type'] = 0;
         if ($input['c_type'] == 0) $input['rel_id'] = 0;
-        $id = $this->repository->create($input);
+        try {
+            $id = $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Product Categories', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.productcategories.index'), ['flash_success' => trans('alerts.backend.productcategories.created') . ' <a href="' . route('biller.productcategories.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.productcategories.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.productcategories.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
     }
@@ -119,8 +123,12 @@ class ProductcategoriesController extends Controller
         ]);
         //Input received from the request
         $input = $request->only(['title', 'extra']);
-        //Update the model using repository update method
-        $this->repository->update($productcategory, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($productcategory, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Product Categories', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.productcategories.index'), ['flash_success' => trans('alerts.backend.productcategories.updated') . ' <a href="' . route('biller.productcategories.show', [$productcategory->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.productcategories.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.productcategories.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
 
@@ -135,8 +143,12 @@ class ProductcategoriesController extends Controller
      */
     public function destroy(Productcategory $productcategory, StoreProductcategoryRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($productcategory);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($productcategory);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Product Categories', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.productcategories.index'), ['flash_success' => trans('alerts.backend.productcategories.deleted')]);
     }

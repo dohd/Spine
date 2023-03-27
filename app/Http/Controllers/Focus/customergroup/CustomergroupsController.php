@@ -90,7 +90,7 @@ class CustomergroupsController extends Controller
             //Create the model using repository create method
             $id = $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customergroups.show', [$id]), ['flash_error' => 'Error Creating Customer Groups']);
+            return errorHandler('Error Creating Customer Groups', $th);
         }
         //return with successfull message
 
@@ -127,7 +127,7 @@ class CustomergroupsController extends Controller
             //Update the model using repository update method
             $this->repository->update($customergroup, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customergroups.show', [$customergroup->id]), ['flash_error' => 'Error Updating Customer Groups']);
+            return errorHandler('Error Updating Customer Groups', $th);
         }
         //return with successfull message
 
@@ -147,7 +147,7 @@ class CustomergroupsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($customergroup);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.customergroups.index'), ['flash_error' => 'Error Deleting Customer Groups']);
+            return errorHandler('Error Deleting Customer Groups', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.customergroups.index'), ['flash_success' => trans('alerts.backend.customergroups.deleted')]);

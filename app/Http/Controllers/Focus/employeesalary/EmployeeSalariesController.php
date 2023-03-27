@@ -91,7 +91,7 @@ class EmployeeSalariesController extends Controller
             //Create the model using repository create method
             $this->repository->create(compact('input_salary', 'input_allowance'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.employeesalaries.index'), ['flash_error' => 'Error Creating Employee Salary']);
+            return errorHandler('Error Creating Employee Salary', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.employeesalaries.index'), ['flash_success' => trans('alerts.backend.allowance.created')]);
@@ -124,7 +124,7 @@ class EmployeeSalariesController extends Controller
             //Update the model using repository update method
             $this->repository->update($employeesalary, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.employeesalary.index'), ['flash_error' => 'Error Updating Employee Salary']);
+            return errorHandler('Error Updating Employee Salary', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.employeesalary.index'), ['flash_success' => trans('alerts.backend.departments.updated')]);
@@ -143,7 +143,7 @@ class EmployeeSalariesController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($employeesalary);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.employeesalary.index'), ['flash_error' => 'Error Deleting Employee Salary']);
+            return errorHandler('Error Deleting Employee Salary', $th);
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.employeesalary.index'), ['flash_success' => trans('alerts.backend.allowance.deleted')]);

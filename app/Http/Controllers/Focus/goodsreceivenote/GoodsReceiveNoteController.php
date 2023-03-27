@@ -62,7 +62,7 @@ class GoodsReceiveNoteController extends Controller
             $msg = 'Goods Received Note Created Successfully With DNote';
             if ($grn->invoice_no) $msg = 'Goods Received Note Created Successfully With Invoice';
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_error' => 'Error Creating GRN']);
+            return errorHandler('Error Creating Goods Received Note', $th);
         }
 
         return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => $msg]);
@@ -104,7 +104,7 @@ class GoodsReceiveNoteController extends Controller
         try {
             $this->respository->update($goodsreceivenote, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_error' => 'Error Updating Goods Received Note']);
+            return errorHandler('Error Updating Goods Received Note', $th);
         }
 
         return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Note Updated Successfully']);
@@ -121,7 +121,7 @@ class GoodsReceiveNoteController extends Controller
         try {
             $this->respository->delete($goodsreceivenote);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_error' => 'Error Deleting Goods Received Note']);
+            return errorHandler('Error Deleting Goods Received Note', $th);
         }
 
         return new RedirectResponse(route('biller.goodsreceivenote.index'), ['flash_success' => 'Goods Received Note Deleted Successfully']);

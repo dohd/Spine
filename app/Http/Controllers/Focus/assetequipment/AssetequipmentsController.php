@@ -97,7 +97,7 @@ class AssetequipmentsController extends Controller
         try {
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.assetequipments.index'), ['flash_error' => 'Error Creating Asset Equipment']);
+            return errorHandler('Error Creating Asset Equipment!', $th);
         }
 
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Created']);
@@ -136,7 +136,7 @@ class AssetequipmentsController extends Controller
         try {
             $this->repository->update($assetequipment, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.assetequipments.index'), ['flash_error' => 'Error Updating Asset Equipment']);
+            return errorHandler('Error Updating Asset Equipment!', $th);
         }
 
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Updated']);
@@ -155,7 +155,7 @@ class AssetequipmentsController extends Controller
         try {
             $this->repository->delete($assetequipment);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.assetequipments.index'), ['flash_error' => 'Error Deleting Asset Equipment']);
+            return errorHandler('Error Deleting Asset Equipment!', $th);
         }
 
         return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Deleted']);

@@ -86,7 +86,7 @@ class PricegroupsController extends Controller
         try {
             $result = $this->repository->create($input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricegroups.index'), ['flash_error' => 'Error Creating Pricegroups']);
+            return errorHandler($th, 'Error Creating PriceGroups');
         }
         if (!$result) throw ValidationException::withMessages(['ref_id' => 'Duplicate Price Group is not allowed']);
 
@@ -121,7 +121,7 @@ class PricegroupsController extends Controller
             //Update the model using repository update method
             $this->repository->update($pricegroup, $input);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricegroups.index'), ['flash_error' => 'Error Updating Pricegroups']);
+            return errorHandler($th, 'Error Updating PriceGroups');
         }
         //return with successfull message
         return new RedirectResponse(route('biller.pricegroups.index'), ['flash_success' => trans('alerts.backend.pricegroups.updated')]);
@@ -140,7 +140,7 @@ class PricegroupsController extends Controller
             //Calling the delete method on repository
             $this->repository->delete($pricegroup);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.pricegroups.index'), ['flash_error' => 'Error Deleting PriceGroups']);
+            return errorHandler($th, 'Error Deleting PriceGroups');
         }
         //returning with successfull message
         return new RedirectResponse(route('biller.pricegroups.index'), ['flash_success' => trans('alerts.backend.pricegroups.deleted')]);

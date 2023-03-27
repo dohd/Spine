@@ -84,7 +84,7 @@ class TaxReportsController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.tax_reports.index'), ['flash_error' => 'Error Creating Tax Report']);
+            return errorHandler('Error Creating Tax Report', $th);
         }
 
         return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Report Created Successfully']);
@@ -115,7 +115,7 @@ class TaxReportsController extends Controller
         try {
             $this->repository->update($tax_report, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.tax_reports.index'), ['flash_error' => 'Error Updating Tax Report']);
+            return errorHandler('Error Updating Tax Report', $th);
         }
 
         return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Report Updated Successfully']);
@@ -132,7 +132,7 @@ class TaxReportsController extends Controller
         try {
             $this->repository->delete($tax_report);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.tax_reports.index'), ['flash_error' => 'Error Deleting Tax Report']);
+            return errorHandler('Error Deleting Tax Report', $th);
         }
 
         return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Report Deleted Successfully']);

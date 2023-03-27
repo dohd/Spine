@@ -78,7 +78,7 @@ class AttendanceController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.attendances.index'), ['flash_error' => 'Error Creating Attendance']);
+            return errorHandler('Error Creating Attendance!', $th);
         }
 
         return new RedirectResponse(route('biller.attendances.index'), ['flash_success' => 'Attendance Created Successfully']);
@@ -110,7 +110,7 @@ class AttendanceController extends Controller
         try {
             $this->repository->update($attendance, $request->except('_token'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.attendances.index'), ['flash_error' => 'Error Updating Attendance']);
+            return errorHandler('Error Updating Attendance!', $th);
         }
 
         return new RedirectResponse(route('biller.attendances.index'), ['flash_success' => 'Attendance Updated Successfully']);
@@ -127,7 +127,7 @@ class AttendanceController extends Controller
         try {
             $this->repository->delete($attendance);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.attendances.index'), ['flash_error' => 'Error Deleting Attendance']);
+            return errorHandler('Error Deleting Attendance!', $th);
         }
 
         return new RedirectResponse(route('biller.attendances.index'), ['flash_success' => 'Attendance Deleted Successfully']);

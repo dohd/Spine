@@ -101,7 +101,7 @@ class PurchaseordersController extends Controller
         try {
             $result = $this->repository->create(compact('order', 'order_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_error' => 'Error creating Purchase Order']);
+            return errorHandler('Error creating Purchase Order', $th);
         }
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
@@ -147,7 +147,7 @@ class PurchaseordersController extends Controller
         try {
             $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_error' => 'Error Updating Purchase Order']);
+            return errorHandler('Error Updating Purchase Order', $th);
         }
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order updated successfully']);
@@ -165,7 +165,7 @@ class PurchaseordersController extends Controller
         try {
             $this->repository->delete($purchaseorder);
         } catch (\Throwable $th) {
-            return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_error' => 'Error Deleting Purchase Order']);
+            return errorHandler('Error Deleting Purchase Order', $th);
         }
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        

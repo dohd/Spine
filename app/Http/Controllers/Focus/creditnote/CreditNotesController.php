@@ -82,7 +82,7 @@ class CreditNotesController extends Controller
       }
   
     } catch (\Throwable $th) {
-      return new RedirectResponse($route, ['flash_error' => 'Error Creating Credit Notes']);
+      return errorHandler('Error Creating Credit Note', $th);
     }
     return new RedirectResponse($route, ['flash_success' => $msg]);
   }
@@ -143,7 +143,7 @@ class CreditNotesController extends Controller
         $route = route('biller.creditnotes.index', 'is_debit=1');
       }
     } catch (\Throwable $th) {
-      return new RedirectResponse($route, ['flash_error' => 'Error Updating Credit Notes']);
+      return errorHandler('Error Updating Credit Note', $th);
     }
 
     return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -167,7 +167,7 @@ class CreditNotesController extends Controller
         $route = route('biller.creditnotes.index', 'is_debit=1');
       }
     } catch (\Throwable $th) {
-      return new RedirectResponse($route, ['flash_error' => 'Error Deleting Credit Notes']);
+      return errorHandler('Error Deleting Credit Note', $th);
     }
 
     return new RedirectResponse($route, ['flash_success' => $msg]);

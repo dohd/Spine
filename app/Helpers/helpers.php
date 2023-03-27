@@ -6,8 +6,24 @@ use App\Models\hrm\Hrm;
 use App\Models\nhif\Nhif;
 use App\Models\Settings\Setting;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\transaction\Transaction;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
+
+
+/**
+ * General Error Handling
+ **/
+if (!function_exists('errorHandler')) {
+    function errorHandler($msg = 'Internal Server Error! Please try again later!', $exception=null) {
+        if ($exception) {
+            Log::error($exception->getMessage() . '{user_id: '. auth()->user()->id .'}' . ' on line ' . $exception->getLine() . ' ' . $exception->getFile());
+            return redirect()->back()->with('flash_error', $msg);
+        }
+    }    
+}
+
+
 
 /**
  * Henerate UUID.
