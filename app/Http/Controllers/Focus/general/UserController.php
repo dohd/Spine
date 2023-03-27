@@ -25,6 +25,7 @@ use App\Models\Access\User\UserProfile;
 use App\Models\Company\ConfigMeta;
 use Illuminate\Http\Request;
 use App\Http\Responses\ViewResponse;
+use App\Models\Company\Company;
 use App\Models\hrm\Attendance;
 use App\Models\hrm\Hrm;
 use App\Models\hrm\HrmMeta;
@@ -55,9 +56,26 @@ class UserController extends Controller
         return new ViewResponse('focus.projects.tasks.index', compact('mics', 'employees', 'project_select'));
     }
 
+    /**
+     * User Profile
+     */
     public function profile()
     {
         $hrm = Hrm::find(auth()->user()->id);
+        $company = Company::find(auth()->user()->ins);
+        $hrm->profile = new UserProfile([
+            'user_id' => $hrm->id,
+            'address_1' => @$hrm->meta->residential_address,
+            'address_2' => @$hrm->meta->home_address,
+            'city' => '',
+            'state' => '',
+            'country' => '',
+            'postal' => '',
+            'company' => $company->cname,
+            'contact' => $hrm->primary_contact,
+            'tax_id' => $hrm->tax_id,
+        ]);
+
         return view('focus.user.profile', compact('hrm'));
     }
 
