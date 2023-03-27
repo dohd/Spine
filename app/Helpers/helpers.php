@@ -17,9 +17,9 @@ use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 if (!function_exists('errorHandler')) {
     function errorHandler($msg = 'Internal Server Error! Please try again later!', $exception=null) {
         if ($exception) {
-            Log::error($exception->getMessage() . '{user_id: '. auth()->user()->id .'}' . ' on line ' . $exception->getLine() . ' ' . $exception->getFile());
-            return redirect()->back()->with('flash_error', $msg);
+            Log::error($exception->getMessage() . ' {user_id: '. auth()->user()->id .'}' . ' at ' . $exception->getFile() . ':' . $exception->getLine());
         }
+        return redirect()->back()->with('flash_error', $msg);
     }    
 }
 
