@@ -75,7 +75,7 @@
                     name: 'id'
                 },
                 ...[
-                    'tid', 'customer', 'subject', 'job_card', 'client_ref', 'lead_tid', 'report_date'
+                    'tid', 'customer', 'subject', 'job_card', 'client_ref', 'lead_id', 'report_date'
                 ].map(v => ({data:v, name:v})),
                 {
                     data: 'actions',
