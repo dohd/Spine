@@ -3,66 +3,70 @@
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     const config = {
-        ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
-        datepicker: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
     };
 
     const Form = {
         billPayment: @json(@$billpayment),
-        directBill: @json(@$direct_bill),
+        directPurchaseBill: @json(@$direct_bill),
         unallocatedPmts: @json(@$unallocated_pmts),
 
         init() {
-            $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
-            $('#supplier').select2({allowClear: true}); 
-            $('#employee').select2({allowClear: true});
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            $('.select2').select2({allowClear: true});
 
-            $('#amount').keyup(this.allocateAmount).focusout(this.amountFocusOut).trigger('focusout');
-            $('#documentsTbl').on('focusout', '.paid', this.tablePaidChange);
+            $('#amount')
+                .keyup(this.allocateAmount)
+                .focusout(function() { $(this).val(accounting.formatNumber($(this).val())); })
+                .trigger('focusout');
+                    
+            $('#billsTbl').on('focusout', '.paid', this.billAmountChange);
             this.columnTotals();
 
-            if (this.billPayment) {
-                // edit mode
-                $('#supplier').attr('disabled', true);
-                if (!this.billPayment.employee_id)
-                    $('#employee').val('').change().attr('disabled', true);
-                if (!this.billPayment.supplier_id)
-                    $('#supplier').val('').change();
-            } else {
-                // create mode
-                $('#supplier').val('').change();  
-                $('#employee').val('').change();  
+            // edit mode
+            const editBill = this.billPayment;
+            if (editBill) {
+                if (editBill.supplier_id) {
+                    $('#employee').val('').change().attr({'disabled': true, 'required':false});
+                } else if (editBill.employee_id) {
+                    $('#supplier').val('').change().attr({'disabled': true, 'required':false});
+                }
             }
+
             $('#supplier').change(this.supplierChange);  
             $('#employee').change(this.employeeChange);     
             $('#payment_type').change(this.paymentTypeChange);
-            $('#rel_payment').change(this.relatedPaymentChange);         
-            this.handleDirectPayment();
-
+            $('#rel_payment').change(this.unallocatedPmtChange);         
             $('form').submit(this.formSubmit);
+            this.paymentFromDirectPurchase();
         },
 
         formSubmit() {
             // filter unallocated inputs
-            $('#documentsTbl tbody tr').each(function() {
-                let payment = $(this).find('.paid');
-                let bill = $(this).find('.bill-id');
-                if (accounting.unformat(payment.val()) == 0) {
-                    payment.attr('disabled', true);
-                    bill.attr('disabled', true);
+            $('#billsTbl tbody tr').each(function() {
+                let paymentInp = $(this).find('.paid');
+                if (accounting.unformat(paymentInp.val()) == 0) {
+                    $(this).remove();
                 } 
             });
+            if (Form.billPayment && $('#payment_type').val() == 'per_invoice' && !$('#billsTbl tbody tr').length) {
+                if (!confirm('Unallocating line items destroys this instance! Are you sure?')) {
+                    event.preventDefault();
+                    location.reload();
+                }
+            }
         },
 
-        relatedPaymentChange() {
+        unallocatedPmtChange() {
             if ($(this).val()) {
                 let data = $(this).children(':selected').attr('data');
                 data = JSON.parse(data);
                 $('#reference').prop('readonly', true).val(data.reference);
                 $('#note').prop('readonly', true).val(data.note);
 
-                const balance = parseFloat(data.amount) - parseFloat(data.allocate_ttl);
-                $('#amount').prop('readonly', true).val(accounting.formatNumber(balance)).keyup();
+                const outstanding = (data.amount*1) - (data.allocate_ttl*1);
+                $('#amount').prop('readonly', true).val(accounting.formatNumber(outstanding)).keyup();
 
                 $('#payment_type').prop('disabled', true)
                     .after(`<input type="hidden" name="payment_type" value="per_invoice" class="pmt-type" />`);
@@ -71,9 +75,8 @@
                 $('#payment_mode').prop({disabled: true}).val(data.payment_mode)
                  .after(`<input type="hidden" name="payment_mode" value="${data.payment_mode}" class="pmt-mode"/>`);
             } else {
-                $('#reference').prop('readonly', false).val('');
-                $('#amount').prop('readonly', false).val('').keyup();
-                $('#note').prop('readonly', false).val('');
+                ['reference', 'amount', 'note'].map(v => $('#'+v).attr('readonly', false).val(''));
+                $('#amount').keyup();
 
                 $('#payment_type').prop('disabled', false);
                 $('.pmt-type').remove();
@@ -85,83 +88,94 @@
             }
         },
 
-        paymentTypeChange() {
-            const type = $(this).val();
-            if (type == 'per_invoice') {
-                if ($('#supplier').val()) $('#supplier').change();
-                else if ($('#employee').val()) $('#employee').change();
-            } else if (type == 'on_account') {
-                $('#documentsTbl tbody').html('');
-            } else if (type == 'advance_payment') {
-                $('#documentsTbl tbody').html('');
+        paymentFromDirectPurchase() {
+            const bill = this.directPurchaseBill;
+            if (bill) {
+                $('#supplier').val(bill.supplier_id).change();
+                $('#amount').val(accounting.formatNumber(bill.amount*1));
+                const rowUpdater = setInterval(() => {
+                    $('#billsTbl tbody tr').each(function() {
+                        const itemTid = $(this).find('.bill-no').text();
+                        if (itemTid == bill.tid) {
+                            $(this).find('.paid').val(bill.amount*1).focusout();
+                            clearInterval(rowUpdater);
+                        }
+                    });
+                }, 500);
             }
-            Form.columnTotals();
         },
 
-        handleDirectPayment() {
-            const bill = this.directBill;
-            if (!bill) return;
-            const amount = parseFloat(bill.amount);
-            $('#amount').val(accounting.formatNumber(amount));
-            $('#supplier').val(bill.supplier_id).change();
-            setTimeout(() => {
-                $('#documentsTbl tbody tr').each(function() {
-                    const billNum = $(this).find('.bill-no').text();
-                    if (billNum == bill.tid) {
-                        $(this).find('.paid').val(amount).focusout();
-                    }
-                });
-            }, 500);
-        },
-
-        amountFocusOut() {
-            $(this).val(accounting.formatNumber($(this).val()));
-        },
-
-        tablePaidChange() {
+        billAmountChange() {
             const tr = $(this).parents('tr:first');
             const paid = accounting.unformat($(this).val());
             const due = accounting.unformat(tr.find('.due').text());
-            if (paid > due) $(this).val(due);
+            const amount = accounting.unformat(tr.find('.amount').text());
+
+            if (Form.billPayment) {
+                if (paid > amount) $(this).val(amount);
+            } else {
+                if (paid > due) $(this).val(due);
+            }
+            
             Form.columnTotals();
         },
 
         supplierChange() {
-            const supplier_id = $(this).val();
-            $('#documentsTbl tbody').html('');
-            $('#employee').attr({required: true, disabled: false});
-
-            // filter supplier unallocated payments
-            $('#rel_payment option:not(:first)').each(function() {
-                if ($(this).attr('supplier_id') == supplier_id) {
-                    $(this).removeClass('d-none');
-                } else  $(this).addClass('d-none');
-            });
-            
-            // fetch bills
+            $('#billsTbl tbody tr').remove();
+            const supplier_id = this.value;
             if (supplier_id) {
                 $('#employee').attr({required: false, disabled: true});
-                $.post("{{ route('biller.suppliers.bills') }}", {supplier_id}, data => {
-                    data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
+                // filter supplier unallocated payments
+                $('#rel_payment option:not(:first)').each(function() {
+                    if ($(this).attr('supplier_id') == supplier_id) {
+                        $(this).removeClass('d-none');
+                    } else  {
+                        $(this).addClass('d-none');
+                    }
                 });
+                // fetch bills
+                $.post("{{ route('biller.suppliers.bills') }}", {supplier_id}, data => {
+                    data.forEach((v,i) => $('#billsTbl tbody').append(Form.billRow(v,i)));
+                });
+            } else {
+                $('#employee').attr({required: true, disabled: false});
             }
         },
 
         employeeChange() {
-            const employee_id = $(this).val();
-            $('#documentsTbl tbody').html('');
-            $('#supplier').attr({required: true, disabled: false});
-            if (!employee_id) return; 
-            
-            $('#supplier').attr({required: false, disabled: true});
-            $.post("{{ route('biller.utility-bills.employee_bills') }}", {employee_id}, data => {
-                data.forEach((v,i) => $('#documentsTbl tbody').append(Form.billRow(v,i)));
-            });
+            $('#billsTbl tbody tr').remove();
+            const employee_id = this.value;
+            if (employee_id) {
+                $('#supplier').attr({required: false, disabled: true});
+                // fetch bills
+                $.post("{{ route('biller.utility-bills.employee_bills') }}", {employee_id}, data => {
+                    data.forEach((v,i) => $('#billsTbl tbody').append(Form.billRow(v,i)));
+                });
+            } else {
+                $('#supplier').attr({required: true, disabled: false});
+            }
+        },
+
+        paymentTypeChange() {
+            switch (this.value) {
+                case 'per_invoice':
+                    if ($('#supplier').val()) $('#supplier').change();
+                    else if ($('#employee').val()) $('#employee').change();
+                    $('#rel_payment').val('').attr('disabled', false);
+                    break;
+                case 'on_account':
+                    $('#billsTbl tbody tr').remove();
+                    $('#rel_payment').val('').attr('disabled', true);
+                    break;
+                case 'advance_payment':
+                    $('#billsTbl tbody tr').remove();
+                    $('#rel_payment').val('').attr('disabled', true);
+                    break;
+            }
+            Form.columnTotals();
         },
 
         billRow(v,i) {
-            const diff = v.total - v.amount_paid;
-            const balance = accounting.formatNumber(diff > 0? diff : 0);
             return `
                 <tr>
                     <td class="text-center">${v.due_date.split('-').reverse().join('-')}</td>
@@ -169,9 +183,9 @@
                     <td>${v.suppliername? v.suppliername : v.supplier.name}</td>
                     <td class="text-center">${v.note}</td>
                     <td>${v.status}</td>
-                    <td>${accounting.formatNumber(v.total)}</td>
+                    <td class="amount">${accounting.formatNumber(v.total)}</td>
                     <td>${accounting.formatNumber(v.amount_paid)}</td>
-                    <td class="text-center due"><b>${balance}</b></td>
+                    <td class="text-center due"><b>${accounting.formatNumber(v.total - v.amount_paid)}</b></td>
                     <td><input type="text" class="form-control paid" name="paid[]" required></td>
                     <input type="hidden" name="bill_id[]" value="${v.id}" class="bill-id">
                 </tr>
@@ -182,13 +196,13 @@
             let dueTotal = 0;
             let allocateTotal = 0;
             let amount = accounting.unformat($(this).val());
-            $('#documentsTbl tbody tr').each(function() {
+            $('#billsTbl tbody tr').each(function() {
                 const due = accounting.unformat($(this).find('.due').text());
                 const paidInput = $(this).find('.paid');
                 if (due > amount) paidInput.val(accounting.formatNumber(amount));
                 else if (amount > due) paidInput.val(accounting.formatNumber(due));
                 else paidInput.val(accounting.formatNumber(due));
-
+                
                 const paid = accounting.unformat(paidInput.val());
                 amount -= paid;
                 dueTotal += due;
@@ -201,13 +215,13 @@
         columnTotals() {
             let dueTotal = 0;
             let allocateTotal = 0;
-            $('#documentsTbl tbody tr').each(function(i) {
+            $('#billsTbl tbody tr').each(function(i) {
                 const due = accounting.unformat($(this).find('.due').text());
                 const paid = accounting.unformat($(this).find('.paid').val());
-                dueTotal += due;
-                allocateTotal += paid;
                 $(this).find('.due').text(accounting.formatNumber(due));
                 $(this).find('.paid').val(accounting.formatNumber(paid));
+                dueTotal += due;
+                allocateTotal += paid;
             });
             $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));

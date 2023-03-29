@@ -1,7 +1,8 @@
 <div class="form-group row">
     <div class="col-4">
         <label for="supplier">Supplier</label>
-        <select name="supplier_id" id="supplier" class="form-control" data-placeholder="Choose supplier" required>
+        <select name="supplier_id" id="supplier" class="form-control select2" data-placeholder="Choose supplier" required>
+            <option value=""></option>
             @foreach ($suppliers as $row)
                 <option value="{{ $row->id }}" {{ @$billpayment && $billpayment->supplier_id == $row->id? 'selected' : '' }}>
                     {{ $row->name }}
@@ -11,7 +12,8 @@
     </div>
     <div class="col-4">
         <label for="employee">Employee</label>
-        <select name="employee_id" id="employee" class="form-control" data-placeholder="Choose Employee" required>
+        <select name="employee_id" id="employee" class="form-control select2" data-placeholder="Choose Employee" required>
+            <option value=""></option>
             @foreach ($employees as $row)
                 <option value="{{ $row->id }}" {{ @$billpayment && $billpayment->employee_id == $row->id? 'selected' : '' }}>
                     {{ $row->fullname }}
@@ -55,7 +57,7 @@
     </div>  
     
     <div class="col-2">
-        <label for="account">Pay From Account</label>
+        <label for="account">Pay From (Ledger Account)</label>
         <select name="account_id" id="account" class="custom-select" required>  
             <option value="">-- select account --</option>                                 
             @foreach ($accounts as $row)
@@ -69,7 +71,7 @@
         @php
             $disabled = '';
             $label_text = '';
-            if (isset($is_allocated) && isset($billpayment) && $billpayment->payment_type != 'per_invoice') {
+            if (@$is_allocated) {
                 $disabled = 'disabled';
                 $label_text = '<span class="text-danger">(Is already allocated)</span>';
             }
@@ -115,7 +117,7 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table tfr my_stripe_single text-center" id="documentsTbl">
+    <table class="table tfr my_stripe_single text-center" id="billsTbl">
         <thead>
             <tr class="bg-gradient-directional-blue white">
                 <th>Due Date</th>
@@ -142,7 +144,7 @@
                         <td>{{ ($bill->purchase? $bill->purchase->suppliername : $bill->supplier)? $bill->supplier->name : '' }}</td>
                         <td class="text-center">{{ $bill->name }}</td>
                         <td>{{ $bill->status }}</td>
-                        <td>{{ numberFormat($bill->total) }}</td>
+                        <td class="amount">{{ numberFormat($bill->total) }}</td>
                         <td>{{ numberFormat($bill->amount_paid) }}</td>
                         <td class="text-center due"><b>{{ numberFormat($bill->total - $bill->amount_paid) }}</b></td>
                         <td><input type="text" class="form-control paid" name="paid[]" value="{{ numberFormat($item->paid) }}" required></td>

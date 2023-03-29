@@ -12,6 +12,7 @@ use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
 use DirectoryIterator;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class BillPaymentController extends Controller
 {
@@ -106,6 +107,7 @@ class BillPaymentController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Bill Payment!', $th);
         }
 
@@ -127,12 +129,10 @@ class BillPaymentController extends Controller
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
 
+        $is_allocated = Billpayment::where('rel_payment_id', $billpayment->id)->exists();
         $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
             ->whereColumn('amount', '!=', 'allocate_ttl')
             ->orderBy('date', 'asc')->get();
-
-        $is_allocated = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
-            ->where('rel_payment_id', $billpayment->id)->count();
 
         return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated'));
     }
@@ -146,10 +146,10 @@ class BillPaymentController extends Controller
      */
     public function update(Request $request, Billpayment $billpayment)
     {
-        
         try {
             $this->repository->update($billpayment, $request->except('_token', 'balance'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Bill Payment!', $th);
         }
 
@@ -164,10 +164,10 @@ class BillPaymentController extends Controller
      */
     public function destroy(Billpayment $billpayment)
     {
-        
         try {
             $this->repository->delete($billpayment);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Bill Payment!', $th);
         }
 
