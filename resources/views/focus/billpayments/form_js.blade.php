@@ -51,10 +51,17 @@
                 } 
             });
             if (Form.billPayment && $('#payment_type').val() == 'per_invoice' && !$('#billsTbl tbody tr').length) {
-                if (!confirm('Unallocating line items destroys this instance! Are you sure?')) {
+                if (!confirm('Unallocating all line items destroys this instance! Are you sure?')) {
                     event.preventDefault();
                     location.reload();
                 }
+            }
+            // check if payment amount >= allocated amount
+            const pmtAmount = accounting.unformat($('#amount').val());
+            const allocAmount = accounting.unformat($('#allocate_ttl').val());
+            if (allocAmount > pmtAmount) {
+                event.preventDefault();
+                alert('Total Allocated Amount must be less or equal to payment Amount!');
             }
         },
 
@@ -91,13 +98,14 @@
         paymentFromDirectPurchase() {
             const bill = this.directPurchaseBill;
             if (bill) {
+                const billAmount = bill.amount*1;
                 $('#supplier').val(bill.supplier_id).change();
-                $('#amount').val(accounting.formatNumber(bill.amount*1));
+                $('#amount').val(accounting.formatNumber(billAmount));
                 const rowUpdater = setInterval(() => {
                     $('#billsTbl tbody tr').each(function() {
                         const itemTid = $(this).find('.bill-no').text();
                         if (itemTid == bill.tid) {
-                            $(this).find('.paid').val(bill.amount*1).focusout();
+                            $(this).find('.paid').val(billAmount).focusout();
                             clearInterval(rowUpdater);
                         }
                     });
@@ -223,8 +231,8 @@
                 dueTotal += due;
                 allocateTotal += paid;
             });
-            $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
+            $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
         },
     }
 

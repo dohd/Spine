@@ -125,16 +125,24 @@ class BillPaymentController extends Controller
         $suppliers = Supplier::get(['id', 'name']);
         $employees = User::get();
         $accounts = Account::whereNull('system')
-        ->whereHas('accountType', function ($q) {
-            $q->where('system', 'bank');
-        })->get(['id', 'holder']);
+            ->whereHas('accountType', fn($q) => $q->where('system', 'bank'))
+            ->get(['id', 'holder']);
 
-        $is_allocated = Billpayment::where('rel_payment_id', $billpayment->id)->exists();
-        $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+        $unallocated_pmts = Billpayment::where('payment_type', '!=', 'per_invoice')
             ->whereColumn('amount', '!=', 'allocate_ttl')
             ->orderBy('date', 'asc')->get();
 
-        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated'));
+        $is_allocated_pmt = false;
+        $has_allocations = Billpayment::where('rel_payment_id', $billpayment->id)->exists();
+        if ($billpayment->payment_type != 'per_invoice' && $has_allocations) $is_allocated_pmt = true;
+            
+        $is_next_allocation = false;
+        $allocation_count = Billpayment::where('rel_payment_id', $billpayment->id)->count();
+        if ($allocation_count > 1) $is_next_allocation = true;
+        
+        return view('focus.billpayments.edit', 
+            compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated_pmt', 'is_next_allocation')
+        );
     }
 
     /**

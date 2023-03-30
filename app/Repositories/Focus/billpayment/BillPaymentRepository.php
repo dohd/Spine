@@ -245,10 +245,10 @@ class BillPaymentRepository extends BaseRepository
             $balance = $billpayment->amount - $billpayment->allocate_ttl;        
             $billpayment->supplier->increment('on_account', $balance);    
         } 
-
+        
         // update payment items, bills and related purchases
         $data_items = modify_array($data_items);
-        foreach ($billpayment->items as $i => $pmt_item) {
+        foreach ($billpayment->items as $pmt_item) {
             $bill = $pmt_item->supplier_bill;
             $purchase = null;
             if ($bill) {
@@ -282,8 +282,8 @@ class BillPaymentRepository extends BaseRepository
             }
             if (!$is_allocated) $pmt_item->delete();
         }
-
-        // check if payment is of advance_payment allocation
+        
+        // check if payment is advance_payment allocation
         if ($billpayment->rel_payment_id) {
             $rel_payment = Billpayment::find($billpayment->rel_payment_id);
             if ($rel_payment && $rel_payment->payment_type == 'advance_payment')

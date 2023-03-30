@@ -69,14 +69,9 @@
     </div>  
     <div class="col-2">
         @php
-            $disabled = '';
-            $label_text = '';
-            if (@$is_allocated) {
-                $disabled = 'disabled';
-                $label_text = '<span class="text-danger">(Is already allocated)</span>';
-            }
+            $disabled = ((@$is_allocated_pmt) || (@$is_next_allocation))? 'disabled' : '';
         @endphp
-        <label for="amount" class="caption"> Amount {!! $label_text !!} </label>
+        <label for="amount" class="caption">Amount</label>
         {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required', $disabled]) }}
     </div>     
 </div>
@@ -164,7 +159,7 @@
 </div>
 <div class="row">  
     <div class="col-2 ml-auto">
-        <label for="allocate_ttl">Total Allocated</label>    
+        <label for="allocate_ttl">Total Allocated Amount</label>    
         {{ Form::text('allocate_ttl', null, ['class' => 'form-control', 'id' => 'allocate_ttl', 'readonly']) }}
     </div>                          
 </div>
