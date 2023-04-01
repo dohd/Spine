@@ -213,7 +213,7 @@ class BillPaymentRepository extends BaseRepository
      */
     public function update(Billpayment $billpayment, array $input)
     {
-        dd($input);
+        // dd($input);
         foreach ($input as $key => $val) {
             if ($key == 'date') $input[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
@@ -231,21 +231,53 @@ class BillPaymentRepository extends BaseRepository
         $prev_note = $billpayment->note;
 
         // reverse supplier on_account balance
-        if ($billpayment->supplier_id) {
-            $balance = $billpayment->amount - $billpayment->allocate_ttl;
-            $billpayment->supplier->decrement('on_account', $balance);    
-        } 
+        if ($billpayment->supplier) {
+            // payment
+            if (!$billpayment->rel_payment_id) {
+                if (in_array($billpayment->payment_type, ['on_account', 'advance_payment'])) {
+                    $billpayment->supplier->decrement('on_account', $billpayment->amount);
+                } else {
+                    $billpayment->supplier->decrement('on_account', $billpayment->amount - $billpayment->allocate_ttl);
+                }
+            }
+
+            // allocated payment
+            if ($billpayment->payment_type == 'per_invoice' && $billpayment->rel_payment_id) {
+                $billpayment->supplier->increment('on_account', $billpayment->allocate_ttl);
+                $rel_payment = Billpayment::find($billpayment->rel_payment_id);
+                if ($rel_payment) {
+                    $rel_payment->decrement('allocate_ttl', $billpayment->allocate_ttl);
+                    if ($rel_payment->payment_type == 'advance_payment') $billpayment->is_advance_allocation = true;
+                }
+            }
+        }
 
         // update payment
         $data = array_diff_key($input, array_flip(['bill_id', 'paid']));
         $result = $billpayment->update($data);
 
         // update supplier on_account balance
-        if ($billpayment->supplier_id) {
-            $balance = $billpayment->amount - $billpayment->allocate_ttl;        
-            $billpayment->supplier->increment('on_account', $balance);    
-        } 
-        
+        if ($billpayment->supplier) {
+            // payment
+            if (!$billpayment->rel_payment_id) {
+                if (in_array($billpayment->payment_type, ['on_account', 'advance_payment'])) {
+                    $billpayment->supplier->increment('on_account', $billpayment->amount);
+                } else {
+                    $billpayment->supplier->increment('on_account', $billpayment->amount - $billpayment->allocate_ttl);
+                }
+            }
+
+            // allocated payment
+            if ($billpayment->payment_type == 'per_invoice' && $billpayment->rel_payment_id) {
+                $billpayment->supplier->decrement('on_account', $billpayment->allocate_ttl);
+                $rel_payment = Billpayment::find($billpayment->rel_payment_id);
+                if ($rel_payment) {
+                    $rel_payment->increment('allocate_ttl', $billpayment->allocate_ttl);
+                    if ($rel_payment->payment_type == 'advance_payment') $billpayment->is_advance_allocation = true;
+                }
+            }
+        }
+
         // update payment items, bills and related purchases
         $data_items = modify_array($data_items);
         foreach ($billpayment->items as $pmt_item) {
@@ -282,7 +314,7 @@ class BillPaymentRepository extends BaseRepository
             }
             if (!$is_allocated) $pmt_item->delete();
         }
-        
+
         // check if payment is advance_payment allocation
         if ($billpayment->rel_payment_id) {
             $rel_payment = Billpayment::find($billpayment->rel_payment_id);
