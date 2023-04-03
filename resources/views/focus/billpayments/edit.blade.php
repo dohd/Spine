@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Bill Payment Management')
+@section('title', 'Edit Payment | Bill Payment Management')
 
 @section('content')
 <div class="content-wrapper">
