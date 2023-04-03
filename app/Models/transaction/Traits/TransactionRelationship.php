@@ -7,7 +7,7 @@ use App\Models\charge\Charge;
 use App\Models\creditnote\CreditNote;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\hrm\Hrm;
-use App\Models\invoice\PaidInvoice;
+use App\Models\invoice\InvoicePayment;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
 use App\Models\manualjournal\Journal;
@@ -22,7 +22,7 @@ trait TransactionRelationship
 {
     public function invoice_payment()
     {
-        return $this->belongsTo(PaidInvoice::class, 'tr_ref');
+        return $this->belongsTo(InvoicePayment::class, 'tr_ref');
     }
 
     public function bill_payment()
@@ -67,7 +67,7 @@ trait TransactionRelationship
 
     public function paidinvoice()
     {
-        return $this->belongsTo(PaidInvoice::class, 'tr_ref');
+        return $this->belongsTo(InvoicePayment::class, 'tr_ref');
     }
     
     public function invoice()

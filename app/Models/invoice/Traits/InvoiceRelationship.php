@@ -8,7 +8,7 @@ use App\Models\project\ProjectRelations;
 use App\Models\lead\Lead;
 use App\Models\customer\Customer;
 use App\Models\items\InvoiceItem;
-use App\Models\items\PaidInvoiceItem;
+use App\Models\items\InvoicePaymentItem;
 use App\Models\items\TaxReportItem;
 use App\Models\items\WithholdingItem;
 use App\Models\quote\Quote;
@@ -35,7 +35,7 @@ trait InvoiceRelationship
 
     public function payments()
     {
-        return $this->hasMany(PaidInvoiceItem::class);
+        return $this->hasMany(InvoicePaymentItem::class);
     }
 
     public function creditnotes()

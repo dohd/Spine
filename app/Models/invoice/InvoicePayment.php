@@ -2,12 +2,12 @@
 
 namespace App\Models\invoice;
 
-use App\Models\invoice\Traits\PaidInvoiceRelationship;
+use App\Models\invoice\Traits\InvoicePaymentRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class PaidInvoice extends Model
+class InvoicePayment extends Model
 {
-    use PaidInvoiceRelationship;
+    use InvoicePaymentRelationship;
     
     /**
      * The database table used by the model.

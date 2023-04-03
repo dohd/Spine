@@ -4,9 +4,9 @@ namespace App\Repositories\Focus\pos;
 
 use App\Models\account\Account;
 use App\Models\invoice\Invoice;
-use App\Models\invoice\PaidInvoice;
+use App\Models\invoice\InvoicePayment;
 use App\Models\items\InvoiceItem;
-use App\Models\items\PaidInvoiceItem;
+use App\Models\items\InvoicePaymentItem;
 use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
@@ -214,7 +214,7 @@ class PosRepository extends BaseRepository
         if (!$pmt_items_data) throw ValidationException::withMessages(['Payment confirmation details required!']);
             
         $pmt_data = [
-            'tid' => PaidInvoice::where('ins', auth()->user()->ins)->max('tid') + 1,
+            'tid' => InvoicePayment::where('ins', auth()->user()->ins)->max('tid') + 1,
             'account_id' => $input['p_account'],
             'customer_id' => $invoice->customer_id,
             'date' => $invoice->invoicedate,
@@ -229,14 +229,14 @@ class PosRepository extends BaseRepository
             $pmt_data = array_replace($pmt_data, [
                 'payment_mode' => $row['p_method'],
             ]);
-            $result = PaidInvoice::create($pmt_data);
+            $result = InvoicePayment::create($pmt_data);
 
             $pmt_item_data = [
                 'paidinvoice_id' => $result->id,
                 'invoice_id' => $invoice->id,
                 'paid' => $result->amount,
             ];
-            PaidInvoiceItem::create($pmt_item_data);
+            InvoicePaymentItem::create($pmt_item_data);
 
             // update invoice amount paid
             $invoice->increment('amountpaid', $result->amount);
