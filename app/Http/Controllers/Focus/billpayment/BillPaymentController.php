@@ -12,6 +12,7 @@ use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\billpayment\BillPaymentRepository;
 use DirectoryIterator;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class BillPaymentController extends Controller
 {
@@ -106,6 +107,7 @@ class BillPaymentController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Bill Payment!', $th);
         }
 
@@ -123,18 +125,24 @@ class BillPaymentController extends Controller
         $suppliers = Supplier::get(['id', 'name']);
         $employees = User::get();
         $accounts = Account::whereNull('system')
-        ->whereHas('accountType', function ($q) {
-            $q->where('system', 'bank');
-        })->get(['id', 'holder']);
+            ->whereHas('accountType', fn($q) => $q->where('system', 'bank'))
+            ->get(['id', 'holder']);
 
-        $unallocated_pmts = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+        $unallocated_pmts = Billpayment::where('payment_type', '!=', 'per_invoice')
             ->whereColumn('amount', '!=', 'allocate_ttl')
             ->orderBy('date', 'asc')->get();
 
-        $is_allocated = Billpayment::whereIn('payment_type', ['on_account', 'advance_payment'])
-            ->where('rel_payment_id', $billpayment->id)->count();
-
-        return view('focus.billpayments.edit', compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated'));
+        $is_allocated_pmt = false;
+        $has_allocations = Billpayment::where('rel_payment_id', $billpayment->id)->exists();
+        if ($billpayment->payment_type != 'per_invoice' && $has_allocations) $is_allocated_pmt = true;
+            
+        $is_next_allocation = false;
+        $allocation_count = Billpayment::where('rel_payment_id', $billpayment->id)->count();
+        if ($allocation_count > 1) $is_next_allocation = true;
+        
+        return view('focus.billpayments.edit', 
+            compact('billpayment', 'accounts', 'suppliers', 'employees', 'unallocated_pmts', 'is_allocated_pmt', 'is_next_allocation')
+        );
     }
 
     /**
@@ -146,10 +154,10 @@ class BillPaymentController extends Controller
      */
     public function update(Request $request, Billpayment $billpayment)
     {
-        
         try {
             $this->repository->update($billpayment, $request->except('_token', 'balance'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Bill Payment!', $th);
         }
 
@@ -164,10 +172,10 @@ class BillPaymentController extends Controller
      */
     public function destroy(Billpayment $billpayment)
     {
-        
         try {
             $this->repository->delete($billpayment);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Bill Payment!', $th);
         }
 
