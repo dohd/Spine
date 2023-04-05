@@ -157,7 +157,7 @@ class QuotesController extends Controller
 
         // extract request input fields
         $data = $request->only([
-            'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
+            'client_ref', 'date', 'notes', 'subtotal', 'tax', 'total', 
             'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
             'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
             'customer_id', 'branch_id', 'bank_id', 'revision', 'is_repair', 'quote_type', 'extra_header', 'extra_footer'

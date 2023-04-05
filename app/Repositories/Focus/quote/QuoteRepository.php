@@ -165,14 +165,13 @@ class QuoteRepository extends BaseRepository
             if (in_array($key, ['total', 'subtotal', 'tax']))
                 $data[$key] = numberClean($val);
         }   
+
         // increament tid
         $tid = 0;
         if (isset($data['bank_id'])) {
-            $tid = Quote::where('ins', $data['ins'])
-                ->where('bank_id', '>', 0)->max('tid');
+            $tid = Quote::where('ins', $data['ins'])->where('bank_id', '>', 0)->max('tid');
         } else {
-            $tid = Quote::where('ins', $data['ins'])
-                ->where('bank_id', 0)->max('tid');
+            $tid = Quote::where('ins', $data['ins'])->where('bank_id', 0)->max('tid');
         }
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
 
@@ -233,7 +232,6 @@ class QuoteRepository extends BaseRepository
             $quote->lead->update(['status' => 0, 'reason' => 'new']);
             Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         }
-        unset($data['tid']);
         $result = $quote->update($data);
 
         $data_items = $input['data_items'];
