@@ -32,7 +32,11 @@
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             $('#supplier').select2(config.select2);
 
+            // edit mode
             if (this.grn) {
+                $('#date').datepicker('setDate', new Date(this.grn.date));
+                if (this.grn.invoice_date) $('#invoice_date').datepicker('setDate', new Date(this.grn.invoice_date));
+                
                 $('#supplier').attr('disabled', true).change();
                 $('#purchaseorder').attr('disabled', true);
                 if (this.grn.invoice_no) {
