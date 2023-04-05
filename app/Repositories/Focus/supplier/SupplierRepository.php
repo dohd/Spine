@@ -203,13 +203,13 @@ class SupplierRepository extends BaseRepository
 
             $payments = collect();
             foreach ($bill->payments as $pmt) {
+                if (!$pmt->bill_payment) continue;
                 $i++;
                 $reference = $pmt->bill_payment->reference;
                 $pmt_tid = gen4tid('PMT-', $pmt->bill_payment->tid);
                 $account = $pmt->bill_payment->account? $pmt->bill_payment->account->holder : '';
                 $amount = numberFormat($pmt->bill_payment->amount);
                 $payment_mode = ucfirst($pmt->bill_payment->payment_mode);
-
                 $record = (object) array(
                     'id' => $i,
                     'date' => $pmt->bill->date,
