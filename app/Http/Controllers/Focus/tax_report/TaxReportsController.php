@@ -25,11 +25,9 @@ use App\Models\additional\Additional;
 use App\Models\Company\Company;
 use App\Models\creditnote\CreditNote;
 use App\Models\invoice\Invoice;
-use App\Models\purchase\Purchase;
 use App\Models\tax_report\TaxReport;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\tax_report\TaxReportRepository;
-use DateTime;
 use Illuminate\Http\Request;
 
 
@@ -69,7 +67,7 @@ class TaxReportsController extends Controller
 
         $month = (date('m')-1)? (date('m')-1) : 12;
         $year = (date('m')-1)? date('Y') : (date('Y')-1);
-        $prev_month = "{$month}-{$year}";
+        $prev_month = strlen($month) == 1? "0{$month}-{$year}" : "{$month}-{$year}";
         
         return view('focus.tax_reports.create', compact('additionals', 'prev_month'));
     }
@@ -267,6 +265,8 @@ class TaxReportsController extends Controller
                         if ($v->tax_rate == 8) {
                             $note .= gen4tid('Grn-', $grn->tid) . ' Fuel';
                         } else $note .= gen4tid('Grn-', $grn->tid) . ' Goods';
+                        $suppliername .= $grn->supplier->name ?? '';
+                        $supplier_taxid .= $grn->supplier->taxid ?? '';
                     } 
                 }
                 
