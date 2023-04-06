@@ -18,7 +18,7 @@
     };
 
     const Form = {
-        invoicePayment: '',
+        invoicePayment: @json(@invoice_payment),
 
         init() {
             $.ajaxSetup(config.ajax);
@@ -38,6 +38,11 @@
 
             $('form').submit(this.formSubmit);
             this.loadUnallocatedPayments();
+
+            if (this.invoicePayment) {
+                const payment = this.invoicePayment;
+                console.log(payment)
+            }
         },
 
         formSubmit() {

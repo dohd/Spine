@@ -359,7 +359,6 @@ class InvoicesController extends Controller
         try {
             $result = $this->inv_payment_repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            dd($th);
             return errorHandler('Error Updating Payment', $th);
         }
 
@@ -370,13 +369,15 @@ class InvoicesController extends Controller
      * Edit invoice payment
      */
     public function edit_payment(InvoicePayment $payment)
-    {
+    {   
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
-        $payments = InvoicePayment::whereColumn('amount', '>', 'allocate_ttl')->get();
+        $unallocated_pmts = InvoicePayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
 
-        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts', 'payments'));
+        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts', 'unallocated_pmts'));
     }    
 
     /**
@@ -405,7 +406,7 @@ class InvoicesController extends Controller
 
         try {
             $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { dd($th);
             return errorHandler('Error Updating Payment', $th);
         }
 
