@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
-use App\Models\invoice\InvoicePayment;
+use App\Models\customer\Customer;
+use App\Models\invoice_payment\InvoicePayment;
+use App\Models\supplier\Supplier;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use Illuminate\Http\Request;
 
@@ -34,7 +36,7 @@ class InvoicePaymentsController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.invoicepayments.index');
+        return new ViewResponse('focus.invoice_payments.index');
     }
 
     /**
@@ -45,6 +47,7 @@ class InvoicePaymentsController extends Controller
     public function create()
     {
         $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
+        $customers = Customer::get(['id', 'company']);
 
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
@@ -54,7 +57,7 @@ class InvoicePaymentsController extends Controller
             ->whereColumn('amount', '!=', 'allocate_ttl')
             ->orderBy('date', 'asc')->get();
 
-        return new ViewResponse('focus.invoicepayments.create_payment', compact('accounts', 'tid', 'unallocated_pmts'));
+        return new ViewResponse('focus.invoice_payments.create', compact('customers', 'accounts', 'tid', 'unallocated_pmts'));
     }
 
     /**
@@ -82,7 +85,7 @@ class InvoicePaymentsController extends Controller
             return errorHandler('Error Updating Payment', $th);
         }
 
-        return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
+        return new RedirectResponse(route('biller.invoice_payments.index'), ['flash_success' => 'Invoice Payment updated successfully']);
     }
 
     /**
@@ -93,7 +96,7 @@ class InvoicePaymentsController extends Controller
      */
     public function show(InvoicePayment $invoice_payment)
     {
-        return new ViewResponse('focus.invoicepayments.view_payment', compact('payment'));
+        return new ViewResponse('focus.invoice_payments.view', compact('invoice_payment'));
     }
 
     /**
@@ -104,6 +107,7 @@ class InvoicePaymentsController extends Controller
      */
     public function edit(InvoicePayment $invoice_payment)
     {
+        $customers = Customer::get(['id', 'company']);
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
@@ -112,7 +116,7 @@ class InvoicePaymentsController extends Controller
             ->whereColumn('amount', '!=', 'allocate_ttl')
             ->orderBy('date', 'asc')->get();
 
-        return new ViewResponse('focus.invoicepayments.edit_payment', compact('payment', 'accounts', 'unallocated_pmts'));
+        return new ViewResponse('focus.invoice_payments.edit', compact('invoice_payment', 'customers', 'accounts', 'unallocated_pmts'));
     }
 
     /**
@@ -141,7 +145,7 @@ class InvoicePaymentsController extends Controller
             return errorHandler('Error Updating Payment', $th);
         }
 
-        return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
+        return new RedirectResponse(route('biller.invoice_payments.index'), ['flash_success' => 'Invoice Payment updated successfully']);
     }
 
 
@@ -156,6 +160,6 @@ class InvoicePaymentsController extends Controller
             return errorHandler('Error Deleting Payment', $th);
         }
 
-        return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment deleted successfully']);
+        return new RedirectResponse(route('biller.invoice_payments.index'), ['flash_success' => 'Invoice Payment deleted successfully']);
     }
 }

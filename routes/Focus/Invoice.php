@@ -9,10 +9,11 @@ Route::group(['namespace' => 'standard_invoice'], function () {
     Route::resource('standard_invoices', 'StandardInvoicesController');
 });
 
+// payment
 Route::group(['namespace' => 'invoice_payment'], function () {
     Route::resource('invoice_payments', 'InvoicePaymentsController');
     // datatable
-    Route::post('invoice_payments/get_payments', 'InvoicePaymentsTableController')->name('invoice_payments.get_payments');
+    Route::post('invoice_payments/get_payments', 'InvoicePaymentsTableController')->name('invoice_payments.get');
 });
 
 Route::group(['namespace' => 'invoice'], function () {
@@ -51,7 +52,7 @@ Route::group(['namespace' => 'invoice'], function () {
     //For Datatable
     Route::post('quotes/get_uninvoiced_quote', 'UninvoicedQuoteTableController')->name('invoices.get_uninvoiced_quote');
     Route::post('invoices/get', 'InvoicesTableController')->name('invoices.get');
-    Route::post('invoices/get_payments', 'InvoicePaymentsTableController')->name('invoices.get_payments');
+    // Route::post('invoices/get_payments', 'InvoicePaymentsTableController')->name('invoices.get_payments');
 });
 
 Route::group(['namespace' => 'printer'], function () {

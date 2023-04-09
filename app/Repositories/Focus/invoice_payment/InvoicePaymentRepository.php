@@ -4,15 +4,13 @@ namespace App\Repositories\Focus\invoice_payment;
 
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
-use App\Models\invoice\InvoicePayment;
+use App\Models\invoice_payment\InvoicePayment;
 use App\Models\items\InvoicePaymentItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use DB;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 class InvoicePaymentRepository extends BaseRepository
 {

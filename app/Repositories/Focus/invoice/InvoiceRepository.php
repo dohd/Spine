@@ -6,7 +6,7 @@ use App\Models\account\Account;
 use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
-use App\Models\invoice\InvoicePayment;
+use App\Models\invoice_payment\InvoicePayment;
 use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;

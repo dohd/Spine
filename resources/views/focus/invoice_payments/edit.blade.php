@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Receive Payment | Invoice Payment Management')
+@section('title', 'Edit | Invoice Payment Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.invoicepayments.partials.invoicepayment-header-buttons')
+                @include('focus.invoice_payments.partials.invoice-payment-header-buttons')
             </div>
         </div>
     </div>
@@ -19,8 +19,8 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.invoice_payments.store_payment', 'method' => 'POST', 'id' => 'invoicePay']) }}
-                        @include('focus.invoicepayments.form')
+                    {{ Form::model($invoice_payment, ['route' => array('biller.invoice_payments.update', $invoice_payment), 'method' => 'PATCH']) }}
+                        @include('focus.invoice_payments.form')
                     {{ Form::close() }}
                 </div>
             </div>
@@ -30,5 +30,6 @@
 @endsection
 
 @section('after-scripts')
-@include('focus/invoicepayments/form_js')
+@include('focus/invoice_payments/form_js')
 @endsection
+

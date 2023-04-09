@@ -3,7 +3,7 @@
 namespace App\Models\items\Traits;
 
 use App\Models\invoice\Invoice;
-use App\Models\invoice\InvoicePayment;
+use App\Models\invoice_payment\InvoicePayment;
 
 trait InvoicePaymentItemRelationship
 {

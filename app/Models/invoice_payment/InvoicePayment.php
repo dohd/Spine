@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Models\invoice;
+namespace App\Models\invoice_payment;
 
-use App\Models\invoice\Traits\InvoicePaymentRelationship;
+use App\Models\invoice_payment\Traits\InvoicePaymentAttribute;
+use App\Models\invoice_payment\Traits\InvoicePaymentRelationship;
+use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class InvoicePayment extends Model
 {
-    use InvoicePaymentRelationship;
+    use ModelTrait, InvoicePaymentAttribute, InvoicePaymentRelationship;
     
     /**
      * The database table used by the model.

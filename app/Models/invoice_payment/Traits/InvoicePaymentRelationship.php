@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\invoice\Traits;
+namespace App\Models\invoice_payment\Traits;
 
 use App\Models\account\Account;
 use App\Models\customer\Customer;

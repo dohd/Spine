@@ -1,4 +1,3 @@
-@section('after-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
@@ -21,7 +20,7 @@
     };
 
     const Form = {
-        invoicePayment: @json(@invoice_payment),
+        invoicePayment: @json(@$invoice_payment),
 
         init() {
             $.ajaxSetup(config.ajax);
@@ -224,5 +223,3 @@
 
     $(() => Form.init());
 </script>
-@endsection
- 
