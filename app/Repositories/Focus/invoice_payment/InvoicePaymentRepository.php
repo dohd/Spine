@@ -195,7 +195,6 @@ class InvoicePaymentRepository extends BaseRepository
         }
 
         // update payment items and invoices
-        $data_items = array_map(fn($v) => numberClean($v['paid']), $data_items);
         foreach ($invoice_payment->items as $pmt_item) {
             $invoice = $pmt_item->invoice;
             if ($invoice) $invoice->decrement('amountpaid', $pmt_item->paid);

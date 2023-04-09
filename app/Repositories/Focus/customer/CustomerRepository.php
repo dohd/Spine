@@ -168,6 +168,7 @@ class CustomerRepository extends BaseRepository
 
             $payments = collect();
             foreach ($invoice->payments as $pmt) {
+                if (!$pmt->paid_invoice) continue;
                 $i++;
                 $reference = $pmt->paid_invoice->reference;
                 $mode = $pmt->paid_invoice->payment_mode;

@@ -4,8 +4,8 @@
         <div class="input-group">
             <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
             <select id="person" name="customer_id" class="form-control select-box" data-placeholder="Search Customer" required>
-                @isset ($payment)
-                    <option value="{{ $payment->customer_id }}">{{ $payment->customer->company }}</option>
+                @isset ($invoice_payment)
+                    <option value="{{ $invoice_payment->customer_id }}">{{ @$invoice_payment->customer->company }}</option>
                 @endisset
             </select>
         </div>
@@ -14,7 +14,7 @@
     <div class="col-2">
         <label for="reference" class="caption">Payment No.</label>
         <div class="input-group">
-            {{ Form::text('tid', @$payment ? $payment->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
+            {{ Form::text('tid', @$invoice_payment->tid ?? @$tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
         </div>
     </div> 
 
@@ -29,7 +29,7 @@
         <label for="type">Payment Type</label>
         <select name="payment_type" id="payment_type" class="custom-select">
             @foreach (['per_invoice', 'on_account', 'advance_payment'] as $val)
-                <option value="{{ $val }}" {{ $val == @$payment->payment_type? 'selected' : '' }}>
+                <option value="{{ $val }}" {{ $val == @$invoice_payment->payment_type? 'selected' : '' }}>
                     {{ ucwords(str_replace('_', ' ', $val)) }}
                 </option>
             @endforeach
@@ -47,9 +47,7 @@
         <select name="account_id" id="account" class="custom-select" required>
             <option value="">-- Select Account --</option>
             @foreach ($accounts as $row)
-                <option value="{{ $row->id }}" {{ $row->id == @$payment->account_id? 'selected' : '' }}>
-                    {{ $row->holder }}                        
-                </option>
+                <option value="{{ $row->id }}">{{ $row->holder }}</option>
             @endforeach
         </select>
     </div>  
@@ -58,9 +56,7 @@
         <select name="payment_mode" id="payment_mode" class="custom-select" required>
             <option value="">-- Select Mode --</option>
             @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
-                <option value="{{ $val }}" {{ $val == @$payment->payment_mode? 'selected' : '' }}>
-                    {{ strtoupper($val) }}
-                </option>
+                <option value="{{ $val }}">{{ strtoupper($val) }}</option>
             @endforeach
         </select>
     </div>  
@@ -93,8 +89,8 @@
             </tr>
         </thead>
         <tbody>   
-            @isset ($payment)
-                @foreach ($payment->items as $row)
+            @isset ($invoice_payment)
+                @foreach ($invoice_payment->items as $row)
                     @php
                         $invoice = $row->invoice;
                         if (!$invoice) continue;
@@ -135,6 +131,6 @@
 </div>
 <div class="form-group row mt-1">                            
     <div class="col-12">  
-        {{ Form::submit(@$payment? 'Update Payment' : 'Receive Payment', ['class' =>'btn btn-primary btn-lg float-right mr-3']) }}
+        {{ Form::submit(@$invoice_payment? 'Update Payment' : 'Receive Payment', ['class' =>'btn btn-primary btn-lg float-right mr-3']) }}
     </div>
 </div>

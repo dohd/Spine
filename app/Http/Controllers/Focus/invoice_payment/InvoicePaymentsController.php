@@ -36,7 +36,9 @@ class InvoicePaymentsController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.invoice_payments.index');
+        $customers = Customer::get(['id', 'company']);
+
+        return new ViewResponse('focus.invoice_payments.index', compact('customers'));
     }
 
     /**
@@ -106,7 +108,7 @@ class InvoicePaymentsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(InvoicePayment $invoice_payment)
-    {
+    {   
         $customers = Customer::get(['id', 'company']);
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');

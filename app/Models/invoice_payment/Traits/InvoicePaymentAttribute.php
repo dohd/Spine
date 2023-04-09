@@ -14,7 +14,7 @@ trait InvoicePaymentAttribute
     public function getActionButtonsAttribute()
     {
         return $this->getViewButtonAttribute("manage-invoice", "biller.invoice_payments.show")
-            . ' ' . $this->getEditButtonAttribute("edit-invoice", "biller.invoice_payments.index") 
+            . ' ' . $this->getEditButtonAttribute("edit-invoice", "biller.invoice_payments.edit") 
             . ' ' . $this->getDeleteButtonAttribute("delete-invoice", "biller.invoice_payments.destroy");
     }
 }
