@@ -73,7 +73,7 @@ class InvoicePaymentsController extends Controller
         // extract request input
         $data = $request->only([
             'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
-            'payment_mode', 'reference', 'payment_id', 'payment_type'
+            'payment_mode', 'reference', 'payment_id', 'payment_type', 'rel_payment_id'
         ]);
         $data_items = $request->only(['invoice_id', 'paid']); 
         $data_items = modify_array($data_items);
@@ -84,7 +84,7 @@ class InvoicePaymentsController extends Controller
         try {
             $result = $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating Payment', $th);
+            return errorHandler('Error Creating Invoice Payment', $th);
         }
 
         return new RedirectResponse(route('biller.invoice_payments.index'), ['flash_success' => 'Invoice Payment updated successfully']);
@@ -133,7 +133,7 @@ class InvoicePaymentsController extends Controller
         // extract request input
         $data = $request->only([
             'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
-            'payment_mode', 'reference', 'payment_id', 'payment_type'
+            'payment_mode', 'reference', 'payment_id', 'payment_type', 'rel_payment_id'
         ]);
         $data_items = $request->only(['id', 'invoice_id', 'paid']); 
 
@@ -143,8 +143,8 @@ class InvoicePaymentsController extends Controller
 
         try {
             $result = $this->repository->update($invoice_payment, compact('data', 'data_items'));
-        } catch (\Throwable $th) { dd($th);
-            return errorHandler('Error Updating Payment', $th);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Invoice Payment', $th);
         }
 
         return new RedirectResponse(route('biller.invoice_payments.index'), ['flash_success' => 'Invoice Payment updated successfully']);

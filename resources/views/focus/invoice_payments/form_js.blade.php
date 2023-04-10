@@ -42,7 +42,6 @@
             // edit mode
             if (this.invoicePayment) {
                 const pmt = this.invoicePayment;
-                console.log(pmt)
                 if (pmt.date) $('#date').datepicker('setDate', new Date(pmt.date));
                 $('#person').attr('disabled', true);
                 $('#payment_type').attr('disabled', true);
@@ -50,6 +49,7 @@
                 $('#account').val(pmt.account_id);
                 $('#payment_mode').val(pmt.payment_mode);
                 $('#reference').val(pmt.reference);
+                $('#rel_payment').attr('disabled', true);
             }
         },
 
@@ -73,6 +73,10 @@
             if (allocatedAmount > pmtAmount) {
                 event.preventDefault();
                 alert('Total Allocated Amount must be less or equal to payment Amount!');
+            }
+            // enable all disabled elements
+            if ($(this).find('select:disabled').length) {
+                $(this).find('select:disabled').attr('disabled', false);
             }
         },
 
@@ -114,7 +118,7 @@
             payments.forEach(v => {
                 const str = `
                     ${v.date.split('-').reverse().join('-')}: 
-                    (${v.payment_type} ${accounting.formatNumber(v.amount)})
+                    (${v.payment_type} ${accounting.formatNumber(v.amount - v.allocate_ttl)})
                     ${v.payment_mode} - ${v.reference}
                 `;
                 
@@ -193,21 +197,20 @@
         },
 
         relatedPaymentChange() {
-            if ($(this).val() == 0) {
-                ['amount', 'reference'].forEach(v => $('#'+v).val('').attr('readonly', false));
-                ['account', 'payment_mode'].forEach(v => $('#'+v).val('').attr('disabled', false));
-                $('#date').datepicker('setDate', new Date()).attr('readonly', false);
-            } else {
-                $('#person').change();
-
+            if ($(this).val()*1) {
                 const opt = $(this).find(':selected');
                 $('#date').datepicker('setDate', new Date(opt.attr('date'))).attr('readonly', true);
                 $('#reference').val(opt.attr('reference')).attr('readonly', true);
                 $('#account').val(opt.attr('accountId')).attr('disabled', true);
                 $('#payment_mode').val(opt.attr('paymentMode')).attr('disabled', true);
-                // execute after ajax async call
-                const balance = accounting.unformat(opt.attr('amount') - opt.attr('allocateTotal'));
-                setTimeout(() => $('#amount').val(balance).keyup().focusout().attr('readonly', true), 100);
+
+                
+                const unallocated = accounting.unformat(opt.attr('amount') - opt.attr('allocateTotal'));
+                $('#amount').val(unallocated).keyup().focusout().attr('readonly', true);
+            } else {
+                ['amount', 'reference'].forEach(v => $('#'+v).val('').attr('readonly', false).keyup());
+                ['account', 'payment_mode'].forEach(v => $('#'+v).val('').attr('disabled', false));
+                $('#date').datepicker('setDate', new Date()).attr('readonly', false);
             }
         },
 

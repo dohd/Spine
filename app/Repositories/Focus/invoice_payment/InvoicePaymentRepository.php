@@ -123,12 +123,12 @@ class InvoicePaymentRepository extends BaseRepository
     /**
      * For updating the respective Model in storage
      *
-     * @param InvoicePayment $payment
-     * @param  array $input
+     * @param InvoicePayment $invoice_payment
+     * @param array $input
      * @throws GeneralException
      * return bool
      */
-    public function update(InvoicePayment $invoice_payment, array $input)
+    public function update($invoice_payment, array $input)
     {
         // dd($input);
         $data = $input['data'];
