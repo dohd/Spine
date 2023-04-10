@@ -8,13 +8,13 @@
             <th width="10%" class="text-center">Est. Buy Price</th>
             <th width="7%" class="text-center">Qty</th>
             <th width="10%" class="text-center">{{ trans('general.rate') }}</th>
-            <th width="10%" class="text-center">{{ trans('general.rate') }} (VAT Inc)</th>
+            <th width="12%" class="text-center">{{ trans('general.rate') }} (VAT Inc)</th>
             <th width="12%" class="text-center">{{ trans('general.amount') }}</th>
             <th width="5%" class="text-center">Action</th>
         </tr>
     </thead>
     <tbody>
-        <!-- product row template-->
+        <!-- Product Row -->
         <tr id="productRow">
             <td><input type="text" class="form-control" name="numbering[]" id="numbering-p0" value=""></td>
             <td>
@@ -25,7 +25,20 @@
             <td><input type="text" class="form-control buyprice" name="buy_price[]" id="buyprice-p0" required></td>  
             <td><input type="number" class="form-control qty" name="product_qty[]" id="qty-p0" step="0.1" required></td>
             <td><input type="text" class="form-control rate" name="product_subtotal[]" id="rate-p0" required></td>
-            <td><input type="text" class="form-control price" name="product_price[]" id="price-p0" readonly></td>
+            <td>
+                <div class="row no-gutters">
+                    <div class="col-6">
+                        <input type="text" class="form-control price" name="product_price[]" id="price-p0" readonly>
+                    </div>
+                    <div class="col-6">
+                        <select class="custom-select tax_rate" name="tax_rate[]" id="taxrate-p0">
+                            @foreach ($additionals as $item)
+                                <option value="{{ +$item->value }}">{{ $item->value == 0? 'OFF' : (+$item->value) . '%' }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </td>
             <td class='text-center'>
                 <span class="amount" id="amount-p0">0</span>&nbsp;&nbsp;
                 <span class="lineprofit text-info" id="lineprofit-p0">0%</span>
@@ -39,8 +52,9 @@
             <input type="hidden" name="a_type[]" value="1" id="atype-p0">
             <input type="hidden" name="id[]" value="0">
         </tr>
+        <!-- End Product Row -->
         
-        <!-- title row template-->
+        <!-- Title Row -->
         <tr id="titleRow">
             <td><input type="text" class="form-control" name="numbering[]" id="numbering-t1" value=""></td>
             <td colspan="8">
@@ -61,12 +75,13 @@
             <input type="hidden" name="a_type[]" value="2" id="atype-t1">
             <input type="hidden" name="id[]" value="0">
         </tr>
+        <!-- End Title Row -->
 
-        <!-- edit quote or pi-->
+        <!-- Edit Quote or PI -->
         @if (isset($quote))
             @foreach ($quote->products as $k => $item)
                 @if ($item->a_type == 1)
-                    <!-- product -->
+                    <!-- Product Row -->
                     <tr>
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-p{{$k}}"></td>
                         <td>
@@ -92,7 +107,7 @@
                         <input type="hidden" name="id[]" value="{{ $item->id }}">
                     </tr>
                 @else
-                    <!-- group title  -->
+                    <!-- Title Row  -->
                     <tr>
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-t{{$k}}"></td>
                         <td colspan="8">
