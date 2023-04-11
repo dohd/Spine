@@ -91,8 +91,25 @@
                         <td><input type="number" class="form-control estqty" name="estimate_qty[]" value="{{ number_format($item->estimate_qty, 1) }}" id="estqty-p{{$k}}" step="0.1" required></td>  
                         <td><input type="text" class="form-control buyprice" name="buy_price[]" value="{{ number_format($item->buy_price, 4) }}" id="buyprice-p{{$k}}" required></td>          
                         <td><input type="number" class="form-control qty {{ !$item->misc ?: 'invisible' }}" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required></td>
-                        <td><input type="text" class="form-control rate {{ !$item->misc ?: 'invisible' }}" name="product_subtotal[]" value="{{ number_format($item->product_subtotal, 4) }}" id="rate-p{{$k}}" required></td>
-                        <td><input type="text" class="form-control price {{ !$item->misc ?: 'invisible' }}" name="product_price[]" value="{{ number_format($item->product_price, 4) }}" id="price-p{{$k}}" readonly></td>
+                        <td>
+                            <input type="text" class="form-control rate {{ !$item->misc ?: 'invisible' }}" name="product_subtotal[]" value="{{ number_format($item->product_subtotal, 4) }}" id="rate-p{{$k}}" required>
+                        </td>
+                        <td>
+                            <div class="row no-gutters">
+                                <div class="col-6">
+                                    <input type="text" class="form-control price {{ !$item->misc ?: 'invisible' }}" name="product_price[]" value="{{ number_format($item->product_price, 4) }}" id="price-p{{$k}}" readonly>
+                                </div>
+                                <div class="col-6">
+                                    <select class="custom-select tax_rate {{ !$item->misc ?: 'invisible' }}" name="tax_rate[]" id="taxrate-p{{$k}}">
+                                        @foreach ($additionals as $add_item)
+                                            <option value="{{ +$add_item->value }}" {{ $add_item->value == $item->tax_rate? 'selected' : ''}}>
+                                                {{ $add_item->value == 0? 'OFF' : (+$add_item->value) . '%' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </td>
                         <td class="text-center {{ !$item->misc ?: 'invisible' }}">
                             <span class="amount" id="amount-p{{$k}}">0</span>&nbsp;&nbsp;
                             <span class="lineprofit text-info" id="lineprofit-p{{$k}}">0%</span>

@@ -15,8 +15,8 @@
 
     // print type
     $('input[type=radio]').change(function() {
-        if ($(this).val() == 'inclusive') $('#vatText').text('(VAT-Inclusive)');
-        else $('#vatText').text('(VAT-Exclusive)');
+        if ($(this).val() == 'inclusive') $('#vatText').text('(Print VAT-Inc)');
+        else $('#vatText').text('(Print VAT-Exc)');
     });
 
     // On change lead and djc
@@ -152,11 +152,12 @@
     // On clicking action drop down
     $("#quoteTbl").on("click", ".up, .down, .delete, .add-title, .add-product, .add-misc", function() {
         const menu = $(this);
-        const row = menu.parents("tr:first");
+        const row = $(this).parents("tr:first");
+        
         if (menu.is('.up')) row.insertBefore(row.prev());
         if (menu.is('.down')) row.insertAfter(row.next());
         if (menu.is('.delete') && confirm('Are you sure?')) {
-            menu.parents('tr:first').remove();
+            row.remove();
             $('#quoteTbl tbody tr.invisible').remove();
             adjustTbodyHeight(1);
         }

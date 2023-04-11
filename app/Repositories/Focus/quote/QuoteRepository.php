@@ -156,16 +156,17 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
         foreach ($data as $key => $val) {
             if (in_array($key, ['date', 'reference_date']))
                 $data[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax']))
+            if (in_array($key, ['total', 'subtotal', 'tax', 'taxable']))
                 $data[$key] = numberClean($val);
         }   
-        // increament tid
+        
         $tid = 0;
         if (isset($data['bank_id'])) {
             $tid = Quote::where('ins', $data['ins'])
@@ -225,7 +226,7 @@ class QuoteRepository extends BaseRepository
         foreach ($data as $key => $val) {
             if (in_array($key, ['date', 'reference_date']))
                 $data[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax'])) 
+            if (in_array($key, ['total', 'subtotal', 'tax', 'taxable'])) 
                 $data[$key] = numberClean($val);
         }   
         // update lead status
@@ -233,7 +234,7 @@ class QuoteRepository extends BaseRepository
             $quote->lead->update(['status' => 0, 'reason' => 'new']);
             Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         }
-        unset($data['tid']);
+        
         $result = $quote->update($data);
 
         $data_items = $input['data_items'];

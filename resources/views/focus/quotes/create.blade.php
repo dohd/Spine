@@ -7,7 +7,7 @@
     if ($is_pi) $header_title = 'Proforma Invoice Management';
 @endphp
 
-@section('title', $header_title)
+@section('title', 'Create | ' . $header_title)
 
 @section('content')
 <div class="content-wrapper">

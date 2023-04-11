@@ -264,7 +264,7 @@
     @endif
 </div>
 <!-- quotes item table -->
-@include('focus.quotes.partials.quote-items-table')
+@include('focus.quotes.partials.quote_items')
 <!-- footer -->
 <div class="form-group row">
     <div class="col-9">

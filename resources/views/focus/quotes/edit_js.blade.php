@@ -6,10 +6,7 @@
     // ajax config
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
     
-    $('#lead_id').select2({
-        allowClear: true,
-        placeholder: 'Search by No, Client, Branch, Title'
-    });
+    $('#lead_id').select2({allowClear: true});
 
     // default edit values
     $('#branch_id').val("{{ $quote->branch_id }}");
@@ -26,6 +23,14 @@
         $(this).datepicker({format: "{{ config('core.user_date_format') }}", autoHide: true})
         .datepicker('setDate', new Date(d))
     });
+
+
+    // print type
+    $('input[type=radio]').change(function() {
+        if ($(this).val() == 'inclusive') $('#vatText').text('(Print VAT-Inc)');
+        else $('#vatText').text('(Print VAT-Exc)');
+    });
+
     
     // On change lead and djc
     const subject = {title: '', djc: ''};
@@ -79,11 +84,12 @@
     // update row tax options
     function updateLineTax(taxSelect) {
         if (taxSelect && taxSelect.length) {
-            const mainTax = $('#tax_id').val();
+            let mainTax = $('#tax_id').val();
             taxSelect.children().each(function() {
                 const value = $(this).attr('value');
                 if ((value == mainTax) || (value == 0)) $(this).removeClass('d-none');
                 else $(this).addClass('d-none');
+                if ($(this).prop('selected')) mainTax = value;
             });
             taxSelect.val(mainTax);
         }
@@ -152,29 +158,29 @@
     $('#addMisc').click(function() {
         $('#quoteTbl tbody tr.invisible').remove();
 
-        const i = 'p' + rowId;
+        const i = `p${rowId}`;
         const newRowHtml = `<tr class="misc"> ${rowHtml.replace(/p0/g, i)} </tr>`;
         $("#quoteTbl tbody").append(newRowHtml);
         $('#name-'+i).autocomplete(autoComp(i));
         $('#misc-'+i).val(1);
         $('#qty-'+i).val(1).addClass('invisible');
-        $('#rate-'+i).addClass('invisible');
-        $('#price-'+i).addClass('invisible');
-        $('#amount-'+i).addClass('invisible');
-        $('#lineprofit-'+i).addClass('invisible');
-        rowId++;
-        calcTotal();
+        ['rate', 'price', 'taxrate', 'amount', 'lineprofit'].forEach(v => {
+            $(`#${v}-${i}`).addClass('invisible');
+        });
+
         adjustTbodyHeight();
+        calcTotal();
+        rowId++;
     });
 
     // On clicking action drop down
     $("#quoteTbl").on("click", ".up, .down, .delete, .add-title, .add-product, .add-misc", function() {
         const menu = $(this);
-        const row = menu.parents("tr:first");
+        const row = $(this).parents("tr:first");
         if (menu.is('.up')) row.insertBefore(row.prev());
         if (menu.is('.down')) row.insertAfter(row.next());
         if (menu.is('.delete') && confirm('Are you sure?')) {
-            menu.parents('tr:first').remove();
+            row.remove();
             $('#quoteTbl tbody tr.invisible').remove();
             adjustTbodyHeight(1);
         }

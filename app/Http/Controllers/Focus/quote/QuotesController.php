@@ -87,20 +87,17 @@ class QuotesController extends Controller
      */
     public function store(CreateQuoteRequest $request)
     {   
-        $request->validate([
-            'lead_id' => 'required',
-        ]);
-
         // extract request input fields
         $data = $request->only([
             'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
             'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
             'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
-            'customer_id', 'branch_id', 'bank_id', 'is_repair', 'quote_type', 'extra_header', 'extra_footer'
+            'customer_id', 'branch_id', 'bank_id', 'is_repair', 'quote_type', 'taxable',
+            'extra_header', 'extra_footer'
         ]);
         $data_items = $request->only([
             'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
-            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 'misc'
+            'unit', 'estimate_qty', 'buy_price', 'tax_rate', 'row_index', 'a_type', 'misc'
         ]);
         $skill_items = $request->only(['skill', 'charge', 'hours', 'no_technician' ]);
             
@@ -124,7 +121,8 @@ class QuotesController extends Controller
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
         } catch (\Throwable $th) {
-            return errorHandler('Error creating Proforma Invoice', $th);
+            $inst = isset($data['bank_id'])? ' Proforma Invoice' : 'Quote';
+            return errorHandler('Error Creating ' . $inst, $th);
         } 
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
@@ -151,20 +149,19 @@ class QuotesController extends Controller
      */
     public function update(EditQuoteRequest $request, Quote $quote)
     {
-        $request->validate([
-            'lead_id' => 'required',
-        ]);
-
+        $request->validate(['lead_id' => 'required']);
+            
         // extract request input fields
         $data = $request->only([
             'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
             'currency_id', 'term_id', 'tax_id', 'lead_id', 'pricegroup_id', 'attention',
             'reference', 'reference_date', 'validity', 'prepared_by', 'print_type', 
-            'customer_id', 'branch_id', 'bank_id', 'revision', 'is_repair', 'quote_type', 'extra_header', 'extra_footer'
+            'customer_id', 'branch_id', 'bank_id', 'revision', 'is_repair', 'quote_type', 'taxable',
+            'extra_header', 'extra_footer'
         ]);
         $data_items = $request->only([
             'id', 'numbering', 'product_id', 'product_name', 'product_qty', 'product_subtotal', 'product_price', 
-            'unit', 'estimate_qty', 'buy_price', 'row_index', 'a_type', 'misc'
+            'unit', 'estimate_qty', 'tax_rate', 'buy_price', 'row_index', 'a_type', 'misc'
         ]);
         $skill_items = $request->only(['skill_id', 'skill', 'charge', 'hours', 'no_technician']);
 
@@ -188,7 +185,8 @@ class QuotesController extends Controller
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating Proforma Invoice', $th);
+            $inst = isset($data['bank_id'])? ' Proforma Invoice' : 'Quote';
+            return errorHandler('Error Updating ' . $inst, $th);
         }        
 
         return new RedirectResponse($route, ['flash_success' => $msg]);
