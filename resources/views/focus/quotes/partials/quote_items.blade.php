@@ -68,6 +68,7 @@
             <input type="hidden" name="unit[]">
             <input type="hidden" name="product_qty[]" value="0">
             <input type="hidden" name="product_price[]" value="0">
+            <input type="hidden" name="tax_rate[]" value="0">
             <input type="hidden" name="product_subtotal[]" value="0">
             <input type="hidden" name="estimate_qty[]" value="0">
             <input type="hidden" name="buy_price[]" value="0">
@@ -138,6 +139,7 @@
                         <input type="hidden" name="unit[]">
                         <input type="hidden" name="product_qty[]" value="0">
                         <input type="hidden" name="product_price[]" value="0">
+                        <input type="hidden" name="tax_rate[]" value="0">
                         <input type="hidden" name="product_subtotal[]" value="0">
                         <input type="hidden" name="estimate_qty[]" value="0">
                         <input type="hidden" name="buy_price[]" value="0">

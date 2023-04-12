@@ -120,14 +120,14 @@
                                                         <td class="text-right">{{ amountFormat($item->product_subtotal, $quote->currency->id) }}</td>
                                                         <td class="text-right">
                                                             {{ amountFormat(($item->product_price - $item->product_subtotal) * $item->product_qty, $quote->currency->id) }}
-                                                            <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
+                                                            <span class="font-size-xsmall">({{ +$item->tax_rate }}%)</span>
                                                         </td>
                                                         <td class="text-right">{{ amountFormat($item->product_qty * $item->product_price, $quote->currency->id) }}</td>
                                                     @else
                                                         <td class="text-right">{{ numberFormat($item->product_subtotal) }}</td>
                                                         <td class="text-right">
                                                             {{ numberFormat(($item->product_price - $item->product_subtotal) * $item->product_qty) }}
-                                                            <span class="font-size-xsmall">({{ $quote->tax_id }}%)</span>
+                                                            <span class="font-size-xsmall">({{ +$item->tax_rate }}%)</span>
                                                         </td>
                                                         <td class="text-right">{{ numberFormat($item->product_qty * $item->product_price) }}</td>
                                                     @endif
