@@ -21,6 +21,9 @@ class CreateProspectsTable extends Migration
             $table->dateTime('reminder_date');
             $table->text('remarks');
             $table->boolean('status');
+            $table->integer('user_id');
+            $table->integer('ins');
+            $table->enum('reason', array('new', 'won'));
             $table->timestamps();
         });
     }
