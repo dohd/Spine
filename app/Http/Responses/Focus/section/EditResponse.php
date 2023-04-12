@@ -29,6 +29,6 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         return view('focus.sections.edit')->with([
-            'section' => $this->section
+            'section' => $this->section]);
     }
 }

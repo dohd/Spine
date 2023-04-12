@@ -231,6 +231,19 @@
             @if(access()->allow('sale'))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-basket"></i><span>{{trans('features.sales')}}</span></a>
                     <ul class="dropdown-menu">
+                        {{-- prospect --}}
+                         @permission('manage-lead')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-star"></i> Prospects</a>
+                            <ul class="dropdown-menu">
+                                 @permission('manage-lead') 
+                                <li><a class="dropdown-item" href="{{ route('biller.prospects.index')}}" data-toggle="dropdown"> <i class="fa fa-compass"></i> Manage Prospects</a></li>
+                                @endauth 
+                                @permission('create-lead') 
+                                <li><a class="dropdown-item" href="{{ route('biller.prospects.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Prospect</a></li>
+                                 @endauth 
+                            </ul>
+                        </li>
+                             @endauth 
                         {{-- lead --}}
                          @permission('manage-lead')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> Tickets</a>

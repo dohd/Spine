@@ -190,6 +190,13 @@ Route::group(['namespace' => 'lead'], function () {
     //For Datatable
     Route::post('leads/get', 'LeadsTableController')->name('leads.get');
 });
+Route::group(['namespace' => 'prospect'], function () {
+    Route::patch('prospects/update_status/{prospect}', 'ProspectsController@update_status')->name('prospects.update_status');
+    Route::resource('prospects', 'ProspectsController');
+
+    //For Datatable
+     Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
+});
 Route::group(['namespace' => 'lender'], function () {
     Route::resource('lenders', 'LendersController');
 
