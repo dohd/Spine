@@ -4,7 +4,7 @@
             <div class="row form-group">
                 <div class="col-3">
                     <label for="record_month">Sale / Purchase Month</label>
-                    {{ Form::text('record_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'record_month']) }}
+                    {{ Form::text('record_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'record_month', 'required']) }}
                 </div>
 
                 <div class="col-3">
@@ -27,7 +27,7 @@
 
                 <div class="col-3">
                     <label for="return_month">Return Month</label>
-                    {{ Form::text('return_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'return_month']) }}
+                    {{ Form::text('return_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'return_month', 'required']) }}
                 </div>
             </div>
 

@@ -6,8 +6,10 @@ use App\Exceptions\GeneralException;
 use App\Models\items\TaxReportItem;
 use App\Models\tax_report\TaxReport;
 use App\Repositories\BaseRepository;
+use DateTime;
 use DB;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 
@@ -90,21 +92,24 @@ class TaxReportRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
+        $data_keys = [
+            'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 'purchase_tax', 
+            'purchase_total',
+        ];
         foreach ($input as $key => $val) {
-            $data_keys = [
-                'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
-                'purchase_tax', 'purchase_total',
-            ];
             if (in_array($key, $data_keys)) $input[$key] = numberClean($val);
+            if (in_array($key, ['record_month', 'return_month'])) {
+                $date = DateTime::createFromFormat('m-Y', $input[$key]);
+                if ($date) $input[$key] = $date->format('m-Y');
+                else throw ValidationException::withMessages(['Valid date format required mm-YYYY']);
+            }
         }
-
+        
         // report data
         $report_data = Arr::only($input, [
             'record_month', 'tax_group', 'return_month', 'note', 'sale_month', 'sale_tax_rate', 
             'purchase_month', 'purchase_tax_rate', ...$data_keys
         ]);
-        $report_data['tid'] = TaxReport::max('tid')+1;
-
         $result = TaxReport::create($report_data);
 
         // sale data items
@@ -168,12 +173,17 @@ class TaxReportRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
+        $data_keys = [
+            'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
+            'purchase_tax', 'purchase_total',
+        ];
         foreach ($input as $key => $val) {
-            $data_keys = [
-                'sale_subtotal', 'sale_tax', 'sale_total', 'purchase_subtotal', 
-                'purchase_tax', 'purchase_total',
-            ];
             if (in_array($key, $data_keys)) $input[$key] = numberClean($val);
+            if (in_array($key, ['record_month', 'return_month'])) {
+                $date = DateTime::createFromFormat('m-Y', $input[$key]);
+                if ($date) $input[$key] = $date->format('m-Y');
+                else throw ValidationException::withMessages(['Valid date format required mm-YYYY']);
+            }
         }
 
         // report data

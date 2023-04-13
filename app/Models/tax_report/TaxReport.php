@@ -71,6 +71,7 @@ class TaxReport extends Model
         static::creating(function ($instance) {
             $instance->user_id = auth()->user()->id;
             $instance->ins = auth()->user()->ins;
+            $instance->tid = TaxReport::max('tid') + 1;
             return $instance;
         });
 

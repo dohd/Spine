@@ -29,7 +29,7 @@ use App\Models\tax_report\TaxReport;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\tax_report\TaxReportRepository;
 use Illuminate\Http\Request;
-
+use Illuminate\Validation\ValidationException;
 
 class TaxReportsController extends Controller
 {
@@ -79,13 +79,16 @@ class TaxReportsController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate(['record_month' => 'required', 'return_month' => 'required']);
+        
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating Tax Report', $th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Creating Tax Filing Report', $th);
         }
 
-        return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Report Created Successfully']);
+        return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Filing Report Created Successfully']);
     }
 
     /**
@@ -110,13 +113,16 @@ class TaxReportsController extends Controller
      */
     public function update(Request $request, TaxReport $tax_report)
     {
+        $request->validate(['record_month' => 'required', 'return_month' => 'required']);
+
         try {
             $this->repository->update($tax_report, $request->except('_token'));
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating Tax Report', $th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Updating Tax Filing Report', $th);
         }
 
-        return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Report Updated Successfully']);
+        return new RedirectResponse(route('biller.tax_reports.index'), ['flash_success' => 'Tax Filing Report Updated Successfully']);
     }
 
     /**
