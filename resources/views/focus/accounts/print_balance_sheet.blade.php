@@ -63,7 +63,7 @@
 	<sethtmlpagefooter name="myfooter" value="on" />
 
     <div style="text-align: center; line-height: 0">
-        <h1>Lean Ventures</h1>
+        <h1>{{ auth()->user()->business->cname }}</h1>
         <h2>Balance Sheet as at {{ $dates[1]? dateFormat($dates[1]) : date('d-m-Y') }}</h2>
     </div>
 

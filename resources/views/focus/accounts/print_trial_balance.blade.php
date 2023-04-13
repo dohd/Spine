@@ -57,7 +57,7 @@
 	<sethtmlpagefooter name="myfooter" value="on" />
 
     <div style="text-align: center; line-height: 0">
-        <h1>Lean Ventures</h1>
+        <h1>{{ auth()->user()->business->cname }}</h1>
         <h2>Trial Balance as at {{ $dates[1]? dateFormat($dates[1]) : date('d-m-Y') }}</h2>
     </div>
 
@@ -109,18 +109,21 @@
                     </tr> 
                 @endif
             @endforeach
-            <tr class="dotted">
-                @for ($i = 0; $i < 3; $i++)
-                    <td></td>
-                @endfor 
-                @foreach ([$debit_total, $credit_total] as $i => $val)
-                    <td>
-                        <h3>{{ amountFormat($val) }}</h3>&nbsp;
-                        @if (!$i && round($debit_total - $credit_total))
-                            <h5 style="color:red">({{ $debit_total - $credit_total }})</h5>
-                        @endif
-                    </td>
-                @endforeach                                       
+            <tr>
+                <td colspan="3"></td>
+                <td colspan="2" style="padding-top: 1em">
+                    <div>
+                        <h3>Debit Total</h3>
+                        <h3 style="font-weight:normal;">{{ amountFormat($debit_total) }}</h3>
+                    </div>
+                    <div style="padding-top:1em">
+                        <h3>Credit Total</h3>
+                        <h3 style="font-weight:normal">{{ amountFormat($credit_total) }}</h3>
+                    </div>
+                    @if (round($debit_total - $credit_total))
+                        <h5 style="color:red;font-weight:normal;">({{ $debit_total - $credit_total }})</h5>
+                    @endif
+                </td>                                    
             </tr>
         </tbody>
     </table>

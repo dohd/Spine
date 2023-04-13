@@ -63,7 +63,7 @@
 	<sethtmlpagefooter name="myfooter" value="on" />
 
     <div style="text-align: center;">
-        <h1>Lean Ventures</h1>
+        <h1>{{ auth()->user()->business->cname }}</h1>
         @if ($dates)
             <h2>Profit & Loss for {{ dateFormat($dates['start_date']) }} to {{ dateFormat($dates['end_date']) }}</h2>
         @else
