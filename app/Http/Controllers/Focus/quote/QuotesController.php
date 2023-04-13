@@ -277,14 +277,16 @@ class QuotesController extends Controller
 
         $data_items = modify_array($data_items);
         $job_cards = modify_array($job_cards);
+        $tid = '';
 
         try {
             $result = $this->repository->verify(compact('data', 'data_items', 'job_cards'));
+            $tid = $result->bank_id? gen4tid('PI-', $result->tid) : gen4tid('QT-', $result->tid);
         } catch (\Throwable $th) {
-            return errorHandler('Error Verifying Quote', $th);
+            return errorHandler('Error Verifying ' . $tid, $th);
         }
 
-        $tid = $result->bank_id? gen4tid('PI-', $result->tid) : gen4tid('QT-', $result->tid);
+        
 
         return new RedirectResponse(route('biller.quotes.get_verify_quote'), ['flash_success' => $tid . ' verified successfully']);
     }
