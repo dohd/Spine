@@ -118,7 +118,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_project_invoice(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
@@ -126,7 +126,7 @@ class InvoiceRepository extends BaseRepository
         $bill['invoiceduedate'] = date_for_database($duedate);
         foreach ($bill as $key => $val) {
             if ($key == 'invoicedate') $bill[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax'], 1)) 
+            if (in_array($key, ['total', 'subtotal', 'tax'])) 
                 $bill[$key] = numberClean($val);
         }
         
