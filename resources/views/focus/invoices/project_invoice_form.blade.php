@@ -186,7 +186,7 @@
                         <td><strong><span class='amount' id="amount-{{$k}}">{{ number_format($val->total, 4) }}</span></strong></td>
 
                         <input type="hidden" class="taxable" value="{{ +$val->taxable }}" id="taxable-{{$k}}">
-                        <input type="hidden" class="taxrate" value="{{ +round($val->tax/$val->taxable * 100) }}" id="taxrate-{{$k}}">
+                        <input type="hidden" class="taxrate" name="tax_rate[]" value="{{ +round($val->tax/$val->taxable * 100) }}" id="taxrate-{{$k}}">
                         <input type="hidden"  class="subtotal" value="{{ $val->product_price }}" id="initprice-{{$k}}" disabled>
                         <input type="hidden" class="num-val" name="numbering[]" id="num-{{$k}}">
                         <input type="hidden" class="row-index" name="row_index[]" id="rowindx-{{$k}}">
@@ -208,7 +208,7 @@
                         <td><input type="text" class="form-control price" name="product_price[]" value="{{ number_format($item->product_price, 4) }}" id="price-{{$k}}" readonly></td>
                         <td><strong><span class='amount' id="result-{{$k}}">{{ number_format($item->product_price * $item->product_qty, 4) }}</span></strong></td>
                         
-                        <input type="hidden" class="taxrate" value="{{ +$item->tax_rate }}" id="taxrate-{{$k}}">
+                        <input type="hidden" class="taxrate" name="tax_rate[]" value="{{ +$item->tax_rate }}" id="taxrate-{{$k}}">
                         <input type="hidden"  class="subtotal" value="{{ $item->product_price }}" id="initprice-{{$k}}" disabled>
                         <input type="hidden" class="num-val" name="numbering[]" value="{{ $item->numbering }}" id="num-{{$k}}">
                         <input type="hidden" class="row-index" name="row_index[]" value="{{ $item->row_index }}" id="rowindx-{{$k}}">

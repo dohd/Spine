@@ -228,7 +228,7 @@ class InvoicesController extends Controller
      * Store newly created project invoice
      */
     public function store_project_invoice(Request $request)
-    {
+    {   dd($request->all());
         // extract request input fields
         $bill = $request->only([
             'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',

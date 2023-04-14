@@ -37,12 +37,12 @@
     // on tax change
     $('#tax_id').change(function() {
         // check if row items are of the same tax bracket
-        const rowTaxes = [];
+        const rowTaxeRates = [];
         $('#quoteTbl tbody tr').each(function(i) {
-            rowTaxes.push($(this).find('.taxrate').val()*1) 
+            rowTaxeRates.push($(this).find('.taxrate').val()*1);
         });
         const mainTax = $('#tax_id').val()*1;
-        if (!rowTaxes.includes(mainTax) && mainTax != 0) {
+        if (!rowTaxeRates.includes(mainTax) && mainTax != 0) {
             $('#tax_id').val('');
             return alert('Cannot apply a different Tax Rate from the original!');
         }
@@ -52,6 +52,7 @@
         let subtotal = 0; 
         let total = 0;
         $('#quoteTbl tbody tr').each(function(i) {
+            $(this).find('.row-index').val(i);
             const qty = accounting.unformat($(this).find('.qty').val());
             const rowSubtotal = accounting.unformat($(this).find('.rate').val());
             const rowTaxable = accounting.unformat($(this).find('.taxable').val());
@@ -64,7 +65,7 @@
                 if (rowTax > 0) {
                     taxable += qty * rowTaxable;
                     if (mainTaxRate == 0) rowTax = 0;
-                };
+                }
                 subtotal += qty * rowSubtotal;
                 price = rowSubtotal + rowTax;
                 total += qty * price;
@@ -82,15 +83,19 @@
             }
         });
         
+        let tax = total - subtotal
+        if ($('#invoice_type').val() == 'standard') 
+            tax = taxable * $('#tax_id').val() / 100;
+        $('#tax').val(accounting.formatNumber(tax));
         $('#taxable').val(accounting.formatNumber(taxable));
         $('#subtotal').val(accounting.formatNumber(subtotal));
         $('#total').val(accounting.formatNumber(total));
-
-        if ($('#invoice_type').val() == 'standard') {
-            tax = taxable * $('#tax_id').val() / 100;
-        } else tax = total - subtotal
-        $('#tax').val(accounting.formatNumber(tax));
     });
+
+    // multiple collective line items
+    if (!$('#invoice_type').length && $('#quoteTbl tbody tr').length) {
+        $('#tax_id').change();
+    }
 
     /**
      * Dynamic Invoice Type
@@ -101,7 +106,8 @@
         ['taxable', 'subtotal', 'tax', 'total'].forEach(v => {
             $(`#${v}`).val('');
         });
-
+        
+        // append line items
         if (this.value == 'collective') {
             $('#quoteTbl tbody').append(`<tr>${invoiceItemRow}</tr>`);
         } else {
@@ -140,8 +146,8 @@
                     row.find('.project-id').val(project_id);
                 });
             }
-            
         }
+        // apply tax
         $('#tax_id').change();
     }).trigger('change');
 </script>
