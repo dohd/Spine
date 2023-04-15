@@ -260,17 +260,27 @@ class CustomerRepository extends BaseRepository
 
         if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
             
-        $is_company = Customer::where('company', $input['company'])->count();
+        $is_company = Customer::where('company', $input['company'])->exists();
         if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
-
-        $email_exists = Customer::where('email', $input['email'])->whereNotNull('email')->count();
+        $email_exists = Customer::where('email', $input['email'])->whereNotNull('email')->exists();
         if ($email_exists) throw ValidationException::withMessages(['Duplicate email!']);
 
-        $taxid_exists = Customer::where('taxid', $input['taxid'])->whereNotNull('taxid')->count();
-        if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
-
-        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->whereNotNull('taxid')->count();
-        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+        if (@$input['taxid']) {
+            $taxid_exists = Customer::where('taxid', $input['taxid'])->whereNotNull('taxid')->exists();
+            if ($taxid_exists) throw ValidationException::withMessages(['Duplicate Tax Pin']);
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->whereNotNull('taxid')->exists();
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed']);
+            if (strlen($input['taxid']) != 11) 
+                throw ValidationException::withMessages(['Customer Tax Pin should contain 11 characters!']);
+            if (!in_array($input['taxid'][0], ['P','A'])) 
+                throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P" or "A"']);
+            $pattern = "/^[0-9]+$/i";
+            if (!preg_match($pattern, substr($input['taxid'],1,9))) 
+                throw ValidationException::withMessages(['Character between first and last letters must be numbers']);
+            $letter_pattern = "/^[a-zA-Z]+$/i";
+            if (!preg_match($letter_pattern, $input['taxid'][-1])) 
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+        }
         
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
@@ -369,18 +379,28 @@ class CustomerRepository extends BaseRepository
         }
         if (empty($input['password'])) unset($input['password']);
 
-        $is_company = Customer::where('id', '!=', $customer->id)->where('company', $input['company'])->count();
+        $is_company = Customer::where('id', '!=', $customer->id)->where('company', $input['company'])->exists();
         if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
-
-        $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->whereNotNull('email')->count();
+        $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->whereNotNull('email')->exists();
         if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
+
+        if (@$input['taxid']) {
+            $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->whereNotNull('taxid')->exists();
+            if ($taxid_exists) throw ValidationException::withMessages(['Duplicate Tax Pin']);
+            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->whereNotNull('taxid')->exists();
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed']);
+            if (strlen($input['taxid']) != 11) 
+                throw ValidationException::withMessages(['Customer Tax Pin should contain 11 characters']);
+            if (!in_array($input['taxid'][0], ['P','A'])) 
+                throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P" or "A"']);
+            $pattern = "/^[0-9]+$/i";
+            if (!preg_match($pattern, substr($input['taxid'],1,9))) 
+                throw ValidationException::withMessages(['Character between first and last letters must be numbers']);
+            $letter_pattern = "/^[a-zA-Z]+$/i";
+            if (!preg_match($letter_pattern, $input['taxid'][-1])) 
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+        }
         
-        $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->whereNotNull('taxid')->count();
-        if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
-
-        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->whereNotNull('taxid')->count();
-        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
-
         $input = array_replace($input, [
             'open_balance' => numberClean($input['open_balance']),
             'open_balance_date' =>  date_for_database($input['open_balance_date'])

@@ -133,6 +133,7 @@ class PurchasesController extends Controller
                 .' <span class="pl-5 font-weight-bold h5"><a href="'. route('biller.billpayments.create', ['src_id' => $purchase->id, 'src_type' => 'direct_purchase']) .'" target="_blank" class="btn btn-purple">
                 <i class="fa fa-money"></i> Direct Payment</a></span>';
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Direct Purchase', $th);
         }
 
@@ -184,6 +185,7 @@ class PurchasesController extends Controller
             $msg = 'Direct Purchase Updated Successfully.';
             $msg .= ' <span class="pl-5 font-weight-bold h5"><a href="'. route('biller.billpayments.create', $payment_params) .'" target="_blank" class="btn btn-purple"><i class="fa fa-money"></i> Direct Payment</a></span>';
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Direct Purchase', $th);
         }
 

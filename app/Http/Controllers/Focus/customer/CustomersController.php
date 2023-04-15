@@ -31,6 +31,7 @@ use App\Http\Requests\Focus\customer\EditCustomerRequest;
 use App\Models\Company\Company;
 use DateTime;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 /**
  * CustomersController
@@ -97,6 +98,7 @@ class CustomersController extends Controller
         try {
             $result = $this->repository->create($input);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Customers', $th);
         }
 
@@ -138,6 +140,7 @@ class CustomersController extends Controller
         try {
             $this->repository->update($customer, $input);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Customers', $th);
         }
 

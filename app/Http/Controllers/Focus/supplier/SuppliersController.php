@@ -29,6 +29,7 @@ use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\supplier\SupplierRepository;
 use DateTime;
+use Illuminate\Validation\ValidationException;
 
 /**
  * SuppliersController
@@ -102,6 +103,7 @@ class SuppliersController extends Controller
                 return response()->json($result);
             } 
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Supplier', $th);
         }
 
@@ -144,6 +146,7 @@ class SuppliersController extends Controller
         try {
             $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Supplier', $th);
         }        
        
