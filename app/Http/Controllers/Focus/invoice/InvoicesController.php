@@ -246,6 +246,7 @@ class InvoicesController extends Controller
         try {
             $result = $this->repository->create_project_invoice(compact('bill', 'bill_items'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Project Invoice', $th);
         }
 
@@ -299,7 +300,8 @@ class InvoicesController extends Controller
 
         try {
             $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
-        } catch (\Throwable $th) {  dd($th);
+        } catch (\Throwable $th) { 
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Project Invoice', $th);
         }
 
