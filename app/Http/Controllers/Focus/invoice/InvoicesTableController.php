@@ -109,8 +109,9 @@ class InvoicesTableController extends Controller
                 $last_pmt = '';
                 if ($invoice->payments->count()) {
                     $last_pmt_item = $invoice->payments()->orderBy('id', 'desc')->first();
-                    $last_pmt .= dateFormat($last_pmt_item->paid_invoice->date);
+                    if ($last_pmt_item->paid_invoice) $last_pmt .= dateFormat($last_pmt_item->paid_invoice->date);
                 } 
+                
                 return $last_pmt;
             })
             ->addColumn('aggregate', function ($invoice) use($aggregate) {

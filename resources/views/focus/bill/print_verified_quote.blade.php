@@ -225,20 +225,13 @@
 						<td>{{ $product->product_name }}</td>
 						<td class="align-c">{{ +$product->product_qty }}</td>
 						<td class="align-c">{{ $product->unit }}</td>
-                        <td class="align-r">
-                            @if ($resource->print_type == 'inclusive')
-                                {{ numberFormat($product->product_subtotal) }}
-                            @else
-                                {{ numberFormat($product->product_price) }}
-                            @endif
-                        </td>
-                        <td class="align-r">
-                            @if ($resource->print_type == 'inclusive')
-                                {{ numberFormat($product->product_qty * $product->product_subtotal) }}
-                            @else
-                                {{ numberFormat($product->product_qty * $product->product_price) }}
-                            @endif
-                        </td>						
+						@if ($resource->print_type == 'inclusive')
+							<td class="align-r">{{ numberFormat($product->product_price) }}</td>
+							<td class="align-r">{{ numberFormat($product->product_qty * $product->product_price) }}</td>
+						@else
+							<td class="align-r">{{ numberFormat($product->product_subtotal) }}</td>
+							<td class="align-r">{{ numberFormat($product->product_qty * $product->product_subtotal) }}</td>
+						@endif
                         <td>{{ $product->remark }}</td>
 					</tr>
 				@else

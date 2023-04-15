@@ -188,24 +188,22 @@ class ProductsController extends Controller
                 $q->where('name', 'LIKE', '%' . request('keyword') . '%');
             })->orWhere('name', 'LIKE', '%' . request('keyword') . '%');
         })
-        ->with(['warehouse' => function ($q) {
-            $q->select(['id', 'title']);
-        }])
+        ->with(['warehouse' => fn($q) => $q->select(['id', 'title'])])
         ->with('product')->limit(6)->get()->unique('name');
         
-        $products = array();
+        $products = [];
         foreach ($productvariations as $row) {
             $product = array_intersect_key($row->toArray(), array_flip([
                 'id', 'product_id', 'name', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'
             ]));
             $product = $product + [
+                'taxrate' => $row->product->taxrate,
                 'product_des' => $row->product->product_des,
                 'units' => $row->product->units,
-                'warehouse' => $row->warehouse->toArray()
+                'warehouse' => $row->warehouse->toArray(),
             ];
-            // purchase price set by inventory valuation (LIFO) method
+            // set purchase price using inventory valuation (LIFO) method
             $product['purchase_price'] = $this->repository->eval_purchase_price($row->id, $row->qty, $row->purchase_price);
-                
             $products[] =  $product;
         }
 

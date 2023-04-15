@@ -113,7 +113,7 @@
 </div>                  
 
 <div>                            
-    <table id="quotation" class="table-responsive tfr my_stripe_single pb-2 text-center">
+    <table id="productsTbl" class="table-responsive tfr my_stripe_single pb-2 text-center">
         <thead>
             <tr class="item_header bg-gradient-directional-blue white">
                 <th width="5%">#</th>
@@ -164,28 +164,37 @@
         </div>
 
         <div class="col-2 col-xs-5 invoice-block pull-right">
-            <div class="form-group">
-                <label>Subtotal</label>
+            <div>
+                <label class="m-0">Taxable</label>
+                <div class="input-group m-bot15">
+                    <input type="text" name="taxable" id="taxable" class="form-control" readonly>
+                </div>
+            </div>
+            <div>
+                <label class="m-0">Subtotal</label>
                 <div class="input-group m-bot15">
                     <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
                 </div>
             </div>
-            <div class="form-group">
-                <label>{{trans('general.total_tax')}}</label>
+            <div>
+                <label class="m-0">{{trans('general.total_tax')}}</label>
                 <div class="input-group m-bot15">
                     <input type="text" name="tax" id="tax" class="form-control" readonly>
                 </div>
             </div>
-            <div class="form-group">
-                <label>{{trans('general.grand_total')}}</label>
+            <div>
+                <label class="m-0">{{trans('general.grand_total')}}</label>
                 <div class="input-group m-bot15">
                     <input type="text" name="total" class="form-control" id="total" placeholder="Total" readonly>
                 </div>
             </div>
-            <button type="button" class="btn btn-danger" aria-label="Left Align" id="reset-items">
-                <i class="fa fa-trash"></i> Undo
-            </button>
-            {{ Form::submit('Submit', ['class' => 'btn btn-success']) }}
+            <div class="form-group mt-1">
+                <button type="button" class="btn btn-danger" aria-label="Left Align" id="reset-items">
+                    <i class="fa fa-trash"></i> Undo
+                </button>
+                {{ Form::submit('Submit', ['class' => 'btn btn-success']) }}
+            </div>
+            
         </div>
     </div>
 </div>

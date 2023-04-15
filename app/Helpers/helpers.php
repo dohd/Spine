@@ -503,9 +503,8 @@ function bill_helper($term = 1, $module_id = 1)
     $assert_accounts = \App\Models\account\Account::where('account_type', 'Assets')->get();
     $income_accounts = \App\Models\account\Account::where('account_type', 'Income')->get();
     $expense_accounts = \App\Models\account\Account::where('account_type', 'Expenses')->get();
-    $whts = \App\Models\account\AccountType::where('system', 'tax')->get();
-    $receivables = \App\Models\account\Account::where(['account_type' => 'Assets'])
-        ->whereHas('accountType', fn($q) => $q->where('system', 'receivables'))->get();
+    $whts = \App\Models\account\Account::where('system', 'tax')->get();
+    $receivables = \App\Models\account\Account::whereHas('accountType', fn($q) => $q->where('system', 'receivable'))->get();
     $warehouses = \App\Models\warehouse\Warehouse::all();
     $projects = \App\Models\project\Project::all();
     $customers = \App\Models\customer\Customer::all();

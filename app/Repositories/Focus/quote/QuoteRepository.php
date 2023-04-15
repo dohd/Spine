@@ -156,17 +156,17 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
         foreach ($data as $key => $val) {
             if (in_array($key, ['date', 'reference_date']))
                 $data[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax']))
+            if (in_array($key, ['total', 'subtotal', 'tax', 'taxable']))
                 $data[$key] = numberClean($val);
         }   
-
-        // increament tid
+        
         $tid = 0;
         if (isset($data['bank_id'])) {
             $tid = Quote::where('ins', $data['ins'])->where('bank_id', '>', 0)->max('tid');
@@ -224,7 +224,7 @@ class QuoteRepository extends BaseRepository
         foreach ($data as $key => $val) {
             if (in_array($key, ['date', 'reference_date']))
                 $data[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax'])) 
+            if (in_array($key, ['total', 'subtotal', 'tax', 'taxable'])) 
                 $data[$key] = numberClean($val);
         }   
         // update lead status
@@ -232,6 +232,7 @@ class QuoteRepository extends BaseRepository
             $quote->lead->update(['status' => 0, 'reason' => 'new']);
             Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         }
+        
         $result = $quote->update($data);
 
         $data_items = $input['data_items'];
@@ -305,6 +306,7 @@ class QuoteRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
+        // update quote verification status
         $data = $input['data'];
         $quote = Quote::find($data['id']);
         $result = $quote->update([
@@ -315,8 +317,10 @@ class QuoteRepository extends BaseRepository
             'verified_amount' => numberClean($data['subtotal']),
             'verified_total' => numberClean($data['total']),
             'verified_tax' => numberClean($data['tax']), 
+            'verified_taxable' => numberClean($data['taxable']), 
         ]);
 
+        // quote verified products
         $data_items = $input['data_items'];
         // delete omitted items
         $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
@@ -328,15 +332,17 @@ class QuoteRepository extends BaseRepository
                 'product_qty' => numberClean($item['product_qty']),
                 'product_price' => floatval(str_replace(',', '', $item['product_price'])),
                 'product_subtotal' => floatval(str_replace(',', '', $item['product_subtotal'])),
-                'ins' => auth()->user()->ins
+                'ins' => auth()->user()->ins,
             ]);
+            $item['product_tax'] = $item['product_subtotal'] * $item['tax_rate'];
+
             $verify_item = VerifiedItem::firstOrNew(['id' => $item['item_id']]);
             $verify_item->fill($item);
-            if (!$verify_item->id) unset($verify_item->id);
             unset($verify_item->item_id);
             $verify_item->save();
         }
 
+        // quote verified jobcards
         $job_cards = $input['job_cards'];
         // delete omitted items
         $item_ids = array_map(fn($v) => $v['jcitem_id'], $job_cards);
@@ -352,9 +358,9 @@ class QuoteRepository extends BaseRepository
                 'quote_id' => $data['id'],
                 'date' => date_for_database($item['date']),
             ]);
+
             $jobcard = VerifiedJc::firstOrNew(['id' => $item['jcitem_id']]);
             $jobcard->fill($item);
-            if (!$jobcard->id) unset($jobcard->id);
             unset($jobcard->jcitem_id);
             $jobcard->save();
         }

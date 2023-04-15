@@ -4,15 +4,13 @@ namespace App\Repositories\Focus\invoice_payment;
 
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
-use App\Models\invoice\InvoicePayment;
+use App\Models\invoice_payment\InvoicePayment;
 use App\Models\items\InvoicePaymentItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use DB;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 class InvoicePaymentRepository extends BaseRepository
 {
@@ -125,12 +123,12 @@ class InvoicePaymentRepository extends BaseRepository
     /**
      * For updating the respective Model in storage
      *
-     * @param InvoicePayment $payment
-     * @param  array $input
+     * @param InvoicePayment $invoice_payment
+     * @param array $input
      * @throws GeneralException
      * return bool
      */
-    public function update(InvoicePayment $invoice_payment, array $input)
+    public function update($invoice_payment, array $input)
     {
         // dd($input);
         $data = $input['data'];
@@ -197,7 +195,6 @@ class InvoicePaymentRepository extends BaseRepository
         }
 
         // update payment items and invoices
-        $data_items = array_map(fn($v) => numberClean($v['paid']), $data_items);
         foreach ($invoice_payment->items as $pmt_item) {
             $invoice = $pmt_item->invoice;
             if ($invoice) $invoice->decrement('amountpaid', $pmt_item->paid);

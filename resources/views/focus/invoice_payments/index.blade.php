@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.invoicepayments.partials.invoicepayment-header-buttons')
+                @include('focus.invoice_payments.partials.invoice-payment-header-buttons')
             </div>
         </div>
     </div>
@@ -106,7 +106,7 @@
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.invoices.get_payments') }}",
+                    url: "{{ route('biller.invoice_payments.get') }}",
                     type: 'POST',
                     data: {customer_id},
                     dataSrc: ({data}) => {

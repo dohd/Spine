@@ -13,7 +13,8 @@
                 <label for="ticket">Ticket</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                    <select class="form-control" name="lead_id" id="lead_id" required>                                                 
+                    <select class="form-control" name="lead_id" id="lead_id" data-placeholder="Search by Ticket No, Subject, Client, Branch" required> 
+                        <option value=""></option>                                                
                         @foreach ($leads as $lead)
                             @php
                                 $customer_name = '';
@@ -263,7 +264,7 @@
     @endif
 </div>
 <!-- quotes item table -->
-@include('focus.quotes.partials.quote-items-table')
+@include('focus.quotes.partials.quote_items')
 <!-- footer -->
 <div class="form-group row">
     <div class="col-9">
@@ -281,19 +282,28 @@
         <div>
             <label><span class="text-primary">(Estimated Cost: <span class="estimate-cost font-weight-bold text-dark">0.00</span>)</span></label>
         </div>
-        <label>SubTotal</label>
-        <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>
-        <label id="tax-label">{{ trans('general.total_tax') }}
-            <span id="vatText" class="text-primary">(VAT-Exc)</span>
-        </label>
-        <input type="text" name="tax" id="tax" class="form-control" readonly>
-        <label>
-            {{trans('general.grand_total')}}
-            <b class="text-primary">
-                (E.P: &nbsp;<span class="text-dark profit">0</span>)
-            </b>
-        </label>
-        <input type="text" name="total" class="form-control" id="total" readonly>
+        <div>
+            <label class="m-0">Taxable Amount</label>
+            <input type="text" name="taxable" id="taxable" class="form-control" readonly>    
+        </div>
+        <div>
+            <label class="m-0">SubTotal</label>
+            <input type="text" name="subtotal" id="subtotal" class="form-control" readonly>    
+        </div>
+        <div>
+            <label id="tax-label" class="m-0">
+                {{ trans('general.total_tax') }}
+                <span id="vatText" class="text-primary">(Print VAT-Exc)</span>
+            </label>
+            <input type="text" name="tax" id="tax" class="form-control" readonly>
+        </div>
+        <div>
+            <label class="m-0">
+                {{trans('general.grand_total')}}
+                <b class="text-primary">(E.P: &nbsp;<span class="text-dark profit">0</span>)</b>
+            </label>
+            <input type="text" name="total" class="form-control" id="total" readonly>
+        </div>
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg mt-1']) }}
     </div>
 </div>

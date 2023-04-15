@@ -32,8 +32,7 @@
         });
     });
 
-    // check if quote total is equal to verified amount
-    // else general remark is required
+    // check if quote_total not equal to verified_amount
     $(function() {
         const total = accounting.unformat($('#total').val());
         const quoteTotal = accounting.unformat($('#quote_total').val());
@@ -157,16 +156,17 @@
                 <td><input type="text" class="form-control" name="numbering[]" id="numbering-${val}" autocomplete="off"></td>
                 <td><input type="text" class="form-control" name="product_name[]" placeholder="{{trans('general.enter_product')}}" id='itemname-${val}'></td>
                 <td><input type="text" class="form-control" name="unit[]" id="unit-${val}" value=""></td>                
-                <td><input type="text" class="form-control req amount" name="product_qty[]" id="amount-${val}" onchange="qtyChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req price" name="product_subtotal[]" id="price-${val}" onchange="priceChange(event)" autocomplete="off"></td>
-                <td><input type="text" class="form-control req prcrate" name="product_price[]" id="rateinclusive-${val}" autocomplete="off" readonly></td>
-                <td><strong><span class='ttlText' id="result-${val}">0</span></strong></td>
-                <td><textarea class="form-control" name="remark[]" id="remark-${val}"></textarea></td>
+                <td><input type="text" class="form-control qty" name="product_qty[]" id="qty-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control rate" name="product_subtotal[]" id="rate-${val}" autocomplete="off"></td>
+                <td><input type="text" class="form-control price" name="product_price[]" id="price-${val}" autocomplete="off" readonly></td>
+                <td><strong><span class="amount" id="amount-${val}">0</span></strong></td>
+                <td><textarea class="form-control remark" name="remark[]" id="remark-${val}"></textarea></td>
                 <td class="text-center">${dropDown()}</td>
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${val}">
                 <input type="hidden" name="product_id[]" value=0 id="productid-${val}">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
+                <input type="hidden" class="rowindx" name="row_index[]" value="0" id="rowindex-${val}">
                 <input type="hidden" name="a_type[]" value="1" id="atype-${val}">
+                <input type="hidden" class="taxrate" name="tax_rate[]" value="0" id="taxrate-${val}">
             </tr>
         `;
     }
@@ -185,16 +185,26 @@
                 <input type="hidden" name="product_qty[]" value="0">
                 <input type="hidden" name="product_price[]" value="0">
                 <input type="hidden" name="product_subtotal[]" value="0">
-                <input type="hidden" name="row_index[]" value="0" id="rowindex-${val}">
+                <input type="hidden" class="rowindx" name="row_index[]" value="0" id="rowindex-${val}">
                 <input type="hidden" name="a_type[]" value="2" id="atype-${val}">
+                <input type="hidden" class="taxrate" name="tax_rate[]" value="0" id="taxrate-${val}">
             </tr>
         `;
     }
 
-    // On product amount or price change condition
-    $('#quotation').on('change', '.amount, .price', function() {
-        const i = $(this).attr('id').split('-')[1];
-        $('#remark-'+i).attr('required', true);
+    // on change qty, rate
+    $('#productsTbl').on('change', '.qty, .rate', function() {
+        const row = $(this).parents('tr');
+        const qty = accounting.unformat(row.find('.qty').val());
+        const rate = accounting.unformat(row.find('.rate').val());
+
+        const tax = @json($quote->tax_id);
+        const price = rate * (tax/100 + 1);
+        const amount = price * qty;
+
+        row.find('.price').val(accounting.formatNumber(price, 4));
+        row.find('.amount').text(accounting.formatNumber(amount, 4));
+        calcTotals();
     });
 
     // set default product rows
@@ -212,7 +222,7 @@
         }
         // check if item type is product
         if (item.a_type == 1) {
-            $('#quotation tbody').append(productRow(rowIndx));
+            $('#productsTbl tbody').append(productRow(rowIndx));
             $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
             // set default values
             $('#itemid-'+i).val(item.id);
@@ -221,38 +231,39 @@
             $('#itemname-'+i).val(item.product_name);
             $('#unit-'+i).val(item.unit); 
             $('#remark-'+i).val(item.remark);
-            $('#amount-'+i).val(accounting.formatNumber(item.product_qty));
-            $('#price-'+i).val(accounting.formatNumber(item.product_subtotal, 4)).attr('readonly', true);
-            $('#rateinclusive-'+i).val(accounting.formatNumber(item.product_price, 4));                
-            $('#result-'+i).text(accounting.formatNumber(item.product_qty * item.product_price, 4));
+            $('#taxrate-'+i).val(item.tax_rate);
+            $('#qty-'+i).val(accounting.formatNumber(item.product_qty));
+            $('#rate-'+i).val(accounting.formatNumber(item.product_subtotal, 4)).attr('readonly', true);
+            $('#price-'+i).val(accounting.formatNumber(item.product_price, 4));                
+            $('#amount-'+i).text(accounting.formatNumber(item.product_qty * item.product_price, 4));
         } else {
-            $('#quotation tbody').append(productTitleRow(rowIndx));
+            $('#productsTbl tbody').append(productTitleRow(rowIndx));
             // set default values
             $('#itemid-'+i).val(item.id);
             $('#productid-'+i).val(item.product_id);
             $('#numbering-'+i).val(item.numbering);
             $('#itemname-'+i).val(item.product_name);
         }
-        rowIndx++;
-        calcTotals();
+        rowIndx++;        
     });    
+    calcTotals();
 
     // On click Add Product
     $('#add-product').click(function() {
-        $('#quotation tbody').append(productRow(rowIndx));
+        $('#productsTbl tbody').append(productRow(rowIndx));
         $('#itemname-'+rowIndx).autocomplete(autocompleteProp(rowIndx));
         rowIndx++;
         calcTotals();
     });
     // on click Add Title button
     $('#add-title').click(function() {
-        $('#quotation tbody').append(productTitleRow(rowIndx));
+        $('#productsTbl tbody').append(productTitleRow(rowIndx));
         rowIndx++;
         calcTotals();
     });
 
     // on clicking Product row drop down menu
-    $("#quotation").on("click", ".up, .down, .removeProd", function() {
+    $("#productsTbl").on("click", ".up, .down, .removeProd", function() {
         const row = $(this).parents("tr:first");
         if ($(this).is('.up')) row.insertBefore(row.prev());
         if ($(this).is('.down')) row.insertAfter(row.next());
@@ -262,60 +273,25 @@
         calcTotals();
     });
 
-    // default tax
-    const tax = @json($quote->tax_id);
-    let taxRate = parseFloat(tax/100 + 1);
-
-    // on quantity input change
-    function qtyChange(e) {
-        const id = e.target.id;
-        const indx = id.split('-')[1];
-        const productQty = $('#'+id).val();
-        let productPrice = accounting.unformat($('#price-'+indx).val());
-
-        const rateInclusive = taxRate * productPrice;
-        $('#rateinclusive-'+indx).val(accounting.formatNumber(rateInclusive, 4));
-        const rowAmount = productQty * rateInclusive;
-        $('#result-'+indx).text(accounting.formatNumber(rowAmount, 4));
-        calcTotals();
-    }
-    // on price input change
-    function priceChange(e) {
-        // change value to float
-        e.target.value = Number(e.target.value).toFixed(2);
-        const id = e.target.id;
-        indx = id.split('-')[1];
-
-        const qty = accounting.unformat($('#amount-'+indx).val());
-        const price = accounting.unformat($('#'+id).val());
-        const rateInclusive = taxRate * price;
-
-        $('#rateinclusive-'+indx).val(accounting.formatNumber(rateInclusive, 4));
-        $('#result-'+indx).text(accounting.formatNumber(qty * rateInclusive, 4));
-        calcTotals();
-    }
-
     // totals
     function calcTotals() {
-        let subTotal = 0;
-        let grandTotal = 0;
-        $('#quotation tr').each(function(i) {
-            if (i == 0) return;
-            const qty = $(this).find('td').eq(3).children().val()
-            if (qty) {
-                let price = $(this).find('td').eq(4).children().val();
-                let rate = $(this).find('td').eq(5).children().val();
-                price = accounting.unformat(price);
-                rate = accounting.unformat(rate);
-                subTotal += qty * price;
-                grandTotal += qty * rate;
-            }
-            // update row_index
-            $(this).find('input[name="row_index[]"]').val($(this).index());
+        let taxable = 0;
+        let subtotal = 0;
+        let total = 0;
+        $('#productsTbl tbody tr').each(function(i) {
+            $(this).find('.rowindx').val(i);
+            const qty = accounting.unformat($(this).find('.qty').val());
+            const rate = accounting.unformat($(this).find('.rate').val());
+            const amount = accounting.unformat($(this).find('.amount').text());
+            const taxRate = accounting.unformat($(this).find('.taxrate').val());
+            if (taxRate > 0) taxable += qty * rate;
+            subtotal += qty * rate;
+            total += amount;
         });
-        $('#subtotal').val(accounting.formatNumber(subTotal));
-        $('#tax').val(accounting.formatNumber(grandTotal - subTotal));        
-        $('#total').val(accounting.formatNumber(grandTotal)).change();
+        $('#taxable').val(accounting.formatNumber(taxable));
+        $('#subtotal').val(accounting.formatNumber(subtotal));
+        $('#tax').val(accounting.formatNumber(total - subtotal));        
+        $('#total').val(accounting.formatNumber(total)).change();
     }
 
     // product autocomplete
@@ -342,18 +318,20 @@
                 $('#productid-'+i).val(data.id);
                 $('#itemname-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
-                $('#amount-'+i).val(1);
+                $('#qty-'+i).val(1);
 
                 const currency = @json($quote->currency);
                 if (currency && parseFloat(currency['rate']) > 1) {
                     data.price = parseFloat(data.price) / parseFloat(currency['rate']);
                 }
 
-                const price = accounting.unformat(data.price);
-                const amount = price * taxRate;
-                $('#price-'+i).val(accounting.formatNumber(price, 4)).attr('readonly', true);
-                $('#rateinclusive-'+i).val(accounting.formatNumber(amount, 4));                
-                $('#result-'+i).text(accounting.formatNumber(amount, 4));
+                const rate = accounting.unformat(data.price);
+                const taxRate = @json($quote->tax_id);
+                const amount = rate * (taxRate/100 + 1);
+                $('#taxrate-'+i).val(taxRate);
+                $('#rate-'+i).val(accounting.formatNumber(rate, 4)).attr('readonly', true);
+                $('#price-'+i).val(accounting.formatNumber(amount, 4));                
+                $('#amount-'+i).text(accounting.formatNumber(amount, 4));
                 calcTotals();
             }
         };

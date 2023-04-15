@@ -6,7 +6,7 @@ use App\Models\account\Account;
 use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
-use App\Models\invoice\InvoicePayment;
+use App\Models\invoice_payment\InvoicePayment;
 use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -126,7 +126,7 @@ class InvoiceRepository extends BaseRepository
         $bill['invoiceduedate'] = date_for_database($duedate);
         foreach ($bill as $key => $val) {
             if ($key == 'invoicedate') $bill[$key] = date_for_database($val);
-            if (in_array($key, ['total', 'subtotal', 'tax'], 1)) 
+            if (in_array($key, ['total', 'subtotal', 'tax'])) 
                 $bill[$key] = numberClean($val);
         }
         
@@ -139,7 +139,10 @@ class InvoiceRepository extends BaseRepository
             $bill_items[$k] = array_replace($item, [
                 'invoice_id' => $result->id,
                 'product_price' => floatval(str_replace(',', '', $item['product_price'])),
+                'product_subtotal' => floatval(str_replace(',', '', $item['product_subtotal'])),
             ]);
+            $item = $bill_items[$k];
+            $bill_items[$k]['product_tax'] = $item['product_price'] - $item['product_subtotal'];
         }
         InvoiceItem::insert($bill_items);
 

@@ -4,7 +4,7 @@ namespace App\Repositories\Focus\pos;
 
 use App\Models\account\Account;
 use App\Models\invoice\Invoice;
-use App\Models\invoice\InvoicePayment;
+use App\Models\invoice_payment\InvoicePayment;
 use App\Models\items\InvoiceItem;
 use App\Models\items\InvoicePaymentItem;
 use App\Models\product\ProductVariation;
