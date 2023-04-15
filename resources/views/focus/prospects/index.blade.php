@@ -159,22 +159,77 @@
                     $('#prospect_id').val(id);
 
                     //on form submit(Creating Remark)
-                    $('#remarkform').submit( function(e) {
+                    $('#remarkform').submit(function(e) {
                         e.preventDefault();
-                       
+
                         var formData = $(this).serialize();
-                        // console.log({{ route('biller.remarks.store') }});
-                        // $.ajax({
-                        //     url:'{{ route('biller.remarks.store') }}',
-                        //     type:'POST',
-                        //     data:formData,
-                        //     success:function(response){
-                        //         alert(response);
-                        //     }
-                        //     error:function(error){
-                        //         alert(error);
-                        //     }
-                        // });
+
+                        $.ajax({
+                            url: "remarks",
+                            type: 'POST',
+                            data: formData,
+                            success: function(response) {
+                                alert(response.message);
+                                $('#remarkform')[0].reset();
+                                $.ajax({
+                                    type: "post",
+                                    url: "{{ route('biller.prospects.followup') }}",
+                                    data: {
+                                        id: id,
+                                    },
+                                    success: function(response) {
+                                        $('#remarksModal').find(
+                                                '#remarks_table tbody')
+                                            .empty();
+                                        //append data fetched to table
+                                        $.each(response.remark,
+                                            function(key, value) {
+                                                var row = $('<tr>');
+                                                var id = $('<td>')
+                                                    .text(key + 1);
+                                                var cdate = $(
+                                                        '<td>')
+                                                    .text(value
+                                                        .created_at
+                                                        );
+                                                var recepient = $(
+                                                        '<td>')
+                                                    .text(value
+                                                        .recepient);
+                                                var remarks = $(
+                                                        '<td>')
+                                                    .text(value
+                                                        .remarks);
+                                                var reminderdate =
+                                                    $('<td>').text(
+                                                        value
+                                                        .reminder_date
+                                                        );
+
+                                                row.append(id);
+                                                row.append(cdate);
+                                                row.append(
+                                                    recepient);
+                                                row.append(remarks);
+                                                row.append(
+                                                    reminderdate
+                                                    );
+                                                $('#remarksModal')
+                                                    .find(
+                                                        '#remarks_table tbody'
+                                                        ).append(
+                                                        row);
+
+
+                                            });
+                                    }
+
+                                })
+                            },
+                            error: function(error) {
+                                alert(error);
+                            }
+                        });
                     });
                 }
             });

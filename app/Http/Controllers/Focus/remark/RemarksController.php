@@ -87,7 +87,7 @@ class RemarksController extends Controller
             
             'recepient' => 'required',
             'reminder_date' => 'required',
-            'remarks' => 'required'
+            'remarks' => 'required',
 
         ]);
         // filter request input fields
@@ -95,9 +95,10 @@ class RemarksController extends Controller
 
         //Create the model using repository create method
         $this->repository->create($data);
-
+        
         return response()->json([
-            'message'=>'Remark created Successfully'
+            'message'=>'Remark created Successfully',
+            'remark'=>$data
         ]);
     }
 
