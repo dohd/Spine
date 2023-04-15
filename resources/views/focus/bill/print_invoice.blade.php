@@ -231,8 +231,8 @@
 				<td width="6%">No.</td>
 
 				@if (
-					(count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference']) ||
-					($resource->products->first() && !$resource->products->first()->reference)
+					(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+					(!@$resource->products->first()->reference)
 				)
 					<td colspan="2">DESCRIPTION</td>
 				@else
@@ -257,24 +257,50 @@
 		<tbody>
 			<!-- Product rows -->
 			@foreach($resource->products as $i => $item)
-				<tr>
-					<td>{{ $item->numbering ?: $i+1 }}</td>
+				@if ($item->unit)
+					<!-- Item Row -->
+					<tr>
+						<td>{{ $item->numbering ?? $i+1 }}</td>
 
-					@if (
-						(count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference']) ||
-						($resource->products->first() && !$resource->products->first()->reference)
-					)
-						<td colspan="2">{{ $item->description }}</td>
-					@else
-						<td>{{ $item->reference }}</td>
-						<td>{{ $item->description }}</td>
-					@endif
-			
-					<td class="align-c">{{ $item->product_qty > 0? +$item->product_qty : '' }}</td>
-					<td class="align-c">{{ $item->unit }}</td>
-					<td class="align-r">{{ $item->product_price > 0? numberFormat($item->product_price) : '' }}</td>
-					<td class="align-r">{{ $item->product_qty > 0? numberFormat($item->product_qty * $item->product_price) : '' }}</td>
-				</tr>
+						@if (
+							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+							(!@$resource->products->first()->reference)
+						)
+							<td colspan="2">{{ $item->description }}</td>
+						@else
+							<td>{{ $item->reference }}</td>
+							<td>{{ $item->description }}ee</td>
+						@endif
+				
+						<td class="align-c">{{ $item->product_qty > 0? +$item->product_qty : '' }}</td>
+						<td class="align-c">{{ $item->unit }}</td>
+
+						@if ($item->product_price > 0 && $item->product_subtotal == 0)
+							<td class="align-r">{{ $item->product_price > 0? numberFormat($item->product_price) : '' }}</td>
+							<td class="align-r">{{ $item->product_qty > 0? numberFormat($item->product_qty * $item->product_price) : '' }}</td>
+						@elseif ($item->product_price > 0 && $item->product_subtotal > 0)
+							<td class="align-r">{{ $item->product_subtotal > 0? numberFormat($item->product_subtotal) : '' }}</td>
+							<td class="align-r">{{ $item->product_qty > 0? numberFormat($item->product_qty * $item->product_subtotal) : '' }}</td>
+						@endif
+					</tr>
+				@else
+					<!-- Title Row -->
+					<tr>
+						<td>{{ $item->numbering ?? $i+1 }}</td>
+						@if (
+							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+							(!@$resource->products->first()->reference)
+						)
+							<td colspan="2">{{ $item->description }}</td>
+						@else
+							<td></td>
+							<td></td>
+						@endif
+						@foreach (range(1,4) as $j)
+							<td></td>
+						@endforeach
+					</tr>
+				@endif
 			@endforeach
 			<!-- End Product rows -->
 
@@ -282,8 +308,8 @@
 			@for ($i = count($resource->products); $i < 5; $i++)
 				<tr>
 					@if (
-						(count($resource->products) > 1 && $resource['products'][0]['reference'] == $resource['products'][1]['reference']) ||
-						($resource->products->first() && !$resource->products->first()->reference)
+						(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+						(!@$resource->products->first()->reference)
 					)
 						@for($j = 0; $j < 6; $j++)
 							@if ($j == 1)
