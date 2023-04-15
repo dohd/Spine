@@ -196,6 +196,15 @@ Route::group(['namespace' => 'prospect'], function () {
 
     //For Datatable
      Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
+     Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
+});
+Route::group(['namespace' => 'remark'], function () {
+    Route::patch('remarks/update_status/{remark}', 'ProspectsController@update_status')->name('remarks.update_status');
+    Route::resource('remarks', 'RemarksController');
+
+    //For Datatable
+    // Route::post('remarks/get', 'RemarksTableController')->name('remarks.get');
+     
 });
 Route::group(['namespace' => 'lender'], function () {
     Route::resource('lenders', 'LendersController');

@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Repositories\Focus\remark;
+
+use App\Models\remark\Remark;
+use App\Exceptions\GeneralException;
+use App\Models\items\Prefix;
+use App\Repositories\BaseRepository;
+use DB;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * Class ProductcategoryRepository.
+ */
+class RemarkRepository extends BaseRepository
+{
+    /**
+     * Associated Repository Model.
+     */
+    const MODEL = Remark::class;
+
+    /**
+     * This method is used by Table Controller
+     * For getting the table data to show in
+     * the grid
+     * @return mixed
+     */
+    public function getForDataTable()
+    {
+        $q = $this->query();
+        return $q->get();
+    }
+
+    /**
+     * For Creating the respective model in storage
+     *
+     * @param array $input
+     * @throws GeneralException
+     * @return bool
+     */
+    public function create(array $data)
+    {
+        $data['reminder_date'] = date_for_database($data['reminder_date']);
+        
+        $result = Remark::create($data);
+        return $result;
+
+        throw new GeneralException('Error Creating Remark');
+    }
+
+    /**
+     * For updating the respective Model in storage
+     *
+     * @param \App\Models\Remark $remark
+     * @param  $input
+     * @throws GeneralException
+     * return bool
+     */
+    public function update(Remark $remark, array $data)
+    {
+        DB::beginTransaction();
+        
+        $result = $remark->update($data);
+        // update attached quote and djc
+        foreach ($remark->quotes as $quote) {
+            $quote->update(['customer_id' => $remark->client_id, 'branch_id' => $remark->branch_id]);
+        }
+        foreach ($remark->djcs as $djc) {
+            $djc->update(['client_id' => $remark->client_id, 'branch_id' => $remark->branch_id]);
+        }
+
+        if ($result) {
+            DB::commit();
+            return true;
+        }
+
+        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
+    }
+
+    /**
+     * For deleting the respective model from storage
+     *
+     * @param \App\Models\remark\Remark $remark
+     * @throws GeneralException
+     * @return bool
+     */
+    public function delete(Remark $remark)
+    {
+        $prefix = Prefix::where('note', 'remark')->first();
+        $tid = gen4tid("{$prefix}-", $remark->reference);
+
+        if ($remark->djcs->count()) 
+            throw ValidationException::withMessages(["{$tid} is attached to DJC Report!"]);
+        if ($remark->quotes->count()) 
+            throw ValidationException::withMessages(["{$tid} is attached to Quote!"]);
+            
+        if ($remark->delete()) return true;
+        
+        throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
+    }
+}

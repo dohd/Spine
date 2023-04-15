@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Models\prospect;
+namespace App\Models\remark;
 
-
+use App\Models\items\Prefix;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\prospect\Traits\ProspectAttribute;
-use App\Models\prospect\Traits\ProspectRelationship;
+use App\Models\remark\Traits\RemarkAttribute;
+use App\Models\remark\Traits\RemarkRelationship;
 
-class Prospect extends Model
+class Remark extends Model
 {
     use ModelTrait,
-        ProspectAttribute,
-        ProspectRelationship {
-        
+        RemarkAttribute,
+        RemarkRelationship {
+        // ProductcategoryAttribute::getEditButtonAttribute insteadof ModelTrait;
     }
 
     /**
@@ -25,7 +25,7 @@ class Prospect extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'prospects';
+    protected $table = 'remarks';
 
     /**
      * Mass Assignable fields of model
@@ -79,6 +79,8 @@ class Prospect extends Model
             return $instance;
         });
 
-        
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

@@ -27,8 +27,8 @@ use App\Http\Responses\Focus\prospect\EditResponse;
 use App\Repositories\Focus\prospect\ProspectRepository;
 use App\Http\Requests\Focus\prospect\ManageProspectRequest;
 use App\Models\branch\Branch;
-use App\Models\customer\Customer;
 use App\Models\prospect\Prospect;
+use App\Models\remark\Remark;
 
 /**
  * ProductcategoriesController
@@ -87,6 +87,7 @@ class ProspectsController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            'company' => 'required',
             'email' => 'required',
             'phone' => 'required',
             'reminder_date' => 'required',
@@ -117,6 +118,23 @@ class ProspectsController extends Controller
 
         return new EditResponse('focus.prospects.edit', compact('prospect', 'branches'));
     }
+
+
+    // follow up
+    public function followup(Request $request)
+    {
+      
+        $prospect = Prospect::where('id', $request->id);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+        if($prospect){
+            $remark = Remark::where('prospect_id',$request->id)->get();
+            return response()->json([
+                'remark'=>$remark,
+                ]);
+        }
+        return response()->json($request);
+    }
+
+
 
     // /**
     //  * Update the specified resource.
@@ -170,26 +188,6 @@ class ProspectsController extends Controller
     {
         return new ViewResponse('focus.prospects.view', compact('prospect'));
     }
-
-    // // fetch prospect details with specific prospect_id
-    // public function prospect_load(Request $request)
-    // {
-    //     $id = $request->get('id');
-        
-    //     $prospects = Prospect::all()->where('rel_id', $id);
-
-    //     return response()->json($prospects);
-    // }
-    
-    // // search specific prospect with defined parameters
-    // public function prospect_search(ManageProspectRequest $request)
-    // {
-    //     $q = $request->post('keyword');
-
-    //     $prospects = Prospect::where('title', 'LIKE', '%'. $q .'%')->limit(6)->get();
-
-    //     return response()->json($prospects);        
-    // }
 
     // /**
     //  * Update Prospect Open Status

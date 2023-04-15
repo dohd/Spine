@@ -52,6 +52,10 @@
                         <th>Prospect Name</th>
                         <td>{{ $prospect->customer ? $prospect->customer->name : $prospect->name }}</td>
                     </tr>
+                    <tr>
+                        <th>Prospect Company</th>
+                        <td>{{ $prospect->customer ? $prospect->customer->company : $prospect->company }}</td>
+                    </tr>
                     
                     <tr>
                         <th>Prospect Contact</th>

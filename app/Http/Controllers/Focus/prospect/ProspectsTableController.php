@@ -53,7 +53,7 @@ class ProspectsTableController extends Controller
 
         // $ins = auth()->user()->ins;
         //$prefixes = prefixesArray(['prospect'], $ins);
-
+        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -62,32 +62,38 @@ class ProspectsTableController extends Controller
             })
             ->addColumn('email', function ($prospect) {
                 $client_email = $prospect->email;
-                
+
                 return $client_email;
+            })
+            ->addColumn('company', function ($prospect) {
+                $client_company = $prospect->company;
+
+                return $client_company;
             })
             ->addColumn('phone', function ($prospect) {
                 $phone = $prospect->phone;
-                
+
                 return $phone;
             })
             ->addColumn('reminder_date', function ($prospect) {
                 $date = $prospect->reminder_date;
-                
+
                 return $date;
             })
-            ->addColumn('remarks', function ($prospect) {
-                $remarks = $prospect->remarks;
-                
-                return $remarks;
+            ->addColumn('follow_up', function ($prospect) {
+              
+                return '<a href="javascript:void(0)" class="btn btn-primary follow" data-id="' . $prospect->id . '" >
+                         Follow up
+                         </a>';
             })
             ->addColumn('status', function ($prospect) {
                 $status = $prospect->status;
-                if($status ==0){
+                if ($status == 0) {
                     $status = "Open";
-                }else{
+                } else {
                     $status = "Closed";
                 }
-                
+
                 return $status;
             })
             ->addColumn('created_at', function ($prospect) {

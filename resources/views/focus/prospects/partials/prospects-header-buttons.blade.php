@@ -7,14 +7,9 @@
             <i class="fa fa-plus-circle"></i> Prospect
         </a>
         &nbsp;&nbsp;
-        <a href="{{ route('biller.djcs.create') }}" class="btn btn-success  btn-lighten-3">
-            <i class="fa fa-plus-circle"></i> Djc
+        <a href="{{ route('biller.leads.create') }}" class="btn btn-success  btn-lighten-3">
+            <i class="fa fa-plus-circle"></i> Ticket
         </a>&nbsp;
-        <a href="{{ route('biller.quotes.create') }}" class="btn btn-warning">
-            <i class="fa fa-plus-circle"></i> Quote
-        </a>&nbsp;
-        <a href="{{ route('biller.quotes.create', 'page=pi') }}" class="btn btn-cyan">
-            <i class="fa fa-plus-circle"></i> PI
-        </a> 
+        
     @endauth
 </div>
