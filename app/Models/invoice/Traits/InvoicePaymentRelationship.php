@@ -4,10 +4,10 @@ namespace App\Models\invoice\Traits;
 
 use App\Models\account\Account;
 use App\Models\customer\Customer;
-use App\Models\items\PaidInvoiceItem;
+use App\Models\items\InvoicePaymentItem;
 use App\Models\transaction\Transaction;
 
-trait PaidInvoiceRelationship
+trait InvoicePaymentRelationship
 {
     public function transactions()
     {
@@ -26,6 +26,6 @@ trait PaidInvoiceRelationship
 
     public function items()
     {
-        return $this->hasMany(PaidInvoiceItem::class, 'paidinvoice_id');
+        return $this->hasMany(InvoicePaymentItem::class, 'paidinvoice_id');
     }
 }

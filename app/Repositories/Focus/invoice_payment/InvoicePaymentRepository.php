@@ -4,12 +4,13 @@ namespace App\Repositories\Focus\invoice_payment;
 
 use App\Exceptions\GeneralException;
 use App\Models\account\Account;
-use App\Models\invoice\PaidInvoice;
-use App\Models\items\PaidInvoiceItem;
+use App\Models\invoice\InvoicePayment;
+use App\Models\items\InvoicePaymentItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use DB;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
@@ -18,7 +19,7 @@ class InvoicePaymentRepository extends BaseRepository
     /**
      * Associated Repository Model.
      */
-    const MODEL = PaidInvoice::class;
+    const MODEL = InvoicePayment::class;
 
     /**
      * This method is used by Table Controller
@@ -42,7 +43,7 @@ class InvoicePaymentRepository extends BaseRepository
      *
      * @param array $input
      * @throws GeneralException
-     * @return PaidInvoice $payment
+     * @return InvoicePayment $payment
      */
     public function create(array $input)
     {
@@ -56,126 +57,183 @@ class InvoicePaymentRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
-        $result = PaidInvoice::where('ins', auth()->user()->ins)->where('tid', $data['tid'])->count();
-        if ($result) throw ValidationException::withMessages(['Similar payment already received!']);
+        if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+            
+        // create payment
+        $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
+        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
+        $result = InvoicePayment::create($data);
 
-        $is_payment = empty($data['payment_id']);
-        if ($is_payment) {
-            if (isset($data['payment_id'])) unset($data['payment_id']);
-            $result = PaidInvoice::create($data);
-
-            if (in_array($result->payment_type, ['per_invoice', 'on_account'])) {
-                $unallocated = $result->amount - $result->allocate_ttl;
-                $result->customer->increment('on_account', $unallocated);  
-            }
-        } else {
-            $result = PaidInvoice::find($data['payment_id']);            
-            $result->increment('allocate_ttl', $data['allocate_ttl']);
-
-            // reduce unallocated, else post Advance Payment Account
-            if (in_array($result->payment_type, ['per_invoice', 'on_account'])) {
-                $allocated = $result->amount - $result->allocate_ttl;
-                $result->customer->decrement('on_account', $allocated);    
-            } else {
-                $result->allocate_ttl = $data['allocate_ttl'];
-                $this->post_transaction($result);
-            }
-        }
-
-        // allocate items
+        // payment line items
         $data_items = $input['data_items'];
-        if ($data_items) {
-            $data_items = array_map(function ($v) use($result) {
-                return array_replace($v, [
-                    'paidinvoice_id' => $result->id,
-                    'paid' => numberClean($v['paid'])
-                ]);
-            }, $data_items);
-            PaidInvoiceItem::insert($data_items);
+        $data_items = array_filter($data_items, fn($v) => $v['paid'] > 0);
+        if (!$data_items && $result->payment_type == 'per_invoice') 
+            throw ValidationException::withMessages(['amount allocation on line items required!']);
+        
+        foreach ($data_items as $key => $val) {
+            $data_items[$key]['paidinvoice_id'] = $result->id;
+            $data_items[$key]['paid'] = numberClean($val['paid']);
+        }
+        InvoicePaymentItem::insert($data_items);
 
-            // increment invoice amount paid and update status
-            foreach ($result->items as $item) {
-                $invoice = $item->invoice;
+        // update invoice amountpaid and status
+        foreach ($result->items as $item) {
+            $invoice = $item->invoice;
+            if ($invoice) {
                 $invoice->increment('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
                 elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
-                else $invoice->update(['status' => 'paid']);
+                else  $invoice->update(['status' => 'paid']);
+            }
+        }
+
+        // update customer on_account balance
+        if ($result->customer) {
+            // payment
+            if (!$result->rel_payment_id) {
+                if (in_array($result->payment_type, ['on_account', 'advance_payment'])) {
+                    $result->customer->increment('on_account', $result->amount);
+                } else {
+                    $result->customer->increment('on_account', $result->amount - $result->allocate_ttl);
+                }
+            }
+
+            // allocated payment
+            if ($result->payment_type == 'per_invoice' && $result->rel_payment_id) {
+                $result->customer->decrement('on_account', $result->allocate_ttl);
+                $rel_payment = InvoicePayment::find($result->rel_payment_id);
+                if ($rel_payment) {
+                    $rel_payment->increment('allocate_ttl', $result->allocate_ttl);
+                    if ($rel_payment->payment_type == 'advance_payment') $result->is_advance_allocation = true;
+                }
             }
         }
         
         /**accounting */
-        if ($is_payment) $this->post_transaction($result);
-        
+        if (!$result->rel_payment_id || $result->is_advance_allocation) {
+            $this->post_transaction($result);
+        }
+                
         if ($result) {
             DB::commit();
             return $result;
         }
 
         DB::rollBack();
-        throw new GeneralException('Error Creating Invoice');
     }
 
     /**
      * For updating the respective Model in storage
      *
-     * @param PaidInvoice $payment
+     * @param InvoicePayment $payment
      * @param  array $input
      * @throws GeneralException
      * return bool
      */
-    public function update(PaidInvoice $payment, array $input)
+    public function update(InvoicePayment $invoice_payment, array $input)
     {
         // dd($input);
-        DB::beginTransaction();
-
         $data = $input['data'];
         foreach ($data as $key => $val) {
             if ($key == 'date') $data[$key] = date_for_database($val);
-            if (in_array($key, ['amount', 'allocate_ttl'])) 
-                $data[$key] = numberClean($val);
+            if (in_array($key, ['amount', 'allocate_ttl'])) $data[$key] = numberClean($val);
         }
-        // reverse customer unallocated amount
-        $unallocated = $payment->amount - $payment->allocate_ttl;
-        $payment->customer->decrement('on_account', $unallocated);
+        if (isset($data['amount']) && $data['amount'] == 0) 
+            throw ValidationException::withMessages(['amount is required!']);
 
-        $result = $payment->update($data);
-        
-        // update customer unallocated amount
-        $unallocated = $payment->amount - $payment->allocate_ttl;        
-        $payment->customer->increment('on_account', $unallocated);
-
-        // allocated items
+        // delete invoice_payment with no unallocated line items
         $data_items = $input['data_items'];
-        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
-        $payment_items = PaidInvoiceItem::whereIn('id', $item_ids)->get();
-        // reverse invoice amount paid
-        foreach ($payment_items as $item) {
-            if ($item->invoice) $item->invoice->decrement('amountpaid', $item->paid);
-        }
-        // update payment items
-        $data_items = array_map(function ($v) {
-            return array_replace($v, [
-                'paid' => numberClean($v['paid'])
-            ]);
-        }, $data_items);
-        Batch::update(new PaidInvoiceItem, $data_items, 'id');
+        if (!$data_items && $invoice_payment->payment_type == 'per_invoice') 
+            return $this->delete($invoice_payment);
 
-        foreach ($payment->items as $item) {
-            // update invoice amount paid
-            if ($item->invoice) {
-                $invoice = $item->invoice;
-                $invoice->increment('amountpaid', $item->paid);
-                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
-                else $invoice->update(['status' => 'paid']);
+        DB::beginTransaction();
+        $prev_note = $invoice_payment->note;
+
+        // reverse customer on_account balance
+        if ($invoice_payment->customer) {
+            // payment
+            if (!$invoice_payment->rel_payment_id) {
+                if (in_array($invoice_payment->payment_type, ['on_account', 'advance_payment'])) {
+                    $invoice_payment->customer->decrement('on_account', $invoice_payment->amount);
+                } else {
+                    $invoice_payment->customer->decrement('on_account', $invoice_payment->amount - $invoice_payment->allocate_ttl);
+                }
             }
-            // delete items with zero payment
-            if ($item->paid == 0) $item->delete();
+
+            // allocated payment
+            if ($invoice_payment->payment_type == 'per_invoice' && $invoice_payment->rel_payment_id) {
+                $invoice_payment->customer->increment('on_account', $invoice_payment->allocate_ttl);
+                $rel_payment = InvoicePayment::find($invoice_payment->rel_payment_id);
+                if ($rel_payment) {
+                    $rel_payment->decrement('allocate_ttl', $invoice_payment->allocate_ttl);
+                    if ($rel_payment->payment_type == 'advance_payment') $invoice_payment->is_advance_allocation = true;
+                }
+            }
         }
 
+        // update payment
+        $result = $invoice_payment->update($data);
+
+        // update customer on_account balance
+        if ($invoice_payment->customer) {
+            // payment
+            if (!$invoice_payment->rel_payment_id) {
+                if (in_array($invoice_payment->payment_type, ['on_account', 'advance_payment'])) {
+                    $invoice_payment->customer->increment('on_account', $invoice_payment->amount);
+                } else {
+                    $invoice_payment->customer->increment('on_account', $invoice_payment->amount - $invoice_payment->allocate_ttl);
+                }
+            }
+
+            // allocated payment
+            if ($invoice_payment->payment_type == 'per_invoice' && $invoice_payment->rel_payment_id) {
+                $invoice_payment->supplier->decrement('on_account', $invoice_payment->allocate_ttl);
+                $rel_payment = InvoicePayment::find($invoice_payment->rel_payment_id);
+                if ($rel_payment) {
+                    $rel_payment->increment('allocate_ttl', $invoice_payment->allocate_ttl);
+                    if ($rel_payment->payment_type == 'advance_payment') $invoice_payment->is_advance_allocation = true;
+                }
+            }
+        }
+
+        // update payment items and invoices
+        $data_items = array_map(fn($v) => numberClean($v['paid']), $data_items);
+        foreach ($invoice_payment->items as $pmt_item) {
+            $invoice = $pmt_item->invoice;
+            if ($invoice) $invoice->decrement('amountpaid', $pmt_item->paid);
+                
+            $is_allocated = 0;
+            foreach ($data_items as $data_item) {
+                if ($data_item['id'] == $pmt_item->id) {
+                    $is_allocated = 1;
+                    $data_item['paid'] = numberClean($data_item['paid']);
+                    $pmt_item->update(['paid' => $data_item['paid']]);
+                    // update invoice status
+                    if ($invoice) {
+                        $invoice->increment('amountpaid', $data_item['paid']);
+                        if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+                        elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                        else $invoice->update(['status' => 'paid']);
+                    }
+                }
+            }
+            if (!$is_allocated) $pmt_item->delete();
+        }
+
+        // check if payment is advance_payment allocation
+        if ($invoice_payment->rel_payment_id) {
+            $rel_payment = InvoicePayment::find($invoice_payment->rel_payment_id);
+            if ($rel_payment && $rel_payment->payment_type == 'advance_payment')
+                $invoice_payment->is_advance_allocation = true;
+        }
+        
         /** accounting */
-        $payment->transactions()->delete();
-        $this->post_transaction($payment);
+        if (!$invoice_payment->rel_payment_id || $invoice_payment->is_advance_allocation) {
+            Transaction::whereIn('tr_type', ['pmt', 'adv_pmt'])
+                ->where(['note' => $prev_note, 'tr_ref' => $invoice_payment->id])
+                ->delete();
+            $this->post_transaction($invoice_payment);
+        }
 
         if ($result) {
             DB::commit();
@@ -183,109 +241,122 @@ class InvoicePaymentRepository extends BaseRepository
         }
 
         DB::rollBack();
-        throw new GeneralException('Error Creating Invoice');
     }
 
     /**
      * For deleting the respective model from storage
      *
-     * @param PaidInvoice $payment
+     * @param InvoicePayment $payment
      * @throws GeneralException
      * @return bool
      */
-    public function delete(PaidInvoice $payment)
+    public function delete(InvoicePayment $invoice_payment)
     {
+        // dd($invoice_payment->id);
         DB::beginTransaction();
 
-        // reverse customer unallocated amount
-        $unallocated = $payment->amount - $payment->allocate_ttl;
-        $payment->customer->decrement('on_account', $unallocated);
-        // reverse payment
-        foreach ($payment->items as $item) {
-            if ($item->invoice) {
-                $invoice = $item->invoice;
+        // check if contain related allocations
+        $has_allocations = InvoicePayment::where('rel_payment_id', $invoice_payment->id)->exists();
+        if ($has_allocations) throw ValidationException::withMessages([
+            'Delete related payment allocations to proceed'
+        ]);
+
+        // reverse customer on_account balance
+        if ($invoice_payment->customer_id) {
+            if ($invoice_payment->rel_payment_id) {
+                $invoice_payment->customer->increment('on_account', $invoice_payment->allocate_ttl);
+                $payment = InvoicePayment::find($invoice_payment->rel_payment_id);
+                if ($payment) $payment->decrement('allocate_ttl', $invoice_payment->allocate_ttl);
+            } else {
+                $balance = $invoice_payment->amount - $invoice_payment->allocate_ttl;
+                $invoice_payment->customer->decrement('on_account', $balance);
+            }
+        }
+
+        // reverse invoice amountpaid and status
+        foreach ($invoice_payment->items as $item) {
+            $invoice = $item->invoice;
+            if ($invoice) {
                 $invoice->decrement('amountpaid', $item->paid);
                 if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
                 elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
                 else $invoice->update(['status' => 'paid']);
-            }            
+            }
         }
         
-        $payment->transactions()->delete();
+        Transaction::whereIn('tr_type', ['pmt', 'adv_pmt'])
+            ->where(['note' => $invoice_payment->note, 'tr_ref' => $invoice_payment->id])
+            ->delete();
         aggregate_account_transactions();
-        if ($payment->delete()) {
-            DB::commit();
-            return true;
-        }
 
-        DB::rollBack();
-        throw new GeneralException('Error Creating Invoice');            
+        if ($invoice_payment->delete()) {
+            DB::commit(); 
+            return true;
+        }         
     }
 
 
     /**
      * Post Invoice Payment Transaction
      */
-    public function post_transaction($payment)
+    public function post_transaction($invoice_payment)
     {
         $account = Account::where('system', 'receivable')->first(['id']);
         $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
-        $tid = Transaction::where('ins', $payment->ins)->max('tid') + 1;
+        $tid = Transaction::where('ins', $invoice_payment->ins)->max('tid') + 1;
         $cr_data = [
             'tid' => $tid,
             'account_id' => $account->id,
             'trans_category_id' => $tr_category->id,
-            'credit' => $payment->amount,
-            'tr_date' => $payment->date,
-            'due_date' => $payment->date,
-            'user_id' => $payment->user_id,
-            'note' => $payment->payment_mode . ' - ' . $payment->reference,
-            'ins' => $payment->ins,
+            'credit' => $invoice_payment->amount,
+            'tr_date' => $invoice_payment->date,
+            'due_date' => $invoice_payment->date,
+            'user_id' => $invoice_payment->user_id,
+            'note' => $invoice_payment->payment_mode . ' - ' . $invoice_payment->reference,
+            'ins' => $invoice_payment->ins,
             'tr_type' => $tr_category->code,
-            'tr_ref' => $payment->id,
+            'tr_ref' => $invoice_payment->id,
             'user_type' => 'customer',
             'is_primary' => 1,
         ];
 
-        if (in_array($payment->payment_type, ['per_invoice', 'on_account'])) {
-            // credit Accounts Receivable (Debtors)
+        if ($invoice_payment->is_advance_allocation) {
+            // credit Receivables (Debtors)
             Transaction::create($cr_data);
             
-            // debit Bank Account
+            // debit customer Advance PMT
             unset($cr_data['credit'], $cr_data['is_primary']);
+            $account = Account::where('system', 'adv_pmt')->first(['id']);
             $dr_data = array_replace($cr_data, [
-                'account_id' => $payment->account_id,
-                'debit' => $payment->amount
-            ]);
+                'account_id' => $account->id,
+                'debit' => $invoice_payment->amount,
+            ]);    
             Transaction::create($dr_data);
         } else {
-            $adv_account = Account::where('system', 'adv_pmt')->first(['id']);
-            if ($payment->allocate_ttl == 0)  {
-                // credit Advance Payment Account
-                $cr_data = array_replace($cr_data, [
-                    'account_id' => $adv_account->id,
-                ]);
+            if ($invoice_payment->payment_type == 'advance_payment') {
+                // credit customer Advance PMT
+                $account = Account::where('system', 'adv_pmt')->first(['id']);
+                $cr_data['account_id'] = $account->id;
                 Transaction::create($cr_data);
-
-                // debit Bank Account
+                
+                // debit bank
                 unset($cr_data['credit'], $cr_data['is_primary']);
                 $dr_data = array_replace($cr_data, [
-                    'account_id' => $payment->account_id,
-                    'debit' => $payment->amount
-                ]);
+                    'account_id' => $invoice_payment->account_id,
+                    'debit' => $invoice_payment->amount,
+                ]);    
                 Transaction::create($dr_data);
             } else {
-                // credit Accounts Receivable (Debtors)
-                $cr_data['credit'] = $payment->allocate_ttl;
+                // credit Receivables (Debtors)
                 Transaction::create($cr_data);
-
-                // debit Advance Payment Account
+                            
+                // debit bank
                 unset($cr_data['credit'], $cr_data['is_primary']);
-                $cr_data = array_replace($cr_data, [
-                    'account_id' => $adv_account->id,
-                    'debit' => $payment->allocate_ttl
-                ]);
-                Transaction::create($cr_data);
+                $dr_data = array_replace($cr_data, [
+                    'account_id' => $invoice_payment->account_id,
+                    'debit' => $invoice_payment->amount,
+                ]);    
+                Transaction::create($dr_data);
             }
         }
         aggregate_account_transactions();        

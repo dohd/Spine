@@ -808,9 +808,9 @@
                     @permission('manage-invoice')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Payment</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.index_payment') }}"><i class="fa fa-money"></i> Manage Payments</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.invoice_payments.index') }}"><i class="fa fa-money"></i> Manage Payments</a></li>
                             @permission('create-invoice')
-                            <li><a class="dropdown-item" href="{{ route('biller.invoices.create_payment') }}"><i class="fa fa-plus-circle"></i> Receive Payment</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.invoice_payments.create') }}"><i class="fa fa-plus-circle"></i> Receive Payment</a></li>
                             @endauth
                         </ul>
                     </li>

@@ -2,12 +2,12 @@
 
 namespace App\Models\items;
 
-use App\Models\items\Traits\PaidInvoiceItemRelationship;
+use App\Models\items\Traits\InvoicePaymentItemRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class PaidInvoiceItem extends Model
+class InvoicePaymentItem extends Model
 {
-    use PaidInvoiceItemRelationship;
+    use InvoicePaymentItemRelationship;
 
     protected $table = 'paid_invoice_items';
 

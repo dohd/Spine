@@ -6,7 +6,7 @@ use App\Models\account\Account;
 use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
-use App\Models\invoice\PaidInvoice;
+use App\Models\invoice\InvoicePayment;
 use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -239,7 +239,7 @@ class InvoiceRepository extends BaseRepository
             }
 
             // delete related payment
-            PaidInvoice::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))->delete();
+            InvoicePayment::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))->delete();
         } else {
             // update Quote or PI invoice status
             foreach ($invoice->products as $item) {

@@ -41,7 +41,7 @@ use App\Models\project\Project;
 use App\Models\bank\Bank;
 use App\Models\Company\Company;
 use App\Models\currency\Currency;
-use App\Models\invoice\PaidInvoice;
+use App\Models\invoice\InvoicePayment;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
@@ -327,13 +327,17 @@ class InvoicesController extends Controller
      */
     public function create_payment(Request $request)
     {
-        $tid = PaidInvoice::where('ins', auth()->user()->ins)->max('tid');
+        $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
+
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
-        $payments = PaidInvoice::whereColumn('amount', '>', 'allocate_ttl')->get();
 
-        return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid', 'payments'));
+        $unallocated_pmts = InvoicePayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
+
+        return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid', 'unallocated_pmts'));
     }
 
     /**
@@ -347,13 +351,10 @@ class InvoicesController extends Controller
             'payment_mode', 'reference', 'payment_id', 'payment_type'
         ]);
         $data_items = $request->only(['invoice_id', 'paid']); 
+        $data_items = modify_array($data_items);
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
-
-        // modify and filter paid data items 
-        $data_items = modify_array($data_items);
-        $data_items = array_filter($data_items, fn($v) => $v['paid'] > 0);
 
         try {
             $result = $this->inv_payment_repository->create(compact('data', 'data_items'));
@@ -367,20 +368,22 @@ class InvoicesController extends Controller
     /**
      * Edit invoice payment
      */
-    public function edit_payment(PaidInvoice $payment)
-    {
+    public function edit_payment(InvoicePayment $payment)
+    {   
         $accounts = Account::whereHas('accountType', function ($q) {
             $q->where('system', 'bank');
         })->get(['id', 'holder']);
-        $payments = PaidInvoice::whereColumn('amount', '>', 'allocate_ttl')->get();
+        $unallocated_pmts = InvoicePayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
 
-        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts', 'payments'));
+        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts', 'unallocated_pmts'));
     }    
 
     /**
      * Show invoice payment
      */
-    public function show_payment(PaidInvoice $payment)
+    public function show_payment(InvoicePayment $payment)
     {
         return new ViewResponse('focus.invoices.view_payment', compact('payment'));
     }   
@@ -388,7 +391,7 @@ class InvoicesController extends Controller
     /**
      * Update invoice payment
      */
-    public function update_payment(PaidInvoice $payment, Request $request)
+    public function update_payment(InvoicePayment $payment, Request $request)
     {
         // extract request input
         $data = $request->only([
@@ -403,7 +406,7 @@ class InvoicesController extends Controller
 
         try {
             $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { dd($th);
             return errorHandler('Error Updating Payment', $th);
         }
 
@@ -415,7 +418,7 @@ class InvoicesController extends Controller
      */
     public function delete_payment($id)
     {
-        $payment = PaidInvoice::find($id);
+        $payment = InvoicePayment::find($id);
         try {
             $this->inv_payment_repository->delete($payment);
         } catch (\Throwable $th) {
@@ -430,8 +433,11 @@ class InvoicesController extends Controller
      */
     public function client_invoices(Request $request)
     {
-        $invoices = Invoice::where('customer_id', $request->id)
-            ->whereIn('status', ['due', 'partial'])->get();
+        $invoices = Invoice::where('customer_id', $request->customer_id)
+            ->where('currency_id', 1)
+            ->whereIn('status', ['due', 'partial'])
+            ->orderBy('invoiceduedate', 'desc')
+            ->get();
 
         return response()->json($invoices);
     }
@@ -441,7 +447,7 @@ class InvoicesController extends Controller
      */
     public function unallocated_payment(Request $request)
     {
-        $pmt = PaidInvoice::where(['customer_id' => $request->customer_id, 'is_allocated' => 0])
+        $pmt = InvoicePayment::where(['customer_id' => $request->customer_id, 'is_allocated' => 0])
             ->with(['account' => function ($q) {
                 $q->select(['id', 'holder']);
             }])->first();
@@ -452,7 +458,7 @@ class InvoicesController extends Controller
     /**
      * Print invoice payment receipt
      */
-    public function print_payment(PaidInvoice $paidinvoice)
+    public function print_payment(InvoicePayment $paidinvoice)
     {
         $html = view('focus.invoices.print_payment', ['resource' => $paidinvoice])->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
