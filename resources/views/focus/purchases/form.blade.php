@@ -32,10 +32,10 @@
                         {{ Form::text('suppliername', null, ['class' => 'form-control round', 'placeholder' => 'Supplier Name', 'id' => 'supplier', 'required']) }}
                     </div>
                 </div>
-                <div class="col-sm-4"><label for="taxid" class="caption">Tax ID</label>
+                <div class="col-sm-4"><label for="taxid" class="caption">Tax PIN</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'Tax Id', 'id'=>'taxid']) }}
+                        {{ Form::text('supplier_taxid', null, ['class' => 'form-control round', 'placeholder' => 'e.g PO515725965', 'id'=>'taxid']) }}
                     </div>
                 </div>
             </div>

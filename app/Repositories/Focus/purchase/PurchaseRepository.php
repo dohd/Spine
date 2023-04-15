@@ -171,8 +171,16 @@ class PurchaseRepository extends BaseRepository
             ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
         if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
 
-        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->count();
-        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed!']);
+
+        if (@$data['supplier_taxid']) {
+            if ($data['supplier_taxid'][0] != 'P') 
+                throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P"']);
+            $letter_pattern = "/^[a-zA-Z]+$/i";
+            if (!preg_match($letter_pattern, $data['supplier_taxid'][-1])) 
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+        }
 
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
@@ -280,11 +288,19 @@ class PurchaseRepository extends BaseRepository
             throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
 
         $inv_exists = Purchase::where('id', '!=', $purchase->id)->where('doc_ref_type', 'Invoice')
-            ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->count();
+            ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->exists();
         if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
 
-        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->count();
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
         if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+
+        if (@$data['supplier_taxid']) {
+            if ($data['supplier_taxid'][0] != 'P') 
+                throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P"']);
+            $letter_pattern = "/^[a-zA-Z]+$/i";
+            if (!preg_match($letter_pattern, $data['supplier_taxid'][-1])) 
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+        }
 
         $prev_note = $purchase->note;
         $result = $purchase->update($data);
