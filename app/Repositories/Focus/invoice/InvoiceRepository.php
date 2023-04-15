@@ -118,7 +118,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_project_invoice(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
@@ -139,7 +139,10 @@ class InvoiceRepository extends BaseRepository
             $bill_items[$k] = array_replace($item, [
                 'invoice_id' => $result->id,
                 'product_price' => floatval(str_replace(',', '', $item['product_price'])),
+                'product_subtotal' => floatval(str_replace(',', '', $item['product_subtotal'])),
             ]);
+            $item = $bill_items[$k];
+            $bill_items[$k]['product_tax'] = $item['product_price'] - $item['product_subtotal'];
         }
         InvoiceItem::insert($bill_items);
 
@@ -172,7 +175,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function update_project_invoice($invoice, array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];

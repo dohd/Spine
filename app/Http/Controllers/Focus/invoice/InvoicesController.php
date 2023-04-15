@@ -228,15 +228,15 @@ class InvoicesController extends Controller
      * Store newly created project invoice
      */
     public function store_project_invoice(Request $request)
-    {   dd($request->all());
+    {  
         // extract request input fields
         $bill = $request->only([
             'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',
-            'subtotal', 'tax', 'total', 
+            'taxable', 'subtotal', 'tax', 'total', 
         ]);
         $bill_items = $request->only([
-            'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 
-            'project_id', 'branch_id'
+            'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_subtotal', 'product_price', 
+            'tax_rate', 'quote_id', 'project_id', 'branch_id'
         ]);
 
         $bill['user_id'] = auth()->user()->id;
@@ -285,11 +285,11 @@ class InvoicesController extends Controller
         // extract request input fields
         $bill = $request->only([
             'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',
-            'subtotal', 'tax', 'total', 
+            'taxable', 'subtotal', 'tax', 'total', 
         ]);
         $bill_items = $request->only([
-            'id', 'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 
-            'branch_id'
+            'id', 'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 
+            'product_subtotal', 'product_price', 'tax_rate', 'quote_id', 'project_id', 'branch_id'
         ]);
 
         $bill['user_id'] = auth()->user()->id;
@@ -299,7 +299,7 @@ class InvoicesController extends Controller
 
         try {
             $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) {  dd($th);
             return errorHandler('Error Updating Project Invoice', $th);
         }
 

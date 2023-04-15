@@ -112,7 +112,7 @@
             $('#quoteTbl tbody').append(`<tr>${invoiceItemRow}</tr>`);
         } else {
             const quote = @json(@$quotes->first());
-            const prefixes = @json($prefixes);
+            const prefixes = @json(@$prefixes);
             if (quote && quote.verified_products) {
                 const items = quote.verified_products;
                 items.forEach((v,i) => {
