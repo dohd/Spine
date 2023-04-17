@@ -191,9 +191,15 @@ class InvoiceRepository extends BaseRepository
         // update invoice items
         $bill_items = $input['bill_items'];
         $bill_items = array_map(function ($v) { 
+            foreach (['product_price', 'product_subtotal'] as $key) {
+                if (isset($v[$key])) $v[$key] = floatval(str_replace(',', '', $v[$key]));
+            }
+            if (isset($v['product_price']) && isset($v['product_subtotal']))
+                $v['product_tax'] = $v['product_price'] - $v['product_subtotal'];
+
             return [
                 'id' => $v['id'],
-                'reference' => isset($v['reference'])? $v['reference'] : '', 
+                'reference' => $v['reference'] ?? '', 
                 'description' => $v['description']
             ];
         }, $bill_items);
@@ -233,8 +239,7 @@ class InvoiceRepository extends BaseRepository
         DB::beginTransaction();
 
         // pos invoice
-        $is_pos_invoice = $invoice->product_expense_total > 0;
-        if ($is_pos_invoice) {
+        if ($invoice->product_expense_total > 0) {
             // reverse product qty
             foreach ($invoice->products as $item) {
                 $pos_product = $item->product;
