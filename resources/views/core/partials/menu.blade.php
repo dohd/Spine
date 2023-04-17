@@ -888,7 +888,7 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.verifications.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a></li>                                                            
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('biller.verifications.quote_index') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Partial Verification
+                                    <a class="dropdown-item" href="{{ route('biller.verifications.quote_index') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Verification
                                     </a>
                                 </li>
                             </ul>                        

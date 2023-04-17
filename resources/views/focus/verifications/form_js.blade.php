@@ -13,8 +13,8 @@
         $(this).datepicker(config.date).datepicker('setDate', new Date(d));
     });
 
-    // on qty, tax_rate change
-    $('#productsTbl').on('change', '.qty, .taxid', function() {
+    // on qty, price, tax_rate change
+    $('#productsTbl').on('change', '.qty, .price, .taxid', function() {
         const row = $(this).parents('tr');
         const qty = row.find('.qty').val()*1;
         const price = accounting.unformat(row.find('.price').val());
@@ -25,16 +25,13 @@
 
         const amount = (qty * price) + tax;
         row.find('.amount').val(accounting.formatNumber(amount, 4));
+        row.find('.price').val(accounting.formatNumber(price, 4));
+        console.log(price, amount)
         calcTotals();
 
         // required attr
-        if ($(this).is('.qty')) row.find('.remark').attr('required', true);
-    });
-    // on amount change
-    $('#productsTbl').on('change', '.amount', function() {
-        const amount = $(this).val();
-        $(this).val(accounting.formatNumber(amount, 4)).attr('required', true);
-        calcTotals();
+        if ($(this).is('.qty') || $(this).is('.price')) 
+            row.find('.remark').attr('required', true);
     });
 
     // set product rows
@@ -74,8 +71,8 @@
             el.find('.prodname').val(v.product_name);
             el.find('.itemid').val(v.id);
         }
-        if (i == quoteItems.length-1) calcTotals();
-    });    
+    });
+    calcTotals();  
 
     // on add product
     $('#addProduct').click(function() {

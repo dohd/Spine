@@ -25,7 +25,11 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        
+                                        <th>#Quote / PI</th>
+                                        <th>Customer</th>
+                                        <th>Total</th>
+                                        <th>LPO No.</th>
+                                        <th>Project No.</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -72,6 +76,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
+                    ...['tid', 'customer', 'total', 'lpo_no', 'project_no'].map(v => ({data:v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

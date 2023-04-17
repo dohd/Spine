@@ -3,13 +3,11 @@
 namespace App\Models\verification;
 
 use App\Models\ModelTrait;
-use App\Models\verification\Traits\VerificationAttribute;
-use App\Models\verification\Traits\VerificationRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class Verification extends Model
+class VerificationJc extends Model
 {
-    use ModelTrait, VerificationAttribute, VerificationRelationship;
+    use ModelTrait;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -20,7 +18,7 @@ class Verification extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'partial_verifications';
+    protected $table = 'partial_verification_jobcards';
 
     /**
      * Mass Assignable fields of model
@@ -58,27 +56,5 @@ class Verification extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-    }
-
-    /**
-     * model life cycle event listeners
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($instance) {
-            $instance->fill([
-                'tid' => $instance->next_tid,
-                'user_id' => auth()->user()->id,
-                'ins' => auth()->user()->ins,
-            ]);
-            return $instance;
-        });
-
-        static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', auth()->user()->ins);
-        });
     }
 }

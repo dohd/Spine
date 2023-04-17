@@ -27,6 +27,8 @@ use App\Models\verification\Verification;
 use App\Models\verifiedjcs\VerifiedJc;
 use App\Repositories\Focus\verification\VerificationRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class VerificationsController extends Controller
 {
@@ -60,11 +62,14 @@ class VerificationsController extends Controller
      */
     public function create(Request $request)
     {
-        $quote = Quote::find($request->quote_id);
+        if (!$request->quote_id) return redirect(route('biller.verifications.quote_index'));
 
-        $additionals = Additional::query()->when($quote->tax_id > 0, function($q) use($quote) {
-            $q->where('value', 0)->orWhere('value', $quote->tax_id);
-        })->when($quote->tax_id == 0, fn($q) => $q->where('value', 0))->get();
+        $quote = Quote::findOrFail($request->quote_id);
+        if ($quote->tax_id > 0) {
+            $additionals = Additional::where('value', 0)->orWhere('value', $quote->tax_id)->get();
+        } else {
+            $additionals = Additional::where('value', 0)->get();
+        }
 
         return view('focus.verifications.create', compact('quote', 'additionals'));
     }
@@ -75,10 +80,15 @@ class VerificationsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function store(Request $request)
-    {
-        $this->repository->create($request->except('_token'));
-
-        return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Verification Created Successfully']);
+    {   
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            throw ValidationException::withMessages(['Error Creating Partial Verification']);
+        }
+        
+        return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Partial Verification Created Successfully']);
     }
 
     /**
@@ -89,7 +99,14 @@ class VerificationsController extends Controller
      */
     public function edit(Verification $verification)
     {
-        return view('focus.verifications.edit', compact('verification'));
+        $quote = $verification->quote ?? new Quote;
+        if ($quote->tax_id > 0) {
+            $additionals = Additional::where('value', 0)->orWhere('value', $quote->tax_id)->get();
+        } else {
+            $additionals = Additional::where('value', 0)->get();
+        }
+
+        return view('focus.verifications.edit', compact('verification', 'quote', 'additionals'));
     }
 
     /**
@@ -101,9 +118,14 @@ class VerificationsController extends Controller
      */
     public function update(Request $request, Verification $verification)
     {
-        $this->repository->update($verification, $request->except('_token'));
+        try {
+            $this->repository->update($verification, $request->except('_token'));
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            throw ValidationException::withMessages(['Error Updating Partial Verification']);
+        }
 
-        return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Verification Updated Successfully']);
+        return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Partial Verification Updated Successfully']);
     }
 
     /**
@@ -114,9 +136,14 @@ class VerificationsController extends Controller
      */
     public function destroy(Verification $verification)
     {
-        $this->repository->delete($verification);
+        try {
+            $this->repository->delete($verification);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            throw ValidationException::withMessages(['Error Deleting Partial Verification']);
+        }
 
-        return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Verification Deleted Successfully']);
+        return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Partial Verification Deleted Successfully']);
     }
 
 

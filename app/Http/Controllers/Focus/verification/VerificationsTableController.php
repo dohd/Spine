@@ -48,12 +48,37 @@ class VerificationsTableController extends Controller
     public function __invoke(Request $request)
     {
         $core = $this->repository->getForDataTable();
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('tid', function ($verification) {
-                return;
+            ->addColumn('tid', function ($verification) use($prefixes) {
+                $quote = $verification->quote;
+                if ($quote) {
+                    $tid = gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);
+                    return '<a class="font-weight-bold" href="'. route('biller.quotes.show',$quote) .'">'. $tid . $quote->revision .'</a>';
+                }
+            })
+            ->addColumn('customer', function ($verification)  {
+                $customer = '';
+                if ($verification->customer) {
+                    $customer = $verification->customer->company;
+                    if ($verification->branch) $customer .= " - {$verification->branch->name}";
+                }
+                
+                return $customer;
+            })
+            ->addColumn('total', function ($verification) {
+                return numberFormat($verification->total);
+            })
+            ->addColumn('lpo_no', function($verification) {
+                $quote = $verification->quote;
+                if ($quote && $quote->lpo) return 'lpo - ' . $quote->lpo->lpo_no;
+            })
+            ->addColumn('project_no', function($verification) use($prefixes) {
+                $quote = $verification->quote;
+                if ($quote && $quote->project) return gen4tid("{$prefixes[2]}-", $quote->project->tid);
             })
             ->addColumn('actions', function ($verification) {
                 return $verification->action_buttons;
