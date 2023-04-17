@@ -246,17 +246,17 @@ class SupplierRepository extends BaseRepository
             $taxid_exists = Supplier::where('taxid', $data['taxid'])->whereNotNull('taxid')->exists();
             if ($taxid_exists) throw ValidationException::withMessages(['Duplicate Tax Pin']);
             $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['taxid']])->exists();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed!']);
             if (strlen($data['taxid']) != 11) 
-                throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+                throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters']);
             if (!in_array($data['taxid'][0], ['P','A'])) 
-                throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P" or "A"']);
+                throw ValidationException::withMessages(['First character of Tax Pin must be letter "P" or "A"']);
             $pattern = "/^[0-9]+$/i";
             if (!preg_match($pattern, substr($data['taxid'],1,9))) 
-                throw ValidationException::withMessages(['Character between first and last letters must be numbers']);
+                throw ValidationException::withMessages(['Characters between 2nd and 10th letters must be numbers']);
             $letter_pattern = "/^[a-zA-Z]+$/i";
             if (!preg_match($letter_pattern, $data['taxid'][-1])) 
-                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter']);
         }
 
         DB::beginTransaction();

@@ -171,17 +171,17 @@ class PurchaseRepository extends BaseRepository
 
         if (@$data['supplier_taxid']) {
             $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed']);
             if (strlen($data['supplier_taxid']) != 11)
                 throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
             if (!in_array($data['supplier_taxid'][0], ['P', 'A'])) 
                 throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P" or "A"']);
             $pattern = "/^[0-9]+$/i";
             if (!preg_match($pattern, substr($data['supplier_taxid'],1,9))) 
-                throw ValidationException::withMessages(['Character between first and last letters must be numbers']);
+            throw ValidationException::withMessages(['Characters between 2nd and 10th letters must be numbers']);
             $letter_pattern = "/^[a-zA-Z]+$/i";
             if (!preg_match($letter_pattern, $data['supplier_taxid'][-1])) 
-                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter']);
         }
 
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
@@ -285,25 +285,25 @@ class PurchaseRepository extends BaseRepository
             // restrict special characters to only "/" and "-"
             $pattern = "/^[a-zA-Z0-9-\/]+$/i";
             if (!preg_match($pattern, $data['doc_ref']))
-                throw ValidationException::withMessages(['Purchase invoice contains invalid characters!']);
+                throw ValidationException::withMessages(['Purchase invoice contains invalid characters']);
             $inv_exists = Purchase::where('id', '!=', $purchase->id)->where('doc_ref_type', 'Invoice')
                 ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->exists();
-            if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists!']);
+            if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists']);
         }
         
         if (@$data['supplier_taxid']) {
             $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed']);
             if (strlen($data['supplier_taxid']) != 11)
                 throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
             if (!in_array($data['supplier_taxid'][0], ['P', 'A'])) 
-                throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P" or "A"']);
+                throw ValidationException::withMessages(['First character of Tax Pin must be letter "P" or "A"']);
             $pattern = "/^[0-9]+$/i";
             if (!preg_match($pattern, substr($data['supplier_taxid'],1,9))) 
-                throw ValidationException::withMessages(['Character between first and last letters must be numbers']);
+                throw ValidationException::withMessages(['Characters between 2nd and 10th letters must be numbers']);
             $letter_pattern = "/^[a-zA-Z]+$/i";
             if (!preg_match($letter_pattern, $data['supplier_taxid'][-1])) 
-                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter!']);
+                throw ValidationException::withMessages(['Last character of Tax Pin must be a letter']);
         }
 
         $prev_note = $purchase->note;
