@@ -236,8 +236,8 @@
                             <tr>
                                 <td>
                                     <select class="custom-select jc_type" name="type[]">
-                                        <option value="1" selected>Jobcard</option>
-                                        <option value="2">DNote</option> 
+                                        <option value="jobcard" selected>Jobcard</option>
+                                        <option value="dnote">DNote</option> 
                                     </select>
                                 </td>
                                 <td><input type="text" class="form-control jc_ref" name="reference[]"></td>
@@ -292,7 +292,7 @@
 </div>
 <div class="row justify-content-end">
     <div class="col-2">
-        {{ link_to_route('biller.verifications.quote_index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md block']) }}
+        {{ link_to_route(@$verification? 'biller.verifications.index' : 'biller.verifications.quote_index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md block']) }}
     </div>
     <div class="col-2">
         {{ Form::submit(@$verification? 'Update' : 'Generate', ['class' => 'btn btn-primary btn-md block']) }}

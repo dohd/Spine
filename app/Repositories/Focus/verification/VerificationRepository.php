@@ -86,7 +86,6 @@ class VerificationRepository extends BaseRepository
         $jc_data_items = array_map(function($v) use($verifix) {
             return array_replace($v, [
                 'parent_id' => $verifix->id,
-                'type' => $v['type'] == 1? 'jobcard' : 'dnote',
             ]);
         }, $jc_data_items);
         VerificationJc::insert($jc_data_items);

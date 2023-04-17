@@ -13,6 +13,8 @@
         $(this).datepicker(config.date).datepicker('setDate', new Date(d));
     });
 
+    const verification = @json(@$verification);
+
     // on qty, price, tax_rate change
     $('#productsTbl').on('change', '.qty, .price, .taxid', function() {
         const row = $(this).parents('tr');
@@ -38,40 +40,93 @@
     const initProductRow = $('#productsTbl tbody tr:first').html();
     const initTitleRow = $('#productsTbl tbody tr:last').html();
     $('#productsTbl tbody tr').remove();
-    const quoteItems = @json($quote->products);
-    quoteItems.forEach((v,i) => {
-        // product type
-        if (v.a_type == 1) {
-            $('#productsTbl tbody').append(`<tr>${initProductRow}</tr>`);
-            const el =  $('#productsTbl tbody tr:last');
-            el.find('.index').val(i);
-            el.find('.num').val(v.numbering);
-            el.find('.prodname').val(v.product_name).autocomplete(productAutocomplete());
-            el.find('.unit').val(v.unit);
-            el.find('.qty').val(v.product_qty*1);
+    if (verification) {
+        const verificationItems = @json(@$verification->items);
+        verificationItems.forEach((v,i) => {
+            // product type
+            if (v.a_type == 1) {
+                $('#productsTbl tbody').append(`<tr>${initProductRow}</tr>`);
+                const el =  $('#productsTbl tbody tr:last');
+                el.find('.index').val(i);
+                el.find('.num').val(v.numbering);
+                el.find('.prodname').val(v.product_name).autocomplete(productAutocomplete());
+                el.find('.unit').val(v.unit);
+                el.find('.qty').val(v.product_qty*1);
 
-            const price = v.product_subtotal*1;
-            el.find('.price').val(accounting.formatNumber(v.product_subtotal, 4));
+                const price = v.product_subtotal*1;
+                el.find('.price').val(accounting.formatNumber(v.product_subtotal, 4));
 
-            const taxId = @json($quote->tax_id)*1;
-            el.find('.taxid').val(taxId);
+                const taxId = @json($quote->tax_id)*1;
+                el.find('.taxid').val(taxId);
 
-            const lineTax = v.product_qty * price * taxId/100;
-            el.find('.prodtax').val(accounting.formatNumber(lineTax, 4));
+                const lineTax = v.product_qty * price * taxId/100;
+                el.find('.prodtax').val(accounting.formatNumber(lineTax, 4));
 
-            const amount = (v.product_qty * price) + lineTax; 
-            el.find('.amount').val(accounting.formatNumber(amount, 4));
-            el.find('.itemid').val(v.id);
-            el.find('.prodid').val(v.product_id);
-        } else {
-            $('#productsTbl tbody').append(`<tr>${initTitleRow}</tr>`);
-            const el =  $('#productsTbl tbody tr:last');
-            el.find('.index').val(i);
-            el.find('.num').val(v.numbering);
-            el.find('.prodname').val(v.product_name);
-            el.find('.itemid').val(v.id);
-        }
-    });
+                const amount = (v.product_qty * price) + lineTax; 
+                el.find('.amount').val(accounting.formatNumber(amount, 4));
+                el.find('.itemid').val(v.id);
+                el.find('.prodid').val(v.product_id);
+            } else {
+                $('#productsTbl tbody').append(`<tr>${initTitleRow}</tr>`);
+                const el =  $('#productsTbl tbody tr:last');
+                el.find('.index').val(i);
+                el.find('.num').val(v.numbering);
+                el.find('.prodname').val(v.product_name);
+                el.find('.itemid').val(v.id);
+            }
+        });
+
+        const initJcRow = $('#jobcardsTbl tbody tr:first').html();
+        $('#jobcardsTbl tbody tr').remove();
+        const verificationJcs = @json(@$verification->jc_items);
+        console.log(verificationJcs)
+        verificationJcs.forEach(v => {
+            $('#jobcardsTbl tbody').append(`<tr>${initJcRow}</tr>`);
+            const el =  $('#jobcardsTbl tbody tr:last');
+            el.find('.jc_type').val(v.type);
+            el.find('.jc_ref').val(v.reference);
+            el.find('.jc_date').datepicker(config.date).datepicker('setDate', new Date(v.date));
+            el.find('.jc_tech').val(v.technician);
+            el.find('.jc_equip').val(v.equipment?.name);
+            el.find('.jc_loc').val(v.location);
+            el.find('.jc_fault').val(v.fault || 'none');
+        });
+    } else {
+        const quoteItems = @json($quote->products);
+        quoteItems.forEach((v,i) => {
+            // product type
+            if (v.a_type == 1) {
+                $('#productsTbl tbody').append(`<tr>${initProductRow}</tr>`);
+                const el =  $('#productsTbl tbody tr:last');
+                el.find('.index').val(i);
+                el.find('.num').val(v.numbering);
+                el.find('.prodname').val(v.product_name).autocomplete(productAutocomplete());
+                el.find('.unit').val(v.unit);
+                el.find('.qty').val(v.product_qty*1);
+
+                const price = v.product_subtotal*1;
+                el.find('.price').val(accounting.formatNumber(v.product_subtotal, 4));
+
+                const taxId = @json($quote->tax_id)*1;
+                el.find('.taxid').val(taxId);
+
+                const lineTax = v.product_qty * price * taxId/100;
+                el.find('.prodtax').val(accounting.formatNumber(lineTax, 4));
+
+                const amount = (v.product_qty * price) + lineTax; 
+                el.find('.amount').val(accounting.formatNumber(amount, 4));
+                el.find('.itemid').val(v.id);
+                el.find('.prodid').val(v.product_id);
+            } else {
+                $('#productsTbl tbody').append(`<tr>${initTitleRow}</tr>`);
+                const el =  $('#productsTbl tbody tr:last');
+                el.find('.index').val(i);
+                el.find('.num').val(v.numbering);
+                el.find('.prodname').val(v.product_name);
+                el.find('.itemid').val(v.id);
+            }
+        });
+    }
     calcTotals();  
 
     // on add product

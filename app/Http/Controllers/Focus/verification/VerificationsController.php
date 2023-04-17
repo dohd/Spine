@@ -106,6 +106,8 @@ class VerificationsController extends Controller
             $additionals = Additional::where('value', 0)->get();
         }
 
+        $verification['jc_items'] = $verification->jc_items()->with('equipment')->get();
+        
         return view('focus.verifications.edit', compact('verification', 'quote', 'additionals'));
     }
 

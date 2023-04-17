@@ -3,11 +3,12 @@
 namespace App\Models\verification;
 
 use App\Models\ModelTrait;
+use App\Models\verifiedjcs\Traits\VerificationJcRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class VerificationJc extends Model
 {
-    use ModelTrait;
+    use ModelTrait, VerificationJcRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
