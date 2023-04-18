@@ -7,23 +7,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="mx-5">
-                <table id="remarks_table" class="table p-1 table-striped table-bordered ">
-                    <thead >
-                        <tr>
-                            <td>NO.</td>
-                            <td>CREATED AT</td>
-                            <td>RECEIPIENT</td>
-                            <td>REMARK</td>
-                            <td>REMINDER DATE</td>
-                        </tr>
-                    </thead>
-                    
-                    <tbody>
-                        
-                       
-                    </tbody>
-                </table>
+            <div id="tableModal" class="mx-5">
+               
             </div>
            
            
@@ -52,7 +37,7 @@
                             </div>
                         </div>
                         
-                        {{ Form::submit("Save Remark",['class'=>'mx-1 my-2 btn btn-md btn-primary','id'=>'save_remark']) }}
+                            {{ Form::button("Save Remark",['class'=>'mx-1 my-2 btn btn-md btn-primary','id'=>'save_remark']) }}
                         {{ Form::close() }}   
                     </div>
         
@@ -63,3 +48,4 @@
         </div>
     </div>
 </div>
+

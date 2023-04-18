@@ -20,12 +20,11 @@ namespace App\Http\Controllers\Focus\remark;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
+
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\remark\CreateResponse;
 use App\Http\Responses\Focus\remark\EditResponse;
 use App\Repositories\Focus\remark\RemarkRepository;
-use App\Http\Requests\Focus\remark\ManageRemarkRequest;
 use App\Models\branch\Branch;
 use App\Models\remark\Remark;
 
@@ -57,7 +56,7 @@ class RemarksController extends Controller
      */
     public function index()
     {
-        
+
 
         return new ViewResponse('focus.remarks.index');
     }
@@ -70,8 +69,7 @@ class RemarksController extends Controller
      */
     public function create()
     {
-         return new CreateResponse('focus.remarks.create');
-      
+        return new CreateResponse('focus.remarks.create');
     }
 
     // /**
@@ -80,11 +78,11 @@ class RemarksController extends Controller
     //  * @param StoreProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function store(ManageRemarkRequest $request)
+    public function store(Request $request)
     {
-       
+
         $request->validate([
-            
+
             'recepient' => 'required',
             'reminder_date' => 'required',
             'remarks' => 'required',
@@ -95,11 +93,8 @@ class RemarksController extends Controller
 
         //Create the model using repository create method
         $this->repository->create($data);
-        
-        return response()->json([
-            'message'=>'Remark created Successfully',
-            'remark'=>$data
-        ]);
+        $remarks = Remark::where('prospect_id', $request->prospect_id)->orderBy('created_at', 'DESC')->limit(10)->get();
+        return view('focus.prospects.partials.remarks_table', compact('remarks'));
     }
 
     // /**
@@ -112,76 +107,8 @@ class RemarksController extends Controller
     public function edit(Remark $remark)
     {
         $branches = Branch::get(['id', 'name', 'customer_id']);
-       
+
 
         return new EditResponse('focus.remarks.edit', compact('remark', 'branches'));
-    }
-
-    // /**
-    //  * Update the specified resource.
-    //  *
-    //  * @param \App\Models\remark\Remark $remark
-    //  * @param EditProductcategoryRequestNamespace $request
-    //  * @return \App\Http\Responses\Focus\productcategory\EditResponse
-    //  */
-    public function update(Request $request, Remark $remark)
-    {
-        // validate fields
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required',
-            'phone' => 'required',
-            'reminder_date' => 'required',
-            'remarks' => 'required'
-
-        ]);
-
-        // update input fields from request
-        $data = $request->except(['_token', 'ins', 'files']);
-
-        //Update the model using repository update method   
-        $this->repository->update($remark, $data);
-
-        return view('successModal');
-    }
-
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param \App\Models\remark\Remark $remark
-    //  * @return \App\Http\Responses\RedirectResponse
-    //  */
-    public function destroy(Remark $remark)
-    {
-        $this->repository->delete($remark);
-            
-        return new RedirectResponse(route('biller.remarks.index'), ['flash_success' => 'Remark Successfully Deleted']);
-    }
-
-    // /**
-    //  * Show the view for the specific resource
-    //  *
-    //  * @param DeleteProductcategoryRequestNamespace $request
-    //  * @param \App\Models\remark\Remark $remark
-    //  * @return \App\Http\Responses\RedirectResponse
-    //  */
-    public function show(Remark $remark, Request $request)
-    {
-        return new ViewResponse('focus.remarks.view', compact('remark'));
-    }
-
-    
-
-    // /**
-    //  * Update Remark Open Status
-    //  */
-    public function update_status(Remark $remark, Request $request)
-    {
-        
-        $status = $request->status;
-        $reason = $request->reason;
-        $remark->update(compact('status', 'reason'));
-
-        return redirect()->back();
     }
 }

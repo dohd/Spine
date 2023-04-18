@@ -84,6 +84,7 @@
 
         $('#prospects-table tbody').on('click', '.follow', function(e) {
             //set datepicker so as to show calender on reminder_date
+            $('#remarksModal').modal('show');
             const config = {
                 ajax: {
                     headers: {
@@ -114,124 +115,53 @@
 
 
             var id = e.target.getAttribute('data-id');
+            //set prospect id to form
+            $('#prospect_id').val(id);
 
             $.ajax({
-                type: "post",
                 url: "{{ route('biller.prospects.followup') }}",
+                type: 'POST',
                 data: {
-                    id: id,
+                    id: id
                 },
-
                 success: function(response) {
-                    if (!response.remark) {
-                        swal({
-                            title: 'Remarks is Not Found',
-                            icon: "warning",
-                            buttons: true,
-                            dangerMode: true,
-                            showCancelButton: true,
-                        }, () => {
-                            return;
-                        });
-                        return;
-                    }
-                    $('#remarksModal').modal('show');
-                    $('#remarksModal').find('#remarks_table tbody').empty();
-                    //append data fetched to table
-                    $.each(response.remark, function(key, value) {
-                        var row = $('<tr>');
-                        var id = $('<td>').text(key + 1);
-                        var cdate = $('<td>').text(value.created_at);
-                        var recepient = $('<td>').text(value.recepient);
-                        var remarks = $('<td>').text(value.remarks);
-                        var reminderdate = $('<td>').text(value.reminder_date);
 
-                        row.append(id);
-                        row.append(cdate);
-                        row.append(recepient);
-                        row.append(remarks);
-                        row.append(reminderdate);
-                        $('#remarksModal').find('#remarks_table tbody').append(row);
-
-
-                    });
-                    //set prospect id to form
-                    $('#prospect_id').val(id);
-
-                    //on form submit(Creating Remark)
-                    $('#remarkform').submit(function(e) {
-                        e.preventDefault();
-
-                        var formData = $(this).serialize();
-
-                        $.ajax({
-                            url: "remarks",
-                            type: 'POST',
-                            data: formData,
-                            success: function(response) {
-                                alert(response.message);
-                                $('#remarkform')[0].reset();
-                                $.ajax({
-                                    type: "post",
-                                    url: "{{ route('biller.prospects.followup') }}",
-                                    data: {
-                                        id: id,
-                                    },
-                                    success: function(response) {
-                                        $('#remarksModal').find(
-                                                '#remarks_table tbody')
-                                            .empty();
-                                        //append data fetched to table
-                                        $.each(response.remark,
-                                            function(key, value) {
-                                                var row = $('<tr>');
-                                                var id = $('<td>')
-                                                    .text(key + 1);
-                                                var cdate = $(
-                                                        '<td>')
-                                                    .text(value
-                                                        .created_at
-                                                        );
-                                                var recepient = $(
-                                                        '<td>')
-                                                    .text(value
-                                                        .recepient);
-                                                var remarks = $(
-                                                        '<td>')
-                                                    .text(value
-                                                        .remarks);
-                                                var reminderdate =
-                                                    $('<td>').text(
-                                                        value
-                                                        .reminder_date
-                                                        );
-
-                                                row.append(id);
-                                                row.append(cdate);
-                                                row.append(
-                                                    recepient);
-                                                row.append(remarks);
-                                                row.append(
-                                                    reminderdate
-                                                    );
-                                                $('#remarksModal')
-                                                    .find(
-                                                        '#remarks_table tbody'
-                                                        ).append(
-                                                        row);
-
-
-                                            });
-                                    }
-
-                                })
-                            },
-                            error: function(error) {
-                                alert(error);
-                            }
-                        });
-                    });
+                    $('#tableModal').append(response);
                 }
+            });
+            
+            $('#save_remark').on('click', function(e) {
+
+                var recepient = $('#recepient').val();
+                var reminder_date = $('#reminder_date').val();
+                var remarks = $('#remarks').val();
+               
+                //disable button
+                $("#save_remark").prop("disabled", true);
+                let formData =  $('#save_remark').parents('form').serializeArray();
+                $.ajax({
+                    url: "remarks",
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        $('#remarks_table').remove();
+                        $('#tableModal').append(response);
+                    },
+                    error: function(error) {
+                        console.log(error.responseText);
+                        
+                    }
+                });
+
+                $('#recepient').val('');
+                $('#reminder_date').val('');
+                $('#remarks').val('');
+                $("#save_remark").prop("disabled", false);
+            });
+
+            $('#remarksModal').on('hidden.bs.modal', function(e) {
+                $('#remarks_table').remove();
+                $('#prospect_id').val('');
             });
         });
 
