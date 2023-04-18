@@ -156,6 +156,86 @@ class QuoteRepository extends BaseRepository
         ]);
     }
 
+    public function getForTurnAroundTime()
+    {
+        $q = $this->query()->with('currency')->whereNotNull('approved_by');
+        
+        $q->when(request('page') == 'pi', fn($q) => $q->where('bank_id', '>', 0));
+        $q->when(request('page') == 'qt', fn($q) => $q->where('bank_id', 0));
+        
+        $q->when(request('start_date') && request('end_date'), function ($q) {
+            $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
+        });
+
+        // client filter
+        $q->when(request('client_id'), fn($q) => $q->where('customer_id', request('client_id')));
+
+        $status = true;
+        if (request('status_filter')) {
+            switch (request('status_filter')) {
+                case 'Unapproved':
+                    $q->whereNull('approved_by');
+                    break;
+                case 'Approved & Unbudgeted':
+                    $q->whereNotNull('approved_by')->whereNull('project_quote_id');
+                    break;
+                case 'Budgeted & Unverified':
+                    $q->whereNotNull('project_quote_id')->whereNull('verified_by');
+                    break;
+                case 'Verified with LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNotNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Verified without LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Approved without LPO & Uninvoiced':
+                    $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Invoiced & Due':
+                    // quotes in due invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'due');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Partially Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'partial');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'paid');
+                        });
+                    });
+                    break;
+                case 'Cancelled':
+                    $status = false;
+                    $q->where('status', 'cancelled');
+                    break;
+            }
+        }
+        $q->when($status, fn($q) => $q->where('status', '!=', 'cancelled'));
+        
+
+        // project quote filter
+        $q->when(request('project_id'), function($q) {
+            if (request('quote_ids')) $q->whereIn('id', explode(',', request('quote_ids')));
+            else $q->whereIn('id', [0]);
+        });
+        
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
+            'verified', 'revision', 'client_ref', 'lpo_id', 'currency_id', 'approved_date'
+        ]);
+    }
+
     /**
      * For Creating the respective model in storage
      *

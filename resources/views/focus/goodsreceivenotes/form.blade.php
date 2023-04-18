@@ -76,6 +76,7 @@
             <tr class="bg-gradient-directional-blue white">
                 <th>#</th>
                 <th>Product Description</th>
+                <th>Project</th>
                 <th>UoM</th>
                 <th>Qty Ordered</th>
                 <th>Qty Received</th>
@@ -90,10 +91,12 @@
                     @php 
                         $po_item = $item->purchaseorder_item;
                         $qty_due = $po_item->qty - $po_item->qty_received;
+
                     @endphp
                     <tr>
                         <td>{{ $i+1 }}</td>
                         <td>{{ $po_item->description }}</td>
+                        <td>{{ $po_item->project ? gen4tid('PRJ-', $po_item->project->tid) : ''}}</td>
                         <td>{{ $po_item->uom }}</td>
                         <td>{{ +$po_item->qty }}</td>
                         <td>{{ +$po_item->qty_received }}</td>

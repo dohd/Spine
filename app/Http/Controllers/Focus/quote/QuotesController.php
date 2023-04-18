@@ -340,4 +340,10 @@ class QuotesController extends Controller
 
         return response()->json(['status' => 'Success', 'message' => 'LPO added successfully', 'refresh' => 1 ]);
     }
+    public function turn_around()
+    {
+        $customers = Customer::all(['id', 'company']);
+        
+        return new ViewResponse('focus.turn_around.index', compact('customers'));
+    }
 }

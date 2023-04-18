@@ -100,7 +100,8 @@
             return `
                 <tr>
                     <td>${i+1}</td>    
-                    <td>${v.description}</td>    
+                    <td>${v.description}</td> 
+                    <td>${v.project_tid}</td>     
                     <td>${v.uom}</td>    
                     <td>${qty}</td>    
                     <td>${received}</td>    

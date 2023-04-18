@@ -20,7 +20,7 @@
                                 <label for="status">Project Status</label>
                                 <select name="status" id="status" class="custom-select">
                                     <option value="">-- select status --</option>
-                                    @foreach (['active', 'complete'] as $val)
+                                    @foreach (['active', 'complete','expense','verified','income'] as $val)
                                         <option value="{{ $val }}">{{ ucfirst($val) }}</option>
                                     @endforeach
                                 </select>

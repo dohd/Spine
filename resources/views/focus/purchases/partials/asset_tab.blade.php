@@ -86,7 +86,7 @@
                                 <textarea class="form-control descr" name="description[]" placeholder="Product Description" id="assetdescr-{{$i}}">{{ $item->description }}</textarea>
                             </td>
                             <td colspan="4">
-                                <input type="text" class="form-control projectasset" value="{{ $item->project ? $item->project->name : '' }}" id="projectassettext-{{$i}}" placeholder="Search Project By Name">
+                                <input type="text" class="form-control projectasset" value="{{ $item->project ? '['.gen4tid('QT-', $item->project->quotes()->first()->tid).']'.' - '.$item->project->customer->name.' - '.$item->project->branch->name.' - '.gen4tid('PRJ-', $item->project->tid).' '.$item->project->name : '' }}" id="projectassettext-{{$i}}" placeholder="Search Project By Name">
                                 <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectassetval-{{$i}}">
                             </td>
                         </tr>

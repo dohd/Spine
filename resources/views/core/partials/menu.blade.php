@@ -389,6 +389,7 @@
                                  @permission('create-rjc') 
                                 <li><a class="dropdown-item" href="{{ route('biller.rjcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Report</a></li>
                                  @endauth 
+                                 <li><a class="dropdown-item" href="{{ route('biller.quotes.turn_around') }}" data-toggle="dropdown"> <i class="fa fa-clock-o" aria-hidden="true"></i> Turn Around Time</a></li>
                             </ul>
                         </li>
                          @endauth 

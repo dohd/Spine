@@ -116,7 +116,7 @@
                             </td>
                             <td colspan="4">
                                 
-                                <input type="text" class="form-control projectstock" value="{{ $item->project ? 'QT-'.$item->project->quotes()->first()->tid.' '.$item->project->name : '' }}" id="projectstocktext-{{$i}}" placeholder="Search Project By Name">
+                                <input type="text" class="form-control projectstock" value="{{ $item->project ? '['.gen4tid('QT-', $item->project->quotes()->first()->tid).']'.' - '.$item->project->customer->name.' - '.$item->project->branch->name.' - '.gen4tid('PRJ-', $item->project->tid).' '.$item->project->name : '' }}" id="projectstocktext-{{$i}}" placeholder="Search Project By Name">
                                 <input type="hidden" class="stockitemprojectid" name="itemproject_id[]" value="{{ $item->itemproject_id ? $item->itemproject_id : '0' }}" id="projectstockval-{{$i}}">
                             </td>
                             <td colspan="6"></td>
