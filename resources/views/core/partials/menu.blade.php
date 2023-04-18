@@ -878,9 +878,22 @@
                                 <li>
                                     <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
                                 </li>
+                                
                             </ul>
                         </li>
                         @endauth 
+                        {{-- verification --}}
+                        @permission('manage-quote-verify') 
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Partial Job Verification</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.verifications.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Verification</a></li>                                                            
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.verifications.quote_index') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Verification
+                                    </a>
+                                </li>
+                            </ul>                        
+                        </li>
+                         @endauth 
                         <hr>
 
                         @permission('manage-equipment-category')

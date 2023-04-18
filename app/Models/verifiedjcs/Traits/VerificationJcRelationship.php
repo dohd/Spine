@@ -7,7 +7,7 @@ use App\Models\equipment\Equipment;
 /**
  * Class WithholdingRelationship
  */
-trait VerifiedJcRelationship
+trait VerificationJcRelationship
 {
     public function equipment()
     {
