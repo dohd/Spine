@@ -331,7 +331,7 @@
         if ($('#quotesTbl tbody tr').length) return;        
         let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
         quoteIds = quoteIds.join(',');
-        console.log(quoteIds);
+
 
         $('#quotesTbl').dataTable({
             processing: true,
@@ -691,6 +691,8 @@
     /**Fetch Invoices */
     function invoices() {
         if ($('#invoices-table_p tbody tr').length) return;
+        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
+        quoteIds = quoteIds.join(',');
         $('#invoices-table_p').dataTable({
             processing: true,
             serverSide: true,
@@ -701,7 +703,7 @@
             ajax: {
                 url: "{{ route('biller.projects.invoices') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id)}
+                data: {project_id: @json(@$project->id), quote_ids: quoteIds}
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
@@ -710,8 +712,7 @@
                 {data: 'invoicedate', name: 'invoicedate'},
                 {data: 'total', name: 'total'},
                 {data: 'status', name: 'status'},
-                {data: 'invoiceduedate', name: 'invoiceduedate'},
-                {data: 'actions', name: 'actions', searchable: false, sortable: false}
+                {data: 'invoiceduedate', name: 'invoiceduedate'}
             ],
             order: [[0, "asc"]],
             searchDelay: 500,

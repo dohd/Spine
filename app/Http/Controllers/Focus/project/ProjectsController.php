@@ -283,17 +283,37 @@ class ProjectsController extends Controller
     /**
      * Invoices Datatable
      */
-    public function invoices(InvoiceRepository $invoice)
+    public function invoices(Request $request)
     {
-        $core = $invoice->getForDataTable();
+        $quote_ids = explode(',', $request->quote_ids);
+        $quotes = [];
+        foreach ($quote_ids as $quote) {
+            $quotes = Quote::where('id', $quote)->get();
+        }
+        $invoices = [];
+        if($quotes){
+           $pro = [];
+            foreach($quotes as $invoice_items){
+                $invoices = $invoice_items->invoice_product()->get();
+            }
+            
+        }
+        $invoice = [];
+        if($invoices){
+            foreach ($invoices as $inv) {
+                $invoice = $inv->invoice()->get();
+            }
+        }
 
-        return Datatables::of($core)
+        return Datatables::of($invoice)
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
-                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', [$invoice->id]) . '">' . $invoice->tid . '</a>';
+                $tid = gen4tid('INV-', $invoice->tid);
+                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', [$invoice->id]) . '">' . $tid . '</a>';
             })
             ->addColumn('customer', function ($invoice) {
-                return $invoice->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '"><i class="ft-eye"></i></a>';
+                if($invoice->customer)
+                    return $invoice->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '"><i class="ft-eye"></i></a>';
             })
             ->addColumn('invoicedate', function ($invoice) {
                 return dateFormat($invoice->invoicedate);
