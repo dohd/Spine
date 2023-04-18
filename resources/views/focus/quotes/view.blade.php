@@ -345,22 +345,19 @@
 
     // On showing Approval Model
     $('#pop_model_1').on('shown.bs.modal', function() { 
-        $form = $(this).find('#form-approve');
-        // On clicking Mark As select dropdown
-        $form.find('select[name=status]').click(function() {
-            $form.find('label[for=approved-by]').text('Approved By');
-            $form.find('label[for=approval-date]').text('Approval Date');
-            
-            $('#approvedby').attr('placeholder', 'Approved By');
-            $('#approvedmethod').attr('disabled', false);
-            $('#btn_approve').text('Approve');
-
-            if ($(this).val() === 'cancelled') {
-                $form.find('label[for=approved-by]').text('Cancelled By');
-                $form.find('label[for=approval-date]').text('Cancel Date');
-                $('#approvedby').attr('placeholder', 'Called By');
-                $('#btn_approve').text('Cancel');
-                $('#approvedmethod').attr('disabled', true);
+        form = $(this).find('#form-approve');
+        $('.aprv-status').click(function() {
+            form.find('label[for=approved-by]').text('Approved By');
+            form.find('label[for=approval-date]').text('Approval Date');
+            if ($(this).val() == 'cancelled') {
+                form.find('label[for=approved-by]').text('Cancelled By');
+                form.find('label[for=approval-date]').text('Cancel Date');
+                form.find('.aprv-by').attr('placeholder', 'Cancelled By');
+                form.find('.aprv-method').val('').attr('disabled', true);
+            } else {
+                form.find('.aprv-by').attr('placeholder', 'Approved By');
+                form.find('.aprv-method').attr('disabled', false);
+                $('#btn_approve').text('Approve');
             }
         });
     });
