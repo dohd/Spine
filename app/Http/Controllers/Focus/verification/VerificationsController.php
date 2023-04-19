@@ -53,7 +53,11 @@ class VerificationsController extends Controller
      */
     public function index()
     {
-        return view('focus.verifications.index');
+        $customers = [];
+        $lpos = [];
+        $projects = [];
+
+        return view('focus.verifications.index', compact('customers', 'lpos', 'projects'));
     }
 
     /**

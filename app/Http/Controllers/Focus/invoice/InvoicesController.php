@@ -200,9 +200,8 @@ class InvoicesController extends Controller
         // set quotes in order of selection
         $quotes = collect();
         foreach ($quote_ids as $id) {
-            $quote = Quote::where('id', $id)->with(['verified_products' => function ($q) {
-                $q->orderBy('row_index', 'ASC');
-            }])->first();
+            $quote = Quote::where('id', $id)
+                ->with(['verified_products' => fn($q) =>$q->orderBy('row_index', 'ASC')])->first();
             $quotes->add($quote);
         }
 

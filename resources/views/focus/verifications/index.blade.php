@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Verification Management</h4>
+            <h4 class="content-header-title">Partial Job Verification</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -16,6 +16,56 @@
     </div>
 
     <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'GET', 'id' => 'mass_add_form']) }}
+                            <div class="row">                            
+                                <div class="col-2">
+                                    <div class="form-group pl-3" style="padding-top: .5em">
+                                        {{ Form::hidden('selected_products', null, ['id' => 'selected_products']) }}
+                                        {{ Form::hidden('customer', null, ['id' => 'customer']) }}
+                                        {{ Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) }}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label><strong>Customer :</strong></label>
+                                        <select name="customer_id" id="customer_id" class="form-control" data-placeholder="Choose Customer" required>
+                                            @foreach ($customers as $row)
+                                                <option value="{{ $row->id }}">{{ $row->company }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label><strong>LPO :</strong></label>
+                                        <select name="lpo_id" id="lpo_number" class="form-control" data-placeholder="Choose Client LPO" required>
+                                            @foreach ($lpos as $row)
+                                                <option value="{{ $row->id }}" customer_id="{{ $row->customer_id }}">{{ $row->lpo_no }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label><strong>Project :</strong></label>
+                                        <select name="project_id" id="project_id" class="form-control" data-placeholder="Choose Project" required>
+                                            @foreach ($projects as $row)
+                                                <option value="{{ $row->id }}" customer_id="{{ $row->customer_id }}">{{ $row->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
