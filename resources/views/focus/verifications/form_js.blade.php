@@ -64,14 +64,16 @@
 
                 const amount = (v.product_qty * price) + lineTax; 
                 el.find('.amount').val(accounting.formatNumber(amount, 4));
-                el.find('.itemid').val(v.id);
+                el.find('.qt-itemid').val(v.quote_item_id);
                 el.find('.prodid').val(v.product_id);
+                el.find('.itemid').val(v.id);
             } else {
                 $('#productsTbl tbody').append(`<tr>${initTitleRow}</tr>`);
                 const el =  $('#productsTbl tbody tr:last');
                 el.find('.index').val(i);
                 el.find('.num').val(v.numbering);
                 el.find('.prodname').val(v.product_name);
+                el.find('.qt-itemid').val(v.quote_item_id);
                 el.find('.itemid').val(v.id);
             }
         });
@@ -79,10 +81,10 @@
         const initJcRow = $('#jobcardsTbl tbody tr:first').html();
         $('#jobcardsTbl tbody tr').remove();
         const verificationJcs = @json(@$verification->jc_items);
-        console.log(verificationJcs)
         verificationJcs.forEach(v => {
             $('#jobcardsTbl tbody').append(`<tr>${initJcRow}</tr>`);
             const el =  $('#jobcardsTbl tbody tr:last');
+            el.find('.jc_itemid').val(v.id);
             el.find('.jc_type').val(v.type);
             el.find('.jc_ref').val(v.reference);
             el.find('.jc_date').datepicker(config.date).datepicker('setDate', new Date(v.date));
@@ -115,7 +117,7 @@
 
                 const amount = (v.product_qty * price) + lineTax; 
                 el.find('.amount').val(accounting.formatNumber(amount, 4));
-                el.find('.itemid').val(v.id);
+                el.find('.qt-itemid').val(v.id);
                 el.find('.prodid').val(v.product_id);
             } else {
                 $('#productsTbl tbody').append(`<tr>${initTitleRow}</tr>`);
@@ -123,7 +125,7 @@
                 el.find('.index').val(i);
                 el.find('.num').val(v.numbering);
                 el.find('.prodname').val(v.product_name);
-                el.find('.itemid').val(v.id);
+                el.find('.qt-itemid').val(v.id);
             }
         });
     }

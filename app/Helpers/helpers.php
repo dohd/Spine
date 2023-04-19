@@ -1,13 +1,16 @@
 <?php
 
-use App\Helpers\uuid;
-use App\Models\account\Account;
-use App\Models\hrm\Hrm;
-use App\Models\nhif\Nhif;
-use App\Models\Settings\Setting;
-use Illuminate\Support\Facades\DB;
-use App\Models\transaction\Transaction;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
+
+/**
+ * General Error Handling
+ **/
+if (!function_exists('errorHandler')) {
+    function errorHandler($msg = 'Internal Server Error! Please try again later.', $e = null)
+    {
+        if ($e) \Illuminate\Support\Facades\Log::error($e->getMessage() .' {user_id: '. auth()->user()->id . '}' . ' at ' . $e->getFile() . ':' . $e->getLine());
+        return redirect()->back()->with('flash_error', $msg);
+    }
+}
 
 /**
  * Henerate UUID.
@@ -16,7 +19,7 @@ use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
  */
 function generateUuid()
 {
-    return uuid::uuid4();
+    return \Ramsey\Uuid\Uuid::uuid4();
 }
 if (!function_exists('homeRoute')) {
     /**
@@ -158,7 +161,7 @@ if (!function_exists('settings')) {
     function settings()
     {
         // Settings Details
-        $settings = Setting::latest()->first();
+        $settings = \App\Models\settings\Setting::latest()->first();
         if (!empty($settings)) {
             return $settings;
         }
@@ -198,24 +201,7 @@ if (!function_exists('escapeSlashes')) {
         return $path;
     }
 }
-if (!function_exists('getMenuItems')) {
-    /**
-     * Converts items (json string) to array and return array.
-     */
-    function getMenuItems($type = 'backend', $id = null)
-    {
-        $menu = new \App\Models\Menu\Menu();
-        $menu = $menu->where('type', $type);
-        if (!empty($id)) {
-            $menu = $menu->where('id', $id);
-        }
-        $menu = $menu->first();
-        if (!empty($menu) && !empty($menu->items)) {
-            return json_decode($menu->items);
-        }
-        return [];
-    }
-}
+
 if (!function_exists('getRouteUrl')) {
     /**
      * Converts querystring params to array and use it as route params and returns URL.
@@ -276,7 +262,7 @@ if (!function_exists('checkDatabaseConnection')) {
     function checkDatabaseConnection()
     {
         try {
-            DB::connection()->reconnect();
+            \Illuminate\Support\Facades\DB::connection()->reconnect();
             return true;
         } catch (Exception $ex) {
             return false;
@@ -517,14 +503,8 @@ function bill_helper($term = 1, $module_id = 1)
     $assert_accounts = \App\Models\account\Account::where('account_type', 'Assets')->get();
     $income_accounts = \App\Models\account\Account::where('account_type', 'Income')->get();
     $expense_accounts = \App\Models\account\Account::where('account_type', 'Expenses')->get();
-    // $whts = \App\Models\account\Account::where('system', 'tax')->get();
-    $whts = DB::table('account_types')->where('system', 'tax')->get();
-    // $receivables = \App\Models\account\Account::where('account_type', 'Assets')->where('system', 'receivables')->get();
-    $receivables = DB::table('accounts')
-        ->where(['accounts.ins' => auth()->user()->ins, 'account_type' => 'Assets'])
-        ->join('account_types', 'account_types.id', '=', 'accounts.account_type_id')
-        ->where(['account_types.system' => 'receivables'])
-        ->get();
+    $whts = \App\Models\account\Account::where('system', 'tax')->get();
+    $receivables = \App\Models\account\Account::whereHas('accountType', fn($q) => $q->where('system', 'receivable'))->get();
     $warehouses = \App\Models\warehouse\Warehouse::all();
     $projects = \App\Models\project\Project::all();
     $customers = \App\Models\customer\Customer::all();
@@ -637,7 +617,7 @@ function project_client($project_id)
 }
 function user_data($id)
 {
-    $user = Hrm::find(1)->first();
+    $user = \App\Models\hrm\Hrm::find(1)->first();
     return $user;
 }
 function units()
@@ -816,23 +796,28 @@ function modify_array(array $input)
 // aggregate transaction credits and debits
 function aggregate_account_transactions()
 {
-    $tr_totals = Transaction::select(DB::raw('account_id AS id, SUM(debit) AS debit, SUM(credit) AS credit'))
+    $tr_totals = \App\Models\transaction\Transaction::selectRaw('account_id AS id, SUM(debit) AS debit, SUM(credit) AS credit')
         ->groupBy('account_id')
         ->get()->toArray();
-    Batch::update(new Account, $tr_totals, 'id');
+
+    $model = new \App\Models\account\Account;
+    \Mavinoo\LaravelBatch\LaravelBatchFacade::update($model, $tr_totals, 'id');
+
     // reset accounts without transactions
     $account_ids = array_map(function ($v) {
         return $v['id'];
     }, $tr_totals);
-    Account::whereNotIn('id', $account_ids)->where(function ($q) {
-        $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-    })->update(['debit' => 0, 'credit' => 0]);
+
+    \App\Models\account\Account::whereNotIn('id', $account_ids)
+        ->where(function ($q) {
+            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
+        })->update(['debit' => 0, 'credit' => 0]);
 }
 // auto-generate a 4 digit number prefixed with a string e.g ID-0001 
-function gen4tid($prefix='', $num=0, $count=4)
+function gen4tid($prefix = '', $num = 0, $count = 4)
 {
-    if ($prefix && $num) return $prefix . sprintf('%0'.$count.'d', $num);
-    return sprintf('%0'.$count.'d', $num);
+    if ($prefix && $num) return $prefix . sprintf('%0' . $count . 'd', $num);
+    return sprintf('%0' . $count . 'd', $num);
 }
 // account numbering
 function accounts_numbering($account)
@@ -894,30 +879,33 @@ function double_entry(
         $dr_data['credit'] = $opening_balance;
         $cr_data['debit'] = $opening_balance;
     }
-    Transaction::create($dr_data);
-    Transaction::create($cr_data);
+    \App\Models\transaction\Transaction::create($dr_data);
+    \App\Models\transaction\Transaction::create($cr_data);
     aggregate_account_transactions();
     return true;
 }
 // handle division by zero
-function div_num($numerator, $denominator) {
-    return $denominator == 0? 0 : ($numerator / $denominator);
+function div_num($numerator, $denominator)
+{
+    return $denominator == 0 ? 0 : ($numerator / $denominator);
 }
 // Get nhif rates amount 
 function nhif_rates($amount)
 {
-    $rate = Nhif::where('salary_from', '<=', $amount)->where('salary_to', '>=', $amount)->value('monthly_contribution');
-    if ($rate) return $rate;
-    return 0;
+    $rate = \App\Models\nhif\Nhif::where('salary_from', '<=', $amount)
+        ->where('salary_to', '>=', $amount)
+        ->value('monthly_contribution');
+
+    return $rate ? $rate : 0;
 }
 // Get nhif rates amount 
 function calculate_paye($basicpay, $nhif, $nssf, $allowance = 0)
 {
-  
-    if ($basicpay <= 24000){
-        $net_pay = $basicpay -$nssf- $nhif + $allowance;
-        return array('paye'=>0,'net_pay'=>$net_pay); 
-    } 
+
+    if ($basicpay <= 24000) {
+        $net_pay = $basicpay - $nssf - $nhif + $allowance;
+        return array('paye' => 0, 'net_pay' => $net_pay);
+    }
     //the tops of each paye brackets
     $band1_top = 24000.00;
     $band2_top = 8333.00;
@@ -959,7 +947,7 @@ function calculate_paye($basicpay, $nhif, $nssf, $allowance = 0)
     }
     $paye_after_tax = $basicpay - $paye;
     $net_pay = $paye_after_tax - $nhif + $allowance;
-    return array('paye'=>$paye,'net_pay'=>$net_pay); 
+    return array('paye' => $paye, 'net_pay' => $net_pay);
 }
 // global document prefixes
 function prefixesArray(array $notes, $ins = 1)
@@ -974,7 +962,8 @@ function prefixesArray(array $notes, $ins = 1)
 }
 
 // query string
-function sqlQuery($builder) {
+function sqlQuery($builder)
+{
     if (!$builder) return '';
     $query = str_replace(array('?'), array('\'%s\''), $builder->toSql());
     $query = vsprintf($query, $builder->getBindings());

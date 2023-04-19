@@ -84,8 +84,7 @@ class VerificationsController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            throw ValidationException::withMessages(['Error Creating Partial Verification']);
+            errorHandler('Error Creating Partial Verification', $th);
         }
         
         return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Partial Verification Created Successfully']);
@@ -122,9 +121,8 @@ class VerificationsController extends Controller
     {
         try {
             $this->repository->update($verification, $request->except('_token'));
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            throw ValidationException::withMessages(['Error Updating Partial Verification']);
+        } catch (\Throwable $th) { dd($th);
+            errorHandler('Error Updating Partial Verification', $th);
         }
 
         return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Partial Verification Updated Successfully']);
@@ -141,8 +139,7 @@ class VerificationsController extends Controller
         try {
             $this->repository->delete($verification);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            throw ValidationException::withMessages(['Error Deleting Partial Verification']);
+            errorHandler('Error Deleting Partial Verification', $th);
         }
 
         return new RedirectResponse(route('biller.verifications.index'), ['flash_success' => 'Partial Verification Deleted Successfully']);

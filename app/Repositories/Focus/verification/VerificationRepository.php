@@ -55,64 +55,8 @@ class VerificationRepository extends BaseRepository
             if (in_array($key, ['product_subtotal', 'product_tax', 'product_total'])) {
                 if (is_array($value)) $input[$key] = array_map(fn($v) => floatval(str_replace(',', '', $v)), $value);                 ;
             }
-        }
-
-        $data = Arr::only($input, ['quote_id', 'customer_id', 'branch_id', 'note', 'taxable', 'subtotal', 'tax', 'total']);
-        $data_items = Arr::only($input, [
-            'numbering', 'product_name', 'unit', 'tax_rate', 'product_qty', 'product_subtotal', 'product_tax', 'product_total', 'remark', 
-            'row_index', 'a_type', 'product_id', 'quote_item_id'
-        ]);
-        $jc_data_items = Arr::only($input, [
-            'type', 'reference', 'date', 'technician', 'equipment', 'location', 'fault', 'equipment_id'
-        ]);
-        $data_items = modify_array($data_items);
-        $jc_data_items = modify_array($jc_data_items);
-        // dd($data, $data_items, $jc_data_items);
-        DB::beginTransaction();
-
-        // part verification
-        $verifix = Verification::create($data);
-
-        // part verification items
-        $data_items = array_map(function($v) use($verifix) {
-            return array_replace($v, [
-                'parent_id' => $verifix->id,
-            ]);
-        }, $data_items);
-        VerificationItem::insert($data_items);
-
-        // part verification jobcards/dnotes
-        $jc_data_items = array_filter($jc_data_items, fn($v) => $v['reference']);
-        $jc_data_items = array_map(function($v) use($verifix) {
-            return array_replace($v, [
-                'parent_id' => $verifix->id,
-            ]);
-        }, $jc_data_items);
-        VerificationJc::insert($jc_data_items);
-
-        if ($verifix) {
-            DB::commit();
-            return $verifix;
-        }
-    }
-
-    /**
-     * For updating the respective Model in storage
-     *
-     * @param Verification $verification
-     * @param  array $input
-     * @throws GeneralException
-     * return bool
-     */
-    public function update(Verification $verification, array $input)
-    {
-        dd($input);
-        // dd($input);
-        foreach ($input as $key => $value) {
-            if (in_array($key, ['taxable', 'subtotal', 'tax', 'total']))
-                $input[$key] = numberClean($value);
-            if (in_array($key, ['product_subtotal', 'product_tax', 'product_total'])) {
-                if (is_array($value)) $input[$key] = array_map(fn($v) => floatval(str_replace(',', '', $v)), $value);                 ;
+            if (in_array($key, ['date'])) {
+                if (is_array($value)) $input[$key] = array_map(fn($v) => date_for_database($v), $value);
             }
         }
 
@@ -130,32 +74,105 @@ class VerificationRepository extends BaseRepository
         DB::beginTransaction();
 
         // part verification
-        $verifix = Verification::create($data);
+        $verification = Verification::create($data);
 
         // part verification items
-        $data_items = array_map(function($v) use($verifix) {
+        $data_items = array_map(function($v) use($verification) {
             return array_replace($v, [
-                'parent_id' => $verifix->id,
+                'parent_id' => $verification->id,
             ]);
         }, $data_items);
         VerificationItem::insert($data_items);
 
         // part verification jobcards/dnotes
         $jc_data_items = array_filter($jc_data_items, fn($v) => $v['reference']);
-        $jc_data_items = array_map(function($v) use($verifix) {
+        $jc_data_items = array_map(function($v) use($verification) {
             return array_replace($v, [
-                'parent_id' => $verifix->id,
-                'type' => $v['type'] == 1? 'jobcard' : 'dnote',
+                'parent_id' => $verification->id,
             ]);
         }, $jc_data_items);
         VerificationJc::insert($jc_data_items);
 
-        if ($verifix) {
+        if ($verification) {
             DB::commit();
-            return $verifix;
+            return $verification;
+        }
+    }
+
+    /**
+     * For updating the respective Model in storage
+     *
+     * @param Verification $verification
+     * @param  array $input
+     * @throws GeneralException
+     * return bool
+     */
+    public function update(Verification $verification, array $input)
+    {
+        // dd($input);
+        foreach ($input as $key => $value) {
+            if (in_array($key, ['taxable', 'subtotal', 'tax', 'total']))
+                $input[$key] = numberClean($value);
+            if (in_array($key, ['product_subtotal', 'product_tax', 'product_total'])) {
+                if (is_array($value)) $input[$key] = array_map(fn($v) => floatval(str_replace(',', '', $v)), $value);                 ;
+            }
+            if (in_array($key, ['date'])) {
+                if (is_array($value)) $input[$key] = array_map(fn($v) => date_for_database($v), $value);
+            }
         }
 
-        throw new GeneralException(trans('exceptions.backend.leave_category.update_error'));
+        $data = Arr::only($input, ['quote_id', 'customer_id', 'branch_id', 'note', 'taxable', 'subtotal', 'tax', 'total']);
+        $data_items = Arr::only($input, [
+            'item_id', 'numbering', 'product_name', 'unit', 'tax_rate', 'product_qty', 'product_subtotal', 'product_tax', 'product_total', 'remark', 
+            'row_index', 'a_type', 'product_id', 'quote_item_id'
+        ]);
+        $jc_data_items = Arr::only($input, [
+            'jcitem_id', 'type', 'reference', 'date', 'technician', 'equipment', 'location', 'fault', 'equipment_id'
+        ]);
+        $data_items = modify_array($data_items);
+        $jc_data_items = modify_array($jc_data_items);
+
+        DB::beginTransaction();
+
+        // part verification
+        $is_updated = $verification->update($data);
+
+        // part verification items
+        $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
+        $verification->items()->whereNotIn('id', $item_ids)->delete();
+        // update or create verified item
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'id' => $item['item_id'],
+                'parent_id' => $verification->id,
+            ]);
+            $db_item = VerificationItem::firstOrNew(['id' => $item['id']]);
+            $db_item->fill($item);
+            if (!$db_item->id) unset($db_item->id);
+            unset($db_item->item_id);
+            $db_item->save();
+        }
+
+        // part-verification jobcards/dnotes
+        $jc_data_items = array_filter($jc_data_items, fn($v) => $v['jcitem_id']);
+        $verification->jc_items()->whereNotIn('id', $jc_data_items)->delete();
+        // update or create verified jc_item
+        foreach ($jc_data_items as $item) {
+            $item = array_replace($item, [
+                'id' => $item['jcitem_id'],
+                'parent_id' => $verification->id,
+            ]);
+            $db_item = VerificationJc::firstOrNew(['id' => $item['id']]);
+            $db_item->fill($item);
+            if (!$db_item->id) unset($db_item->id);
+            unset($db_item->jcitem_id);
+            $db_item->save();
+        }
+
+        if ($is_updated) {
+            DB::commit();
+            return $verification;
+        }
     }
 
     /**
@@ -168,7 +185,5 @@ class VerificationRepository extends BaseRepository
     public function delete(Verification $verification)
     {   
         if ($verification->delete()) return true;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));
     }
 }

@@ -169,8 +169,9 @@
                 </td>
                 <input type="hidden" name="row_index[]" class="index">
                 <input type="hidden" name="a_type[]" value="1" class="type">
-                <input type="hidden" name="product_id[]">
-                <input type="hidden" name="quote_item_id[]" class="itemid">
+                <input type="hidden" name="product_id[]" class="prodid">
+                <input type="hidden" name="quote_item_id[]" class="qt-itemid">
+                <input type="hidden" name="item_id[]" class="itemid">
             </tr>
 
             {{-- Title Row Template --}}
@@ -192,14 +193,15 @@
                 <input type="hidden" name="row_index[]" value="0">
                 <input type="hidden" name="product_id[]">
                 <input type="hidden" name="remark[]">
-                <input type="hidden" name="unit[]" value="">
+                <input type="hidden" name="unit[]">
                 <input type="hidden" name="tax_rate[]">
                 <input type="hidden" name="product_qty[]">
                 <input type="hidden" name="product_tax[]">
                 <input type="hidden" name="product_total[]">
                 <input type="hidden" name="product_subtotal[]">
                 <input type="hidden" name="a_type[]" value="2">
-                <input type="hidden" name="quote_item_id[]">
+                <input type="hidden" name="quote_item_id[]" class="qt-itemid">
+                <input type="hidden" name="item_id[]" class="itemid">
             </tr>
         </tbody>
     </table>
@@ -258,7 +260,7 @@
                                 </td>
                                 <td><a href="javascript:" class="btn btn-primary btn-md remove" type="button">Remove</a></td>
                                 <input type="hidden" name="equipment_id[]" class="jc_equipid">
-                                <input type="hidden" name="jcitem_id[]">
+                                <input type="hidden" name="jcitem_id[]" class="jc_itemid">
                             </tr>
                         </tbody>
                     </table>
