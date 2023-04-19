@@ -25,6 +25,7 @@ use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\remark\CreateResponse;
 use App\Http\Responses\Focus\remark\EditResponse;
 use App\Repositories\Focus\remark\RemarkRepository;
+use App\Http\Requests\Focus\remark\RemarkRequest;
 use App\Models\branch\Branch;
 use App\Models\remark\Remark;
 
@@ -78,16 +79,9 @@ class RemarksController extends Controller
     //  * @param StoreProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function store(Request $request)
+    public function store(RemarkRequest $request)
     {
 
-        $request->validate([
-
-            'recepient' => 'required',
-            'reminder_date' => 'required',
-            'remarks' => 'required',
-
-        ]);
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
 

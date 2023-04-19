@@ -4,7 +4,7 @@ namespace App\Http\Requests\Focus\remark;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ManageRemarkRequest extends FormRequest
+class RemarkRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,9 @@ class ManageRemarkRequest extends FormRequest
     public function rules()
     {
         return [
-            //Put your rules for the request in here
-            //For Example : 'title' => 'required'
-            //Further, see the documentation : https://laravel.com/docs/5.4/validation#creating-form-requests
+            'recepient' => 'required',
+            'reminder_date' => 'required',
+            'remarks' => 'required',
         ];
     }
 
