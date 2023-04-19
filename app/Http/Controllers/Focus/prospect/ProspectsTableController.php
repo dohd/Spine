@@ -50,9 +50,6 @@ class ProspectsTableController extends Controller
     public function __invoke()
     {
         $core = $this->prospect->getForDataTable();
-
-        // $ins = auth()->user()->ins;
-        //$prefixes = prefixesArray(['prospect'], $ins);
         
         return Datatables::of($core)
             ->escapeColumns(['id'])

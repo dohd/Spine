@@ -25,7 +25,7 @@ use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\prospect\CreateResponse;
 use App\Http\Responses\Focus\prospect\EditResponse;
 use App\Repositories\Focus\prospect\ProspectRepository;
-use App\Http\Requests\Focus\prospect\ManageProspectRequest;
+use App\Http\Requests\Focus\prospect\ProspectRequest;
 use App\Models\branch\Branch;
 use App\Models\prospect\Prospect;
 use App\Models\remark\Remark;
@@ -83,7 +83,7 @@ class ProspectsController extends Controller
     //  * @param StoreProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function store(ManageProspectRequest $request)
+    public function store(ProspectRequest $request)
     {
         $request->validate([
             'name' => 'required',
@@ -128,6 +128,8 @@ class ProspectsController extends Controller
             $remarks = Remark::where('prospect_id',$request->id)->orderBy('created_at', 'DESC')->limit(10)->get();
            
         }
+
+       
         return view('focus.prospects.partials.remarks_table',compact('remarks'));
     }
 
@@ -140,17 +142,9 @@ class ProspectsController extends Controller
     //  * @param EditProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\Focus\productcategory\EditResponse
     //  */
-    public function update(Request $request, Prospect $prospect)
+    public function update(ProspectRequest $request, Prospect $prospect)
     {
-        // validate fields
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required',
-            'phone' => 'required',
-            'reminder_date' => 'required',
-            'remarks' => 'required'
-
-        ]);
+       
 
         // update input fields from request
         $data = $request->except(['_token', 'ins', 'files']);
@@ -181,7 +175,7 @@ class ProspectsController extends Controller
     //  * @param \App\Models\prospect\Prospect $prospect
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function show(Prospect $prospect, Request $request)
+    public function show(Prospect $prospect)
     {
         return new ViewResponse('focus.prospects.view', compact('prospect'));
     }

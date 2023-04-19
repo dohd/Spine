@@ -25,7 +25,7 @@ class Remark extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'remarks';
+    protected $table = 'prospect_remarks';
 
     /**
      * Mass Assignable fields of model

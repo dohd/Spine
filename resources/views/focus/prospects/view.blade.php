@@ -50,25 +50,22 @@
                     </tr> 
                     <tr>
                         <th>Prospect Name</th>
-                        <td>{{ $prospect->customer ? $prospect->customer->name : $prospect->name }}</td>
+                        <td>{{  $prospect->name }}</td>
                     </tr>
                     <tr>
                         <th>Prospect Company</th>
-                        <td>{{ $prospect->customer ? $prospect->customer->company : $prospect->company }}</td>
+                        <td>{{ $prospect->company }}</td>
                     </tr>
                     
                     <tr>
                         <th>Prospect Contact</th>
-                        <td>{{ $prospect->customer ? $prospect->customer->phone : $prospect->phone }}</td>
+                        <td>{{  $prospect->phone }}</td>
                     </tr>
                     <tr>
                         <th>Prospect Email</th>
-                        <td>{{ $prospect->customer? $prospect->customer->email : $prospect->email }}</td>
+                        <td>{{ $prospect->email }}</td>
                     </tr> 
-                    <tr>
-                        <th>Remarks/Notes</th>
-                        <td>{{ $prospect->customer? $prospect->customer->remarks : $prospect->remarks }}</td>
-                    </tr>   
+                     
                     <tr>
                         <th>Reminder Date</th>
                         <td>{{ dateFormat($prospect->reminder_date) }}</td>

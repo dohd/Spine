@@ -11,6 +11,6 @@ trait ProspectRelationship
 {
     public function remarks()
     {
-        return $this->hasMany(Remark::class)->orderBy('row_index', 'ASC');
+        return $this->hasMany(Remark::class)->orderBy('id', 'ASC');
     }
 }
