@@ -21,14 +21,13 @@ namespace App\Http\Controllers\Focus\verification;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\additional\Additional;
-use App\Models\items\VerifiedItem;
+use App\Models\customer\Customer;
+use App\Models\lpo\Lpo;
+use App\Models\project\Project;
 use App\Models\quote\Quote;
 use App\Models\verification\Verification;
-use App\Models\verifiedjcs\VerifiedJc;
 use App\Repositories\Focus\verification\VerificationRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class VerificationsController extends Controller
 {
@@ -53,9 +52,12 @@ class VerificationsController extends Controller
      */
     public function index()
     {
-        $customers = [];
-        $lpos = [];
-        $projects = [];
+        $customers = Customer::whereHas('quotes', fn($q) => $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+            ->get(['id', 'company']);
+        $lpos = Lpo::whereHas('quotes', fn($q) =>  $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+            ->get(['id', 'lpo_no', 'customer_id']);
+        $projects = Project::whereHas('quote', fn($q) => $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+            ->get(['id', 'name', 'customer_id']);
 
         return view('focus.verifications.index', compact('customers', 'lpos', 'projects'));
     }
