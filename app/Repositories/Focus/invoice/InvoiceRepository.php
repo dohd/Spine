@@ -118,7 +118,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_project_invoice(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];

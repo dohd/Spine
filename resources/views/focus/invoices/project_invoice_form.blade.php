@@ -163,7 +163,7 @@
                         // Description details
                         $jcs = [];
                         foreach($val->verified_jcs as $jc) {
-                            if ($jc->type == 2) $jcs[] = "{$prefixes[4]}-{$jc->reference}";
+                            if ($jc->type == 2 || $jc->type == 'dnote') $jcs[] = "{$prefixes[4]}-{$jc->reference}";
                             else $jcs[] = "{$prefixes[5]}-{$jc->reference}";
                         }
     
@@ -193,6 +193,7 @@
                         <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $val->id }}" id="quoteid-{{$k}}">
                         <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $val->branch_id }}" id="branchid-{{$k}}">
                         <input type="hidden" class="project-id" name="project_id[]" value="{{ $project_id }}" id="projectid-{{$k}}">
+                        <input type="hidden" class="verification-id" name="verification_id[]" value="{{ $val->verification_id }}" id="verificationid-{{ $k }}">
                     </tr>
                 @endforeach
             @else        
@@ -215,6 +216,7 @@
                         <input type="hidden" class="quote-id" name="quote_id[]" value="{{ $item->quote_id }}" id="quoteid-{{$k}}">
                         <input type="hidden" class="branch-id" name="branch_id[]" value="{{ $item->branch_id }}" id="branchid-{{$k}}">
                         <input type="hidden" class="project-id" name="project_id[]" value="{{ $item->project_id }}" id="projectid-{{$k}}">
+                        <input type="hidden" class="verification-id" name="verification_id[]" value="{{ $item->verification_id }}" id="verificationid-{{ $k }}">
                         <input type="hidden" name="id[]" value="{{ $item->id }}">
                     </tr>
                 @endforeach

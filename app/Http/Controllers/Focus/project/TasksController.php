@@ -22,19 +22,15 @@ use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\project\Project;
 use App\Models\project\Task;
-use App\Models\tag\Tag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Http\Responses\Focus\task\CreateResponse;
 use App\Http\Responses\Focus\task\EditResponse;
 use App\Repositories\Focus\project\TaskRepository;
 use App\Http\Requests\Focus\project\ManageTaskRequest;
 use App\Http\Requests\Focus\project\CreateTaskRequest;
-use App\Http\Requests\Focus\project\StoreTaskRequest;
 use App\Http\Requests\Focus\project\EditTaskRequest;
-use App\Http\Requests\Focus\project\UpdateTaskRequest;
 use App\Http\Requests\Focus\project\DeleteTaskRequest;
 
 /**
@@ -180,28 +176,25 @@ class TasksController extends Controller
      */
     public function load(ManageTaskRequest $request)
     {
+        $task = Task::findOrFail($request->task_id);
 
-        $task = Task::where('id', '=', $request->id)->first();
-        $task['start'] = dateTimeFormat($task['start']);
-        $task['duedate'] = dateTimeFormat($task['duedate']);
-        $task['creator'] = $task->creator->first_name . ' ' . $task->creator->last_name;
-        $c = '';
-        foreach ($task->users as $row) {
-            $c .= $row['first_name'] . ' ' . $row['last_name'] . ', ';
-        }
-        $task['assigned'] = $c;
-
+        $task_users = $task->users->map(fn($v) => $v->full_name)->toArray();
         $task_back = task_status($task->status);
-        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ';
-        $task['status'] = $status;
-        $s = '';
+        $task->fill([
+            'start' => dateTimeFormat($task['start']),
+            'duedate' => dateTimeFormat($task['duedate']),
+            'creator' => $task->creator? $task->creator->full_name : '', 
+            'assigned' => implode(', ', $task_users),
+            'status' => '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ',
+            'status_list' => '',
+        ]);
+
         foreach (status_list() as $row) {
-            if ($row['id'] == @$task_back->id) $s .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
-            $s .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
+            if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
+            else $task->status_list .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
         }
 
-        $task['status_list'] = $s;
-        return json_encode($task->only('id', 'name', 'status', 'start', 'duedate', 'description', 'short_desc', 'priority', 'creator', 'assigned', 'status', 'status_list'));
+        return response()->json($task->only('id', 'name', 'status', 'start', 'duedate', 'description', 'short_desc', 'priority', 'creator', 'assigned', 'status', 'status_list'));
     }
 
     public function update_status(Request $request)

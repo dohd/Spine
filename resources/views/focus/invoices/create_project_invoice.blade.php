@@ -1,11 +1,14 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Create Project Invoice')
+@section('title', 'Create | Invoice Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
-        <div class="col-12">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Invoice Management</h4>
+        </div>
+        <div class="col-6">
             <div class="btn-group float-right">
                 @include('focus.invoices.partials.invoices-header-buttons')
             </div>
@@ -32,7 +35,7 @@
     // Initialize datepicker
     $('.datepicker')
     .datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date())
+    .datepicker('setDate', new Date());
 
     // on tax change
     $('#tax_id').change(function() {
@@ -118,10 +121,11 @@
                 items.forEach((v,i) => {
                     $('#quoteTbl tbody').append(`<tr>${invoiceItemRow}</tr>`);
                     const row = $('#quoteTbl tbody tr:last');
-
+                    
                     row.find('.num').text(v.numbering);
                     row.find('.num-val').val(v.numbering);
-                    row.find('.row-indx').val(v.row_index);
+                    row.find('.row-indx').val(v.row_index);                    
+                    row.find('.verification-id').text(v.verification_id);
 
                     const tid = `${quote.tid}`.length < 4? `000${quote.tid}`.slice(-4) : quote.tid;
                     const pfx = quote.bank_id == 0? prefixes[1] : prefixes[2];
@@ -145,6 +149,7 @@
                     const project_id = quote.project_quote? quote.project_quote.project_id : '';
                     row.find('.project-id').val(project_id);
                 });
+                $('#tax_id').change();
             }
         }
         // apply tax

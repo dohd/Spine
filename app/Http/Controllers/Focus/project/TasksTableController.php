@@ -80,7 +80,7 @@ class TasksTableController extends Controller
                     . $task->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $task->short_desc . '</span></div> </div>';
             })
             ->addColumn('actions', function ($task) {
-                $btn = '<a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-item="'. $task->id .'">
+                $btn = '<a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-id="'. $task->id .'">
                     <i  class="ft-eye"></i></a> ';
 
                 if (access()->allow('edit-task')) 

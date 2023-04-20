@@ -44,6 +44,7 @@ use App\Models\currency\Currency;
 use App\Models\invoice_payment\InvoicePayment;
 use App\Models\lpo\Lpo;
 use App\Models\term\Term;
+use App\Models\verification\Verification;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
 use Endroid\QrCode\QrCode;
@@ -169,16 +170,12 @@ class InvoicesController extends Controller
      */
     public function uninvoiced_quote(ManageInvoiceRequest $request)
     {
-        $customers = Customer::whereHas('quotes', function ($q) {
-            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
-        })->get(['id', 'company']);
-            
-        $lpos = Lpo::whereHas('quotes', function ($q) {
-            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
-        })->get(['id', 'lpo_no', 'customer_id']);
-        $projects = Project::whereHas('quote', function ($q) {
-            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
-        })->get(['id', 'name', 'customer_id']);
+        $customers = Customer::whereHas('quotes', fn($q) => $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+            ->get(['id', 'company']);
+        $lpos = Lpo::whereHas('quotes', fn($q) =>  $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+            ->get(['id', 'lpo_no', 'customer_id']);
+        $projects = Project::whereHas('quote', fn($q) => $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+            ->get(['id', 'name', 'customer_id']);
 
         return new ViewResponse('focus.invoices.uninvoiced_quote', compact('customers', 'lpos', 'projects'));
     }
@@ -187,29 +184,50 @@ class InvoicesController extends Controller
      * Filter Invoice Products and redirect to Invoice Form
      */
     public function filter_invoice_quotes(Request $request)
-    {
-        // extract input fields
+    { 
         $customer_id = $request->customer;
         $quote_ids = explode(',', $request->selected_products);
-
         if (!$customer_id || !$quote_ids) {
-            $customers = Customer::where('active', '1')->pluck('company', 'id');
-            $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
-            $projects = Project::pluck('name', 'id');
-            
-            return redirect()->back()->with('flash_error', 'Please filter records by customer!');
+            $customers = Customer::whereHas('quotes', fn($q) => $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+                ->get(['id', 'company']);
+            $lpos = Lpo::whereHas('quotes', fn($q) =>  $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+                ->get(['id', 'lpo_no', 'customer_id']);
+            $projects = Project::whereHas('quote', fn($q) => $q->where(['verified' => 'Yes', 'invoiced' => 'No']))
+                ->get(['id', 'name', 'customer_id']);
+
+            return view($request->is_part_verification? 'focus.verifications.index' : 'focus.invoices.uninvoiced_quote', compact('customers', 'lpos', 'projects'))
+                ->with(['flash_error' => 'Filter and select customer records']);
         }
 
-        // set quotes in order of selection
-        $quotes = collect();
-        foreach ($quote_ids as $id) {
-            $quote = Quote::where('id', $id)->with(['verified_products' => function ($q) {
-                $q->orderBy('row_index', 'ASC');
-            }])->first();
-            $quotes->add($quote);
+        if ($request->is_part_verification) {
+            // Quote/PI in order of selection (partial verification)
+            $quotes = Verification::whereIn('id', $quote_ids)
+                ->orderByRaw("FIELD(id,{$request->selected_products})")
+                ->with(['items' => fn($q) =>$q->orderBy('row_index', 'ASC')])
+                ->with(['branch', 'customer'])
+                ->get()
+                ->map(function($v) {
+                    // mimic quote by assigning quote attributes
+                    $v->verification_id = $v->id;
+                    $v->title = @$v->quote->notes;
+                    $v->bank_id = @$v->quote->bank_id;
+                    $v->tid = @$v->quote->tid;
+                    $v->client_ref = @$v->quote->client_ref;
+                    $v->lpo = @$v->quote->lpo;
+                    $v->project_quote = @$v->project_quote;
+                    $v->verified_products = $v->items;
+                    $v->verified_jcs = $v->jc_items;
+                    return $v;
+                });
+        } else {
+            // Quote/PI in order of selection (main verification)
+            $quotes = Quote::whereIn('id', $quote_ids)
+                ->orderByRaw("FIELD(id,{$request->selected_products})")
+                ->with(['verified_products' => fn($q) =>$q->orderBy('row_index', 'ASC')])
+                ->get();
         }
 
-        $customer = Customer::find($customer_id) ?: new Customer;
+        $customer = Customer::find($customer_id) ?? new Customer;
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
         $terms = Term::where('type', 1)->get();  // invoice term type is 1
         $banks = Bank::all();
@@ -236,7 +254,7 @@ class InvoicesController extends Controller
         ]);
         $bill_items = $request->only([
             'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_subtotal', 'product_price', 
-            'tax_rate', 'quote_id', 'project_id', 'branch_id'
+            'tax_rate', 'quote_id', 'project_id', 'branch_id','verification_id'
         ]);
 
         $bill['user_id'] = auth()->user()->id;
@@ -290,7 +308,8 @@ class InvoicesController extends Controller
         ]);
         $bill_items = $request->only([
             'id', 'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 
-            'product_subtotal', 'product_price', 'tax_rate', 'quote_id', 'project_id', 'branch_id'
+            'product_subtotal', 'product_price', 'tax_rate', 'quote_id', 'project_id', 'branch_id',
+            'verification_id'
         ]);
 
         $bill['user_id'] = auth()->user()->id;

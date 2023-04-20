@@ -1,19 +1,15 @@
 <?php
 
-namespace App\Models\hrm;
+namespace App\Models\verification;
 
 use App\Models\ModelTrait;
+use App\Models\verification\Traits\VerificationAttribute;
+use App\Models\verification\Traits\VerificationRelationship;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\hrm\Traits\HrmAttribute;
-use App\Models\hrm\Traits\HrmRelationship;
 
-class Hrm extends Model
+class Verification extends Model
 {
-    use ModelTrait,
-        HrmAttribute,
-        HrmRelationship {
-        // HrmAttribute::getEditButtonAttribute insteadof ModelTrait;
-    }
+    use ModelTrait, VerificationAttribute, VerificationRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -24,7 +20,7 @@ class Hrm extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'users';
+    protected $table = 'partial_verifications';
 
     /**
      * Mass Assignable fields of model
@@ -63,32 +59,26 @@ class Hrm extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
-        static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', '=', auth()->user()->ins);
-        });
-    }
-    /**
-     * Set password attribute.
-     *
-     * @param [string] $password
-     */
-    public function setPasswordAttribute($password)
-    {
-        if (!empty($password)) {
-            $this->attributes['password'] = bcrypt($password);
-        }
-    }
 
-    /**
-     * Concatenate first_name and last_name column
-     * 
-     * @return string
-     */
-    public function getFullnameAttribute()
-    {
-        return "{$this->first_name} {$this->last_name}";
+        static::creating(function ($instance) {
+            $instance->fill([
+                'tid' => $instance->next_tid,
+                'user_id' => auth()->user()->id,
+                'ins' => auth()->user()->ins,
+            ]);
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

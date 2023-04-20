@@ -10,6 +10,7 @@ use App\Models\invoice\Invoice;
 use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
+use App\Models\items\VerificationItem;
 use App\Models\items\VerifiedItem;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
@@ -19,6 +20,7 @@ use App\Models\project\Project;
 use App\Models\project\ProjectQuote;
 use App\Models\projectstock\Projectstock;
 use App\Models\term\Term;
+use App\Models\verification\Verification;
 use App\Models\verifiedjcs\VerifiedJc;
 
 /**
@@ -90,6 +92,16 @@ trait QuoteRelationship
     public function verified_products()
     {
         return $this->hasMany(VerifiedItem::class)->orderBy('row_index', 'ASC');
+    }
+
+    public function part_verification_products()
+    {
+        return $this->hasManyThrough(VerificationItem::class, Verification::class, 'quote_id', 'parent_id', 'id', 'id');
+    }
+
+    public function part_verifications()
+    {
+        return $this->hasMany(Verification::class);
     }
 
     public function products()

@@ -8,7 +8,8 @@
                 </button>
             </div>
             <div class="modal-body"> 
-                {{ Form::open(['route' => 'biller.projects.store', 'id' => 'data_form_project']) }}    
+                {{ Form::open(['route' => 'biller.projects.store', 'id' => 'data_form_project']) }}   
+                {{-- 
                 <div class="row">
                     <fieldset class="form-group position-relative has-icon-left  col-md-4">
                         <div><label for="customer">Search Customer</label></div>
@@ -65,9 +66,11 @@
                 <fieldset class="form-group">
                     <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}" rows="6" name="note"></textarea>
                 </fieldset>
+                 --}} 
+                 @include('focus.projects.form-main')
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-info">
+                    <button type="submit" class="btn btn-info" id="submit-data_project">
                         Create Project
                     </button>
                 </div>
