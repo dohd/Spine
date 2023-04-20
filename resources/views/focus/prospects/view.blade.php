@@ -70,6 +70,10 @@
                         <th>Reminder Date</th>
                         <td>{{ dateFormat($prospect->reminder_date) }}</td>
                     </tr>                    
+                    <tr>
+                        <th>Remarks</th>
+                        <td>{{ $prospect->remarks->first()->remarks }}</td>
+                    </tr>                    
                 </tbody>
             </table>
         </div>

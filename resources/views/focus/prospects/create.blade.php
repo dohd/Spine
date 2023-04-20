@@ -26,7 +26,7 @@
                                 @include("focus.prospects.form")
                                 <div class="column">
                                     {{ link_to_route('biller.prospects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md col-1 ml-auto mr-1']) }}
-                                    {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md col-1 mr-2']) }}                                           
+                                    {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md col-1']) }}                                           
                                 </div>
                             {{ Form::close() }}
                         </div>

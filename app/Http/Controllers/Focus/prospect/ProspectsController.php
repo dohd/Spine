@@ -90,14 +90,17 @@ class ProspectsController extends Controller
             'company' => 'required',
             'email' => 'required',
             'phone' => 'required',
+            'reminder_date' => 'required',
+            'remarks' => 'required'
 
         ]);
         // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files']);
+        $data = $request->except(['_token', 'ins', 'files','reminder_date','remarks']);
 
-
+        $remark = $request->only('reminder_date','remarks','name');
+        
         //Create the model using repository create method
-        $this->repository->create($data);
+        $this->repository->create($data,$remark);
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Created']);
     }

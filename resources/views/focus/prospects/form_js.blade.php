@@ -13,8 +13,7 @@
         init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             if (this.prospect) {
-                
-                
+ 
                 $('#reminder_date').datepicker('setDate', new Date(this.prospect.reminder_date));
             }
         },

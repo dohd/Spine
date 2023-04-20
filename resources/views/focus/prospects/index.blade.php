@@ -49,6 +49,7 @@
                                             <th>Email</th>
                                             <th>Phone</th>
                                             <th>Reminder Date</th>
+                                            <th>Remark</th>
                                             <th>Follow up</th>
                                             <th>Status</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -162,6 +163,7 @@
             $('#remarksModal').on('hidden.bs.modal', function(e) {
                 $('#remarks_table').remove();
                 $('#prospect_id').val('');
+                location.reload();
             });
         });
 
@@ -200,6 +202,10 @@
                     {
                         data: 'reminder_date',
                         name: 'reminder_date'
+                    },
+                    {
+                        data: 'remarks',
+                        name: 'remarks'
                     },
                     {
                         data: 'follow_up',

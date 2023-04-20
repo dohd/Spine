@@ -28,6 +28,7 @@ class ProspectRequest extends FormRequest
             'company' => 'required',
             'email' => 'required',
             'phone' => 'required',
+            'remarks' => 'required',
             'reminder_date' => 'required'
         ];
     }

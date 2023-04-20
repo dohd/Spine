@@ -4,7 +4,7 @@ namespace App\Repositories\Focus\prospect;
 
 use App\Models\prospect\Prospect;
 use App\Exceptions\GeneralException;
-
+use App\Repositories\Focus\remark\RemarkRepository;
 use App\Repositories\BaseRepository;
 use DB;
 
@@ -19,6 +19,15 @@ class ProspectRepository extends BaseRepository
      */
     const MODEL = Prospect::class;
 
+
+    //Remark repository
+
+    private $remark;
+
+    public function __construct(RemarkRepository $remark)
+    {
+        $this->remark = $remark;
+    }
     /**
      * This method is used by Table Controller
      * For getting the table data to show in
@@ -39,10 +48,18 @@ class ProspectRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function create(array $data)
+    public function create(array $data, array $remark)
     {
-        $data['reminder_date'] = date_for_database($data['reminder_date']);
+        
+       
         $result = Prospect::create($data);
+        
+        $remark['reminder_date'] = date_for_database($remark['reminder_date']);
+        $remark['recepient'] =$result->name ;
+        $remark['prospect_id'] = $result->id;
+        unset($remark['name']);
+       
+        $this->remark->create($remark);
         return $result;
 
         throw new GeneralException('Error Creating Prospect');
@@ -59,7 +76,7 @@ class ProspectRepository extends BaseRepository
     public function update(Prospect $prospect, array $data)
     {
         DB::beginTransaction();
-        $data['reminder_date'] = date_for_database($data['reminder_date']);
+       // $data['reminder_date'] = date_for_database($data['reminder_date']);
         $result = $prospect->update($data);
       
        
@@ -80,10 +97,7 @@ class ProspectRepository extends BaseRepository
      * @return bool
      */
     public function delete(Prospect $prospect)
-    {
-       
-     
-            
+    {   
         if ($prospect->delete()) return true;
         
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
