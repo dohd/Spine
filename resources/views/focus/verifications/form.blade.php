@@ -190,7 +190,7 @@
                         </div>
                     </div>   
                 </td>
-                <input type="hidden" name="row_index[]" value="0">
+                <input type="hidden" name="row_index[]" class="index">
                 <input type="hidden" name="product_id[]">
                 <input type="hidden" name="remark[]">
                 <input type="hidden" name="unit[]">
@@ -292,7 +292,7 @@
     </div>
     
 </div>
-<div class="row justify-content-end">
+<div class="row justify-content-end mt-1">
     <div class="col-2">
         {{ link_to_route(@$verification? 'biller.verifications.index' : 'biller.verifications.quote_index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md block']) }}
     </div>

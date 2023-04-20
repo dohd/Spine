@@ -3,7 +3,7 @@
 namespace App\Models\verification;
 
 use App\Models\ModelTrait;
-use App\Models\verifiedjcs\Traits\VerificationJcRelationship;
+use App\Models\verification\Traits\VerificationJcRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class VerificationJc extends Model

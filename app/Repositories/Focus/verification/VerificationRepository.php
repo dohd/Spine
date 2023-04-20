@@ -4,7 +4,6 @@ namespace App\Repositories\Focus\verification;
 
 use App\Exceptions\GeneralException;
 use App\Models\items\VerificationItem;
-use App\Models\project\BudgetItem;
 use App\Models\quote\Quote;
 use App\Models\verification\Verification;
 use App\Models\verification\VerificationJc;
@@ -28,6 +27,16 @@ class VerificationRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
+        $q->when(request('lpo_id'), function ($q) {
+            $q->whereHas('quote', fn($q) => $q->where('lpo_id', request('lpo_id')));
+        });
+        $q->when(request('project_id'), function ($q) {
+            $q->whereHas('quote', function ($q) {
+                $q->whereHas('project_quote', fn($q) => $q->where('project_id', request('project_id')));
+            });
+        });
             
         return $q->get();
     }

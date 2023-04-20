@@ -165,7 +165,8 @@
         let subtotal = 0;
         let tax = 0;
         let total = 0;
-        $('#productsTbl tbody tr').each(function() {
+        $('#productsTbl tbody tr').each(function(i) {
+            $(this).find('.index').val(i);
             const qty = accounting.unformat($(this).find('.qty').val());
             const price = accounting.unformat($(this).find('.price').val());
             const taxId = accounting.unformat($(this).find('.taxid').val());

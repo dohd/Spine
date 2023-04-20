@@ -53,7 +53,13 @@ class VerificationsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('tid', function ($verification) use($prefixes) {
+            ->addColumn('checkbox', function ($verification) {
+                return '<input type="checkbox" class="select-row" value="'. $verification->id .'">';
+            })
+            ->addColumn('tid', function ($verification) {
+                return $verification->tid;
+            })
+            ->addColumn('quote_tid', function ($verification) use($prefixes) {
                 $quote = $verification->quote;
                 if ($quote) {
                     $tid = gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);

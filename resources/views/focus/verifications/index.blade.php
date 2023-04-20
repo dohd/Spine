@@ -20,37 +20,42 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'GET', 'id' => 'mass_add_form']) }}
+                        {{ Form::open(['route' => 'biller.invoices.filter_invoice_quotes', 'method' => 'GET']) }}
+                            <input type="hidden" name="selected_products" value="" id="quote_ids">
+                            <input type="hidden" name="is_part_verification" value="1">
                             <div class="row">                            
                                 <div class="col-2">
                                     <div class="form-group pl-3" style="padding-top: .5em">
-                                        {{ Form::submit('Add Selected', ['class' => 'btn btn-xs btn-success update_product_location mt-2', 'id' => 'add-selected']) }}
+                                        {{ Form::submit('Invoice Selected', ['class' => 'btn btn-xs btn-success mt-2 add-selected']) }}
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-4">
                                     <div class="form-group">
                                         <label><strong>Customer :</strong></label>
-                                        <select name="customer_id" id="customer_id" class="form-control" data-placeholder="Choose Customer" required>
+                                        <select name="customer" id="customer" class="form-control select2" data-placeholder="Choose Customer" required>
+                                            <option value=""></option>
                                             @foreach ($customers as $row)
                                                 <option value="{{ $row->id }}">{{ $row->company }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <div class="form-group">
                                         <label><strong>LPO :</strong></label>
-                                        <select name="lpo_id" id="lpo_number" class="form-control" data-placeholder="Choose Client LPO" required>
+                                        <select name="lpo_id" id="lpo" class="form-control select2" data-placeholder="Choose Client LPO">
+                                            <option value=""></option>
                                             @foreach ($lpos as $row)
                                                 <option value="{{ $row->id }}" customer_id="{{ $row->customer_id }}">{{ $row->lpo_no }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-4">
                                     <div class="form-group">
                                         <label><strong>Project :</strong></label>
-                                        <select name="project_id" id="project_id" class="form-control" data-placeholder="Choose Project" required>
+                                        <select name="project_id" id="project" class="form-control select2" data-placeholder="Choose Project">
+                                            <option value=""></option>
                                             @foreach ($projects as $row)
                                                 <option value="{{ $row->id }}" customer_id="{{ $row->customer_id }}">{{ $row->name }}</option>
                                             @endforeach
@@ -73,6 +78,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>#Ver No.</th>
                                         <th>#Quote / PI</th>
                                         <th>Customer</th>
                                         <th>Total</th>
@@ -109,7 +115,50 @@
 
     const Index = {
         init() {
+            $('.select2').select2({allowClear: true});
+
+            $('#verificationsTbl').on('change', '.select-row', this.selectRowChange);
+
+            $('#customer').change(this.customerChange);
+            $('#lpo').change(this.lpoChange);
+            $('#project').change(this.projectChange);
+            $('form').submit(this.formSubmit);
+
             this.drawDataTable();
+        },
+
+        formSubmit() {
+            if (!$('#quote_ids').val()) {
+                event.preventDefault();
+                return swal('Select records before submission!');
+            }
+        },
+
+        selectRowChange() {
+            if ($('#customer').val()) {
+                const quoteIds = $('#quote_ids').val()? $('#quote_ids').val().split(',') : [];
+                if (this.checked) quoteIds.push(this.value);
+                else quoteIds.splice(quoteIds.indexOf(this.value), 1);
+                $('#quote_ids').val(quoteIds.join(','));
+            } else {
+                this.checked = false;
+                swal('Filter records by customer before selection!');
+            }
+        },
+
+        lpoChange() {
+            $('#verificationsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        projectChange() {
+            $('#verificationsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        customerChange() {
+            $('#verificationsTbl').DataTable().destroy();
+            return Index.drawDataTable();
         },
 
         drawDataTable() {
@@ -121,10 +170,15 @@
                 ajax: {
                     url: "{{ route('biller.verifications.get') }}",
                     type: 'POST',
+                    data: {
+                        customer_id: $('#customer').val(),
+                        lpo_id: $('#lpo').val(),
+                        project_id: $('#project').val(),
+                    }
                 },
                 columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'customer', 'total', 'lpo_no', 'project_no'].map(v => ({data:v, name: v})),
+                    {data: 'checkbox',  searchable: false,  sortable: false},
+                    ...['tid', 'quote_tid', 'customer', 'total', 'lpo_no', 'project_no'].map(v => ({data:v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
