@@ -124,7 +124,7 @@
                     
                     row.find('.num').text(v.numbering);
                     row.find('.num-val').val(v.numbering);
-                    row.find('.row-indx').val(v.row_index);                    
+                    row.find('.row-index').val(v.row_index);                    
                     row.find('.verification-id').text(v.verification_id);
 
                     const tid = `${quote.tid}`.length < 4? `000${quote.tid}`.slice(-4) : quote.tid;
