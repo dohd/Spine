@@ -46,7 +46,6 @@ use App\Models\lpo\Lpo;
 use App\Models\term\Term;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use App\Repositories\Focus\pos\PosRepository;
-use Egulias\EmailValidator\Warning\QuotedPart;
 use Endroid\QrCode\QrCode;
 use Error;
 use Illuminate\Validation\ValidationException;
@@ -193,13 +192,17 @@ class InvoicesController extends Controller
             return redirect()->back()->with('flash_error', 'Please filter records by customer!');
         }
 
-        // set quotes in order of selection
-        $quotes = collect();
-        foreach ($quote_ids as $id) {
-            $quote = Quote::where('id', $id)
-                ->with(['verified_products' => fn($q) =>$q->orderBy('row_index', 'ASC')])->first();
-            $quotes->add($quote);
-        }
+        // Quote/PI in order of selection
+        $quotes = Quote::whereIn('id', $quote_ids)
+            ->orderByRaw("FIELD(id,{$request->selected_products})")
+            ->with(['verified_products' => fn($q) =>$q->orderBy('row_index', 'ASC')])
+            ->get();
+        // $quotes = collect();
+        // foreach ($quote_ids as $id) {
+        //     $quote = Quote::where('id', $id)
+        //         ->with(['verified_products' => fn($q) =>$q->orderBy('row_index', 'ASC')])->first();
+        //     $quotes->add($quote);
+        // }
 
         $customer = Customer::find($customer_id) ?: new Customer;
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
