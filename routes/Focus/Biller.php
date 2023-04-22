@@ -170,6 +170,12 @@ Route::group(['namespace' => 'department'], function () {
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
 
+Route::group(['namespace' => 'employee_branch'], function () {
+    Route::resource('employee_branch', 'EmployeeBranchController');
+    //For Datatable
+    Route::post('employee_branch/get', 'EmployeeBranchTableController')->name('employee_branch.get');
+});
+
 Route::group(['namespace' => 'jobtitle'], function () {
     Route::post('jobtitles/select', 'JobTitleController@select')->name('jobtitles.select');
     Route::resource('jobtitles', 'JobTitleController');
@@ -433,6 +439,7 @@ Route::group(['namespace' => 'quote'], function () {
     Route::get('quotes/verify/{quote}', 'QuotesController@verify_quote')->name('quotes.verify');
     Route::post('quotes/verified_jcs/{id}', 'QuotesController@fetch_verified_jcs')->name('quotes.fetch_verified_jcs');
     Route::get('quotes/get_verify', 'QuotesController@get_verify_quote')->name('quotes.get_verify_quote');
+    Route::get('quotes/turn_around', 'QuotesController@turn_around')->name('quotes.turn_around');
 
     // should be delete methods
     Route::get('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
@@ -445,6 +452,7 @@ Route::group(['namespace' => 'quote'], function () {
     //For Datatable
     Route::post('quotes/get_project', 'QuoteVerifyTableController')->name('quotes.get_project');
     Route::post('quotes/get', 'QuotesTableController')->name('quotes.get');
+    Route::post('turn_around/search', 'TurnAroundTimeTableController')->name('turn_around.search');
 });
 
 Route::group(['namespace' => 'region'], function () {

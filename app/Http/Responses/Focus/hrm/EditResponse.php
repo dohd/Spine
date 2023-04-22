@@ -8,6 +8,7 @@ use App\Models\Access\Role\Role;
 use App\Models\department\Department;
 use App\Models\hrm\HrmMeta;
 use Illuminate\Contracts\Support\Responsable;
+use App\Models\employee_branch\EmployeeBranch;
 
 class EditResponse implements Responsable
 {
@@ -34,6 +35,7 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $departments = Department::all()->pluck('name','id');
+        $employee_branch = EmployeeBranch::all()->pluck('name','id');
         $roles = Role::where('status', 0)->get();
 
         $hrm_metadata = $this->hrms->meta? $this->hrms->meta->toArray() : [];
@@ -52,6 +54,6 @@ class EditResponse implements Responsable
         $general['create'] = $this->hrms->id;
         $permissions = PermissionUser::all()->keyBy('id')->where('user_id', $general['create'])->toArray();
 
-        return view('focus.hrms.edit',compact('hrms', 'roles', 'general', 'permissions_all', 'permissions', 'departments', 'last_tid'));
+        return view('focus.hrms.edit',compact('hrms', 'roles', 'general', 'permissions_all', 'permissions', 'departments', 'last_tid','employee_branch'));
     }
 }

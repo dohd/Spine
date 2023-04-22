@@ -181,6 +181,7 @@ class PurchaseordersController extends Controller
         $stock_goods = $purchaseorder? $purchaseorder->goods()->where('type', 'Stock')->get() : collect();
         $stock_goods = $stock_goods->map(function($v) {
             if ($v->productvariation) $v->description .= " - {$v->productvariation->code}";
+            $v->project_tid = gen4tid("PRJ-", $v->project->tid);
             return $v;
         });
 

@@ -34,6 +34,7 @@ use App\Models\customer\Customer;
 use App\Models\items\VerifiedItem;
 use App\Models\lpo\Lpo;
 use App\Models\verifiedjcs\VerifiedJc;
+use App\Models\employee_branch\EmployeeBranch;
 
 /**
  * QuotesController
@@ -64,8 +65,9 @@ class QuotesController extends Controller
     public function index(ManageQuoteRequest $request)
     {   
         $customers = Customer::all(['id', 'company']);
+        $employee_branch = EmployeeBranch::all(['id','name']);
         
-        return new ViewResponse('focus.quotes.index', compact('customers'));
+        return new ViewResponse('focus.quotes.index', compact('customers','employee_branch'));
     }
 
     /**
@@ -339,5 +341,11 @@ class QuotesController extends Controller
         Quote::find($input['bill_id'])->update(['lpo_id' => $input['lpo_id']]);
 
         return response()->json(['status' => 'Success', 'message' => 'LPO added successfully', 'refresh' => 1 ]);
+    }
+    public function turn_around()
+    {
+        $customers = Customer::all(['id', 'company']);
+        
+        return new ViewResponse('focus.turn_around.index', compact('customers'));
     }
 }

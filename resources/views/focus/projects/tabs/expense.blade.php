@@ -36,7 +36,18 @@
             </table>
         </div>  
         <br>
-        <h5 class="font-weight-bold">Total Issued Stock Item Amount: <span>{{ numberFormat(0) }}</span></h5>
+        @php
+           $price = 0;
+           foreach ($project->quotes as $quotes) {
+             foreach ($quotes->projectstock as $projectstock) {
+                foreach ($projectstock->items as $items) {
+                   // dd($items->product->sum('purchase_price'));
+                    $price = $items->product->sum('purchase_price');
+                }
+             }
+           }
+        @endphp
+        <h5 class="font-weight-bold">Total Issued Stock Item Amount: <span>{{ numberFormat($price) }}</span></h5>
         <div class="table-responsive">
             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                 <thead>
@@ -61,7 +72,7 @@
                                     <td>{{ $item->unit }}</td>
                                     <td>{{ +$item->qty }}</td>
                                     <td>{{ $item->product->warehouse->title }}</td>
-                                    <td>{{ numberFormat($item->amount) }}</td>
+                                    <td>{{ numberFormat($item->product->purchase_price) }}</td>
                                 </tr>                                
                             @endforeach                            
                         @endforeach                        

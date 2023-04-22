@@ -84,7 +84,7 @@
                                 <textarea id="expdescr-{{$i}}" class="form-control descr" name="description[]" placeholder="Enter Description">{{ $item->description }}</textarea>
                             </td>
                             <td colspan="5">
-                                <input type="text" class="form-control projectexp" value="{{ $item->project ? $item->project->name : '' }}" id="projectexptext-{{$i}}" placeholder="Enter Project">
+                                <input type="text" class="form-control projectexp" value="{{ $item->project ? '['.gen4tid('QT-', $item->project->quotes()->first()->tid).']'.' - '.$item->project->customer->name.' - '.$item->project->branch->name.' - '.gen4tid('PRJ-', $item->project->tid).' '.$item->project->name : '' }}" id="projectexptext-{{$i}}" placeholder="Enter Project">
                                 <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectexpval-{{$i}}">
                             </td>
                         </tr>

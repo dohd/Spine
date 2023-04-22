@@ -389,6 +389,7 @@
                                  @permission('create-rjc') 
                                 <li><a class="dropdown-item" href="{{ route('biller.rjcs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Report</a></li>
                                  @endauth 
+                                 <li><a class="dropdown-item" href="{{ route('biller.quotes.turn_around') }}" data-toggle="dropdown"> <i class="fa fa-clock-o" aria-hidden="true"></i> Turn Around Time</a></li>
                             </ul>
                         </li>
                          @endauth 
@@ -1061,6 +1062,23 @@
                         </li>
                         @endauth
 
+                        @permission('manage-holiday')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Employee Branch Management</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.employee_branch.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Emp. Branch
+                                    </a>
+                                </li>
+                                @endauth
+                                @permission('create-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.employee_branch.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Emp. Branch
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
                         @permission('manage-holiday')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
                             <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> Job Title Management</a>

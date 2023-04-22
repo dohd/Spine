@@ -253,6 +253,18 @@
 
             <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
                 <div class='form-group'>
+                    {{ Form::label( 'employee_branch', 'Employee Branch',['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        {!! Form::select('employee_branch_id', @$employee_branch, null, [
+                            'placeholder' => '-- Select employee_branch --',
+                            'class' => ' form-control round',
+                            'id' => 'employee_branch',
+                            'required' => 'required',
+                        ]) !!}
+
+                    </div>
+                </div>
+                <div class='form-group'>
                     {{ Form::label( 'department', trans('departments.department'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
                         {!! Form::select('department_id', @$departments, null, [
@@ -269,16 +281,6 @@
                     <div class='col-lg-10'>
                         {{ Form::text('position', null, ['class' => 'form-control box-size', 'placeholder' => 'Position']) }}
                     </div>
-                </div>
-                <div class="col-4">
-                    <label for="purchaseorder" class="caption">Position</label>
-                    <select name="purchaseorder_id" id="purchaseorder" class="custom-select">
-                        @isset($goodsreceivenote)
-                            <option value="{{ $goodsreceivenote->purchaserder_id }}">
-                                {{ $goodsreceivenote->purchaseorder? $goodsreceivenote->purchaseorder->note : '' }}
-                            </option>
-                        @endisset
-                    </select>
                 </div> 
 
                 <div class='form-group'>

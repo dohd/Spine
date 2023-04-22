@@ -2,7 +2,7 @@
 
 @php
     $query_str = request()->getQueryString();
-    $quote_label = trans('labels.backend.quotes.management');
+    $quote_label = "Turn Around Time";
     if ($query_str == 'page=pi') $quote_label = 'Proforma Invoice Management';
 @endphp
 
@@ -52,22 +52,22 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-3">
-                            <label for="total">Total Amount</label>                             
-                            <input type="text" name="amount_total" class="form-control" id="amount_total" readonly>
+                        
+                        
+                    </div> 
+                    <br>
+                    <div class="row">
+                        <div class="col-2">{{ trans('general.search_date')}} </div>
+                        <div class="col-2">
+                            <input type="text" name="start_date" id="start_date" class="form-control datepicker date30  form-control-sm" autocomplete="off" />
                         </div>
-                    </div>   
-                    <div class="row form-group">
-                        <div class="col-3">
-                            <label for="employee_branch" class="h4">Employee Branch</label>
-                            <select name="employee_branch_id" id="employee_branch" class="custom-select">
-                                <option value="">-- select location --</option>
-                                @foreach ($employee_branch as $branch)
-                                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                                @endforeach
-                            </select>
+                        <div class="col-2">
+                            <input type="text" name="end_date" id="end_date" class="form-control datepicker form-control-sm" autocomplete="off" />
                         </div>
-                    </div>                 
+                        <div class="col-2">
+                            <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
+                        </div>
+                    </div>                   
                 </div>
             </div>
         </div>
@@ -79,16 +79,23 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Date</th>   
-                                <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
-                                <th>Customer - Branch</th>   
-                                <th>Title</th>                                                                       
-                                <th>Amount</th>
-                                <th>Approval Date</th>
-                                <th>Client Ref</th>                                
+                                <th>Customer - Branch</th>
                                 <th>Ticket No</th>
+                                <th>Ticket Date</th>   
+                                <th>DJC No</th>
+                                <th>DJC Date</th>
+                                <th>{{ $query_str == 'page=pi' ? '#PI' : '#Quote'  }} No</th>
+                                <th>Quote Date</th>    
+                                <th>Approval Date</th> 
+                                <th>Project No.</th> 
+                                <th>Project Date</th> 
+                                <th>Verification Date</th>
+                                <th>RJC No</th>
+                                <th>RJC Date</th>
                                 <th>Invoice No</th>
-                                <th>{{ trans('labels.general.actions') }}</th>
+                                <th>Invoice Date</th>
+                               <th>Payment No</th>
+                               <th>Payment Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -117,15 +124,15 @@
 
     const Index = {
         customers: @json($customers),
-        employeeBranch: @json(request('employee_branch_id')),
 
         init(config) {
             $.ajaxSetup(config.ajaxSetup);
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#client').select2({allowClear: true}).val('').trigger('change');
-            $('#employee_branch').val(this.employeeBranch).change(this.employeeBranchChange);
+
             $('#filters').on('change', '#status_filter, #client', this.filterCriteriaChange);
             this.drawDataTable();
+            $('#search').click(this.searchDateClick);
         },
 
         filterCriteriaChange() {
@@ -135,11 +142,16 @@
                 client_id: $('#client').val()
             });   
         },
+        searchDateClick() {
+            const startDate = $('#start_date').val();
+            const endDate = $('#end_date').val();
+            if (!startDate || !endDate) return alert("Date range required!"); 
 
-        employeeBranchChange() {
-            Index.employeeBranch = $(this).val();
             $('#quotesTbl').DataTable().destroy();
-            return Index.drawDataTable();
+            return Index.drawDataTable({
+                start_date: startDate, 
+                end_date: endDate
+            });
         },
 
         drawDataTable(params={}) {
@@ -149,7 +161,7 @@
                 stateSave: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.quotes.get') }}",
+                    url: "{{ route('biller.turn_around.search') }}",
                     type: 'POST',
                     data: {
                         ...params,
@@ -166,18 +178,14 @@
                         name: 'id'
                     },
                     ...[
-                        'date', 'tid', 'customer', 'notes', 'total', 'approved_date', 'client_ref', 'lead_tid', 'invoice_tid'
-                    ].map(v => ({data: v, name: v})),
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
-                    }
+                        'customer','lead_tid', 'lead_date','djcs_tid','djcs_date','tid','date', 
+                         'approved_date','project_no','project_date','project_closure_date','rjcs','rjcs_date',  'invoice_tid', 'invoice_date','payment_tid','payment_date'
+                    ].map(v => ({data: v, name: v}))
+                    
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: 5 },
-                    { type: "custom-date-sort", targets: [1,6] }
+                    { type: "custom-date-sort", targets: [3,5,7,8,10,11,13,15,17] }
                 ],
                 order:[[0, 'desc']],
                 searchDelay: 500,

@@ -131,4 +131,8 @@ trait QuoteRelationship
     {
         return $this->hasOne(Lead::class, 'id', 'lead_id')->withoutGlobalScopes();
     }
+    public function employee_branch()
+    {
+        return $this->hasManyThrough(EmployeeBranch::class, User::class, 'id', 'user_id', 'id', 'employee_branch_id')->withoutGlobalScopes();
+    }
 }

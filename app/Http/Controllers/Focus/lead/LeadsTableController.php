@@ -77,8 +77,8 @@ class LeadsTableController extends Controller
                 }
                 return $days;
             })
-            ->addColumn('created_at', function ($lead) {
-                return dateFormat($lead->created_at);
+            ->addColumn('date_of_request', function ($lead) {
+                return dateFormat($lead->date_of_request);
             })
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;

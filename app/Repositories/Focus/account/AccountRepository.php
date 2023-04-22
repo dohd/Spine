@@ -54,6 +54,18 @@ class AccountRepository extends BaseRepository
       $q->whereHas('quotes', function ($q) {
         $q->whereHas('budget')->where('verified', 'Yes');
       });
+    })->when(request('expense') == 'expense', function ($q) {
+      $q->whereHas('purchase_items', function ($q) {
+        $q->where('type', 'Expense');
+      });
+    })->when(request('verified') == 'verified', function ($q) {
+      $q->whereHas('quotes', function ($q) {
+        $q->where('verified', 'Yes');
+      });
+    })->when(request('income') == 'income', function ($q) {
+      $q->whereHas('quotes', function ($q) {
+        $q->whereHas('invoice_product')->where('product_subtotal','>', '0.00');
+      });
     });
 
     $q->with(['customer_project', 'quotes', 'purchase_items']);

@@ -46,7 +46,7 @@
                                         <th>Title</th>
                                         <th>New/Existing</th>
                                         <th>Source</th>
-                                        <th>{{ trans('general.createdat') }}</th>
+                                        <th>Callout Date</th>
                                         <th>Client Ref</th>
                                         <th>Days to Event</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
@@ -112,8 +112,8 @@
                     name: 'source'
                 },
                 {
-                    data: 'created_at',
-                    name: 'created_at',
+                    data: 'date_of_request',
+                    name: 'date_of_request',
                 },
                 {
                     data: 'client_ref',

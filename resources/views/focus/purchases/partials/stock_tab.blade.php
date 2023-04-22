@@ -106,7 +106,7 @@
                                 </select>
                             </td>
                             <td colspan="4">
-                                <input type="text" class="form-control projectstock" value="{{ $item->project ? $item->project->name : '' }}" id="projectstocktext-0" placeholder="Search Project By Name">
+                                <input type="text" class="form-control projectstock" value="{{ $item->project ? '['.gen4tid('QT-', $item->project->quotes()->first()->tid).']'.' - '.$item->project->customer->name.' - '.$item->project->branch->name.' - '.gen4tid('PRJ-', $item->project->tid).' '.$item->project->name : '' }}" id="projectstocktext-0" placeholder="Search Project By Name">
                                 <input type="hidden" name="itemproject_id[]" value="{{ $item->itemproject_id }}" id="projectstockval-{{$i}}">
                             </td>
                         </tr>

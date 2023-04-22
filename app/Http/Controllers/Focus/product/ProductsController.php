@@ -216,10 +216,10 @@ class ProductsController extends Controller
                 ->map(function ($v) {
                     $item = '';
                     if ($v->row_num) {
-                        $item = $v->row_num;
+                        $item = "({$v->row_num})";
                     }
                     return $v->fill([
-                        'name' => "{$v->descr} - {$item}",
+                        'name' => "{$v->descr} {$item}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => $v->rate,
