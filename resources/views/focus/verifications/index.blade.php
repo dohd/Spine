@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Verification Management')
+@section('title', 'Partial Verification Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -77,7 +77,7 @@
                             <table id="verificationsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
+                                        <th><input type="checkbox" name="" id="select-all"></th>
                                         <th>#Ver No.</th>
                                         <th>#Quote / PI</th>
                                         <th>Customer</th>
@@ -118,6 +118,7 @@
             $('.select2').select2({allowClear: true});
 
             $('#verificationsTbl').on('change', '.select-row', this.selectRowChange);
+            $('#select-all').change(this.selectAllChange);
 
             $('#customer').change(this.customerChange);
             $('#lpo').change(this.lpoChange);
@@ -140,6 +141,25 @@
                 if (this.checked) quoteIds.push(this.value);
                 else quoteIds.splice(quoteIds.indexOf(this.value), 1);
                 $('#quote_ids').val(quoteIds.join(','));
+            } else {
+                this.checked = false;
+                swal('Filter records by customer before selection!');
+            }
+        },
+
+        selectAllChange() {
+            if ($('#customer').val()) {
+                if (this.checked) {
+                    $('.select-row').prop('checked', true);
+                    const quoteIds = [];
+                    $('.select-row').each(function() {
+                        quoteIds.push($(this).val());
+                    });
+                    $('#quote_ids').val(quoteIds.join(','));
+                } else {
+                    $('.select-row').prop('checked', false);
+                    $('#quote_ids').val('');
+                }
             } else {
                 this.checked = false;
                 swal('Filter records by customer before selection!');
