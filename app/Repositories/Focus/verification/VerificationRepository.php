@@ -79,13 +79,13 @@ class VerificationRepository extends BaseRepository
         ]);
         $data_items = modify_array($data_items);
         $jc_data_items = modify_array($jc_data_items);
-        // dd($data, $data_items, $jc_data_items);
+        
         DB::beginTransaction();
 
-        // part verification
+        // verification
         $verification = Verification::create($data);
 
-        // part verification items
+        // verification items
         $data_items = array_map(function($v) use($verification) {
             return array_replace($v, [
                 'parent_id' => $verification->id,
@@ -93,7 +93,7 @@ class VerificationRepository extends BaseRepository
         }, $data_items);
         VerificationItem::insert($data_items);
 
-        // part verification jobcards/dnotes
+        // verification jobcards/dnotes
         $jc_data_items = array_filter($jc_data_items, fn($v) => $v['reference']);
         $jc_data_items = array_map(function($v) use($verification) {
             return array_replace($v, [
@@ -101,6 +101,18 @@ class VerificationRepository extends BaseRepository
             ]);
         }, $jc_data_items);
         VerificationJc::insert($jc_data_items);
+
+        // update quote
+        $verification->quote->update([
+            'verified' => 'Yes', 
+            'verification_date' => date('Y-m-d'),
+            'verified_by' => auth()->user()->id,
+            'gen_remark' => $verification->note,
+            'verified_amount' => numberClean($verification->subtotal),
+            'verified_tax' => numberClean($verification->tax), 
+            'verified_total' => numberClean($verification->total),
+            'verified_taxable' => numberClean($verification->taxable),
+        ]);
 
         if ($verification) {
             DB::commit();
@@ -178,6 +190,19 @@ class VerificationRepository extends BaseRepository
             $db_item->save();
         }
 
+        // update related quote
+        $verification = Verification::where('quote_id', $verification->quote_id)->latest()->first();
+        $verification->quote->update([
+            'verified' => 'Yes', 
+            'verification_date' => date('Y-m-d'),
+            'verified_by' => auth()->user()->id,
+            'gen_remark' => $verification->note,
+            'verified_amount' => numberClean($verification->subtotal),
+            'verified_tax' => numberClean($verification->tax), 
+            'verified_total' => numberClean($verification->total),
+            'verified_taxable' => numberClean($verification->taxable),
+        ]);
+
         if ($is_updated) {
             DB::commit();
             return $verification;
@@ -193,6 +218,39 @@ class VerificationRepository extends BaseRepository
      */
     public function delete(Verification $verification)
     {   
-        if ($verification->delete()) return true;
+        DB::beginTransaction();
+
+        $verification_count = Verification::where('quote_id', $verification->quote_id)->count();
+        if ($verification_count > 0) {
+            $verifications = Verification::where('quote_id', $verification->quote_id)->latest();
+            if ($verifications->first()->id == $verification->id) {
+                $verifications[1]->quote->update([
+                    'verified' => 'Yes', 
+                    'verification_date' => date('Y-m-d'),
+                    'verified_by' => auth()->user()->id,
+                    'gen_remark' => $verification->note,
+                    'verified_amount' => numberClean($verifications[1]->subtotal),
+                    'verified_tax' => numberClean($verifications[1]->tax), 
+                    'verified_total' => numberClean($verifications[1]->total),
+                    'verified_taxable' => numberClean($verifications[1]->taxable),
+                ]);
+            }
+        } else {
+            $verification->quote->update([
+                'verified' => 'No', 
+                'verification_date' => '',
+                'verified_by' => '',
+                'gen_remark' => '',
+                'verified_amount' => 0,
+                'verified_tax' => 0,
+                'verified_total' => 0,
+                'verified_taxable' => 0,
+            ]);
+        }
+
+        if ($verification->delete()) {
+            DB::commit();
+            return true;
+        }
     }
 }
