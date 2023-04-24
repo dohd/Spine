@@ -47,32 +47,51 @@ class GoodsReceiveNoteTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = $this->repository->getForDataTable();
+        $query = $this->repository->getForDataTable();
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['goods_received','purchase_order'], $ins);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('tid', function ($grn) {
-                return gen4tid('GRN-', $grn->tid);
+            ->editColumn('tid', function ($grn) use ($prefixes){
+                return gen4tid("{$prefixes[0]}-", $grn->tid);
+            })
+            ->filterColumn('tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                } elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
+                }
             })
             ->addColumn('supplier', function ($grn) {
                 if ($grn->supplier)
                 return $grn->supplier->name;
             })        
-            ->addColumn('purchase_type', function ($grn) {
+            ->addColumn('purchase_type', function ($grn) use ($prefixes){
                 $po = $grn->purchaseorder;
                 if ($po) {
-                    $lpo_no = '<a href="'. route('biller.purchaseorders.show', $po) .'">'. gen4tid('PO-', $po->tid) .'</a>';
+                    $lpo_no = '<a href="'. route('biller.purchaseorders.show', $po) .'">'. gen4tid("{$prefixes[1]}-", $po->tid) .'</a>';
                     $note = $po->note;
                     return "({$lpo_no}) - {$note}";
                 }
             })
-            ->addColumn('dnote', function ($grn) {
+            ->filterColumn('purchase_type', function($query, $type) use($prefixes) {
+                $arr = explode('-', $type);
+                if (strtolower($arr[0]) == strtolower($prefixes[1]) && isset($arr[1])) {
+                    $query->whereHas('purchaseorder', fn($q) => $q->where('tid', floatval($arr[1])));
+                } elseif (floatval($type)) {
+                    $query->whereHas('purchaseorder', fn($q) => $q->where('tid', floatval($type)));
+                }
+            })
+            ->editColumn('dnote', function ($grn) {
                 return $grn->dnote;
             })
-            ->addColumn('date', function ($grn) {
+            ->editColumn('date', function ($grn) {
                 return dateFormat($grn->date);
             })
+            ->orderColumn('date', '-date $1')
             ->addColumn('actions', function ($grn) {
                 return $grn->action_buttons;
             })

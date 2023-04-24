@@ -48,7 +48,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             }
         });
         
-        return $q->get();
+        return $q;
     }
 
     /**

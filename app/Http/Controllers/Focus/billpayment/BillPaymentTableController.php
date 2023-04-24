@@ -47,48 +47,84 @@ class BillPaymentTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = $this->repository->getForDataTable();
-
+        $query = $this->repository->getForDataTable();
+        $query_1 = clone $query;
+        $prefixes = prefixesArray(['remittance','bill'], auth()->user()->ins);
         // aggregate
-        $amount_total = $core->sum('amount');
-        $unallocated_total = $amount_total - $core->sum('allocate_ttl');
+        $amount_total = $query_1->sum('amount');
+        $unallocated_total = $amount_total - $query_1->sum('allocate_ttl');
         $aggregate = [
             'amount_total' => numberFormat($amount_total),
             'unallocated_total' => numberFormat($unallocated_total),
         ];
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('tid', function ($billpayment) {
-                return gen4tid('RMT-', $billpayment->tid);
+            ->editColumn('tid', function ($billpayment) use ($prefixes) {
+                return gen4tid("{$prefixes[0]}-", $billpayment->tid);
+            })
+            ->filterColumn('tid', function($query, $tid) use ($prefixes){
+                $arr = explode('-',$tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                }
+                elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
+                }
             })
             ->addColumn('supplier', function ($billpayment) {
                 $supplier = $billpayment->supplier;
                 if ($supplier) 
                 return $supplier->name;
-            })    
+            }) 
+            ->filterColumn('supplier', function($query, $supplier) {
+                $query->whereHas('supplier', fn($q) => $q->where('name', 'LIKE', "%{$supplier}%"));
+            })   
             ->addColumn('account', function ($billpayment) {
                 if ($billpayment->account)
                 return $billpayment->account->holder;
             })
+            ->filterColumn('account', function($query, $account) {
+                $query->whereHas('account', fn($q) => $q->where('holder', 'LIKE', "%{$account}%"));
+            })
             ->addColumn('date', function ($billpayment) {
                 return dateFormat($billpayment->date);
             })
-            ->addColumn('amount', function ($billpayment) {
+            ->orderColumn('date', 'date $1')
+            ->editColumn('amount', function ($billpayment) {
                 return numberFormat($billpayment->amount);
+            })
+            ->orderColumn('amount', function ($query, $order) {
+                $query->orderBy('amount', $order);
             })
             ->addColumn('unallocated', function ($billpayment) {
                 return numberFormat($billpayment->amount - $billpayment->allocate_ttl);
             })
-            ->addColumn('bill_no', function ($billpayment) {
+            ->addColumn('bill_no', function ($billpayment) use ($prefixes) {
                 $links = [];
                 foreach ($billpayment->bills as $bill) {
-                    $tid = gen4tid('BILL-', $bill->tid);
+                    $tid = gen4tid("{$prefixes[1]}-", $bill->tid);
                     $links[] = '<a href="'. route('biller.utility-bills.show', $bill) .'">'.$tid.'</a>';
                 }
                 
                 return implode(', ', $links);
+            })
+            ->filterColumn('bill_no', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[1]) && isset($arr[1])) {
+                    $query->whereHas('bills', fn($q) => $q->where('tid', floatval($arr[1])));
+                } elseif (floatval($tid)) {
+                    $query->whereHas('bills', fn($q) => $q->where('tid', floatval($tid)));
+                }
+            })
+            ->orderColumn('bill_no', function ($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[1]) && isset($arr[1])) {
+                    $query->whereHas('bills', fn($q) => $q->where('tid', floatval($arr[1])));
+                } elseif (floatval($tid)) {
+                    $query->whereHas('bills', fn($q) => $q->where('tid', floatval($tid)));
+                }
             })
             ->addColumn('aggregate', function ($billpayment) use($aggregate) {
                 return $aggregate;

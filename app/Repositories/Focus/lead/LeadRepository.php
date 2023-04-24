@@ -27,9 +27,7 @@ class LeadRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
-
-        return $q->get();
+        return $this->query();
     }
 
     /**

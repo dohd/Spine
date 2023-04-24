@@ -33,7 +33,7 @@ class PriceListRepository extends BaseRepository
             $q->where(['supplier_id' => request('supplier_id')]);
         });
 
-        return $q->get();
+        return $q;
     }
 
     /**

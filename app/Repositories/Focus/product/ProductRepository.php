@@ -76,7 +76,7 @@ class ProductRepository extends BaseRepository
 
         $q->with('standard');
 
-        return $q->get();
+        return $q;
     }
 
     /**

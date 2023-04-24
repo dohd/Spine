@@ -51,22 +51,23 @@ class InvoicePaymentsTableController extends Controller
      */
     public function __invoke(ManageInvoiceRequest $request)
     {
-        $core = $this->repository->getForDataTable();
-        $prefixes = prefixesArray(['invoice'], auth()->user()->ins);
+        $query = $this->repository->getForDataTable();
+        $prefixes = prefixesArray(['invoice','payment'], auth()->user()->ins);
         
+        $query_1 = clone $query;
         // aggregate
-        $amount_total = $core->sum('amount');
-        $unallocated_total = $amount_total - $core->sum('allocate_ttl');
+        $amount_total = $query_1->sum('amount');
+        $unallocated_total = $amount_total - $query_1->sum('allocate_ttl');
         $aggregate = [
             'amount_total' => numberFormat($amount_total),
             'unallocated_total' => numberFormat($unallocated_total),
         ];
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('tid', function ($payment) {
-                return gen4tid('PMT-', $payment->tid);
+            ->addColumn('tid', function ($payment) use($prefixes) {
+                return gen4tid("{$prefixes[1]}-", $payment->tid);
             })
             ->addColumn('account', function ($payment) {
                 if ($payment->account)
@@ -75,6 +76,7 @@ class InvoicePaymentsTableController extends Controller
             ->addColumn('date', function ($payment) {
                 return dateFormat($payment->date);
             })
+            ->orderColumn('date', '-date $1')
             ->addColumn('amount', function ($payment) {
                 return numberFormat($payment->amount);
             })

@@ -52,21 +52,31 @@ class EquipmentsTableController extends Controller
    */
   public function __invoke(ManageEquipmentRequest $request)
   {
-    $core = $this->repository->getForDataTable();
+    $query = $this->repository->getForDataTable();
+    $prefixes = prefixesArray(['equipment'], auth()->user()->ins);
     
-    return Datatables::of($core)
+    return Datatables::of($query)
       ->escapeColumns(['id'])
       ->addIndexColumn()
-      ->addColumn('tid', function ($equipment) {
-        return gen4tid('Eq-', $equipment->tid);
+      ->editColumn('tid', function ($equipment) use($prefixes) {
+        return gen4tid("{$prefixes[0]}-", $equipment->tid);
       })
+      ->filterColumn('tid', function($query, $tid) use ($prefixes){
+        $arr = explode('-',$tid);
+        if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+            $query->where('tid', floatval($arr[1]));
+        }
+        elseif (floatval($tid)) {
+            $query->where('tid', floatval($tid));
+        }
+    })
       ->addColumn('customer', function ($equipment) {
         $customer = $equipment->customer;
         $branch = $equipment->branch;
         if ($customer && $branch)
           return "{$customer->company} - {$branch->name}";
       })
-      ->addColumn('capacity', function ($equipment) {
+      ->editColumn('capacity', function ($equipment) {
         return $equipment->capacity;
       })
       ->addColumn('service_rate', function ($equipment) {

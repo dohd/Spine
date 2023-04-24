@@ -58,10 +58,18 @@ class QuotesTableController extends Controller
         return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function ($quote) use($prefixes) {               
+            ->editColumn('tid', function ($quote) use($prefixes) {               
                 $link = route('biller.quotes.show', [$quote->id]);
                 if ($quote->bank_id) $link = route('biller.quotes.show', [$quote->id, 'page=pi']);
                 return '<a class="font-weight-bold" href="' . $link . '">' . gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid) . '</a>';
+            })
+            ->filterColumn('tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[1]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                } elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
+                }
             })
             ->addColumn('customer', function ($quote) {
                 $customer = '';
@@ -77,6 +85,7 @@ class QuotesTableController extends Controller
             ->addColumn('date', function ($quote) {
                 return dateFormat($quote->date);
             })
+            ->orderColumn('date', '-date $1')
             ->addColumn('total', function ($quote) {
                 if ($quote->currency) return amountFormat($quote->total, $quote->currency->id);
                 return numberFormat($quote->total);
@@ -84,16 +93,33 @@ class QuotesTableController extends Controller
             ->addColumn('approved_date', function ($quote) {
                 return $quote->approved_date? dateFormat($quote->approved_date) : '';
             })
-            ->addColumn('lead_tid', function($quote) use($prefixes) {
+            ->orderColumn('approved_date', '-approved_date $1')
+            ->editColumn('lead_tid', function($quote) use($prefixes) {
                 $link = '';
                 if ($quote->lead) {
                     $link = '<a href="'. route('biller.leads.show', $quote->lead) .'">'.gen4tid("{$prefixes[2]}-", $quote->lead->reference).'</a>';
                 }
                 return $link;
             })
+            ->filterColumn('lead_tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[2]) && isset($arr[1])) {
+                    $query->whereHas('lead', fn($q) => $q->where('reference', floatval($arr[1])));
+                } elseif (floatval($tid)) {
+                    $query->whereHas('lead', fn($q) => $q->where('reference', floatval($tid)));
+                }
+            })
             ->addColumn('invoice_tid', function ($quote) use($prefixes) {
                 $inv_product = $quote->invoice_product;
                 if ($inv_product) return gen4tid("{$prefixes[3]}-", $inv_product->invoice->tid);
+            })
+            ->filterColumn('invoice_tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[3]) && isset($arr[1])) {
+                    $query->whereHas('invoice', fn($q) => $q->where('tid', floatval($arr[1])));
+                } elseif (floatval($tid)) {
+                    $query->whereHas('invoice', fn($q) => $q->where('tid', floatval($tid)));
+                }
             })
             ->addColumn('sum_total', function ($quote) use($sum_total) {
                 return $sum_total;

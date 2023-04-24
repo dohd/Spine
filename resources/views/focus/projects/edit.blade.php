@@ -49,6 +49,7 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
     // initialize datepicker
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
     $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}" });
     $('.from_date').datepicker('setDate', "{{ dateFormat($project->start_date) }}");
     $('.from_date').datepicker({ format: "{{ config('core.user_date_format') }}" });
@@ -115,8 +116,13 @@
         // fetch customer branches
         $("#branch_id").html('').select2({
             ajax: {
-                url: "{{route('biller.branches.select')}}?id=" + id,
+                url: "{{route('biller.branches.select')}}",
+                method: "POST",
                 dataType: 'json',
+                data: ({term}) => ({ 
+                            search: term, 
+                            customer_id: id,
+                        }),
                 quietMillis: 50,
                 processResults: function(data) {
                     return {

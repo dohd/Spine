@@ -52,14 +52,24 @@ class PurchasesTableController extends Controller
     public function __invoke(ManagePurchaseRequest $request)
     {
         $query = $this->purchase->getForDataTable();
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['direct_purchase'], $ins);
 
         return Datatables::of($query)
             ->addIndexColumn()
             ->escapeColumns(['id'])
-            ->addColumn('tid', function ($purchase) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchases.show', $purchase->id) . '">' . gen4tid('DP-', $purchase->tid) . '</a>';
+            ->editColumn('tid', function ($purchase) use($prefixes) {
+                return '<a class="font-weight-bold" href="' . route('biller.purchases.show', $purchase->id) . '">' . gen4tid("{$prefixes[0]}-", $purchase->tid) . '</a>';
             })
-            ->addColumn('date', function ($purchase) {
+            ->filterColumn('tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                } elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
+                }
+            })
+            ->editColumn('date', function ($purchase) {
                 return dateFormat($purchase->date);
             })
             ->addColumn('supplier', function ($purchase) {
@@ -72,11 +82,17 @@ class PurchasesTableController extends Controller
 
                 return ' <a class="font-weight-bold" href="'. route('biller.suppliers.show', $purchase->supplier_id) .'">'. $name .'</a>';
             })
+            ->filterColumn('supplier', function($query, $supplier) {
+                $query->whereHas('supplier', fn($q) => $q->where('name', 'LIKE', "%{$supplier}%"));
+            })
             ->addColumn('reference', function ($purchase) {
                 $reference = $purchase->doc_ref_type;
                 if ($purchase->doc_ref) $reference .= " - {$purchase->doc_ref}";
                 
                 return $reference;
+            })
+            ->filterColumn('reference', function($query, $reference) {
+                $query->where('doc_ref_type', 'LIKE', "%{$reference}%")->orwhere('doc_ref', 'LIKE', "%{$reference}%");
             })
             ->addColumn('amount', function ($purchase) {
                 return numberFormat($purchase->grandttl);

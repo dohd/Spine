@@ -54,19 +54,19 @@ class ProductsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->repository->getForDataTable();
-
+        $query = $this->repository->getForDataTable();
+        $query_1 = clone $query;
         // aggregate
         $product_count = 0;
         $product_worth = 0;
-        foreach ($core as $product) {
+        foreach ($query_1->get() as $product) {
             $product_count += $product->variations()->count();
             $product_worth += $product->variations()->sum(DB::raw('purchase_price*qty'));
         }
         $product_worth = amountFormat($product_worth);
         $aggregate = compact('product_count', 'product_worth');
        
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($product) {
@@ -77,8 +77,15 @@ class ProductsTableController extends Controller
                 $this->standard_product = $product->standard ?: $product;
                 return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product->name . '</a>';
             })
+            ->filterColumn('name', function($query, $name) {
+                $query->where('name', 'LIKE', "%{$name}%");
+            })
             ->addColumn('code', function ($product) {
                 return  $this->standard_product->code;
+            })
+            ->filterColumn('code', function($query, $code) {
+
+                $query->whereHas('variations', fn($q) => $q->where('code', 'LIKE', "%{$code}%"));
             })
             ->addColumn('qty', function ($product) {
                 return $product->variations->sum('qty');       
@@ -100,6 +107,7 @@ class ProductsTableController extends Controller
             ->addColumn('created_at', function ($product) {
                 return dateFormat($product->created_at);
             })
+            ->orderColumn('created_at', '-created_at $1')
             ->addColumn('actions', function ($product) {
                 return $product->action_buttons;
             })
