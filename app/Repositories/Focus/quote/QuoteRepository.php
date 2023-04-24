@@ -50,6 +50,9 @@ class QuoteRepository extends BaseRepository
                 case 'Unapproved':
                     $q->whereNull('approved_by');
                     break;
+                case 'Approved & Uninvoiced':
+                    $q->whereNotNull('approved_by')->doesntHave('invoice_product');
+                    break;                    
                 case 'Approved & Unbudgeted':
                     $q->whereNotNull('approved_by')->whereNull('project_quote_id');
                     break;

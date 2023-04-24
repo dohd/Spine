@@ -40,7 +40,7 @@
                             <label for="filter">Filter Criteria</label>                             
                             @php
                                 $criteria = [
-                                    'Unapproved', 'Approved & Unbudgeted', 'Approved without LPO & Uninvoiced', 
+                                    'Unapproved', 'Approved & Uninvoiced', 'Approved without LPO & Uninvoiced', 'Approved & Unbudgeted',  
                                     'Budgeted & Unverified', 'Verified with LPO & Uninvoiced', 'Verified without LPO & Uninvoiced',
                                     'Invoiced & Due', 'Invoiced & Partially Paid', 'Invoiced & Paid', 'Cancelled'
                                 ];
