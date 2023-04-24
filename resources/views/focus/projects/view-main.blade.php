@@ -123,9 +123,13 @@
                                             <li>{{trans('projects.owner')}}: <span
                                                         class="text-muted text-bold-600 blue">{{$project->creator->first_name.' '.$project->creator->last_name}}</span>
                                             </li>
-                                                <li>{{trans('customers.customer')}}: <span
-                                                        class="text-bold-600 primary"><a
-                                            href="{{route('biller.customers.show',[$project->customer->id])}}">{{$project->customer->name}} ({{$project->customer->company}})</a></span>
+                                            <li>
+                                                {{trans('customers.customer')}}: 
+                                                <span class="text-bold-600 primary">
+                                                    <a href="{{route('biller.customers.show',[$project->customer->id])}}">
+                                                        {{ @$project->customer->company }} - {{ @$project->branch->name }}
+                                                    </a>
+                                                </span>
                                             </li>
                                             @if($project->worth>0.00)  <li>{{trans('projects.worth')}}: <span
                                                         class="text-bold-600 primary">{{amountFormat($project->worth)}}</span>
