@@ -19,11 +19,18 @@
             $('#customer').change(this.customerChange);
             $('#add-reminder').change(this.reminderChange);
             if (this.lead) {
-                $('#customer').val(this.lead.client_id).change();
-                $('#branch').val(this.lead.branch_id);
-                $('#date_of_request').datepicker('setDate', new Date(this.lead.date_of_request));
-                $('#reminder_date').val(this.lead.reminder_date);
-                $('#exact_date').val(this.lead.exact_date);
+                const lead = this.lead;
+                $('#customer').val(lead.client_id).change();
+                $('#branch').val(lead.branch_id);
+                $('#date_of_request').datepicker('setDate', new Date(lead.date_of_request));
+                $('#reminder_date').val(lead.reminder_date);
+                $('#exact_date').val(lead.exact_date);
+                ['reminder_date', 'exact_date'].forEach(v => $('#' + v).attr('disabled', false));
+                if (lead.client_id == 0) {
+                    ['payer-name', 'client_email', 'client_contact', 'client_address']
+                    .forEach(v => $('#' + v).attr('readonly', false));
+                    $('#colorCheck3').prop('checked', true);
+                }
             } else {
                 $('#customer').val('').change();
                 $('#branch').val('').change();
