@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Leave Management')
+@section('title', 'Tax PRN Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Leave Management</h4>
+            <h4 class="content-header-title">Tax PRN Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.leave.partials.leave-header-buttons')
+                @include('focus.tax_prns.partials.tax-prn-header-buttons')
             </div>
         </div>
     </div>
@@ -18,39 +18,31 @@
     <div class="content-body">
         <div class="card">
             <div class="card-content">
-                <div class="card-header">
-                    <a href="#" class="btn btn-warning btn-sm mr-1" data-toggle="modal" data-target="#leaveStatusModal">
-                        <i class="fa fa-pencil" aria-hidden="true"></i> Status
-                    </a>
-                </div>
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         @php
-                            $employee_name = '';
-                            $employee = $leave->employee;
-                            if ($employee) $employee_name = $employee->first_name . ' ' . $employee->last_name;
-                        
                             $details = [
-                                'Employee' => $employee_name,
-                                'Leave Category' => $leave->leave_category? $leave->leave_category->title : '',
-                                'Leave Status' => $leave->status,
-                                'Leave Reason' => $leave->reason,
-                                'Leave Duration' => $leave->qty . ' days',
-                                'Start Date' => dateFormat($leave->start_date),
-                                'End Date' => dateFormat($leave->end_date),
+                                'Return Month' => $tax_prn->return_month,
+                                'PRN Code' => $tax_prn->code,
+                                'Payment Mode' => ucfirst($tax_prn->payment_mode),
+                                'Amount' => numberFormat($tax_prn->amount),
+                                'Date' => dateFormat($tax_prn->date),
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
                                 <th width="30%">{{ $key }}</th>
                                 <td>
-                                    @if ($key == 'Leave Status')
-                                        <span class="text-success">{{ $val }}</span>
+                                    @if ($key == 'Return Month')
+                                        <span class="mr-1">{{ $val }}</span>
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['return_month' => $tax_prn->return_month]) }}" title="Tax Returns">
+                                            <i class="fa fa-list"></i> List
+                                        </a>  
                                     @else
                                         {{ $val }}
-                                    @endif
+                                    @endif  
                                 </td>
-                            </tr>
+                            </tr>                           
                         @endforeach
                     </table>
                 </div>
@@ -58,5 +50,4 @@
         </div>
     </div>
 </div>
-@include('focus.leave.partials.leave-status-modal')
 @endsection

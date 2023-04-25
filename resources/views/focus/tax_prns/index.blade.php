@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Leave Management')
+@section('title', 'Tax PRN Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Leave Management</h4>
+            <h4 class="content-header-title">Tax PRN Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.leave.partials.leave-header-buttons')
+                @include('focus.tax_prns.partials.tax-prn-header-buttons')
             </div>
         </div>
     </div>
@@ -21,17 +21,15 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="leaveTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="taxPrnTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Employee</th>
-                                        <th>Leave Category</th>
-                                        <th>Leave Reason</th>
-                                        <th>Leave Duration</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Status</th>
+                                        <th>Return Month</th>
+                                        <th>PRN Code</th>
+                                        <th>Payment Mode</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -67,24 +65,18 @@
         },
 
         drawDataTable() {
-            $('#leaveTbl').dataTable({
+            $('#taxPrnTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.leave.get') }}",
+                    url: "{{ route('biller.tax_prns.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'employee', name: 'employee'},
-                    {data: 'leave_category', name: 'leave_category'},                    
-                    {data: 'reason', name: 'reason'},
-                    {data: 'qty', name: 'qty'},
-                    {data: 'start_date', name: 'start_date'},
-                    {data: 'end_date', name: 'end_date'},
-                    {data: 'status', name: 'status'},
+                    ...['return_month', 'code', 'payment_mode', 'amount', 'date'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

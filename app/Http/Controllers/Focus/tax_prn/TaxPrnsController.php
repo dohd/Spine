@@ -24,6 +24,7 @@ use App\Http\Responses\ViewResponse;
 use App\Models\tax_prn\TaxPrn;
 use App\Repositories\Focus\tax_prn\TaxPrnRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TaxPrnsController extends Controller
 {
@@ -57,7 +58,11 @@ class TaxPrnsController extends Controller
      */
     public function create()
     {
-        return view('focus.tax_prns.create');
+        $month = date('m')-1? date('m')-1 : 12;
+        $year = date('m')-1? date('Y') : date('Y')-1;
+        $prev_month = strlen($month) == 1? "0{$month}-{$year}" : "{$month}-{$year}";
+
+        return view('focus.tax_prns.create', compact('prev_month'));
     }
 
     /**
@@ -67,11 +72,15 @@ class TaxPrnsController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate(['return_month' => 'required']);
+
         try {
             $this->repository->create($request->except('_token'));
-        } catch (\Throwable $th) {
-            errorHandler('Error Creating Tax PRN', $th);
+        } catch (\Throwable $th) { dd($th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Creating Tax PRN', $th);
         }
+
         return new RedirectResponse(route('biller.tax_prns.index'), ['flash_success' => 'Tax PRN Created Successfully']);
     }
 
@@ -95,9 +104,12 @@ class TaxPrnsController extends Controller
      */
     public function update(Request $request, TaxPrn $tax_prn)
     {
+        $request->validate(['return_month' => 'required']);
+
         try {
             $this->repository->update($tax_prn, $request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Tax PRN', $th);
         }
 
@@ -115,6 +127,7 @@ class TaxPrnsController extends Controller
         try {
             $this->repository->delete($tax_prn);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Tax PRN', $th);
         }
 

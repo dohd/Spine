@@ -42,6 +42,24 @@ Route::group(['namespace' => 'account'], function () {
     Route::post('accounts/project_gross_profit/get', 'ProjectGrossProfitTableController')->name('accounts.get_project_gross_profit');
     Route::post('accounts/get', 'AccountsTableController')->name('accounts.get');
 });
+
+// Tax Return
+Route::group(['namespace' => 'tax_report'], function () {
+    Route::get('tax_reports/filed_report', 'TaxReportsController@filed_report')->name('tax_reports.filed_report');
+    Route::post('tax_reports/purchases', 'TaxReportsController@get_purchases')->name('tax_reports.get_purchases');
+    Route::post('tax_reports/sales', 'TaxReportsController@get_sales')->name('tax_reports.get_sales');
+    Route::resource('tax_reports', 'TaxReportsController');
+    // data table
+    Route::post('tax_reports/get_filed_items', 'FiledTaxReportsTableController')->name('tax_reports.get_filed_items');
+    Route::post('tax_reports/get', 'TaxReportsTableController')->name('tax_reports.get');
+});
+Route::group(['namespace' => 'tax_prn'], function () {
+    Route::resource('tax_prns', 'TaxPrnsController');
+    // data table
+    Route::post('tax_prns/get', 'TaxPrnsTableController')->name('tax_prns.get');
+});
+
+
 Route::group(['namespace' => 'allowance'], function () {
     Route::resource('allowances', 'AllowancesController');
     //For Datatable

@@ -46,7 +46,7 @@
                                 <td>
                                     @if ($key == 'Sale/Purchase Month')
                                         <span class="mr-1">{{ $val }}</span>
-                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', $filed_report_params) }}" title="field_returns">
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', $filed_report_params) }}" title="Tax Returns">
                                             <i class="fa fa-list"></i> List
                                         </a>  
                                     @else

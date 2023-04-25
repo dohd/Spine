@@ -1,38 +1,34 @@
 <div class="form-group row">
-    <div class="col-3">
-        <label for="employee">Leave Applicant</label>
-    </div>
-    <div class="col-2">
-        <label for="category">Leave Category</label>
-        
-    </div>
-    <div class="col-2">
-        <label for="title">Viable Leave Days</label>
-        {{ Form::text('viable_qty', null, ['class' => 'form-control', 'id' => 'viable_days', 'readonly']) }}
-    </div>
-    <div class="col-2">
-        <label for="days">Leave Start Date</label>
-        {{ Form::text('start_date', null, ['class' => 'form-control datepicker', 'id' => 'start_date']) }}
-    </div>
-    <div class="col-2">
-        <label for="qty">Leave Duration (Days)</label>
-        {{ Form::number('qty', null, ['class' => 'form-control', 'min' => '1', 'id' => 'qty', 'required']) }}
-    </div>    
+    <div class="col-6">
+        <label for="return_month">Return Month</label>
+        {{ Form::text('return_month', @$prev_month, ['class' => 'form-control datepicker', 'id' => 'return_month', 'required']) }}
+    </div> 
+    <div class="col-6">
+        <label for="date">Date</label>
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
+    </div> 
 </div>
 
 <div class="form-group row">
-    <div class="col-12">
-        <label for="title">Reason for Leave Request</label>
-        {{ Form::text('reason', null, ['class' => 'form-control', 'id' => 'title', 'required']) }}
-    </div>
+    <div class="col-6">
+        <label for="prn_code">PRN Code</label>
+        {{ Form::text('code', null, ['class' => 'form-control', 'id' => 'prn_code', 'required']) }}
+    </div> 
+    <div class="col-3">
+        <label for="mode">Payment Mode</label>
+        <select name="payment_mode" id="payment_mode" class="custom-select">
+            @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
+                <option value="{{ $val }}">{{ strtoupper($val) }}</option>
+            @endforeach
+        </select>
+    </div> 
+    <div class="col-3">
+        <label for="amount">Payment Amount</label>
+        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
+    </div> 
+    
 </div>
 
-<div class="form-group row">
-    <div class="col-3">
-        <label for="assistant">Duties Delegated To</label>
-        
-    </div>
-</div>
 
 <div class="form-group row no-gutters">
     <div class="col-1 ml-auto">
@@ -51,53 +47,33 @@
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
     };
 
-    const Index = {
-        leave: @json(@$tax_prn),
+    const Form = {
+        taxPrn: @json(@$tax_prn),
 
         init() {
             $.ajaxSetup(config.ajax);
-            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-            $('#leave_category').change(this.leaveCategoryChange);
-            $('#user').select2({allowClear: true});
-            $('#assist_user').select2({allowClear: true});
-
-            if (this.leave) {
-                $('#start_date').datepicker('setDate', new Date(this.leave.start_date));
-                $('#leave_category').val(this.leave.leave_category_id);
-            } else {
-                $('#user').val('').change();
-                $('#assist_user').val('').change();
-            }
-            $('#user').change(this.employeeChange);
-            $('#qty').change(this.leaveQtyChange);
-        },
-
-        leaveQtyChange() {
-            const qty = accounting.unformat($(this).val());
-            const viableDays = accounting.unformat($('#viable_days').val());
-            if (qty > viableDays) $(this).val(viableDays);
-        },
-
-        employeeChange() {
-            $('#viable_days').val('');
-            $('#leave_category option:not(:eq(0))').remove();
-            if (!$(this).val()) return; 
-
-            const url = "{{ route('biller.leave.leave_categories') }}";
-            $.post(url, {employee_id: $(this).val()}, data => {
-                data.forEach(v => {
-                    const opt = `<option value="${v.id}" category_qty="${v.qty}">${v.title}</option>`;
-                    $('#leave_category').append(opt);
-                });
+            // month picker
+            $('#return_month').datepicker({
+                autoHide: true,
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                format: 'MM-yyyy',
+                onClose: function(dateText, inst) { 
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
             });
-        },
+            $('#date').datepicker(config.date).datepicker('setDate', new Date());
 
-        leaveCategoryChange() {
-            const days = $(this).find(':selected').attr('category_qty');
-            $('#viable_days').val(days);
+            if (this.taxPrn) {
+                const taxPrn = this.taxPrn;
+                $('#date').datepicker('setDate', new Date(taxPrn.date));
+                $('#payment_mode').val(taxPrn.payment_mode);
+                $('#amount').val(accounting.formatNumber(taxPrn.amount*1));
+            }
         },
     };
 
-    $(() => Index.init());
+    $(() => Form.init());
 </script>
 @endsection
