@@ -330,6 +330,11 @@ class QuotesController extends Controller
      */
     public function approve_quote(ManageQuoteRequest $request, Quote $quote)
     {
+        $request->validate([
+            'approved_date' => 'required',
+            'approved_by' => 'required',
+        ]);
+        
         // extract request input fields
         $input = $request->only(['status', 'approved_method', 'approved_by', 'approval_note', 'approved_date']);
 
