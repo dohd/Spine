@@ -65,8 +65,8 @@ class TaxReportsController extends Controller
     {
         $additionals = Additional::all();
 
-        $month = (date('m')-1)? (date('m')-1) : 12;
-        $year = (date('m')-1)? date('Y') : (date('Y')-1);
+        $month = date('m')-1? date('m')-1 : 12;
+        $year = date('m')-1? date('Y') : date('Y')-1;
         $prev_month = strlen($month) == 1? "0{$month}-{$year}" : "{$month}-{$year}";
         
         return view('focus.tax_reports.create', compact('additionals', 'prev_month'));

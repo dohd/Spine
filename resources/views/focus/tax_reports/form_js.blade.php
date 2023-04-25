@@ -6,7 +6,7 @@
         date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
     };
 
-    const Index = {
+    const Form = {
         salesData: [],
         purchasesData: [],
         taxReport: @json(@$tax_report),
@@ -28,12 +28,12 @@
 
             $('#record_month').change(function() {
                 $('#tax_group').val('');
-                Index.fetchSales();
-                Index.fetchPurchases();
+                Form.fetchSales();
+                Form.fetchPurchases();
             });
             $('#tax_group').change(function() {
-                Index.saleTaxRateChange();
-                Index.purchaseTaxRateChange();
+                Form.saleTaxRateChange();
+                Form.purchaseTaxRateChange();
             });
             
             $('form').on('change', '#sale_file_all, #sale_remove_all, .sale-file-row, .sale-remove-row', this.saleRadioChange);
@@ -115,7 +115,7 @@
          * sales 
         */
         saleTaxRateChange() {
-            let data = Index.salesData;
+            let data = Form.salesData;
             const tax = $('#tax_group').val();
             if ($('#tax_group option:selected').attr('key') == '00') {
                 data = data.filter(v => parseFloat(v.tax_rate) == tax && v.is_tax_exempt);
@@ -123,7 +123,7 @@
                 data = data.filter(v => parseFloat(v.tax_rate) == tax && !v.is_tax_exempt);
             }
             
-            Index.renderSalesRow(data);
+            Form.renderSalesRow(data);
         },
         fetchSales() {
             const url = "{{ route('biller.tax_reports.get_sales') }}";
@@ -195,7 +195,7 @@
                 }
             });
 
-            Index.calcTotals();
+            Form.calcTotals();
         },
 
 
@@ -203,7 +203,7 @@
          * purchases
         */
         purchaseTaxRateChange() {
-            let data = Index.purchasesData;
+            let data = Form.purchasesData;
             const tax = $('#tax_group').val();
             if ($('#tax_group option:selected').attr('key') == '00') {
                 data = [];
@@ -211,7 +211,7 @@
                 data = data.filter(v => parseFloat(v.tax_rate) == tax);
             }
 
-            Index.renderPurchasesRow(data);
+            Form.renderPurchasesRow(data);
         },
         fetchPurchases() {
             const url = "{{ route('biller.tax_reports.get_purchases') }}";
@@ -283,7 +283,7 @@
                 }
             });
 
-            Index.calcTotals();
+            Form.calcTotals();
         },
 
         calcTotals() {
@@ -319,6 +319,6 @@
         },
     };
 
-    $(() => Index.init());
+    $(() => Form.init());
 </script>
 @endsection

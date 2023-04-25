@@ -741,6 +741,7 @@
                     </li>
                     @endauth
 
+                    {{-- Account --}}
                     @permission('manage-account')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Charts Of Accounts
                         </a>
@@ -758,7 +759,8 @@
                             </li>
                         </ul>
                     </li>
-                    
+
+                    {{-- Book balance report --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Book Balance Report</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance', 'v') }}"><i class="fa fa-balance-scale"></i> Trial Balance</a></li>
@@ -768,11 +770,20 @@
                         </ul>
                     </li>
 
+                    {{-- Tax Report --}}
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Tax Returns</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.tax_reports.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax Returns</a></li>
                             <li><a class="dropdown-item" href="{{ route('biller.tax_reports.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax Return</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.tax_reports.filed_report') }}"><i class="fa fa-book"></i> Filed Tax Returns</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- Tax PRN --}}
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Tax PRNs</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_prns.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax PRN</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_prns.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax PRN</a></li>
                         </ul>
                     </li>
                     @endauth
