@@ -35,13 +35,29 @@
                 </div>
             </div>
         </div>
+        <div class="form-group row">
+
+            <div class="col-sm-6"><label for="region" class="caption">Prospect Region</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                    {{ Form::text('region', null, ['class' => 'form-control round', 'placeholder' => 'Region', 'id' => 'region']) }}
+                </div>
+            </div>
+            <div class="col-sm-6"><label for="industry" class="caption">Industry</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                    {{ Form::text('industry', null, ['class' => 'form-control round', 'placeholder' => 'Industry', 'id' => 'industry']) }}
+                </div>
+            </div>
+        </div>
 
         <div class="form-group row">
 
             <div class="col-sm-12"><label for="reminder_date" class="caption">Reminder Date</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                    {{ Form::text('reminder_date',  @$prospect->remarks()->first()->reminder_date , ['class' => 'form-control round ', 'placeholder' => 'Date', 'id' => 'reminder_date']) }}
+                    {{-- <input type="text" value=" {{ @$prospect->remarks->reminder_date }} " class="form-control round" id="'reminder_date"> --}}
+                    {{ Form::text('reminder_date', null, ['class' => 'form-control round datepicker', 'placeholder' => 'Date', 'id' => 'reminder_date']) }}
                 </div>
             </div>
         </div>
@@ -49,7 +65,7 @@
             <div class="col-sm-12"><label for="remarks" class="caption">Remark</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::textarea('remarks', @$prospect->remarks()->first()->remarks, ['class' => 'form-control','rows' => 3, 'placeholder' => 'Remark','id'=>'remarks','required']) }}
+                    {{ Form::textarea('remarks',null, ['class' => 'form-control','rows' => 3, 'placeholder' => 'Remark','id'=>'remarks','required']) }}
                 </div>
             </div>
         </div>

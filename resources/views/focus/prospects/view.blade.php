@@ -68,7 +68,7 @@
                      
                     <tr>
                         <th>Reminder Date</th>
-                        <td>{{ dateFormat($prospect->reminder_date) }}</td>
+                        <td>{{ dateFormat($prospect->remarks->first()->reminder_date) }}</td>
                     </tr>                    
                     <tr>
                         <th>Remarks</th>

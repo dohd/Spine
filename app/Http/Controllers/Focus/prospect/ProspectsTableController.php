@@ -50,7 +50,7 @@ class ProspectsTableController extends Controller
     public function __invoke()
     {
         $core = $this->prospect->getForDataTable();
-        
+       
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -61,6 +61,16 @@ class ProspectsTableController extends Controller
                 $client_email = $prospect->email;
 
                 return $client_email;
+            })
+            ->addColumn('industry', function ($prospect) {
+                $client_industry = $prospect->industry;
+
+                return $client_industry;
+            })
+            ->addColumn('region', function ($prospect) {
+                $client_region = $prospect->region;
+
+                return $client_region;
             })
             ->addColumn('company', function ($prospect) {
                 $client_company = $prospect->company;
@@ -83,9 +93,9 @@ class ProspectsTableController extends Controller
                 return $remark;
             })
             ->addColumn('follow_up', function ($prospect) {
-              
-                return '<a href="javascript:void(0)" class="btn btn-primary follow" data-id="' . $prospect->id . '" >
-                         Follow up
+             
+                return '<a id="follow" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospect->id . '" data-toggle="tooltip"  title="FollowUp" >
+                <i  class="fa fa-vcard"></i>
                          </a>';
             })
             ->addColumn('status', function ($prospect) {

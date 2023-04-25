@@ -45,6 +45,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Names</th>
+                                            <th>Industry</th>
+                                            <th>Region</th>
                                             <th>Company</th>
                                             <th>Email</th>
                                             <th>Phone</th>
@@ -76,165 +78,168 @@
 @section('after-scripts')
     {{ Html::script(mix('js/dataTable.js')) }}
     <script>
-        setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': "{{ csrf_token() }}"
-            }
-        });
-
-        $('#prospects-table tbody').on('click', '.follow', function(e) {
-            //set datepicker so as to show calender on reminder_date
-            $('#remarksModal').modal('show');
-            const config = {
-                ajax: {
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                    }
-                },
-                date: {
-                    format: "{{ config('core.user_date_format') }}",
-                    autoHide: true
-                },
-            };
-
-            const Form = {
-                remark: @json(@$remark),
-
-
-                init() {
-                    $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
-
-                },
-
-
-
-            };
-
-            $(() => Form.init());
-
-
-
-            var id = e.target.getAttribute('data-id');
-            //set prospect id to form
-            $('#prospect_id').val(id);
-
-            $.ajax({
-                url: "{{ route('biller.prospects.followup') }}",
-                type: 'POST',
-                data: {
-                    id: id
-                },
-                success: function(response) {
-
-                    $('#tableModal').append(response);
+        const config = {
+            ajax: {
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
                 }
-            });
-            
-            $('#save_remark').on('click', function(e) {
+            },
+            date: {
+                format: "{{ config('core.user_date_format') }}",
+                autoHide: true
+            },
+        };
 
-                var recepient = $('#recepient').val();
-                var reminder_date = $('#reminder_date').val();
-                var remarks = $('#remarks').val();
-               
-                //disable button
-                $("#save_remark").prop("disabled", true);
-                let formData =  $('#save_remark').parents('form').serializeArray();
+        const Index = {
+
+            init() {
+                $.ajaxSetup(config.ajax);
+                this.draw_data();
+                this.showModal();
+                //form remark
+                remark: @json(@$remark),
+                $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
+            },
+
+            showModal(){
+                $('#prospects-table tbody').on('click','#follow', function(e) {
+                 var id = $('#follow').attr('data-id');  
+                //show modal
+                $('#remarksModal').modal('show');
+
+                //set prospect id to form
+                $('#prospect_id').val(id);
+
                 $.ajax({
-                    url: "remarks",
+                    url: "{{ route('biller.prospects.followup') }}",
                     type: 'POST',
-                    data: formData,
-                    success: function(response) {
-                        $('#remarks_table').remove();
-                        $('#tableModal').append(response);
+                    data: {
+                        id: id
                     },
-                    error: function(error) {
-                        console.log(error.responseText);
-                        
+                    success: function(response) {
+
+                        $('#tableModal').append(response);
                     }
                 });
 
-                $('#recepient').val('');
-                $('#reminder_date').val('');
-                $('#remarks').val('');
-                $("#save_remark").prop("disabled", false);
-            });
+                $('#save_remark').on('click', function(e) {
 
-            $('#remarksModal').on('hidden.bs.modal', function(e) {
-                $('#remarks_table').remove();
-                $('#prospect_id').val('');
-                location.reload();
-            });
-        });
+                    var recepient = $('#recepient').val();
+                    var reminder_date = $('#reminder_date').val();
+                    var remarks = $('#remarks').val();
 
-        function draw_data() {
-            const dataTable = $('#prospects-table').dataTable({
-                stateSave: true,
-                processing: true,
-                responsive: true,
-                language: {
-                    @lang('datatable.strings')
-                },
-                ajax: {
-                    url: '{{ route('biller.prospects.get') }}',
-                    type: 'post',
-                },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'company',
-                        name: 'company'
-                    },
-                    {
-                        data: 'email',
-                        name: 'email'
-                    },
-                    {
-                        data: 'phone',
-                        name: 'phone'
-                    },
-                    {
-                        data: 'reminder_date',
-                        name: 'reminder_date'
-                    },
-                    {
-                        data: 'remarks',
-                        name: 'remarks'
-                    },
-                    {
-                        data: 'follow_up',
-                        name: 'follow_up'
-                    },
+                    //disable button
+                    $("#save_remark").prop("disabled", true);
+                    let formData = $('#save_remark').parents('form').serializeArray();
+                    $.ajax({
+                        url: "remarks",
+                        type: 'POST',
+                        data: formData,
+                        success: function(response) {
+                            $('#remarks_table').remove();
+                            $('#tableModal').append(response);
+                        },
+                        error: function(error) {
+                            console.log(error.responseText);
 
-                    {
-                        data: 'status',
-                        name: 'status'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
-                    }
-                ],
-                columnDefs: [{
-                    type: "custom-date-sort",
-                    targets: [5]
-                }],
-                order: [
-                    [0, "desc"]
-                ],
-                searchDelay: 500,
-                dom: 'Blfrtip',
-                buttons: ['csv', 'excel', 'print'],
+                        }
+                    });
+
+                    $('#recepient').val('');
+                    $('#reminder_date').val('');
+                    $('#remarks').val('');
+                    $("#save_remark").prop("disabled", false);
+                });
+
+                $('#remarksModal').on('hidden.bs.modal', function(e) {
+                    $('#remarks_table').remove();
+                    $('#prospect_id').val('');
+
+                });
             });
-        }
+            },
+          
+
+            draw_data() {
+                $('#prospects-table').dataTable({
+                    stateSave: true,
+                    processing: true,
+                    responsive: true,
+                    language: {
+                        @lang('datatable.strings')
+                    },
+                    ajax: {
+                        url: '{{ route('biller.prospects.get') }}',
+                        type: 'post',
+                    },
+                    columns: [{
+                            data: 'DT_Row_Index',
+                            name: 'id'
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'industry',
+                            name: 'industry'
+                        },
+                        {
+                            data: 'region',
+                            name: 'region'
+                        },
+                        {
+                            data: 'company',
+                            name: 'company'
+                        },
+
+
+                        {
+                            data: 'email',
+                            name: 'email'
+                        },
+                        {
+                            data: 'phone',
+                            name: 'phone'
+                        },
+                        {
+                            data: 'reminder_date',
+                            name: 'reminder_date'
+                        },
+                        {
+                            data: 'remarks',
+                            name: 'remarks'
+                        },
+                        {
+                            data: 'follow_up',
+                            name: 'follow_up'
+                        },
+
+                        {
+                            data: 'status',
+                            name: 'status'
+                        },
+                        {
+                            data: 'actions',
+                            name: 'actions',
+                            searchable: false,
+                            sortable: false
+                        }
+                    ],
+                    columnDefs: [{
+                        type: "custom-date-sort",
+                        targets: [5]
+                    }],
+                    order: [
+                        [0, "desc"]
+                    ],
+                    searchDelay: 500,
+                    dom: 'Blfrtip',
+                    buttons: ['csv', 'excel', 'print'],
+                });
+            }
+        };
+        $(() => Index.init());
     </script>
 
 

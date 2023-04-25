@@ -25,11 +25,12 @@ class ProspectRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'company' => 'required',
             'email' => 'required',
             'phone' => 'required',
             'remarks' => 'required',
-            'reminder_date' => 'required'
+            'reminder_date' => 'required',
+            'industry' => 'required',
+            'region' => 'required',
         ];
     }
 

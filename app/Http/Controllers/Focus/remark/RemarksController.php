@@ -58,8 +58,7 @@ class RemarksController extends Controller
     public function index()
     {
 
-
-        return new ViewResponse('focus.remarks.index');
+       
     }
 
     /**
