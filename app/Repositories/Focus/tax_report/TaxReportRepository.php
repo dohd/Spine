@@ -4,6 +4,7 @@ namespace App\Repositories\Focus\tax_report;
 
 use App\Exceptions\GeneralException;
 use App\Models\items\TaxReportItem;
+use App\Models\tax_prn\TaxPrn;
 use App\Models\tax_report\TaxReport;
 use App\Repositories\BaseRepository;
 use DateTime;
@@ -171,6 +172,9 @@ class TaxReportRepository extends BaseRepository
     public function update(TaxReport $tax_report, array $input)
     {
         // dd($input);
+        $is_exists = TaxPrn::where('return_month', 'LIKE', $tax_report->return_month)->exists();
+        if ($is_exists) throw ValidationException::withMessages(['Tax Returns locked using PRN Code']);
+
         DB::beginTransaction();
 
         $data_keys = [
@@ -232,6 +236,9 @@ class TaxReportRepository extends BaseRepository
      */
     public function delete(TaxReport $tax_report)
     {
+        $is_exists = TaxPrn::where('return_month', 'LIKE', $tax_report->return_month)->exists();
+        if ($is_exists) throw ValidationException::withMessages(['Tax Returns locked using PRN Code']);
+        
         if ($tax_report->delete()) return true;
             
         throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));
