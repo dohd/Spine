@@ -754,7 +754,7 @@
                                 </a>
                             </li>
                             @endauth
-                            <li><a class="dropdown-item" href="{{ route('biller.transactions.index') }}" data-toggle="dropdown"> <i class="fa fa-exchange"></i> Double Entry Transactions
+                            <li><a class="dropdown-item" href="{{ route('biller.transactions.index') }}" data-toggle="dropdown"> <i class="fa fa-exchange"></i> Journal Entries
                                 </a>
                             </li>
                         </ul>
