@@ -257,7 +257,7 @@
 		<tbody>
 			<!-- Product rows -->
 			@foreach($resource->products as $i => $item)
-				@if ($item->unit)
+				@if ($item->product_price > 0 || $item->product_subtotal > 0)
 					<!-- Item Row -->
 					<tr>
 						<td>{{ $item->numbering ?? $i+1 }}</td>
