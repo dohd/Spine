@@ -52,14 +52,25 @@
         </div>
 
         <div class="form-group row">
-
-            <div class="col-sm-12"><label for="reminder_date" class="caption">Reminder Date</label>
+            <div class="col-sm-6"><label for="prospect_status" class="caption">Prospect Status</label>
+                <div class="input-group">
+                    <select class="form-control" name="status" id="prospect_status">
+                        @foreach (['Hot','Warm','Cold','Won','Lost'] as $i => $val)
+                            <option value="{{ $i }}">
+                                {{ $val }}
+                            </option>
+                        @endforeach                            
+                    </select>
+                    {{-- {{ Form::text('prospect_status', null, ['class' => 'form-control', 'id' => 'prospect_status']) }} --}}
+                </div>
+            </div>
+            <div class="col-sm-6"><label for="reminder_date" class="caption">Reminder Date</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                    {{-- <input type="text" value=" {{ @$prospect->remarks->reminder_date }} " class="form-control round" id="'reminder_date"> --}}
                     {{ Form::text('reminder_date', null, ['class' => 'form-control round datepicker', 'placeholder' => 'Date', 'id' => 'reminder_date']) }}
                 </div>
             </div>
+            
         </div>
         <div class="form-group row">
             <div class="col-sm-12"><label for="remarks" class="caption">Remark</label>

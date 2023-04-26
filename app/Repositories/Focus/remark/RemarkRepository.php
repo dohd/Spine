@@ -62,14 +62,6 @@ class RemarkRepository extends BaseRepository
         DB::beginTransaction();
         
         $result = $remark->update($data);
-        // update attached quote and djc
-        foreach ($remark->quotes as $quote) {
-            $quote->update(['customer_id' => $remark->client_id, 'branch_id' => $remark->branch_id]);
-        }
-        foreach ($remark->djcs as $djc) {
-            $djc->update(['client_id' => $remark->client_id, 'branch_id' => $remark->branch_id]);
-        }
-
         if ($result) {
             DB::commit();
             return true;

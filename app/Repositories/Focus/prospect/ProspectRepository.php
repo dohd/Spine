@@ -72,18 +72,22 @@ class ProspectRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Prospect $prospect, array $data)
+    public function update(Prospect $prospect, array $data,array $remark)
     {
-        DB::beginTransaction();
-       // $data['reminder_date'] = date_for_database($data['reminder_date']);
-        $result = $prospect->update($data);
-      
        
+    //     DB::beginTransaction();
+    //    // $data['reminder_date'] = date_for_database($data['reminder_date']);
+    //     $result = $prospect->update($data);
 
-        if ($result) {
-            DB::commit();
-            return true;
-        }
+       // dd($prospect);
+        $remark['reminder_date'] = date_for_database($remark['reminder_date']);
+        unset($remark['name']);
+       // $this->remark->update(,$remark);
+
+        // if ($result) {
+        //     DB::commit();
+        //     return true;
+        // }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }

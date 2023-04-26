@@ -82,6 +82,14 @@ class ProspectsTableController extends Controller
 
                 return $phone;
             })
+            ->addColumn('previous_date', function ($prospect) {
+                $date =$prospect->remarks()->get()->count() > 1 ?  $prospect->remarks()->skip(1)
+                ->take(1)
+                ->first()->reminder_date : $prospect->remarks()->first()->reminder_date ;
+                //$date =$prospect->remarks()->first()->reminder_date;
+               
+                return $date;
+            })
             ->addColumn('reminder_date', function ($prospect) {
                 $date =$prospect->remarks()->first()->reminder_date;
                

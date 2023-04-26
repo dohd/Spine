@@ -50,6 +50,7 @@
                                             <th>Company</th>
                                             <th>Email</th>
                                             <th>Phone</th>
+                                            <th>Previous Date</th>
                                             <th>Reminder Date</th>
                                             <th>Remark</th>
                                             <th>Follow up</th>
@@ -106,7 +107,10 @@
                  var id = $('#follow').attr('data-id');  
                 //show modal
                 $('#remarksModal').modal('show');
+                
 
+                //varible to check if data is saved
+                let saved = false;
                 //set prospect id to form
                 $('#prospect_id').val(id);
 
@@ -136,6 +140,7 @@
                         type: 'POST',
                         data: formData,
                         success: function(response) {
+                            saved = true;
                             $('#remarks_table').remove();
                             $('#tableModal').append(response);
                         },
@@ -154,7 +159,7 @@
                 $('#remarksModal').on('hidden.bs.modal', function(e) {
                     $('#remarks_table').remove();
                     $('#prospect_id').val('');
-
+                    saved?window.location.reload():null;
                 });
             });
             },
@@ -201,6 +206,10 @@
                         {
                             data: 'phone',
                             name: 'phone'
+                        },
+                        {
+                            data: 'previous_date',
+                            name: 'previous_date'
                         },
                         {
                             data: 'reminder_date',

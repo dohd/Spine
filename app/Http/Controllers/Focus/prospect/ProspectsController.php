@@ -73,7 +73,7 @@ class ProspectsController extends Controller
      */
     public function create()
     {
-         return new CreateResponse('focus.prospects.create');
+        return new CreateResponse('focus.prospects.create');
         //return view('focus.prospects.create', ['branches' => collect()]);
     }
 
@@ -85,14 +85,14 @@ class ProspectsController extends Controller
     //  */
     public function store(ProspectRequest $request)
     {
-        
-        // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files','reminder_date','remarks']);
 
-        $remark = $request->only('reminder_date','remarks','name');
-        
+        // filter request input fields
+        $data = $request->except(['_token', 'ins', 'files', 'reminder_date', 'remarks']);
+
+        $remark = $request->only('reminder_date', 'remarks', 'name');
+
         //Create the model using repository create method
-        $this->repository->create($data,$remark);
+        $this->repository->create($data, $remark);
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Created']);
     }
@@ -106,18 +106,18 @@ class ProspectsController extends Controller
     //  */
     public function edit(Prospect $prospect)
     {
-        
-       $remarks = $prospect->remarks()->first();
 
-        return new EditResponse('focus.prospects.edit', compact('prospect','remarks'));
+        $getremarks = $prospect->remarks()->get();
+        $remarks =$getremarks->reverse()->first();
+        return new EditResponse('focus.prospects.edit', compact('prospect', 'remarks'));
     }
 
 
     // follow up
     public function followup(Request $request)
-    {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-        $remarks = Remark::where('prospect_id',$request->id)->orderBy('created_at', 'DESC')->limit(10)->get();
-        return view('focus.prospects.partials.remarks_table',compact('remarks'));
+    {
+        $remarks = Remark::where('prospect_id', $request->id)->orderBy('created_at', 'DESC')->limit(10)->get();
+        return view('focus.prospects.partials.remarks_table', compact('remarks'));
     }
 
 
@@ -131,13 +131,13 @@ class ProspectsController extends Controller
     //  */
     public function update(ProspectRequest $request, Prospect $prospect)
     {
-       
+
 
         // update input fields from request
-        $data = $request->except(['_token', 'ins', 'files']);
-
+        $data = $request->except(['_token', 'ins', 'files','reminder_date', 'remarks']);
+        $remark = $request->only('reminder_date', 'remarks', 'name');
         //Update the model using repository update method
-        $this->repository->update($prospect, $data);
+        $this->repository->update($prospect, $data,$remark);
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Updated']);
     }
@@ -151,7 +151,7 @@ class ProspectsController extends Controller
     public function destroy(Prospect $prospect)
     {
         $this->repository->delete($prospect);
-            
+
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Deleted']);
     }
 
@@ -172,7 +172,7 @@ class ProspectsController extends Controller
     //  */
     public function update_status(Prospect $prospect, Request $request)
     {
-        
+
         $status = $request->status;
         $reason = $request->reason;
         $prospect->update(compact('status', 'reason'));
