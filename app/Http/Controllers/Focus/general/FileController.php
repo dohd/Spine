@@ -89,10 +89,12 @@ class FileController extends Controller
 
     public function project_attachment(Request $request)
     {
-        $action = $request->only('op', 'id');
+        //dd($request->all());
+        $action = $request->only('op', 'id', 'milestone_id');
+        //dd($action['id']);
         if (project_access($action['id'])) {
             if (@$action['op'] == 'delete') {
-                $file_value = ProjectMeta::find($action['id']);
+                $file_value = ProjectMeta::find($action['milestone_id']);
                 if (delete_file($this->file_item_path . $file_value['value'])) $file_value->delete();
                 return response()->json(['success' => 'Deleted']);
             } else {
@@ -113,7 +115,7 @@ class FileController extends Controller
                         $this->storage->put($path . $file_name, file_get_contents($item->getRealPath()));
                         $bill_type = array('project_id' => $item_rel['id'], 'meta_key' => 1, 'value' => $file_name);
                         $upload = ProjectMeta::create($bill_type);
-                        $up[] = array('id' => $upload->id, 'name' => $file_name);
+                        $up[] = array('id' => $upload->id,'project_id'=>$upload->project_id, 'name' => $file_name);
                     }
                     ProjectLog::create(array('project_id' => $upload->project_id, 'value' => '[' . trans('general.files') . '] ' . $upload->value));
                     return response()->json($up);

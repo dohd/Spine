@@ -27,6 +27,7 @@ use App\Repositories\Focus\note\NoteRepository;
 use App\Http\Requests\Focus\note\ManageNoteRequest;
 use App\Http\Requests\Focus\note\CreateNoteRequest;
 use App\Http\Requests\Focus\note\EditNoteRequest;
+use App\Http\Requests\Focus\note\DeleteNoteRequest;
 
 
 /**
@@ -126,7 +127,7 @@ class NotesController extends Controller
      * @param App\Models\note\Note $note
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Note $note, EditNoteRequest $request)
+    public function destroy(Note $note, DeleteNoteRequest $request)
     {
         //Calling the delete method on repository
         $this->repository->delete($note);

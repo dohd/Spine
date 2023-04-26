@@ -19,12 +19,13 @@
                 project_id : project_id,
             },
             success: function (response) {
-                //console.log(response);
                 if(response == -1){
                     $('.extimate').text('No Limit');
+                    $('#limit').val(-1);
                 }
                 else{
                     $('.extimate').text(response);
+                    $('#limit').val(response);
                 }
                 
             }
@@ -40,12 +41,13 @@
     });
     $('#extimated-milestone').on('key up change', function () {
         var extimate = accounting.unformat($('.extimate').text());
+        var limit = accounting.unformat($('#limit').val());
         var extimated_milestone_amount = accounting.unformat($(this).val());
-        if(extimate <= -1){
+        if(limit <= -1){
             $('#extimated-milestone').val();
             
         }
-       else if (extimate == 0) {
+       else if (limit == 0) {
             swal({
                     title: 'Adjust Your Budget?',
                     icon: "warning",
@@ -60,7 +62,7 @@
         }
         else if(extimated_milestone_amount > extimate){
             $('#extimated-milestone').val(extimate).change();
-            return;
+            
         }
     });
 
@@ -212,7 +214,7 @@
             formData: {_token: "{{ csrf_token() }}", id: '{{$project['id']}}', 'bill': 11},
             done: function (e, data) {
                 $.each(data.result, function (index, file) {
-                    $('#files').append('<tr><td><a data-url="{{route('biller.project_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
+                    $('#files').append('<tr><td><a data-url="{{route('biller.project_attachment')}}?op=delete&milestone_id='+file.id+'&id='+file.project_id+'" class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
                 });
             },
             progressall: function (e, data) {

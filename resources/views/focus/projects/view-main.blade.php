@@ -260,6 +260,9 @@
                                                     <a href="#" class=" delete-object" data-object-type="2" data-object-id="{{$row['id']}}">
                                                         <i class="danger fa fa-trash"></i>
                                                     </a>
+                                                    <a href="{{route('biller.projects.edit_project_milestone',$row['id'])}}">
+                                                        <i class="primary fa fa-edit"></i>
+                                                    </a>
                                                 </div>
                                             {{-- @endif --}}
                                             <small class="text-muted"><i class="fa fa-user"></i>
@@ -353,7 +356,7 @@
                                 @foreach($project->attachment as $row)
                                     <tr>
                                         <td>
-                                            <a data-url="{{route('biller.project_attachment')}}?op=delete&id={{$row['id']}}"
+                                            <a data-url="{{route('biller.project_attachment')}}?op=delete&milestone_id={{$row['id']}}&id={{$row['project_id']}}"
                                                 class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> <a
                                                     href="{{ Storage::disk('public')->url('app/public/files/' . $row['value']) }}"
                                                     class="purple"><i

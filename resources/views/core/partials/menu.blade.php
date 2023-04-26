@@ -1126,6 +1126,18 @@
             @if(access()->allowMultiple(['manage-note', 'manage-event', 'manage-project', 'manage-invoice']))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-star"></i><span>{{trans('features.misc')}}</span></a>
                     <ul class="dropdown-menu">
+                        @permission('manage-misc')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-umbrella"></i> Misc Management</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.miscs.index')}}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Misc
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('biller.miscs.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Misc
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endauth
                         @permission('manage-note')
                         <li><a class="dropdown-item" href="{{ route('biller.notes.index')? '#' : '#' }}" data-toggle="dropdown"><i class="icon-note"></i> {{trans('general.notes')}}</a>
                         </li>

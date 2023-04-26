@@ -12,6 +12,12 @@ use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\Access\User\User;
+use App\Models\event\Event;
+use App\Models\event\EventRelation;
+use App\Models\project\ProjectLog;
+use App\Models\project\ProjectRelations;
+use App\Notifications\Rose;
 
 /**
  * Class ProjectRepository.
@@ -31,7 +37,11 @@ class ProjectRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+        //dd(request('client_id'));
+        // client filter
+        $q->when(request('client_id'), fn($q) => $q->where('customer_id', request('client_id')));
+        return $q;
     }
 
     /**
@@ -45,24 +55,67 @@ class ProjectRepository extends BaseRepository
     {
         // dd($input);
         DB::beginTransaction();
-
-        $data_items = $input['data_items'];
-        $project_quote_exists = ProjectQuote::whereIn('quote_id', $data_items)->count();
-        if ($project_quote_exists) throw ValidationException::withMessages(['Tagged Quote / PI already attached to a project']);
-
-        $data = $input['data'];
-        $tid = Project::where('ins', auth()->user()->ins)->max('tid');
-        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
-        $data['main_quote_id'] = $data_items[0];
         
-        $result = Project::create($data);
+        $employees = @$input['employees'];
+        $tags = @$input['tags'];
+        $calender = @$input['link_to_calender'];
+        $color = @$input['color'];
+        $customer = @$input['customer'];
 
-        // create project_quote and update related foreign key in quote
-        foreach ($data_items as $quote_id) {
-            $project_quote_id = ProjectQuote::insertGetId(['quote_id' => $quote_id, 'project_id' => $result->id]);
-            Quote::find($quote_id)->update(compact('project_quote_id'));
+        $input = array_diff_key($input, array_flip(['tags', 'employees', 'customer', 'link_to_calender', 'color']));
+        $input['worth'] = numberClean($input['worth']);
+        $input['start_date'] = datetime_for_database("{$input['start_date']} {$input['time_from']}");
+        $input['end_date'] = datetime_for_database("{$input['end_date']} {$input['time_to']}");
+        unset($input['time_from'], $input['time_to']);
+
+        $tid = Project::max('tid');
+        if (@$input['tid'] <= $tid) $input['tid'] = $tid+1;
+        $result = Project::create($input);
+
+        $tag_group = [];
+        if (is_array($tags)) {
+            foreach ($tags as $row) {
+                $tag_group[] = ['project_id' => $result->id, 'related' => 1, 'rid' => $row];
+            }
         }
-        
+
+        $employee_group = [];
+        if (is_array($employees)) {
+            foreach ($employees as $row) {
+                $tag_group[] = ['project_id' => $result->id, 'related' => 2, 'rid' => $row];
+                $employee_group[] = $row;
+            }
+        }
+
+        if ($customer > 0) $tag_group[] = ['project_id' => $result->id, 'related' => 8, 'rid' => $customer];
+        $tag_group[] = ['project_id' => $result->id, 'related' => 3, 'rid' => $result->user_id];
+        ProjectRelations::insert($tag_group);
+
+        $data = ['project_id' => $result->id, 'value' => '[' . trans('general.create') . '] ' . $result->name, 'user_id' => $result->user_id];
+        ProjectLog::create($data);
+        if ($calender) {
+            $data = [
+                'title' => trans('projects.project') . ' - ' . $input['name'], 
+                'description' => $input['short_desc'], 
+                'start' => $input['start_date'], 
+                'end' => $input['end_date'], 
+                'color' => $color, 
+                'user_id' => $result->user_id, 
+                'ins' => $result['ins']
+            ];
+            $event = Event::create($data);
+            EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $result->id]);
+        }
+        $message = array('title' => trans('projects.project') . ' - ' . $result->name, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']);
+
+        if (is_array(@$employee_group)) {
+            $users = User::whereIn('id', $employee_group)->get();
+            \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
+        } else {
+            $notification = new Rose(auth()->user(), $message);
+            auth()->user()->notify($notification);
+        }
+
         if ($result) {
             DB::commit();
             return $result;
@@ -84,38 +137,54 @@ class ProjectRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $data = $input['data'];
-        if (isset($data['status'])) {
-            if ($data['status'] == 'closed') {
-                $data = array_replace($data, [
-                    'end_date' => date('Y-m-d'),
-                    'ended_by' => auth()->user()->id,
-                ]);
-            } else {
-                $data = array_replace($data, [
-                    'end_date' => null,
-                    'ended_by' => null,
-                ]);
+        $employees = @$input['employees'];
+        $tags = @$input['tags'];
+        $calender = @$input['link_to_calender'];
+        $color = @$input['color'];
+        $customer = @$input['customer'];
+
+        $input = array_diff_key($input, array_flip(['tags', 'employees', 'customer', 'link_to_calender', 'color']));
+        $input['worth'] = numberClean($input['worth']);
+        $input['start_date'] = datetime_for_database("{$input['start_date']} {$input['time_from']}");
+        $input['end_date'] = datetime_for_database("{$input['end_date']} {$input['time_to']}");
+        unset($input['time_from'], $input['time_to']);
+
+        $result = $project->update($input);
+
+        ProjectRelations::whereIn('related', range(1,3))->where('project_id', $project->id)->delete();
+        $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
+        if ($event_rel) {
+            $event_rel->event->delete();
+            $event_rel->delete();
+        }
+
+        $tag_group = [];
+        if (is_array($tags)) {
+            foreach ($tags as $row) {
+                $tag_group[] = ['project_id' => $project->id, 'related' => 1, 'rid' => $row];
             }
         }
-
-        $data_items = array_filter($input['data_items'], fn($v) => $v);
-        if ($data_items) $data['main_quote_id'] = $data_items[0];
-
-        // dd($data, $data_items);
-        $result = $project->update($data);
-
-        // create or update project quotes
-        ProjectQuote::where('project_id', $project->id)->whereNotIn('quote_id', $data_items)->delete();
-        foreach($data_items as $quote_id) {
-            $item = ProjectQuote::firstOrNew(['project_id' => $project->id, 'quote_id' => $quote_id]);
-            Quote::find($quote_id)->update(['project_quote_id' => $item->id]);
-            $item->save();
+        if (is_array($employees)) {
+            foreach ($employees as $row) {
+                $tag_group[] = ['project_id' => $project->id, 'related' => 2, 'rid' => $row];
+            }
         }
+        if ($customer > 0) $tag_group[] = ['project_id' => $project->id, 'related' => 8, 'rid' => $customer];
+            
+        $tag_group[] = ['project_id' => $project->id, 'related' => 3, 'rid' => $project->user_id];
+        ProjectRelations::insert($tag_group);
 
+        $data = ['project_id' => $project->id, 'value' => '[' . trans('general.edit') . '] ' . $project->name, 'user_id' => $project->user_id];
+        ProjectLog::create($data);
+        if ($calender) {
+            $data = ['title' => trans('projects.project') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start_date'], 'end' => $input['end_date'], 'color' => $color, 'user_id' => $project->user_id, 'ins' => $project->ins];
+            $event = Event::create($data);
+            EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $project->id]);
+        }
+        
         if ($result) {
             DB::commit();
-            return true;
+            return $result;
         }
 
         throw new GeneralException(trans('exceptions.backend.projects.update_error'));

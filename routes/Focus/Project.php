@@ -36,6 +36,8 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/issued_items', 'ProjectsController@issued_items')->name('projects.issued_items');
   Route::post('projects/labour_skillsets', 'ProjectsController@labour_skillsets')->name('projects.labour_skillsets');
   Route::post('projects/quotes_service_items', 'ProjectsController@quotes_service_items')->name('projects.quotes_service_items');
+  Route::get('projects/edit_project_milestone/{id}', 'ProjectsController@edit_project_milestone')->name('projects.edit_project_milestone');
+  Route::patch('projects/update_project_milestone/{id}', 'ProjectsController@update_project_milestone')->name('projects.update_project_milestone');
 });
 
 // project budget

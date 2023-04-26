@@ -49,6 +49,7 @@ use App\Models\items\QuoteItem;
 use DB;
 use Illuminate\Support\Arr;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\customer\Customer;
 
 /**
  * ProjectsController
@@ -86,11 +87,12 @@ class ProjectsController extends Controller
         $tags = Misc::where('section', 1)->get();
 
         $employees = Hrm::all();
+        $customers = Customer::all(['id', 'company']);
         $project = new Project;
 
         // return new ViewResponse('focus.projects.index', compact('accounts', 'last_tid'));
 
-        return new ViewResponse('focus.projects.index-main', compact('accounts', 'last_tid', 'project', 'mics', 'employees', 'statuses', 'tags'));
+        return new ViewResponse('focus.projects.index-main', compact('accounts','customers', 'last_tid', 'project', 'mics', 'employees', 'statuses', 'tags'));
     }
 
 
@@ -413,7 +415,7 @@ class ProjectsController extends Controller
      */
     public function quotes_select()
     {   
-        $quotes = Quote::where(['customer_id' => request('customer_id'), 'status' => 'approved'])
+        $quotes = Quote::where(['customer_id' => request('customer_id'), 'status' => 'approved','quote_type'=>'project'])
             ->whereDoesntHave('project')
             ->get()->map(fn($v) => [
                 'id' => $v->id,
@@ -516,6 +518,7 @@ class ProjectsController extends Controller
                 break;
             case 6: // project note
                 $data = ['title' => $input['title'], 'content' => $input['content'], 'section' => 1];
+                dd($data);
                 $note = Note::create($data);
 
                 $data = ['project_id' => $request->project_id, 'related' => 6, 'rid' => $note->id];
@@ -555,6 +558,21 @@ class ProjectsController extends Controller
         } 
 
         return response()->json($response);
+    }
+
+    public function delete_meta(ManageProjectRequest $request)
+    {
+        $input = $request->except(['_token', 'ins']);
+        switch ($input['obj_type']) {
+            case 2 :
+                $milestone = ProjectMileStone::find($input['object_id']);
+                ProjectLog::create(array('project_id' => $milestone->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 'user_id' => auth()->user()->id));
+                $milestone->delete();
+                return json_encode(array('status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']));
+                break;
+
+        }
+
     }
 
     /**
@@ -834,14 +852,15 @@ class ProjectsController extends Controller
     }
     public function labour_skillsets(Request $request)
     {
+       // dd($request->quote_ids);
         $quote_ids = explode(',', $request->quote_ids);
         $budget_skillsets = [];
+       if($request->quote_ids != null){
         foreach ($quote_ids as $quote) {
             $budget_skillsets = BudgetSkillset::where('quote_id', $quote)->get();
         }
+       }
        
-        
-
         return Datatables::of($budget_skillsets)
             ->addIndexColumn()
             ->addColumn('skill', function ($budget_skillset) {
@@ -858,6 +877,7 @@ class ProjectsController extends Controller
             })
             ->addColumn('tid', function ($budget_skillset) {
                 $tid = Quote::find($budget_skillset->quote_id);
+                if($tid)
                 return '<b>'.'QT-'.$tid->tid.'</b>';
             })
             ->addColumn('amount', function ($budget_skillset) {
@@ -865,6 +885,8 @@ class ProjectsController extends Controller
                 return amountFormat($total);
             })->rawColumns(['tid', 'skill','charge', 'hours','no_technician','amount'])
             ->make(true);
+
+        
     }
 
     //Quote service items
@@ -930,5 +952,22 @@ class ProjectsController extends Controller
             ->make(true);
        }
         
+    }
+
+    public function edit_project_milestone($id)
+    {
+        $milestone = ProjectMilestone::findOrFail($id);
+        return view('focus.projects.milestone.edit', compact('milestone'));
+    }
+
+    public function update_project_milestone(Request $request, $id)
+    {
+        $data = $request->only(['name','description','duedate','time_to','color','extimated_milestone_amount']);
+        $data['due_date'] = date_for_database("{$data['duedate']} {$data['time_to']}:00");
+        $data['note'] = $data['description'];
+        unset($data['duedate'], $data['time_to'], $data['description']);
+        $project_id = ProjectMilestone::find($id)->update($data);
+        return redirect(url('projects', $request->project_id))->with('flash_status','Project MileStone Updated Successfully!!');
+
     }
 }

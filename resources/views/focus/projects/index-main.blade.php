@@ -57,8 +57,25 @@
                     <div class="search">
 
                     </div>
+                    
 
                     <div class="card-body">
+                        <div class="card" id="filters">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="form-group row">
+                                        <div class="col-4">
+                                            <label for="client">Customer</label>                             
+                                            <select name="client_id" class="custom-select" id="client" data-placeholder="Choose Client">
+                                                @foreach ($customers as $customer)
+                                                    <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>                    
+                                </div>
+                            </div>
+                        </div>
                         <table id="projects-table"
                                 class="table table-striped table-bordered zero-configuration" cellspacing="0"
                                 width="100%">
@@ -112,6 +129,7 @@
 <script>
     
     setTimeout(() => draw_data(), {{config('master.delay')}});
+    var client =  @json(request('client_id'));
     
     $.ajaxSetup({
         headers: {
@@ -119,6 +137,7 @@
         }
     });
 
+    $('#client').select2({allowClear: true}).val('').trigger('change');
     // on project submit 
     $("#submit-data_project").on("click", function (e) {
         e.preventDefault();
@@ -171,7 +190,7 @@
                 },
             }
         });
-
+        const quoteData = [];
         $("#person").on('change', function () {
             $("#branch_id").val('').trigger('change');
             const tips = $('#person').val();
@@ -196,7 +215,36 @@
                     },
                 }
             });
+
+            // fetch customer quotes
+            $("#main_quote").html('').select2({
+                    
+                    ajax: {
+                        url: "{{ route('biller.quotes.customer_quotes') }}?id=" + $(this).val(),
+                        processResults: function(data) {
+                            const results = data.map(v => {
+                                const tid = `${v.tid}`.length < 4? `000${v.tid}`.slice(-4) : v.tid;
+                                const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch? v.branch.name : ''} - ${v.notes}`;
+                                return {id: v.id, text}; 
+                            });
+                            // replace array data
+                            quoteData.length = 0;
+                            quoteData.push.apply(quoteData, results);
+                            return { results };
+                        },
+                    }
+            });
         });
+         // On selecting Main Quote
+         $("#main_quote").change(function() {
+                // set Other Quotes select options 
+                $("#other_quote").html('').select2({ 
+                    allowClear: true,
+                    data: quoteData.filter(v => v.id != $(this).val())
+                });
+                const quoteTitle = $(this).find(':selected').text().split(' - ')[2];
+                $('#project-name').val(quoteTitle);
+         });
     });
 
     // dataTable
@@ -210,6 +258,9 @@
             ajax: {
                 url: '{{ route("biller.projects.get") }}',
                 type: 'post'
+            },
+            data: {
+                client_id: $('#client').val(),
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
