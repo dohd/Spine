@@ -656,7 +656,7 @@
                 <ul class="dropdown-menu">
                     @permission('manage-client-lpo')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Client LPO</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file-o"></i> Client LPO</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.lpo.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Client LPO</a></li>                           
                         </ul>
@@ -665,7 +665,7 @@
 
                     @permission('manage-bill')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Bills Management</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-usd"></i> Bills Management</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.utility-bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Bills</a></li>
                             @permission('create-bill')
@@ -677,7 +677,7 @@
                     @endauth
 
                     @permission('manage-invoice')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Management</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-usd"></i> Invoice Management</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.invoices.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Project Invoice
                                 </a>
@@ -760,8 +760,8 @@
                         </ul>
                     </li>
 
-                    {{-- Book balance report --}}
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-book"></i> Book Balance Report</a>
+                    {{-- Accounting Report --}}
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-file-text-o"></i> Accounting Report</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.trial_balance', 'v') }}"><i class="fa fa-balance-scale"></i> Trial Balance</a></li>
                             <li><a class="dropdown-item " href="{{ route('biller.accounts.balance_sheet', 'v') }}"><i class="fa fa-book"></i> {{ trans('accounts.balance_sheet') }}</a></li>
@@ -780,7 +780,7 @@
                     </li>
 
                     {{-- Tax PRN --}}
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Tax PRNs</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-check-square-o"></i> Tax PRNs</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.tax_prns.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax PRN</a></li>
                             <li><a class="dropdown-item" href="{{ route('biller.tax_prns.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax PRN</a></li>
@@ -797,7 +797,7 @@
                 <ul class="dropdown-menu">
                     @permission('manage-bill')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Bill Payment</a>
+                        <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-credit-card" aria-hidden="true"></i> Bill Payment</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.billpayments.index') }}"><i class="fa fa-money"></i> Manage Payments</a></li>
                             @permission('create-bill')
@@ -808,7 +808,7 @@
                     @endauth
 
                     @permission('manage-invoice')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-layout"></i> Invoice Payment</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-credit-card-alt" aria-hidden="true"></i> Invoice Payment</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('biller.invoice_payments.index') }}"><i class="fa fa-money"></i> Manage Payments</a></li>
                             @permission('create-invoice')
