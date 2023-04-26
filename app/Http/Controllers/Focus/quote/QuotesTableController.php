@@ -93,7 +93,7 @@ class QuotesTableController extends Controller
             })
             ->addColumn('invoice_tid', function ($quote) use($prefixes) {
                 $inv_product = $quote->invoice_product;
-                if ($inv_product) return gen4tid("{$prefixes[3]}-", $inv_product->invoice->tid);
+                if (@$inv_product->invoice) return gen4tid("{$prefixes[3]}-", $inv_product->invoice->tid);
             })
             ->addColumn('sum_total', function ($quote) use($sum_total) {
                 return $sum_total;
