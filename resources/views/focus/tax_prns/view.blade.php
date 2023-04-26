@@ -27,6 +27,7 @@
                                 'Payment Mode' => ucfirst($tax_prn->payment_mode),
                                 'Amount' => numberFormat($tax_prn->amount),
                                 'Date' => dateFormat($tax_prn->date),
+                                'Note' => $tax_prn->note,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)

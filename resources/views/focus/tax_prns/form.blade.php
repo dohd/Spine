@@ -26,9 +26,14 @@
         <label for="amount">Payment Amount</label>
         {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
     </div> 
-    
 </div>
 
+<div class="form-group row">
+    <div class="col-12">
+        <label for="note">Note</label>
+        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
+    </div> 
+</div>
 
 <div class="form-group row no-gutters">
     <div class="col-1 ml-auto">
