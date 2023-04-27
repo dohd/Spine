@@ -50,9 +50,6 @@ class QuoteRepository extends BaseRepository
                 case 'Unapproved':
                     $q->whereNull('approved_by');
                     break;
-                case 'Approved & Uninvoiced':
-                    $q->whereNotNull('approved_by')->doesntHave('invoice_product');
-                    break;                    
                 case 'Approved & Unbudgeted':
                     $q->whereNotNull('approved_by')->whereNull('project_quote_id');
                     break;
@@ -68,6 +65,9 @@ class QuoteRepository extends BaseRepository
                 case 'Approved without LPO & Uninvoiced':
                     $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
                     break;
+                case 'Approved & Uninvoiced':
+                    $q->whereNotNull('approved_by')->doesntHave('invoice_product');
+                    break;                    
                 case 'Invoiced & Due':
                     // quotes in due invoices
                     $q->whereHas('invoice_product', function ($q) {
@@ -92,6 +92,9 @@ class QuoteRepository extends BaseRepository
                         });
                     });
                     break;
+                case 'Invoiced':
+                    $q->whereHas('invoice_product');
+                    break;                    
                 case 'Cancelled':
                     $status = false;
                     $q->where('status', 'cancelled');

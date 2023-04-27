@@ -40,9 +40,11 @@
                             <label for="filter">Filter Criteria</label>                             
                             @php
                                 $criteria = [
-                                    'Unapproved', 'Approved & Uninvoiced', 'Approved without LPO & Uninvoiced', 'Approved & Unbudgeted',  
+                                    'Unapproved', 'Approved without LPO & Uninvoiced', 'Approved & Unbudgeted',  
                                     'Budgeted & Unverified', 'Verified with LPO & Uninvoiced', 'Verified without LPO & Uninvoiced',
-                                    'Invoiced & Due', 'Invoiced & Partially Paid', 'Invoiced & Paid', 'Cancelled'
+                                    'Approved & Uninvoiced', 
+                                    'Invoiced', 'Invoiced & Due', 'Invoiced & Partially Paid', 'Invoiced & Paid',
+                                    'Cancelled'
                                 ];
                             @endphp
                             <select name="filter" class="custom-select" id="status_filter">
