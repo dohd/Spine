@@ -4,6 +4,7 @@ namespace App\Repositories\Focus\prospect;
 
 use App\Models\prospect\Prospect;
 use App\Exceptions\GeneralException;
+use App\Models\remark\Remark;
 use App\Repositories\Focus\remark\RemarkRepository;
 use App\Repositories\BaseRepository;
 use DB;
@@ -72,22 +73,26 @@ class ProspectRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Prospect $prospect, array $data,array $remark)
+    public function update($prospect, array $input)
     {
        
-    //     DB::beginTransaction();
-    //    // $data['reminder_date'] = date_for_database($data['reminder_date']);
-    //     $result = $prospect->update($data);
-
-       // dd($prospect);
+        DB::beginTransaction();
+        $result = $prospect->update($input['data']);
+        
+       
+        
+        $remark = $input['remark'];
+        $remark_item = Remark::where('prospect_id',$remark['id'])->orderBy('created_at','DESC')->first();
         $remark['reminder_date'] = date_for_database($remark['reminder_date']);
         unset($remark['name']);
-       // $this->remark->update(,$remark);
+        //dd($remark_item);
+        $remark_item->update($remark);
+        
 
-        // if ($result) {
-        //     DB::commit();
-        //     return true;
-        // }
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }

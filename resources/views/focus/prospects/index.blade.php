@@ -53,6 +53,7 @@
                                             <th>Previous Date</th>
                                             <th>Reminder Date</th>
                                             <th>Remark</th>
+                                            <th>State</th>
                                             <th>Follow up</th>
                                             <th>Status</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -104,7 +105,8 @@
 
             showModal(){
                 $('#prospects-table tbody').on('click','#follow', function(e) {
-                 var id = $('#follow').attr('data-id');  
+                 var id = $(this).attr('data-id');
+                
                 //show modal
                 $('#remarksModal').modal('show');
                 
@@ -158,7 +160,8 @@
 
                 $('#remarksModal').on('hidden.bs.modal', function(e) {
                     $('#remarks_table').remove();
-                    $('#prospect_id').val('');
+                    $('#prospect_id').val();
+                    id= "";
                     saved?window.location.reload():null;
                 });
             });
@@ -218,6 +221,10 @@
                         {
                             data: 'remarks',
                             name: 'remarks'
+                        },
+                        {
+                            data: 'prospect_status',
+                            name: 'prospect_status'
                         },
                         {
                             data: 'follow_up',

@@ -54,14 +54,13 @@
         <div class="form-group row">
             <div class="col-sm-6"><label for="prospect_status" class="caption">Prospect Status</label>
                 <div class="input-group">
-                    <select class="form-control" name="status" id="prospect_status">
-                        @foreach (['Hot','Warm','Cold','Won','Lost'] as $i => $val)
-                            <option value="{{ $i }}">
-                                {{ $val }}
+                    <select class="form-control" name="prospect_status" id="prospect_status">
+                        @foreach (['hot','warm','cold'] as $val)
+                            <option value="{{ $val }}">
+                                {{ ucfirst( $val) }}
                             </option>
                         @endforeach                            
                     </select>
-                    {{-- {{ Form::text('prospect_status', null, ['class' => 'form-control', 'id' => 'prospect_status']) }} --}}
                 </div>
             </div>
             <div class="col-sm-6"><label for="reminder_date" class="caption">Reminder Date</label>
@@ -80,6 +79,7 @@
                 </div>
             </div>
         </div>
+        {{ Form::hidden('id',null, ['class' => 'form-control','id'=>'id','required']) }}
     </div>
 </div>
 

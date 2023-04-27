@@ -17,14 +17,17 @@
             prospect: @json(@$prospect),
             date: @json(@$remarks->reminder_date),
             remark: @json(@$remarks->remarks),
+            id: @json(@$remarks->id),
             init() {
                 $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
                 if (this.prospect) {
                     $('#reminder_date').datepicker('setDate', new Date(this.date));
                     $('#remarks').val(this.remark);
+                    $('#remark_id').val(this.id);
                 
                 } else {
                     $('#remarks').val('');
+                    $('#remark_id').val('');
                     $('#reminder_date').datepicker('setDate', new Date());
                 }
 

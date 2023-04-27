@@ -26,7 +26,6 @@ use App\Http\Responses\Focus\prospect\CreateResponse;
 use App\Http\Responses\Focus\prospect\EditResponse;
 use App\Repositories\Focus\prospect\ProspectRepository;
 use App\Http\Requests\Focus\prospect\ProspectRequest;
-use App\Models\branch\Branch;
 use App\Models\prospect\Prospect;
 use App\Models\remark\Remark;
 
@@ -61,7 +60,7 @@ class ProspectsController extends Controller
         $open_prospect = Prospect::where('status', 0)->count();
         $closed_prospect = Prospect::where('status', 1)->count();
         $total_prospect = Prospect::count();
-
+        
         return new ViewResponse('focus.prospects.index', compact('open_prospect', 'closed_prospect', 'total_prospect'));
     }
 
@@ -108,7 +107,7 @@ class ProspectsController extends Controller
     {
 
         $getremarks = $prospect->remarks()->get();
-        $remarks =$getremarks->reverse()->first();
+        $remarks =$getremarks->first();
         return new EditResponse('focus.prospects.edit', compact('prospect', 'remarks'));
     }
 
@@ -116,7 +115,7 @@ class ProspectsController extends Controller
     // follow up
     public function followup(Request $request)
     {
-        $remarks = Remark::where('prospect_id', $request->id)->orderBy('created_at', 'DESC')->limit(10)->get();
+        $remarks = Remark::where('prospect_id', $request->id)->orderBy('updated_at', 'DESC')->limit(10)->get();
         return view('focus.prospects.partials.remarks_table', compact('remarks'));
     }
 
@@ -132,12 +131,12 @@ class ProspectsController extends Controller
     public function update(ProspectRequest $request, Prospect $prospect)
     {
 
-
+        //dd($request);
         // update input fields from request
-        $data = $request->except(['_token', 'ins', 'files','reminder_date', 'remarks']);
-        $remark = $request->only('reminder_date', 'remarks', 'name');
+        $data = $request->only(['company','name','email','phone','region','industry','prospect_status']);
+        $remark = $request->only('reminder_date', 'remarks', 'name','id');
         //Update the model using repository update method
-        $this->repository->update($prospect, $data,$remark);
+        $this->repository->update($prospect, compact('data','remark'));
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Updated']);
     }

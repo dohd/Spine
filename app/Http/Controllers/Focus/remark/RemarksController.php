@@ -104,4 +104,11 @@ class RemarksController extends Controller
 
         return new EditResponse('focus.remarks.edit', compact('remark', 'branches'));
     }
+    public function update(RemarkRequest $request,Remark $remark)
+    {
+      
+        
+
+        return new EditResponse('focus.remarks.edit', compact('remark'));
+    }
 }

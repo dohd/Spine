@@ -57,18 +57,18 @@ class RemarkRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Remark $remark, array $data)
-    {
-        DB::beginTransaction();
+    // public function update(array $data)
+    // {
+    //     DB::beginTransaction();
         
-        $result = $remark->update($data);
-        if ($result) {
-            DB::commit();
-            return true;
-        }
+    //     $result = $remark->update($data);
+    //     if ($result) {
+    //         DB::commit();
+    //         return true;
+    //     }
 
-        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
-    }
+    //     throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
+    // }
 
     /**
      * For deleting the respective model from storage

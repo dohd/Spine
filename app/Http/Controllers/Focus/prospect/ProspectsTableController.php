@@ -100,8 +100,12 @@ class ProspectsTableController extends Controller
 
                 return $remark;
             })
+            ->addColumn('prospect_status', function ($prospect) {
+                $state =$prospect->prospect_status;
+
+                return $state;
+            })
             ->addColumn('follow_up', function ($prospect) {
-             
                 return '<a id="follow" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospect->id . '" data-toggle="tooltip"  title="FollowUp" >
                 <i  class="fa fa-vcard"></i>
                          </a>';
@@ -124,4 +128,5 @@ class ProspectsTableController extends Controller
             })
             ->make(true);
     }
+
 }
