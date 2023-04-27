@@ -60,11 +60,13 @@ class LeaveController extends Controller
      */
     public function create()
     {
-        $leave_categories = LeaveCategory::get(['id', 'title', 'qty']);
+        $leave_categories = LeaveCategory::get(['id', 'title', 'qty']); 
         
-        $users = collect();
-        if (access()->allow('department-manage'))  $users = User::get(['id', 'first_name', 'last_name']);
-        else $users->add(User::find(auth()->user()->id, ['id', 'first_name', 'last_name']));
+        if (access()->allow('department-manage')) {
+            $users = User::get(['id', 'first_name', 'last_name']);
+        } else {
+            $users = User::where('id', auth()->user()->id)->get(['id', 'first_name', 'last_name']);
+        }
 
         return view('focus.leave.create', compact('leave_categories', 'users'));
     }
