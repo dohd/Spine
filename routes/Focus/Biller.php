@@ -198,6 +198,14 @@ Route::group(['namespace' => 'prospect'], function () {
      Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
      Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
 });
+Route::group(['namespace' => 'calllist'], function () {
+    Route::patch('calllists/update_status/{calllist}', 'CallListController@update_status')->name('calllists.update_status');
+    Route::resource('calllists', 'CallListController');
+
+    //For Datatable
+     Route::post('calllists/get', 'CallListTableController')->name('calllists.get');
+     Route::post('calllists/followup', 'CallListController@followup')->name('calllists.followup');
+});
 Route::group(['namespace' => 'remark'], function () {
     Route::patch('remarks/update_status/{remark}', 'ProspectsController@update_status')->name('remarks.update_status');
     Route::resource('remarks', 'RemarksController');

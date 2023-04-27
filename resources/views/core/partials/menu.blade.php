@@ -563,6 +563,23 @@
                                                 data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Prospect</a>
                                         </li>
                                     @endauth
+                                    @permission('manage-lead')
+                                        <li><a class="dropdown-item" href=""
+                                                data-toggle="dropdown"> <i class="ft-phone"></i> My Today Call List</a>
+                                        </li>
+                                        
+                                    @endauth
+                                    @permission('manage-lead')
+                                        <li><a class="dropdown-item" href=""
+                                                data-toggle="dropdown"> <i class="ft-list"></i> Manage Call List</a>
+                                        </li>
+                                      
+                                    @endauth
+                                    @permission('create-lead')
+                                        <li><a class="dropdown-item" href=""
+                                                data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Call List</a>
+                                        </li>
+                                    @endauth
                                 </ul>
                             </li>
                         @endauth
