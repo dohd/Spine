@@ -36,8 +36,9 @@
                 $('#supplier').attr('disabled', true).change();
                 $('#purchaseorder').attr('disabled', true);
                 if (this.grn.invoice_no) {
-                    $('#invoice_no').attr('disabled', false);
                     $('#invoice_status option:eq(0)').remove();
+                    $('#invoice_no').attr('disabled', false);
+                    $('#invoice_date').attr('disabled', false);
                 } else {
                     $('#invoice_status option:eq(1)').remove();
                 }
@@ -55,8 +56,14 @@
 
         invoiceStatusChange() {
             const el = $(this);
-            if (el.val() == 'with_invoice') $('#invoice_no').val('').attr('disabled', false);
-            else $('#invoice_no').val('').attr('disabled', true);
+            if (el.val() == 'with_invoice') {
+                $('#invoice_no').val('').attr('disabled', false);
+                $('#invoice_date').val('').attr('disabled', false);
+            }
+            else {
+                $('#invoice_no').val('').attr('disabled', true);
+                $('#invoice_date').val('').attr('disabled', true);
+            }
         },
 
         supplierChange() {

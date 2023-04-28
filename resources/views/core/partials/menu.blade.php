@@ -311,7 +311,7 @@
                                 href="{{ route('biller.attendance') }}"><i class="ft-activity"></i>
                                 {{ trans('hrms.attendance') }}</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ route('biller.logout') }}"><i class="ft-power"></i>
+                            <a class="dropdown-item" href="{{ route('biller.logout', 'auth=1') }}"><i class="ft-power"></i>
                                 {{ trans('navs.general.logout') }}</a>
                         </div>
                     </li>
@@ -1780,68 +1780,54 @@
                             </ul>
                         </li>
 
-                        {{-- import data --}}
-                        <li class="col-md-3" data-mega-col="col-md-3">
-                            <ul class="drilldown-menu">
-                                <li class="menu-list">
-                                    <ul class="mega-menu-sub">
-                                        <li class="nav-item text-bold-600 ml-1 text-info p-1">
-                                            {{ trans('import.import') }}</li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['prospects']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Prospects
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['customer']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Customers
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['products']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Products
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['accounts']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Accounts
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['transactions']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Transactions
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['equipments']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Equipments
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['client_pricelist']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Client Pricelist
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('biller.import.general', ['supplier_pricelist']) }}">
-                                                <i class="fa fa-file-excel-o"></i> Supplier Pricelist
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
+                    {{-- import data --}}
+                    <li class="col-md-3" data-mega-col="col-md-3">
+                        <ul class="drilldown-menu">
+                            <li class="menu-list">
+                                <ul class="mega-menu-sub">
+                                    <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('import.import')}}</li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['customer'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Customers
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['supplier'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Suppliers
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['products'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Products
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['accounts'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Accounts
+                                        </a>
+                                    </li>
+                                
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['equipments'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Equipments
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['client_pricelist'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Client Pricelist
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['supplier_pricelist'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Supplier Pricelist
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
             @endauth
         </ul>
     </div>

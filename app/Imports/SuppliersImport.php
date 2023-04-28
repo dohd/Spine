@@ -2,14 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\customer\Customer;
+use App\Models\supplier\Supplier;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class CustomersImport implements ToCollection, WithBatchInserts, WithValidation, WithStartRow
+class SuppliersImport implements ToCollection, WithBatchInserts, WithValidation, WithStartRow
 {
     /**
      * @param array $row
@@ -28,14 +28,14 @@ class CustomersImport implements ToCollection, WithBatchInserts, WithValidation,
     public function collection(Collection $rows)
     {
         // dd($rows);
-        $customer_data = [];
+        $supplier_data = [];
         foreach ($rows as $key => $row) {
             $row_num = $key+1;
             if ($row_num == 1 && $row->count() < 9) {
                 trigger_error('Missing columns! Use latest CSV file template.');
             } elseif ($row_num > 1) {
                 if (empty($row[0])) trigger_error('Company is required on row no. $row_num', );
-                $customer_data[] = [
+                $supplier_data[] = [
                     'company' => $row[0],
                     'name' => empty($row[1])? $row[0] : $row[1],
                     'phone' => $row[2],
@@ -50,7 +50,7 @@ class CustomersImport implements ToCollection, WithBatchInserts, WithValidation,
                 ++$this->rows;
             }            
         }
-        Customer::insert($customer_data);
+        Supplier::insert($supplier_data);
     }
 
     public function rules(): array

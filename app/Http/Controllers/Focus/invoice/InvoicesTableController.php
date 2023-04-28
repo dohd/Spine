@@ -68,9 +68,9 @@ class InvoicesTableController extends Controller
             ->addIndexColumn()
             ->addColumn('customer', function ($invoice) {
                 $link = '';
-                $customer = $invoice->customer;
-                if ($customer) {
-                    $link = ' <a class="font-weight-bold" href="'. route('biller.customers.show', $customer) .'">'. $customer->name .'</a>'; 
+                if ($invoice->customer) {
+                    $customer_name = $invoice->customer->company ?? $invoice->customer->name; 
+                    $link = ' <a class="font-weight-bold" href="'. route('biller.customers.show', $invoice->customer) .'">'. $customer_name .'</a>'; 
                 }
                 return $link;             
             })

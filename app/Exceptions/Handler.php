@@ -54,7 +54,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         if (strpos($request->url(), '/api/') !== false) {
-            \Log::debug('API Request Exception - '.$request->url().' - '.$exception->getMessage().(!empty($request->all()) ? ' - '.json_encode($request->except(['password'])) : ''));
+            \Log::debug('API Request Exception - ' . $request->url() . ' - ' . $exception->getMessage() . (!empty($request->all()) ? ' - ' . json_encode($request->except(['password'])) : ''));
 
             if ($exception instanceof AuthorizationException) {
                 return $this->setStatusCode(403)->respondWithError($exception->getMessage());
@@ -77,7 +77,7 @@ class Handler extends ExceptionHandler
             }
 
             if ($exception instanceof ValidationException) {
-                \Log::debug('API Validation Exception - '.json_encode($exception->validator->messages()));
+                \Log::debug('API Validation Exception - ' . json_encode($exception->validator->messages()));
 
                 return $this->setStatusCode(422)->respondWithError($exception->validator->messages());
             }
@@ -127,8 +127,10 @@ class Handler extends ExceptionHandler
         if ($request->expectsJson()) {
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
+        // set url for login redirect
+        session()->put('url_intended', url()->current());
 
-         return redirect()->guest(route('biller.logout'));
+        return redirect()->guest(route('biller.logout'));
     }
 
     /**
@@ -165,11 +167,11 @@ class Handler extends ExceptionHandler
     protected function respondWithError($message)
     {
         return $this->respond([
-                'error' => [
-                    'message'     => $message,
-                    'status_code' => $this->getStatusCode(),
-                ],
-            ]);
+            'error' => [
+                'message'     => $message,
+                'status_code' => $this->getStatusCode(),
+            ],
+        ]);
     }
 
     /**
