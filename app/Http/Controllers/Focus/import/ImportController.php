@@ -31,7 +31,7 @@ class ImportController extends Controller
     public function index(ManageReports $request, $type)
     {
         $labels = [
-            'prospects' => trans('import.import_prospects'),
+            'prospect' => trans('import.import_prospects'),
             'customer' => trans('import.import_customers'),
             'supplier' => 'Import Suppliers',
             'products' => trans('import.import_products'),
@@ -79,6 +79,7 @@ class ImportController extends Controller
         // process file
         $data['ins'] = auth()->user()->ins;
         $models = [
+            'prospect' => new \App\Imports\ProspectsImport($data),
             'customer' => new \App\Imports\CustomersImport($data),
             'supplier' => new \App\Imports\SuppliersImport($data),
             'products' => new \App\Imports\ProductsImport($data),
