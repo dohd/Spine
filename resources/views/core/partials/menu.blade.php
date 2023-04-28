@@ -564,20 +564,20 @@
                                         </li>
                                     @endauth
                                     @permission('manage-lead')
-                                        <li><a class="dropdown-item" href=""
-                                                data-toggle="dropdown"> <i class="ft-phone"></i> My Today Call List</a>
+                                        <li><a class="dropdown-item" href="" data-toggle="dropdown"> <i
+                                                    class="ft-phone"></i> My Today Call List</a>
                                         </li>
-                                        
+
                                     @endauth
                                     @permission('manage-lead')
-                                        <li><a class="dropdown-item" href=""
-                                                data-toggle="dropdown"> <i class="ft-list"></i> Manage Call List</a>
+                                        <li><a class="dropdown-item" href="" data-toggle="dropdown"> <i
+                                                    class="ft-list"></i> Manage Call List</a>
                                         </li>
-                                      
+
                                     @endauth
                                     @permission('create-lead')
-                                        <li><a class="dropdown-item" href=""
-                                                data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Call List</a>
+                                        <li><a class="dropdown-item" href="" data-toggle="dropdown"> <i
+                                                    class="fa fa-plus-circle"></i> Create Call List</a>
                                         </li>
                                     @endauth
                                 </ul>
@@ -1789,10 +1789,17 @@
                                             {{ trans('import.import') }}</li>
                                         <li>
                                             <a class="dropdown-item"
+                                                href="{{ route('biller.import.general', ['prospects']) }}">
+                                                <i class="fa fa-file-excel-o"></i> Prospects
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"
                                                 href="{{ route('biller.import.general', ['customer']) }}">
                                                 <i class="fa fa-file-excel-o"></i> Customers
                                             </a>
                                         </li>
+
                                         <li>
                                             <a class="dropdown-item"
                                                 href="{{ route('biller.import.general', ['products']) }}">

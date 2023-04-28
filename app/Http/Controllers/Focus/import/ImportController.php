@@ -55,6 +55,7 @@ class ImportController extends Controller
     public function index(ManageReports $request, $type)
     {
         $titles = [
+            'prospects' => trans('import.import_prospects'),
             'customers' => trans('import.import_customers'),
             'products' => trans('import.import_products'),
             'accounts' => trans('import.import_accounts'),
@@ -74,6 +75,7 @@ class ImportController extends Controller
     public function sample_template($file_name)
     {
         $file_path = public_path() . '/storage/app/public/sample/' . $file_name . '.csv';
+        dd($file_path);
         $file_exists = file_exists($file_path);
         if (!$file_exists) throw ValidationException::withMessages(['Template file does not exist!']);
         

@@ -203,7 +203,7 @@ Route::group(['namespace' => 'calllist'], function () {
     Route::resource('calllists', 'CallListController');
 
     //For Datatable
-     Route::post('calllists/get', 'CallListTableController')->name('calllists.get');
+    // Route::get('calllists/get', 'CallListTableController')->name('calllists.get');
      Route::post('calllists/followup', 'CallListController@followup')->name('calllists.followup');
 });
 Route::group(['namespace' => 'remark'], function () {
