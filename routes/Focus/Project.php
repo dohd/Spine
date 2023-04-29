@@ -17,6 +17,7 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/log_history', 'ProjectsController@log_history')->name('projects.log_history');
   Route::post('projects/notes', 'ProjectsController@notes')->name('projects.notes');
   Route::post('projects/invoices', 'ProjectsController@invoices')->name('projects.invoices');
+  Route::post('projects/project_budget', 'ProjectsController@project_budget')->name('projects.project_budget');
   Route::post('projects/quotes_select', 'ProjectsController@quotes_select')->name('projects.quotes_select');
   Route::post('projects/detach_quote', 'ProjectsController@detach_quote')->name('projects.detach_quote');
   Route::post('projects/detach_budget', 'ProjectsController@detach_budget')->name('projects.detach_budget');
@@ -24,9 +25,17 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   // project budget
   Route::get('projects/budget/{quote}', 'ProjectsController@create_project_budget')->name('projects.create_project_budget');
   Route::get('projects/budget/{qoute_id}/{budget_id}', 'ProjectsController@edit_project_budget')->name('projects.edit_project_budget');
+  Route::get('projects/budget', 'ProjectsController@view_budget')->name('projects.view_budget');
+  Route::get('projects/get_extimated_milestone', 'ProjectsController@get_extimated_milestone')->name('projects.get_extimated_milestone');
   Route::post('projects/budget_store', 'ProjectsController@store_project_budget')->name('projects.store_project_budget');
   Route::post('projects/budget_update/{budget}', 'ProjectsController@update_project_budget')->name('projects.update_project_budget');
   Route::post('projects/budget_tool_update/{budget}', 'ProjectsController@update_budget_tool')->name('projects.update_budget_tool');
+  //Project Expenses
+  Route::post('projects/bill_stock_items', 'ProjectsController@bill_stock_items')->name('projects.bill_stock_items');
+  Route::post('projects/project_expense', 'ProjectsController@project_expense')->name('projects.project_expense');
+  Route::post('projects/issued_items', 'ProjectsController@issued_items')->name('projects.issued_items');
+  Route::post('projects/labour_skillsets', 'ProjectsController@labour_skillsets')->name('projects.labour_skillsets');
+  Route::post('projects/quotes_service_items', 'ProjectsController@quotes_service_items')->name('projects.quotes_service_items');
 });
 
 // project budget

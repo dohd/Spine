@@ -124,6 +124,28 @@ class QuotesTableController extends Controller
             ->addColumn('sum_total', function ($quote) use($sum_total) {
                 return $sum_total;
             })
+            ->addColumn('stats', function ($quote) {
+                if($quote->budget){
+                    return '<div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Action
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item quote_delete text-danger" href="${url}">Dettach</a>
+                                </div>
+                            </div> ';
+                }
+                return '<div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Action
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item create" href="'. route('biller.projects.create_project_budget', $quote). '">Create Budget</a>
+                                <a class="dropdown-item quote_delete text-danger" href="${url}">Delete</a>
+                            </div>
+                        </div> 
+                ';
+            })
             ->addColumn('actions', function ($quote) {
                 $action_buttons = $quote->action_buttons;
                 if (request('page') == 'pi') {

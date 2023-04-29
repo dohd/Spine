@@ -260,6 +260,7 @@
                                             {{-- @if (project_access($project->id)) --}}
                                                 <div class="timeline-body mb-1">
                                                     <p>{{$row['note']}}</p>
+                                                    <p>Extimated Milestone Amount: <b>{{amountFormat($row['extimated_milestone_amount'])}}</b></p>
                                                     <a href="#" class=" delete-object" data-object-type="2" data-object-id="{{$row['id']}}">
                                                         <i class="danger fa fa-trash"></i>
                                                     </a>
@@ -407,13 +408,13 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Date</th>
                                             <th>Tr No.</th>
                                             <th>Customer - Branch</th>
                                             <th>Title</th>
                                             <th>Amount</th>
                                             <th>Ticket No.</th>
                                             <th>Invoice No.</th>
+                                            <th>Budget Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -428,15 +429,15 @@
                                 <button type="button" class="btn btn-info float-right mr-2" id="addbudget" data-toggle="modal"
                                         data-target="#AddBudgetModal"><i class="fa fa-plus-circle"></i> Add
                                 </button>
-                                <table id="budgetsTbl_" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <table id="budgetsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
                                             <th>Tr No.</th>
                                             <th>Customer - Branch</th>
-                                            <th>Title</th>
                                             <th>Quoted Amount</th>
-                                            <th>Budget Amount</th>
+                                            <th>Budgeted Amount</th>
+                                            
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -448,53 +449,76 @@
                         {{-- expenses --}}
                         <div class="tab-pane" id="tab_data11" aria-labelledby="tab11" role="tabpanel">
                             <div class="card-body">
-                                <h4>Labour</h4>
+                                <h4>Inventory Service Labour</h4>
+                                <table id="serviceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Quote/PI No.</th>
+                                            <th>Description</th>
+                                            <th>UoM</th>
+                                            <th>Qty</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                <h4 class="mt-3">Skillset Labour</h4>
                                 <table id="labourTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Date</th>
-                                            <th>Tr No.</th>
-                                            <th>Customer - Branch</th>
-                                            <th>Title</th>
+                                            <th>Quote/PI No.</th>
+                                            <th>Skill</th>
+                                            <th>Charge</th>
+                                            <th>Working Hrs.</th>
+                                            <th>No. Technicians</th>
                                             <th>Amount</th>
-                                            <th>Ticket No.</th>
-                                            <th>Invoice No.</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
-                                <h4>Issued Stock</h4>
+                                <h4 class="mt-3">Issued Stock</h4>
                                 <table id="stockTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Date</th>
-                                            <th>Tr No.</th>
-                                            <th>Customer - Branch</th>
-                                            <th>Title</th>
+                                            <th>Quote/PI No.</th>
+                                            <th>Description</th>
+                                            <th>UoM</th>
+                                            <th>Qty</th>
+                                            <th>Warehouse</th>
                                             <th>Amount</th>
-                                            <th>Ticket No.</th>
-                                            <th>Invoice No.</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
-                                <h4>Purchased Stock</h4>
+                                <h4 class="mt-3">Purchased Stock To Project</h4>
                                 <table id="purchaseTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Date</th>
-                                            <th>Tr No.</th>
-                                            <th>Customer - Branch</th>
-                                            <th>Title</th>
+                                            <th>Bill Number</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>UOM</th>
+                                            <th>Qty</th>
                                             <th>Amount</th>
-                                            <th>Ticket No.</th>
-                                            <th>Invoice No.</th>
-                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                <h4 class="mt-3">Direct Purchase Expenses</h4>
+                                <table id="expenseTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Bill Number</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>UOM</th>
+                                            <th>Qty</th>
+                                            <th>Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -505,10 +529,7 @@
                         {{-- invoices tab --}}
                         <div class="tab-pane" id="tab_data7" aria-labelledby="tab7" role="tabpanel">
                             @if($project->creator->id == auth()->user()->id)
-                                <a class="btn btn-info float-right mr-2"
-                                    href="{{route('biller.invoices.create')}}?p={{$project->id}}">
-                                    <i class="fa fa-plus-circle"></i> Invoice
-                                </a>
+                               
                                 <div class="card-body">
                                     <table id="invoices-table_p"
                                             class="table table-striped table-bordered zero-configuration"
@@ -523,7 +544,6 @@
                                                 <th>{{ trans('general.amount') }}</th>
                                                 <th>{{ trans('general.status') }}</th>
                                                 <th>{{ trans('invoices.invoice_due_date') }}</th>
-                                                <th>{{ trans('labels.general.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
