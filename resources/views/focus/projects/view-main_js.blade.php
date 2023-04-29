@@ -149,8 +149,6 @@
     @include('focus.projects.adt.new_task_js');
 
     $(function () {
-        'use strict';
-
         var slider = $('#progress');
         var textn = $('#prog');
         textn.text(slider.val() + '%');
@@ -179,19 +177,13 @@
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             localStorage.setItem('project_tab', $(e.target).attr('href'));
             switch ($(e.target).attr('href')) {
-                case '#tab_data3': 
-                    tasks(); break;
-                case '#tab_data4': 
-                    project_log(); break;
-                case '#tab_data6': 
-                    notes(); break;
-                case '#tab_data7': 
-                    invoices(); break;
+                case '#tab_data3': tasks(); break;
+                case '#tab_data4': project_log(); break;
+                case '#tab_data6': notes(); break;
+                case '#tab_data10': invoices(); break;
+                case '#tab_data7': quotes(); break;
+                case '#tab_data8': budgets(); break;
                 case '#tab_data9': 
-                    quotes(); break;
-                case '#tab_data10': 
-                    budgets(); break;
-                case '#tab_data11': 
                     skillset();
                     service();
                     stocks();
@@ -200,8 +192,8 @@
             }
         });
 
-        var project_tab = localStorage.getItem('project_tab');
-        if (project_tab) $('a[href="' + project_tab + '"]').tab('show');
+        if (localStorage.project_tab) 
+            $('a[href="' + localStorage.project_tab + '"]').tab('show');
 
         // Change this to the location of your server-side upload handler:
         var url = '{{route('biller.project_attachment')}}';
@@ -224,7 +216,6 @@
             }
         }).prop('disabled', !$.support.fileInput)
         .parent().addClass($.support.fileInput ? undefined : 'disabled');
-
     });
 
     $('.summernote').summernote({
@@ -327,7 +318,7 @@
     function quotes() {
         if ($('#quotesTbl tbody tr').length) return;        
         let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-
+        
         $('#quotesTbl').dataTable({
             processing: true,
             responsive: true,
