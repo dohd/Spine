@@ -3,8 +3,6 @@
     // html editor
     editor();
 
-    const quote = '4'
-    console.log(quote);
     $('.datepicker').datepicker({ format: "{{ config('core.user_date_format') }}" })
     if (quote.date) $('#date').datepicker('setDate', new Date(quote.date));
 

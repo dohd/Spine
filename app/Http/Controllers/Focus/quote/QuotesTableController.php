@@ -121,30 +121,12 @@ class QuotesTableController extends Controller
                     $query->whereHas('invoice', fn($q) => $q->where('tid', floatval($tid)));
                 }
             })
-            ->addColumn('sum_total', function ($quote) use($sum_total) {
+            ->addColumn('sum_total', function() use($sum_total) {
                 return $sum_total;
             })
-            ->addColumn('stats', function ($quote) {
-                if($quote->budget){
-                    return '<div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Action
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item quote_delete text-danger" href="${url}">Dettach</a>
-                                </div>
-                            </div> ';
-                }
-                return '<div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Action
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item create" href="'. route('biller.projects.create_project_budget', $quote). '">Create Budget</a>
-                                <a class="dropdown-item quote_delete text-danger" href="${url}">Delete</a>
-                            </div>
-                        </div> 
-                ';
+            ->addColumn('budget_status', function ($quote) {
+                return $quote->budget? '<span class="badge badge-success">budgeted</span>' : 
+                    '<span class="badge badge-secondary">pending</span>';
             })
             ->addColumn('actions', function ($quote) {
                 $action_buttons = $quote->action_buttons;
