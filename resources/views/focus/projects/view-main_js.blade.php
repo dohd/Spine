@@ -19,7 +19,6 @@
                 project_id : project_id,
             },
             success: function (response) {
-                //console.log(response);
                 if(response == -1){
                     $('.extimate').text('No Limit');
                 }
@@ -267,7 +266,6 @@
     $(document).on('click', ".budget_delete", function (e) {
         var pro_id = e.target.getAttribute('data-pro');
         var budget_id = e.target.getAttribute('data-id');
-        //console.log(quote_id);
         var url = "{{ route('biller.projects.detach_budget') }}";
         $.ajax({
             method: "POST",
@@ -288,7 +286,6 @@
                 });
             }
         });
-        // console.log(quote_id);
         // e.preventDefault();
         // addObject({form: '', url: $(this).attr('href')}, true);
         // $(this).closest('tr').remove();
@@ -330,8 +327,6 @@
     function quotes() {
         if ($('#quotesTbl tbody tr').length) return;        
         let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        quoteIds = quoteIds.join(',');
-
 
         $('#quotesTbl').dataTable({
             processing: true,
@@ -341,36 +336,33 @@
             ajax: {
                 url: "{{ route('biller.quotes.get') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds},
+                data: {project_id: @json(@$project->id), quote_ids: quoteIds.join(',')},
                 dataSrc: ({data}) => {
                     data = data.map(v => {
-                        const url = "{{ route('biller.projects.detach_quote', ['project_id' => $project->id]) }}" + `&quote_id=${v.id}`;
-                        const create_url = "{{ url('projects/budget/') }}" +`/${v.id}`;
-                        //v['actions'] = `<a href="${url}" class="quote_delete"><i class="fa fa-trash fa-lg text-danger"></i></a>`;
-                        v['actions'] = `
+                        const create_budget_url = @json(url('projects/budget/')) + '/' + v.id;
+                        const detach_quote_url = @json(route('biller.projects.detach_quote', ['project_id' => $project->id])) + '&quote_id=' + v.id;
+                        v.actions = `
                                 <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         Action
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <a class="dropdown-item create" href="${create_url}">Create</a>
-                                        <a class="dropdown-item quote_delete text-danger" href="${url}">Remove</a>
+                                        <a class="dropdown-item create" href="${create_budget_url}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Budget</a>
+                                        <a class="dropdown-item quote_delete text-danger" href="${detach_quote_url}"><i class="fa fa-trash text-danger" aria-hidden="true"></i> Detach</a>
                                     </div>
                                 </div> 
                         `;
                         return v;
                     });
+
                     return data;
                 }
             },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                     'tid', 'customer', 'notes', 'total', 'lead_tid', 'invoice_tid', 'quote_budget'
-                ].map(v => ({data: v, name: v})),
-                {data: 'stats', name: 'stats', searchable: false, sortable: false}
+            columns: [
+                {data: 'DT_Row_Index',name: 'id'},
+                ...['tid', 'customer', 'notes', 'total', 'lead_tid', 'invoice_tid', 'budget_status']
+                .map(v => ({data: v, name: v})),
+                {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             columnDefs: [
                 { type: "custom-number-sort", targets: 5 },

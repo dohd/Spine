@@ -1,9 +1,9 @@
-<div class="tab-pane" id="tab_data7" aria-labelledby="tab7" role="tabpanel">
-
+<div class="tab-pane" id="tab_data11" aria-labelledby="tab11" role="tabpanel">
     <div class="card">
         <div class="card-header mb-0">
-            <h4 class="card-title">{{ trans('projects.users') }}</h4>
-            <a class="heading-elements-toggle"><i class="fa fa-ellipsis-v font-medium-3"></i></a>
+            <h4 class="card-title">{{trans('projects.users')}}</h4>
+            <a class="heading-elements-toggle"><i
+                        class="fa fa-ellipsis-v font-medium-3"></i></a>
             <div class="heading-elements">
                 <ul class="list-inline mb-0">
                     <li><a data-action="collapse"><i class="ft-minus"></i></a></li>
@@ -20,18 +20,15 @@
                             <a href="javascript:void(0)" class="list-group-item">
                                 <div class="media">
                                     <div class="media-left pr-1"><span
-                                            class="avatar avatar-sm"><img
-                                                src="{{ Storage::disk('public')->url('app/public/img/users/' . @$row->picture) }}"><i></i></span>
+                                                class="avatar avatar-sm"><img
+                                                    src="{{ Storage::disk('public')->url('app/public/img/users/' . @$row->picture) }}"><i></i></span>
                                     </div>
                                     <div class="media-body w-100">
-                                        <h6 class="media-heading mb-0">{{ $row['first_name'] }}
-                                            {{ $row['last_name'] }}</h6>
+                                        <h6 class="media-heading mb-0">{{$row['first_name']}} {{$row['last_name']}}</h6>
 
                                     </div>
                                 </div>
-                            </a>
-                        @endforeach
-
+                            </a>@endforeach
                     </div>
                 </div>
             </div>

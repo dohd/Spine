@@ -1,4 +1,4 @@
-<div class="tab-pane" id="tab_data10" aria-labelledby="tab10" role="tabpanel">
+<div class="tab-pane" id="tab_data12" aria-labelledby="tab12" role="tabpanel">
     <div class="card-body">
         <h5>1. Quotation / Proforma Invoice</h5>
         <div class="table-responsive">
