@@ -65,7 +65,7 @@ class ProjectsTableController extends Controller
                 return $name;
             })
             ->editColumn('tid', function($project) use ($prefixes) {
-                return gen4tid("{$prefixes[1]}-", $project->tid);
+                return '<a href="'.route('biller.projects.show', $project).'">'. gen4tid("{$prefixes[1]}-", $project->tid) .'</a>';;
             })
             ->filterColumn('tid', function($query, $tid) use($prefixes) {
                 $arr = explode('-', $tid);

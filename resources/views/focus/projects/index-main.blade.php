@@ -3,104 +3,120 @@
 @section ('title', trans('labels.backend.projects.management'))
 
 @section('content')
-    <div class="sidebar-left">
-        <div class="sidebar">
-            <div class="sidebar-content">
-                <div class="card">
-                    <div class="card-body">
-                        @permission('create-project')
-                            <div class="form-group form-group-compose text-center">
-                                <button type="button" class="btn btn-info btn-block" id="addt" data-toggle="modal"
-                                        data-target="#AddProjectModal">
-                                    {{trans('projects.new_project')}}
-                                </button>
-                            </div> 
-                        @endauth
+    <div class="content-wrapper">
+        <!-- Header -->
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
+                <h4 class="content-header-title">Project Management</h4>
+            </div>
+            <div class="col-6">
+                <div class="media-body media-right text-right">
+                    @include('focus.projects.partials.projects-header-buttons')
+                </div>
+            </div>
+        </div>
+        <!-- End Header -->
 
-                        <div class="sidebar-todo-container">
-                            <h6 class="text-muted text-bold-500 my-1">{{trans('general.messages')}}</h6>
-                            <div class="list-group list-group-messages">
-                                <a href="{{route('biller.dashboard')}}"
-                                    class="list-group-item list-group-item-action border-0">
-                                    <i class="icon-home mr-1"></i>
-                                    <span>{{trans('navs.frontend.dashboard')}}</span>
-                                </a>
-                                <a href="{{route('biller.todo')}}"
-                                    class="list-group-item list-group-item-action border-0">
-                                    <i class="icon-list mr-1"></i>
-                                    <span>{{trans('general.tasks')}}</span><span
-                                            class="badge badge-secondary badge-pill float-right">8</span>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action border-0">
-                                    <i class="icon-bell mr-1"></i>
-                                    <span>{{trans('general.messages')}}</span>
-                                    <span class="badge badge-danger badge-pill float-right">3</span> </a>
+        <!-- Left sidebar -->
+        <div class="sidebar-left">
+            <div class="sidebar">
+                <div class="sidebar-content">                        
+                    <div class="card mr-1">
+                        <div class="card-body">
+                            <div class="card-content">
+                                @permission('create-project')
+                                    <div class="form-group form-group-compose text-center">
+                                        <button type="button" class="btn btn-success btn-block" id="addt" data-toggle="modal"
+                                                data-target="#AddProjectModal">
+                                            {{trans('projects.new_project')}}
+                                        </button>
+                                    </div> 
+                                @endauth
+        
+                                <div class="sidebar-todo-container">
+                                    <h6 class="text-muted text-bold-500 my-1">{{trans('general.messages')}}</h6>
+                                    <div class="list-group list-group-messages">
+                                        <a href="{{route('biller.dashboard')}}"
+                                            class="list-group-item list-group-item-action border-0">
+                                            <i class="icon-home mr-1"></i>
+                                            <span>{{trans('navs.frontend.dashboard')}}</span>
+                                        </a>
+                                        <a href="{{route('biller.todo')}}"
+                                            class="list-group-item list-group-item-action border-0">
+                                            <i class="icon-list mr-1"></i>
+                                            <span>{{trans('general.tasks')}}</span><span
+                                                    class="badge badge-secondary badge-pill float-right">8</span>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action border-0">
+                                            <i class="icon-bell mr-1"></i>
+                                            <span>{{trans('general.messages')}}</span>
+                                            <span class="badge badge-danger badge-pill float-right">3</span> </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="content-right">
-        <div class="content-wrapper">
-            <div class="content-header row mb-1">
-                <div class="content-header-left col-6">
-                    <h4 class="content-header-title">Project Management</h4>
-                </div>
-                <div class="col-6">
-                    <div class="media-body media-right text-right">
-                        @include('focus.projects.partials.projects-header-buttons')
-                    </div>
-                </div>
-            </div>
+        <!-- End Left sidebar -->
 
+        <!-- Content -->
+        <div class="content-right">
             <div class="content-body">
-                <div class="content-overlay"></div>
-                <!-- Modal -->
-                @include('focus.projects.modal.project_new')
-                <div class="card todo-details rounded-0">
-                    <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
-                    <div class="search">
-
-                    </div>
-
+                <div class="card">
                     <div class="card-body">
-                        <table id="projects-table"
-                                class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                                width="100%">
+                        <div class="row">
+                            <div class="col-4">
+                                <select class="form-control custom-select" id="customer">
+                                    <option value="">-- Filter Customer --</option>
+                                    @foreach ([] as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <select class="form-control custom-select" id="branch">
+                                    <option value="">-- Filter Branch --</option>
+                                    @foreach ([] as $branch)
+                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div> 
+
+                        <hr>
+                        <table id="projects-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                             <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Project No.</th>
-                                <th>Name</th>
-                                <th>Priority</th>
-                                <th>Status</th>
-                                <th>Deadline</th>
-                                <th>{{ trans('general.action') }}</th>
-                            </tr>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Project No.</th>
+                                    <th>Name</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Deadline</th>
+                                    <th>{{ trans('general.action') }}</th>
+                                </tr>
                             </thead>
-
-
                             <tbody>
-                            <tr>
-                                <td colspan="100%" class="text-center text-success font-large-1"><i
-                                            class="fa fa-spinner spinner"></i></td>
-                            </tr>
+                                <tr>
+                                    <td colspan="100%" class="text-center text-success font-large-1">
+                                        <i class="fa fa-spinner spinner"></i>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
         </div>
+        <!-- End Content -->
     </div>
-    <!-- END: Content-->
 
     <div class="sidenav-overlay"></div>
     <div class="drag-target"></div>
     {{-- <input type="hidden" id="loader_url" value="{{route('biller.projects.load')}}"> --}}
+    @include('focus.projects.modal.project_new')
     @include('focus.projects.modal.project_view')
 @endsection
 @section('after-styles')
