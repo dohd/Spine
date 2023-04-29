@@ -5,7 +5,7 @@
 @section('content')
     <div class="sidebar-left">
         <div class="sidebar">
-            <div class="sidebar-content sidebar-todo">
+            <div class="sidebar-content">
                 <div class="card">
                     <div class="card-body">
                         @permission('create-project')
@@ -35,19 +35,27 @@
                                     <i class="icon-bell mr-1"></i>
                                     <span>{{trans('general.messages')}}</span>
                                     <span class="badge badge-danger badge-pill float-right">3</span> </a>
-
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
     <div class="content-right">
         <div class="content-wrapper">
-            <div class="content-header row">
+            <div class="content-header row mb-1">
+                <div class="content-header-left col-6">
+                    <h4 class="content-header-title">Project Management</h4>
+                </div>
+                <div class="col-6">
+                    <div class="media-body media-right text-right">
+                        @include('focus.projects.partials.projects-header-buttons')
+                    </div>
+                </div>
             </div>
+
             <div class="content-body">
                 <div class="content-overlay"></div>
                 <!-- Modal -->

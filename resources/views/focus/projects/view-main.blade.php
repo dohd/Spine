@@ -5,27 +5,13 @@
 @section('content')
     <!-- BEGIN: Content-->
     <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h3 class="content-header-title mb-0">{{trans('projects.project_summary')}}</h3>
-                <div class="row breadcrumbs-top">
-                    <div class="breadcrumb-wrapper col-12">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a
-                                        href="{{route('biller.dashboard')}}">{{trans('core.home')}}</a>
-                            </li>
-                            <li class="breadcrumb-item"><a
-                                        href="{{route('biller.projects.index')}}">{{trans('projects.projects')}}</a>
-                            </li>
-                            <li class="breadcrumb-item active">{{trans('projects.project_summary')}}
-                            </li>
-                        </ol>
-                    </div>
-                </div>
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
+                <h3 class="content-header-title">{{trans('projects.project_summary')}}</h3>
             </div>
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right">
-                    <div class="media-left media-middle"></div>
+            <div class="col-6">
+                <div class="media-body media-right text-right">
+                    @include('focus.projects.partials.projects-header-buttons')
                 </div>
             </div>
         </div>
