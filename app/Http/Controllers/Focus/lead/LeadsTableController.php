@@ -49,16 +49,24 @@ class LeadsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->lead->getForDataTable();
+        $query = $this->lead->getForDataTable();
 
         $ins = auth()->user()->ins;
         $prefixes = prefixesArray(['lead'], $ins);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('reference', function ($lead) use($prefixes) {
+            ->editColumn('reference', function ($lead) use($prefixes) {
                 return gen4tid("{$prefixes[0]}-", $lead->reference);
+            })
+            ->filterColumn('reference', function($query, $reference) use($prefixes) {
+                $arr = explode('-', $reference);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('reference', floatval($arr[1]));
+                } elseif (floatval($reference)) {
+                    $query->where('reference', floatval($reference));
+                }
             })
             ->addColumn('client_name', function ($lead) {
                 $client_name = $lead->client_name;
@@ -69,6 +77,7 @@ class LeadsTableController extends Controller
             ->addColumn('created_at', function ($lead) {
                 return dateFormat($lead->created_at);
             })
+            ->orderColumn('created_at', '-created_at $1')
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
             })

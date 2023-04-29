@@ -38,7 +38,7 @@ class TaskScheduleRepository extends BaseRepository
             $q->whereHas('contractservices')->whereHas('equipments');
         });
 
-        return $q->get();
+        return $q;
     }
 
     /**

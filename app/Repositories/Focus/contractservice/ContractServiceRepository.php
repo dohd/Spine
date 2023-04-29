@@ -39,7 +39,7 @@ class ContractServiceRepository extends BaseRepository
             $q->where('branch_id', request('branch_id'));
         });
 
-        return $q->get();
+        return $q;
     }
 
     public function getServiceReportItemsForDataTable()

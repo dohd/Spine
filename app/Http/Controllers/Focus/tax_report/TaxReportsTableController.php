@@ -47,9 +47,9 @@ class TaxReportsTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = $this->repository->getForDataTable();
+        $query = $this->repository->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()   
             ->addColumn('tax_group', function ($report) {
@@ -74,6 +74,7 @@ class TaxReportsTableController extends Controller
             ->addColumn('date', function ($report) {
                 return dateFormat($report->created_at);
             })
+            ->orderColumn('date', '-date $1')
             ->addColumn('actions', function ($report) {
                 return $report->action_buttons;
             })

@@ -48,7 +48,7 @@ class UtilityBillTableController extends Controller
     public function __invoke(Request $request)
     {
         $query = $this->repository->getForDataTable();
-
+        $prefixes = prefixesArray(['bill'], auth()->user()->ins);
         // aggregate
         $query_1 = clone $query;
         $amount_total = $query_1->sum('total');
@@ -61,8 +61,8 @@ class UtilityBillTableController extends Controller
         return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('tid', function ($utility_bill) {
-                $tid = gen4tid('BILL-', $utility_bill->tid);
+            ->editColumn('tid', function ($utility_bill) use($prefixes) {
+                $tid = gen4tid("{$prefixes[0]}-", $utility_bill->tid);
                 $doc_type = $utility_bill->document_type;
                 if ($doc_type == 'direct_purchase') {
                     $purchase = $utility_bill->purchase;
@@ -76,6 +76,14 @@ class UtilityBillTableController extends Controller
                 }
                 
                 return $tid;
+            })
+            ->filterColumn('tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                } elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
+                }
             })
             ->addColumn('supplier', function ($utility_bill) {
                 $name = '';

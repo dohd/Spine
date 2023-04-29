@@ -49,14 +49,17 @@ class PriceListTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->pricelist->getForDataTable();
+        $query = $this->pricelist->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('supplier', function ($supplier_product) {
                 $supplier = $supplier_product->supplier;
                 if ($supplier) return $supplier->company;
+            })
+            ->filterColumn('supplier', function($query, $supplier) {
+                $query->whereHas('supplier', fn($q) => $q->where('name', 'LIKE', "%{$supplier}%"));
             })
             ->addColumn('row', function ($supplier_product) {
                 return $supplier_product->row_num;

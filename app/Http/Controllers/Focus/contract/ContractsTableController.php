@@ -49,9 +49,9 @@ class ContractsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->contract->getForDataTable();
+        $query = $this->contract->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($contract) {

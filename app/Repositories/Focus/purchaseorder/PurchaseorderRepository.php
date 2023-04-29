@@ -40,7 +40,7 @@ class PurchaseorderRepository extends BaseRepository
             $q->where('status', request('status'));     
         });
 
-        return $q->get();
+        return $q;
     }
 
     /**

@@ -51,7 +51,7 @@ class EquipmentRepository extends BaseRepository
         
         
         $q->with(['customer', 'branch']);
-        return $q->get();
+        return $q;
     }
 
     /**

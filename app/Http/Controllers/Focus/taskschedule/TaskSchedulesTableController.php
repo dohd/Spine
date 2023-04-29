@@ -50,9 +50,9 @@ class TaskSchedulesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->schedule->getForDataTable();
+        $query = $this->schedule->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('contract', function ($schedule) {   

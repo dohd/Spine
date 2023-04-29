@@ -107,6 +107,7 @@
                 processing: true,
                 serverSide: true,
                 responsive: true,
+                searching: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
                     url: "{{ route('biller.billpayments.get') }}",

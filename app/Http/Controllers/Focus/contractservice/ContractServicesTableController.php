@@ -48,18 +48,18 @@ class ContractServicesTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->contractservice->getForDataTable();
+        $query = $this->contractservice->getForDataTable();
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('client', function ($contractservice) {
+            ->editColumn('client', function ($contractservice) {
                 $customer = $contractservice->customer;
                 $branch = $contractservice->branch;
                 if ($customer && $branch)
                     return "{$customer->company} - {$branch->name}";
             })
-            ->addColumn('contract', function ($contractservice) {
+            ->editColumn('contract', function ($contractservice) {
                 $contract = $contractservice->contract;
                 $schedule = $contractservice->task_schedule;
                 if ($contract && $schedule)
@@ -71,7 +71,7 @@ class ContractServicesTableController extends Controller
             ->addColumn('unit', function ($contractservice) {
                 return $contractservice->items->count();
             })
-            ->addColumn('jobcard_no', function ($contractservice) {
+            ->editColumn('jobcard_no', function ($contractservice) {
                 return 'Jc-' . $contractservice->jobcard_no;
             })
             ->addColumn('date', function ($contractservice) {

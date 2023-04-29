@@ -39,7 +39,7 @@ class TaxReportRepository extends BaseRepository
             $q->where('tax_group', request('tax_group'));
         });
     
-        return $q->get();
+        return $q;
     }
 
     // sales returns

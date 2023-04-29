@@ -49,6 +49,8 @@ class ProjectsTableController extends Controller
     public function __invoke()
     {
         $query = $this->repository->getForDataTable();
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['lead', 'project', 'proforma_invoice', 'quote'], $ins);
 
         return Datatables::of($query)
             ->escapeColumns(['id'])
@@ -62,8 +64,16 @@ class ProjectsTableController extends Controller
                 
                 return $name;
             })
-            ->addColumn('tid', function($project) {
-                return gen4tid('Prj-', $project->tid);
+            ->editColumn('tid', function($project) use ($prefixes) {
+                return gen4tid("{$prefixes[1]}-", $project->tid);
+            })
+            ->filterColumn('tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[1]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                } elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
+                }
             })
             ->addColumn('quote_budget', function($project) {
                 $links = '';
@@ -76,19 +86,47 @@ class ProjectsTableController extends Controller
                 
                 return $links;
             })
-            ->addColumn('lead_tid', function($project) {
+            ->filterColumn('quote_budget', function($query, $budget) use($prefixes) {
+                $arr = explode('-', $budget);
+                if (strtolower($arr[0]) == strtolower($prefixes[2]) && isset($arr[1])) {
+                    $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
+                    
+                    //fn($q) => $q->where('budget', floatval($arr[1]))
+                } 
+                elseif (strtolower($arr[0]) == strtolower($prefixes[3]) && isset($arr[1])) {
+                    $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
+                }
+                elseif (floatval($budget)) {
+                    //$query->whereHas('quotes', fn($q) => $q->where('budget', floatval($budget)));
+                    $query->whereHas('quotes',  fn($q) => $q->where('tid', floatval($budget)));
+                }
+            })
+            ->addColumn('lead_tid', function($project) use ($prefixes) {
                 $tids = array();                
                 foreach ($project->quotes as $quote) {
-                    $tids[] = gen4tid('Tkt-', $quote->lead->reference);
+                    $tids[] = gen4tid("{$prefixes[0]}-", $quote->lead->reference);
                 }
                 return implode(', ', $tids);
             })
-            ->addColumn('start_date', function ($project) {
+            ->filterColumn('lead_tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->whereHas('quotes', fn($q) => $q->whereHas('lead', fn($q) => $q->where('reference', floatval($arr[1]))));
+                    
+                    //fn($q) => $q->where('tid', floatval($arr[1]))
+                } elseif (floatval($tid)) {
+                    //$query->whereHas('quotes', fn($q) => $q->where('tid', floatval($tid)));
+                    $query->whereHas('quotes', fn($q) => $q->whereHas('lead', fn($q) => $q->where('reference', floatval($tid))));
+                }
+            })
+            ->editColumn('start_date', function ($project) {
                 return dateFormat($project->start_date);
             })
-            ->addColumn('end_date', function ($project) {
+            ->orderColumn('start_date', '-start_date $1')
+            ->editColumn('end_date', function ($project) {
                 return dateFormat($project->end_date);
             })
+            ->orderColumn('end_date', '-end_date $1')
             ->addColumn('status', function ($project) {
                 if ($project->misc)
                 return ucfirst($project->misc->name);
