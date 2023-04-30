@@ -549,6 +549,38 @@ class ProjectsController extends Controller
     }
 
     /**
+     * Delete meta
+     */
+    public function delete_meta(ManageProjectRequest $request)
+    {
+        $input = $request->except(['_token', 'ins']);
+
+        DB::beginTransaction();
+
+        try {
+            switch ($input['obj_type']) {
+                case 2 :
+                    $milestone = ProjectMileStone::find($input['object_id']);
+                    ProjectLog::create([
+                        'project_id' => $milestone->project_id, 
+                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 
+                        'user_id' => auth()->user()->id
+                    ]);
+                    $milestone->delete();
+                    $data = ['status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']];
+                    break;
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            $data = ['status' => 'Error', 'message' => 'Internal server error!'];
+        }
+
+        return response()->json($data);
+    }
+
+
+    /**
      * Remove Project Quote
      */
     public function detach_quote(Request $request)
