@@ -51,7 +51,7 @@
                         @if($project->creator->id==auth()->user()->id)
                             <li class="nav-item">
                                 <a class="nav-link" id="tab4" data-toggle="tab" href="#tab_data4" aria-controls="tab_data4" role="tab" aria-selected="true">
-                                    <i class="fa fa-list-ol"></i> {{trans('projects.activity')}}
+                                    <i class="fa fa-list-ol"></i> Project Log
                                 </a>
                             </li> 
                         @endif
