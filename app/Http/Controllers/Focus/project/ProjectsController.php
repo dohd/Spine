@@ -586,41 +586,44 @@ class ProjectsController extends Controller
     public function detach_quote(Request $request)
     {
         $input = $request->except('_token');
+        $error_data = [];
 
         DB::beginTransaction();
-        
-        $project = Project::find($input['project_id']);
-        // expense
-        $purchase_items = $project->purchase_items;
-        $expense_amount = $purchase_items->sum('amount');
-        // issuance
-        $issuance_amount = 0;
-        foreach ($project->quotes as $quote) {
-            $issuance_amount += $quote->projectstock->sum('total');
-        }
-        $expense_total = $expense_amount + $issuance_amount;
-        $project_budget = $project->quotes->sum('total');
+    
+        try {
+            $project = Project::find($input['project_id']);
+            $quote = Quote::find($input['quote_id']);
 
-        $detach = false;
-        $quote = Quote::find($input['quote_id']);
-        if ($expense_total < $project_budget - $quote->total) {
-            if ($quote->invoiced == 'Yes') {
-                $type = $quote->bank_id? 'Proforma Invoice' : 'Quote';
-                return response()->json(['status' => 'Error', 'message' => "Not allowed! {$type} has been invoiced."], 500);
-            } else {
-                ProjectQuote::where(['project_id' => $input['project_id'], 'quote_id' => $input['quote_id']])->delete();
-                if ($project->main_quote_id == $input['quote_id']) {
-                    $other_project_quote = ProjectQuote::where(['project_id' => $input['project_id']])->first();
-                    if ($other_project_quote) $project->update(['main_quote_id' => $other_project_quote->quote_id]);
-                    else $project->update(['main_quote_id' => null]);
-                }
-                $detach = true;
+            $expense_amount = $project->purchase_items->sum('amount');
+            $issuance_amount = 0;
+            foreach ($project->quotes as $quote) {
+                $issuance_amount += $quote->projectstock->sum('total');
             }
-        } else return response()->json(['status' => 'Error', 'message' => "Project has expense."], 500);
+            $expense_total = $expense_amount + $issuance_amount;
+            $project_budget = $project->quotes->sum('total');
 
-        if ($detach) {
+            if ($expense_total >= $project_budget - $quote->total) {
+                $error_data = ['status' => 'Error', 'message' => "Project has expense."];
+                trigger_error($error_data['message']);
+            } elseif ($quote->invoiced == 'Yes') {
+                $doc = $quote->bank_id? 'Proforma Invoice' : 'Quote';
+                $error_data = ['status' => 'Error', 'message' => "Not allowed! {$doc} has been invoiced."];
+                trigger_error($error_data['message']);
+            }
+            
+            ProjectQuote::where(['project_id' => $input['project_id'], 'quote_id' => $input['quote_id']])->delete();
+            if ($project->main_quote_id == $input['quote_id']) {
+                $other_project_quote = ProjectQuote::where(['project_id' => $input['project_id']])->first();
+                if ($other_project_quote) $project->update(['main_quote_id' => $other_project_quote->quote_id]);
+                else $project->update(['main_quote_id' => null]);
+            }
+
             DB::commit();
             return response()->json(['status' => 'Success', 'message' => 'Resource Detached Successfully', 't_type' => 7]);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            if (!$error_data) $error_data = ['status' => 'Error', 'message' => 'Something went wrong!'];
+            return response()->json($error_data, 500);
         }
     }
 
