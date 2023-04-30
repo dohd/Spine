@@ -15,7 +15,6 @@
                     <th>Customer - Branch</th>
                     <th>Title</th>
                     <th>Amount</th>
-                    <th>Ticket No.</th>
                     <th>Invoice No.</th>
                     <th>Budget Status</th>
                     <th>Actions</th>

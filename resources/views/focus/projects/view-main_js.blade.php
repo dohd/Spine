@@ -315,7 +315,7 @@
             },
             columns: [
                 {data: 'DT_Row_Index',name: 'id'},
-                ...['tid', 'customer', 'notes', 'total', 'lead_tid', 'invoice_tid', 'budget_status']
+                ...['tid', 'customer', 'notes', 'total', 'invoice_tid', 'budget_status']
                 .map(v => ({data: v, name: v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
@@ -629,7 +629,6 @@
         });
     }
 
-
     /**SkillSet Labour */
     function skillset() {
         if ($('#labourTbl tbody tr').length) return;        
@@ -746,6 +745,7 @@
                 data: {project_id: @json(@$project_id)}
             },
             columns: [
+                {data: 'DT_Row_Index', name: 'id'},
                 {data: 'tags', name: 'tags'},
                 {data: 'start', name: 'start'},
                 {data: 'duedate', name: 'duedate'},
