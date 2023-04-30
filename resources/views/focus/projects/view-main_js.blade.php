@@ -245,43 +245,7 @@
                 obj.remove();
             }
         });
-    });
-
-    // detach quote
-    $(document).on('click', ".quote_delete", function (e) {
-        e.preventDefault();
-        addObject({form: '', url: $(this).attr('href')}, true);
-        $(this).closest('tr').remove();
-    });
-    // detach budget
-    $(document).on('click', ".budget_delete", function (e) {
-        var pro_id = e.target.getAttribute('data-pro');
-        var budget_id = e.target.getAttribute('data-id');
-        var url = "{{ route('biller.projects.detach_budget') }}";
-        $.ajax({
-            method: "POST",
-            url: url,
-            data: {
-                budget_id: budget_id,
-            },
-            
-            success: function (response) {
-                swal({
-                    title: response.status,
-                    icon: "success",
-                    buttons: true,
-                    dangerMode: true,
-                    showCancelButton: true,
-                }, () =>{ 
-                    window.location.reload();
-                });
-            }
-        });
-        // e.preventDefault();
-        // addObject({form: '', url: $(this).attr('href')}, true);
-        // $(this).closest('tr').remove();
-    });
-   
+    });   
 
     // modal submit callback
     function trigger(data) {
@@ -314,7 +278,7 @@
         return;
     }
     
-    /**Fetch quotes / pi */
+    // Fetch quotes
     function quotes() {
         if ($('#quotesTbl tbody tr').length) return;        
         let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
@@ -339,7 +303,7 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         <a class="dropdown-item create" href="${create_budget_url}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Budget</a>
-                                        <a class="dropdown-item quote_delete text-danger" href="${detach_quote_url}"><i class="fa fa-trash text-danger" aria-hidden="true"></i> Detach</a>
+                                        <a class="dropdown-item qt-detach text-danger" href="${detach_quote_url}"><i class="fa fa-trash text-danger" aria-hidden="true"></i> Detach</a>
                                     </div>
                                 </div> 
                         `;
@@ -365,8 +329,14 @@
             buttons: ['csv', 'excel', 'print'],
         });
     }    
+    // detach quote
+    $(document).on('click', ".qt-detach", function(e) {
+        e.preventDefault();
+        addObject({form: '', url: $(this).attr('href')}, true);
+        $(this).parents('tr').remove();
+    });    
 
-    /**Fetch budget */
+    // Fetch budget
     function budgets() {
         if ($('#budgetsTbl tbody tr').length) return;        
         let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
@@ -408,6 +378,35 @@
             buttons: ['csv', 'excel', 'print'],
         });
     }
+    // detach budget
+    $(document).on('click', ".budget_delete", function (e) {
+        var pro_id = e.target.getAttribute('data-pro');
+        var budget_id = e.target.getAttribute('data-id');
+        var url = "{{ route('biller.projects.detach_budget') }}";
+        $.ajax({
+            method: "POST",
+            url: url,
+            data: {
+                budget_id: budget_id,
+            },
+            
+            success: function (response) {
+                swal({
+                    title: response.status,
+                    icon: "success",
+                    buttons: true,
+                    dangerMode: true,
+                    showCancelButton: true,
+                }, () =>{ 
+                    window.location.reload();
+                });
+            }
+        });
+        // e.preventDefault();
+        // addObject({form: '', url: $(this).attr('href')}, true);
+        // $(this).closest('tr').remove();
+    });
+    // budget view
     $('#budgetsTbl tbody').on('click', '.view',  function(e){
         var id = e.target.getAttribute('data-id');
 
