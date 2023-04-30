@@ -29,7 +29,11 @@
                                         {{-- Including Form blade file --}}
                                         @include("focus.projects.tasks.form")
                                         <div class="edit-form-btn float-right">
-                                            {{ link_to_route('biller.tasks.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                            @if (strpos(url()->previous(), 'projects') !== false)
+                                                <a href="{{ url()->previous() }}" class="btn btn-danger btn-md">{{ trans('buttons.general.cancel') }}</a>
+                                            @else
+                                                {{ link_to_route('biller.tasks.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                            @endif                                            
                                             {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
                                         </div><!--edit-form-btn-->
                                     </div><!--form-group-->

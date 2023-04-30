@@ -11,6 +11,7 @@
                 width="100%">
             <thead>
             <tr>
+                <th>#</th>
                 <th>{{ trans('tasks.task') }}</th>
                 <th>{{ trans('tasks.start') }}</th>
                 <th>{{ trans('tasks.duedate') }}</th>
