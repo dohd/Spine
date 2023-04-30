@@ -66,9 +66,13 @@ function isNumber(evt) {
 }
 
 function addObject(action, trigger_n = false) {
-    var form_name = false;
-    if (action['form_name']) form_name = action['form_name'];
-    var errorNum = farmCheck(form_name);
+    let form_name = false;
+    let errorNum = 0;
+    if (action['form_name']) {
+        form_name = action['form_name'];
+        errorNum = farmCheck(form_name);
+    }
+    
     if ($("#notify").length == 0) {
         $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
     }
