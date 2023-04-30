@@ -294,26 +294,9 @@ class ProjectsController extends Controller
     public function invoices(Request $request)
     {
         $quote_ids = explode(',', $request->quote_ids);
-        $quotes = [];
-        foreach ($quote_ids as $quote) {
-            $quotes = Quote::where('id', $quote)->get();
-        }
-        $invoices = [];
-        if($quotes){
-           $pro = [];
-            foreach($quotes as $invoice_items){
-                $invoices = $invoice_items->invoice_product()->get();
-            }
-            
-        }
-        $invoice = [];
-        if($invoices){
-            foreach ($invoices as $inv) {
-                $invoice = $inv->invoice()->get();
-            }
-        }
+        $invoices = Invoice::whereHas('quotes', fn($q) => $q->whereIn('quotes.id', $quote_ids));
 
-        return Datatables::of($invoice)
+        return Datatables::of($invoices)
             ->addIndexColumn()
             ->addColumn('tid', function ($invoice) {
                 $tid = gen4tid('INV-', $invoice->tid);
