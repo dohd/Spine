@@ -25,8 +25,6 @@ use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMileStone;
 use App\Models\project\ProjectRelations;
 use Illuminate\Http\Request;
-use App\Repositories\Focus\invoice\InvoiceRepository;
-use App\Repositories\Focus\budget\BudgetRepository;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -37,7 +35,6 @@ use App\Http\Requests\Focus\project\CreateProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
 use App\Models\Access\User\User;
 use App\Models\hrm\Hrm;
-use App\Models\items\PurchaseItem;
 use App\Models\misc\Misc;
 use App\Models\project\Budget;
 use App\Models\project\BudgetSkillset;
@@ -49,6 +46,7 @@ use App\Models\items\QuoteItem;
 use DB;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Log;
 use Yajra\DataTables\Facades\DataTables;
 
 /**
@@ -603,14 +601,14 @@ class ProjectsController extends Controller
             $project_budget = $project->quotes->sum('total');
 
             if ($expense_total >= $project_budget - $quote->total) {
-                $error_data = ['status' => 'Error', 'message' => "Project has expense."];
+                $error_data = ['status' => 'Error', 'message' => "Not allowed! Project has attached expenses."];
                 trigger_error($error_data['message']);
             } elseif ($quote->invoiced == 'Yes') {
                 $doc = $quote->bank_id? 'Proforma Invoice' : 'Quote';
-                $error_data = ['status' => 'Error', 'message' => "Not allowed! {$doc} has been invoiced."];
+                $error_data = ['status' => 'Error', 'message' => "Not allowed! {$doc} has an attached invoice."];
                 trigger_error($error_data['message']);
             }
-            
+
             ProjectQuote::where(['project_id' => $input['project_id'], 'quote_id' => $input['quote_id']])->delete();
             if ($project->main_quote_id == $input['quote_id']) {
                 $other_project_quote = ProjectQuote::where(['project_id' => $input['project_id']])->first();
