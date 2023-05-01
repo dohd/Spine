@@ -9,6 +9,126 @@
         headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}
     });
 
+    // modal submit callback
+    function trigger(data) {
+        switch (data.t_type) {
+            case 1:
+                $('#m_' + data.meta).remove();
+                break;
+            case 2:
+                $('.timeline').prepend(data.meta);
+                break;
+            case 3:
+                $(data.row).prependTo("#tasks-table tbody");
+                $("#data_form_task").trigger('reset');
+                break;
+            case 5:
+                $(data.meta).prependTo("#log-table  tbody");
+                $("#data_form_log").trigger('reset');
+                break;
+            case 6:
+                $(data.meta).prependTo("#notes-table  tbody");
+                $("#data_form_note").trigger('reset');
+                break;
+            case 7:
+                $("#data_form_quote").trigger('reset');
+                break;
+            case 8:
+                $("#data_form_budget").trigger('reset');
+                break;                
+        }
+        return;
+    }
+
+    // on document load
+    $(() => {
+        // on show tab
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            localStorage.setItem('project_tab', $(e.target).attr('href'));
+            switch ($(e.target).attr('href')) {
+                case '#tab_data3': tasks(); break;
+                case '#tab_data4': project_log(); break;
+                case '#tab_data6': notes(); break;
+                case '#tab_data10': invoices(); break;
+                case '#tab_data7': quotes(); break;
+                case '#tab_data8': budgets(); break;
+                case '#tab_data9': 
+                    skillset();
+                    service();
+                    stocks();
+                    expense();
+                    purchase(); break;    
+            }
+        });
+        const projectTab = localStorage.project_tab;
+        if (projectTab) $('a[href="' + projectTab + '"]').tab('show');
+
+        // project progress slider
+        $('#prog').text($('#progress').val() + '%');
+        $(document).on('change', $('#progress'), function (e) {
+            e.preventDefault();
+            $('#prog').text($('#progress').val() + '%');
+            $.ajax({
+                url: '{{route('biller.projects.update_status')}}',
+                type: 'POST',
+                data: {
+                    'project_id': @json($project['id']), 
+                    'r_type': '1', 
+                    'progress': $('#progress').val()
+                },
+                success: function (data) {
+                    ['description', 'employee', 'assign', 'priority'].forEach(v => $('#'+v).html(data[v]));
+                    $('#task_title').html(data.name);
+                }
+            });
+        });
+        
+        // file attachment upload 
+        $('#fileupload').fileupload({
+            url: @json(route('biller.project_attachment')),
+            dataType: 'json',
+            formData: {_token: "{{ csrf_token() }}", project_id: '{{$project['id']}}', 'bill': 11},
+            done: function (e, data) {
+                $.each(data.result, function (index, file) {
+                    const del_url = @json(route('biller.project_attachment', '?op=delete&meta_id='));
+                    const view_url = @json(asset('storage/app/public/files'));
+                    const row = `
+                    <tr>
+                        <td width="5%">
+                            <a href="${del_url}${file.id}" class="file-del red">
+                                <i class="btn-sm fa fa-trash"></i>
+                            </a> 
+                        </td>
+                        <td>
+                            <a href="${view_url}/${file.name}" target="_blank" class="purple">
+                                <i class="btn-sm fa fa-eye"></i> ${file.name}
+                            </a>
+                        </td>
+                    </tr>`;
+
+                    $('#files').append(row);
+                });
+            },
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css('width', progress + '%');
+            }
+        })
+        .prop('disabled', !$.support.fileInput)
+        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+
+        // on delete file attachment
+        $(document).on('click', ".file-del", function (e) {
+            e.preventDefault();
+            const obj = $(this);
+            $.ajax({
+                url: $(this).attr('href'),
+                type: 'POST',
+                success: (data)  => obj.parents('tr').remove(),
+            });
+        });   
+    });
+
     // milestone show modal
     $('#AddMileStoneModal').on('shown.bs.modal', function () {
         var project_id = @json($project->id);
@@ -87,7 +207,6 @@
         });
     });
     
-
     // milestone submit
     $("#submit-data_mile_stone").on("click", function () {
         event.preventDefault();
@@ -145,79 +264,6 @@
         $('#AddNoteModal').modal('toggle');
     });
 
-    // task submit
-    @include('focus.projects.adt.new_task_js');
-
-    $(function () {
-        var slider = $('#progress');
-        var textn = $('#prog');
-        textn.text(slider.val() + '%');
-        $(document).on('change', slider, function (e) {
-            e.preventDefault();
-            textn.text($('#progress').val() + '%');
-            $.ajax({
-                url: '{{route('biller.projects.update_status')}}',
-                type: 'POST',
-                data: {
-                    'project_id': '{{$project['id']}}',
-                    'r_type': '1',
-                    'progress': $('#progress').val()
-                },
-                success: function (data) {
-                    $('#description').html(data.description);
-                    $('#task_title').html(data.name);
-                    $('#employee').html(data.employee);
-                    $('#assign').html(data.assign);
-                    $('#priority').html(data.priority);
-                }
-            });
-        });
-
-        // on select tab
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-            localStorage.setItem('project_tab', $(e.target).attr('href'));
-            switch ($(e.target).attr('href')) {
-                case '#tab_data3': tasks(); break;
-                case '#tab_data4': project_log(); break;
-                case '#tab_data6': notes(); break;
-                case '#tab_data10': invoices(); break;
-                case '#tab_data7': quotes(); break;
-                case '#tab_data8': budgets(); break;
-                case '#tab_data9': 
-                    skillset();
-                    service();
-                    stocks();
-                    expense();
-                    purchase(); break;    
-            }
-        });
-
-        if (localStorage.project_tab) 
-            $('a[href="' + localStorage.project_tab + '"]').tab('show');
-
-        // Change this to the location of your server-side upload handler:
-        var url = '{{route('biller.project_attachment')}}';
-        $('#fileupload').fileupload({
-            url: url,
-            dataType: 'json',
-            formData: {_token: "{{ csrf_token() }}", id: '{{$project['id']}}', 'bill': 11},
-            done: function (e, data) {
-                $.each(data.result, function (index, file) {
-                    $('#files').append('<tr><td><a data-url="{{route('biller.project_attachment')}}?op=delete&id= ' + file.id + ' " class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> ' + file.name + ' </td></tr>');
-                });
-            },
-            progressall: function (e, data) {
-                var progress = parseInt(data.loaded / data.total * 100, 10);
-                $('#progress .progress-bar').css(
-                    'width',
-                    progress + '%'
-                );
-
-            }
-        }).prop('disabled', !$.support.fileInput)
-        .parent().addClass($.support.fileInput ? undefined : 'disabled');
-    });
-
     $('.summernote').summernote({
         height: 300,
         toolbar: [
@@ -233,50 +279,6 @@
         ],
         popover: {}
     });
-    $(document).on('click', ".aj_delete", function (e) {
-        e.preventDefault();
-        var aurl = $(this).attr('data-url');
-        var obj = $(this);
-        $.ajax({
-            url: aurl,
-            type: 'POST',
-            success: function (data) {
-                obj.closest('tr').remove();
-                obj.remove();
-            }
-        });
-    });   
-
-    // modal submit callback
-    function trigger(data) {
-        switch (data.t_type) {
-            case 1:
-                $('#m_' + data.meta).remove();
-                break;
-            case 2:
-                $('.timeline').prepend(data.meta);
-                break;
-            case 3:
-                $(data.row).prependTo("#tasks-table tbody");
-                $("#data_form_task").trigger('reset');
-                break;
-            case 5:
-                $(data.meta).prependTo("#log-table  tbody");
-                $("#data_form_log").trigger('reset');
-                break;
-            case 6:
-                $(data.meta).prependTo("#notes-table  tbody");
-                $("#data_form_note").trigger('reset');
-                break;
-            case 7:
-                $("#data_form_quote").trigger('reset');
-                break;
-            case 8:
-                $("#data_form_budget").trigger('reset');
-                break;                
-        }
-        return;
-    }
     
     // Fetch quotes
     function quotes() {
@@ -728,8 +730,9 @@
             buttons: ['csv', 'excel', 'print'],
         });
     }
-
+    
     /**Fetch Tasks */
+    @include('focus.projects.adt.new_task_js');
     function tasks() {
         if ($('#tasks-table tbody tr').length) return;
         $('#tasks-table').dataTable({

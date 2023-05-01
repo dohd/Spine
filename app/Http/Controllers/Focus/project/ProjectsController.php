@@ -398,13 +398,15 @@ class ProjectsController extends Controller
     }
 
     /**
-     * Project Quotes Select
+     * Project Quotes select
      */
     public function quotes_select()
     {   
         $quotes = Quote::where(['customer_id' => request('customer_id'), 'status' => 'approved'])
-            ->whereDoesntHave('project')
-            ->get()->map(fn($v) => [
+            ->doesntHave('project')
+            ->doesntHave('invoice')
+            ->get()
+            ->map(fn($v) => [
                 'id' => $v->id,
                 'name' => gen4tid($v->bank_id? 'PI-' : 'QT-', $v->tid) . ' - ' . $v->notes,
             ]);

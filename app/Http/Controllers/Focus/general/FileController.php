@@ -23,8 +23,9 @@ use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use DB;
+use File;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class FileController extends Controller
 {
@@ -43,6 +44,8 @@ class FileController extends Controller
      */
     protected $storage;
 
+    protected $file_path;
+
     /**
      * Constructor.
      */
@@ -50,6 +53,17 @@ class FileController extends Controller
     {
         $this->file_item_path = 'files' . DIRECTORY_SEPARATOR;
         $this->storage = Storage::disk('public');
+
+        $this->file_path = $this->absolute_path(public_path(), ['storage', 'app', 'public', 'files']);
+    }
+
+    public function absolute_path($path='', $dirs=[])
+    {
+        $path .= DIRECTORY_SEPARATOR;
+        foreach ($dirs as $dir) {
+            $path .= $dir . DIRECTORY_SEPARATOR;
+        }
+        return $path;
     }
 
 
@@ -87,39 +101,49 @@ class FileController extends Controller
         }
     }
 
+    /**
+     * Project attachment file handler
+     */
     public function project_attachment(Request $request)
     {
-        $action = $request->only('op', 'id');
-        if (project_access($action['id'])) {
-            if (@$action['op'] == 'delete') {
-                $file_value = ProjectMeta::find($action['id']);
-                if (delete_file($this->file_item_path . $file_value['value'])) $file_value->delete();
-                return response()->json(['success' => 'Deleted']);
-            } else {
-                $item_rel = $request->only('id', 'bill');
-                $upload_setting = ConfigMeta::where('feature_id', '=', 9)->where('ins', '=', auth()->user()->ins)->first(array('feature_value', 'value1'));
-                if ($upload_setting['feature_value']) {
-                    $itemName = $request->only('files');
-                    $request->validate([
-                        'files' => 'required|mimes:' . $upload_setting['value1'],
-                    ]);
-                    $path = $this->file_item_path;
-                    $bill_type = array();
-                    $up = array();
-                    foreach ($itemName as $item) {
-                        $name = $item->getClientOriginalName();
-                        $file_name = strlen($name) > 20 ? substr($name, 0, 20) . '.' . $item->getClientOriginalExtension() : $name;
-                        $file_name = time() . $file_name;
-                        $this->storage->put($path . $file_name, file_get_contents($item->getRealPath()));
-                        $bill_type = array('project_id' => $item_rel['id'], 'meta_key' => 1, 'value' => $file_name);
-                        $upload = ProjectMeta::create($bill_type);
-                        $up[] = array('id' => $upload->id, 'name' => $file_name);
-                    }
-                    ProjectLog::create(array('project_id' => $upload->project_id, 'value' => '[' . trans('general.files') . '] ' . $upload->value));
-                    return response()->json($up);
+        $operation = $request->op;
+        $meta_id = $request->meta_id;
+        $project_id = $request->project_id;
+        $files = $request->files;
+
+        DB::beginTransaction();
+        
+        try {
+            if ($operation == 'delete') {
+                $project_meta = ProjectMeta::find($meta_id);
+                $file = $this->file_path . $project_meta->value;
+                if (file_exists($file)) delete_file($file); 
+                $project_meta->delete();
+
+                DB::commit();
+                return response()->json(['status' => 'Success', 'message' => 'deleted']);
+            }
+
+            $uploads = [];
+            $config_meta = ConfigMeta::where('feature_id', 9)->first(['feature_value', 'value1']);
+            if (@$config_meta->feature_value) {
+                $request->validate(['files' => 'required|mimes:' . $config_meta->value1]);
+                foreach ($files as $file) {
+                    $origin_filename = $file->getClientOriginalName();
+                    $file_name = time() . '_' . substr($origin_filename, 0, 20);
+                    File::put($this->file_path . $file_name, file_get_contents($file->getRealPath()));
+
+                    $project_meta = ProjectMeta::create(['project_id' => $project_id, 'meta_key' => 1, 'value' => $file_name]);
+                    $uploads[] = ['id' => $project_meta->id, 'name' => $file_name];
                 }
             }
+            $project_meta = ProjectMeta::latest()->first();
+            ProjectLog::create(['project_id' => $project_meta->project_id, 'value' => '[' . trans('general.files') . '] ' . $project_meta->value]);
+
+            DB::commit();
+            return response()->json($uploads);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
         }
     }
-
 }

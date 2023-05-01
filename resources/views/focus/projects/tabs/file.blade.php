@@ -9,7 +9,7 @@
                     <div class="btn btn-success fileinput-button display-block col-4">
                         <i class="glyphicon glyphicon-plus"></i>
                         <span>Select files...</span>
-                        <!-- The file input field used as target for the file upload widget -->
+                        <!-- input target for the file upload widget -->
                         <input id="fileupload" type="file" name="files">
                     </div>
                 </div>
@@ -19,14 +19,17 @@
     <table id="files" class="files table table-striped mt-2">
         @foreach($project->attachment as $row)
             <tr>
+                <td width="5%">
+                    <a href="{{ route('biller.project_attachment') }}?op=delete&meta_id={{ $row['id'] }}" class="file-del red">
+                        <i class="btn-sm fa fa-trash"></i>
+                    </a> 
+                </td>
                 <td>
-                    <a data-url="{{route('biller.project_attachment')}}?op=delete&id={{$row['id']}}"
-                        class="aj_delete red"><i class="btn-sm fa fa-trash"></i></a> <a
-                            href="{{ Storage::disk('public')->url('app/public/files/' . $row['value']) }}"
-                            class="purple"><i
-                                class="btn-sm fa fa-eye"></i> {{$row['value']}}</a></td>
+                    <a href="{{ asset('storage/app/public/files/' . $row['value']) }}" target="_blank" class="purple">
+                        <i class="btn-sm fa fa-eye"></i> {{ $row['value'] }}
+                    </a>
+                </td>
             </tr>
         @endforeach
     </table>
-
 </div>
