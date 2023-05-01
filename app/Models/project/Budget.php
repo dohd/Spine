@@ -2,12 +2,14 @@
 
 namespace App\Models\project;
 
+use App\Models\ModelTrait;
+use App\Models\project\Traits\BudgetAttribute;
 use App\Models\project\Traits\BudgetRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class Budget extends Model
 {
-    use BudgetRelationship;
+    use ModelTrait, BudgetAttribute,BudgetRelationship;
     
      /**
      * The database table used by the model.

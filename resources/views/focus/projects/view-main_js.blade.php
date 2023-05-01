@@ -296,7 +296,11 @@
                 data: {project_id: @json(@$project->id), quote_ids: quoteIds.join(',')},
                 dataSrc: ({data}) => {
                     data = data.map(v => {
-                        const create_budget_url = @json(url('projects/budget/')) + '/' + v.id;
+                        if (v.budget_status.includes('budgeted')) {
+                            v.actions = '';
+                            return v;
+                        }
+                        const create_budget_url = @json(route('biller.budgets.create', 'quote_id=')) + v.id;
                         const detach_quote_url = @json(route('biller.projects.detach_quote', ['project_id' => $project->id])) + '&quote_id=' + v.id;
                         v.actions = `
                                 <div class="dropdown">
@@ -341,33 +345,19 @@
     // Fetch budget
     function budgets() {
         if ($('#budgetsTbl tbody tr').length) return;        
-        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        quoteIds = quoteIds.join(',');
-
         $('#budgetsTbl').dataTable({
             processing: true,
             responsive: true,
             stateSave: true,
             language: {@lang('datatable.strings')},
             ajax: {
-                url: "{{ route('biller.projects.project_budget') }}",
+                url: "{{ route('biller.budgets.get') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds},
-                dataSrc: ({data}) => {
-                    data = data.map(v => {
-                       
-                        return v;
-                    });
-                    return data;
-                }
+                data: {project_id: "{{ $project->id }}"},
             },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                    'tid', 'customer', 'quote_total', 'budget_total'
-                ].map(v => ({data: v, name: v})),
+            columns: [
+                {data: 'DT_Row_Index', name: 'id'},
+                ...['tid', 'customer', 'quote_total', 'budget_total'].map(v => ({data: v, name: v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             columnDefs: [

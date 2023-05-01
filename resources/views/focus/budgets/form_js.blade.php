@@ -13,7 +13,7 @@
             <tr>
                 <td class="text-center">${n+1}</td>
                 <td>
-                    <select class="form-control update" name="skill[]" id="skill-${n}" required>
+                    <select class="form-control update" name="skill[]" id="skill-${n}">
                         <option value="" class="text-center">-- Select Skill Type --</option>                        
                         <option value="casual">Casual</option>
                         <option value="contract">Contract</option>
@@ -21,9 +21,9 @@
                         <option value="outsourced">Outsourced</option>
                     </select>
                 </td>
-                <td><input type="number" class="form-control update" name="charge[]" id="charge-${n}" required readonly></td>
-                <td><input type="number" class="form-control update" name="hours[]" id="hours-${n}" required></td>               
-                <td><input type="number" class="form-control update" name="no_technician[]" id="notech-${n}" required></td>
+                <td><input type="number" class="form-control update" name="charge[]" id="charge-${n}" readonly></td>
+                <td><input type="number" class="form-control update" name="hours[]" id="hours-${n}" ></td>               
+                <td><input type="number" class="form-control update" name="no_technician[]" id="notech-${n}"></td>
                 <td class="text-center"><span>0</span></td>
                 <td><button type="button" class="btn btn-primary removeItem">Remove</button></td>
                 <input type="hidden" name="skillitem_id[]" value="0" id="skillitemid-${n}">
@@ -181,7 +181,7 @@
     // set default product rows
     let productIndx = 0;
     let quoteItems = @json($quote->products()->orderByRow()->get());  
-    let budgetItems = @json(@$budget_items);
+    let budgetItems = @json(@$budget->items);
     if (budgetItems) quoteItems = budgetItems;
     quoteItems.forEach(v => {
         let i = productIndx;

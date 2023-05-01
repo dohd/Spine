@@ -85,7 +85,7 @@
                     <th width="20%" class="text-center">Skill Type</th>
                     <th width="15%" class="text-center">Charge</th>
                     <th width="15%" class="text-center">Work Hr</th>
-                    <th width="15%" class="text-center">Count Technician</th> 
+                    <th width="15%" class="text-center">No. of Technicians</th> 
                     <th width="15%" class="text-center">Amount</th>
                     <th width="10%" class="text-center">Action</th>
                 </tr>

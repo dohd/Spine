@@ -37,7 +37,7 @@
     <div class="content-body">
         <div class="card">
             <div class="card-body">                
-                {{ Form::model($quote, ['route' => ['biller.projects.store_project_budget'], 'method' => 'POST' ]) }}
+                {{ Form::model($quote, ['route' => ['biller.budgets.store'], 'method' => 'POST' ]) }}
                     @include('focus.budgets.form')
                 {{ Form::close() }}
             </div>             
