@@ -4,10 +4,14 @@
 {!! Html::style('focus/jq_file_upload/css/jquery.fileupload.css') !!}
 {{ Html::script('focus/jq_file_upload/js/jquery.fileupload.js') }}
 <script>
+    const config = {
+        ajax: {
+            headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}
+        },
+        date: {autoHide: true, format: '{{config('core.user_date_format')}}'},
+    };
     // ajax header set up
-    $.ajaxSetup({
-        headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}
-    });
+    $.ajaxSetup(config.ajax);
 
     // modal submit callback
     function trigger(data) {
@@ -65,18 +69,18 @@
 
         // project progress slider
         $('#prog').text($('#progress').val() + '%');
-        $(document).on('change', $('#progress'), function (e) {
+        $(document).on('change', '#progress', function (e) {
             e.preventDefault();
             $('#prog').text($('#progress').val() + '%');
             $.ajax({
-                url: '{{route('biller.projects.update_status')}}',
+                url: "{{ route('biller.projects.update_status') }}",
                 type: 'POST',
                 data: {
-                    'project_id': @json($project['id']), 
-                    'r_type': '1', 
-                    'progress': $('#progress').val()
+                    project_id: "{{ $project->id }}", 
+                    r_type: '1', 
+                    progress: $('#progress').val(),
                 },
-                success: function (data) {
+                success: function(data) {
                     ['description', 'employee', 'assign', 'priority'].forEach(v => $('#'+v).html(data[v]));
                     $('#task_title').html(data.name);
                 }
@@ -130,57 +134,23 @@
     });
 
     // milestone show modal
-    $('#AddMileStoneModal').on('shown.bs.modal', function () {
-        var project_id = @json($project->id);
-        $.ajax({
-            methode: "GET",
-            url: "{{ route('biller.projects.get_extimated_milestone') }}",
-            data: {
-                project_id : project_id,
-            },
-            success: function (response) {
-                if(response == -1){
-                    $('.extimate').text('No Limit');
-                }
-                else{
-                    $('.extimate').text(response);
-                }
-                
-            }
+    $('#AddMileStoneModal').on('shown.bs.modal', function() {
+        // fetch project budget amount
+        $.get("{{ route('biller.projects.budget_limit', $project) }}", ({data}) => {
+            const milestoneBudget = accounting.formatNumber(data.milestone_budget);
+            $('.milestone-limit').text(milestoneBudget);
         });
-        $('[data-toggle="datepicker"]').datepicker({autoHide: true, format: '{{config('core.user_date_format')}}'});
-        $('.from_date').datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('-30 days', strtotime(date('Y-m-d')))))}}');
-        $('.from_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
-        $('.to_date').datepicker('setDate', 'today');
-        $('.to_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
-        $('#color').colorpicker();
-       
-        
-    });
-    $('#extimated-milestone').on('key up change', function () {
-        var extimate = accounting.unformat($('.extimate').text());
-        var extimated_milestone_amount = accounting.unformat($(this).val());
-        if(extimate <= -1){
-            $('#extimated-milestone').val();
-            
-        }
-       else if (extimate == 0) {
-            swal({
-                    title: 'Adjust Your Budget?',
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                    showCancelButton: true,
-                }, () =>{ 
-                    $('#extimated-milestone').val('');
-                    $('#AddMileStoneModal').modal('hide')
-                });
-                
-        }
-        else if(extimated_milestone_amount > extimate){
-            $('#extimated-milestone').val(extimate).change();
-            return;
-        }
+
+        $('[data-toggle="datepicker"]').datepicker(config.date);
+        $('.from_date').datepicker(config.date).datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('-30 days', strtotime(date('Y-m-d')))))}}');
+        $('.to_date').datepicker(config.date).datepicker('setDate', 'today');
+        $('#color').colorpicker();        
+
+        $('#milestone-amount').change(function() {
+            const milestoneBudget = accounting.unformat($('.milestone-limit').text());
+            if (this.value > milestoneBudget) this.value = milestoneBudget;
+            this.value = accounting.formatNumber(this.value);
+        });
     });
 
     // quote show modal
@@ -208,28 +178,34 @@
     });
     
     // milestone submit
-    $("#submit-data_mile_stone").on("click", function () {
-        event.preventDefault();
-        var num = $('#extimated-milestone').val();
-        if (num == '') {
-            swal({
-                    title: 'Enter Extimated Milestone Amount?',
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                    showCancelButton: true,
-                }, () =>{ return;});
-            
-        }
-       else{
-    
+    $("#submit-data_mile_stone").on("click", function (e) {
+        e.preventDefault();
         const form_data = {};
-            form_data['form_name'] = 'data_form_quote';
-            form_data['form'] = $("#data_form_mile_stone").serialize();
-            form_data['url'] = $('#action-url').val();
-            $('#AddMileStoneModal').modal('toggle');
-            addObject(form_data, true);
-       }
+        form_data['form'] = $("#data_form_mile_stone").serialize();
+        form_data['url'] = $('#action-url').val();
+        addObject(form_data, true);
+        $('#AddMileStoneModal').modal('toggle');
+
+    //     var num = $('#estimated-milestone').val();
+    //     if (num == '') {
+    //         swal({
+    //                 title: 'Enter Estimated Milestone Amount?',
+    //                 icon: "warning",
+    //                 buttons: true,
+    //                 dangerMode: true,
+    //                 showCancelButton: true,
+    //             }, () =>{ return;});
+            
+    //     }
+    //    else{
+    
+    //     const form_data = {};
+    //         form_data['form_name'] = 'data_form_quote';
+    //         form_data['form'] = $("#data_form_mile_stone").serialize();
+    //         form_data['url'] = $('#action-url').val();
+    //         $('#AddMileStoneModal').modal('toggle');
+    //         addObject(form_data, true);
+    //    }
     });
 
     // log submit

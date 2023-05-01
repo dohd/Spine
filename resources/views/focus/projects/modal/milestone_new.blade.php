@@ -13,31 +13,32 @@
                     <div class="modal-body">
                         <div class="row">
                             <fieldset class="form-group col-12">
-                                <input type="text" class="new-todo-item form-control"
-                                       placeholder="{{trans('additionals.name')}}" name="name">
+                                <input type="text" class="new-todo-item form-control" placeholder="{{trans('additionals.name')}}" name="name">
                             </fieldset>
                         </div>
 
-
                         <fieldset class="form-group">
-                            <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}"
-                                      rows="6" name="description"></textarea>
+                            <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}" rows="6" name="description">
+                            </textarea>
                         </fieldset>
+
                         <div class="form-group row mt-3">
                             <div class="col-4">
                                 <label for="sdate">{{trans('general.due_date')}}</label>
-                                <input type="text" class="form-control required to_date"
-                                               placeholder="End Date" name="duedate"
-                                               data-toggle="datepicker" autocomplete="false">
-                                        <input type="time" name="time_to" class="form-control" value="23:59">
+                                <input type="text" class="form-control required to_date" placeholder="End Date" name="duedate" data-toggle="datepicker" autocomplete="false">
+                                <input type="time" name="time_to" class="form-control" value="23:59">
                             </div>
                             <div class="col-4">
                                 {{ Form::label( 'color', trans('miscs.color'),['class' => 'col-2 control-label']) }}
                                 {{ Form::text('color', '#0b97f4', ['class' => 'form-control round', 'id'=>'color','placeholder' => trans('miscs.color'),'autocomplete'=>'off']) }}
                             </div>
                             <div class="col-4">
-                                <label for="extimated_milestone"> <span class="text-primary">(Extimated Milestone Amount: <span class="extimate font-weight-bold text-dark">0.00</span>)</span></label>
-                                <input type="number" class="form-control" name="extimated_milestone_amount" id="extimated-milestone" placeholder="0.0" required>
+                                <label for="amount">
+                                    <span class="text-primary">
+                                        (Budget Limit: <span class="milestone-limit font-weight-bold text-dark">0.00</span>)
+                                    </span>
+                                </label>
+                                <input type="text" class="form-control" name="amount" id="milestone-amount" placeholder="Milestone Amount" required>
                             </div>
                         </div>
                         {{-- <div class="form-group row">

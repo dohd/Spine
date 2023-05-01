@@ -180,96 +180,7 @@ class ProjectsController extends Controller
         $mics = Misc::all();
         $employees = User::all();
 
-        $params = ['mics', 'employees'];
-
-        // return new ViewResponse('focus.projects.view', compact('project', 'accounts', 'last_tid', ...$params));
-
-        return new ViewResponse('focus.projects.view-main', compact('project', 'accounts', 'last_tid', ...$params));
-    }
-
-    /**
-     * show form to create resource
-     * 
-     * @param App\Models\quote\Quote quote
-     */
-    public function create_project_budget(Quote $quote)
-    {
-        $project = $quote->project()->first();
-        $milestone_exists = $project->milestones()->first();
-        if($milestone_exists) return redirect(route('biller.projects.show', $project->id))->with('flash_error', 'Milestone Already Created !! Cannot Budget this Quote');
-        $budget = Budget::where('quote_id', $quote->id)->first();
-        if ($budget) return redirect(route('biller.projects.edit_project_budget', [$quote, $budget]));
-
-        return view('focus.projects.create_project_budget', compact('quote'));
-    }
-
-    /**
-     * show form to edit resource
-     * 
-     * @param App\Models\quote\Quote quote
-     */
-    public function edit_project_budget($quote_id, $budget_id)
-    {
-        $quote = Quote::find($quote_id);
-        $budget = Budget::find($budget_id);
-        $budget_items = $budget->items()->orderBy('row_index')->get();
-
-        return view('focus.projects.edit_project_budget', compact('quote', 'budget', 'budget_items'));
-    }
-
-    /**
-     * store a newly created resource
-     * 
-     * @param Request request
-     */
-    public function store_project_budget(Request $request)
-    {
-        // extract request input
-        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'note');
-        $data_items = $request->only('numbering', 'row_index', 'a_type', 'product_id', 'product_name',            
-            'product_qty', 'unit', 'new_qty',  'price'
-        );
-        $data_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
-
-        $data_items = modify_array($data_items);
-        $data_skillset = modify_array($data_skillset);
-        $project_id = ProjectQuote::where('quote_id', $data['quote_id'])->first()->project_id;
-
-        try {
-            $this->repository->create_budget(compact('data', 'data_items', 'data_skillset'));
-        } catch (\Throwable $th) {
-            return errorHandler('Error Creating Project Budget', $th);
-        }
-
-        return new RedirectResponse(route('biller.projects.show',[$project_id]), ['flash_success' => 'Budget created successfully']);
-    }
-
-    /**
-     * Update Project Budget resource in storage
-     * 
-     * @param Request request
-     */
-    public function update_project_budget(Request $request, Budget $budget)
-    {
-        // extract request input
-        $data = $request->only('labour_total', 'budget_total', 'quote_id', 'quote_total', 'note');
-        $data_items = $request->only(
-            'item_id', 'numbering',  'row_index',  'a_type', 'product_id', 'product_name',            
-            'product_qty', 'unit', 'new_qty',  'price'
-        );
-        $data_skillset = $request->only('skillitem_id', 'skill', 'charge', 'hours', 'no_technician');
-
-        $data_items = modify_array($data_items);
-        $data_skillset = modify_array($data_skillset);
-        $project_id = ProjectQuote::where('quote_id', $data['quote_id'])->first()->project_id;
-
-        try {
-            $this->repository->update_budget($budget, compact('data', 'data_items', 'data_skillset'));
-        } catch (\Throwable $th) {
-            return errorHandler('Error Updating Project Budget', $th);
-        }
-
-        return new RedirectResponse(route('biller.projects.show', [$project_id]), ['flash_success' => 'Project Budget updated successfully']);
+        return new ViewResponse('focus.projects.view-main', compact('project', 'accounts', 'last_tid', 'mics', 'employees'));
     }
 
     /**
@@ -459,7 +370,7 @@ class ProjectsController extends Controller
 
         switch ($input['obj_type']) {
             case 2: // milestone
-                $data = Arr::only($input, ['project_id','extimated_milestone_amount', 'name', 'description', 'color', 'duedate', 'time_to']);
+                $data = Arr::only($input, ['project_id','amount', 'name', 'description', 'color', 'duedate', 'time_to']);
                 $data['due_date'] = date_for_database("{$data['duedate']} {$data['time_to']}:00");
                 $data['note'] = $data['description'];
                 unset($data['duedate'], $data['time_to'], $data['description']);
@@ -475,7 +386,7 @@ class ProjectsController extends Controller
                             </div>
                             <div class="timeline-body mb-1">
                                 <p> '. $milestone->note .'</p>
-                                <p> '. $milestone->extimated_milestone_amount .'</p>
+                                <p> '. $milestone->estimated_milestone_amount .'</p>
                                 <a href="#" class=" delete-object" data-object-type="2" data-object-id="'. $milestone->id .'">
                                     <i class="danger fa fa-trash"></i>
                                 </a>
@@ -695,28 +606,30 @@ class ProjectsController extends Controller
         return response()->json($request);
     }
 
-    public function get_extimated_milestone(Request $request)
+    /**
+     * Milestone budget limit
+     */
+    public function budget_limit(Project $project)
     {
-        $project = Project::find($request->project_id);
-        $quote_total = $project->quotes()->where('status', 'approved')->sum('total');
-        $budget = $project->quotes()->where('status', 'approved')->get();
-        $total_budget = '';
-        foreach ($budget as $budget_total) {
-            $total_budget = $budget_total->budgets()->sum('budget_total');
+        $project_budget = 0;
+        foreach ($project->quotes as $quote) {
+            if ($quote->budget) $project_budget += $quote->budget->budget_total;
         }
-        $total_milestone = ProjectMileStone::where('project_id', $request->project_id)->get()->sum('extimated_milestone_amount');
-        $milestone = -1;
-        if ($total_budget > 0) {
-            $milestone = $total_budget - $total_milestone;
-            return response()->json($milestone);
-        }else{
-            if($quote_total > 0){
-                $milestone = $quote_total - $total_milestone;
-                return response()->json($milestone);
-            }
+        if ($project_budget == 0 && $project->quotes->count()) {
+            $project_budget = $project->quotes->sum('total');
+        } elseif ($project_budget == 0) {
+            $project_budget = $project->worth;
         }
-        return response()->json($milestone);
+
+        $milestone_budget = $project_budget;
+        foreach ($project->milestones as $milestone) {
+            $milestone_budget -= $milestone->amount;
+        }
+
+        return response()->json(['status' => 'Success', 'data' => compact('project_budget', 'milestone_budget')]);
     }
+
+
 
     public function project_budget(Request $request){
         //$core = $budget->getForDataTable();

@@ -26,7 +26,7 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::get('projects/budget/{quote}', 'ProjectsController@create_project_budget')->name('projects.create_project_budget');
   Route::get('projects/budget/{qoute_id}/{budget_id}', 'ProjectsController@edit_project_budget')->name('projects.edit_project_budget');
   Route::get('projects/budget', 'ProjectsController@view_budget')->name('projects.view_budget');
-  Route::get('projects/get_extimated_milestone', 'ProjectsController@get_extimated_milestone')->name('projects.get_extimated_milestone');
+  Route::get('projects/budget_limit/{project}', 'ProjectsController@budget_limit')->name('projects.budget_limit');
   Route::post('projects/budget_store', 'ProjectsController@store_project_budget')->name('projects.store_project_budget');
   Route::post('projects/budget_update/{budget}', 'ProjectsController@update_project_budget')->name('projects.update_project_budget');
   Route::post('projects/budget_tool_update/{budget}', 'ProjectsController@update_budget_tool')->name('projects.update_budget_tool');

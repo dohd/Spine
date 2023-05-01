@@ -26,7 +26,7 @@
                     {{-- @if (project_access($project->id)) --}}
                         <div class="timeline-body mb-1">
                             <p>{{$row['note']}}</p>
-                            <p>Extimated Milestone Amount: <b>{{ amountFormat($row['extimated_milestone_amount']) }}</b></p>
+                            <p>Estimated Milestone Amount: <b>{{ amountFormat($row['estimated_milestone_amount']) }}</b></p>
                         </div>
                     {{-- @endif --}}
                     <small class="text-muted"><i class="fa fa-user"></i>
@@ -35,11 +35,12 @@
                     </small>
                     <div>
                         <div class="btn-group">
-                            <a href="#" class="delete-object" data-object-type="2" data-object-id="{{$row['id']}}">
-                                <i class="fa fa-trash danger"></i>
-                            </a> &nbsp;&nbsp;
-                            <a href="#" class="edit-object"  data-object-id="{{$row['id']}}">
-                                <i class="ft ft-edit"></i>
+                            <a href="#" class="edit-object mr-1"  data-object-id="{{$row['id']}}">
+                                <i class="ft ft-edit" style="font-size: 1.5em"></i>
+                            </a>
+
+                            <a href="#" class="delete-object mr-1" data-object-type="2" data-object-id="{{$row['id']}}">
+                                <i class="fa fa-trash fa-lg danger"></i>
                             </a>
                         </div>
                     </div>
