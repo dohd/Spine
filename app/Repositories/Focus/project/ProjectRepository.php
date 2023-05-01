@@ -32,7 +32,15 @@ class ProjectRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query();
+        $q = $this->query();
+
+        if(request('customer_id')) {
+            $q->where('customer_id', request('customer_id'));
+            if (request('branch_id')) $q->where('branch_id', request('branch_id'));
+        } 
+        else $q->limit(500);
+        
+        return $q;
     }
 
     /**

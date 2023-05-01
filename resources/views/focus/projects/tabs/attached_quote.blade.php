@@ -2,7 +2,7 @@
     <div class="card-body">
         <button type="button" class="btn btn-info float-right mr-2" id="addquote" data-toggle="modal"
                 data-target="#AddQuoteModal">
-                <i class="fa fa-plus-circle"></i> Add
+                <i class="fa fa-plus-circle"></i> Attach
         </button>
         <table id="quotesTbl"
                 class="table table-striped table-bordered zero-configuration"

@@ -90,7 +90,7 @@
         </fieldset>
 
         <fieldset class="form-group col-md-3">
-            {{ Form::text('worth', numberFormat(@$project->worth), ['class' => 'new-todo-item form-control']) }}
+            {{ Form::text('worth', @$project->worth? numberFormat(@$project->worth) : '', ['class' => 'new-todo-item form-control', 'placeholder' => 'Estimated Budget']) }}
         </fieldset>
         <fieldset class="form-group col-md-3">
             <select class="form-control select-box" name="project_share" data-placeholder="{{trans('projects.project_share')}}">
@@ -138,6 +138,7 @@
 
         <fieldset class="form-group position-relative has-icon-left  col-md-4">
             <select id="branch_id" name="branch_id" class="form-control required select-box"  data-placeholder="Choose Branch" >
+                <option value="">-- Select Branch --</option>
                 @isset($project->branch)
                     <option value="{{ $project->branch->id }}">
                         {{ $project->branch->name}}
