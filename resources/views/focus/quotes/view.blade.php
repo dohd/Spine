@@ -115,7 +115,7 @@
                                                         <p>{{$item['product_name']}}</p>
                                                         <p class="text-muted"> {!! $item['product_des'] !!} </p>
                                                     </td>
-                                                    <td class="text-right">{{ +$item['product_qty'] }} {{$item['unit']}}</td>
+                                                    <td class="text-right">{{ $item->misc? +$item->estimate_qty : +$item['product_qty'] }} {{$item['unit']}}</td>
                                                     @if ($quote->currency)
                                                         <td class="text-right">{{ amountFormat($item->product_subtotal, $quote->currency->id) }}</td>
                                                         <td class="text-right">

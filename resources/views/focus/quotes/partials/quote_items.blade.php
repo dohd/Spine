@@ -83,7 +83,7 @@
             @foreach ($quote->products as $k => $item)
                 @if ($item->a_type == 1)
                     <!-- Product Row -->
-                    <tr>
+                    <tr class="{{ !$item->misc ?: 'misc' }}">
                         <td><input type="text" class="form-control" name="numbering[]" value="{{ $item->numbering }}" id="numbering-p{{$k}}"></td>
                         <td>
                             <textarea name="product_name[]" id="name-p{{ $k }}" cols="35" rows="2" class="form-control pname" placeholder="{{trans('general.enter_product')}}" required>{{ $item->product_name }}</textarea>
