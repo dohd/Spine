@@ -84,7 +84,11 @@ class CallListTableController extends Controller
             })
             ->addColumn('call_status', function ($calllist) {
                 $call_status =$calllist->call_status;
-
+                if ($call_status == 0) {
+                    $call_status = "Not Called";
+                } else {
+                    $call_status = "Called";
+                }
                 return $call_status;
             })
             

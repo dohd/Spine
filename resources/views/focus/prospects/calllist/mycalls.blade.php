@@ -39,8 +39,9 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <table id="mytodaycalllist-table" class="table table-striped table-bordered zero-configuration"
-                                    cellspacing="0" width="100%">
+                                <table id="mytodaycalllist-table"
+                                    class="table table-striped table-bordered zero-configuration" cellspacing="0"
+                                    width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -52,7 +53,7 @@
                                             <th>Region</th>
                                             <th>Call Status</th>
                                             <th>Call</th>
-                                            
+
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -95,75 +96,45 @@
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
                 this.showModal();
-                //form remark
-                remark: @json(@$remark),
+                this.dismissModal();
+                $('#callModal').find('.call-status').change(this.callTypeChange);
                 $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
             },
 
-            showModal(){
-                $('#mytodaycalllist-table tbody').on('click','#call', function(e) {
-                 var id = $(this).attr('data-id');
-                
-                //show modal
-                $('#callModal').modal('show');
-                
+            showModal() {
+                $('#mytodaycalllist-table tbody').on('click', '#call', function(e) {
+                    var id = $(this).attr('data-id');
 
-                //varible to check if data is saved
-                let saved = false;
-                //set prospect id to form
-                $('#prospect_id').val(id);
+                    //show modal
+                    $('#callModal').modal('show');
 
-                // $.ajax({
-                //     url: "{{ route('biller.prospects.followup') }}",
-                //     type: 'POST',
-                //     data: {
-                //         id: id
-                //     },
-                //     success: function(response) {
 
-                //         $('#tableModal').append(response);
-                //     }
-                // });
 
-                // $('#save_remark').on('click', function(e) {
+                    $('#prospect_id').val(id);
 
-                //     var recepient = $('#recepient').val();
-                //     var reminder_date = $('#reminder_date').val();
-                //     var remarks = $('#remarks').val();
-
-                //     //disable button
-                //     $("#save_remark").prop("disabled", true);
-                //     let formData = $('#save_remark').parents('form').serializeArray();
-                //     $.ajax({
-                //         url: "remarks",
-                //         type: 'POST',
-                //         data: formData,
-                //         success: function(response) {
-                //             saved = true;
-                //             $('#remarks_table').remove();
-                //             $('#tableModal').append(response);
-                //         },
-                //         error: function(error) {
-                //             console.log(error.responseText);
-
-                //         }
-                //     });
-
-                //     $('#recepient').val('');
-                //     $('#reminder_date').val('');
-                //     $('#remarks').val('');
-                //     $("#save_remark").prop("disabled", false);
-                // });
-
-                // $('#callModal').on('hidden.bs.modal', function(e) {
-                //     $('#remarks_table').remove();
-                //     $('#prospect_id').val();
-                //     id= "";
-                //     saved?window.location.reload():null;
-                // });
-            });
+                });
             },
-          
+
+
+            callTypeChange() {
+                if ($(this).val() == 'picked') {
+                    $("#div_picked").css("display", "block");
+                    $("#div_notpicked").css("display", "none");
+                } else {
+                    $("#div_picked").css("display", "none");
+                    $("#div_notpicked").css("display", "block");
+                }
+
+
+            },
+
+            dismissModal() {
+                $('#callModal').on('hidden.bs.modal', function() {
+
+                });
+            },
+
+
 
             draw_data() {
                 $('#mytodaycalllist-table').dataTable({
@@ -232,6 +203,7 @@
                     buttons: ['csv', 'excel', 'print'],
                 });
             }
+
         };
         $(() => Index.init());
     </script>

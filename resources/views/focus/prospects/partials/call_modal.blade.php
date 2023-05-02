@@ -9,7 +9,7 @@
             </div>
 
 
-            <div class="mx-3">
+            <div class="mx-2 mt-3">
                 <div class="form-group row">
                     <div class='col-sm-6 mb-2'>
 
@@ -29,104 +29,131 @@
                 </div>
             </div>
 
-            <div class="picked">
-                <div class="mx-2">
-                    <h3>Follow up questions</h3>
-                    <div class="form-group">
-                        <p>Do you have an ERP</p>
-                        <div class="d-inline-block">
-                            <input type="radio" id="yes" name="erp" value="1">
-                            <label for="yes">Yes</label><br>
-                        </div>
-                        <div class="d-inline-block">
-                            <input type="radio" id="no" name="erp" value="0">
-                            <label for="no">No</label><br>
-                        </div>
-                    </div>
 
-                    <div class="form-group row">
-                        <div class="col-md-6">
-                            <p>Which One</p>
-                            {!! Form::text('current_erp', null, ['class' => 'form-control ', 'placeholder' => 'Current ERP', 'id'=>'current_erp' ]) !!}
-                        </div>
-                        <div class="col-md-6">
-                            <p>How long have you been using the ERP</p>
-                            {!! Form::text('current_erp_usage', null, ['class' => 'form-control ', 'placeholder' => 'Weeks/Months/Years', 'id'=>'current_erp_usage' ]) !!}
-                        </div>
-                        
+            <div id="div_picked" class="mx-2">
+                <h3>Follow up questions</h3>
+                <div class="form-group">
+                    <p>Do you have an ERP</p>
+                    <div class="d-inline-block">
+                        <input type="radio" id="yes" name="erp" value="1">
+                        <label for="yes">Yes</label><br>
                     </div>
-                    <div class="form-group">
-                        <p>Do you have any challenges in your existing ERP</p>
-                        <div class="d-inline-block">
-                            <input type="radio" id="yes" name="erp_challenges" value="1">
-                            <label for="yes">Yes</label><br>
-                        </div>
-                        <div class="d-inline-block">
-                            <input type="radio" id="no" name="erp_challenges" value="0">
-                            <label for="no">No</label><br>
-                        </div>
+                    <div class="d-inline-block">
+                        <input type="radio" id="no" name="erp" value="0">
+                        <label for="no">No</label><br>
                     </div>
-                    <div class="form-group row">
-                        <div class="col-md-12">
-                            <p>State some of the challenges</p>
-                            {!! Form::textarea('current_erp_challenges', null, ['class' => 'form-control ', 'rows' => 3,'placeholder' => 'Challenges', 'id'=>'current_erp_challenges' ]) !!}
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <p>Are you interested in us showing you a demo</p>
-                        <div class="d-inline-block">
-                            <input type="radio" id="yes" name="erp_demo" value="1">
-                            <label for="yes">Yes</label><br>
-                        </div>
-                        <div class="d-inline-block">
-                            <input type="radio" id="no" name="erp_demo" value="0">
-                            <label for="no">No</label><br>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <div class="col-md-6">
-                            <p>When do you think is the appropriate date</p>
-                            {!! Form::text('demo_date', null, ['class' => 'form-control ', 'placeholder' => 'Demo date', 'id'=>'demo_date' ]) !!}
-                        </div>
-                        <div class="col-md-6">
-                            <p>Any Notes?</p>
-                            {!! Form::text('notes', null, ['class' => 'form-control ', 'placeholder' => 'Notes/Remarks', 'id'=>'notes' ]) !!}
-                        </div>
-                    </div>
-                    {{ Form::button("Save Call Chat",['class'=>' my-2 btn btn-md btn-primary','id'=>'save_remark']) }}
                 </div>
+
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <p>Which One</p>
+                        {!! Form::text('current_erp', null, [
+                            'class' => 'form-control ',
+                            'placeholder' => 'Current ERP',
+                            'id' => 'current_erp',
+                        ]) !!}
+                    </div>
+                    <div class="col-md-6">
+                        <p>How long have you been using the ERP</p>
+                        {!! Form::text('current_erp_usage', null, [
+                            'class' => 'form-control ',
+                            'placeholder' => 'Weeks/Months/Years',
+                            'id' => 'current_erp_usage',
+                        ]) !!}
+                    </div>
+
+                </div>
+                <div class="form-group">
+                    <p>Do you have any challenges in your existing ERP</p>
+                    <div class="d-inline-block">
+                        <input type="radio" id="yes" name="erp_challenges" value="1">
+                        <label for="yes">Yes</label><br>
+                    </div>
+                    <div class="d-inline-block">
+                        <input type="radio" id="no" name="erp_challenges" value="0">
+                        <label for="no">No</label><br>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <p>State some of the challenges</p>
+                        {!! Form::textarea('current_erp_challenges', null, [
+                            'class' => 'form-control ',
+                            'rows' => 3,
+                            'placeholder' => 'Challenges',
+                            'id' => 'current_erp_challenges',
+                        ]) !!}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <p>Are you interested in us showing you a demo</p>
+                    <div class="d-inline-block">
+                        <input type="radio" id="yes" name="erp_demo" value="1">
+                        <label for="yes">Yes</label><br>
+                    </div>
+                    <div class="d-inline-block">
+                        <input type="radio" id="no" name="erp_demo" value="0">
+                        <label for="no">No</label><br>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <p>When do you think is the appropriate date</p>
+                        {!! Form::text('demo_date', null, [
+                            'class' => 'form-control ',
+                            'placeholder' => 'Demo date',
+                            'id' => 'demo_date',
+                        ]) !!}
+                    </div>
+                    <div class="col-md-6">
+                        <p>Any Notes?</p>
+                        {!! Form::text('notes', null, ['class' => 'form-control ', 'placeholder' => 'Notes/Remarks', 'id' => 'notes']) !!}
+                    </div>
+                </div>
+                {{ Form::button('Save Call Chat', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_remark']) }}
             </div>
 
-            <div class="not-picked">
-                <div class="mx-2">
-                    <h3>Busy Not Picking</h3>
-                    <div class="form-group">
-                        <p>Leave Reminder</p>
-                        <div class="d-inline-block">
-                            <input type="radio" id="yes" name="reminder" value="1">
-                            <label for="yes">Yes</label><br>
-                        </div>
-                        <div class="d-inline-block">
-                            <input type="radio" id="no" name="reminder" value="0">
-                            <label for="no">No</label><br>
-                        </div>
+
+            <div id="div_notpicked" style="display:none" class="mx-2">
+                <h3>Busy Not Picking</h3>
+                <div class="form-group">
+                    <p>Leave Reminder</p>
+                    <div class="d-inline-block">
+                        <input type="radio" id="yes" name="reminder" value="1">
+                        <label for="yes">Yes</label><br>
                     </div>
-    
-                    <div class="form-group row">
-                        <div class="col-md-6">
-                            <p>Reminder Date</p>
-                            {!! Form::text('reminder_date', null, ['class' => 'form-control ', 'placeholder' => 'Reminder date', 'id'=>'reminder_date' ]) !!}
-                        </div>
-                        <div class="col-md-6">
-                            <p>Reminder NOte</p>
-                            {!! Form::text('reminder_note', null, ['class' => 'form-control ', 'placeholder' => 'Reminder note', 'id'=>'reminder_note' ]) !!}
-                        </div>
+                    <div class="d-inline-block">
+                        <input type="radio" id="no" name="reminder" value="0">
+                        <label for="no">No</label><br>
                     </div>
-                    {{ Form::button("Save Reminder",['class'=>' my-2 btn btn-md btn-primary','id'=>'save_remark']) }}
                 </div>
-               
+
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <p>Reminder Date</p>
+                        {!! Form::text('reminder_date', null, [
+                            'class' => 'form-control ',
+                            'placeholder' => 'Reminder date',
+                            'id' => 'reminder_date',
+                        ]) !!}
+                    </div>
+                    <div class="col-md-6">
+                        <p>Reminder Note</p>
+                        {!! Form::text('reminder_note', null, [
+                            'class' => 'form-control ',
+                            'placeholder' => 'Reminder note',
+                            'id' => 'reminder_note',
+                        ]) !!}
+                    </div>
+                </div>
+                {{ Form::button('Save Reminder', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_remark']) }}
             </div>
+
+
+
+
+
 
             {{-- <div class="mx-3">
                

@@ -23,7 +23,7 @@
 
             prospectTypeChange() {
             if ($(this).val() == 'direct') {
-                $('#group_title').attr('disabled', true).attr('disabled', true).val('').change();
+                $('#group_title').attr('disabled', true).val('').change();
                 
             } else {
                 $('#group_title').attr('disabled', false).val('');
